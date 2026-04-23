@@ -28,6 +28,9 @@ html {
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --mono: 'SF Mono', 'Consolas', 'Fira Mono', 'Courier New', monospace;
 
+  --header-bg: rgba(10, 10, 18, 0.92);
+  --nav-bg: rgba(10, 10, 18, 0.96);
+
   /* Fluid container width */
   --content-max: 960px;
 
@@ -38,6 +41,25 @@ html {
   --safe-right: env(safe-area-inset-right, 0px);
 }
 
+[data-theme="light"] {
+  --bg: #eef0f5;
+  --bg-elevated: #e5e8f0;
+  --card: #f8f9fc;
+  --card-hover: #eef0f6;
+  --border: #d4d8e8;
+  --border-strong: #b8bcd0;
+  --text: #1a1a2a;
+  --text-dim: #44445e;
+  --text-mute: #84849c;
+  --info: #0a7ae0;
+  --warn: #c47a00;
+  --danger: #d42b2b;
+  --success: #1a9440;
+
+  --header-bg: rgba(238, 240, 245, 0.92);
+  --nav-bg: rgba(238, 240, 245, 0.96);
+}
+
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -46,6 +68,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   overflow-x: hidden;
+  transition: background 0.2s, color 0.2s;
 }
 
 #root { min-height: 100vh; min-height: 100dvh; }
@@ -58,7 +81,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10, 10, 18, 0.92);
+  background: var(--header-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
@@ -74,6 +97,35 @@ body {
   display: flex;
   flex-direction: column;
   gap: clamp(10px, 1.8vw, 14px);
+}
+
+/* Logo row */
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.theme-toggle:hover {
+  background: var(--card-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 
 /* Logo */
@@ -114,7 +166,7 @@ body {
   right: 0;
   z-index: 200;
   display: flex;
-  background: rgba(10, 10, 18, 0.96);
+  background: var(--nav-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
