@@ -1,0 +1,55 @@
+# ─── PWA Apache Configuration ────────────────────────────────────────────────
+
+<IfModule mod_headers.c>
+
+  # Assets versionnés CRA (/static/js, /static/css, /static/media)
+  # Ces fichiers ont des hashes dans le nom → cache immutable 1 an
+  <FilesMatch "\.(js|css|png|gif|jpg|jpeg|svg|woff|woff2|ttf|eot|webp|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Service Worker : JAMAIS mis en cache par le navigateur
+  # (doit toujours être rechargé pour détecter les mises à jour)
+  <FilesMatch "service-worker\.js$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
+    Header set Pragma "no-cache"
+  </FilesMatch>
+
+  # index.html et manifest.json : revalidation courte
+  <FilesMatch "^(index\.html|manifest\.json)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  # JSON: charset UTF-8
+  <FilesMatch "\.json$">
+    Header set Content-Type "application/json; charset=UTF-8"
+  </FilesMatch>
+
+</IfModule>
+
+# ─── Compression Gzip ─────────────────────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# ─── Routing SPA (React Router) ───────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Exclure les fichiers et dossiers physiques
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Toutes les autres URLs → index.html
+  RewriteRule ^ index.html [QSA,L]
+</IfModule>
+
+# ─── MIME Types ───────────────────────────────────────────────────────────────
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType application/x-web-app-manifest+json .manifest
+  AddEncoding gzip .svgz
+  AddType image/svg+xml svg svgz
+  AddType font/woff2 .woff2
+</IfModule>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FF3B30" />
+  <meta name="description" content="MediURG - Livret pharmacologique d'urgence pour SAUV, SMUR et SAU. Accès hors ligne à plus de 70 médicaments critiques." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MediURG" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <title>MediURG - Pharmacologie d'Urgence Hors Ligne</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    #root { min-height: 100vh; }
+    .offline-indicator {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #FF3B30;
+      color: white;
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      z-index: 1000;
+    }
+    .offline-indicator.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="offline-indicator" id="offline-indicator">
+    📡 Mode hors ligne — Les données sont mises en cache
+  </div>
+  <div id="root"></div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('%PUBLIC_URL%/service-worker.js')
+          .then(r => console.log('✓ Service Worker enregistré:', r))
+          .catch(e => console.warn('Service Worker échoué:', e));
+      });
+    }
+    function updateOnlineStatus() {
+      document.getElementById('offline-indicator')
+        .classList.toggle('show', !navigator.onLine);
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+  </script>
+</body>
+</html>
