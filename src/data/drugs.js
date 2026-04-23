@@ -690,16 +690,6 @@ export const DRUGS = [
     poso:{a:["Analgésie IV : 0,1-0,2 µg/kg/dose IV lent","IVSE réa : 0,1-0,5 µg/kg/h","ISR adjuvant : 0,3-1 µg/kg IV"],p:["IV : 0,1-0,2 µg/kg IV lent","Intranasal : 0,3-0,5 µg/kg (max 20 µg) — SMUR pédiatrique sans abord IV"]}
   },
   {
-    id:70, nom:"Suxaméthonium", commercial:"CELOCURINE (bis)", dci:"Voir fiche Suxaméthonium", classe:"Curare dépolarisant", cat:"Curares", svc:["SMUR"],
-    couleur:"#8E8E93", icon:"🔒",
-    desc:"Voir fiche Suxaméthonium / CELOCURINE (page 17).",
-    indic:["Voir fiche CELOCURINE"],
-    ci:["Voir fiche CELOCURINE"],
-    ei:["Voir fiche CELOCURINE"],
-    cond:["Ampoule 200 mg/10 mL (20 mg/mL) — CELOCURINE®"],
-    poso:{a:["ISR : 1-1,5 mg/kg IV bolus"],p:["2 mg/kg IV"]}
-  },
-  {
     id:71, nom:"Terbutaline", commercial:"BRICANYL", dci:"Terbutaline sulfate", classe:"Bêta-2 mimétique bronchodilatateur / Tocolytique", cat:"Pneumologie", svc:["SMUR"],
     couleur:"#30D158", icon:"🫁",
     desc:"Agoniste β2 sélectif. Bronchodilatateur et tocolytique (relaxation utérine). Voie SC rapide très utile en SMUR si nébulisation non disponible.",

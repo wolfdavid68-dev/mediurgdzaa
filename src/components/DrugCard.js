@@ -13,6 +13,7 @@ const DrugCard = ({ drug }) => {
   const [activeTab, setActiveTab] = useState(null);
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
+  const [weight, setWeight] = useState("");
 
   // Charger la note depuis localStorage au montage
   useEffect(() => {
@@ -43,6 +44,27 @@ const DrugCard = ({ drug }) => {
 
   const toggleTab = (key) => setActiveTab(activeTab === key ? null : key);
 
+  const calcDose = (text, w) => {
+    const kg = parseFloat(w);
+    if (!kg || kg <= 0 || kg > 300) return null;
+    const match = text.match(/(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(mg|µg|mcg|ml|g)\/kg/i);
+    if (!match) return null;
+    const min = parseFloat(match[1].replace(",", "."));
+    const max = match[2] ? parseFloat(match[2].replace(",", ".")) : null;
+    const unit = match[3];
+    let doseMin = +(min * kg).toFixed(2);
+    let doseMax = max ? +(max * kg).toFixed(2) : null;
+    const maxMatch = text.match(/max\s+(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|ml|g)/i);
+    if (maxMatch && maxMatch[2].toLowerCase() === unit.toLowerCase()) {
+      const cap = parseFloat(maxMatch[1].replace(",", "."));
+      const capped = doseMin > cap || (doseMax && doseMax > cap);
+      if (doseMin > cap) doseMin = cap;
+      if (doseMax && doseMax > cap) doseMax = cap;
+      if (capped) return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}`, capped: true };
+    }
+    return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}`, capped: false };
+  };
+
   const renderList = (items) => {
     if (!items || items.length === 0) return <span className="na">Non renseigné</span>;
     return (
@@ -67,17 +89,55 @@ const DrugCard = ({ drug }) => {
     if (key === "poso") {
       return (
         <>
+          <div className="poso-calc">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span className="poso-calc-label">Poids patient</span>
+            <input
+              className="poso-calc-input"
+              type="number"
+              min="1"
+              max="300"
+              placeholder="kg"
+              value={weight}
+              onChange={e => setWeight(e.target.value)}
+            />
+            <span className="poso-calc-unit">kg</span>
+            {weight && (
+              <button className="poso-calc-clear" onClick={() => setWeight("")}>×</button>
+            )}
+          </div>
+
           <div className="poso-grid">
             <div className="poso-box">
               <div className="poso-title">Adulte</div>
               {drug.poso.a && drug.poso.a.length
-                ? drug.poso.a.map((p, i) => <div key={i} className="poso-item">{p}</div>)
+                ? drug.poso.a.map((p, i) => {
+                    const res = calcDose(p, weight);
+                    return (
+                      <div key={i} className="poso-item">
+                        {p}
+                        {res && <span className={`calc-result ${res.capped ? "calc-over" : "calc-ok"}`}>{res.value}{res.capped ? " ⚠ max" : ""}</span>}
+                      </div>
+                    );
+                  })
                 : <span className="na">Non renseigné</span>}
             </div>
             <div className="poso-box">
               <div className="poso-title">Pédiatrique</div>
               {drug.poso.p && drug.poso.p.length
-                ? drug.poso.p.map((p, i) => <div key={i} className="poso-item">{p}</div>)
+                ? drug.poso.p.map((p, i) => {
+                    const res = calcDose(p, weight);
+                    return (
+                      <div key={i} className="poso-item">
+                        {p}
+                        {res && <span className={`calc-result ${res.capped ? "calc-over" : "calc-ok"}`}>{res.value}{res.capped ? " ⚠ max" : ""}</span>}
+                      </div>
+                    );
+                  })
                 : <span className="na">Non renseigné</span>}
             </div>
           </div>
