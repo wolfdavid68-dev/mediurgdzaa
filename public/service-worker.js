@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mediurg-v1';
+const CACHE_NAME = 'mediurg-v2';
 
 const BASE_URLS = [
   '/',
@@ -64,15 +64,12 @@ self.addEventListener('fetch', (event) => {
 
   if (url.pathname.startsWith('/static/')) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
-          }
-          return response;
-        });
-      })
+      fetch(request).then((response) => {
+        if (response.ok) {
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+        }
+        return response;
+      }).catch(() => caches.match(request))
     );
     return;
   }

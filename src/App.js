@@ -13,6 +13,7 @@ const normalize = (str) =>
     .replace(/[\u0300-\u036f]/g, "");
 
 const App = () => {
+  const [page, setPage] = useState("medicaments");
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("Tout");
   const [svc, setSvc] = useState("Tout");
@@ -35,7 +36,7 @@ const App = () => {
   }, [search, cat, svc]);
 
   return (
-    <div className="app">
+    <div className="app" data-testid="app">
       <header className="app-header">
         <div className="header-inner">
           <div className="logo">
@@ -46,74 +47,111 @@ const App = () => {
             </div>
           </div>
 
-          <div className="search-bar">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Rechercher un médicament, DCI, classe…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoComplete="off"
-              spellCheck="false"
-            />
-            {search && (
-              <button className="search-clear" onClick={() => setSearch("")} aria-label="Effacer">
-                ×
-              </button>
-            )}
-          </div>
-
-          <div className="filters">
-            <div className="filter-group">
-              <span className="filter-label">CAT</span>
-              <div className="filter-chips">
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c}
-                    className={`chip ${cat === c ? "chip-active" : ""}`}
-                    onClick={() => setCat(c)}
-                  >
-                    {c}
+          {page === "medicaments" && (
+            <>
+              <div className="search-bar">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Rechercher un médicament, DCI, classe…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  autoComplete="off"
+                  spellCheck="false"
+                />
+                {search && (
+                  <button className="search-clear" onClick={() => setSearch("")} aria-label="Effacer">
+                    ×
                   </button>
-                ))}
+                )}
               </div>
-            </div>
-            <div className="filter-group">
-              <span className="filter-label">SVC</span>
-              <div className="filter-chips">
-                {SERVICES.map((s) => (
-                  <button
-                    key={s}
-                    className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
-                    onClick={() => setSvc(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          <div className="result-count">
-            {filtered.length} médicament{filtered.length > 1 ? "s" : ""}
-          </div>
+              <div className="filters">
+                <div className="filter-group">
+                  <span className="filter-label">CAT</span>
+                  <div className="filter-chips">
+                    {CATEGORIES.map((c) => (
+                      <button
+                        key={c}
+                        className={`chip ${cat === c ? "chip-active" : ""}`}
+                        onClick={() => setCat(c)}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="filter-group">
+                  <span className="filter-label">SVC</span>
+                  <div className="filter-chips">
+                    {SERVICES.map((s) => (
+                      <button
+                        key={s}
+                        className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
+                        onClick={() => setSvc(s)}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="result-count">
+                {filtered.length} médicament{filtered.length > 1 ? "s" : ""}
+              </div>
+            </>
+          )}
         </div>
       </header>
 
       <main className="main-content">
-        {filtered.length === 0 ? (
+        {page === "medicaments" && (
+          filtered.length === 0 ? (
+            <div className="empty">
+              <div className="empty-icon">🔍</div>
+              <p>Aucun médicament trouvé</p>
+              <small>Essayez un autre terme ou réinitialisez les filtres</small>
+            </div>
+          ) : (
+            <DrugList drugs={filtered} />
+          )
+        )}
+        {page === "protocoles" && (
           <div className="empty">
-            <div className="empty-icon">🔍</div>
-            <p>Aucun médicament trouvé</p>
-            <small>Essayez un autre terme ou réinitialisez les filtres</small>
+            <div className="empty-icon">📋</div>
+            <p>Protocoles</p>
+            <small>Cette section est en cours de construction</small>
           </div>
-        ) : (
-          <DrugList drugs={filtered} />
         )}
       </main>
+
+      <nav className="bottom-nav">
+        <button
+          className={`bottom-tab ${page === "medicaments" ? "bottom-tab-active" : ""}`}
+          onClick={() => setPage("medicaments")}
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
+          </svg>
+          <span>Médicaments</span>
+        </button>
+        <button
+          className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
+          onClick={() => setPage("protocoles")}
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+            <rect x="9" y="3" width="6" height="4" rx="2" />
+            <line x1="9" y1="12" x2="15" y2="12" />
+            <line x1="9" y1="16" x2="13" y2="16" />
+          </svg>
+          <span>Protocoles</span>
+        </button>
+      </nav>
     </div>
   );
 };

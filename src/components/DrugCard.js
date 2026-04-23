@@ -108,9 +108,9 @@ const DrugCard = ({ drug }) => {
   };
 
   return (
-    <div className={`drug-card ${open ? "drug-card-open" : ""}`} style={{ "--drug-color": drug.couleur }}>
+    <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
       <button className="drug-header" onClick={() => setOpen(!open)}>
-        <div className="drug-color-bar" />
+        <div className="drug-color-bar" style={{ background: drug.couleur }} />
         <div className="drug-main">
           <div className="drug-title-row">
             <span className="drug-icon">{drug.icon}</span>
@@ -152,9 +152,14 @@ const DrugCard = ({ drug }) => {
               <button
                 key={tab.key}
                 className={`tab-btn tab-${tab.type} ${activeTab === tab.key ? "tab-active" : ""}`}
+                style={tab.type === "poso" && activeTab === tab.key ? {
+                  background: drug.couleur + "25",
+                  borderColor: drug.couleur,
+                  color: drug.couleur
+                } : {}}
                 onClick={() => toggleTab(tab.key)}
               >
-                <span className={`dot dot-${tab.type}`} />
+                <span className={`dot dot-${tab.type}`} style={tab.type === "poso" ? { background: drug.couleur } : {}} />
                 <span className="tab-label">{tab.label}</span>
               </button>
             ))}
