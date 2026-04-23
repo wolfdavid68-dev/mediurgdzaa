@@ -47,22 +47,29 @@ const DrugCard = ({ drug }) => {
   const calcDose = (text, w) => {
     const kg = parseFloat(w);
     if (!kg || kg <= 0 || kg > 300) return null;
-    const match = text.match(/(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(mg|µg|mcg|ml|g)\/kg/i);
+
+    const match = text.match(
+      /(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)\/kg(?:\/(min|h|j|24h))?/i
+    );
     if (!match) return null;
-    const min = parseFloat(match[1].replace(",", "."));
-    const max = match[2] ? parseFloat(match[2].replace(",", ".")) : null;
+
+    const min  = parseFloat(match[1].replace(",", "."));
+    const max  = match[2] ? parseFloat(match[2].replace(",", ".")) : null;
     const unit = match[3];
+    const per  = match[4] ? `/${match[4]}` : "";
+
     let doseMin = +(min * kg).toFixed(2);
     let doseMax = max ? +(max * kg).toFixed(2) : null;
-    const maxMatch = text.match(/max\s+(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|ml|g)/i);
+
+    const maxMatch = text.match(/max\s+(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)/i);
     if (maxMatch && maxMatch[2].toLowerCase() === unit.toLowerCase()) {
       const cap = parseFloat(maxMatch[1].replace(",", "."));
       const capped = doseMin > cap || (doseMax && doseMax > cap);
       if (doseMin > cap) doseMin = cap;
       if (doseMax && doseMax > cap) doseMax = cap;
-      if (capped) return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}`, capped: true };
+      if (capped) return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: true };
     }
-    return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}`, capped: false };
+    return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: false };
   };
 
   const renderList = (items) => {

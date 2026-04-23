@@ -690,13 +690,13 @@ export const DRUGS = [
     poso:{a:["Asthme SC : 0,25-0,5 mg SC, répéter /30 min si besoin (max 0,5 mg/4h)","Tocolyse IV : 10 µg/min IVSE, augmenter /20 min par paliers 5 µg/min (max 25 µg/min)"],p:["SC : 0,01 mg/kg (max 0,3 mg/dose)","Nébulisation : 0,1 mg/kg/dose (max 5 mg)"]}
   },
   {
-    id:72, nom:"Salbutamol", commercial:"SALBUMOL / VENTOLINE", dci:"Salbutamol sulfate", classe:"Bêta-2 mimétique bronchodilatateur sélectif", cat:"Pneumologie", svc:["SAUV","SMUR"],
+    id:72, nom:"Salbutamol", commercial:"SALBUTAMOL / VENTOLINE", dci:"Salbutamol sulfate", classe:"Bêta-2 mimétique bronchodilatateur sélectif", cat:"Pneumologie", svc:["SAUV","SMUR"],
     couleur:"#30D158", icon:"🫁",
     desc:"Agoniste sélectif β2-adrénergique. Bronchodilatateur d'action rapide (5-10 min) et courte durée (4-6h). Également utilisé pour l'hyperkaliémie (translocation K+ intracellulaire).",
     indic:["Crise d'asthme aiguë (toute sévérité — 1ère ligne)","BPCO décompensée avec bronchospasme","Hyperkaliémie sévère (translocation K+ intracel. — adjuvant)","Bronchospasme per-intubation"],
     ci:["Tachycardie > 130/min (relative)","IDM récent < 3 mois (relative)","Hyperthyroïdie non contrôlée"],
     ei:["Tremblements fins des extrémités","Tachycardie, palpitations","Hypokaliémie (forte dose — risque arythmies)","Céphalées"],
-    cond:["Nébulisation 2,5 mg/2,5 mL — SALBUMOL® / VENTOLINE® nébulisation","Spray 100 µg/dose (VENTOLINE® inhalateur)","Ampoule IV 5 mg/5 mL"],
+    cond:["Nébulisation 2,5 mg/2,5 mL — SALBUTAMOL® / VENTOLINE® nébulisation","Spray 100 µg/dose (VENTOLINE® inhalateur)","Ampoule IV 5 mg/5 mL"],
     poso:{a:["Nébulisation : 2,5-5 mg dans 3 mL NaCl 0,9%, répéter /20 min × 3 (asthme aigu)","Inhalateur : 2-4 bouffées /20 min × 3 (urgence)","IV choc asthmatique : 0,1-0,2 mg/kg/h IVSE"],p:["Nébulisation : 0,15 mg/kg (min 1,25 mg, max 5 mg)","Inhalateur + chambre : 2-4 bouffées /20 min × 3"]}
   },
   {
