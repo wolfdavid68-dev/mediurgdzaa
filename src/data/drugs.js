@@ -240,16 +240,6 @@ export const DRUGS = [
     poso:{a:["5 mg IV lent sur 5 min ou IM","Répéter 1 fois si besoin après 30 min"],p:["0,1 mg/kg IV ou IM (max 5 mg/dose)","⚠️ Ne remplace JAMAIS l'adrénaline dans l'anaphylaxie"]}
   },
   {
-    id:25, nom:"Diazépam", commercial:"VALIUM", dci:"Diazépam", classe:"Benzodiazépine (longue durée d'action)", cat:"Neurologie", svc:["SAUV","SMUR"],
-    couleur:"#5856D6", icon:"🧠",
-    desc:"BZD à longue demi-vie (20-100h). Anticonvulsivant, anxiolytique, myorelaxant central. Référence pour la forme rectale pédiatrique si pas d'accès IV.",
-    indic:["EME convulsif (2e ligne après BZD IV)","Sevrage alcoolique (delirium tremens)","Contractures musculaires (tétanos)","Anxiété aiguë intense"],
-    ci:["Myasthénie grave","Insuffisance respiratoire sévère non ventilée","Insuffisance hépatique sévère","Glaucome à angle fermé"],
-    ei:["Dépression respiratoire","Somnolence prolongée (t½ longue)","Hypotension","Douleur injection IV (lipophile)","Phlébite"],
-    cond:["Ampoule 10 mg/2 mL (5 mg/mL) — VALIUM®","Solution rectale 5 mg et 10 mg"],
-    poso:{a:["Convulsions : 10 mg IV lent (< 2 mg/min)","EME : 10-20 mg IV, répéter /15 min (max 30 mg)","Sevrage OH : 10-20 mg IV ou PO selon score CIWA"],p:["0,3-0,5 mg/kg IV lent (max 10 mg/dose)","Rectal : 0,5 mg/kg (< 5 ans : 5 mg ; ≥ 5 ans : 10 mg)"]}
-  },
-  {
     id:26, nom:"Digoxine", commercial:"DIGOXINE NATIVELLE", dci:"Digoxine", classe:"Glycoside cardiotonique (hétéroside)", cat:"Cardiologie", svc:["SAU"],
     couleur:"#FF9500", icon:"💓",
     desc:"Inhibe la Na+/K+-ATPase. Inotrope positif, chronotrope et dromotrope négatif. Index thérapeutique très étroit (toxicité fréquente). Demi-vie 36-48h.",
@@ -718,5 +708,25 @@ export const DRUGS = [
     ei:["Toxicité neurologique (surdosage) : acouphènes, vertiges, troubles visuels, convulsions","Toxicité cardiaque : bradycardie, BAV, ACR (fortes doses IV)","Méthémoglobinémie (rare, fortes doses topiques muqueuses)"],
     cond:["Ampoule 1% (10 mg/mL) et 2% (20 mg/mL) — XYLOCAÏNE®","Solution spray 5% et 10%","Gel 2%"],
     poso:{a:["Infiltration : 1-7 mg/kg selon zone (max 200 mg sans adrénaline, 500 mg avec)","Antiarythmique IV : 1,5 mg/kg bolus, puis 1-4 mg/min IVSE","Topique voies aériennes : 2-4 mg/kg spray (max 8 mg/kg avec adrénaline)"],p:["Infiltration : 3-5 mg/kg (max, jamais sur muqueuse très vascularisée sans précaution)","IV : 1 mg/kg bolus, puis 20-50 µg/kg/min IVSE"]}
+  },
+  {
+    id:75, nom:"Diazépam", commercial:"VALIUM", dci:"Diazépam", classe:"Benzodiazépine longue durée d'action", cat:"Neurologie", svc:["SAUV","SMUR","SAU"],
+    couleur:"#007AFF", icon:"🧠",
+    desc:"Benzodiazépine à longue demi-vie (20-70 h) et métabolite actif (déméthyldiazépam). Potentialise le GABA-A. Antiépileptique, anxiolytique, myorelaxant.",
+    indic:["État de mal épileptique (2ème ligne après midazolam/clonazépam)","Sevrage alcoolique symptomatique","Tétanos (myorelaxation)","Anxiolyse / sédation procédurale légère"],
+    ci:["Insuffisance respiratoire sévère non assistée","Myasthénie","Allergie BZD","Intoxication alcool aiguë sévère (relative)"],
+    ei:["Dépression respiratoire","Sédation excessive","Hypotension","Amnésie antérograde","Dépendance (usage prolongé)"],
+    cond:["Ampoule 10 mg/2 mL (5 mg/mL)","Comprimé 2 mg, 5 mg, 10 mg","Solution rectale 5 mg, 10 mg (Valium rectal®)"],
+    poso:{a:["État de mal : 10 mg IV lent (2,5 mg/min), répéter une fois si besoin","Sevrage alcoolique : 10-20 mg PO /6h selon CIWA","Sédation : 2-10 mg IV lent selon effet"],p:["Convulsions : 0,3-0,5 mg/kg rectal (max 10 mg) ou 0,2-0,3 mg/kg IV lent (max 10 mg)"]}
+  },
+  {
+    id:78, nom:"Spironolactone injectable", commercial:"SOLUDACTONE", dci:"Canrénate de potassium", classe:"Antagoniste de l'aldostérone / Diurétique épargneur de potassium", cat:"Cardiologie", svc:["SAUV"],
+    couleur:"#FF9500", icon:"💧",
+    desc:"Forme injectable de l'antagoniste de l'aldostérone. Diurétique épargneur de potassium, utilisé en réanimation pour hyperaldostéronisme, insuffisance cardiaque et cirrhose avec ascite.",
+    indic:["Insuffisance cardiaque congestive (surcharge hydrosodée)","Cirrhose hépatique avec ascite et oedèmes","Hyperaldostéronisme primaire (Conn)","Hypokaliémie réfractaire aux suppléments"],
+    ci:["Hyperkaliémie","Insuffisance rénale aiguë (créatinine > 200 µmol/L)","Association potassium + IEC + ARA2 (triple whammy)"],
+    ei:["Hyperkaliémie (risque principal)","Gynécomastie (usage prolongé)","Hyponatrémie","Acidose métabolique hyperchlorémique"],
+    cond:["Ampoule 200 mg/10 mL","Ampoule 400 mg/10 mL"],
+    poso:{a:["200-400 mg/j IV en 1-2 perfusions de 30-60 min","Ascite réfractaire : 400 mg/j IV","Relais PO dès que possible : 25-200 mg/j"],p:["Non recommandé en pédiatrie d'urgence"]}
   }
 ];
