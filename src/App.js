@@ -20,13 +20,22 @@ const App = () => {
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem("mediurg-theme") || "dark"; } catch { return "dark"; }
   });
+  const [bigFont, setBigFont] = useState(() => {
+    try { return localStorage.getItem("mediurg-bigfont") === "1"; } catch { return false; }
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     try { localStorage.setItem("mediurg-theme", theme); } catch {}
   }, [theme]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-fontsize", bigFont ? "large" : "normal");
+    try { localStorage.setItem("mediurg-bigfont", bigFont ? "1" : "0"); } catch {}
+  }, [bigFont]);
+
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
+  const toggleFont = () => setBigFont(f => !f);
 
   const filtered = useMemo(() => {
     const q = normalize(search.trim());
@@ -57,6 +66,9 @@ const App = () => {
                 <p>Pharmacologie d'urgence · SAUV · SMUR · SAU</p>
               </div>
             </div>
+            <button className={`font-toggle ${bigFont ? "font-toggle-active" : ""}`} onClick={toggleFont} aria-label={bigFont ? "Réduire la police" : "Agrandir la police"}>
+              A+
+            </button>
             <button className="theme-toggle" onClick={toggleTheme} aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}>
               {theme === "dark" ? (
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
