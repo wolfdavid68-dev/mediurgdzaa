@@ -3,6 +3,7 @@ import { DRUGS } from "./data/drugs";
 import { PROTOCOLS } from "./data/protocols";
 import DrugList from "./components/DrugList";
 import ProtocolCard from "./components/ProtocolCard";
+import IncompatibilityList from "./components/IncompatibilityList";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -183,17 +184,22 @@ const App = () => {
         {page === "protocoles" && (
           <>
             <div className="proto-category-bar">
-              {["PISU"].map(cat => (
-                <button
-                  key={cat}
-                  className={`proto-category-tab ${protoCategory === cat ? "proto-category-active" : ""}`}
-                  onClick={() => setProtoCategory(cat)}
-                >
-                  {cat}
-                  <span className="proto-category-count">{filteredProtocols.length}</span>
-                </button>
-              ))}
+              <button
+                className={`proto-category-tab ${protoCategory === "PISU" ? "proto-category-active" : ""}`}
+                onClick={() => setProtoCategory("PISU")}
+              >
+                PISU
+                <span className="proto-category-count">{filteredProtocols.length}</span>
+              </button>
+              <button
+                className={`proto-category-tab ${protoCategory === "incompatibilites" ? "proto-category-active" : ""}`}
+                onClick={() => setProtoCategory("incompatibilites")}
+              >
+                Incompatibilité Médicamenteuse
+              </button>
             </div>
+
+            {protoCategory === "incompatibilites" && <IncompatibilityList />}
 
             {protoCategory === "PISU" && (
               <>

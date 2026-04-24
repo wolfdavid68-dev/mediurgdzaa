@@ -1690,6 +1690,155 @@ body {
 [data-fontsize="large"] .proto-item        { font-size: 15px; }
 [data-fontsize="large"] .proto-sub-item    { font-size: 14px; }
 
+/* ── INCOMPATIBILITÉS MÉDICAMENTEUSES ────────────────────── */
+.incompat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 24px;
+}
+
+.incompat-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+
+.incompat-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.incompat-search svg { color: var(--text-dim); flex-shrink: 0; }
+
+.incompat-legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.incompat-legend-item { display: flex; align-items: center; }
+
+.incompat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.incompat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.incompat-card-open { border-color: var(--accent); }
+
+.incompat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.incompat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.incompat-drug-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.incompat-count {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.incompat-body {
+  padding: 0 14px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.incompat-items {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.incompat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.incompat-item:last-child { border-bottom: none; }
+
+.incompat-item .incompat-badge { flex-shrink: 0; margin-top: 1px; }
+
+.incompat-item-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.incompat-note {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.incompat-compatible {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: rgba(22, 163, 74, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  font-size: 12px;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+[data-theme="light"] .incompat-compatible {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.08);
+}
+
 /* ── CONTRE-INDICATIONS AVEC SÉVÉRITÉ ────────────────────── */
 .ci-list {
   list-style: none;
