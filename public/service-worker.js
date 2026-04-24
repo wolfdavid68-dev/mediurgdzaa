@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mediurg-v2';
+const CACHE_NAME = 'mediurg-v3';
 
 const BASE_URLS = [
   '/',
