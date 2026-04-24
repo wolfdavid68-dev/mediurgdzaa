@@ -503,6 +503,44 @@ body {
   border-color: var(--warn);
   color: var(--warn);
 }
+
+/* Contre-indications — rouge d'alarme */
+.tab-ci {
+  border-color: rgba(255, 71, 87, 0.3);
+  color: #ff6b78;
+}
+.tab-ci .tab-ci-icon { stroke: #ff6b78; }
+.tab-ci.tab-active {
+  background: rgba(255, 71, 87, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.tab-ci.tab-active .tab-ci-icon { stroke: var(--accent); }
+
+.tab-ci-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  font-family: var(--mono);
+  background: rgba(255, 71, 87, 0.2);
+  color: var(--accent);
+  border: 1px solid rgba(255, 71, 87, 0.4);
+  margin-left: 2px;
+}
+.tab-ci.tab-active .tab-ci-badge {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.tab-ci-icon { flex-shrink: 0; }
 .tab-danger.tab-active {
   background: rgba(255, 85, 85, 0.12);
   border-color: var(--danger);
@@ -788,6 +826,168 @@ body {
   color: var(--accent);
   margin-left: 2px;
   cursor: help;
+}
+
+/* ── Préparation médicament ─────────────────────────────── */
+
+.prep-block {
+  margin: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prep-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+
+.prep-solvant-tag {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(100, 180, 255, 0.15);
+  color: #64b4ff;
+  border: 1px solid rgba(100, 180, 255, 0.3);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.prep-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.prep-meta-chip {
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--mono);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.prep-chip-stab {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.08);
+  border-color: rgba(74, 222, 128, 0.25);
+}
+
+.prep-chip-debit {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.08);
+  border-color: rgba(167, 139, 250, 0.25);
+}
+
+.prep-chip-conc {
+  color: var(--text-mute);
+}
+
+.prep-etapes {
+  margin: 0;
+  padding: 10px 14px 10px 32px;
+  border-bottom: 1px solid var(--border);
+  list-style: decimal;
+}
+
+.prep-etape {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  padding: 2px 0;
+}
+
+.prep-calc-box {
+  padding: 12px 14px;
+  background: rgba(100, 180, 255, 0.08);
+  border-bottom: 1px solid rgba(100, 180, 255, 0.25);
+  border-top: 1px solid rgba(100, 180, 255, 0.25);
+}
+
+.prep-calc-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: var(--mono);
+  color: #64b4ff;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+}
+
+.prep-calc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.prep-calc-row:last-child { margin-bottom: 0; }
+
+.prep-calc-step {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: #64b4ff;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  width: 78px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.prep-calc-val {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.prep-calc-highlight {
+  font-size: 16px;
+  font-weight: 800;
+  color: #64b4ff;
+  font-family: var(--mono);
+  letter-spacing: -0.3px;
+}
+
+.prep-notes {
+  margin: 0;
+  padding: 8px 14px 8px 14px;
+  list-style: none;
+}
+
+.prep-note-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: #fbbf24;
+  line-height: 1.5;
+  padding: 2px 0;
+}
+
+.prep-note-item svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  stroke: #fbbf24;
 }
 
 /* ── Empty state ────────────────────────────────────────── */

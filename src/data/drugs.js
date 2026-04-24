@@ -49,6 +49,7 @@ export const DRUGS = [
       ],
       p: ["Induction : 2,5-3,5 mg/kg IV", "Non recommandé < 3 ans en sédation prolongée"],
     },
+    prep: {solvant:"Pur (émulsion)",volume_final:null,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1.5,dose_max_kg:2.5,duree:"Bolus lent ou IVSE",stabilite:"Utiliser dans les 12h après ouverture",etapes:["Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure","Induction : 1–2,5 mg/kg IV titration lente","IVSE réa : 0,5–4 mg/kg/h — régler selon poids"],notes:["Attention : 2 concentrations (10 mg/mL et 20 mg/mL)","Émulsion lipidique — risque SIPP si > 4 mg/kg/h prolongé","Allergie œuf/soja : CI"]},
   },
   {
     id: 2,
@@ -132,6 +133,7 @@ export const DRUGS = [
         "Sédation : 0,05-0,1 mg/kg IV (max 6 mg)",
       ],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:50,conc_finale:"1 mg/mL",conc_produit:5,unite:"mg",dose_kg:0.1,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 50 mg/10 mL (5 mg/mL)","PSE : 1 ampoule 50 mg qsp 50 mL NaCl 0,9% → 1 mg/mL","Bolus titrés : ampoule 5 mg/5 mL (1 mg/mL) utilisée pure"],notes:["Dépression respiratoire dose-dépendante — avoir matériel IOT à portée","Antagoniste : Flumazénil"]},
   },
   {
     id: 4,
@@ -175,6 +177,7 @@ export const DRUGS = [
       ],
       p: ["ISR : 1-2 mg/kg IV", "Sédation procédurale : 1,5 mg/kg IV ou 4 mg/kg IM"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"10 mg/mL (50 mg/mL dispo)",conc_produit:50,unite:"mg",dose_kg:1.5,dose_max_kg:2,duree:"Bolus ou IVSE",stabilite:"Utiliser immédiatement après ouverture",etapes:["Ampoule 250 mg/5 mL (50 mg/mL) — peut être diluée","Diluer si nécessaire : 1 mL (50 mg) qsp 5 mL NaCl → 10 mg/mL","ISR : 1,5-2 mg/kg IV bolus (+ midazolam)","IM : injection pure à 50 mg/mL"],notes:["Stupéfiant : tracer dans le cahier","Hypersécrétion salivaire : prémédication atropine 0,01 mg/kg","Hallucinations : prémédiquer avec midazolam chez l'adulte"]},
   },
 
   // ──────────────── ANALGÉSIE ────────────────
@@ -216,6 +219,7 @@ export const DRUGS = [
       ],
       p: ["0,2-0,3 µg/kg IV ou IN", "PSE : 0,1-0,5 µg/kg/h"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:50,conc_finale:"5 µg/mL",conc_produit:50,unite:"µg",dose_kg:0.3,dose_max_kg:0.5,duree:"IVSE ou bolus IV lent",stabilite:"24h à 25°C",etapes:["Ampoule 250 µg/5 mL (50 µg/mL)","PSE : 1 ampoule 250 µg qsp 50 mL NaCl 0,9% → 5 µg/mL","IN : administrer pur selon dose poids (0,3-0,5 µg/kg)"],notes:["Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules","Dépression respiratoire dose-dépendante","Antidote : Naloxone"]},
   },
   {
     id: 6,
@@ -257,6 +261,7 @@ export const DRUGS = [
       ],
       p: ["0,1-0,2 mg/kg SC ou IV lente /4-6h", "Titration : 0,05 mg/kg /5 min"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"1 mg/mL",conc_produit:10,unite:"mg",dose_kg:0.1,duree:"Titration bolus /5 min ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 10 mg/1 mL (10 mg/mL)","Titration : 1 ampoule qsp 10 mL NaCl 0,9% → 1 mg/mL","PSE : concentration 1 mg/mL NaCl 0,9% — régler selon kg/h"],notes:["Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules","Antagoniste : Naloxone","Surdosage : dépression respiratoire — avoir naloxone à portée"]},
   },
   {
     id: 7,
@@ -335,6 +340,7 @@ export const DRUGS = [
       ],
       p: ["0,01 mg/kg IV, répéter /2 min (max 0,1 mg/kg ou 2 mg)"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"0,04 mg/mL",conc_produit:0.4,unite:"mg",dose_kg:0.01,duree:"Bolus titré toutes les 2-3 min",stabilite:"24h à 25°C",etapes:["Ampoule 0,4 mg/1 mL","Bolus : 1 ampoule qsp 10 mL NaCl 0,9% → 0,04 mg/mL — injecter 1 mL (= 0,04 mg)","PSE si rechute : 10 ampoules qsp 40 mL NaCl 0,9% → 0,1 mg/mL","IN : administrer pur"],notes:["Demi-vie courte (60-90 min) < opioïdes — risque de réintoxication","Titrer doucement : ne pas précipiter le sevrage"]},
   },
 
   // ──────────────── CURARES ────────────────
@@ -378,6 +384,7 @@ export const DRUGS = [
       ],
       p: ["ISR : 1,5-2 mg/kg IV", "Laryngospasme : 4 mg/kg IM"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1,dose_max_kg:1.5,duree:"Bolus ISR (< 5 sec)",stabilite:"Utiliser immédiatement",etapes:["Ampoule 200 mg/2 mL (100 mg/mL)","Diluer : 1 mL qsp 10 mL NaCl 0,9% → 10 mg/mL","Posologie : 1–1,5 mg/kg IV bolus strict"],notes:["CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie","Stupéfiant : tracer dans le cahier + conserver l'ampoule","Risque choc anaphylactique — avoir adrénaline à portée"]},
   },
   {
     id: 10,
@@ -412,6 +419,7 @@ export const DRUGS = [
       ],
       p: ["ISR : 1,2 mg/kg IV", "Entretien : 0,1-0,15 mg/kg IV"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"10 mg/mL (pur)",conc_produit:10,unite:"mg",dose_kg:1.2,duree:"Bolus ISR (< 5 sec)",stabilite:"28j réfrigéré / 12h à 25°C après ouverture",etapes:["Ampoule 50 mg/5 mL (10 mg/mL) — administrer pure","ISR : 1,2 mg/kg IV bolus strict","Standard : 0,6 mg/kg IV"],notes:["TOUJOURS avoir Sugammadex disponible avant injection","Conserver au réfrigérateur — ne pas secouer"]},
   },
   {
     id: 11,
@@ -442,6 +450,7 @@ export const DRUGS = [
       ],
       p: ["0,1 mg/kg IV"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"2 mg/mL (pur)",conc_produit:2,unite:"mg",dose_kg:0.15,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 20 mg/10 mL (2 mg/mL) — utiliser pure pour bolus","PSE entretien : pas de dilution nécessaire (2 mg/mL)","Régler IVSE selon µg/kg/min cible"],notes:["Administrer dilué pour éviter l'allergie","Pas d'hyperkaliémie — alternative à la Célocurine"]},
   },
   {
     id: 12,
@@ -521,6 +530,7 @@ export const DRUGS = [
         "< 15 kg : EpiPen Jr 0,15 mg",
       ],
     },
+    prep: {solvant:"G5%",volume_final:50,conc_finale:"0,2 mg/mL",conc_produit:1,unite:"mg",duree:"Continu IVSE",stabilite:"24h à 25°C",etapes:["ACR : ampoule 1 mg/mL utilisée pure — prélever 1 mL (= 1 mg)","Anaphylaxie : 0,5 mg IM pur — utiliser ampoule 1 mg/mL","PSE choc : 2 ampoules 5 mg/5 mL qsp 50 mL G5% → 0,2 mg/mL"],notes:["Administrer toujours au plus proche du patient","IVSE : débit constant — pas de bolus sur cette voie","À l'abri de la lumière"]},
   },
   {
     id: 14,
@@ -559,6 +569,7 @@ export const DRUGS = [
       ],
       p: ["0,1-0,3 mg/kg IV"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"3 mg/mL",conc_produit:30,unite:"mg",dose_kg:0.1,duree:"Bolus titré",stabilite:"Utiliser immédiatement",etapes:["Ampoule 30 mg/1 mL (30 mg/mL)","Diluer : 1 ampoule qsp 10 mL NaCl 0,9% → 3 mg/mL","Injecter 1-2 mL par bolus selon PA cible"],notes:["Effet épuisable après 30 mg (tachyphylaxie)","Passer au plus proche du patient"]},
   },
   {
     id: 15,
@@ -598,6 +609,7 @@ export const DRUGS = [
       ],
       p: ["PSE : 2-20 µg/kg/min"],
     },
+    prep: {solvant:"G5% ou NaCl 0,9%",volume_final:50,conc_finale:"5 mg/mL",conc_produit:12.5,unite:"mg",duree:"Continu IVSE",stabilite:"Stable 6h à 25°C",etapes:["Flacon 250 mg/20 mL (12,5 mg/mL)","PSE : 1 flacon 250 mg qsp 50 mL → 5 mg/mL","Débit IVSE selon µg/kg/min cible"],notes:["Surveillance cardiaque continue","PSE : débit constant — pas de bolus sur cette voie"]},
   },
   {
     id: 16,
@@ -636,6 +648,7 @@ export const DRUGS = [
       ],
       p: ["0,05-2 µg/kg/min IVSE"],
     },
+    prep: {solvant:"G5%",volume_final:50,conc_finale:"0,02 mg/mL = 20 µg/mL",conc_produit:0.2,unite:"mg",duree:"Continu IVSE",stabilite:"Stable 6h — à l'abri de la lumière",etapes:["Ampoule 0,2 mg/1 mL (0,2 mg/mL)","PSE : 5 ampoules qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL"],notes:["À l'abri de la lumière — tubulure opaque","Ne se conserve plus au réfrigérateur"]},
   },
   {
     id: 17,
@@ -672,6 +685,7 @@ export const DRUGS = [
       ],
       p: ["0,05-2 µg/kg/min IVSE"],
     },
+    prep: {solvant:"G5%",volume_final:48,conc_finale:"0,33 mg/mL",conc_produit:2,unite:"mg",duree:"Continu IVSE sur VVC dédiée",stabilite:"Stable 12h à 25°C à l'abri de la lumière",etapes:["Ampoule 8 mg/4 mL (2 mg/mL)","PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL","Démarrer à 0,1-0,2 µg/kg/min, titrer selon PAM cible"],notes:["Sur voie centrale dédiée — VVC OBLIGATOIRE","Pas de bolus sur cette voie — débit constant","À l'abri de la lumière — tubulure opaque"]},
   },
   {
     id: 18,
@@ -704,6 +718,7 @@ export const DRUGS = [
       ],
       p: ["2-20 µg/kg/min IVSE"],
     },
+    prep: {solvant:"G5% ou NaCl 0,9%",volume_final:50,conc_finale:"4 mg/mL",conc_produit:40,unite:"mg",duree:"Continu IVSE",stabilite:"Stable 6h à 25°C",etapes:["Ampoule 200 mg/5 mL (40 mg/mL)","PSE : 200 mg (1 ampoule) qsp 50 mL G5% ou NaCl 0,9% → 4 mg/mL","Régler débit selon µg/kg/min cible"],notes:["Effets strictement dose-dépendants","Sur voie dédiée — VVC préférable","Pas de bolus sur cette voie"]},
   },
 
   // ──────────────── TRAITEMENTS CARDIAQUES ────────────────
@@ -746,6 +761,7 @@ export const DRUGS = [
       ],
       p: ["0,02 mg/kg IV (min 0,1 mg, max 0,5 mg/dose)"],
     },
+    prep: {solvant:"Pur (IVD)",volume_final:null,conc_finale:"0,5 mg/mL",conc_produit:0.5,unite:"mg",dose_kg:0.02,duree:"Bolus IV lent",stabilite:"Utiliser immédiatement",etapes:["Ampoule 0,5 mg/1 mL — utiliser pure","Prélever 2 ampoules (= 1 mg) pour bradycardie","Organophosphorés : prévoir plusieurs ampoules à portée"],notes:["Dose min 0,1 mg (risque bradycardie paradoxale si < 0,1 mg)","Max 3 mg en bradycardie — doses illimitées dans intox organophosphorés"]},
   },
   {
     id: 20,
@@ -830,6 +846,7 @@ export const DRUGS = [
       ],
       p: ["5 mg/kg IV sur 20-60 min (max 300 mg/dose)"],
     },
+    prep: {solvant:"G5% STRICT",volume_final:20,conc_finale:"15 mg/mL (ACR)",conc_produit:50,unite:"mg",dose_kg:5,duree:"20-60 min (charge) / continu IVSE",stabilite:"Utiliser immédiatement",etapes:["ACR 3e CEE : 300 mg qsp 20 mL G5% → 15 mg/mL — bolus IV","ACR 5e CEE : 150 mg qsp 10 mL G5% → 15 mg/mL — bolus IV","Charge : 5 mg/kg dans G5% sur 20-60 min","PSE entretien : max 600 mg/48 mL G5%"],notes:["G5% STRICT — incompatible NaCl 0,9%","Changer tubulures à chaque changement (corrosion PVC)","Phlébite sur VVP — VVC recommandée pour PSE"]},
   },
   {
     id: 22,
@@ -987,6 +1004,7 @@ export const DRUGS = [
       ],
       p: ["Non établi"],
     },
+    prep: {solvant:"EPPI fourni",volume_final:10,conc_finale:"5 mg/mL",conc_produit:5,unite:"mg",duree:"Bolus IV unique < 10 sec",stabilite:"Utiliser immédiatement après reconstitution",etapes:["Lyophilisat + seringue-solvant 10 000 UI (50 mg) avec 10 mL EPPI fourni","Adapter la dose au POIDS : < 60 kg → 30 mg ; 60-70 kg → 35 mg ; > 90 kg → 50 mg","Injection IV bolus unique strict — ne pas perfuser"],notes:["BOLUS UNIQUE — dose adaptée au poids (tableau ci-dessus)","Ne pas secouer le flacon lors de la reconstitution","Associer systématiquement anticoagulation (HNF)"]},
   },
   {
     id: 26,
@@ -1056,6 +1074,7 @@ export const DRUGS = [
       ],
       p: ["Non établi < 18 ans"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:50,conc_finale:"1 mg/mL",conc_produit:5,unite:"mg",duree:"Bolus lent ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 25 mg/5 mL (5 mg/mL) — pur pour bolus","PSE : 2 ampoules 25 mg/5 mL qsp 50 mL → 50 mg/50 mL → 1 mg/mL","Bolus : administrer pur (5 mg/mL), 2,5-5 mL lentement"],notes:["Conserver l'ampoule dans son emballage à l'abri de la lumière"]},
   },
   {
     id: 28,
@@ -1096,6 +1115,7 @@ export const DRUGS = [
       ],
       p: ["1-3 µg/kg/min IVSE"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"1 mg/mL (pur)",conc_produit:1,unite:"mg",duree:"Continu IVSE",stabilite:"Utiliser immédiatement",etapes:["Ampoule 10 mg/10 mL (1 mg/mL) — utiliser pure en IVSE","Débuter à 1-2 mg/h = 1-2 mL/h","Titration par paliers 1-2 mg/h selon PA cible"],notes:["CI absolue si inhibiteurs PDE5 < 48h (effondrement PA MORTEL)","Surveiller PA en continu"]},
   },
 
   // ──────────────── ANTIDOTES ────────────────
@@ -1170,6 +1190,7 @@ export const DRUGS = [
       ],
       p: ["< 25 kg : 0,5 mg SC/IM", "> 25 kg : 1 mg SC/IM"],
     },
+    prep: {solvant:"G5%",volume_final:24,conc_finale:"Variable selon débit cible",conc_produit:1,unite:"mg",duree:"Bolus puis IVSE",stabilite:"Utiliser immédiatement après reconstitution",etapes:["Flacon 1 mg poudre + seringue solvant 1 mL EPPI — reconstituer extemporanément","Intox bêtabloquants : bolus 1-5 mg IV lent","PSE : ampoules qsp 24 mL G5% (1-5 mg/h)"],notes:["Reconstitution obligatoire extemporanée — ne pas préparer à l'avance","Nausées/vomissements fréquents","Conserver au réfrigérateur (boîte déchocage)"]},
   },
   {
     id: 31,
@@ -1318,6 +1339,7 @@ export const DRUGS = [
       ],
       p: ["40-60 mg/kg IV sur 15 min (max 3000 mg)"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:100,conc_finale:"Variable selon dose",conc_produit:100,unite:"mg",dose_kg:60,duree:"15-20 min",stabilite:"Stable 24h à 25°C",etapes:["Flacon 500 mg/5 mL (100 mg/mL)","Jusqu'à 1 000 mg : diluer dans 100 mL NaCl 0,9%","Dose > 1 000 mg : diluer dans 250 mL NaCl 0,9%","Perfuser en 15-20 min"],notes:["Ne pas mélanger avec solutions glucosées dans la même ligne"]},
   },
   {
     id: 35,
@@ -1397,6 +1419,7 @@ export const DRUGS = [
       ],
       p: ["1-2 mg/kg IV (max 6 mg/kg/j)"],
     },
+    prep: {solvant:"Pur (IVD) ou NaCl 0,9% (PSE)",volume_final:null,conc_finale:"10 mg/mL (pur)",conc_produit:10,unite:"mg",dose_kg:0.5,dose_max_kg:1,duree:"Bolus IV lent > 2 min",stabilite:"Utiliser immédiatement",etapes:["Ampoule 20 mg/2 mL (10 mg/mL) — administrer pure en bolus","PSE entretien : ampoule 250 mg/25 mL dans NaCl 0,9%","Ototoxicité si injection rapide : toujours > 2 min"],notes:["Rincer la tubulure avant et après (incompatibilités nombreuses)"]},
   },
   {
     id: 37,
@@ -1434,6 +1457,7 @@ export const DRUGS = [
       ],
       p: ["20 mg/kg (0,2 mL/kg CaCl2 10%) IV sur 5-10 min"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"10% (100 mg/mL = 270 mg Ca2+/10 mL)",conc_produit:100,unite:"mg",dose_kg:20,duree:"5-10 min IV lent sous scope",stabilite:"Utiliser immédiatement",etapes:["Ampoule 1 g/10 mL à 10% CaCl2 (= 270 mg Ca2+ élémentaire)","Peut être utilisée pure en IVL lent sur 5-10 min sous scope","Pour infusion : diluer dans 50-100 mL NaCl 0,9%"],notes:["VVC recommandée : veinotoxique — nécrose si extravasation","Ne pas mélanger avec bicarbonates, phosphates ou sulfates","Surveillance ECG : bradycardie si injection trop rapide"]},
   },
   {
     id: 38,
@@ -1463,6 +1487,7 @@ export const DRUGS = [
       ],
       p: ["100 mg/kg IV lente"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:100,conc_finale:"1 g/100 mL",conc_produit:0.1,unite:"g",duree:"10 min IV lent",stabilite:"Utiliser immédiatement",etapes:["Ampoule 1 g/10 mL à 10%","Reconstituer dans 50 mL ou 100 mL NaCl 0,9%","Perfuser en 10 min IV lent sous scope"],notes:["Ne pas mélanger avec bicarbonates (précipitation)","Surveillance scope : bradycardie si injection trop rapide"]},
   },
   {
     id: 39,
@@ -1545,6 +1570,7 @@ export const DRUGS = [
         "TdP : 25-50 mg/kg IV (max 2 g)",
       ],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:100,conc_finale:"20 mg/mL (2 g/100 mL)",conc_produit:150,unite:"mg",dose_kg:30,dose_max_kg:50,duree:"20 min (charge) puis IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 1,5 g/10 mL (15%)","1-2 g dans 100 mL NaCl 0,9% — perfusion 20 min","Torsades : 2 g en 2-3 min","PSE entretien : 1 g dans 100 mL sur 15 min"],notes:["Antidote surdosage : Gluconate de Calcium IV","Surveiller réflexes ostéotendineux (abolition = signe d'alarme)","Insuffisance rénale : adapter posologie"]},
   },
 
   // ──────────────── ANTIHÉMORRAGIQUES / ANTICOAGULANTS ────────────────
@@ -1584,6 +1610,7 @@ export const DRUGS = [
       ],
       p: ["15-20 mg/kg IV sur 20 min (max 1 g)"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:100,conc_finale:"10 mg/mL",conc_produit:100,unite:"mg",dose_kg:15,duree:"10-15 min puis 8h",stabilite:"24h à 25°C",etapes:["Ampoule 500 mg/5 mL (100 mg/mL)","Dose initiale : 1 g qsp 100 mL NaCl 0,9% — perfusion 10-15 min","PSE entretien : 1 g/48 mL NaCl 0,9%"],notes:["IMPÉRATIF < 3h du trauma pour effet maximal (CRASH-2)","Nausées si injection trop rapide"]},
   },
   {
     id: 42,
@@ -1625,6 +1652,7 @@ export const DRUGS = [
         "75 UI/kg bolus IV puis 20 UI/kg/h IVSE",
       ],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"1 000 UI/mL",conc_produit:1000,unite:"UI",dose_kg:80,duree:"Bolus puis IVSE continu",stabilite:"24h à 25°C",etapes:["Flacon 25 000 UI/25 mL (1 000 UI/mL)","Bolus IV : prélever 2 mL (= 2 000 UI) qsp 10 mL NaCl → 200 UI/mL","PSE entretien : selon tableau de dilution (NaCl 0,9%)"],notes:["Risque hémorragique : surveillance clinique","TCA à contrôler à H+4 après instauration","Précipite avec de nombreux médicaments — rincer la ligne"]},
   },
   {
     id: 43,
@@ -1657,6 +1685,7 @@ export const DRUGS = [
       ],
       p: ["70 mg/kg IV"],
     },
+    prep: {solvant:"Solvant fourni dans la boîte",volume_final:100,conc_finale:"15 g/L = 1,5 g/flacon",conc_produit:15,unite:"g",dose_kg:0.07,duree:"20-30 min IV via PSE",stabilite:"Utiliser dans les 8h après reconstitution",etapes:["Flacon poudre 1,5 g — reconstituer avec le solvant fourni (100 mL)","Suivre la notice de reconstitution : attention produit fragile","Dose initiale : 2 flacons = 3 g — perfuser via PSE en 20-30 min"],notes:["Traçabilité obligatoire — documents à envoyer à la pharmacie","Contrôle fibrinogénémie 30 min après perfusion"]},
   },
 
   // ──────────────── PNEUMOLOGIE ────────────────
@@ -1740,6 +1769,7 @@ export const DRUGS = [
       ],
       p: ["1-2 mg/kg IV (max 60-120 mg)"],
     },
+    prep: {solvant:"NaCl 0,9% ou G5%",volume_final:100,conc_finale:"Variable",conc_produit:null,unite:"mg",dose_kg:2,duree:"20-30 min",stabilite:"Stable 24h à 25°C",etapes:["Flacon poudre 40 mg, 120 mg, 500 mg ou 1 g — reconstituer avec le solvant fourni","Diluer dans 100 mL NaCl 0,9% ou G5%","Perfusion 20-30 min"],notes:["Hyperglycémie — surveillance glycémique","Risque infection opportuniste en cas de cure prolongée"]},
   },
   {
     id: 46,
@@ -1779,6 +1809,7 @@ export const DRUGS = [
         "Nourrisson : G10% 2-5 mL/kg",
       ],
     },
+    prep: {solvant:"Pur ou dilué G10%",volume_final:null,conc_finale:"30% (300 g/L)",conc_produit:300,unite:"g",duree:"Bolus IV lent",stabilite:"Utiliser immédiatement après ouverture",etapes:["Ampoule 10 mL à 30% = 3 g glucose","Adulte : prélever 1–2 ampoules (10–20 mL) et administrer pur","Enfant : diluer à G10% (1 vol G30% + 2 vol eau PPI)"],notes:["Veinotoxique : bien rincer après injection","Hyperglycémie rebond : contrôle à 15-30 min","Extravasation : nécrose tissulaire — s'assurer de l'accès veineux"]},
   },
   {
     id: 47,
@@ -1812,6 +1843,7 @@ export const DRUGS = [
       ],
       p: ["1 mg/kg IV /12h (max 40 mg/dose)"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:100,conc_finale:"0,8 mg/mL (bolus) / 1,67 mg/mL (PSE)",conc_produit:40,unite:"mg",duree:"Bolus 20-30 min puis IVSE 72h",debit:"PSE : 5 mL/h (8 mg/h) = 200 mg/24h",stabilite:"Stable 12h maximum",etapes:["Flacon poudre 40 mg — reconstituer","Bolus : 40-80 mg dans 100 mL NaCl 0,9% — perfusion 20-30 min","PSE entretien : 80 mg/48 mL NaCl 0,9% → 1,67 mg/mL → débit 5 mL/h"],notes:["Stabilité 12h MAXIMUM — changer toutes les 12h","Malaise vagal et hypotension possible"]},
   },
   {
     id: 48,
@@ -1922,6 +1954,7 @@ export const DRUGS = [
       ],
       p: ["1-10 µg/kg/j IVSE"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:48,conc_finale:"12,5 µg/mL",conc_produit:100,unite:"µg",duree:"Continu IVSE 3-5 jours",debit:"25-50 µg/h = 2-4 mL/h",stabilite:"Conserver au réfrigérateur",etapes:["Ampoule 100 µg/1 mL (réfrigérateur)","PSE : 6 ampoules (600 µg) qsp 48 mL NaCl 0,9% → 12,5 µg/mL","Débit : 25 µg/h = 2 mL/h / 50 µg/h = 4 mL/h"],notes:["Conserver au réfrigérateur avant utilisation","Surveillance hémodynamique et glycémique"]},
   },
   {
     id: 51,
@@ -1958,6 +1991,7 @@ export const DRUGS = [
       ],
       p: ["Non établi"],
     },
+    prep: {solvant:"Pur (0,2 mg/mL)",volume_final:null,conc_finale:"0,2 mg/mL",conc_produit:0.2,unite:"mg",debit:"1 mg/h = 5 mL/h",duree:"Continu IVSE 5-14j",stabilite:"Conserver à l'abri de la lumière",etapes:["Flacon 10 mg/50 mL (0,2 mg/mL) — administrer pur","1 mg/h = 5 mL/h en IVSE","2 mg/h = 10 mL/h en IVSE"],notes:["Conserver à l'abri de la lumière — tubulure opaque recommandée"]},
   },
 
   // ──────────────── ANTIBIOTIQUES ────────────────
@@ -1999,6 +2033,7 @@ export const DRUGS = [
       ],
       p: ["15-20 mg/kg/j IV (dose unique)"],
     },
+    prep: {solvant:"NaCl 0,9% ou G5%",volume_final:50,conc_finale:"Variable selon dose",conc_produit:250,unite:"mg",dose_kg:15,dose_max_kg:20,duree:"30 min (PSE)",stabilite:"Stable 24h à 25°C",etapes:["Flacon 500 mg/4 mL ou 1 g/4 mL","Jusqu'à 1 g : diluer dans 50 mL NaCl 0,9% / G5%","Si > 1 g : diluer dans 100 mL — perfusion 30 min via PSE"],notes:["Néphrotoxique et ototoxique — surveillance créatinine","Pic sérique > 64 mg/L (efficacité) — résiduelle < 2,5 mg/L (sécurité)","Deux concentrations différentes : vérifier le flacon"]},
   },
   {
     id: 53,
@@ -2036,6 +2071,7 @@ export const DRUGS = [
       ],
       p: ["30 mg/kg/j en 3 injections IV"],
     },
+    prep: {solvant:"NaCl 0,9% STRICT",volume_final:100,conc_finale:"10 mg/mL (amox.)",conc_produit:5,unite:"g",duree:"30-60 min (ne pas dépasser 1h)",stabilite:"Administration immédiate conseillée (instable)",etapes:["Flacon poudre IV 1 g amoxicilline/200 mg clavulanate","1-2 g dans 100 mL NaCl 0,9% STRICT — perfusion 30-60 min"],notes:["NaCl 0,9% UNIQUEMENT — incompatible G5%","Ne pas dépasser 1h de perfusion (problème de stabilité)"]},
   },
   {
     id: 54,
@@ -2071,6 +2107,7 @@ export const DRUGS = [
       ],
       p: ["50-200 mg/kg/j selon indication"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:100,conc_finale:"10 mg/mL",conc_produit:10,unite:"g",dose_kg:0.1,dose_max_kg:0.3,duree:"20-30 min",stabilite:"Stable 8h à 25°C",etapes:["Flacon poudre 1 g — reconstituer avec 10 mL eau PPI","Diluer qsp 100 mL NaCl 0,9% — perfusion 20-30 min","Dose méningée : 300 mg/kg/j en 6 injections IV"],notes:["Dose méningée très élevée (jusqu'à 24 g/j adulte) — vérifier la prescription"]},
   },
   {
     id: 55,
@@ -2107,6 +2144,7 @@ export const DRUGS = [
       ],
       p: ["10-20 mg/kg /8h (encéphalite)"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"Variable : 250 mg/50-100 mL",conc_produit:25,unite:"mg",dose_kg:10,duree:"1h minimum (strict)",stabilite:"Utiliser immédiatement après reconstitution",etapes:["Flacon poudre 250 mg ou 500 mg","Reconstituer : 250 mg avec 10 mL EPPI ou NaCl 0,9%","Diluer : 500 mg dans 100 mL / > 500 mg dans 250 mL NaCl 0,9%","Perfuser en ≥ 1h STRICTEMENT (cristallurie si rapide)"],notes:["PASSER SEUL — incompatible avec la plupart des médicaments","Hydratation obligatoire pour prévenir la cristallurie rénale","Neurotoxicité si insuffisance rénale — adapter la dose"]},
   },
   {
     id: 56,
@@ -2145,6 +2183,7 @@ export const DRUGS = [
       ],
       p: ["50-300 mg/kg/j selon indication"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:50,conc_finale:"20-40 mg/mL",conc_produit:20,unite:"g",dose_kg:0.05,dose_max_kg:0.1,duree:"20-30 min",stabilite:"Stable 24h à 25°C",etapes:["Flacon poudre 1 g ou 2 g","1 g dans 50 mL / 2 g dans 100 mL NaCl 0,9% — perfusion 20-30 min","Dose méningée : 200-300 mg/kg/j en 4-6 injections"],notes:["Attention : risque d'arythmie si administration rapide sur cathéter central"]},
   },
   {
     id: 57,
@@ -2186,6 +2225,7 @@ export const DRUGS = [
         "Infections courantes : 50-75 mg/kg/j",
       ],
     },
+    prep: {solvant:"NaCl 0,9% ou G5%",volume_final:100,conc_finale:"10-20 mg/mL",conc_produit:10,unite:"g",dose_kg:0.05,dose_max_kg:0.1,duree:"30 min",stabilite:"Stable 3h à 25°C",etapes:["Flacon poudre 1 g ou 2 g — reconstituer puis diluer dans 100 mL NaCl/G5%","Perfusion 30 min","Dose méningée : 100 mg/kg/j en 1 injection IV"],notes:["NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation","Stable seulement 3h après reconstitution"]},
   },
   {
     id: 58,
@@ -2225,6 +2265,7 @@ export const DRUGS = [
       ],
       p: ["4-7 mg/kg/j IV (dose unique)"],
     },
+    prep: {solvant:"NaCl 0,9% ou G5%",volume_final:50,conc_finale:"≤ 8 mg/mL",conc_produit:40,unite:"mg",dose_kg:3,dose_max_kg:7,duree:"30 min (PSE)",stabilite:"Stable 24h à 25°C",etapes:["Flacon 160 mg/1,5 mL (80 mg/mL)","Dose ≤ 500 mg : diluer dans 50 mL NaCl 0,9%","Dose > 500 mg : diluer dans 100 mL — perfusion 30 min via PSE"],notes:["Néphrotoxique et ototoxique — surveillance créatinine","Pic sérique > 10 mg/L (efficacité) — résiduelle non détectable (sécurité)"]},
   },
   {
     id: 59,
@@ -2263,6 +2304,7 @@ export const DRUGS = [
       ],
       p: ["Non recommandé < 18 ans (tendinopathie)"],
     },
+    prep: {solvant:"Flacon prêt à l'emploi",volume_final:null,conc_finale:"2,5 mg/mL ou 5 mg/mL",conc_produit:5,unite:"mg",duree:"30 min (250 mg) ou 60 min (500 mg)",stabilite:"Stable 24h à 25°C",etapes:["Flacon prêt 250 mg/50 mL ou 500 mg/100 mL — ne pas diluer davantage","Perfusion 30 min (250 mg) ou 60 min (500 mg)","Ne pas mélanger avec d'autres médicaments"],notes:["Allongement QTc — ECG si facteur de risque","Tendinopathie et rupture tendineuse — arrêter au moindre signe"]},
   },
   {
     id: 60,
@@ -2300,6 +2342,7 @@ export const DRUGS = [
       ],
       p: ["7,5 mg/kg IV /8h (max 500 mg/dose)"],
     },
+    prep: {solvant:"Flacon prêt à l'emploi",volume_final:100,conc_finale:"5 mg/mL",conc_produit:5,unite:"mg",duree:"30 min",stabilite:"Stable 24h à 25°C à l'abri de la lumière",etapes:["Flacon prêt 500 mg/100 mL — ne pas diluer davantage","Perfusion 30 min","À l'abri de la lumière"],notes:["Réaction antabuse si alcool — prévenir le patient","Goût métallique : informer le patient (normal)"]},
   },
   {
     id: 61,
@@ -2336,6 +2379,7 @@ export const DRUGS = [
       ],
       p: ["100 mg/kg/j pipéracilline en 3-4 injections"],
     },
+    prep: {solvant:"NaCl 0,9%",volume_final:100,conc_finale:"40 mg/mL",conc_produit:4,unite:"g",duree:"30-60 min",stabilite:"Stable 24h à 25°C",etapes:["Flacon poudre 4 g pip/500 mg tazo","Reconstituer avec 20 mL EPPI puis diluer dans 100 mL NaCl 0,9%","Perfusion 30-60 min (ou perfusion prolongée 4h si Pseudomonas)"],notes:["Hypokaliémie possible (apport sodé) — surveiller ionogramme","Incompatibilités nombreuses — rincer la ligne avant/après"]},
   },
   {
     id: 62,
@@ -2371,6 +2415,7 @@ export const DRUGS = [
       ],
       p: ["150 000 UI/kg/j en 2-3 injections"],
     },
+    prep: {solvant:"G5% STRICT",volume_final:100,conc_finale:"15 000 UI/mL",conc_produit:1500000,unite:"MUI",duree:"60 min",stabilite:"Utilisation immédiate",etapes:["Flacon poudre 1,5 MUI","Reconstituer puis diluer dans 100 mL G5% STRICT","Perfusion 60 min — NE PAS UTILISER NaCl 0,9%"],notes:["G5% STRICT — incompatible NaCl 0,9%","Utilisation immédiate après reconstitution"]},
   },
   {
     id: 63,
@@ -2410,6 +2455,7 @@ export const DRUGS = [
       ],
       p: ["15 mg/kg /6h IV sur 60 min"],
     },
+    prep: {solvant:"NaCl 0,9% ou G5%",volume_final:250,conc_finale:"4 mg/mL (1g/250mL)",conc_produit:4,unite:"mg",dose_kg:25,dose_max_kg:30,duree:"60 min minimum (≥ 2h pour dose de charge)",stabilite:"Stable 24h à 25°C",etapes:["Flacon poudre 500 mg ou 1 g","500 mg : diluer dans 100 mL / 1 g : diluer dans 250 mL NaCl 0,9%","Sur KTC : 100 mL pour toutes les posologies — perfusion 60 min","Dose de charge : perfusion ≥ 2h obligatoire"],notes:["Injecter lentement — Red Man Syndrome si trop rapide","VVC conseillée si doses élevées (pH acide — veinotoxique)","Monitorage TDM obligatoire : résiduelle 15-25 mg/L"]},
   },
 
   // ──────────────── SOLUTÉS ────────────────

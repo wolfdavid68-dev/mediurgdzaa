@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 
 const TABS = [
-  { key: "indic", label: "Indications",         type: "info" },
-  { key: "ci",    label: "Contre-indications",  type: "warn" },
-  { key: "ei",    label: "Effets indésirables", type: "danger" },
-  { key: "cond",  label: "Conditionnements",    type: "neutral" },
   { key: "poso",  label: "Posologie",           type: "poso" },
+  { key: "indic", label: "Indications",         type: "info" },
+  { key: "ci",    label: "Contre-ind.",         type: "ci" },
+  { key: "ei",    label: "Effets indés.",       type: "danger" },
+  { key: "cond",  label: "Conditionnements",    type: "neutral" },
 ];
 
 const DrugCard = ({ drug }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
+
+  useEffect(() => {
+    if (open) setActiveTab("poso");
+  }, [open]);
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
   const [weight, setWeight] = useState("");
@@ -94,6 +98,44 @@ const DrugCard = ({ drug }) => {
       );
     }
     if (key === "poso") {
+      const prep = drug.prep || null;
+      const kg = parseFloat(weight);
+      const validKg = kg && kg > 0 && kg <= 300;
+
+      const renderPrepCalc = () => {
+        if (!prep || !prep.dose_kg || !validKg) return null;
+        const dose = prep.dose_kg * kg;
+        const doseMax = prep.dose_max_kg ? prep.dose_max_kg * kg : null;
+        const volMin = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
+        const volMax = doseMax && prep.conc_produit ? +(doseMax / prep.conc_produit).toFixed(1) : null;
+        if (!volMin) return null;
+        const volLabel = volMax && volMax !== volMin ? `${volMin}–${volMax} mL` : `${volMin} mL`;
+        const doseLabel = doseMax ? `${+dose.toFixed(1)}–${+doseMax.toFixed(1)} ${prep.unite}` : `${+dose.toFixed(1)} ${prep.unite}`;
+        const solvantVol = prep.volume_final ? prep.volume_final - volMin : null;
+        return (
+          <div className="prep-calc-box">
+            <div className="prep-calc-header">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+              Pour {kg} kg
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Dose</span>
+              <span className="prep-calc-val">{doseLabel}</span>
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Prélever</span>
+              <span className="prep-calc-val prep-calc-highlight">{volLabel} du produit</span>
+            </div>
+            {solvantVol !== null && (
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Compléter à</span>
+                <span className="prep-calc-val prep-calc-highlight">{prep.volume_final} mL avec {prep.solvant}</span>
+              </div>
+            )}
+          </div>
+        );
+      };
+
       return (
         <>
           <div className="poso-calc">
@@ -148,6 +190,42 @@ const DrugCard = ({ drug }) => {
                 : <span className="na">Non renseigné</span>}
             </div>
           </div>
+
+          {prep && (
+            <div className="prep-block">
+              <div className="prep-header">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+                <span>Préparation</span>
+                <span className="prep-solvant-tag">{prep.solvant}</span>
+              </div>
+
+              <div className="prep-meta-row">
+                {prep.duree && <span className="prep-meta-chip">{prep.duree}</span>}
+                {prep.stabilite && <span className="prep-meta-chip prep-chip-stab">{prep.stabilite}</span>}
+                {prep.debit && <span className="prep-meta-chip prep-chip-debit">{prep.debit}</span>}
+                {prep.conc_finale && <span className="prep-meta-chip prep-chip-conc">{prep.conc_finale}</span>}
+              </div>
+
+              {prep.etapes && prep.etapes.length > 0 && (
+                <ol className="prep-etapes">
+                  {prep.etapes.map((e, i) => <li key={i} className="prep-etape">{e}</li>)}
+                </ol>
+              )}
+
+              {renderPrepCalc()}
+
+              {prep.notes && prep.notes.length > 0 && (
+                <ul className="prep-notes">
+                  {prep.notes.map((n, i) => (
+                    <li key={i} className="prep-note-item">
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      {n}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           <div className="poso-note">
             <div className="poso-note-header">
@@ -215,21 +293,33 @@ const DrugCard = ({ drug }) => {
           <p className="drug-desc">{drug.desc}</p>
 
           <div className="tabs-row">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                className={`tab-btn tab-${tab.type} ${activeTab === tab.key ? "tab-active" : ""}`}
-                style={tab.type === "poso" && activeTab === tab.key ? {
-                  background: drug.couleur + "25",
-                  borderColor: drug.couleur,
-                  color: drug.couleur
-                } : {}}
-                onClick={() => toggleTab(tab.key)}
-              >
-                <span className={`dot dot-${tab.type}`} style={tab.type === "poso" ? { background: drug.couleur } : {}} />
-                <span className="tab-label">{tab.label}</span>
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.key;
+              const isCi = tab.key === "ci";
+              const ciCount = isCi && drug.ci && drug.ci.length > 0 ? drug.ci.length : 0;
+              return (
+                <button
+                  key={tab.key}
+                  className={`tab-btn tab-${tab.type} ${isActive ? "tab-active" : ""}`}
+                  style={tab.type === "poso" && isActive ? {
+                    background: drug.couleur + "25",
+                    borderColor: drug.couleur,
+                    color: drug.couleur
+                  } : {}}
+                  onClick={() => toggleTab(tab.key)}
+                >
+                  {isCi ? (
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" className="tab-ci-icon"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  ) : (
+                    <span className={`dot dot-${tab.type}`} style={tab.type === "poso" ? { background: drug.couleur } : {}} />
+                  )}
+                  <span className="tab-label">{tab.label}</span>
+                  {ciCount > 0 && (
+                    <span className="tab-ci-badge">{ciCount}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {activeTab && (
