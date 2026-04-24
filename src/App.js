@@ -19,6 +19,7 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("Tout");
   const [svc, setSvc] = useState("Tout");
+  const [protoFilter, setProtoFilter] = useState("Tout");
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem("mediurg-theme") || "dark"; } catch { return "dark"; }
   });
@@ -38,6 +39,18 @@ const App = () => {
 
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
   const toggleFont = () => setBigFont(f => !f);
+
+  const filteredProtocols = useMemo(() => {
+    if (protoFilter === "Tout") return PROTOCOLS;
+    return PROTOCOLS.filter(p => {
+      const isEnfant = p.code.includes("ENF") || p.titre.includes("Enfant");
+      const isAdulte = !isEnfant && p.titre.includes("Adulte");
+      const isTous   = !isEnfant && !isAdulte;
+      if (protoFilter === "Enfant") return isEnfant || isTous;
+      if (protoFilter === "Adulte") return isAdulte || isTous;
+      return true;
+    });
+  }, [protoFilter]);
 
   const filtered = useMemo(() => {
     const q = normalize(search.trim());
@@ -167,9 +180,25 @@ const App = () => {
           )
         )}
         {page === "protocoles" && (
-          <div className="protocol-list">
-            {PROTOCOLS.map(p => <ProtocolCard key={p.id} protocol={p} />)}
-          </div>
+          <>
+            <div className="proto-filter-bar">
+              {["Tout", "Adulte", "Enfant"].map(f => (
+                <button
+                  key={f}
+                  className={`proto-filter-chip ${protoFilter === f ? "proto-filter-active" : ""}`}
+                  onClick={() => setProtoFilter(f)}
+                >
+                  {f}
+                </button>
+              ))}
+              <span className="proto-filter-count">
+                {filteredProtocols.length} protocole{filteredProtocols.length > 1 ? "s" : ""}
+              </span>
+            </div>
+            <div className="protocol-list">
+              {filteredProtocols.map(p => <ProtocolCard key={p.id} protocol={p} />)}
+            </div>
+          </>
         )}
       </main>
 

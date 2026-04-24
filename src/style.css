@@ -1322,6 +1322,50 @@ body {
   padding: 4px 0;
 }
 
+/* ── FILTRE PROTOCOLES ───────────────────────────────────── */
+.proto-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 10px;
+  flex-wrap: wrap;
+}
+
+.proto-filter-chip {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.proto-filter-chip:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+.proto-filter-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.proto-filter-active:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.proto-filter-count {
+  font-size: 11px;
+  color: var(--text-mute);
+  margin-left: auto;
+}
+
 /* ── PROTOCOLES ──────────────────────────────────────────── */
 .protocol-list {
   display: flex;
