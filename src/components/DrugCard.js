@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { PSE } from "../data/pse";
 
 const TABS = [
   { key: "poso",  label: "Posologie",           type: "poso" },
@@ -18,6 +19,7 @@ const DrugCard = ({ drug }) => {
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
   const [weight, setWeight] = useState("");
+  const [pseTarget, setPseTarget] = useState("");
 
   // Charger la note depuis localStorage au montage
   useEffect(() => {
@@ -74,6 +76,13 @@ const DrugCard = ({ drug }) => {
       if (capped) return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: true };
     }
     return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: false };
+  };
+
+  const calcDebit = (pse, dose, kg) => {
+    const d = parseFloat(dose), w = parseFloat(kg);
+    if (!d || !w || d <= 0 || w <= 0) return null;
+    if (pse.unite === "µg/kg/min") return +((d * w * 60) / pse.conc).toFixed(2);
+    return +((d * w) / pse.conc).toFixed(2);
   };
 
   const renderList = (items) => {
@@ -226,6 +235,76 @@ const DrugCard = ({ drug }) => {
               )}
             </div>
           )}
+
+          {PSE[drug.id] && (() => {
+            const pse = PSE[drug.id];
+            const kg = parseFloat(weight);
+            const validKg = kg > 0 && kg <= 300;
+            const debit = calcDebit(pse, pseTarget, weight);
+            const inRange = debit && parseFloat(pseTarget) >= pse.min && parseFloat(pseTarget) <= pse.max;
+            const outRange = debit && (parseFloat(pseTarget) < pse.min || parseFloat(pseTarget) > pse.max);
+            return (
+              <div className="pse-block">
+                <div className="pse-header">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                  </svg>
+                  Débit PSE
+                  <span className="pse-conc-tag">{pse.conc}{pse.unite.includes("mg") ? " mg" : " µg"}/mL · seringue</span>
+                </div>
+                <div className="pse-body">
+                  <div className="pse-input-row">
+                    <span className="pse-input-label">Dose cible</span>
+                    <input
+                      className="pse-input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder={pse.min}
+                      value={pseTarget}
+                      onChange={e => setPseTarget(e.target.value)}
+                    />
+                    <span className="pse-unit">{pse.unite}</span>
+                    <span className="pse-input-label" style={{marginLeft: 4}}>plage {pse.min}–{pse.max}</span>
+                  </div>
+
+                  {debit ? (
+                    <div className="pse-result-box">
+                      <span className="pse-result-label">Débit</span>
+                      <span className="pse-result-value">{debit}</span>
+                      <span className="pse-result-unit">mL/h</span>
+                      {outRange && <span className="pse-range-warn">⚠ hors plage</span>}
+                    </div>
+                  ) : null}
+
+                  {validKg ? (
+                    <table className="pse-table">
+                      <thead>
+                        <tr>
+                          <th>Dose ({pse.unite})</th>
+                          <th>mL/h</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pse.steps.map(step => {
+                          const d = calcDebit(pse, step, weight);
+                          const isActive = parseFloat(pseTarget) === step;
+                          return (
+                            <tr key={step} className={isActive ? "pse-row-active" : ""}>
+                              <td>{step}</td>
+                              <td>{d}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="pse-no-weight">Entrez le poids patient pour afficher le tableau de référence</div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="poso-note">
             <div className="poso-note-header">

@@ -1102,6 +1102,191 @@ body {
   .logo-text p { display: none; }
 }
 
+/* ── PSE CALCULATOR ──────────────────────────────────────── */
+.pse-block {
+  margin-top: 12px;
+  background: #0e1a2b;
+  border: 1px solid #1d4ed8;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+[data-theme="light"] .pse-block {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.pse-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  background: #1d4ed820;
+  border-bottom: 1px solid #1d4ed840;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #60a5fa;
+}
+
+[data-theme="light"] .pse-header {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-bottom-color: #bfdbfe;
+}
+
+.pse-conc-tag {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: #93c5fd;
+  background: #1d4ed830;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-theme="light"] .pse-conc-tag {
+  color: #1e40af;
+  background: #bfdbfe;
+}
+
+.pse-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pse-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pse-input-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.pse-input {
+  width: 80px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #1d4ed860;
+  background: #0a1628;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+
+[data-theme="light"] .pse-input {
+  background: #fff;
+  border-color: #93c5fd;
+  color: #1e3a5f;
+}
+
+.pse-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #3b82f620;
+}
+
+.pse-unit {
+  font-size: 11px;
+  color: #60a5fa;
+  white-space: nowrap;
+}
+
+.pse-result-box {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #1d4ed820;
+  border-radius: 8px;
+  border: 1px solid #1d4ed840;
+}
+
+.pse-result-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.pse-result-value {
+  font-size: 26px;
+  font-weight: 900;
+  color: #60a5fa;
+  line-height: 1;
+}
+
+[data-theme="light"] .pse-result-value {
+  color: #1d4ed8;
+}
+
+.pse-result-unit {
+  font-size: 13px;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.pse-range-warn {
+  font-size: 10px;
+  color: var(--warn);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.pse-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.pse-table th {
+  color: var(--text-mute);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 6px;
+  border-bottom: 1px solid #1d4ed830;
+  text-align: right;
+}
+
+.pse-table th:first-child { text-align: left; }
+
+.pse-table td {
+  padding: 4px 6px;
+  text-align: right;
+  color: var(--text-dim);
+  border-bottom: 1px solid #ffffff08;
+}
+
+.pse-table td:first-child {
+  text-align: left;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.pse-table tr.pse-row-active td {
+  color: #60a5fa;
+  font-weight: 700;
+}
+
+.pse-no-weight {
+  font-size: 11px;
+  color: var(--text-mute);
+  font-style: italic;
+  text-align: center;
+  padding: 4px 0;
+}
+
 /* Hover supprimé sur écrans tactiles */
 @media (hover: none) {
   .drug-card:hover { border-color: var(--border); }
