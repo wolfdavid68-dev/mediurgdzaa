@@ -78,6 +78,13 @@ const DrugCard = ({ drug }) => {
     return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: false };
   };
 
+  const ciSeverity = (text) => {
+    const t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    if (/\brelative\b/.test(t)) return "rel";
+    if (/allergi|hypersensibil|\bimao\b|porphyri|myastheni|hyperkalie|insuffisance surrenal|brulures etendues|para.{0,3}tetrapleg|myopathi|pseudocholinesteras|epilepsie non|nouveau.ne|nourrisson|depression respiratoire sev/.test(t)) return "abs";
+    return null;
+  };
+
   const calcDebit = (pse, dose, kg) => {
     const d = parseFloat(dose), w = parseFloat(kg);
     if (!d || !w || d <= 0 || w <= 0) return null;
@@ -96,7 +103,26 @@ const DrugCard = ({ drug }) => {
 
   const renderContent = (key) => {
     if (key === "indic") return renderList(drug.indic);
-    if (key === "ci")    return renderList(drug.ci);
+    if (key === "ci") {
+      if (!drug.ci || drug.ci.length === 0) return <span className="na">Non renseigné</span>;
+      return (
+        <ul className="ci-list">
+          {drug.ci.map((it, i) => {
+            const sev = ciSeverity(it);
+            return (
+              <li key={i} className={`ci-item ${sev ? `ci-item-${sev}` : ""}`}>
+                {sev && (
+                  <span className={`ci-badge ci-badge-${sev}`}>
+                    {sev === "abs" ? "Absolue" : "Relative"}
+                  </span>
+                )}
+                <span className="ci-text">{it}</span>
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
     if (key === "ei")    return renderList(drug.ei);
     if (key === "cond") {
       if (!drug.cond || drug.cond.length === 0) return <span className="na">Non renseigné</span>;

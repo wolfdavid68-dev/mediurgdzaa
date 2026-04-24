@@ -1322,6 +1322,84 @@ body {
   padding: 4px 0;
 }
 
+/* ── CONTRE-INDICATIONS AVEC SÉVÉRITÉ ────────────────────── */
+.ci-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ci-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  font-size: clamp(12px, 1.3vw, 14px);
+  line-height: 1.4;
+}
+
+.ci-item-abs {
+  background: #2a0a0a;
+  border-color: #7f1d1d;
+}
+
+.ci-item-rel {
+  background: #2a1500;
+  border-color: #7c3a00;
+}
+
+[data-theme="light"] .ci-item-abs {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+[data-theme="light"] .ci-item-rel {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.ci-badge {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 1px;
+  white-space: nowrap;
+}
+
+.ci-badge-abs {
+  background: #dc2626;
+  color: #fff;
+}
+
+.ci-badge-rel {
+  background: #ea580c;
+  color: #fff;
+}
+
+.ci-text {
+  flex: 1;
+  color: var(--text);
+}
+
+.ci-item-abs .ci-text { color: #fca5a5; }
+.ci-item-rel .ci-text { color: #fdba74; }
+
+[data-theme="light"] .ci-item-abs .ci-text { color: #991b1b; }
+[data-theme="light"] .ci-item-rel .ci-text { color: #9a3412; }
+
+/* Grande police CI */
+[data-fontsize="large"] .ci-item { font-size: 15px; padding: 9px 12px; }
+[data-fontsize="large"] .ci-badge { font-size: 10px; padding: 3px 7px; }
+
 /* ── MODE GRANDE POLICE ──────────────────────────────────── */
 [data-fontsize="large"] .drug-name        { font-size: 20px; }
 [data-fontsize="large"] .drug-commercial  { font-size: 15px; }
