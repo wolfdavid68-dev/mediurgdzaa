@@ -1481,55 +1481,26 @@ body {
 }
 
 .proto-section-header {
-  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 12px;
-  background: var(--bg-elevated);
-  border: none;
+  padding: 7px 12px;
   border-left: 3px solid transparent;
-  cursor: pointer;
-  text-align: left;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.12s;
 }
 
-.proto-section-header:hover { background: var(--card-hover); }
-
 .proto-section-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .proto-section-title {
-  flex: 1;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text);
-}
-
-.proto-section-count {
   font-size: 11px;
-  color: var(--text-mute);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1px 6px;
-  font-weight: 600;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
-
-.proto-chevron {
-  color: var(--text-mute);
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-
-.proto-chevron-open { transform: rotate(180deg); }
 
 .proto-items {
   list-style: none;
