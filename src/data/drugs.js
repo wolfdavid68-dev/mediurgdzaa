@@ -13,7 +13,7 @@ export const DRUGS = [
     classe: "Hypnotique / Anesthésique GABA-A",
     cat: "Hypnotiques",
     svc: ["SAUV", "SMUR"],
-    couleur: "#34C759",
+    couleur: "#F5D300",
     icon: "💤",
     desc: "Sédatif d'action rapide, hypnotique et anticonvulsivant. Potentialise les récepteurs GABA-A. Délai d'action 10-50 sec, durée 3-10 min. Attention : existe en 2 concentrations (10 mg/mL et 20 mg/mL).",
     indic: [
@@ -59,7 +59,7 @@ export const DRUGS = [
     classe: "Hypnotique d'action rapide",
     cat: "Hypnotiques",
     svc: ["SAUV", "SMUR"],
-    couleur: "#34C759",
+    couleur: "#F5D300",
     icon: "💊",
     desc: "Sédatif d'action rapide, hypnotique. Délai 14-45 sec, durée 3-12 min. Moins d'hypotension que les autres sédatifs → indiqué pour l'ISR du patient instable. Peut être blanc ou translucide.",
     indic: [
@@ -98,7 +98,7 @@ export const DRUGS = [
     classe: "Benzodiazépine hydrosoluble",
     cat: "Hypnotiques",
     svc: ["SAUV", "SMUR", "SAU"],
-    couleur: "#34C759",
+    couleur: "#F97316",
     icon: "😴",
     desc: "Benzodiazépine hydrosoluble à action rapide (2-3 min) et courte (1-2h). Anxiolytique, sédatif, amnésiant, anticonvulsivant. BZD de référence en urgence. Peut entraîner des hypotensions.",
     indic: [
@@ -143,7 +143,7 @@ export const DRUGS = [
     classe: "Anesthésique dissociatif / Antagoniste NMDA",
     cat: "Hypnotiques",
     svc: ["SAUV", "SMUR", "SAU"],
-    couleur: "#34C759",
+    couleur: "#F5D300",
     icon: "🧠",
     desc: "Anesthésique dissociatif antagoniste NMDA. Hypnotique et bronchodilatateur. Maintient les réflexes laryngés, la ventilation spontanée et la tonicité vasculaire. STUPÉFIANT (traçabilité obligatoire).",
     indic: [
@@ -189,7 +189,7 @@ export const DRUGS = [
     classe: "Opioïde fort / Agoniste morphinique majeur",
     cat: "Analgésie",
     svc: ["SAUV", "SMUR"],
-    couleur: "#5856D6",
+    couleur: "#1D4ED8",
     icon: "💉",
     desc: "Analgésie centrale agoniste morphinique majeur. Opioïde 5-10× plus puissant que le fentanyl. Antalgique d'action rapide. STUPÉFIANT — traçabilité obligatoire, conserver l'ampoule.",
     indic: [
@@ -229,7 +229,7 @@ export const DRUGS = [
     classe: "Opioïde fort / Antalgique de palier 3",
     cat: "Analgésie",
     svc: ["SAUV", "SMUR", "SAU"],
-    couleur: "#5856D6",
+    couleur: "#1D4ED8",
     icon: "🩺",
     desc: "Antalgique de palier 3. Opioïde de référence, agoniste des récepteurs µ centraux et périphériques. STUPÉFIANT — traçabilité obligatoire dans le cahier des stups, ne pas jeter les ampoules.",
     indic: [
@@ -271,7 +271,7 @@ export const DRUGS = [
     classe: "Antalgique d'action centrale non opioïde",
     cat: "Analgésie",
     svc: ["SAUV", "SAU"],
-    couleur: "#5856D6",
+    couleur: "#1D4ED8",
     icon: "💆",
     desc: "Antalgique central non opioïde, non AINS. Inhibe la recapture des monoamines. Pas d'effet anti-inflammatoire. Privilégier le G5% comme solvant.",
     indic: [
@@ -313,7 +313,7 @@ export const DRUGS = [
     classe: "Antidote des morphiniques",
     cat: "Antidotes",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF2D55",
+    couleur: "#93C5FD",
     icon: "🚨",
     desc: "Antagoniste compétitif des récepteurs µ, κ, δ opioïdes. ATTENTION : demi-vie plus courte que les morphiniques → risque de réapparition des symptômes après l'arrêt du traitement.",
     indic: [
@@ -352,7 +352,7 @@ export const DRUGS = [
     classe: "Curare dépolarisant / Myorelaxant majeur",
     cat: "Curares",
     svc: ["SAUV", "SMUR"],
-    couleur: "#007AFF",
+    couleur: "#DC2626",
     icon: "⚙️",
     desc: "Seul curare dépolarisant. Délai 1 min-1 min 30, durée 7 min. FRIGO (Déchoc 1). S'injecte TOUJOURS dilué pour éviter l'allergie. Risque de choc anaphylactique avec rush cutané pouvant mener à l'ACR.",
     indic: [
@@ -394,7 +394,7 @@ export const DRUGS = [
     classe: "Curare non dépolarisant / Myorelaxant majeur",
     cat: "Curares",
     svc: ["SAUV", "SMUR"],
-    couleur: "#007AFF",
+    couleur: "#DC2626",
     icon: "⚙️",
     desc: "Curare non dépolarisant. Délai 1 min, durée 50 min. FRIGO (Déchoc 1). Alternative à la Célocurine, ne génère pas d'hyperkaliémie. Réversible par sugammadex.",
     indic: [
@@ -429,7 +429,7 @@ export const DRUGS = [
     classe: "Curare non dépolarisant / Myorelaxant majeur",
     cat: "Curares",
     svc: ["SAUV"],
-    couleur: "#007AFF",
+    couleur: "#DC2626",
     icon: "⚙️",
     desc: "Curare non dépolarisant à délai long. FRIGO (Déchoc 1). Nécessite une mobilisation limitée du patient en bloc et une attention particulière au niveau des cervicales.",
     indic: [
@@ -460,7 +460,7 @@ export const DRUGS = [
     classe: "Antidote ESMERON (curares amino-stéroïdiens)",
     cat: "Antidotes",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF2D55",
+    couleur: "#F87171",
     icon: "🔓",
     desc: "Agent de décurarisation sélectif. Encapsule le rocuronium et la vécuronium. Permet la décurarisation profonde en 2-3 min. Disponible en REA.",
     indic: [
@@ -491,7 +491,7 @@ export const DRUGS = [
     classe: "Catécholamine α/β agoniste — Arrêt cardiaque, choc anaphylactique",
     cat: "Catécholamines",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF3B30",
+    couleur: "#7C3AED",
     icon: "⚡",
     desc: "Médicament de l'arrêt cardiaque et du choc anaphylactique. Action vasopressive, puissant inotrope/chronotrope/dromotrope positif, vasoconstriction, bronchodilatation. À administrer TOUJOURS au plus proche du patient.",
     indic: [
@@ -540,7 +540,7 @@ export const DRUGS = [
     classe: "Sympathomimétique indirect",
     cat: "Catécholamines",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF3B30",
+    couleur: "#A78BFA",
     icon: "⬆️",
     desc: "Médicament d'urgence en cas d'hypotension sévère. Libère la noradrénaline endogène. À administrer toujours au plus proche du patient. Effet épuisable après 30 mg.",
     indic: [
@@ -579,7 +579,7 @@ export const DRUGS = [
     classe: "Catécholamine β1 agoniste (inotrope)",
     cat: "Catécholamines",
     svc: ["SAUV"],
-    couleur: "#FF3B30",
+    couleur: "#A78BFA",
     icon: "❤️",
     desc: "Action tonicardiaque dans les états de bas débit cardiaque. Agoniste β1 sélectif. Augmente le débit cardiaque sans vasoconstriction majeure.",
     indic: [
@@ -619,7 +619,7 @@ export const DRUGS = [
     classe: "Agoniste β1/β2 pur",
     cat: "Catécholamines",
     svc: ["SAUV"],
-    couleur: "#FF3B30",
+    couleur: "#A78BFA",
     icon: "💓",
     desc: "Utilisée dans le cadre du BAV complet (type III). Agoniste β pur, chronotrope et inotrope positif. À l'abri de la lumière dans une tubulure opaque. Ne se conserve plus au frigo.",
     indic: [
@@ -658,7 +658,7 @@ export const DRUGS = [
     classe: "Catécholamine α1 agoniste prédominant",
     cat: "Catécholamines",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF3B30",
+    couleur: "#7C3AED",
     icon: "🔴",
     desc: "Médicament d'urgence en cas d'état de choc. Action vasopressive puissante par agonisme α1. Sur voie dédiée. Fiche mémo sur le bureau de l'ordinateur.",
     indic: [
@@ -695,7 +695,7 @@ export const DRUGS = [
     classe: "Catécholamine précurseur / Dopaminergique",
     cat: "Catécholamines",
     svc: ["SAUV"],
-    couleur: "#FF3B30",
+    couleur: "#A78BFA",
     icon: "⚗️",
     desc: "Précurseur de la noradrénaline. Effets dose-dépendants : dopaminergiques (< 5 µg/kg/min), β1 (5-10 µg/kg/min), α1 (> 10 µg/kg/min).",
     indic: [
@@ -730,7 +730,7 @@ export const DRUGS = [
     classe: "Anticholinergique / Parasympatholytique",
     cat: "Cardiologie",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF9500",
+    couleur: "#16A34A",
     icon: "🫀",
     desc: "Anticholinergique pour corriger des bradycardies sévères. Antagoniste muscarinique compétitif.",
     indic: [
@@ -771,7 +771,7 @@ export const DRUGS = [
     classe: "β-bloquant cardiosélectif ultrarapide",
     cat: "Cardiologie",
     svc: ["SAUV"],
-    couleur: "#FF9500",
+    couleur: "#0EA5E9",
     icon: "🛑",
     desc: "β-bloquant cardio-sélectif. Dans le cadre de : tachycardie supraventriculaire, HTA, IDM phase aiguë, Dissection aortique. Demi-vie ultra-courte (9 min).",
     indic: [
@@ -812,7 +812,7 @@ export const DRUGS = [
     classe: "Antiarythmique classe III",
     cat: "Cardiologie",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF9500",
+    couleur: "#0EA5E9",
     icon: "💓",
     desc: "Antiarythmique bradycardisant. Dans troubles du rythme supra-ventriculaire et ventriculaire, tachycardie supraventriculaire mal tolérée. Dilution G5% STRICT. Changer les tubulures à chaque changement de seringue (corrosion PVC).",
     indic: [
@@ -856,7 +856,7 @@ export const DRUGS = [
     classe: "Cardiotonique inotrope + bathmotrope -",
     cat: "Cardiologie",
     svc: ["SAUV"],
-    couleur: "#FF9500",
+    couleur: "#0EA5E9",
     icon: "💓",
     desc: "Cardiotonique inotrope positif et bathmotrope négatif. Marge thérapeutique très étroite. ECG à réaliser avant toute injection.",
     indic: [
@@ -893,7 +893,7 @@ export const DRUGS = [
     classe: "Antiarythmique / Freinateur NAV",
     cat: "Cardiologie",
     svc: ["SAUV", "SAU"],
-    couleur: "#FF9500",
+    couleur: "#0EA5E9",
     icon: "🫀",
     desc: "Conversion rapide en rythme sinusal des tachycardies jonctionnelles. Demi-vie ultra-courte (< 10 sec). ECG long à réaliser pendant l'injection. Atropine + adrénaline à proximité.",
     indic: [
@@ -932,7 +932,7 @@ export const DRUGS = [
     classe: "Thrombolytique de sauvetage",
     cat: "Cardiologie",
     svc: ["SAUV"],
-    couleur: "#FF375F",
+    couleur: "#F97316",
     icon: "🔓",
     desc: "Utilisée dans le cadre de l'AVC ischémique et l'EP massive. Stable 8h à 25°C. Conserver à l'abri de la lumière avant utilisation — NE PAS DÉCONDITIONNER.",
     indic: [
@@ -974,7 +974,7 @@ export const DRUGS = [
     classe: "Antithrombotique",
     cat: "Cardiologie",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF375F",
+    couleur: "#F97316",
     icon: "🔓",
     desc: "Antithrombotique par voie IVD. Ne pas mélanger avec solutés glucosés dans la même ligne de perfusion.",
     indic: ["IDM STEMI (thrombolyse préhospitalière)"],
@@ -1014,7 +1014,7 @@ export const DRUGS = [
     classe: "Antihypertenseur / Inhibiteur calcique",
     cat: "Cardiologie",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF9500",
+    couleur: "#0EA5E9",
     icon: "📉",
     desc: "Antihypertenseur inhibiteur calcique. Conserver l'ampoule dans son emballage, à l'abri de la lumière.",
     indic: [
@@ -1054,7 +1054,7 @@ export const DRUGS = [
     classe: "Antihypertenseur α1-bloquant",
     cat: "Cardiologie",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF9500",
+    couleur: "#0EA5E9",
     icon: "📉",
     desc: "Antihypertenseur. Double mécanisme : α1-bloquant périphérique + agoniste 5-HT1A central. Pas de tachycardie réflexe.",
     indic: [
@@ -1084,7 +1084,7 @@ export const DRUGS = [
     classe: "Dérivé nitré / Vasodilatateur",
     cat: "Cardiologie",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF9500",
+    couleur: "#0EA5E9",
     icon: "💨",
     desc: "Dérivé nitré. Libère du NO → vasodilatation veineuse (précharge) et artérielle coronarienne. Surveillance hémodynamique.",
     indic: [
@@ -1127,7 +1127,7 @@ export const DRUGS = [
     classe: "Antagoniste des benzodiazépines",
     cat: "Antidotes",
     svc: ["SAUV", "SMUR"],
-    couleur: "#FF2D55",
+    couleur: "#FCD34D",
     icon: "🔄",
     desc: "Antagoniste compétitif spécifique des récepteurs GABA-A aux BZD. Actif aussi sur molécules apparentées (Zolpidem, Zopiclone). Durée d'action plus courte que les BZD → attention à la réapparition des symptômes.",
     indic: [
@@ -1234,7 +1234,7 @@ export const DRUGS = [
     classe: "Benzodiazépine",
     cat: "Neurologie",
     svc: ["SAUV", "SMUR", "SAU"],
-    couleur: "#5856D6",
+    couleur: "#F97316",
     icon: "🧠",
     desc: "BZD à longue durée d'action. Peut s'injecter en intra-rectale (PUR) chez l'enfant. Risque d'apnée.",
     indic: [
@@ -1278,7 +1278,7 @@ export const DRUGS = [
     classe: "Benzodiazépine antiépileptique",
     cat: "Neurologie",
     svc: ["SAUV", "SAU"],
-    couleur: "#5856D6",
+    couleur: "#F97316",
     icon: "🧠",
     desc: "BZD antiépileptique puissante. ATTENTION : à reconstituer avec son solvant.",
     indic: [
@@ -1315,7 +1315,7 @@ export const DRUGS = [
     classe: "Antiépileptique / Modulateur SV2A",
     cat: "Neurologie",
     svc: ["SAUV", "SAU"],
-    couleur: "#5856D6",
+    couleur: "#0D9488",
     icon: "🧠",
     desc: "Antiépileptique à spectre large, excellente tolérance, peu d'interactions. Surveillance réapparition des crises convulsives.",
     indic: [
@@ -1349,7 +1349,7 @@ export const DRUGS = [
     classe: "Antiépileptique / Prodrug de la phénytoïne",
     cat: "Neurologie",
     svc: ["SAUV"],
-    couleur: "#5856D6",
+    couleur: "#0D9488",
     icon: "🧠",
     desc: "Prodrug de la phénytoïne, mieux tolérée en IV. Surveillance hémodynamique obligatoire.",
     indic: [
@@ -1429,7 +1429,7 @@ export const DRUGS = [
     classe: "Electrolyte / Cardioprotecteur",
     cat: "Électrolytes",
     svc: ["SAUV", "SMUR"],
-    couleur: "#30D158",
+    couleur: "#34D399",
     icon: "⚗️",
     desc: "Traitement de l'urgence de l'hypocalcémie. Le calcium antagonise l'effet de l'hyperkaliémie sur l'excitabilité du muscle cardiaque. 3× plus concentré que le gluconate.",
     indic: [
@@ -1467,7 +1467,7 @@ export const DRUGS = [
     classe: "Electrolyte / Cardioprotecteur",
     cat: "Électrolytes",
     svc: ["SAUV", "SMUR", "SAU"],
-    couleur: "#30D158",
+    couleur: "#34D399",
     icon: "⚗️",
     desc: "Traitement de l'urgence de l'hypocalcémie et cardioprotection dans l'hyperkaliémie. Dans l'hyperkaliémie : stabilise les membranes, réduit les échanges d'ions et les troubles du rythme.",
     indic: [
@@ -1497,7 +1497,7 @@ export const DRUGS = [
     classe: "Electrolyte",
     cat: "Électrolytes",
     svc: ["SAUV", "SMUR", "SAU"],
-    couleur: "#30D158",
+    couleur: "#34D399",
     icon: "⚗️",
     desc: "Traitement de l'hypokaliémie. Débit maximum 1 g/h. Veinotoxique. En PSE privilégier un débit à 0,5 g/h.",
     indic: [
@@ -1535,7 +1535,7 @@ export const DRUGS = [
     classe: "Electrolyte / Antiarythmique / Tocolytique",
     cat: "Électrolytes",
     svc: ["SAUV", "SMUR"],
-    couleur: "#30D158",
+    couleur: "#34D399",
     icon: "⚗️",
     desc: "Stabilise les membranes dans l'hypokaliémie → réduit les échanges d'ions et les troubles du rythme. Effets multiples : antiarythmique (TdP), tocolytique, bronchodilatateur, anticonvulsivant éclamptique.",
     indic: [
@@ -1779,7 +1779,7 @@ export const DRUGS = [
     classe: "Sucre / Antihypoglycémiant",
     cat: "Métabolique",
     svc: ["SAUV", "SMUR", "SAU"],
-    couleur: "#30D158",
+    couleur: "#34D399",
     icon: "🍬",
     desc: "Traitement d'urgence de l'hypoglycémie sévère. Veinotoxique — bien rincer après injection.",
     indic: [
@@ -1964,7 +1964,7 @@ export const DRUGS = [
     classe: "Inhibiteur calcique (neurotrope)",
     cat: "Neurologie",
     svc: ["SAUV"],
-    couleur: "#5856D6",
+    couleur: "#0EA5E9",
     icon: "🧠",
     desc: "Prévention des déficits neurologiques ischémiques sévères consécutifs à une hémorragie sous-arachnoïdienne d'origine anévrismale.",
     indic: [

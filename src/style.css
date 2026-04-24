@@ -395,7 +395,25 @@ body {
   border-radius: 4px;
   letter-spacing: 0.3px;
 }
+/* Badge catégorie — couleur par famille SFAR */
 .badge-cat { background: var(--border); color: var(--text-dim); }
+
+.badge-cat[data-cat="Hypnotiques"]       { background: rgba(245,211,0,0.18);   color: #F5D300;  border: 1px solid rgba(245,211,0,0.4); }
+.badge-cat[data-cat="Analgésie"]         { background: rgba(29,78,216,0.18);   color: #93C5FD;  border: 1px solid rgba(29,78,216,0.4); }
+.badge-cat[data-cat="Curares"]           { background: rgba(220,38,38,0.18);   color: #F87171;  border: 1px solid rgba(220,38,38,0.4); }
+.badge-cat[data-cat="Catécholamines"]    { background: rgba(124,58,237,0.18);  color: #C4B5FD;  border: 1px solid rgba(124,58,237,0.4); }
+.badge-cat[data-cat="Cardiologie"]       { background: rgba(14,165,233,0.18);  color: #7DD3FC;  border: 1px solid rgba(14,165,233,0.4); }
+.badge-cat[data-cat="Neurologie"]        { background: rgba(13,148,136,0.18);  color: #5EEAD4;  border: 1px solid rgba(13,148,136,0.4); }
+.badge-cat[data-cat="Antibiotiques"]     { background: rgba(50,173,230,0.18);  color: #7DD3FC;  border: 1px solid rgba(50,173,230,0.35); }
+.badge-cat[data-cat="Antidotes"]         { background: rgba(252,211,77,0.18);  color: #FCD34D;  border: 1px solid rgba(252,211,77,0.4); }
+.badge-cat[data-cat="Anticoagulants"]    { background: rgba(236,72,153,0.18);  color: #F9A8D4;  border: 1px solid rgba(236,72,153,0.4); }
+.badge-cat[data-cat="Électrolytes"]      { background: rgba(52,211,153,0.15);  color: #6EE7B7;  border: 1px solid rgba(52,211,153,0.35); }
+.badge-cat[data-cat="Métabolique"]       { background: rgba(52,211,153,0.15);  color: #6EE7B7;  border: 1px solid rgba(52,211,153,0.35); }
+.badge-cat[data-cat="Diurétiques"]       { background: rgba(34,211,238,0.15);  color: #67E8F9;  border: 1px solid rgba(34,211,238,0.35); }
+.badge-cat[data-cat="Pneumologie"]       { background: rgba(34,211,238,0.15);  color: #67E8F9;  border: 1px solid rgba(34,211,238,0.35); }
+.badge-cat[data-cat="Solutés"]           { background: rgba(34,211,238,0.12);  color: #67E8F9;  border: 1px solid rgba(34,211,238,0.3); }
+.badge-cat[data-cat="Produits sanguins"] { background: rgba(185,28,28,0.18);   color: #FCA5A5;  border: 1px solid rgba(185,28,28,0.4); }
+.badge-cat[data-cat="Urgence vitale"]    { background: rgba(255,71,87,0.18);   color: #ff6b78;  border: 1px solid rgba(255,71,87,0.4); }
 .badge-svc {
   background: rgba(255, 71, 87, 0.15);
   color: #ff6b78;

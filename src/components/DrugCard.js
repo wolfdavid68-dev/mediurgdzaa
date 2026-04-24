@@ -264,7 +264,7 @@ const DrugCard = ({ drug }) => {
             {note && <span className="note-indicator" title="Note personnelle ajoutée">✎</span>}
           </div>
           <div className="drug-subtitle">
-            <span className="badge badge-cat">{drug.cat}</span>
+            <span className="badge badge-cat" data-cat={drug.cat}>{drug.cat}</span>
             {drug.svc.map((s) => <span key={s} className="badge badge-svc">{s}</span>)}
             <span className="drug-classe">{drug.classe}</span>
           </div>
