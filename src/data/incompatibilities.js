@@ -1,4 +1,4 @@
-export const INCOMPATIBILITIES = [
+﻿export const INCOMPATIBILITIES = [
   {
     drug: "Amiodarone",
     short: "Amio.",
