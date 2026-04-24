@@ -270,30 +270,71 @@ body {
 .filter-chips::-webkit-scrollbar { display: none; }
 
 .chip {
-  padding: 6px 12px;
-  font-size: clamp(11px, 1.2vw, 13px);
-  font-weight: 500;
+  padding: 5px 11px;
+  font-size: clamp(10px, 1.1vw, 12px);
+  font-weight: 700;
   font-family: var(--font);
+  letter-spacing: 0.2px;
   color: var(--text-dim);
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: 2px solid var(--border);
+  border-radius: 5px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s;
+  transition: all 0.12s;
   flex-shrink: 0;
-  min-height: 30px;
+  min-height: 28px;
+  opacity: 0.72;
 }
-.chip:hover { background: var(--card-hover); color: var(--text); }
+.chip:hover { opacity: 1; }
+
+/* ── Couleurs SFAR par catégorie ──────────────────────────── */
+.chip[data-cat="Tout"]              { background: var(--card); color: var(--text); border-color: var(--border-strong); opacity: 1; }
+.chip[data-cat="Hypnotiques"]       { background: #F5D300; color: #1a1a2e; border-color: #F5D300; }
+.chip[data-cat="Analgésie"]         { background: #1D4ED8; color: #fff;    border-color: #1D4ED8; }
+.chip[data-cat="Curares"]           { background: #DC2626; color: #fff;    border-color: #DC2626; }
+.chip[data-cat="Catécholamines"]    { background: #7C3AED; color: #fff;    border-color: #7C3AED; }
+.chip[data-cat="Cardiologie"]       { background: #0EA5E9; color: #fff;    border-color: #0EA5E9; }
+.chip[data-cat="Neurologie"]        { background: #0D9488; color: #fff;    border-color: #0D9488; }
+.chip[data-cat="Antidotes"]         { background: #FCD34D; color: #1a1a2e; border-color: #FCD34D; }
+.chip[data-cat="Antibiotiques"]     { background: #0284C7; color: #fff;    border-color: #0284C7; }
+.chip[data-cat="Anticoagulants"]    { background: #EC4899; color: #fff;    border-color: #EC4899; }
+.chip[data-cat="Électrolytes"]      { background: #34D399; color: #1a1a2e; border-color: #34D399; }
+.chip[data-cat="Métabolique"]       { background: #34D399; color: #1a1a2e; border-color: #34D399; }
+.chip[data-cat="Diurétiques"]       { background: #22D3EE; color: #1a1a2e; border-color: #22D3EE; }
+.chip[data-cat="Pneumologie"]       { background: #22D3EE; color: #1a1a2e; border-color: #22D3EE; }
+.chip[data-cat="Solutés"]           { background: #38BDF8; color: #1a1a2e; border-color: #38BDF8; }
+.chip[data-cat="Produits sanguins"] { background: #B91C1C; color: #fff;    border-color: #B91C1C; }
+.chip[data-cat="Urgence vitale"]    { background: #FF4757; color: #fff;    border-color: #FF4757; }
+
+/* État actif : contour blanc + pleine opacité */
 .chip-active {
+  opacity: 1 !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px currentColor;
+  transform: scale(1.04);
+}
+.chip[data-cat="Tout"].chip-active {
   background: var(--text);
   color: var(--bg);
   border-color: var(--text);
+  box-shadow: none;
+}
+
+/* SVC chips — gardent le style pilule */
+.chip-svc {
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text-dim);
+  border-color: var(--border);
+  font-weight: 600;
+  opacity: 1;
 }
 .chip-svc.chip-active {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
+  box-shadow: none;
+  transform: none;
 }
 
 .result-count {

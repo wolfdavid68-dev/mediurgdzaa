@@ -107,6 +107,7 @@ const App = () => {
                     {CATEGORIES.map((c) => (
                       <button
                         key={c}
+                        data-cat={c}
                         className={`chip ${cat === c ? "chip-active" : ""}`}
                         onClick={() => setCat(c)}
                       >
