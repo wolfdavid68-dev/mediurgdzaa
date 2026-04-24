@@ -9,6 +9,7 @@ export const INCOMPATIBILITIES = [
       { with: "Bicarbonate de sodium",         type: "inactivation",  note: "Dégradation alcaline" },
       { with: "Midazolam",                     type: "precipitation", note: "" },
     ],
+    compatibleWith: [],
     solvant: "G5 % uniquement — NaCl 0,9 % contre-indiqué (précipitation)",
   },
   {
@@ -20,7 +21,9 @@ export const INCOMPATIBILITIES = [
       { with: "Midazolam",                     type: "precipitation", note: "Précipité visible immédiatement" },
       { with: "Morphine",                      type: "precipitation", note: "" },
       { with: "Hydroxocobalamine (Cyanokit)",  type: "precipitation", note: "" },
+      { with: "Dobutamine",                    type: "precipitation", note: "" },
     ],
+    compatibleWith: [],
     solvant: "NaCl 0,9 % ou G5 %",
   },
   {
@@ -33,7 +36,10 @@ export const INCOMPATIBILITIES = [
       { with: "Noradrénaline",                 type: "inactivation",  note: "Dégradation alcaline" },
       { with: "Amiodarone",                    type: "inactivation",  note: "" },
       { with: "Midazolam",                     type: "precipitation", note: "" },
+      { with: "Atropine",                      type: "inactivation",  note: "Dégradation alcaline" },
+      { with: "Dobutamine",                    type: "inactivation",  note: "Dégradation alcaline" },
     ],
+    compatibleWith: [],
     solvant: "Voie séparée impérative",
   },
   {
@@ -44,7 +50,9 @@ export const INCOMPATIBILITIES = [
       { with: "Furosémide",                    type: "precipitation", note: "" },
       { with: "Héparine sodique",              type: "incompatible",  note: "" },
       { with: "Midazolam",                     type: "precipitation", note: "Précipité rouge-brun" },
+      { with: "Dobutamine",                    type: "incompatible",  note: "" },
     ],
+    compatibleWith: [],
     solvant: "Voie dédiée — ne rien co-administrer",
   },
   {
@@ -52,6 +60,7 @@ export const INCOMPATIBILITIES = [
     short: "Propo.",
     color: "#eab308",
     items: [],
+    compatibleWith: [],
     solvant: "Voie exclusive — émulsion lipidique, ne jamais mélanger",
     exclusif: true,
   },
@@ -63,6 +72,7 @@ export const INCOMPATIBILITIES = [
       { with: "Bicarbonate de sodium",         type: "precipitation", note: "Carbonate de calcium insoluble" },
       { with: "Ceftriaxone",                   type: "precipitation", note: "DANGER — décès rapportés chez le nouveau-né" },
     ],
+    compatibleWith: [],
     solvant: "NaCl 0,9 % ou G5 %",
   },
   {
@@ -72,6 +82,7 @@ export const INCOMPATIBILITIES = [
     items: [
       { with: "Midazolam",                     type: "precipitation", note: "Précipité si mélangés en seringue" },
     ],
+    compatibleWith: ["Morphine", "Sufentanil"],
     solvant: "NaCl 0,9 % ou G5 %",
   },
   {
@@ -83,7 +94,9 @@ export const INCOMPATIBILITIES = [
       { with: "Morphine",                      type: "incompatible",  note: "" },
       { with: "Hydroxocobalamine (Cyanokit)",  type: "incompatible",  note: "" },
       { with: "Vancomycine",                   type: "precipitation", note: "" },
+      { with: "Dobutamine",                    type: "precipitation", note: "" },
     ],
+    compatibleWith: [],
     solvant: "NaCl 0,9 % ou G5 %",
   },
   {
@@ -97,6 +110,7 @@ export const INCOMPATIBILITIES = [
       { with: "Kétamine",                      type: "precipitation", note: "Si mélangés en seringue" },
       { with: "Hydroxocobalamine (Cyanokit)",  type: "precipitation", note: "" },
     ],
+    compatibleWith: ["Morphine", "Sufentanil"],
     solvant: "NaCl 0,9 % ou G5 %",
   },
   {
@@ -106,6 +120,7 @@ export const INCOMPATIBILITIES = [
     items: [
       { with: "Bicarbonate de sodium",         type: "inactivation",  note: "Dégradation par alcalinisation" },
     ],
+    compatibleWith: ["Adrénaline", "Dobutamine"],
     solvant: "G5 % ou NaCl 0,9 % — pH acide impératif",
   },
   {
@@ -115,6 +130,7 @@ export const INCOMPATIBILITIES = [
     items: [
       { with: "Bicarbonate de sodium",         type: "inactivation",  note: "Dégradation par alcalinisation" },
     ],
+    compatibleWith: ["Noradrénaline", "Atropine"],
     solvant: "G5 % ou NaCl 0,9 % — pH acide impératif",
   },
   {
@@ -125,6 +141,7 @@ export const INCOMPATIBILITIES = [
       { with: "Furosémide",                    type: "precipitation", note: "" },
       { with: "Héparine sodique",              type: "incompatible",  note: "" },
     ],
+    compatibleWith: ["Midazolam", "Kétamine", "Atropine", "Sufentanil"],
     solvant: "NaCl 0,9 % ou G5 %",
   },
   {
@@ -133,7 +150,9 @@ export const INCOMPATIBILITIES = [
     color: "#16a34a",
     items: [
       { with: "Calcium",                       type: "precipitation", note: "DANGER — décès rapportés chez nouveau-né" },
+      { with: "Vancomycine",                   type: "precipitation", note: "" },
     ],
+    compatibleWith: [],
     solvant: "NaCl 0,9 % ou G5 % uniquement — Ringer Lactate contient Ca²⁺",
   },
   {
@@ -144,6 +163,58 @@ export const INCOMPATIBILITIES = [
       { with: "Héparine sodique",              type: "precipitation", note: "" },
       { with: "Ceftriaxone",                   type: "precipitation", note: "" },
     ],
-    solvant: "G5 % ou NaCl 0,9 % — perfusion lente 60 min min",
+    compatibleWith: [],
+    solvant: "G5 % ou NaCl 0,9 % — perfusion lente ≥ 60 min",
+  },
+  {
+    drug: "Atropine",
+    short: "Atro.",
+    color: "#ca8a04",
+    items: [
+      { with: "Bicarbonate de sodium",         type: "inactivation",  note: "Dégradation par alcalinisation" },
+    ],
+    compatibleWith: ["Morphine", "Sufentanil", "Adrénaline"],
+    solvant: "NaCl 0,9 % ou G5 %",
+  },
+  {
+    drug: "Sufentanil",
+    short: "Sufen.",
+    color: "#6366f1",
+    items: [
+      { with: "Furosémide",                    type: "incompatible",  note: "" },
+    ],
+    compatibleWith: ["Midazolam", "Morphine", "Kétamine", "Atropine"],
+    solvant: "NaCl 0,9 % ou G5 %",
+  },
+  {
+    drug: "Dobutamine",
+    short: "Dobu.",
+    color: "#0ea5e9",
+    items: [
+      { with: "Bicarbonate de sodium",         type: "inactivation",  note: "Dégradation alcaline" },
+      { with: "Héparine sodique",              type: "precipitation", note: "" },
+      { with: "Furosémide",                    type: "precipitation", note: "" },
+      { with: "Hydroxocobalamine (Cyanokit)",  type: "incompatible",  note: "" },
+    ],
+    compatibleWith: ["Noradrénaline"],
+    solvant: "G5 % ou NaCl 0,9 %",
+  },
+  {
+    drug: "Kétoprofène",
+    short: "Kéto.",
+    color: "#84cc16",
+    items: [
+      { with: "Vancomycine",                   type: "incompatible",  note: "" },
+    ],
+    compatibleWith: ["Morphine", "Paracétamol IV", "Atropine"],
+    solvant: "NaCl 0,9 % — perfusion 20 min minimum",
+  },
+  {
+    drug: "Paracétamol IV",
+    short: "Para.",
+    color: "#14b8a6",
+    items: [],
+    compatibleWith: ["Morphine", "Kétoprofène", "Sufentanil"],
+    solvant: "Prêt à l'emploi — voie dédiée recommandée",
   },
 ];
