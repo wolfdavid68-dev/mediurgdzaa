@@ -1,19 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const SECTION_META = {
-  inclusion:             { label: "Critères d'inclusion",      color: "#16a34a" },
-  exclusion:             { label: "Critères d'exclusion",      color: "#dc2626" },
-  gravite:               { label: "Signes de gravité",         color: "#f97316" },
-  actions:               { label: "Actions infirmières",       color: "#3b82f6" },
-  surveillance:          { label: "Surveillance",              color: "#06b6d4" },
-  recueil:               { label: "Recueil de données",        color: "#64748b" },
-  rythme_choquable:      { label: "Rythme choquable",          color: "#f97316" },
-  rythme_non_choquable:  { label: "Rythme non choquable",      color: "#6b7280" },
-  reprise:               { label: "Reprise d'activité",        color: "#16a34a" },
+  inclusion:             { label: "Inclusion",     color: "#16a34a", short: "Inclusion" },
+  exclusion:             { label: "Exclusion",     color: "#dc2626", short: "Exclusion" },
+  gravite:               { label: "Gravité",       color: "#f97316", short: "Gravité"   },
+  actions:               { label: "Actions",       color: "#3b82f6", short: "Actions"   },
+  surveillance:          { label: "Surveillance",  color: "#06b6d4", short: "Surveil."  },
+  recueil:               { label: "Recueil",       color: "#64748b", short: "Recueil"   },
+  rythme_choquable:      { label: "Choquable",     color: "#f97316", short: "Choquable" },
+  rythme_non_choquable:  { label: "Non choquable", color: "#6b7280", short: "Non choq." },
+  reprise:               { label: "Reprise",       color: "#16a34a", short: "Reprise"   },
 };
 
 const ProtocolCard = ({ protocol: p }) => {
   const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(null);
+
+  useEffect(() => {
+    if (open) {
+      const actionsIdx = p.sections.findIndex(s => s.type === "actions");
+      setActiveTab(actionsIdx >= 0 ? actionsIdx : 0);
+    }
+  }, [open, p.sections]);
+
+  const sec = activeTab !== null ? p.sections[activeTab] : null;
+  const meta = sec ? (SECTION_META[sec.type] || { label: sec.titre, color: "#888", short: sec.titre }) : null;
 
   return (
     <div className={`protocol-card ${open ? "protocol-card-open" : ""}`}>
@@ -48,45 +59,52 @@ const ProtocolCard = ({ protocol: p }) => {
             </div>
           )}
 
-          <div className="protocol-sections">
-            {p.sections.map((sec, i) => {
-              const meta = SECTION_META[sec.type] || { label: sec.titre, color: "#888" };
+          {/* Onglets sections */}
+          <div className="proto-tabs">
+            {p.sections.map((s, i) => {
+              const m = SECTION_META[s.type] || { short: s.titre, color: "#888" };
+              const isActive = activeTab === i;
               return (
-                <div key={i} className="proto-section">
-                  <div
-                    className="proto-section-header"
-                    style={{ borderLeftColor: meta.color, background: meta.color + "18" }}
-                  >
-                    <span className="proto-section-dot" style={{ background: meta.color }} />
-                    <span className="proto-section-title" style={{ color: meta.color }}>{sec.titre}</span>
-                  </div>
-
-                  <ul className="proto-items">
-                    {sec.items.map((item, j) => (
-                      <li key={j} className={`proto-item proto-item-${sec.type}`}>
-                        <span className="proto-item-bullet" style={{ background: meta.color }} />
-                        <div className="proto-item-content">
-                          <span>{item.text}</span>
-                          {item.sub && (
-                            <ul className="proto-sub-items">
-                              {item.sub.map((s, k) => (
-                                <li key={k} className="proto-sub-item">
-                                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke={meta.color} strokeWidth="2.5">
-                                    <polyline points="20 6 9 17 4 12" />
-                                  </svg>
-                                  <span>{s}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <button
+                  key={i}
+                  className={`proto-tab ${isActive ? "proto-tab-active" : ""}`}
+                  style={isActive ? { borderColor: m.color, color: m.color, background: m.color + "18" } : {}}
+                  onClick={() => setActiveTab(i)}
+                >
+                  <span className="proto-tab-dot" style={{ background: m.color }} />
+                  {m.short}
+                </button>
               );
             })}
           </div>
+
+          {/* Contenu de l'onglet actif */}
+          {sec && (
+            <div className="proto-tab-content">
+              <ul className="proto-items">
+                {sec.items.map((item, j) => (
+                  <li key={j} className={`proto-item proto-item-${sec.type}`}>
+                    <span className="proto-item-bullet" style={{ background: meta.color }} />
+                    <div className="proto-item-content">
+                      <span>{item.text}</span>
+                      {item.sub && (
+                        <ul className="proto-sub-items">
+                          {item.sub.map((s, k) => (
+                            <li key={k} className="proto-sub-item">
+                              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke={meta.color} strokeWidth="2.5">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              <span>{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
