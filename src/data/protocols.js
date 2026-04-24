@@ -147,4 +147,79 @@ export const PROTOCOLS = [
       },
     ],
   },
+  {
+    id: 3,
+    code: "PISU 2",
+    version: "2",
+    valide: "01/01/2024",
+    titre: "Réaction Anaphylactique Sévère — Adulte",
+    auteurs: ["Dr NOIZET", "Dr DE CARLO"],
+    ref: "Recommandations ERC 2021",
+    service: "SMUR",
+    couleur: "#dc2626",
+    icon: "⚠️",
+    sections: [
+      {
+        titre: "Critères d'inclusion",
+        type: "inclusion",
+        items: [
+          { text: "Apparition brutale d'au moins deux des signes suivants après suspicion d'exposition à un allergène :" },
+          { text: "Réaction urticarienne cutanéomuqueuse (éruption, prurit et/ou œdème), signes digestifs" },
+          { text: "Hypotension artérielle avec PAS < 90 mmHg" },
+          { text: "Bronchospasme responsable d'une dyspnée asthmatiforme" },
+        ],
+      },
+      {
+        titre: "Critères d'exclusion",
+        type: "exclusion",
+        items: [
+          { text: "Réaction urticarienne cutanéomuqueuse isolée" },
+        ],
+      },
+      {
+        titre: "Signes de gravité",
+        type: "gravite",
+        items: [
+          { text: "Raucité de la voix, altération de la fluence verbale, sueurs, cyanose" },
+          { text: "FR > 30 cycles/min, SpO₂ < 94 %" },
+          { text: "FC > 120 bpm, PAS < 90 mmHg" },
+          { text: "Marbrures" },
+          { text: "Altération de l'état de conscience ou agitation" },
+        ],
+      },
+      {
+        titre: "Actions et actes infirmiers",
+        type: "actions",
+        items: [
+          { text: "Éviction de l'allergène si possible." },
+          { text: "Demander ou faire demander un renfort médical en présence de signes de gravité." },
+          { text: "Mettre la victime en décubitus dorsal (en l'absence de signe respiratoire) ou dans la position la mieux tolérée." },
+          { text: "Oxygénothérapie pour un objectif de SpO₂ > 94 %." },
+          {
+            text: "Administrer, en cas de présence d'au moins 2 critères d'inclusion :",
+            sub: [
+              "Adrénaline 0,5 mg IM face latéro-externe du tiers moyen de la cuisse.",
+            ],
+          },
+          {
+            text: "Poser une VVP et administrer :",
+            sub: [
+              "NaCl 0,9 % 500 mL sur 10 min, puis poursuivre le remplissage en adaptant le débit à la clinique, sans dépasser 20 mL/kg au total.",
+            ],
+          },
+          { text: "En l'absence de réponse tensionnelle ou clinique favorable après 5 minutes, administrer une seconde dose d'adrénaline 0,5 mg IM." },
+          { text: "En cas de dyspnée asthmatiforme, cf. PISU 1." },
+          { text: "En cas d'ACR, cf. PISU 3." },
+        ],
+      },
+      {
+        titre: "Surveillance",
+        type: "surveillance",
+        items: [
+          { text: "Efficacité des thérapeutiques par l'amélioration des signes cliniques et des paramètres vitaux" },
+          { text: "Apparition d'éventuel signe d'épuisement ou de troubles de la conscience" },
+        ],
+      },
+    ],
+  },
 ];
