@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { DRUGS } from "./data/drugs";
+import { PROTOCOLS } from "./data/protocols";
 import DrugList from "./components/DrugList";
+import ProtocolCard from "./components/ProtocolCard";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -165,10 +167,8 @@ const App = () => {
           )
         )}
         {page === "protocoles" && (
-          <div className="empty">
-            <div className="empty-icon">📋</div>
-            <p>Protocoles</p>
-            <small>Cette section est en cours de construction</small>
+          <div className="protocol-list">
+            {PROTOCOLS.map(p => <ProtocolCard key={p.id} protocol={p} />)}
           </div>
         )}
       </main>
