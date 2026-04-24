@@ -2833,4 +2833,214 @@ export const DRUGS = [
       p: ["25-50 UI/kg selon INR"],
     },
   },
+
+  // ──────────────── BRONCHODILATATEURS NÉBULISÉS ────────────────
+  {
+    id: 74,
+    nom: "BRICANYL",
+    commercial: "Terbutaline",
+    dci: "Terbutaline sulfate",
+    classe: "β2-mimétique bronchodilatateur",
+    cat: "Pneumologie",
+    svc: ["SAUV", "SMUR", "SAU"],
+    couleur: "#64D2FF",
+    icon: "🫁",
+    desc: "Bronchodilatateur β2-agoniste sélectif. Utilisé en nébulisation pour l'asthme aigu et l'exacerbation de BPCO. Administrer sous oxygène 6 L/min. À associer à l'ipratropium.",
+    indic: [
+      "Asthme aigu grave (nébulisation)",
+      "Exacerbation sévère de BPCO",
+      "Bronchospasme réfractaire",
+    ],
+    ci: [
+      "Allergie aux β2-agonistes (rare)",
+      "Tachycardie sévère (relative)",
+    ],
+    ei: [
+      "Tachycardie, palpitations",
+      "Tremblements fins des extrémités",
+      "Hypokaliémie (nébulisations répétées)",
+      "Céphalées",
+    ],
+    cond: [
+      "Ampoule 5 mg/2 mL (solution pour nébulisation)",
+      "Ampoule 2,5 mg/2,5 mL (pédiatrique)",
+    ],
+    poso: {
+      a: [
+        "Nébulisation : 5 mg + Ipratropium 0,5 mg + NaCl 0,9 % QSP 5 mL sous O₂ 6 L/min",
+        "À renouveler 1 fois en l'absence d'amélioration",
+        "Voie : nébulisation sous O₂",
+      ],
+      p: [
+        "< 6 ans : 2,5 mg en nébulisation + Ipratropium 0,25 mg",
+        "≥ 6 ans : 5 mg en nébulisation + Ipratropium 0,5 mg",
+        "À renouveler selon l'âge si pas d'amélioration",
+      ],
+    },
+  },
+  {
+    id: 75,
+    nom: "ATROVENT",
+    commercial: "Ipratropium",
+    dci: "Bromure d'ipratropium",
+    classe: "Anticholinergique bronchodilatateur",
+    cat: "Pneumologie",
+    svc: ["SAUV", "SMUR", "SAU"],
+    couleur: "#64D2FF",
+    icon: "🫁",
+    desc: "Bronchodilatateur anticholinergique. Bloque les récepteurs muscariniques bronchiques. Synergie avec les β2-agonistes. Début d'action plus lent (15-30 min) mais durée plus longue (4-6h).",
+    indic: [
+      "Asthme aigu (en association avec β2-agoniste)",
+      "Exacerbation sévère de BPCO",
+      "Bronchospasme chez le sujet âgé ou BPCO",
+    ],
+    ci: [
+      "Glaucome à angle fermé (relative — nébulisation)",
+      "Rétention urinaire sur adénome prostatique (relative)",
+    ],
+    ei: [
+      "Sécheresse buccale",
+      "Tachycardie sinusale",
+      "Vision trouble si contact oculaire (protéger les yeux)",
+    ],
+    cond: [
+      "Ampoule 0,5 mg/2 mL (adulte — solution pour nébulisation)",
+      "Ampoule 0,25 mg/1 mL (enfant — solution pour nébulisation)",
+    ],
+    poso: {
+      a: [
+        "Nébulisation : 0,5 mg + Terbutaline 5 mg + NaCl 0,9 % QSP 5 mL sous O₂ 6 L/min",
+        "Voie : nébulisation sous O₂",
+      ],
+      p: [
+        "< 6 ans : 0,25 mg en nébulisation",
+        "≥ 6 ans : 0,5 mg en nébulisation",
+      ],
+    },
+  },
+
+  // ──────────────── CORTICOÏDES ORAUX ────────────────
+  {
+    id: 76,
+    nom: "CÉLESTÈNE",
+    commercial: "Bétaméthasone",
+    dci: "Bétaméthasone",
+    classe: "Corticostéroïde",
+    cat: "Métabolique",
+    svc: ["SMUR", "SAU"],
+    couleur: "#30D158",
+    icon: "💊",
+    desc: "Corticostéroïde de synthèse, voie orale. Solution buvable utilisée chez l'enfant (15 gouttes/kg per os). Alternative au Solumédrol IV dans les crises d'asthme légères à modérées ou quand la VVP n'est pas accessible.",
+    indic: [
+      "Crise d'asthme de l'enfant per os",
+      "Laryngite sous-glottique de l'enfant",
+      "Allergie légère à modérée",
+    ],
+    ci: [
+      "Pas de CI absolue si urgence vitale",
+      "Infection systémique non contrôlée (relative)",
+    ],
+    ei: [
+      "Hyperglycémie",
+      "Hypokaliémie",
+      "Insomnie, agitation chez l'enfant",
+    ],
+    cond: [
+      "Solution buvable 0,05 % : 0,5 mg/mL — flacon 30 mL (≈ 600 gouttes)",
+    ],
+    poso: {
+      a: ["Per os : 1-2 mg selon indication"],
+      p: ["Per os : 15 gouttes/kg (= 0,75 mg/kg) — dose max 60 gouttes"],
+    },
+  },
+
+  // ──────────────── ANALGÉSIQUES NON OPIOÏDES ────────────────
+  {
+    id: 77,
+    nom: "PERFALGAN",
+    commercial: "Paracétamol IV",
+    dci: "Paracétamol",
+    classe: "Antalgique / Antipyrétique de palier 1",
+    cat: "Analgésie",
+    svc: ["SAUV", "SMUR", "SAU"],
+    couleur: "#1D4ED8",
+    icon: "💊",
+    desc: "Antalgique et antipyrétique de palier 1. Première ligne pour EVA 3-6. Épargne morphinique. Peut se combiner avec AINS et opioïdes. Délai d'action : 15-30 min. Flacon prêt à l'emploi.",
+    indic: [
+      "Douleur aiguë EVA 3 à 6",
+      "Hyperthermie (> 38,5 °C)",
+      "Douleur post-traumatique",
+      "Adjuvant épargne morphinique",
+    ],
+    ci: [
+      "Allergie au paracétamol",
+      "Insuffisance hépatocellulaire sévère",
+      "Prise de paracétamol < 6 heures",
+    ],
+    ei: [
+      "Hépatotoxicité en cas de surdosage (> 4 g/j adulte)",
+      "Rare : réaction cutanée allergique",
+    ],
+    cond: [
+      "Flacon 1 000 mg/100 mL (prêt à l'emploi)",
+      "Flacon 500 mg/50 mL (pédiatrique)",
+    ],
+    poso: {
+      a: [
+        "IVL : 1 000 mg en 15 min",
+        "Renouveler toutes les 6h (max 4 g/24h)",
+        "Voie : VVP",
+      ],
+      p: [
+        "IVL : 15 mg/kg en 15 min",
+        "Max 60 mg/kg/24h (max 3 g/24h)",
+        "Renouveler toutes les 6h",
+      ],
+    },
+    prep: {solvant:"Prêt à l'emploi",volume_final:100,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:15,dose_max_kg:15,duree:"15 min",stabilite:"Utiliser immédiatement après ouverture",etapes:["Flacon prêt à l'emploi 1 g/100 mL","Adulte : administrer 1 flacon entier en IVL sur 15 min","Enfant : calculer 15 mg/kg — prélever le volume correspondant et administrer en IVL 15 min"],notes:["Vérifier prise récente (< 6h) — risque de surdosage","Max 4 g/24h adulte, 60 mg/kg/24h enfant","Réduire à 3 g/24h si insuffisance hépatique ou dénutrition sévère"]},
+  },
+
+  // ──────────────── ANTIDOTES ────────────────
+  {
+    id: 78,
+    nom: "CYANOKIT",
+    commercial: "Hydroxocobalamine",
+    dci: "Hydroxocobalamine",
+    classe: "Antidote / Chélateur du cyanure",
+    cat: "Antidotes",
+    svc: ["SAUV", "SMUR"],
+    couleur: "#FF453A",
+    icon: "🚨",
+    desc: "Antidote du cyanure. Chélate le cyanure en formant de la cyanocobalamine (B12). Utilisé en intoxication aux fumées d'incendie avec signes de toxicité systémique. Colore les urines et la peau en rouge — effet transitoire normal.",
+    indic: [
+      "Intoxication aux fumées d'incendie avec toxicité systémique",
+      "Suspicion d'intoxication au cyanure",
+      "ACR dans contexte d'incendie en espace clos",
+    ],
+    ci: [
+      "Allergie à l'hydroxocobalamine (très rare)",
+    ],
+    ei: [
+      "Coloration rouge des urines, peau et muqueuses (transitoire)",
+      "HTA transitoire",
+      "Nausées",
+      "Chromaturie rouge : gêne le monitoring SpO₂ et SpCO",
+    ],
+    cond: [
+      "Flacon lyophilisé 5 g + 200 mL NaCl 0,9 % solvant fourni",
+    ],
+    poso: {
+      a: [
+        "IVL : 5 g en 15 min (1 flacon reconstitué)",
+        "ACR : 5 g en bolus IV rapide",
+        "2ème flacon si réponse insuffisante",
+        "Voie : VVP ou VVC",
+      ],
+      p: [
+        "IVL : 70 mg/kg en 15 min",
+        "ACR : 70 mg/kg en bolus IV rapide",
+      ],
+    },
+    prep: {solvant:"NaCl 0,9%",volume_final:200,conc_finale:"25 mg/mL",conc_produit:5000,unite:"mg",dose_kg:70,duree:"15 min",stabilite:"Utiliser dans les 6h après reconstitution",etapes:["Flacon lyophilisé 5 g — injecter 200 mL NaCl 0,9 % fourni","Retourner doucement (ne pas agiter)","Perfuser en 15 min","En cas d'ACR : passer en bolus IV rapide"],notes:["Colore urines et peau en rouge : normal — prévenir l'équipe","Ne pas administrer en même temps que diazépam ou thiopental (incompatibilité)","Deuxième flacon possible si réponse insuffisante ou ACR réfractaire"]},
+  },
 ];
