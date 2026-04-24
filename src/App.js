@@ -3,7 +3,7 @@ import { DRUGS } from "./data/drugs";
 import DrugList from "./components/DrugList";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
-const SERVICES = ["Tout", "SAUV", "SMUR", "SAU"];
+const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
 
 // Retire les accents et met en minuscules pour une recherche insensible aux diacritiques
 const normalize = (str) =>
