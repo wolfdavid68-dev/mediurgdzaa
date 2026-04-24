@@ -1583,6 +1583,48 @@ body {
 
 .proto-sub-item svg { flex-shrink: 0; margin-top: 3px; }
 
+/* Doses colorées + liens médicaments */
+.proto-dose {
+  color: #60a5fa;
+  font-weight: 800;
+}
+
+.proto-drug-link {
+  display: inline;
+  background: rgba(29, 78, 216, 0.15);
+  border: 1px solid rgba(29, 78, 216, 0.45);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: #93c5fd;
+  font-weight: 700;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.proto-drug-link:hover { background: rgba(29, 78, 216, 0.3); }
+
+[data-theme="light"] .proto-dose { color: #1d4ed8; }
+[data-theme="light"] .proto-drug-link { color: #1d4ed8; border-color: rgba(29, 78, 216, 0.5); background: rgba(29, 78, 216, 0.08); }
+[data-theme="light"] .proto-drug-link:hover { background: rgba(29, 78, 216, 0.18); }
+
+/* Numéros d'étapes actions */
+.proto-item-num {
+  min-width: 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 10px;
+  margin-top: 1px;
+}
+
 .proto-section-gravite .proto-item { color: #fdba74; }
 .proto-section-exclusion .proto-item { color: #fca5a5; }
 

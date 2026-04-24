@@ -196,7 +196,13 @@ const App = () => {
               </span>
             </div>
             <div className="protocol-list">
-              {filteredProtocols.map(p => <ProtocolCard key={p.id} protocol={p} />)}
+              {filteredProtocols.map(p => (
+                <ProtocolCard
+                  key={p.id}
+                  protocol={p}
+                  onDrugSearch={(name) => { setPage("medicaments"); setSearch(name); }}
+                />
+              ))}
             </div>
           </>
         )}

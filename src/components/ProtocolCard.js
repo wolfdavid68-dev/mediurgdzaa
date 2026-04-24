@@ -8,23 +8,81 @@ const SECTION_META = {
   surveillance:          { label: "Surveillance",  color: "#06b6d4", short: "Surveil."  },
   recueil:               { label: "Recueil",       color: "#64748b", short: "Recueil"   },
   rythme_choquable:      { label: "Choquable",     color: "#f97316", short: "Choquable" },
-  rythme_non_choquable:  { label: "Non choquable", color: "#6b7280", short: "Non choq." },
+  rythme_non_choquable:  { label: "Rythme non choquable", color: "#6b7280", short: "Non choq." },
   reprise:               { label: "Reprise",       color: "#16a34a", short: "Reprise"   },
 };
 
-const ProtocolCard = ({ protocol: p }) => {
+// Médicaments détectables dans les textes de protocoles
+const DRUG_PATTERNS = [
+  "adrénaline", "noradrénaline", "dobutamine", "dopamine",
+  "midazolam", "propofol", "kétamine", "étomidate",
+  "morphine", "sufentanil", "naloxone",
+  "amiodarone", "atropine", "adénosine",
+  "terbutaline", "salbutamol", "ipratropium",
+  "solumédrol", "méthylprednisolone", "bétaméthasone",
+  "diazépam", "clonazépam", "rivotril",
+  "paracétamol", "kétoprofène", "nefopam",
+  "acide tranexamique", "exacyl",
+  "hydroxocobalamine", "cyanokit",
+];
+
+const DRUG_REGEX = new RegExp(
+  `\\b(${DRUG_PATTERNS.map(d => d.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  "gi"
+);
+
+const DOSE_REGEX = /\b(\d+(?:[,.]\d+)?(?:\s*[-–]\s*\d+(?:[,.]\d+)?)?)\s*(mg\/kg|µg\/kg|mL\/kg|mg\/h|mL\/h|L\/min|gouttes\/kg|mg|µg|mcg|mL|g\/L|g)\b(?:\/(?:kg|h|min|j|24h))?/g;
+
+// Découpe un texte et renvoie du JSX avec doses colorées + médicaments cliquables
+const renderText = (text, onDrugSearch) => {
+  // Combine les deux regex en un seul passage
+  const combined = new RegExp(
+    `(${DRUG_REGEX.source})|(${DOSE_REGEX.source})`,
+    "gi"
+  );
+  const parts = [];
+  let last = 0;
+  let match;
+  combined.lastIndex = 0;
+
+  while ((match = combined.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    if (match[1]) {
+      // Médicament
+      const name = match[1];
+      parts.push(
+        <button
+          key={match.index}
+          className="proto-drug-link"
+          onClick={e => { e.stopPropagation(); onDrugSearch(name); }}
+        >
+          {name}
+        </button>
+      );
+    } else {
+      // Dose
+      parts.push(<strong key={match.index} className="proto-dose">{match[0]}</strong>);
+    }
+    last = combined.lastIndex;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length > 1 ? <>{parts}</> : text;
+};
+
+const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
 
   useEffect(() => {
     if (open) {
-      const actionsIdx = p.sections.findIndex(s => s.type === "actions");
-      setActiveTab(actionsIdx >= 0 ? actionsIdx : 0);
+      const idx = p.sections.findIndex(s => s.type === "actions");
+      setActiveTab(idx >= 0 ? idx : 0);
     }
   }, [open, p.sections]);
 
   const sec = activeTab !== null ? p.sections[activeTab] : null;
-  const meta = sec ? (SECTION_META[sec.type] || { label: sec.titre, color: "#888", short: sec.titre }) : null;
+  const meta = sec ? (SECTION_META[sec.type] || { color: "#888" }) : null;
+  const isActions = sec?.type === "actions" || sec?.type === "rythme_choquable" || sec?.type === "rythme_non_choquable";
 
   return (
     <div className={`protocol-card ${open ? "protocol-card-open" : ""}`}>
@@ -41,11 +99,9 @@ const ProtocolCard = ({ protocol: p }) => {
             <span className="protocol-version">v{p.version} · {p.valide}</span>
           </div>
         </div>
-        <svg
-          className={`chevron ${open ? "chevron-open" : ""}`}
+        <svg className={`chevron ${open ? "chevron-open" : ""}`}
           viewBox="0 0 24 24" width="18" height="18"
-          fill="none" stroke="currentColor" strokeWidth="2"
-        >
+          fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
@@ -59,7 +115,6 @@ const ProtocolCard = ({ protocol: p }) => {
             </div>
           )}
 
-          {/* Onglets sections */}
           <div className="proto-tabs">
             {p.sections.map((s, i) => {
               const m = SECTION_META[s.type] || { short: s.titre, color: "#888" };
@@ -78,15 +133,17 @@ const ProtocolCard = ({ protocol: p }) => {
             })}
           </div>
 
-          {/* Contenu de l'onglet actif */}
           {sec && (
             <div className="proto-tab-content">
-              <ul className="proto-items">
+              <ol className={`proto-items ${isActions ? "proto-items-numbered" : ""}`}>
                 {sec.items.map((item, j) => (
                   <li key={j} className={`proto-item proto-item-${sec.type}`}>
-                    <span className="proto-item-bullet" style={{ background: meta.color }} />
+                    {isActions
+                      ? <span className="proto-item-num" style={{ background: meta.color }}>{j + 1}</span>
+                      : <span className="proto-item-bullet" style={{ background: meta.color }} />
+                    }
                     <div className="proto-item-content">
-                      <span>{item.text}</span>
+                      <span>{renderText(item.text, onDrugSearch || (() => {}))}</span>
                       {item.sub && (
                         <ul className="proto-sub-items">
                           {item.sub.map((s, k) => (
@@ -94,7 +151,7 @@ const ProtocolCard = ({ protocol: p }) => {
                               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke={meta.color} strokeWidth="2.5">
                                 <polyline points="20 6 9 17 4 12" />
                               </svg>
-                              <span>{s}</span>
+                              <span>{renderText(s, onDrugSearch || (() => {}))}</span>
                             </li>
                           ))}
                         </ul>
@@ -102,7 +159,7 @@ const ProtocolCard = ({ protocol: p }) => {
                     </div>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </div>
           )}
         </div>
