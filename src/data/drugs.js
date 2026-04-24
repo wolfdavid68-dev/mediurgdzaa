@@ -620,7 +620,7 @@ export const DRUGS = [
     poso:{a:["4-8 mg IV lent (> 30 sec) ou IM","Répéter /8h (max 32 mg/j en contexte chimiothérapie)"],p:["≥ 1 mois : 0,1 mg/kg IV (max 4 mg/dose)","Répéter /4-8h (max 3 doses)"]}
   },
   {
-    id:64, nom:"Octaplex", commercial:"OCTAPLEX", dci:"Complexe prothrombinique (CCP 4 facteurs : II, VII, IX, X + prot. C, S)", classe:"Facteurs de coagulation vitamine K-dépendants", cat:"Cardiologie", svc:["SAU"],
+    id:64, nom:"Octaplex", commercial:"OCTAPLEX", dci:"Complexe prothrombinique (CCP 4 facteurs : II, VII, IX, X + prot. C, S)", classe:"Facteurs de coagulation vitamine K-dépendants", cat:"Produits sanguins", svc:["SAU"],
     couleur:"#FF9500", icon:"🩸",
     desc:"Concentré de facteurs de coagulation vit. K-dépendants. Neutralise rapidement les AVK. Action immédiate. Indispensable pour les hémorragies graves sous AVK.",
     indic:["Surdosage AVK avec hémorragie grave","Hémorragie intracrânienne sous AVK (urgence vitale — 1ère ligne)","Chirurgie urgente non ajournée sous AVK","Antagonisation urgente anticoagulants oraux AVK"],
