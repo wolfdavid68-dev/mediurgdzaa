@@ -1807,7 +1807,7 @@ body {
 }
 
 .incompat-cell-empty {
-  background: transparent;
+  background: rgba(22, 163, 74, 0.12);
 }
 
 .incompat-cell-hit {
