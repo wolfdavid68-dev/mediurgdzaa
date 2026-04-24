@@ -1322,6 +1322,59 @@ body {
   padding: 4px 0;
 }
 
+/* ── CATÉGORIES PROTOCOLES ───────────────────────────────── */
+.proto-category-bar {
+  display: flex;
+  gap: 6px;
+  padding: 12px 0 4px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.proto-category-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.12s, color 0.12s;
+  margin-bottom: -2px;
+}
+
+.proto-category-tab:hover {
+  background: var(--card);
+  color: var(--text);
+}
+
+.proto-category-active {
+  background: var(--card);
+  color: var(--accent);
+  border-color: var(--border);
+  border-bottom-color: var(--card);
+}
+
+.proto-category-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 /* ── FILTRE PROTOCOLES ───────────────────────────────────── */
 .proto-filter-bar {
   display: flex;

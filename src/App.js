@@ -20,6 +20,7 @@ const App = () => {
   const [cat, setCat] = useState("Tout");
   const [svc, setSvc] = useState("Tout");
   const [protoFilter, setProtoFilter] = useState("Tout");
+  const [protoCategory, setProtoCategory] = useState("PISU");
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem("mediurg-theme") || "dark"; } catch { return "dark"; }
   });
@@ -181,29 +182,43 @@ const App = () => {
         )}
         {page === "protocoles" && (
           <>
-            <div className="proto-filter-bar">
-              {["Tout", "Adulte", "Enfant"].map(f => (
+            <div className="proto-category-bar">
+              {["PISU"].map(cat => (
                 <button
-                  key={f}
-                  className={`proto-filter-chip ${protoFilter === f ? "proto-filter-active" : ""}`}
-                  onClick={() => setProtoFilter(f)}
+                  key={cat}
+                  className={`proto-category-tab ${protoCategory === cat ? "proto-category-active" : ""}`}
+                  onClick={() => setProtoCategory(cat)}
                 >
-                  {f}
+                  {cat}
+                  <span className="proto-category-count">{filteredProtocols.length}</span>
                 </button>
               ))}
-              <span className="proto-filter-count">
-                {filteredProtocols.length} protocole{filteredProtocols.length > 1 ? "s" : ""}
-              </span>
             </div>
-            <div className="protocol-list">
-              {filteredProtocols.map(p => (
-                <ProtocolCard
-                  key={p.id}
-                  protocol={p}
-                  onDrugSearch={(name) => { setPage("medicaments"); setSearch(name); }}
-                />
-              ))}
-            </div>
+
+            {protoCategory === "PISU" && (
+              <>
+                <div className="proto-filter-bar">
+                  {["Tout", "Adulte", "Enfant"].map(f => (
+                    <button
+                      key={f}
+                      className={`proto-filter-chip ${protoFilter === f ? "proto-filter-active" : ""}`}
+                      onClick={() => setProtoFilter(f)}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+                <div className="protocol-list">
+                  {filteredProtocols.map(p => (
+                    <ProtocolCard
+                      key={p.id}
+                      protocol={p}
+                      onDrugSearch={(name) => { setPage("medicaments"); setSearch(name); }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
       </main>
