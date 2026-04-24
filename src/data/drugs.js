@@ -728,5 +728,275 @@ export const DRUGS = [
     ei:["Hyperkaliémie (risque principal)","Gynécomastie (usage prolongé)","Hyponatrémie","Acidose métabolique hyperchlorémique"],
     cond:["Ampoule 200 mg/10 mL","Ampoule 400 mg/10 mL"],
     poso:{a:["200-400 mg/j IV en 1-2 perfusions de 30-60 min","Ascite réfractaire : 400 mg/j IV","Relais PO dès que possible : 25-200 mg/j"],p:["Non recommandé en pédiatrie d'urgence"]}
+  },
+  {
+    id:79, nom:"Chlorure de Calcium", commercial:"CHLORURE DE CALCIUM", dci:"Chlorure de calcium 10% (CaCl2)", classe:"Sel calcique IV hypertonique (cardioprotecteur)", cat:"Métabolique", svc:["SAUV","SMUR"],
+    couleur:"#FFD60A", icon:"⚗️",
+    desc:"Sel calcique hypertonique à haute teneur en Ca2+ élémentaire (3× le gluconate). Cardioprotecteur direct. Voie centrale recommandée (veinotoxique). Stabilise la membrane myocardique en hyperkaliémie sévère.",
+    indic:["Hyperkaliémie sévère avec signes ECG — cardioprotection immédiate","Hypocalcémie symptomatique sévère (tétanie, laryngospasme)","Intoxication inhibiteurs calciques (vérapamil, diltiazem)","Antagonisme du sulfate de magnésium en surdosage"],
+    ci:["Hypercalcémie","Traitement digitalique en cours (risque arythmies graves)","Ne pas mélanger avec bicarbonates, phosphates ni sulfates (précipitation)"],
+    ei:["Bradycardie si injection trop rapide","Nécrose tissulaire sévère si extravasation (VVC fortement recommandée)","Phlébite sur voie périphérique"],
+    cond:["Ampoule 1 g/10 mL à 10% (CaCl2) — 270 mg Ca2+ élémentaire/10 mL"],
+    poso:{a:["Hyperkaliémie ECG : 5-10 mL (0,5-1 g) IV lent sur 5-10 min sous scope (répétable)","Intox inhibiteurs calciques : 1-2 g IV en 10-20 min, puis IVSE 0,2-0,4 mg/kg/h"],p:["0,2 mL/kg de CaCl2 10% IV lent sur 5-10 min sous scope (max 10 mL/dose)"]}
+  },
+  {
+    id:80, nom:"Fibrinogène", commercial:"CLOTTAFACT", dci:"Fibrinogène humain (concentré)", classe:"Facteur de coagulation — protéine plasmatique", cat:"Urgence vitale", svc:["SAUV","SAU"],
+    couleur:"#FF3B30", icon:"🩸",
+    desc:"Concentré lyophilisé de fibrinogène humain. Corrige le déficit en fibrinogène (premier facteur à chuter en choc hémorragique). Seuil d'alerte < 1,5 g/L. Reconstituer extemporanément.",
+    indic:["Choc hémorragique avec hypofibrinogénémie < 1,5 g/L","Hémorragie du post-partum sévère (HPP) réfractaire","Coagulopathie traumatique aiguë","CIVD avec effondrement fibrinogène"],
+    ci:["Thrombose en cours non traitée (relatif — balance bénéfice/risque)","Allergie aux protéines plasmatiques humaines"],
+    ei:["Réactions allergiques / anaphylaxie (rares — produit sécurisé viroatténué)","Événements thromboemboliques (rares)"],
+    cond:["Poudre 1,5 g + solvant 100 mL — CLOTTAFACT® (reconstituer avec le solvant fourni dans la boîte)"],
+    poso:{a:["Dose initiale : 3 g (2 flacons) IV en 20-30 min via PSE","Objectif fibrinogénémie > 1,5 g/L — contrôle à 30 min puis adaptation","Dose max : 6 g selon contrôle"],p:["70 mg/kg IV (max 3 g/dose) selon fibrinogénémie"]}
+  },
+  {
+    id:81, nom:"Dopamine", commercial:"DOPAMINE", dci:"Dopamine chlorhydrate", classe:"Catécholamine (agoniste dopaminergique D1/D2 + adrénergique α/β dose-dépendant)", cat:"Cardiologie", svc:["SAUV","SMUR"],
+    couleur:"#FF9500", icon:"💗",
+    desc:"Précurseur de la noradrénaline. Effets strictement dose-dépendants : dopaminergique (vasodilatation rénale) à faibles doses, β1 (inotrope) à doses intermédiaires, α1 (vasoconstricteur) à fortes doses. TOUJOURS en IVSE.",
+    indic:["Choc cardiogénique avec bas débit (alternative dobutamine/noradrénaline)","Choc septique réfractaire (2e ligne après noradrénaline)","Bradycardie réfractaire en attente de PM"],
+    ci:["Phéochromocytome (stimulation adrénergique massive)","Hypovolémie non corrigée","Association IMAO","Tachycardie, FV","Fibrillation ventriculaire"],
+    ei:["Tachycardie, arythmies ventriculaires","Nécrose tissulaire si extravasation","HTA excessive (fortes doses)","Nausées, vomissements"],
+    cond:["Ampoule 200 mg/5 mL (40 mg/mL) — DOPAMINE®","PSE : diluer dans G5% ou NaCl 0,9%"],
+    poso:{a:["Bas débit β1 : 5-10 µg/kg/min IVSE","Vasopresseur α : 10-20 µg/kg/min IVSE (max 20-30 µg/kg/min)","PSE : 200 mg dans 50 mL G5% = 4 mg/mL"],p:["2-20 µg/kg/min IVSE (mêmes effets dose-dépendants)"]}
+  },
+  {
+    id:82, nom:"Ténectéplase", commercial:"METALYSE", dci:"Ténectéplase (TNK-tPA)", classe:"Fibrinolytique (activateur tissulaire du plasminogène modifié)", cat:"Thrombolyse", svc:["SAUV","SMUR"],
+    couleur:"#FF375F", icon:"🔓",
+    desc:"Mutant du rt-PA avec demi-vie longue permettant l'administration en bolus IV unique. Haute affinité pour la fibrine et résistant à l'inhibiteur PAI-1. Thrombolyse coronaire de 1ère ligne si angioplastie impossible.",
+    indic:["IDM STEMI si délai angioplastie > 120 min (thrombolyse pharmaco-invasive)","EP massive avec instabilité hémodynamique et CI à l'angioplastie"],
+    ci:["Hémorragie active ou récente < 3 mois","AVC ou TIA < 6 mois","Chirurgie majeure < 3 semaines","HTA > 180/110 mmHg non contrôlée","Ponction artérielle non compressible récente"],
+    ei:["Hémorragie majeure (risque principal)","Hémorragie intracrânienne (0,5-1%)","Arythmies de reperfusion","Hypotension transitoire"],
+    cond:["Lyophilisat + solvant (10 000 UI = 50 mg) avec 10 mL EPPI — METALYSE®","Bolus unique adapté au poids"],
+    poso:{a:["Poids < 60 kg : 30 mg (6 000 UI) IV bolus unique","60-70 kg : 35 mg ; 70-80 kg : 40 mg ; 80-90 kg : 45 mg ; > 90 kg : 50 mg","Systématiquement associé à anticoagulation (HNF ou HBPM)"],p:["Non recommandé < 18 ans"]}
+  },
+  {
+    id:83, nom:"Octréotide", commercial:"SANDOSTATINE", dci:"Octréotide acétate", classe:"Analogue de la somatostatine — vasoconstricteur splanchnique", cat:"Gastro-entérologie", svc:["SAUV"],
+    couleur:"#32D74B", icon:"💊",
+    desc:"Analogue synthétique de la somatostatine à longue durée d'action. Réduit le débit sanguin splanchnique et inhibe les sécrétions gastriques. Traitement médical des hémorragies sur rupture de varices œsophagiennes.",
+    indic:["Hémorragie digestive sur rupture de varices œsophagiennes (en attente endoscopie)","Fistules digestives à haut débit","Tumeurs neuroendocrines sécrétantes (diarrhée profuse, flush carcinoïde)"],
+    ci:["Allergie octréotide","Grossesse (données insuffisantes)"],
+    ei:["Nausées, douleurs abdominales, diarrhées","Bradycardie, anomalies ECG (espace QT)","Hypoglycémie ou hyperglycémie","Lithiase biliaire (usage prolongé)"],
+    cond:["Ampoule 100 µg/1 mL — SANDOSTATINE®","Ampoule 200 µg/1 mL","Conserver au réfrigérateur (boîte déchocage)"],
+    poso:{a:["Bolus initial : 50 µg IV lent puis IVSE : 6 ampoules 100 µg qsp 48 mL NaCl 0,9%","Débit : 25-50 µg/h IVSE × 3-5 jours","Soit 1-2 mL/h avec la préparation 600 µg/48 mL"],p:["1-2 µg/kg IV bolus, puis 1-2 µg/kg/h IVSE"]}
+  },
+  {
+    id:84, nom:"Oméprazole", commercial:"MOPRAL / INIPOMP", dci:"Oméprazole", classe:"Inhibiteur de la pompe à protons (IPP)", cat:"Gastro-entérologie", svc:["SAUV","SAU"],
+    couleur:"#32D74B", icon:"🟢",
+    desc:"IPP inhibant de façon irréversible la H+/K+-ATPase de la cellule pariétale gastrique. Réduit la sécrétion acide de 90-95%. Prévention des ulcères de stress en réanimation.",
+    indic:["Hémorragie digestive haute sur ulcère gastro-duodénal","Prévention ulcères de stress (réanimation, ventilation mécanique)","Œsophagite peptique sévère","RGO sévère","Syndrome de Zollinger-Ellison"],
+    ci:["Hypersensibilité IPP","Association atazanavir / nelfinavir (antiviraux VIH — réduction absorption)"],
+    ei:["Diarrhée, nausées, céphalées","Hyponatrémie, hypomagnésémie (usage prolongé)","Infections digestives (Clostridium difficile)","Ostéoporose (traitement long terme)"],
+    cond:["Poudre IV 40 mg — MOPRAL® / INIPOMP® IV","Gélule 10 mg, 20 mg, 40 mg PO","PSE entretien : 80 mg/48 mL = 1,67 mg/mL"],
+    poso:{a:["Hémorragie digestive : 80 mg IV bolus en 20-30 min dans 100 mL NaCl 0,9%, puis 8 mg/h IVSE × 72h (PSE 200 mg/24h)","Standard : 40 mg/j IV ou PO"],p:["1-2 mg/kg/j PO (max 40 mg/j)","IV : 0,5-1 mg/kg/j"]}
+  },
+  {
+    id:85, nom:"Striadyne", commercial:"STRIADYNE", dci:"Adénosine triphosphate (ATP)", classe:"Antiarythmique — nucléotide endogène (agoniste récepteurs A1)", cat:"Cardiologie", svc:["SAUV"],
+    couleur:"#FF9500", icon:"📡",
+    desc:"Nucléotide endogène agissant sur les récepteurs adénosinergiques A1. Bloque la conduction nodale AV. Utilisé pour la conversion des TSV en rythme sinusal. Effets très transitoires < 30 secondes.",
+    indic:["TSV paroxystique par réentrée nodale (TRNAV) ou jonctionelle","Diagnostic différentiel tachycardies à QRS fins (bloc AV transitoire révélateur)"],
+    ci:["BAV 2e/3e degré sans PM","Dysfonction sinusale sévère sans PM","Asthme sévère actif (bronchospasme)","Syndrome de WPW avec pré-excitation (risque FV)","Association dipyridamole"],
+    ei:["Flush facial intense, dyspnée, douleurs thoraciques (transitoires < 30 sec — prévisibles)","Pause sinusale transitoire","BAV transitoire","Bronchospasme (asthmateux CI)"],
+    cond:["Ampoule 20 mg/2 mL — STRIADYNE® (ATP)","Administrer pur, bolus IV rapide < 2 sec"],
+    poso:{a:["20 mg IV bolus très rapide (< 2 sec) + flush 20 mL NaCl 0,9% rapide en proximal","Si échec après 2 min : 20 mg (même dose répétée)","Annoncer au patient les effets transitoires prévisibles"],p:["0,3-0,5 mg/kg IV bolus rapide (max 20 mg)"]}
+  },
+  {
+    id:86, nom:"Glucagon", commercial:"GLUCAGEN", dci:"Glucagon (rDNA) chlorhydrate", classe:"Hormone pancréatique α / Antidote bêtabloquants et inhibiteurs calciques", cat:"Métabolique", svc:["SAUV","SMUR"],
+    couleur:"#FFD60A", icon:"🔋",
+    desc:"Hormone hyperglycémiante stimulant la glycogénolyse hépatique. Principale indication d'urgence : antidote des bêtabloquants (inotrope positif non adrénergique) et des inhibiteurs calciques.",
+    indic:["Intoxication / surdosage bêtabloquants (bradycardie, BAV, choc)","Intoxication inhibiteurs calciques (2e ligne)","Hypoglycémie sévère si voie IV impossible (administration IM ou SC)"],
+    ci:["Phéochromocytome (libération catécholamines massive)","Insulinome (risque hypoglycémie rebond sévère)","Allergie glucagon"],
+    ei:["Nausées, vomissements (fréquents)","Hypokaliémie","Tachycardie, hypertension (doses élevées)","Hyperglycémie transitoire"],
+    cond:["Flacon 1 mg poudre + seringue solvant 1 mL EPPI — GLUCAGEN® HypoKit","Flacon 1 mg IV","Nécessite reconstitution extemporanée"],
+    poso:{a:["Intox bêtabloquants : 1-5 mg IV bolus lent (max 5 mg), puis IVSE 2-5 mg/h selon réponse","Hypoglycémie : 1 mg IM ou SC (adulte > 25 kg), puis gestion voie orale dès réveil"],p:["< 25 kg : 0,5 mg IM ou SC","Intox : 0,05-0,1 mg/kg IV, puis 0,07 mg/kg/h IVSE"]}
+  },
+  {
+    id:87, nom:"Amikacine", commercial:"AMIKLIN", dci:"Amikacine sulfate", classe:"Aminoside (aminoglycoside) — bactéricide concentration-dépendant", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Aminoside de 3e génération. Spectre étendu aux BGN résistants aux autres aminosides (Pseudomonas, entérobactéries sécrétant des enzymes modificatrices). Dosage une fois par jour. Surveillance de la toxicité rénale et auditive.",
+    indic:["Sepsis grave / choc septique à BGN en association (synergie)","Infection à Pseudomonas aeruginosa (association)","Pneumopathie nosocomiale (en association)","Méningite à BGN (en association)"],
+    ci:["Insuffisance rénale sévère (adapter impérativement)","Myasthénie grave","Grossesse (ototoxicité fœtale)"],
+    ei:["Néphrotoxicité (surveillance créatinine / diurèse)","Ototoxicité cochléaire et vestibulaire (surveillance audiogramme si > 5j)","Bloc neuromusculaire (fortes doses)"],
+    cond:["Flacon 500 mg/4 mL (125 mg/mL)","Flacon 1 g/4 mL","Diluer dans 50-100 mL NaCl 0,9% — perfusion 30 min"],
+    poso:{a:["Dose unique journalière : 15-20 mg/kg IV sur 30 min (max 1,5 g/j)","Pic sérique cible > 64 mg/L à 30 min après fin de perfusion","Résiduelle cible < 2,5 mg/L avant dose suivante"],p:["Néonat : 15 mg/kg/48h IV","NN-enfant : 15-20 mg/kg/j IV (1 injection)"]}
+  },
+  {
+    id:88, nom:"Amoxicilline", commercial:"AMOXICILLINE", dci:"Amoxicilline trihydratée", classe:"Antibiotique pénicilline A (aminopénicilline) — bactéricide", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Aminopénicilline à large spectre sur les germes sensibles. Bactéricide par inhibition de la synthèse du peptidoglycane. Dose méningée très élevée (12-24 g/j) pour franchir la BHE.",
+    indic:["Méningite bactérienne (Listéria — dose méningée en association)","Endocardite à streptocoque (traitement de référence)","Pneumopathie communautaire (association si nécessaire)","Angine à streptocoque A","Infections ORL communautaires"],
+    ci:["Allergie pénicillines (anaphylaxie)","Mononucléose infectieuse EBV (rash maculo-papuleux généralisé)"],
+    ei:["Diarrhée, nausées","Allergie cutanée (exanthème maculo-papuleux)","Anaphylaxie","Colite à Clostridioides difficile (rare)"],
+    cond:["Flacon poudre IV 500 mg, 1 g, 2 g","Diluer dans 100 mL NaCl 0,9% — perfusion 20-30 min","Stable 8h à 25°C"],
+    poso:{a:["Standard : 1-2 g IV × 3-4/j","Méningite : 200-300 mg/kg/j IV en 6 injections (max 24 g/j)","Endocardite : 12 g/j IV en perfusion continue ou 6 injections"],p:["100-200 mg/kg/j en 3-4 injections","Méningite : 300-400 mg/kg/j en 6 injections"]}
+  },
+  {
+    id:89, nom:"Aciclovir", commercial:"ZOVIRAX IV", dci:"Aciclovir (acyclovir)", classe:"Antiviral — analogue nucléosidique inhibiteur de l'ADN polymérase virale", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Analogue de la guanosine activé spécifiquement par la thymidine kinase virale. Actif sur HSV 1 et 2, VZV. Traitement de référence de l'encéphalite herpétique. Administrer seul (incompatible avec de nombreux produits).",
+    indic:["Encéphalite herpétique (HSV) — urgence diagnostique et thérapeutique","Primo-infection herpétique grave (HSV)","Zona ophtalmique ou disséminé sévère (VZV)","Infection herpétique chez immunodéprimé"],
+    ci:["Allergie aciclovir / valaciclovir","Insuffisance rénale sévère sans adaptation posologique","Ne pas mélanger avec d'autres médicaments (risque cristallisation)"],
+    ei:["Néphrotoxicité (cristallurie — hydratation +++, perfusion > 1h)","Neurotoxicité (confusion, tremblements, encéphalopathie — IR ou surdosage)","Phlébite (pH alcalin)","Nausées"],
+    cond:["Poudre IV 250 mg / 500 mg / 1 000 mg — ZOVIRAX® IV","Reconstituer puis diluer dans 50-250 mL NaCl 0,9% — perfusion ≥ 1h STRICT","Passer SEUL — incompatible avec de nombreux produits"],
+    poso:{a:["Encéphalite herpétique : 10 mg/kg IV toutes les 8h (× 14-21 jours)","HSV mucocutané grave : 5 mg/kg/8h","Adapater si insuffisance rénale selon DFG"],p:["NN : 20 mg/kg IV /8h × 14-21 j","Encéphalite > 3 mois : 10-15 mg/kg/8h"]}
+  },
+  {
+    id:90, nom:"Ceftriaxone", commercial:"ROCÉPHINE", dci:"Ceftriaxone disodique", classe:"Céphalosporine 3e génération (C3G) — bactéricide", cat:"Infectiologie", svc:["SAUV","SMUR","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"C3G à large spectre avec excellente diffusion méningée et demi-vie longue (1 injection/jour). Active sur la plupart des entérobactéries, cocci gram+ et gram-. Référence méningite bactérienne de l'adulte.",
+    indic:["Méningite bactérienne (1ère ligne adulte et enfant)","Sepsis sévère communautaire à point de départ non identifié","Pneumopathie communautaire grave","Infections ostéo-articulaires / endocardite (certain germe)","SAMU : infections graves de l'adulte"],
+    ci:["Allergie céphalosporines","Allergie pénicillines sévère (10% allergie croisée — prudence)","Nourrisson < 41 SA corrigées avec bilirubinémie élevée (compétition albumine)","Ne pas mélanger avec du calcium IV (précipitation)"],
+    ei:["Diarrhée, nausées","Allergie cutanée","Colite à Clostridioides difficile (rare)","Lithiase biliaire de boue (usage prolongé)","Arythmie si injection IV rapide sur cathéter central (risque)"],
+    cond:["Flacon poudre IV 1 g, 2 g — ROCÉPHINE®","Diluer dans 100 mL NaCl 0,9% ou G5% — perfusion 30 min","Stable 3h à 25°C","Attention : NE PAS PASSER avec une perfusion calcium IV (même ligne)"],
+    poso:{a:["Standard : 1-2 g IV /24h","Méningite : 100 mg/kg/j IV en 1 injection (max 4 g/j)","Sepsis grave : 2 g/j IV"],p:["50-100 mg/kg/j IV en 1-2 injections (max 4 g/j)","Méningite : 100 mg/kg/j"]}
+  },
+  {
+    id:91, nom:"Gentamicine", commercial:"GENTALLINE", dci:"Gentamicine sulfate", classe:"Aminoside (aminoglycoside) — bactéricide concentration-dépendant", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Aminoside de 1ère génération. Spectre large sur BGN aérobies. Toujours en dose unique journalière (meilleure efficacité, moindre toxicité). Synergie avec les bêta-lactamines (endocardite).",
+    indic:["Sepsis grave à BGN en association (synergie bêta-lactamines)","Endocardite à entérocoque ou streptocoque (synergie — dose réduite)","Infection urinaire compliquée à BGN","Infections graves à BGN nosocomiales (en association)"],
+    ci:["Insuffisance rénale sévère (adapter impérativement)","Myasthénie grave","Grossesse (ototoxicité fœtale)"],
+    ei:["Néphrotoxicité (dépend de la durée et des doses cumulées)","Ototoxicité cochléo-vestibulaire","Bloc neuromusculaire (rare, fortes doses)"],
+    cond:["Flacon 160 mg/1,5 mL (80 mg/mL)","Flacon 80 mg/2 mL","Diluer dans 50-100 mL NaCl 0,9% — perfusion 30 min","Stable 24h à 25°C"],
+    poso:{a:["Dose unique journalière : 3-5 mg/kg IV sur 30 min (sepsis grave jusqu'à 7 mg/kg)","Pic sérique cible > 10 mg/L à 30 min post-perfusion","Résiduelle cible < 0,5 mg/L avant la prochaine dose (ou non détectable)"],p:["NN : 2,5 mg/kg/36-48h selon âge gestationnel","Enfant : 3-5 mg/kg/j en 1 injection IV"]}
+  },
+  {
+    id:92, nom:"Lévofloxacine", commercial:"TAVANIC", dci:"Lévofloxacine hémihydratée", classe:"Antibiotique fluoroquinolone (quinolone 3e génération) — bactéricide", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Fluoroquinolone de 3e génération avec activité étendue aux cocci gram+ (pneumocoque) et BGN. Bonne diffusion pulmonaire. Flacon prêt à l'emploi (250 mg/50 mL ou 500 mg/100 mL).",
+    indic:["Pneumopathie communautaire sévère (alternative ou association)","Exacerbation aiguë de BPCO (formes sévères)","Infections urinaires compliquées à BGN","Légionellose"],
+    ci:["Allergie fluoroquinolones","Antécédent de tendinopathie aux quinolones","Association médicaments allongeant le QT (risque torsades de pointe)","Épilepsie non contrôlée","Grossesse / allaitement"],
+    ei:["Tendinopathie et rupture tendineuse (Achille ++)","Allongement QTc (ECG si facteur de risque)","Nausées, diarrhées","Hypoglycémie (diabétique sous sulfamide)","Encéphalopathie (sujet âgé, IR)"],
+    cond:["Flacon prêt à l'emploi 250 mg/50 mL — TAVANIC® (perfusion 30 min)","Flacon prêt à l'emploi 500 mg/100 mL (perfusion 60 min)","Ne pas diluer davantage"],
+    poso:{a:["500 mg IV /24h (ou /12h si infection sévère ou à germe résistant) — perfusion 60 min","Adapter à la fonction rénale (DFG < 50 : espacer)"],p:["Non recommandé < 15 ans (chondrotoxicité animaux)"]}
+  },
+  {
+    id:93, nom:"Métronidazole", commercial:"FLAGYL", dci:"Métronidazole", classe:"Antibiotique / Antiparasitaire nitroimidazolé — bactéricide anaérobies", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Actif spécifiquement sur les bactéries anaérobies et les protozoaires. Réduit par des réductases bactériennes en dérivés cytotoxiques pour l'ADN. Flacon prêt à l'emploi.",
+    indic:["Infections à anaérobies (péritonite, abcès, infections gynécologiques)","Colite à Clostridioides difficile (cure orale — alternative vancomycine PO)","Amœbose hépatique","Infections dentaires sévères (association)","Traitement d'Helicobacter pylori (en trithérapie)"],
+    ci:["Allergie métronidazole","Association disulfirame (Antabuse®)","Grossesse 1er trimestre (relatif)","Allaitement (suspension 12-24h post-dose)"],
+    ei:["Nausées, goût métallique","Réaction antabuse si alcool (ne pas consommer)","Neurotoxicité (neuropathie périphérique, encéphalopathie) — traitement prolongé","Coloration des urines en brun (normal)"],
+    cond:["Flacon prêt à l'emploi 500 mg/100 mL — FLAGYL® (perfusion 30 min)","Comprimé 250 mg, 500 mg PO","Stable 24h à 25°C à l'abri de la lumière"],
+    poso:{a:["500 mg IV toutes les 8h — perfusion 30 min","Infections sévères : 1 g /8h","PO : 500 mg × 3/j pendant 7-14 jours"],p:["15 mg/kg/j IV en 3 injections (max 500 mg/dose)"]}
+  },
+  {
+    id:94, nom:"Pipéracilline + Tazobactam", commercial:"TAZOCILLINE", dci:"Pipéracilline sodique + Tazobactam sodique", classe:"Antibiotique pénicilline de 4e génération + inhibiteur β-lactamase — très large spectre", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Association d'une uréidopénicilline à large spectre (pipéracilline) et d'un inhibiteur de β-lactamase (tazobactam). Actif sur Pseudomonas, entérobactéries (dont productrices de BLSE selon CMI), anaérobies.",
+    indic:["Sepsis grave / choc septique nosocomial — spectre large en probabiliste","Pneumopathie acquise sous ventilation (PAV)","Péritonite, infection intra-abdominale sévère","Infection urinaire compliquée à BGN","Infection du patient neutropénique fébrile"],
+    ci:["Allergie pénicillines (anaphylaxie)","Allergie céphalosporines sévère (allergie croisée partielle)"],
+    ei:["Diarrhée, nausées","Allergie cutanée","Hypokaliémie (apport sodé important)","Colite à Clostridioides difficile","Élévation transaminases","Neutropénie (usage prolongé)"],
+    cond:["Flacon poudre IV 4 g/500 mg — TAZOCILLINE® (pipéracilline 4g + tazobactam 500mg)","Dissoudre avec 20 mL EPPI, puis diluer dans 100 mL NaCl 0,9% — perfusion 30-60 min","Stable 24h à 25°C"],
+    poso:{a:["4 g/500 mg IV toutes les 8h (toutes les 6h en infections sévères à Pseudomonas)","Neutropénie fébrile : 4 g/8h IV","Perfusion prolongée 4h possible pour optimiser la couverture (T > CMI)"],p:["Enfant > 2 mois : 100 mg/kg/j de pipéracilline IV en 3-4 injections","NN et < 2 mois : données limitées"]}
+  },
+  {
+    id:95, nom:"Rovamycine", commercial:"ROVAMYCINE", dci:"Spiramycine", classe:"Antibiotique macrolide — bactériostatique / bactéricide (concentration-dépendant)", cat:"Infectiologie", svc:["SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Macrolide de 16 carbones à forte concentration tissulaire intracellulaire. Actif sur les bactéries intracellulaires, germes atypiques et certains cocci gram+. Alternative aux bêta-lactamines si allergie.",
+    indic:["Infections ORL et respiratoires à germes sensibles (alternative bêta-lactamines)","Toxoplasmose en cours de grossesse (1ère ligne)","Infections à germes atypiques (Mycoplasma, Chlamydia, Legionella)"],
+    ci:["Allergie macrolides","Insuffisance hépatique sévère"],
+    ei:["Nausées, vomissements, diarrhées (moins qu'érythromycine)","Réactions allergiques cutanées","Élévation des transaminases (rare)"],
+    cond:["Comprimé 1,5 MUI et 3 MUI — ROVAMYCINE® PO","Flacon poudre IV 1,5 MUI","IV : 1,5 MUI dans 100 mL G5% — perfusion 60 min","Utilisation immédiate après reconstitution"],
+    poso:{a:["IV : 1,5 MUI toutes les 8h (perfusion 60 min dans G5% STRICT)","PO : 3 MUI × 2-3/j","Toxoplasmose grossesse : 9 MUI/j en 3 prises PO (jusqu'à amniocentèse)"],p:["150 000 UI/kg/j PO en 2-3 prises","IV : 75 000 UI/kg × 2-3/j"]}
+  },
+  {
+    id:96, nom:"Vancomycine", commercial:"VANCOMYCINE", dci:"Vancomycine chlorhydrate", classe:"Glycopeptide — bactéricide sur cocci gram+ (dont SARM)", cat:"Infectiologie", svc:["SAUV","SAU"],
+    couleur:"#00C7BE", icon:"🦠",
+    desc:"Glycopeptide actif sur les bactéries gram+ résistantes aux bêta-lactamines (SARM, ERV). Inhibiteur de la synthèse du peptidoglycane. Monitoring TDM obligatoire (objectif : AUC 400-600 mg.h/L ou résiduelle 15-20 mg/L selon protocole).",
+    indic:["Sepsis grave / endocardite à SARM ou entérocoque résistant","Méningite à SARM ou pneumocoque résistant (dose méningée ++)","Infection grave chez sujet allergique aux bêta-lactamines (staphylococci)","Colite à Clostridioides difficile sévère (voie orale uniquement)"],
+    ci:["Allergie vancomycine","Insuffisance rénale sévère sans adaptation (accumulation)","Ne pas associer en même ligne IV à d'autres médicaments (incompatibilités multiples)"],
+    ei:["Red man syndrome (flush, prurit, hypotension) si injection trop rapide — prévenir par lenteur","Néphrotoxicité (surveillance créatinine ++)","Ototoxicité (surdosage)","Phlébite (solution acide — VVC conseillée si doses élevées)"],
+    cond:["Flacon poudre 500 mg ou 1 g — VANCOMYCINE®","Reconstituer puis diluer : 500 mg dans 100 mL / 1 g dans 250 mL NaCl 0,9%","Perfusion 60 min (sur KTC : 100 mL quelle que soit la posologie)","Stable 24h à 25°C"],
+    poso:{a:["Dose de charge : 25-30 mg/kg IV (max 3 g) — perfusion ≥ 2h","Entretien : 15-20 mg/kg IV /8-12h selon DFG et monitorage","Objectif AUC/CMI 400-600 ou résiduelle 15-25 mg/L (méningite : 20-25)"],p:["Néonat : 15-20 mg/kg/12-24h selon AG","Enfant : 40-60 mg/kg/j en 4 injections (méningite : 60 mg/kg/j)"]}
+  },
+  {
+    id:97, nom:"NaCl 0,9%", commercial:"CHLORURE DE SODIUM 0,9%", dci:"Chlorure de sodium 9 g/L — solution isotonique", classe:"Soluté isotonique de remplissage / diluant / vecteur", cat:"Solutés", svc:["SAUV","SMUR","SAU"],
+    couleur:"#007AFF", icon:"💧",
+    desc:"Soluté cristalloïde isotonique de référence. Soluté de remplissage universel, vecteur de dilution pour la majorité des médicaments IV. Apport exclusivement extracellulaire. À privilégier chez les cérébrolésés.",
+    indic:["Déshydratation extracellulaire / déplétion sodique","Remplissage vasculaire en première intention (choc, hypovolémie)","Vecteur de dilution pour la majorité des médicaments IV","Soluté de référence pour les patients neurochirurgicaux et cérébrolésés","Lavage de cathéter / rinçage de ligne"],
+    ci:["Hypernatrémie sévère non corrigée","Surcharge hydrosodée / OAP (relatif — adapter débit)","Hyperchlorémie sévère (acidose hyperchlorémique si volumes importants)"],
+    ei:["Hypernatrémie, hyperchlorémie (volumes importants)","Acidose métabolique hyperchlorémique (apports massifs)","Surcharge volumique (patient insuffisant cardiaque)"],
+    cond:["Poche 50 mL / 100 mL / 250 mL / 500 mL / 1000 mL","Ampoules 5 mL / 10 mL (pour dilution médicaments)"],
+    poso:{a:["Remplissage : 500 mL à 1 L IV sur 15-30 min selon état hémodynamique (évaluer la réponse)","Dilution médicaments : selon le médicament concerné","Entretien : 500-2000 mL/24h selon bilan entrées-sorties"],p:["Remplissage : 10-20 mL/kg IV sur 20-30 min, réévaluer"]}
+  },
+  {
+    id:98, nom:"Glucose 5%", commercial:"GLUCOSÉ 5%", dci:"Glucose anhydre 5 g/100 mL — solution isotonique", classe:"Soluté glucosé isotonique d'entretien", cat:"Solutés", svc:["SAUV","SMUR","SAU"],
+    couleur:"#007AFF", icon:"💧",
+    desc:"Soluté glucosé isotonique. Fournit 50 g de glucose/L soit 200 kcal/L. Apport hypotonique résiduel après métabolisation du glucose. À éviter en neurochirurgie (aggrave les lésions ischémiques). Vecteur de choix pour amiodarone et certains produits incompatibles avec NaCl.",
+    indic:["Entretien hydrique et apport calorique modéré (état de jeûne)","Soluté de dilution obligatoire pour certains médicaments (amiodarone, noradrénaline)","Suspicion de pathologie cardiaque en entretien (moins de sodium)","Corriger une hypernatrémie (avec surveillance)"],
+    ci:["Hyperglycémie (contrôler glycémie, adapter)","Cérébrolésion aiguë : éviter (aggrave œdème cérébral et ischémie)","En remplissage seul (pas de sodium : risque hyponatrémie)"],
+    ei:["Hyperglycémie (surveillance glycémique ++)","Risque d'hyponatrémie si perfusion isolée prolongée","Aggravation des lésions ischémiques cérébrales"],
+    cond:["Poche 250 mL / 500 mL / 1 000 mL — GLUCOSÉ 5%","Apport de 50 g sucre par litre"],
+    poso:{a:["Entretien : 500-2000 mL/24h selon besoins","Correction hypernatrémie : calcul selon déficit en eau libre, correction lente < 10 mEq/L/24h","Vecteur médicament : volume selon protocole du médicament"],p:["Entretien : 60-120 mL/kg/j selon poids et âge"]}
+  },
+  {
+    id:99, nom:"Isofundine", commercial:"ISOFUNDINE", dci:"Solution polyélectrolytique balancée (cristalloïde isotonique balancé)", classe:"Soluté de remplissage cristalloïde balancé — solution de Hartmann modifiée", cat:"Solutés", svc:["SAUV","SMUR"],
+    couleur:"#007AFF", icon:"💧",
+    desc:"Cristalloïde balancé iso-osmolaire à la composition proche du plasma. Contient Na+, K+, Ca2+, Mg2+, Cl- et acétate/malate comme tampons. Limite l'acidose hyperchlorémique comparativement au NaCl 0,9%.",
+    indic:["Remplissage vasculaire — soluté de remplissage cristalloïde à privilégier","Choc hémorragique, hypovolémie, déshydratation extracellulaire","Alternative au NaCl 0,9% pour limiter l'acidose hyperchlorémique","Grands brûlés (protocole de remplissage)"],
+    ci:["Hyperkaliémie (contient du potassium — vérifier kaliémie)","Insuffisance rénale oligo-anurique (risque hyperkaliémie)","Alcalose métabolique sévère"],
+    ei:["Surcharge volumique si apports excessifs","Hyperkaliémie (patient avec IR)","Hypercalcémie (contient du calcium)"],
+    cond:["Poche 500 mL — ISOFUNDINE®","Poche 1 000 mL"],
+    poso:{a:["Remplissage : 500 mL IV sur 15-30 min, réévaluation clinique","Grands brûlés : 2-4 mL/kg/% surface brûlée sur 24h (Parkland modifié)"],p:["10-20 mL/kg IV sur 20-30 min, réévaluer"]}
+  },
+  {
+    id:100, nom:"Ringer Lactate", commercial:"RINGER LACTATE", dci:"Solution de Ringer lactate (lactate de sodium, NaCl, KCl, CaCl2)", classe:"Soluté de remplissage cristalloïde balancé (solution de Hartmann)", cat:"Solutés", svc:["SAUV","SMUR"],
+    couleur:"#007AFF", icon:"💧",
+    desc:"Cristalloïde balancé classique contenant lactate (métabolisé en bicarbonate par le foie), potassium et calcium. Proche de la composition plasmatique. Soluté de référence du choc hémorragique traumatique.",
+    indic:["Choc hémorragique traumatique (référence traumato)","Remplissage vasculaire — moins d'acidose hyperchlorémique que NaCl 0,9%","Déshydratation extracellulaire","Grands brûlés (protocole Parkland)"],
+    ci:["Insuffisance hépatique sévère (métabolisme du lactate altéré)","Hyperkaliémie (contient K+ — vérifier kaliémie)","Alcalose lactique préexistante"],
+    ei:["Surcharge volumique si apports excessifs","Élévation de la lactatémie (interférence avec le monitoring biologique)","Hypercalcémie (contient Ca2+)"],
+    cond:["Poche 500 mL — RINGER LACTATE®","Poche 1 000 mL"],
+    poso:{a:["Remplissage choc hémorragique : 500-1000 mL IV rapide, réévaluation","Grands brûlés : 3-4 mL/kg/% surface brûlée sur 24h (Parkland)","Entretien : adapter aux besoins"],p:["10-20 mL/kg IV sur 20-30 min, réévaluer"]}
+  },
+  {
+    id:101, nom:"Mannitol 20%", commercial:"MANNITOL 20%", dci:"Mannitol 200 g/L (solution hypertonique)", classe:"Diurétique osmotique / Osmothérapie", cat:"Neurologie", svc:["SAUV","SMUR"],
+    couleur:"#007AFF", icon:"🧠",
+    desc:"Diurétique osmotique non réabsorbable. Réduit la pression intracrânienne par déshydratation osmotique du parenchyme cérébral sain (BHE intacte) et par augmentation de la déformabilité érythrocytaire. Effet en 15-30 min.",
+    indic:["Hypertension intracrânienne (HTIC) aiguë — TCG grave, AVC hémorragique étendu","Engagement cérébral imminent (signe mydriase unilatérale)","Traitement osmotique avant transfert neurochirurgical"],
+    ci:["Hypovolémie non corrigée (aggrave)","Insuffisance rénale anurique","Hyperosmolarité sévère > 320 mOsm/kg","Insuffisance cardiaque décompensée (surcharge)"],
+    ei:["Déshydratation, hypovolémie (effet osmotique)","Hyperosmolarité, hypernatrémie","Insuffisance rénale aiguë (doses élevées répétées)","Effet rebond si fuite vers le parenchyme cérébral (BHE lésée)"],
+    cond:["Flacon 500 mL à 20% (200 g/L) — MANNITOL®","Pouvant être perfusé pur ou dilué dans NaCl 0,9%","Surveiller osmolarité : objectif < 320 mOsm/kg"],
+    poso:{a:["0,5-1,5 g/kg IV en 20-30 min (débit libre)","Dose répétée /4-6h si persistance HTIC (max 2 g/kg/24h)","Objectif osmolarité sérique 295-310 mOsm/kg"],p:["0,5-1 g/kg IV en 15-30 min","Même surveillance osmolarité"]}
+  },
+  {
+    id:102, nom:"Concentré Globulaire Rouge", commercial:"CGR — CONCENTRÉ DE GLOBULES ROUGES", dci:"Concentré érythrocytaire (produit sanguin labile)", classe:"Produit sanguin labile — érythrocytes déleucocytés", cat:"Produits sanguins", svc:["SAUV","SAU"],
+    couleur:"#FF3B30", icon:"🩸",
+    desc:"Produit sanguin labile composé d'érythrocytes concentrés déleucocytés. Restaure la capacité de transport de l'oxygène. Commande à l'EFS. Traçabilité obligatoire (RAI, groupe sanguin). Conservation au réfrigérateur à sang dédié.",
+    indic:["Anémie aiguë symptomatique (Hb < 7 g/dL ou < 10 g/dL si cardiopathie ischémique)","Choc hémorragique (transfusion massive)","Hémorragie active menaçant le pronostic vital"],
+    ci:["Incompatibilité ABO / Rh (groupe préalable et RAI indispensable)","Absence de contrôle ultime au lit du patient avant transfusion","Surcharge volémique relative (adapter débit)"],
+    ei:["Réaction hémolytique immunologique (incompatibilité ABO — MORTEL)","Réaction fébrile non hémolytique","Allergie / TRALI","Surcharge volumique (TACO)","Transmission agent infectieux (très faible risque)"],
+    cond:["Poche de 250-350 mL environ — conservée au réfrigérateur dédié (+ 4°C)","Durée de transfusion : 1-2h (max 4h après sortie du frigo)","Utiliser une tubulure à transfusion avec filtre","Peut être conservé max 6h hors frigo"],
+    poso:{a:["1 CGR augmente l'Hb d'environ 1 g/dL (chez adulte de 70 kg)","Choc hémorragique : transfusion massive (CGR + PFC en ratio 1:1)","Débit adapté selon urgence clinique, tolérance et état cardiaque"],p:["10-15 mL/kg sur 2-3h (augmentation Hb ≈ 2-3 g/dL)"]}
+  },
+  {
+    id:103, nom:"Plasma Frais Congelé", commercial:"PFC — PLASMA FRAIS CONGELÉ", dci:"Plasma humain frais congelé (facteurs de coagulation)", classe:"Produit sanguin labile — plasma thérapeutique", cat:"Produits sanguins", svc:["SAUV","SAU"],
+    couleur:"#FF3B30", icon:"🩸",
+    desc:"Plasma humain contenant tous les facteurs de coagulation, inhibiteurs naturels (protéines C, S, antithrombine) et fibrinogène. Traçabilité obligatoire. Administration dans les 6h après décongélation. Compatible avec le TGV (transfusion globale).",
+    indic:["Coagulopathie de consommation / CIVD avec saignement","Transfusion massive (ratio CGR:PFC 1:1 ou 1:2)","Antidote urgente si concentrés de facteurs indisponibles","Déficit en facteur de coagulation non disponible en concentré spécifique"],
+    ci:["Surcharge volémique sévère (TACO)","Ne pas utiliser pour simple remplissage","Incompatibilité ABO (iso-groupe ou iso-compatible)"],
+    ei:["TRALI (lésion pulmonaire aiguë post-transfusionnelle — grave)","Allergie / anaphylaxie","TACO (surcharge volumique)","Transmission agents infectieux (très faible risque)"],
+    cond:["Poche 200-250 mL — décongeler avant utilisation (décongélation au bain-marie)","Administration dans les 30 min en perfusion IV","Compatible avec le TGV (transfusion globale)","Traçabilité obligatoire — peut être transfusé jusqu'à 6h après décongélation"],
+    poso:{a:["10-15 mL/kg IV en 30 min (4-6 poches adulte en général)","Transfusion massive : ratio CGR:PFC 1:1 ou selon protocole local","Objectif TP > 50% / TCA < 1,5 × témoin"],p:["10-15 mL/kg IV sur 30 min — même principe"]}
+  },
+  {
+    id:104, nom:"Plaquettes", commercial:"CONCENTRÉ PLAQUETTAIRE (CP)", dci:"Concentré plaquettaire (produit sanguin labile)", classe:"Produit sanguin labile — plaquettes thérapeutiques", cat:"Produits sanguins", svc:["SAUV","SAU"],
+    couleur:"#FF3B30", icon:"🩸",
+    desc:"Concentré plaquettaire (CP) ou apherèse plaquettaire (MCP). Restaure l'hémostase primaire. Transfuser dès réception dans le service sans délai. Ne JAMAIS administrer avec le TGV.",
+    indic:["Thrombopénie sévère < 10 G/L (ou < 20 G/L si fièvre)","Thrombopénie avec hémorragie active (seuil < 50 G/L)","Chirurgie urgente / neurochirurgie (objectif > 100 G/L)","Transfusion massive avec thrombopénie < 50 G/L"],
+    ci:["Purpura thrombotique thrombocytopénique (PTT) — CONTRE-INDICATION FORMELLE","Thrombopénie induite à l'héparine (TIH) — éviter","Ne JAMAIS administrer avec le TGV"],
+    ei:["Réaction allergique / anaphylaxie","Allo-immunisation plaquettaire (réfractarité)","Réaction fébrile non hémolytique","TRALI (rare)","Transmission agents infectieux (très faible risque)"],
+    cond:["Poche de CP ou MCP (apherèse) — à transfuser AU PLUS VITE après réception","Administration en 20-30 min","Tubulure standard (ne PAS utiliser tubulure TGV)","Conservation à température ambiante sous agitation (ne pas mettre au réfrigérateur)"],
+    poso:{a:["1 concentré plaquettaire d'aphérèse (CPA) = augmentation de 20-50 G/L","Transfuser sans délai après réception (ne pas stocker dans le service)","Contrôle NFS 1h post-transfusion pour évaluer le rendement transfusionnel"],p:["1 CPA pour 10-15 kg (même principe)"]}
+  },
+  {
+    id:105, nom:"Albumine", commercial:"ALBUMINE HUMAINE", dci:"Albumine humaine (solution à 4% ou 20%)", classe:"Médicament dérivé du sang — colloïde macromoléculaire", cat:"Produits sanguins", svc:["SAUV","SAU"],
+    couleur:"#FF9500", icon:"💊",
+    desc:"Protéine plasmatique humaine à haute pression oncotique. Maintien de la pression oncotique intravasculaire. En urgence : expansion volémique (20%). Traçabilité obligatoire. Documents à envoyer à la pharmacie.",
+    indic:["Remplissage vasculaire si inefficacité cristalloïdes (choc réfractaire, brûlés étendus)","Syndrome hépatorénal (en association terlipressine)","Prévention dysfonction rénale après paracentèse évacuatrice (> 5 L)","Hypoalbuminémie sévère < 20 g/L avec œdèmes réfractaires"],
+    ci:["Insuffisance cardiaque décompensée sévère","Hypervolémie","Allergie albumine humaine"],
+    ei:["Surcharge volémique (TACO)","Réaction allergique / anaphylaxie (rare — produit viroatténué)","Hyperthermie transitoire","Frisson"],
+    cond:["Flacon prêt à l'emploi 200 mL à 4% (40 g/L) ou 50-100 mL à 20% (200 g/L) — ALBUMINE HUMAINE®","Traçabilité obligatoire — documents à envoyer à la pharmacie","Flacon en verre : faire l'appel d'air sur la tubulure avant perfusion"],
+    poso:{a:["Remplissage : albumine 20% : 100 mL IV en 30-60 min (équivalent oncotique 500 mL cristalloïdes)","Albumine 4% : 200-500 mL IV sur 1-4h","Syndrome hépatorénal : albumine 1 g/kg J1 puis 20-40 g/j"],p:["0,5-1 g/kg IV sur 1-2h (selon indication)"]}
   }
 ];
