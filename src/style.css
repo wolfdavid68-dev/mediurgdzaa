@@ -1482,24 +1482,25 @@ body {
 
 .proto-tabs {
   display: flex;
-  gap: 5px;
+  gap: 7px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .proto-tab {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 7px;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 9px;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  min-height: 44px;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1511,8 +1512,8 @@ body {
 }
 
 .proto-tab-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
