@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 
 const SECTION_META = {
-  inclusion:   { label: "Inclusion",   color: "#16a34a", bg: "inclusion" },
-  exclusion:   { label: "Exclusion",   color: "#dc2626", bg: "exclusion" },
-  gravite:     { label: "Gravité",     color: "#f97316", bg: "gravite"   },
-  actions:     { label: "Actions",     color: "#3b82f6", bg: "actions"   },
-  surveillance:{ label: "Surveillance",color: "#06b6d4", bg: "surveillance" },
+  inclusion:          { label: "Inclusion",            color: "#16a34a" },
+  exclusion:          { label: "Exclusion",            color: "#dc2626" },
+  gravite:            { label: "Gravité",              color: "#f97316" },
+  actions:            { label: "Actions",              color: "#3b82f6" },
+  surveillance:       { label: "Surveillance",         color: "#06b6d4" },
+  recueil:            { label: "Recueil de données",   color: "#64748b" },
+  rythme_choquable:   { label: "Rythme choquable",     color: "#f97316" },
+  rythme_non_choquable:{ label: "Rythme non choquable",color: "#6b7280" },
+  reprise:            { label: "Reprise d'activité",   color: "#16a34a" },
 };
 
 const ProtocolCard = ({ protocol: p }) => {
