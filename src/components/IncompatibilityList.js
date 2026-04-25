@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
 
 const TYPE_META = {
-  precipitation: { label: "Précipitation", short: "P", color: "#ef4444" },
-  inactivation:  { label: "Inactivation",  short: "I", color: "#f97316" },
-  incompatible:  { label: "Incompatible",  short: "✕", color: "#6b7280" },
-  compatible:    { label: "Compatible validé", short: "✓", color: "#16a34a" },
-  nodata:        { label: "Données insuffisantes", short: "?", color: "#3b82f6" },
+  precipitation: { label: "Précipitation", short: "P",  color: "#ef4444" },
+  inactivation:  { label: "Inactivation",  short: "I",  color: "#f97316" },
+  incompatible:  { label: "Incompatible",  short: "✕",  color: "#6b7280" },
+  pH:            { label: "Incompatibilité pH", short: "pH", color: "#a855f7" },
+  compatible:    { label: "Compatible validé", short: "✓",  color: "#16a34a" },
+  nodata:        { label: "Données insuffisantes", short: "?",  color: "#3b82f6" },
 };
 
 const buildMatrix = () => {
