@@ -146,7 +146,7 @@ const DrugCard = ({ drug }) => {
         if (!volMin) return null;
         const volLabel = volMax && volMax !== volMin ? `${volMin}–${volMax} mL` : `${volMin} mL`;
         const doseLabel = doseMax ? `${+dose.toFixed(1)}–${+doseMax.toFixed(1)} ${prep.unite}` : `${+dose.toFixed(1)} ${prep.unite}`;
-        const solvantVol = prep.volume_final ? prep.volume_final - volMin : null;
+        const solvantVol = !prep.prelever_total && prep.volume_final ? prep.volume_final - volMin : null;
         return (
           <div className="prep-calc-box">
             <div className="prep-calc-header">
@@ -159,12 +159,26 @@ const DrugCard = ({ drug }) => {
             </div>
             <div className="prep-calc-row">
               <span className="prep-calc-step">Prélever</span>
-              <span className="prep-calc-val prep-calc-highlight">{volLabel} du produit</span>
+              <span className="prep-calc-val prep-calc-highlight">
+                {prep.prelever_total ? `${prep.volume_final} mL du produit` : `${volLabel} du produit`}
+              </span>
             </div>
+            {prep.prelever_total && (
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Compléter à</span>
+                <span className="prep-calc-val prep-calc-highlight">{prep.volume_final} mL avec {prep.solvant}</span>
+              </div>
+            )}
             {solvantVol !== null && (
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Compléter à</span>
                 <span className="prep-calc-val prep-calc-highlight">{prep.volume_final} mL avec {prep.solvant}</span>
+              </div>
+            )}
+            {prep.prelever_total && (
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Injecter</span>
+                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{volLabel}</span>
               </div>
             )}
           </div>
