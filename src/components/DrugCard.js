@@ -309,12 +309,21 @@ const DrugCard = ({ drug }) => {
                   </div>
 
                   {debit ? (
-                    <div className="pse-result-box">
-                      <span className="pse-result-label">Débit</span>
-                      <span className="pse-result-value">{debit}</span>
-                      <span className="pse-result-unit">mL/h</span>
-                      {outRange && <span className="pse-range-warn">⚠ hors plage</span>}
-                    </div>
+                    <>
+                      <div className="pse-result-box">
+                        <span className="pse-result-label">Débit</span>
+                        <span className="pse-result-value">{debit}</span>
+                        <span className="pse-result-unit">mL/h</span>
+                        {outRange && <span className="pse-range-warn">⚠ hors plage</span>}
+                      </div>
+                      {pse.unite === "UI/kg/h" && (
+                        <div className="pse-result-box" style={{marginTop:4}}>
+                          <span className="pse-result-label">Dose/24h</span>
+                          <span className="pse-result-value">{Math.round(parseFloat(pseTarget) * parseFloat(weight) * 24)}</span>
+                          <span className="pse-result-unit">UI/24h</span>
+                        </div>
+                      )}
+                    </>
                   ) : null}
 
                   {validKg ? (
@@ -323,6 +332,7 @@ const DrugCard = ({ drug }) => {
                         <tr>
                           <th>Dose ({pse.unite})</th>
                           <th>mL/h</th>
+                          {pse.unite === "UI/kg/h" && <th>UI/24h</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -333,6 +343,7 @@ const DrugCard = ({ drug }) => {
                             <tr key={step} className={isActive ? "pse-row-active" : ""}>
                               <td>{step}</td>
                               <td>{d}</td>
+                              {pse.unite === "UI/kg/h" && <td>{Math.round(step * parseFloat(weight) * 24)}</td>}
                             </tr>
                           );
                         })}

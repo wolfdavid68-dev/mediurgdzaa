@@ -1652,7 +1652,7 @@ export const DRUGS = [
         "75 UI/kg bolus IV puis 20 UI/kg/h IVSE",
       ],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"1 000 UI/mL",conc_produit:1000,unite:"UI",dose_kg:80,duree:"Bolus puis IVSE continu",stabilite:"24h à 25°C",etapes:["Flacon 25 000 UI/25 mL (1 000 UI/mL)","Bolus IV : prélever 2 mL (= 2 000 UI) qsp 10 mL NaCl → 200 UI/mL","PSE entretien : selon tableau de dilution (NaCl 0,9%)"],notes:["Risque hémorragique : surveillance clinique","TCA à contrôler à H+4 après instauration","Précipite avec de nombreux médicaments — rincer la ligne"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:48,conc_finale:"416,7 UI/mL",conc_produit:5000,unite:"UI",duree:"IVSE continu — 20 UI/kg/h",stabilite:"24h à 25°C",etapes:["Flacon HNF 5 000 UI/mL","PSE : prélever 4 mL (= 20 000 UI) + 44 mL NaCl 0,9% → volume final 48 mL","Concentration : 416,7 UI/mL","Prescription et adaptation en UI/24h (voir tableau de conversion)"],notes:["TCA à contrôler à H+4 après instauration (cible 50–70 sec)","Risque hémorragique : surveillance clinique rapprochée","Précipite avec de nombreux médicaments — rincer la ligne avant injection"]},
   },
   {
     id: 43,
