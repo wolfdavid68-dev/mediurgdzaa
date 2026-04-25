@@ -1,12 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { DRUGS } from "./data/drugs";
-import { PROTOCOLS } from "./data/protocols";
 import DrugList from "./components/DrugList";
-import ProtocolCard from "./components/ProtocolCard";
-import IncompatibilityList from "./components/IncompatibilityList";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
-const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
+const SERVICES = ["Tout", "SAUV", "SMUR", "SAU"];
 
 // Retire les accents et met en minuscules pour une recherche insensible aux diacritiques
 const normalize = (str) =>
@@ -20,13 +17,8 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("Tout");
   const [svc, setSvc] = useState("Tout");
-  const [protoFilter, setProtoFilter] = useState("Tout");
-  const [protoCategory, setProtoCategory] = useState("PISU");
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem("mediurg-theme") || "dark"; } catch { return "dark"; }
-  });
-  const [bigFont, setBigFont] = useState(() => {
-    try { return localStorage.getItem("mediurg-bigfont") === "1"; } catch { return false; }
   });
 
   useEffect(() => {
@@ -34,25 +26,7 @@ const App = () => {
     try { localStorage.setItem("mediurg-theme", theme); } catch {}
   }, [theme]);
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-fontsize", bigFont ? "large" : "normal");
-    try { localStorage.setItem("mediurg-bigfont", bigFont ? "1" : "0"); } catch {}
-  }, [bigFont]);
-
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
-  const toggleFont = () => setBigFont(f => !f);
-
-  const filteredProtocols = useMemo(() => {
-    if (protoFilter === "Tout") return PROTOCOLS;
-    return PROTOCOLS.filter(p => {
-      const isEnfant = p.code.includes("ENF") || p.titre.includes("Enfant");
-      const isAdulte = !isEnfant && p.titre.includes("Adulte");
-      const isTous   = !isEnfant && !isAdulte;
-      if (protoFilter === "Enfant") return isEnfant || isTous;
-      if (protoFilter === "Adulte") return isAdulte || isTous;
-      return true;
-    });
-  }, [protoFilter]);
 
   const filtered = useMemo(() => {
     const q = normalize(search.trim());
@@ -83,9 +57,6 @@ const App = () => {
                 <p>Pharmacologie d'urgence · SAUV · SMUR · SAU</p>
               </div>
             </div>
-            <button className={`font-toggle ${bigFont ? "font-toggle-active" : ""}`} onClick={toggleFont} aria-label={bigFont ? "Réduire la police" : "Agrandir la police"}>
-              A+
-            </button>
             <button className="theme-toggle" onClick={toggleTheme} aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}>
               {theme === "dark" ? (
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
@@ -136,7 +107,6 @@ const App = () => {
                     {CATEGORIES.map((c) => (
                       <button
                         key={c}
-                        data-cat={c}
                         className={`chip ${cat === c ? "chip-active" : ""}`}
                         onClick={() => setCat(c)}
                       >
@@ -182,50 +152,11 @@ const App = () => {
           )
         )}
         {page === "protocoles" && (
-          <>
-            <div className="proto-category-bar">
-              <button
-                className={`proto-category-tab ${protoCategory === "PISU" ? "proto-category-active" : ""}`}
-                onClick={() => setProtoCategory("PISU")}
-              >
-                PISU
-                <span className="proto-category-count">{filteredProtocols.length}</span>
-              </button>
-              <button
-                className={`proto-category-tab ${protoCategory === "incompatibilites" ? "proto-category-active" : ""}`}
-                onClick={() => setProtoCategory("incompatibilites")}
-              >
-                Incompatibilité Médicamenteuse
-              </button>
-            </div>
-
-            {protoCategory === "incompatibilites" && <IncompatibilityList />}
-
-            {protoCategory === "PISU" && (
-              <>
-                <div className="proto-filter-bar">
-                  {["Tout", "Adulte", "Enfant"].map(f => (
-                    <button
-                      key={f}
-                      className={`proto-filter-chip ${protoFilter === f ? "proto-filter-active" : ""}`}
-                      onClick={() => setProtoFilter(f)}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-                <div className="protocol-list">
-                  {filteredProtocols.map(p => (
-                    <ProtocolCard
-                      key={p.id}
-                      protocol={p}
-                      onDrugSearch={(name) => { setPage("medicaments"); setSearch(name); }}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </>
+          <div className="empty">
+            <div className="empty-icon">📋</div>
+            <p>Protocoles</p>
+            <small>Cette section est en cours de construction</small>
+          </div>
         )}
       </main>
 

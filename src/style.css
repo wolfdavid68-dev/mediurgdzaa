@@ -1806,8 +1806,8 @@ body {
   font-size: 14px;
 }
 
-.incompat-cell-empty {
-  background: rgba(22, 163, 74, 0.12);
+.incompat-cell-nodata {
+  cursor: pointer;
 }
 
 .incompat-cell-hit {
