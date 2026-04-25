@@ -290,7 +290,7 @@ const DrugCard = ({ drug }) => {
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                   </svg>
                   Débit PSE
-                  <span className="pse-conc-tag">{pse.conc}{pse.unite.includes("mg") ? " mg" : " µg"}/mL · seringue</span>
+                  <span className="pse-conc-tag">{pse.conc}{pse.unite.includes("mg") ? " mg" : pse.unite.includes("UI") ? " UI" : " µg"}/mL · seringue</span>
                 </div>
                 <div className="pse-body">
                   <div className="pse-input-row">

@@ -58,4 +58,10 @@ export const PSE = {
     conc: 1, unite: "mg/kg/h", min: 0.01, max: 0.05,
     steps: [0.02, 0.03, 0.04, 0.05],
   },
+
+  // ── ANTICOAGULANTS ────────────────────────────────────────
+  42: { // Héparine sodique — 25 000 UI qsp 50 mL NaCl → 500 UI/mL
+    conc: 500, unite: "UI/kg/h", min: 10, max: 25,
+    steps: [10, 15, 18, 20, 25],
+  },
 };
