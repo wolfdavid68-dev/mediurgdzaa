@@ -1157,7 +1157,7 @@ export const DRUGS = [
       ],
       p: ["0,01 mg/kg IV (max 0,2 mg/dose)"],
     },
-    prep: {solvant:"Ampoule pure (0,1 mg/mL)",volume_final:null,conc_finale:"0,1 mg/mL",conc_produit:0.1,unite:"mg",dose_kg:0.01,duree:"Bolus puis PSE entretien",stabilite:"24h à 25°C",dose_threshold:2,amp_low:4,vol_low:20,amp_high:8,vol_high:40,etapes:["Ampoule 0,5 mg/5 mL (0,1 mg/mL) — administrer pure","Produit final < 2 mg → prendre 4 ampoules soit 20 mL","Produit final ≥ 2 mg → prendre 8 ampoules soit 40 mL","Volume à injecter = produit final (mg) × 10"],notes:["Durée d'action plus courte que les BZD — surveiller réapparition de la sédation","Titration : 0,2 mg IVD → répéter 0,1 mg/min jusqu'à effet","PSE entretien : régler à dose efficace / heure"]},
+    prep: {solvant:"Ampoule pure (0,1 mg/mL)",volume_final:null,conc_finale:"0,1 mg/mL",unite:"mg",duree:"Bolus puis PSE entretien",stabilite:"24h à 25°C",dose_threshold:2,amp_low:4,vol_low:20,amp_high:8,vol_high:40,etapes:["Ampoule 0,5 mg/5 mL (0,1 mg/mL) — administrer pure","Produit final < 2 mg → prendre 4 ampoules soit 20 mL","Produit final ≥ 2 mg → prendre 8 ampoules soit 40 mL","Volume à injecter = produit final (mg) × 10"],notes:["Durée d'action plus courte que les BZD — surveiller réapparition de la sédation","Titration : 0,2 mg IVD → répéter 0,1 mg/min jusqu'à effet","PSE entretien : régler à dose efficace / heure"]},
   },
   {
     id: 30,

@@ -20,6 +20,7 @@ const DrugCard = ({ drug }) => {
   const [noteSaved, setNoteSaved] = useState(false);
   const [weight, setWeight] = useState("");
   const [pseTarget, setPseTarget] = useState("");
+  const [produitFinal, setProduitFinal] = useState("");
 
   // Charger la note depuis localStorage au montage
   useEffect(() => {
@@ -140,31 +141,49 @@ const DrugCard = ({ drug }) => {
       const renderPrepCalc = () => {
         if (!prep || !validKg) return null;
 
-        // Préparation conditionnelle selon seuil de dose (ex : Anexate)
-        if (prep.dose_threshold !== undefined && prep.dose_kg) {
-          const dose = +(prep.dose_kg * kg).toFixed(2);
-          const isHigh = dose >= prep.dose_threshold;
+        // Préparation par saisie directe du produit final (ex : Anexate)
+        if (prep.dose_threshold !== undefined) {
+          const pf = parseFloat(produitFinal);
+          const validPf = pf > 0;
+          const isHigh  = validPf && pf >= prep.dose_threshold;
           const ampCount = isHigh ? prep.amp_high : prep.amp_low;
-          const vol     = isHigh ? prep.vol_high  : prep.vol_low;
-          const injectMl = +(dose * 10).toFixed(1);
+          const vol      = isHigh ? prep.vol_high  : prep.vol_low;
+          const injectMl = validPf ? +(pf * 10).toFixed(1) : null;
           return (
             <div className="prep-calc-box">
               <div className="prep-calc-header">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
-                Pour {kg} kg
+                Calcul Anexate
               </div>
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Produit final</span>
-                <span className="prep-calc-val">{dose} {prep.unite}</span>
+                <input
+                  className="poso-calc-input"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  placeholder="mg"
+                  value={produitFinal}
+                  onChange={e => setProduitFinal(e.target.value)}
+                  style={{width:64}}
+                />
+                <span className="prep-calc-val" style={{marginLeft:4}}>mg</span>
+                {produitFinal && (
+                  <button className="poso-calc-clear" onClick={() => setProduitFinal("")}>×</button>
+                )}
               </div>
-              <div className="prep-calc-row">
-                <span className="prep-calc-step">Prendre</span>
-                <span className="prep-calc-val prep-calc-highlight">{ampCount} ampoules soit {vol} mL</span>
-              </div>
-              <div className="prep-calc-row">
-                <span className="prep-calc-step">Injecter</span>
-                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{injectMl} mL</span>
-              </div>
+              {validPf && (
+                <>
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">Prendre</span>
+                    <span className="prep-calc-val prep-calc-highlight">{ampCount} ampoules soit {vol} mL</span>
+                  </div>
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">Injecter</span>
+                    <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{injectMl} mL</span>
+                  </div>
+                </>
+              )}
             </div>
           );
         }
