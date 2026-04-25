@@ -144,46 +144,25 @@ const DrugCard = ({ drug }) => {
         // Préparation par saisie directe du produit final (ex : Anexate)
         if (prep.dose_threshold !== undefined) {
           const pf = parseFloat(produitFinal);
-          const validPf = pf > 0;
-          const isHigh  = validPf && pf >= prep.dose_threshold;
+          if (!pf || pf <= 0) return null;
+          const isHigh   = pf >= prep.dose_threshold;
           const ampCount = isHigh ? prep.amp_high : prep.amp_low;
           const vol      = isHigh ? prep.vol_high  : prep.vol_low;
-          const injectMl = validPf ? +(pf * 10).toFixed(1) : null;
+          const injectMl = +(pf * 10).toFixed(1);
           return (
             <div className="prep-calc-box">
               <div className="prep-calc-header">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
-                Calcul Anexate
+                Pour {pf} mg
               </div>
               <div className="prep-calc-row">
-                <span className="prep-calc-step">Produit final</span>
-                <input
-                  className="poso-calc-input"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  placeholder="mg"
-                  value={produitFinal}
-                  onChange={e => setProduitFinal(e.target.value)}
-                  style={{width:64}}
-                />
-                <span className="prep-calc-val" style={{marginLeft:4}}>mg</span>
-                {produitFinal && (
-                  <button className="poso-calc-clear" onClick={() => setProduitFinal("")}>×</button>
-                )}
+                <span className="prep-calc-step">Prendre</span>
+                <span className="prep-calc-val prep-calc-highlight">{ampCount} ampoules soit {vol} mL</span>
               </div>
-              {validPf && (
-                <>
-                  <div className="prep-calc-row">
-                    <span className="prep-calc-step">Prendre</span>
-                    <span className="prep-calc-val prep-calc-highlight">{ampCount} ampoules soit {vol} mL</span>
-                  </div>
-                  <div className="prep-calc-row">
-                    <span className="prep-calc-step">Injecter</span>
-                    <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{injectMl} mL</span>
-                  </div>
-                </>
-              )}
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Injecter</span>
+                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{injectMl} mL</span>
+              </div>
             </div>
           );
         }
@@ -237,27 +216,51 @@ const DrugCard = ({ drug }) => {
 
       return (
         <>
-          <div className="poso-calc">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span className="poso-calc-label">Poids patient</span>
-            <input
-              className="poso-calc-input"
-              type="number"
-              min="1"
-              max="300"
-              placeholder="kg"
-              value={weight}
-              onChange={e => setWeight(e.target.value)}
-            />
-            <span className="poso-calc-unit">kg</span>
-            {weight && (
-              <button className="poso-calc-clear" onClick={() => setWeight("")}>×</button>
-            )}
-          </div>
+          {prep?.dose_threshold !== undefined ? (
+            <div className="poso-calc">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span className="poso-calc-label">Produit final</span>
+              <input
+                className="poso-calc-input"
+                type="number"
+                min="0"
+                step="0.1"
+                placeholder="mg"
+                value={produitFinal}
+                onChange={e => setProduitFinal(e.target.value)}
+              />
+              <span className="poso-calc-unit">mg</span>
+              {produitFinal && (
+                <button className="poso-calc-clear" onClick={() => setProduitFinal("")}>×</button>
+              )}
+            </div>
+          ) : (
+            <div className="poso-calc">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span className="poso-calc-label">Poids patient</span>
+              <input
+                className="poso-calc-input"
+                type="number"
+                min="1"
+                max="300"
+                placeholder="kg"
+                value={weight}
+                onChange={e => setWeight(e.target.value)}
+              />
+              <span className="poso-calc-unit">kg</span>
+              {weight && (
+                <button className="poso-calc-clear" onClick={() => setWeight("")}>×</button>
+              )}
+            </div>
+          )}
 
           <div className="poso-grid">
             <div className="poso-box">
