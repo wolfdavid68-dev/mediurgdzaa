@@ -384,7 +384,7 @@ export const DRUGS = [
       ],
       p: ["ISR : 1,5-2 mg/kg IV", "Laryngospasme : 4 mg/kg IM"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1,dose_max_kg:1.5,duree:"Bolus ISR (< 5 sec)",stabilite:"Utiliser immédiatement",etapes:["Ampoule 200 mg/2 mL (100 mg/mL)","Diluer : 1 mL qsp 10 mL NaCl 0,9% → 10 mg/mL","Posologie : 1–1,5 mg/kg IV bolus strict"],notes:["CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie","Stupéfiant : tracer dans le cahier + conserver l'ampoule","Risque choc anaphylactique — avoir adrénaline à portée"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1,dose_max_kg:1.5,duree:"Bolus ISR (< 5 sec)",stabilite:"Utiliser immédiatement",etapes:["Ampoule 200 mg/2 mL (100 mg/mL)","Diluer : 1 mL qsp 10 mL NaCl 0,9% → 10 mg/mL","Posologie : 1 mg/kg IV bolus strict"],notes:["CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie","Stupéfiant : tracer dans le cahier + conserver l'ampoule","Risque choc anaphylactique — avoir adrénaline à portée"]},
   },
   {
     id: 10,
