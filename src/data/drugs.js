@@ -2801,7 +2801,7 @@ export const DRUGS = [
     commercial: "Octaplex",
     dci: "Concentré de complexe prothrombinique (CCP)",
     classe: "Médicament dérivé du sang / Facteurs II, VII, IX, X",
-    cat: "medicaments derives du sang",
+    cat: "Produits sanguins",
     svc: ["SAUV"],
     couleur: "#AF52DE",
     icon: "🩸",
