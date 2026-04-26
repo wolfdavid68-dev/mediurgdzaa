@@ -64,4 +64,10 @@ export const PSE = {
     conc: 416.7, unite: "UI/kg/h", min: 15, max: 25,
     steps: [15, 18, 20, 22, 25],
   },
+
+  // ── ANTIDOTES ─────────────────────────────────────────────
+  29: { // Anexate — ampoule pure 0,5 mg/5 mL = 0,1 mg/mL ; débit sans facteur poids
+    conc: 0.1, unite: "mg/h", min: 0.1, max: 1,
+    steps: [0.1, 0.2, 0.3, 0.5, 1],
+  },
 };

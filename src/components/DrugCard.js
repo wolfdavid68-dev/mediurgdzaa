@@ -87,8 +87,11 @@ const DrugCard = ({ drug }) => {
   };
 
   const calcDebit = (pse, dose, kg) => {
-    const d = parseFloat(dose), w = parseFloat(kg);
-    if (!d || !w || d <= 0 || w <= 0) return null;
+    const d = parseFloat(dose);
+    if (!d || d <= 0) return null;
+    if (pse.unite === "mg/h") return +(d / pse.conc).toFixed(2);
+    const w = parseFloat(kg);
+    if (!w || w <= 0) return null;
     if (pse.unite === "µg/kg/min") return +((d * w * 60) / pse.conc).toFixed(2);
     return +((d * w) / pse.conc).toFixed(2);
   };
@@ -379,7 +382,7 @@ const DrugCard = ({ drug }) => {
                     </>
                   ) : null}
 
-                  {validKg ? (
+                  {(validKg || pse.unite === "mg/h") ? (
                     <table className="pse-table">
                       <thead>
                         <tr>
