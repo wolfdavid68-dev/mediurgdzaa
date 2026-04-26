@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
 
 const TYPE_META = {
-  precipitation: { label: "Précipitation",       short: "P",  color: "#ef4444" },
-  inactivation:  { label: "Inactivation",         short: "I",  color: "#f97316" },
-  incompatible:  { label: "Incompatible",         short: "✕",  color: "#6b7280" },
-  pH:            { label: "Incompatibilité pH",   short: "pH", color: "#a855f7" },
-  compatible:    { label: "Compatible validé",    short: "✓",  color: "#16a34a" },
+  precipitation: { label: "Précipitation",                short: "P",  color: "#ef4444" },
+  inactivation:  { label: "Inactivation",                  short: "I",  color: "#f97316" },
+  incompatible:  { label: "Incompatible",                  short: "✕",  color: "#6b7280" },
+  pH:            { label: "Compatible — vigilance pH",     short: "pH", color: "#16a34a" },
+  compatible:    { label: "Compatible validé",             short: "✓",  color: "#16a34a" },
 };
 
 const buildMatrix = () => {
@@ -111,9 +111,9 @@ const IncompatibilityList = () => {
                     return (
                       <td key={colDrug.drug}
                         className={`incompat-cell incompat-cell-hit ${isSelected ? "incompat-cell-selected" : ""}`}
-                        style={{ background: meta.color + "cc" }}
+                        style={{ background: meta.color + "cc", textAlign:"center", color:"#fff", fontSize:9, fontWeight:800 }}
                         onClick={() => handleCell(rowDrug.drug, colDrug.drug)}
-                      />
+                      >{cell.type === "pH" ? "pH" : ""}</td>
                     );
                   }
                   if (isCompat) {
