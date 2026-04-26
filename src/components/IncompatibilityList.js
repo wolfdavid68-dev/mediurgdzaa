@@ -87,14 +87,18 @@ const IncompatibilityList = () => {
             </tr>
           </thead>
           <tbody>
-            {INCOMPATIBILITIES.map(rowDrug => (
+            {INCOMPATIBILITIES.map((rowDrug, rowIndex) => (
               <tr key={rowDrug.drug}>
                 <td className="incompat-row-head" style={{ borderLeft: `3px solid ${rowDrug.color}` }}>
                   <span className="incompat-row-name" style={{ color: rowDrug.color }}>{rowDrug.short}</span>
                   <span className="incompat-row-full">{rowDrug.drug}</span>
                   {rowDrug.exclusif && <span className="incompat-excl-badge">excl.</span>}
                 </td>
-                {INCOMPATIBILITIES.map(colDrug => {
+                {INCOMPATIBILITIES.map((colDrug, colIndex) => {
+                  // Triangle supérieur masqué
+                  if (colIndex > rowIndex) {
+                    return <td key={colDrug.drug} className="incompat-cell incompat-cell-upper" />;
+                  }
                   if (rowDrug.drug === colDrug.drug) {
                     return <td key={colDrug.drug} className="incompat-cell incompat-cell-self" />;
                   }
