@@ -1151,7 +1151,7 @@ export const DRUGS = [
     poso: {
       a: [
         "IVD : administrer PUR",
-        "Bolus 0,2 mg IVD puis 0,1 mg/min jusqu'à dose efficace",
+        "Bolus 0,2 mg IVD puis 0,1 mg/min jusqu'à dose efficace (max 2 mg)",
         "PSE entretien : dose efficace/heure",
         "Voies : VVP ou VVC",
       ],
