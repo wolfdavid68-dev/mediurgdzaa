@@ -3090,9 +3090,15 @@ export const DRUGS = [
       solvant: "G5% (préféré) ou NaCl 0,9%",
       volume_final: null,
       conc_finale: "200 mg/mL (pur)",
+      conc_produit: 200,
       unite: "mg",
       duree: "3 phases successives",
       stabilite: "Utiliser immédiatement après dilution",
+      phases: [
+        { label: "Phase 1", dose_kg: 150, duree: "60 min",  solvant_vol: 200  },
+        { label: "Phase 2", dose_kg: 50,  duree: "4h",      solvant_vol: 500  },
+        { label: "Phase 3", dose_kg: 100, duree: "16h",     solvant_vol: 1000 },
+      ],
       etapes: [
         "Phase 1 — 150 mg/kg dans 200 mL G5% → perfuser en 60 min",
         "Phase 2 — 50 mg/kg dans 500 mL G5% → perfuser en 4h",

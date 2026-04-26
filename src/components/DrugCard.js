@@ -172,6 +172,41 @@ const DrugCard = ({ drug }) => {
           );
         }
 
+        // Préparation multi-phases (ex : Hidonac)
+        if (prep.phases && prep.phases.length > 0) {
+          return (
+            <div className="prep-calc-box">
+              <div className="prep-calc-header">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+                Pour {kg} kg
+              </div>
+              {prep.phases.map((phase, i) => {
+                const dose   = +(phase.dose_kg * kg).toFixed(0);
+                const vol    = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
+                return (
+                  <div key={i} style={{marginTop: i > 0 ? 8 : 0, paddingTop: i > 0 ? 8 : 0, borderTop: i > 0 ? "1px solid var(--border)" : "none"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"var(--text-dim)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{phase.label} — {phase.duree}</div>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Dose</span>
+                      <span className="prep-calc-val">{dose} mg</span>
+                    </div>
+                    {vol !== null && (
+                      <div className="prep-calc-row">
+                        <span className="prep-calc-step">Prélever</span>
+                        <span className="prep-calc-val prep-calc-highlight">{vol} mL</span>
+                      </div>
+                    )}
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Diluer dans</span>
+                      <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{phase.solvant_vol} mL G5%</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
         if (!prep.dose_kg) return null;
         const dose = prep.dose_kg * kg;
         const doseMax = prep.dose_max_kg ? prep.dose_max_kg * kg : null;
