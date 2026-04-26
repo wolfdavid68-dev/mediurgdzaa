@@ -3096,12 +3096,12 @@ export const DRUGS = [
       duree: "3 phases successives",
       stabilite: "Utiliser immédiatement après dilution",
       phases: [
-        { label: "Phase 1", dose_kg: 150, duree: "60 min",  solvant_vol: 200  },
+        { label: "Phase 1", dose_kg: 150, duree: "60 min",  solvant_vol: 500  },
         { label: "Phase 2", dose_kg: 50,  duree: "4h",      solvant_vol: 500  },
         { label: "Phase 3", dose_kg: 100, duree: "16h",     solvant_vol: 1000 },
       ],
       etapes: [
-        "Phase 1 — 150 mg/kg dans 200 mL G5% → perfuser en 60 min",
+        "Phase 1 — 150 mg/kg dans 500 mL G5% → perfuser en 60 min",
         "Phase 2 — 50 mg/kg dans 500 mL G5% → perfuser en 4h",
         "Phase 3 — 100 mg/kg dans 1000 mL G5% → perfuser en 16h",
       ],
