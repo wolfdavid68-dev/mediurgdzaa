@@ -22,6 +22,7 @@ const DrugCard = ({ drug }) => {
   const [pseTarget, setPseTarget] = useState("");
   const [pseTarget2, setPseTarget2] = useState("");
   const [produitFinal, setProduitFinal] = useState("");
+  const [doseLibre, setDoseLibre] = useState("");
 
   // Charger la note depuis localStorage au montage
   useEffect(() => {
@@ -355,6 +356,37 @@ const DrugCard = ({ drug }) => {
               )}
 
               {renderPrepCalc()}
+
+              {prep.dose_calc && prep.conc_produit && (
+                <div className="prep-calc-box" style={{marginTop: 8}}>
+                  <div className="prep-calc-header">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Calcul dose libre
+                  </div>
+                  <div className="prep-calc-row" style={{alignItems:"center", gap:8}}>
+                    <span className="prep-calc-step">Dose</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="mg"
+                      value={doseLibre}
+                      onChange={e => setDoseLibre(e.target.value)}
+                      style={{width:80, padding:"3px 6px", borderRadius:6, border:"1px solid var(--border)", background:"var(--bg)", color:"var(--text)", fontSize:13}}
+                    />
+                    <span style={{fontSize:12, color:"var(--text-dim)"}}>mg</span>
+                    {doseLibre && <button style={{background:"transparent",border:"none",color:"var(--text-dim)",cursor:"pointer",fontSize:14}} onClick={() => setDoseLibre("")}>×</button>}
+                  </div>
+                  {doseLibre && parseFloat(doseLibre) > 0 && (
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Prélever</span>
+                      <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>
+                        {+(parseFloat(doseLibre) / prep.conc_produit).toFixed(2)} mL
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {prep.notes && prep.notes.length > 0 && (
                 <ul className="prep-notes">

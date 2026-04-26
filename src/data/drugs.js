@@ -3092,6 +3092,7 @@ export const DRUGS = [
       conc_finale: "200 mg/mL (pur)",
       conc_produit: 200,
       unite: "mg",
+      dose_calc: true,
       duree: "3 phases successives",
       stabilite: "Utiliser immédiatement après dilution",
       phases: [
