@@ -351,38 +351,32 @@ const DrugCard = ({ drug }) => {
                   <span className="pse-conc-tag">{pse.conc}{pse.unite.includes("mg") ? " mg" : pse.unite.includes("UI") ? " UI" : " µg"}/mL · seringue</span>
                 </div>
                 <div className="pse-body">
-                  <div className="pse-input-row">
-                    <span className="pse-input-label">Dose cible</span>
-                    <input
-                      className="pse-input"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder={pse.min}
-                      value={pseTarget}
-                      onChange={e => setPseTarget(e.target.value)}
-                    />
-                    <span className="pse-unit">{pse.unite}</span>
-                    <span className="pse-input-label" style={{marginLeft: 4}}>plage {pse.min}–{pse.max}</span>
-                  </div>
-
-                  {debit ? (
+                  {!pse.extra && (
                     <>
-                      <div className="pse-result-box">
-                        <span className="pse-result-label">Débit</span>
-                        <span className="pse-result-value">{debit}</span>
-                        <span className="pse-result-unit">mL/h</span>
-                        {outRange && <span className="pse-range-warn">⚠ hors plage</span>}
+                      <div className="pse-input-row">
+                        <span className="pse-input-label">Dose cible</span>
+                        <input
+                          className="pse-input"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder={pse.min}
+                          value={pseTarget}
+                          onChange={e => setPseTarget(e.target.value)}
+                        />
+                        <span className="pse-unit">{pse.unite}</span>
+                        <span className="pse-input-label" style={{marginLeft: 4}}>plage {pse.min}–{pse.max}</span>
                       </div>
-                      {pse.unite === "UI/kg/h" && (
-                        <div className="pse-result-box" style={{marginTop:4}}>
-                          <span className="pse-result-label">Dose/24h</span>
-                          <span className="pse-result-value">{Math.round(parseFloat(pseTarget) * parseFloat(weight) * 24)}</span>
-                          <span className="pse-result-unit">UI/24h</span>
+                      {debit && (
+                        <div className="pse-result-box">
+                          <span className="pse-result-label">Débit</span>
+                          <span className="pse-result-value">{debit}</span>
+                          <span className="pse-result-unit">mL/h</span>
+                          {outRange && <span className="pse-range-warn">⚠ hors plage</span>}
                         </div>
                       )}
                     </>
-                  ) : null}
+                  )}
 
                   {(validKg || pse.unite === "mg/h") ? (
                     <table className="pse-table">
