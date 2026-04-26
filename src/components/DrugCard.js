@@ -407,9 +407,7 @@ const DrugCard = ({ drug }) => {
                         })}
                       </tbody>
                     </table>
-                  ) : (
-                    <div className="pse-no-weight">Entrez le poids patient pour afficher le tableau de référence</div>
-                  )}
+                  ) : null}
                 </div>
 
                 {pse.extra && (() => {
