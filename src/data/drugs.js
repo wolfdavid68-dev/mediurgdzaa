@@ -3074,13 +3074,13 @@ export const DRUGS = [
     ],
     poso: {
       a: [
-        "Phase 1 : 150 mg/kg IV en 15–60 min",
+        "Phase 1 : 150 mg/kg IV en 60 min",
         "Phase 2 : 50 mg/kg IV en 4h",
         "Phase 3 : 100 mg/kg IV en 16h",
         "Voie : VVP ou VVC — G5% préféré",
       ],
       p: [
-        "Phase 1 : 150 mg/kg IV en 15–60 min",
+        "Phase 1 : 150 mg/kg IV en 60 min",
         "Phase 2 : 50 mg/kg IV en 4h",
         "Phase 3 : 100 mg/kg IV en 16h",
         "Volumes adaptés au poids (< 20 kg : réduire volume solvant)",
@@ -3094,7 +3094,7 @@ export const DRUGS = [
       duree: "3 phases successives",
       stabilite: "Utiliser immédiatement après dilution",
       etapes: [
-        "Phase 1 — 150 mg/kg dans 200 mL G5% → perfuser en 15–60 min",
+        "Phase 1 — 150 mg/kg dans 200 mL G5% → perfuser en 60 min",
         "Phase 2 — 50 mg/kg dans 500 mL G5% → perfuser en 4h",
         "Phase 3 — 100 mg/kg dans 1000 mL G5% → perfuser en 16h",
       ],
