@@ -180,12 +180,6 @@ const App = () => {
           )
         )}
 
-        {page === "kits" && (
-          <div className="protocol-list">
-            {PREP_KITS.map(k => <PrepKitCard key={k.id} kit={k} />)}
-          </div>
-        )}
-
         {page === "protocoles" && (
           <>
             <div className="proto-category-bar">
@@ -202,9 +196,22 @@ const App = () => {
               >
                 Incompatibilité Médicamenteuse
               </button>
+              <button
+                className={`proto-category-tab ${protoCategory === "kits" ? "proto-category-active" : ""}`}
+                onClick={() => setProtoCategory("kits")}
+              >
+                Kits de préparation
+                <span className="proto-category-count">{PREP_KITS.length}</span>
+              </button>
             </div>
 
             {protoCategory === "incompatibilites" && <IncompatibilityList />}
+
+            {protoCategory === "kits" && (
+              <div className="protocol-list">
+                {PREP_KITS.map(k => <PrepKitCard key={k.id} kit={k} />)}
+              </div>
+            )}
 
             {protoCategory === "PISU" && (
               <>
@@ -243,18 +250,6 @@ const App = () => {
             <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
           </svg>
           <span>Médicaments</span>
-        </button>
-        <button
-          className={`bottom-tab ${page === "kits" ? "bottom-tab-active" : ""}`}
-          onClick={() => setPage("kits")}
-        >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <rect x="3" y="7" width="18" height="13" rx="2" />
-            <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            <line x1="12" y1="11" x2="12" y2="17" />
-            <line x1="9" y1="14" x2="15" y2="14" />
-          </svg>
-          <span>Kits prép.</span>
         </button>
         <button
           className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
