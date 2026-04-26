@@ -3044,4 +3044,66 @@ export const DRUGS = [
     },
     prep: {solvant:"NaCl 0,9%",volume_final:200,conc_finale:"25 mg/mL",conc_produit:5000,unite:"mg",dose_kg:70,duree:"15 min",stabilite:"Utiliser dans les 6h après reconstitution",etapes:["Flacon lyophilisé 5 g — injecter 200 mL NaCl 0,9 % fourni","Retourner doucement (ne pas agiter)","Perfuser en 15 min","En cas d'ACR : passer en bolus IV rapide"],notes:["Colore urines et peau en rouge : normal — prévenir l'équipe","Ne pas administrer en même temps que diazépam ou thiopental (incompatibilité)","Deuxième flacon possible si réponse insuffisante ou ACR réfractaire"]},
   },
+  {
+    id: 79,
+    nom: "HIDONAC",
+    commercial: "Acétylcystéine",
+    dci: "Acétylcystéine (N-acétylcystéine)",
+    classe: "Antidote / Hépatoprotecteur",
+    cat: "Antidotes",
+    svc: ["SAUV", "SMUR", "SAU"],
+    couleur: "#0EA5E9",
+    icon: "🧪",
+    desc: "Antidote de référence du surdosage au paracétamol. Précurseur du glutathion hépatique. Efficacité maximale dans les 8–10 premières heures. Administré en 3 phases successives. Contacter le centre antipoison.",
+    indic: [
+      "Intoxication au paracétamol (surdosage volontaire ou accidentel)",
+      "Hépatoprotection en cas de surdosage paracétamol",
+      "Prévention de la néphrotoxicité des produits de contraste iodés",
+    ],
+    ci: [
+      "Allergie à l'acétylcystéine",
+      "Relative : asthme sévère (risque de bronchospasme — peut être administré sous surveillance rapprochée)",
+    ],
+    ei: [
+      "Réaction anaphylactoïde : flush, urticaire, prurit, bronchospasme (surtout phase 1 — dose-dépendant)",
+      "Nausées, vomissements",
+      "Tachycardie, hypotension transitoire",
+    ],
+    cond: [
+      "Ampoule 5 g / 25 mL (200 mg/mL)",
+    ],
+    poso: {
+      a: [
+        "Phase 1 : 150 mg/kg IV en 15–60 min",
+        "Phase 2 : 50 mg/kg IV en 4h",
+        "Phase 3 : 100 mg/kg IV en 16h",
+        "Voie : VVP ou VVC — G5% préféré",
+      ],
+      p: [
+        "Phase 1 : 150 mg/kg IV en 15–60 min",
+        "Phase 2 : 50 mg/kg IV en 4h",
+        "Phase 3 : 100 mg/kg IV en 16h",
+        "Volumes adaptés au poids (< 20 kg : réduire volume solvant)",
+      ],
+    },
+    prep: {
+      solvant: "G5% (préféré) ou NaCl 0,9%",
+      volume_final: null,
+      conc_finale: "200 mg/mL (pur)",
+      unite: "mg",
+      duree: "3 phases successives",
+      stabilite: "Utiliser immédiatement après dilution",
+      etapes: [
+        "Phase 1 — 150 mg/kg dans 200 mL G5% → perfuser en 15–60 min",
+        "Phase 2 — 50 mg/kg dans 500 mL G5% → perfuser en 4h",
+        "Phase 3 — 100 mg/kg dans 1000 mL G5% → perfuser en 16h",
+      ],
+      notes: [
+        "Réaction anaphylactoïde : arrêter la perfusion, antihistaminique IV, reprendre à débit réduit après résolution",
+        "Initier le plus tôt possible (efficacité maximale < 8–10h post-ingestion)",
+        "Contacter le centre antipoison : 0800 59 59 00",
+        "En cas d'insuffisance hépatique : ne pas réduire les doses",
+      ],
+    },
+  },
 ];
