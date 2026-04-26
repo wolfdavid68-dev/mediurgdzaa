@@ -20,6 +20,7 @@ const DrugCard = ({ drug }) => {
   const [noteSaved, setNoteSaved] = useState(false);
   const [weight, setWeight] = useState("");
   const [pseTarget, setPseTarget] = useState("");
+  const [pseTarget2, setPseTarget2] = useState("");
   const [produitFinal, setProduitFinal] = useState("");
 
   // Charger la note depuis localStorage au montage
@@ -90,6 +91,7 @@ const DrugCard = ({ drug }) => {
     const d = parseFloat(dose);
     if (!d || d <= 0) return null;
     if (pse.unite === "mg/h") return +(d / pse.conc).toFixed(2);
+    if (pse.unite === "UI/24h") return +(d / (pse.conc * 24)).toFixed(2);
     const w = parseFloat(kg);
     if (!w || w <= 0) return null;
     if (pse.unite === "µg/kg/min") return +((d * w * 60) / pse.conc).toFixed(2);
@@ -409,6 +411,59 @@ const DrugCard = ({ drug }) => {
                     <div className="pse-no-weight">Entrez le poids patient pour afficher le tableau de référence</div>
                   )}
                 </div>
+
+                {pse.extra && (() => {
+                  const ex = { unite: pse.extra.unite, conc: pse.conc };
+                  const debit2 = calcDebit(ex, pseTarget2, null);
+                  const inRange2 = debit2 && parseFloat(pseTarget2) >= pse.extra.min && parseFloat(pseTarget2) <= pse.extra.max;
+                  const outRange2 = debit2 && (parseFloat(pseTarget2) < pse.extra.min || parseFloat(pseTarget2) > pse.extra.max);
+                  return (
+                    <div style={{marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--border)"}}>
+                      <div className="pse-input-row">
+                        <span className="pse-input-label">Dose cible</span>
+                        <input
+                          className="pse-input"
+                          type="number"
+                          min="0"
+                          step="500"
+                          placeholder={pse.extra.min}
+                          value={pseTarget2}
+                          onChange={e => setPseTarget2(e.target.value)}
+                        />
+                        <span className="pse-unit">{pse.extra.unite}</span>
+                        <span className="pse-input-label" style={{marginLeft: 4}}>plage {pse.extra.min}–{pse.extra.max}</span>
+                      </div>
+                      {debit2 && (
+                        <div className="pse-result-box">
+                          <span className="pse-result-label">Débit</span>
+                          <span className="pse-result-value">{debit2}</span>
+                          <span className="pse-result-unit">mL/h</span>
+                          {outRange2 && <span className="pse-range-warn">⚠ hors plage</span>}
+                        </div>
+                      )}
+                      <table className="pse-table">
+                        <thead>
+                          <tr>
+                            <th>Dose ({pse.extra.unite})</th>
+                            <th>mL/h</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pse.extra.steps.map(step => {
+                            const d = calcDebit(ex, step, null);
+                            const isActive = parseFloat(pseTarget2) === step;
+                            return (
+                              <tr key={step} className={isActive ? "pse-row-active" : ""}>
+                                <td>{step.toLocaleString("fr-FR")}</td>
+                                <td>{d}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
               </div>
             );
           })()}

@@ -63,6 +63,7 @@ export const PSE = {
   42: { // Héparine — 4 mL HNF 5000 UI/mL + 44 mL NaCl 0,9% → 20 000 UI / 48 mL = 416,7 UI/mL
     conc: 416.7, unite: "UI/kg/h", min: 15, max: 25,
     steps: [15, 18, 20, 22, 25],
+    extra: { unite: "UI/24h", min: 10000, max: 40000, steps: [10000, 15000, 20000, 25000, 30000, 35000, 40000] },
   },
 
   // ── ANTIDOTES ─────────────────────────────────────────────
