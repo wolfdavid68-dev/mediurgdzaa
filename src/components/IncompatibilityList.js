@@ -64,6 +64,14 @@ const IncompatibilityList = () => {
         </span>
       </div>
 
+      {/* Scroll hint */}
+      <div className="incompat-scroll-hint">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+        Faites défiler horizontalement pour voir toute la table
+      </div>
+
       {/* Matrice */}
       <div className="incompat-matrix-scroll">
         <table className="incompat-matrix">
