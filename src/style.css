@@ -1725,11 +1725,12 @@ body {
 
 /* Matrice */
 .incompat-matrix-scroll {
-  overflow-x: auto;
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border);
   border-radius: 10px;
   margin-bottom: 12px;
+  max-height: calc(100vh - 220px);
   position: relative;
 }
 
