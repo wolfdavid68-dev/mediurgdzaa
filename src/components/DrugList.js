@@ -3,7 +3,7 @@ import DrugCard from "./DrugCard";
 
 const DrugList = ({ drugs, favorites, onToggleFavorite, onOpen }) => {
   return (
-    <div>
+    <div className="drug-list-grid">
       {drugs.map((drug) => (
         <DrugCard
           key={drug.id}

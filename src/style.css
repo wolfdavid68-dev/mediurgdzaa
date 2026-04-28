@@ -535,6 +535,49 @@ body {
 [data-theme="light"] .chip-fav.chip-active { background: rgba(234, 179, 8, 0.18) !important; color: #92400e !important; }
 [data-theme="light"] .chip-count { background: rgba(234, 179, 8, 0.30); color: #92400e; }
 
+/* ── Layout 2 colonnes — tablette paysage / desktop ───────── */
+@media (min-width: 900px) {
+  .main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .drug-list-grid,
+  .protocol-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .drug-list-grid > .drug-card-open,
+  .protocol-list > .protocol-card-open {
+    grid-column: 1 / -1;
+  }
+
+  .recent-section .drug-list-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .drug-list-grid,
+  .protocol-list {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .drug-list-grid > .drug-card-open,
+  .protocol-list > .protocol-card-open {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Section Récents */
 .recent-section {
   margin-bottom: 18px;
