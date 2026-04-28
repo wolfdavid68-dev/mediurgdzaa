@@ -1079,7 +1079,7 @@ export const DRUGS = [
   {
     id: 28,
     nom: "RISORDAN",
-    commercial: "Trinitrine",
+    commercial: "Isosorbide",
     dci: "Dinitrate d'isosorbide",
     classe: "Dérivé nitré / Vasodilatateur",
     cat: "Cardiologie",
