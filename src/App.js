@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { DRUGS } from "./data/drugs";
 import { PROTOCOLS } from "./data/protocols";
 import { PREP_KITS } from "./data/prepKits";
+import { ALIASES } from "./data/aliases";
 import DrugList from "./components/DrugList";
 import ProtocolCard from "./components/ProtocolCard";
 import IncompatibilityList from "./components/IncompatibilityList";
@@ -100,14 +101,24 @@ const App = () => {
 
   const filtered = useMemo(() => {
     const q = normalize(search.trim());
+
+    // Trouve toutes les cibles d'alias dont la clé contient (ou est contenue dans) la requête
+    const aliasTargets = q
+      ? Object.entries(ALIASES)
+          .filter(([alias]) => {
+            const a = normalize(alias);
+            return a.includes(q) || q.includes(a);
+          })
+          .map(([, target]) => normalize(target))
+      : [];
+
     return DRUGS
       .filter((d) => {
-        const matchQ =
-          !q ||
-          normalize(d.nom).includes(q) ||
-          normalize(d.commercial).includes(q) ||
-          normalize(d.dci).includes(q) ||
-          normalize(d.classe).includes(q);
+        const fields = [d.nom, d.commercial, d.dci, d.classe].map(normalize);
+        const matchDirect = !q || fields.some(f => f.includes(q));
+        const matchAlias = aliasTargets.length > 0
+          && aliasTargets.some(t => fields.some(f => f.includes(t)));
+        const matchQ = matchDirect || matchAlias;
         const matchC = cat === "Tout" || d.cat === cat;
         const matchS = svc === "Tout" || d.svc.includes(svc);
         const matchF = !showFavoritesOnly || favorites.has(d.id);
