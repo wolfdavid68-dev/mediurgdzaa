@@ -7,7 +7,7 @@ export const INCOMPATIBILITIES = [
       { with: "Cisatracurium (Nimbex®)",               type: "pH",           note: "Alcalin dégrade le cisatracurium" },
       { with: "Ceftazidime (Fortum®)",                  type: "pH",           note: "" },
     ],
-    compatibleWith: ["Dobutamine®", "Noradrénaline®", "Isoprénaline (Isuprel®)", "Lidocaïne®"],
+    compatibleWith: ["Dobutamine®", "Noradrénaline®", "Amiodarone (Cordarone®)", "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)"],
     solvant: "G5 % ou NaCl 0,9 % — pH acide impératif",
   },
   {
@@ -20,7 +20,7 @@ export const INCOMPATIBILITIES = [
       { with: "Cisatracurium (Nimbex®)",                type: "pH",           note: "" },
       { with: "Ceftazidime (Fortum®)",                  type: "pH",           note: "" },
     ],
-    compatibleWith: ["Adrénaline®", "Noradrénaline®", "Isoprénaline (Isuprel®)"],
+    compatibleWith: ["Adrénaline®", "Noradrénaline®", "Amiodarone (Cordarone®)", "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)"],
     solvant: "G5 % ou NaCl 0,9 %",
   },
   {
@@ -31,7 +31,7 @@ export const INCOMPATIBILITIES = [
       { with: "Cisatracurium (Nimbex®)",                type: "pH",           note: "" },
       { with: "Ceftazidime (Fortum®)",                  type: "pH",           note: "" },
     ],
-    compatibleWith: ["Adrénaline®", "Dobutamine®", "Isoprénaline (Isuprel®)"],
+    compatibleWith: ["Adrénaline®", "Dobutamine®", "Amiodarone (Cordarone®)", "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)"],
     solvant: "G5 % ou NaCl 0,9 % — pH acide impératif",
   },
   {
@@ -45,7 +45,7 @@ export const INCOMPATIBILITIES = [
       { with: "Cisatracurium (Nimbex®)",                type: "pH",           note: "" },
       { with: "Ceftazidime (Fortum®)",                  type: "pH",           note: "" },
     ],
-    compatibleWith: [],
+    compatibleWith: ["Adrénaline®", "Dobutamine®", "Noradrénaline®", "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)"],
     solvant: "G5 % uniquement — NaCl 0,9 % contre-indiqué (précipitation)",
   },
   {
@@ -53,7 +53,7 @@ export const INCOMPATIBILITIES = [
     short: "Isopré.",
     color: "#ec4899",
     items: [],
-    compatibleWith: ["Adrénaline®", "Dobutamine®", "Noradrénaline®"],
+    compatibleWith: ["Adrénaline®", "Dobutamine®", "Noradrénaline®", "Amiodarone (Cordarone®)", "Lidocaïne®", "Milrinone (Corotrope®)"],
     solvant: "G5 % ou NaCl 0,9 %",
   },
   {
@@ -61,7 +61,7 @@ export const INCOMPATIBILITIES = [
     short: "Lido.",
     color: "#6366f1",
     items: [],
-    compatibleWith: ["Adrénaline®", "Dobutamine®", "Noradrénaline®"],
+    compatibleWith: ["Adrénaline®", "Dobutamine®", "Noradrénaline®", "Amiodarone (Cordarone®)", "Isoprénaline (Isuprel®)", "Milrinone (Corotrope®)"],
     solvant: "G5 % ou NaCl 0,9 %",
   },
   {
@@ -71,7 +71,7 @@ export const INCOMPATIBILITIES = [
     items: [
       { with: "Furosémide (Lasilix®)",                  type: "precipitation", note: "" },
     ],
-    compatibleWith: ["Dobutamine®"],
+    compatibleWith: ["Adrénaline®", "Dobutamine®", "Noradrénaline®", "Amiodarone (Cordarone®)", "Isoprénaline (Isuprel®)", "Lidocaïne®"],
     solvant: "G5 % ou NaCl 0,9 %",
   },
   {
