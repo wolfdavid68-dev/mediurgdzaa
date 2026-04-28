@@ -1084,6 +1084,46 @@ body {
   stroke: #fbbf24;
 }
 
+/* ── Mode CLAIR : couleurs plus sombres pour la lisibilité ── */
+[data-theme="light"] .prep-chip-stab {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.10);
+  border-color: rgba(22, 163, 74, 0.35);
+}
+
+[data-theme="light"] .prep-chip-debit {
+  color: #6d28d9;
+  background: rgba(109, 40, 217, 0.08);
+  border-color: rgba(109, 40, 217, 0.30);
+}
+
+[data-theme="light"] .prep-calc-box {
+  background: rgba(29, 78, 216, 0.06);
+  border-bottom-color: rgba(29, 78, 216, 0.25);
+  border-top-color: rgba(29, 78, 216, 0.25);
+}
+
+[data-theme="light"] .prep-calc-header {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-calc-step {
+  color: #1d4ed8;
+  opacity: 1;
+}
+
+[data-theme="light"] .prep-calc-highlight {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-note-item {
+  color: #92400e;
+}
+
+[data-theme="light"] .prep-note-item svg {
+  stroke: #b45309;
+}
+
 /* ── Empty state ────────────────────────────────────────── */
 
 .empty { padding: clamp(40px, 8vw, 80px) 20px; text-align: center; }
