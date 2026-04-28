@@ -230,7 +230,7 @@ const DrugCard = ({ drug }) => {
             <div className="prep-calc-row">
               <span className="prep-calc-step">Prélever</span>
               <span className="prep-calc-val prep-calc-highlight">
-                {prep.prelever_total ? `${prep.volume_final} mL du produit` : `${volLabel} du produit`}
+                {prep.prelever_total ? `${prep.prelever_vol ?? prep.volume_final} mL du produit` : `${volLabel} du produit`}
               </span>
             </div>
             {prep.prelever_total && (

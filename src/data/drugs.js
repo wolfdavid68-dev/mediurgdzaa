@@ -374,7 +374,7 @@ export const DRUGS = [
       "Hypertonie massétérine",
       "Hyperthermie maligne (rare)",
     ],
-    cond: ["Ampoule 100 mg/2 mL"],
+    cond: ["Ampoule 100 mg/2 mL (50 mg/mL)"],
     poso: {
       a: [
         "IVD en bolus à l'induction",
@@ -384,7 +384,7 @@ export const DRUGS = [
       ],
       p: ["ISR : 1,5-2 mg/kg IV", "Laryngospasme : 4 mg/kg IM"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1,duree:"Bolus ISR (< 5 sec)",stabilite:"Utiliser immédiatement",prelever_total:true,etapes:["Ampoule 200 mg/2 mL (100 mg/mL)","Diluer : 1 mL qsp 10 mL NaCl 0,9% → 10 mg/mL","Posologie : 1 mg/kg IV bolus strict"],notes:["CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie","Stupéfiant : tracer dans le cahier + conserver l'ampoule","Risque choc anaphylactique — avoir adrénaline à portée"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1,duree:"Bolus ISR (< 5 sec)",stabilite:"Utiliser immédiatement",prelever_total:true,prelever_vol:2,etapes:["Ampoule 100 mg/2 mL (50 mg/mL)","Diluer : 2 mL d'ampoule qsp 10 mL NaCl 0,9% → 10 mg/mL","Posologie : 1 mg/kg IV bolus strict"],notes:["CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie","Stupéfiant : tracer dans le cahier + conserver l'ampoule","Risque choc anaphylactique — avoir adrénaline à portée"]},
   },
   {
     id: 10,
@@ -450,7 +450,7 @@ export const DRUGS = [
       ],
       p: ["0,1 mg/kg IV"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:20,conc_finale:"1 mg/mL",conc_produit:1,unite:"mg",dose_kg:0.15,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",prelever_total:true,etapes:["Ampoule 20 mg/10 mL (2 mg/mL)","Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL","Posologie : 0,15 mg/kg IV"],notes:["Administrer dilué pour éviter l'allergie","Pas d'hyperkaliémie — alternative à la Célocurine"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:20,conc_finale:"1 mg/mL",conc_produit:1,unite:"mg",dose_kg:0.15,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",prelever_total:true,prelever_vol:10,etapes:["Ampoule 20 mg/10 mL (2 mg/mL)","Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL","Posologie : 0,15 mg/kg IV"],notes:["Administrer dilué pour éviter l'allergie","Pas d'hyperkaliémie — alternative à la Célocurine"]},
   },
   {
     id: 12,
