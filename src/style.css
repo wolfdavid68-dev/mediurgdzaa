@@ -503,10 +503,10 @@ body {
   color: #ca8a04;
 }
 
-/* Filtre Favoris — même style que les chips catégorie (jaune ambre) */
+/* Filtre Favoris — même style que les chips catégorie (fond page, contour jaune) */
 .chip-fav {
-  background: #EAB308;
-  color: #1a1a2e;
+  background: var(--card);
+  color: #EAB308;
   border-color: #EAB308;
 }
 
