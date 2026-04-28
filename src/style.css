@@ -459,8 +459,12 @@ body {
 }
 .drug-classe {
   font-size: clamp(10px, 1.1vw, 12px);
-  color: var(--text-mute);
+  color: var(--text-dim);
   font-style: italic;
+}
+
+[data-theme="light"] .drug-classe {
+  color: #4b5563;
 }
 
 .badge {
