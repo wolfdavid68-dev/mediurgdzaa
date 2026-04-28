@@ -450,7 +450,7 @@ export const DRUGS = [
       ],
       p: ["0,1 mg/kg IV"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"2 mg/mL (pur)",conc_produit:2,unite:"mg",dose_kg:0.15,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 20 mg/10 mL (2 mg/mL) — utiliser pure pour bolus","PSE entretien : pas de dilution nécessaire (2 mg/mL)","Régler IVSE selon µg/kg/min cible"],notes:["Administrer dilué pour éviter l'allergie","Pas d'hyperkaliémie — alternative à la Célocurine"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:20,conc_finale:"1 mg/mL",conc_produit:1,unite:"mg",dose_kg:0.15,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",prelever_total:true,etapes:["Ampoule 20 mg/10 mL (2 mg/mL)","Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL","Posologie : 0,15 mg/kg IV"],notes:["Administrer dilué pour éviter l'allergie","Pas d'hyperkaliémie — alternative à la Célocurine"]},
   },
   {
     id: 12,
