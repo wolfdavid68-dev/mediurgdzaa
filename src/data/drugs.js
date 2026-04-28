@@ -2010,6 +2010,7 @@ export const DRUGS = [
     indic: [
       "Sepsis sévère à Gram négatifs",
       "Infections nosocomiales sévères",
+      "Sepsis urinaire",
       "Association β-lactamines dans le sepsis",
     ],
     ci: [
@@ -2025,16 +2026,19 @@ export const DRUGS = [
     cond: ["Flacon 500 mg, 1 g"],
     poso: {
       a: [
-        "Dilution : NaCl 0,9% ou G5%",
-        "Jusqu'à 1 g → 50 mL",
-        "> 1 g → 100 mL",
-        "IVL en 30 min (PSE pour 50 mL, pompe pour 100 mL)",
-        "Dose : 20-30 mg/kg/j IV",
+        "ADULTE : Perfusion 30 min dans G5%",
+        "Dose < 1500 mg → 250 mL G5%",
+        "Dose > 1500 mg → 500 mL G5%",
+        "Dose : 20-30 mg/kg en dose unique journalière",
         "Voies : VVP ou VVC",
       ],
-      p: ["15-20 mg/kg/j IV (dose unique)"],
+      p: [
+        "PÉDIATRIE : Dilution NaCl 0,9% ou G5% — concentration max 5 mg/mL",
+        "Mini-perfusion sur 30–60 min",
+        "Dose : 15-20 mg/kg/j IV (dose unique)",
+      ],
     },
-    prep: {solvant:"NaCl 0,9% ou G5%",volume_final:50,conc_finale:"Variable selon dose",conc_produit:250,unite:"mg",dose_kg:15,dose_max_kg:20,duree:"30 min (PSE)",stabilite:"Stable 24h à 25°C",etapes:["Flacon 500 mg/4 mL ou 1 g/4 mL","Jusqu'à 1 g : diluer dans 50 mL NaCl 0,9% / G5%","Si > 1 g : diluer dans 100 mL — perfusion 30 min via PSE"],notes:["Néphrotoxique et ototoxique — surveillance créatinine","Pic sérique > 64 mg/L (efficacité) — résiduelle < 2,5 mg/L (sécurité)","Deux concentrations différentes : vérifier le flacon"]},
+    prep: {solvant:"G5% (adulte) — NaCl 0,9% ou G5% (pédiatrie)",volume_final:250,conc_finale:"Variable selon dose",conc_produit:250,unite:"mg",dose_kg:20,dose_max_kg:30,duree:"30 min (adulte) / 30–60 min (pédiatrie)",stabilite:"Stable 24h à 25°C",etapes:["Flacon 500 mg ou 1 g","ADULTE — dose < 1500 mg : diluer dans 250 mL G5%","ADULTE — dose > 1500 mg : diluer dans 500 mL G5%","PÉDIATRIE : dilution NaCl 0,9% ou G5% — conc max 5 mg/mL, mini-perf 30–60 min","Perfusion IV en 30 min (adulte)"],notes:["Néphrotoxique et ototoxique — surveillance créatinine","Pic sérique > 64 mg/L (efficacité) — résiduelle < 2,5 mg/L (sécurité)","Deux concentrations différentes : vérifier le flacon","Dose unique journalière en monoprise"]},
   },
   {
     id: 53,
