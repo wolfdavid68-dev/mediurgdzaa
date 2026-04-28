@@ -464,6 +464,96 @@ body {
   font-weight: 500;
 }
 
+/* Étoile favoris sur la card médicament */
+.drug-favorite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 18px;
+  color: #94a3b8;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 4px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.drug-favorite:hover {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  transform: scale(1.1);
+}
+
+.drug-favorite-active {
+  color: #eab308;
+}
+
+.drug-favorite-active:hover {
+  color: #ca8a04;
+}
+
+[data-theme="light"] .drug-favorite {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .drug-favorite-active {
+  color: #ca8a04;
+}
+
+/* Filtre Favoris */
+.chip-fav {
+  border-color: rgba(234, 179, 8, 0.4) !important;
+  color: #eab308 !important;
+}
+
+.chip-fav.chip-active {
+  background: rgba(234, 179, 8, 0.20) !important;
+  border-color: #eab308 !important;
+  color: #eab308 !important;
+}
+
+.chip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: rgba(234, 179, 8, 0.30);
+  color: #eab308;
+  font-size: 10px;
+  font-weight: 800;
+  margin-left: 4px;
+  line-height: 1;
+}
+
+[data-theme="light"] .chip-fav { color: #b45309 !important; }
+[data-theme="light"] .chip-fav.chip-active { background: rgba(234, 179, 8, 0.18) !important; color: #92400e !important; }
+[data-theme="light"] .chip-count { background: rgba(234, 179, 8, 0.30); color: #92400e; }
+
+/* Section Récents */
+.recent-section {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.recent-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  padding: 4px 0 8px;
+}
+
 .offline-badge {
   display: inline-flex;
   align-items: center;

@@ -28,6 +28,36 @@ const App = () => {
   });
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const raw = localStorage.getItem("mediurg-favorites");
+      return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch { return new Set(); }
+  });
+  const [history, setHistory] = useState(() => {
+    try {
+      const raw = localStorage.getItem("mediurg-history");
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  const toggleFavorite = (id) => {
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      try { localStorage.setItem("mediurg-favorites", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
+
+  const addToHistory = (id) => {
+    setHistory(prev => {
+      const next = [id, ...prev.filter(x => x !== id)].slice(0, 5);
+      try { localStorage.setItem("mediurg-history", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -80,10 +110,16 @@ const App = () => {
           normalize(d.classe).includes(q);
         const matchC = cat === "Tout" || d.cat === cat;
         const matchS = svc === "Tout" || d.svc.includes(svc);
-        return matchQ && matchC && matchS;
+        const matchF = !showFavoritesOnly || favorites.has(d.id);
+        return matchQ && matchC && matchS && matchF;
       })
       .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
-  }, [search, cat, svc]);
+  }, [search, cat, svc, showFavoritesOnly, favorites]);
+
+  const recentDrugs = useMemo(() => {
+    if (search.trim() || cat !== "Tout" || svc !== "Tout" || showFavoritesOnly) return [];
+    return history.map(id => DRUGS.find(d => d.id === id)).filter(Boolean);
+  }, [history, search, cat, svc, showFavoritesOnly]);
 
   return (
     <div className="app" data-testid="app">
@@ -154,6 +190,13 @@ const App = () => {
                 <div className="filter-group">
                   <span className="filter-label">CAT</span>
                   <div className="filter-chips">
+                    <button
+                      className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
+                      onClick={() => setShowFavoritesOnly(v => !v)}
+                      title={showFavoritesOnly ? "Désactiver le filtre favoris" : "Afficher seulement les favoris"}
+                    >
+                      ★ Favoris {favorites.size > 0 && <span className="chip-count">{favorites.size}</span>}
+                    </button>
                     {CATEGORIES.map((c) => (
                       <button
                         key={c}
@@ -196,10 +239,33 @@ const App = () => {
             <div className="empty">
               <div className="empty-icon">🔍</div>
               <p>Aucun médicament trouvé</p>
-              <small>Essayez un autre terme ou réinitialisez les filtres</small>
+              <small>{showFavoritesOnly ? "Aucun favori — étoilez un médicament avec ☆" : "Essayez un autre terme ou réinitialisez les filtres"}</small>
             </div>
           ) : (
-            <DrugList drugs={filtered} />
+            <>
+              {recentDrugs.length > 0 && (
+                <div className="recent-section">
+                  <div className="recent-header">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>Récents</span>
+                  </div>
+                  <DrugList
+                    drugs={recentDrugs}
+                    favorites={favorites}
+                    onToggleFavorite={toggleFavorite}
+                    onOpen={addToHistory}
+                  />
+                </div>
+              )}
+              <DrugList
+                drugs={filtered}
+                favorites={favorites}
+                onToggleFavorite={toggleFavorite}
+                onOpen={addToHistory}
+              />
+            </>
           )
         )}
 

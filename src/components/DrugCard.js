@@ -9,13 +9,16 @@ const TABS = [
   { key: "cond",  label: "Conditionnements",    type: "neutral" },
 ];
 
-const DrugCard = ({ drug }) => {
+const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
 
   useEffect(() => {
-    if (open) setActiveTab("poso");
-  }, [open]);
+    if (open) {
+      setActiveTab("poso");
+      if (onOpen) onOpen(drug.id);
+    }
+  }, [open, drug.id, onOpen]);
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
   const [weight, setWeight] = useState("");
@@ -613,6 +616,19 @@ const DrugCard = ({ drug }) => {
             <span className="drug-classe">{drug.classe}</span>
           </div>
         </div>
+        {onToggleFavorite && (
+          <span
+            role="button"
+            tabIndex={0}
+            className={`drug-favorite ${isFavorite ? "drug-favorite-active" : ""}`}
+            onClick={(e) => { e.stopPropagation(); onToggleFavorite(drug.id); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onToggleFavorite(drug.id); } }}
+            aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+            title={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+          >
+            {isFavorite ? "★" : "☆"}
+          </span>
+        )}
         <svg
           className={`chevron ${open ? "chevron-open" : ""}`}
           viewBox="0 0 24 24"
