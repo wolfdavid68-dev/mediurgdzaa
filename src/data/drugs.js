@@ -212,14 +212,14 @@ export const DRUGS = [
     poso: {
       a: [
         "IN : PUR selon dose/poids",
-        "IVSE : 1 ampoule 250 µg qsp 50 mL (soit 5 µg/mL)",
+        "IVSE : 0,2 à 2 µg/kg/h (débit 2 à 20 mL/h)",
         "IV : 0,1-0,3 µg/kg IV lente",
         "ISR : 0,3-0,5 µg/kg",
         "Voies : VVP ou VVC",
       ],
-      p: ["0,2-0,3 µg/kg IV ou IN", "PSE : 0,1-0,5 µg/kg/h"],
+      p: ["0,2-0,3 µg/kg IV ou IN", "IVSE : 0,2 à 2 µg/kg/h"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:50,conc_finale:"5 µg/mL",conc_produit:50,unite:"µg",dose_kg:0.3,dose_max_kg:0.5,duree:"IVSE ou bolus IV lent",stabilite:"24h à 25°C",etapes:["Ampoule 250 µg/5 mL (50 µg/mL)","PSE : 1 ampoule 250 µg qsp 50 mL NaCl 0,9% → 5 µg/mL","IN : administrer pur selon dose poids (0,3-0,5 µg/kg)"],notes:["Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules","Dépression respiratoire dose-dépendante","Antidote : Naloxone"]},
+    prep: {solvant:"NaCl 0,9% (PHY) ou G5",conc_finale:"1 mL/h = 0,1 µg/kg/h",unite:"µg",duree:"IVSE 2 à 20 mL/h",stabilite:"24h à 25°C",sufenta_table:true,etapes:["Ampoule 250 µg/5 mL (50 µg/mL)","Prélever Vi mL d'ampoule pure et diluer dans NaCl 0,9% / G5 pour obtenir Vf mL dans la seringue","1 mL/h de solution = 0,1 µg/kg/h de Sufentanil","Posologie IVSE : 0,2 à 2 µg/kg/h (= débit 2 à 20 mL/h)"],notes:["Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules","Dépression respiratoire dose-dépendante","Antidote : Naloxone","Vi/Vf calculés selon table de dilution par poids"]},
   },
   {
     id: 6,

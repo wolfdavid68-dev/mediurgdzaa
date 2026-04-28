@@ -91,6 +91,7 @@ const DrugCard = ({ drug }) => {
   const calcDebit = (pse, dose, kg) => {
     const d = parseFloat(dose);
     if (!d || d <= 0) return null;
+    if (pse.factor) return +(d * pse.factor).toFixed(2);
     if (pse.unite === "mg/h") return +(d / pse.conc).toFixed(2);
     if (pse.unite === "UI/24h") return +(d / (pse.conc * 24)).toFixed(2);
     const w = parseFloat(kg);
@@ -168,6 +169,36 @@ const DrugCard = ({ drug }) => {
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Injecter</span>
                 <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{injectMl} mL</span>
+              </div>
+            </div>
+          );
+        }
+
+        // Table de dilution Sufentanil (1 mL/h = 0,1 µg/kg/h)
+        if (prep.sufenta_table) {
+          let vi;
+          if (kg < 10) vi = 0.5;
+          else if (kg < 30) vi = 1;
+          else if (kg < 50) vi = 2;
+          else vi = 5;
+          const vf = Math.round((500 * vi) / kg);
+          return (
+            <div className="prep-calc-box">
+              <div className="prep-calc-header">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+                Pour {kg} kg
+              </div>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Vi (prélever)</span>
+                <span className="prep-calc-val prep-calc-highlight">{vi} mL d'ampoule pure</span>
+              </div>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Vf (diluer à)</span>
+                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{vf} mL dans la seringue</span>
+              </div>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Débit IVSE</span>
+                <span className="prep-calc-val">2 à 20 mL/h (= 0,2 à 2 µg/kg/h)</span>
               </div>
             </div>
           );

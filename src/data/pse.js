@@ -50,9 +50,9 @@ export const PSE = {
   },
 
   // ── MORPHINIQUES ─────────────────────────────────────────
-  5: { // Sufentanil — 250 µg qsp 50 mL NaCl → 5 µg/mL
-    conc: 5, unite: "µg/kg/h", min: 0.1, max: 0.5,
-    steps: [0.1, 0.2, 0.3, 0.5],
+  5: { // Sufentanil — table de dilution adaptée au poids : 1 mL/h = 0,1 µg/kg/h ⇒ mL/h = dose × 10
+    conc: 1, unite: "µg/kg/h", min: 0.2, max: 2, factor: 10,
+    steps: [0.2, 0.5, 1, 1.5, 2],
   },
   6: { // Morphine — 10 mg qsp 10 mL NaCl → 1 mg/mL
     conc: 1, unite: "mg/kg/h", min: 0.01, max: 0.05,
