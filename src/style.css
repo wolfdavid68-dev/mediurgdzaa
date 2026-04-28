@@ -2106,6 +2106,11 @@ body {
   border-color: #7c3a00;
 }
 
+.ci-item-prec {
+  background: #2a2300;
+  border-color: #78651e;
+}
+
 [data-theme="light"] .ci-item-abs {
   background: #fef2f2;
   border-color: #fca5a5;
@@ -2114,6 +2119,11 @@ body {
 [data-theme="light"] .ci-item-rel {
   background: #fff7ed;
   border-color: #fdba74;
+}
+
+[data-theme="light"] .ci-item-prec {
+  background: #fefce8;
+  border-color: #fde047;
 }
 
 .ci-badge {
@@ -2138,6 +2148,11 @@ body {
   color: #fff;
 }
 
+.ci-badge-prec {
+  background: #ca8a04;
+  color: #fff;
+}
+
 .ci-text {
   flex: 1;
   color: var(--text);
@@ -2145,9 +2160,11 @@ body {
 
 .ci-item-abs .ci-text { color: #fca5a5; }
 .ci-item-rel .ci-text { color: #fdba74; }
+.ci-item-prec .ci-text { color: #fde047; }
 
 [data-theme="light"] .ci-item-abs .ci-text { color: #991b1b; }
 [data-theme="light"] .ci-item-rel .ci-text { color: #9a3412; }
+[data-theme="light"] .ci-item-prec .ci-text { color: #854d0e; }
 
 /* Grande police CI */
 [data-fontsize="large"] .ci-item { font-size: 15px; padding: 9px 12px; }

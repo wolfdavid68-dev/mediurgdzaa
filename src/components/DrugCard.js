@@ -83,8 +83,21 @@ const DrugCard = ({ drug }) => {
 
   const ciSeverity = (text) => {
     const t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-    if (/\brelative\b/.test(t)) return "rel";
-    if (/allergi|hypersensibil|\bimao\b|porphyri|myastheni|hyperkalie|insuffisance surrenal|brulures etendues|para.{0,3}tetrapleg|myopathi|pseudocholinesteras|epilepsie non|nouveau.ne|nourrisson|depression respiratoire sev/.test(t)) return "abs";
+
+    // Marqueurs explicites prioritaires
+    if (/\b(absolue?s?)\b/.test(t)) return "abs";
+    if (/\b(relative?s?)\b/.test(t)) return "rel";
+    if (/\b(precaution|prudence)\b/.test(t)) return "prec";
+
+    // Précaution : adaptation de dose / surveillance / populations à risque
+    if (/adapter\s+(la\s+)?dose|reduire\s+(la\s+)?dose|diminuer\s+(la\s+)?dose|surveillance|sujet\s+age|personne\s+age|grossesse|allaitement|insuffisance\s+(renal|hepati)(?!.*sever)|clairance|adapter|titrer/.test(t)) return "prec";
+
+    // Absolue : pathologies / situations à risque vital
+    if (/allergi|hypersensibil|\bimao\b|porphyri|myastheni|hyperkalie|insuffisance\s+surrenal|brulure(s)?\s+etend|para.{0,4}tetrapleg|hemipleg|deficit\s+moteur|myopathi|dystrophie\s+musc|pseudocholinesteras|epilepsie\s+non\s+control|nouveau.ne|nourrisson|depression\s+respiratoire|glaucome|angle\s+ferme|choc\s+cardiogenique|bloc\s+av|bav\s+(2|3|haut)|pheochromocyt|hyperthermie\s+maligne|crush|hypovolemie\s+severe|intoxication\s+digital|wpw|wolff/.test(t)) return "abs";
+
+    // Relative implicite : conditions à risque relatif
+    if (/asthme|bpco|bronchospasme|hypotension|bradycardie|hypothyroid|hyperthyroid|qt\s+long|insuffisance\s+(renal|hepati|cardia).*sever|trouble\s+(coag|conduction)|porphyrie/.test(t)) return "rel";
+
     return null;
   };
 
@@ -121,7 +134,7 @@ const DrugCard = ({ drug }) => {
               <li key={i} className={`ci-item ${sev ? `ci-item-${sev}` : ""}`}>
                 {sev && (
                   <span className={`ci-badge ci-badge-${sev}`}>
-                    {sev === "abs" ? "Absolue" : "Relative"}
+                    {sev === "abs" ? "Absolue" : sev === "rel" ? "Relative" : "Précaution"}
                   </span>
                 )}
                 <span className="ci-text">{it}</span>
