@@ -71,6 +71,28 @@ const App = () => {
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
   const toggleFont = () => setBigFont(f => !f);
 
+  // Synchronisation du state `page` avec l'historique navigateur
+  // → permet au bouton retour de revenir à la page précédente au lieu de quitter l'app
+  const navigateTo = (newPage) => {
+    if (newPage === page) return;
+    try { window.history.pushState({ page: newPage }, ""); } catch {}
+    setPage(newPage);
+  };
+
+  useEffect(() => {
+    try {
+      if (!window.history.state || !window.history.state.page) {
+        window.history.replaceState({ page: "medicaments" }, "");
+      }
+    } catch {}
+    const onPopState = (e) => {
+      const target = (e.state && e.state.page) ? e.state.page : "medicaments";
+      setPage(target);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   const filteredProtocols = useMemo(() => {
     if (protoFilter === "Tout") return PROTOCOLS;
     return PROTOCOLS.filter(p => {
@@ -308,7 +330,7 @@ const App = () => {
                     <ProtocolCard
                       key={p.id}
                       protocol={p}
-                      onDrugSearch={(name) => { setPage("medicaments"); setSearch(name); }}
+                      onDrugSearch={(name) => { navigateTo("medicaments"); setSearch(name); }}
                     />
                   ))}
                 </div>
@@ -321,7 +343,7 @@ const App = () => {
       <nav className="bottom-nav">
         <button
           className={`bottom-tab ${page === "medicaments" ? "bottom-tab-active" : ""}`}
-          onClick={() => setPage("medicaments")}
+          onClick={() => navigateTo("medicaments")}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
             <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
@@ -330,7 +352,7 @@ const App = () => {
         </button>
         <button
           className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
-          onClick={() => setPage("protocoles")}
+          onClick={() => navigateTo("protocoles")}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
             <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
