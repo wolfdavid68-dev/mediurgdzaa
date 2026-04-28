@@ -464,6 +464,55 @@ body {
   font-weight: 500;
 }
 
+.offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid;
+  margin-right: 6px;
+  user-select: none;
+}
+
+.offline-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.offline-badge-online {
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.10);
+  border-color: rgba(22, 163, 74, 0.40);
+}
+
+.offline-badge-online .offline-badge-dot {
+  background: #16a34a;
+  box-shadow: 0 0 6px rgba(22, 163, 74, 0.6);
+}
+
+.offline-badge-offline {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.10);
+  border-color: rgba(245, 158, 11, 0.40);
+}
+
+.offline-badge-offline .offline-badge-dot {
+  background: #f59e0b;
+  animation: offlinePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes offlinePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 [data-theme="light"] .drug-classe {
   color: #1f2937;
 }
@@ -753,9 +802,10 @@ body {
   text-align: center;
   transition: border 0.15s;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 .poso-calc-input::-webkit-outer-spin-button,
-.poso-calc-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.poso-calc-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; }
 .poso-calc-input:focus { border-color: var(--accent); }
 
 .poso-calc-unit {
