@@ -183,7 +183,7 @@ export const DRUGS = [
   // ──────────────── ANALGÉSIE ────────────────
   {
     id: 5,
-    nom: "SUFENTA",
+    nom: "SUFENTANIL",
     commercial: "Sufentanil",
     dci: "Sufentanil citrate",
     classe: "Opioïde fort / Agoniste morphinique majeur",
