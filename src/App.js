@@ -27,8 +27,6 @@ const App = () => {
   const [bigFont, setBigFont] = useState(() => {
     try { return localStorage.getItem("mediurg-bigfont") === "1"; } catch { return false; }
   });
-  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
-  const [offlineReady, setOfflineReady] = useState(false);
   const [favorites, setFavorites] = useState(() => {
     try {
       const raw = localStorage.getItem("mediurg-favorites");
@@ -59,20 +57,6 @@ const App = () => {
       return next;
     });
   };
-
-  useEffect(() => {
-    const onOnline = () => setIsOnline(true);
-    const onOffline = () => setIsOnline(false);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.ready.then(() => setOfflineReady(true)).catch(() => {});
-    }
-    return () => {
-      window.removeEventListener("online", onOnline);
-      window.removeEventListener("offline", onOffline);
-    };
-  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -144,13 +128,6 @@ const App = () => {
                 <p>Pharmacologie d'urgence · SAUV · SMUR · SAU</p>
               </div>
             </div>
-            <span
-              className={`offline-badge ${isOnline ? "offline-badge-online" : "offline-badge-offline"}`}
-              title={isOnline ? (offlineReady ? "En ligne — données disponibles hors-ligne" : "En ligne") : "Hors-ligne — fonctionne en mode déconnecté"}
-            >
-              <span className="offline-badge-dot" />
-              {isOnline ? (offlineReady ? "Offline OK" : "En ligne") : "Hors-ligne"}
-            </span>
             <button className={`font-toggle ${bigFont ? "font-toggle-active" : ""}`} onClick={toggleFont} aria-label={bigFont ? "Réduire la police" : "Agrandir la police"}>
               A+
             </button>
