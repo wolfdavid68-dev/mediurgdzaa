@@ -12,7 +12,10 @@ const SECTION_META = {
   reprise:               { label: "Reprise",       color: "#16a34a", short: "Reprise"   },
 };
 
-// Médicaments détectables dans les textes de protocoles
+// Médicaments détectables dans les textes de protocoles.
+// Ne pas terminer un pattern par un caractère non-word (%, espace) :
+// le \b de fin du regex échouerait — utiliser un nom court (« NaCl »
+// plutôt que « NaCl 0,9 % »), la recherche normalisée d'App.js fait le reste.
 const DRUG_PATTERNS = [
   "adrénaline", "noradrénaline", "dobutamine", "dopamine",
   "midazolam", "propofol", "kétamine", "étomidate",
@@ -24,6 +27,7 @@ const DRUG_PATTERNS = [
   "paracétamol", "kétoprofène", "nefopam",
   "acide tranexamique", "exacyl",
   "hydroxocobalamine", "cyanokit",
+  "Ringer Lactate", "NaCl", "Glucose",
 ];
 
 const DRUG_REGEX = new RegExp(

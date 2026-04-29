@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { PSE } from "../data/pse";
+import {
+  calcDose,
+  ciSeverity,
+  calcDebit,
+  calcPrepThreshold,
+  calcPrepSufentaTable,
+  calcPrepPhases,
+  calcPrepDoseKg,
+} from "../lib/calc";
 
 const TABS = [
   { key: "poso",  label: "Posologie",           type: "poso" },
@@ -56,66 +65,6 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
 
   const toggleTab = (key) => setActiveTab(activeTab === key ? null : key);
 
-  const calcDose = (text, w) => {
-    const kg = parseFloat(w);
-    if (!kg || kg <= 0 || kg > 300) return null;
-
-    const match = text.match(
-      /(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)\/kg(?:\/(min|h|j|24h))?/i
-    );
-    if (!match) return null;
-
-    const min  = parseFloat(match[1].replace(",", "."));
-    const max  = match[2] ? parseFloat(match[2].replace(",", ".")) : null;
-    const unit = match[3];
-    const per  = match[4] ? `/${match[4]}` : "";
-
-    let doseMin = +(min * kg).toFixed(2);
-    let doseMax = max ? +(max * kg).toFixed(2) : null;
-
-    const maxMatch = text.match(/max\s+(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)/i);
-    if (maxMatch && maxMatch[2].toLowerCase() === unit.toLowerCase()) {
-      const cap = parseFloat(maxMatch[1].replace(",", "."));
-      const capped = doseMin > cap || (doseMax && doseMax > cap);
-      if (doseMin > cap) doseMin = cap;
-      if (doseMax && doseMax > cap) doseMax = cap;
-      if (capped) return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: true };
-    }
-    return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: false };
-  };
-
-  const ciSeverity = (text) => {
-    const t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-
-    // Marqueurs explicites prioritaires
-    if (/\b(absolue?s?)\b/.test(t)) return "abs";
-    if (/\b(relative?s?)\b/.test(t)) return "rel";
-    if (/\b(precaution|prudence)\b/.test(t)) return "prec";
-
-    // Précaution : adaptation de dose / surveillance / populations à risque
-    if (/adapter\s+(la\s+)?dose|reduire\s+(la\s+)?dose|diminuer\s+(la\s+)?dose|surveillance|sujet\s+age|personne\s+age|grossesse|allaitement|insuffisance\s+(renal|hepati)(?!.*sever)|clairance|adapter|titrer/.test(t)) return "prec";
-
-    // Absolue : pathologies / situations à risque vital
-    if (/allergi|hypersensibil|\bimao\b|porphyri|myastheni|hyperkalie|insuffisance\s+surrenal|brulure(s)?\s+etend|para.{0,4}tetrapleg|hemipleg|deficit\s+moteur|myopathi|dystrophie\s+musc|pseudocholinesteras|epilepsie\s+non\s+control|nouveau.ne|nourrisson|depression\s+respiratoire|glaucome|angle\s+ferme|choc\s+cardiogenique|bloc\s+av|bav\s+(2|3|haut)|pheochromocyt|hyperthermie\s+maligne|crush|hypovolemie\s+severe|intoxication\s+digital|wpw|wolff/.test(t)) return "abs";
-
-    // Relative implicite : conditions à risque relatif
-    if (/asthme|bpco|bronchospasme|hypotension|bradycardie|hypothyroid|hyperthyroid|qt\s+long|insuffisance\s+(renal|hepati|cardia).*sever|trouble\s+(coag|conduction)|porphyrie/.test(t)) return "rel";
-
-    return null;
-  };
-
-  const calcDebit = (pse, dose, kg) => {
-    const d = parseFloat(dose);
-    if (!d || d <= 0) return null;
-    if (pse.factor) return +(d * pse.factor).toFixed(2);
-    if (pse.unite === "mg/h") return +(d / pse.conc).toFixed(2);
-    if (pse.unite === "UI/24h") return +(d / (pse.conc * 24)).toFixed(2);
-    const w = parseFloat(kg);
-    if (!w || w <= 0) return null;
-    if (pse.unite === "µg/kg/min") return +((d * w * 60) / pse.conc).toFixed(2);
-    return +((d * w) / pse.conc).toFixed(2);
-  };
-
   const renderList = (items) => {
     if (!items || items.length === 0) return <span className="na">Non renseigné</span>;
     return (
@@ -166,25 +115,21 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
 
         // Préparation par saisie directe du produit final (ex : Anexate)
         if (prep.dose_threshold !== undefined) {
-          const pf = parseFloat(produitFinal);
-          if (!pf || pf <= 0) return null;
-          const isHigh   = pf >= prep.dose_threshold;
-          const ampCount = isHigh ? prep.amp_high : prep.amp_low;
-          const vol      = isHigh ? prep.vol_high  : prep.vol_low;
-          const injectMl = +(pf * 10).toFixed(1);
+          const r = calcPrepThreshold(prep, produitFinal);
+          if (!r) return null;
           return (
             <div className="prep-calc-box">
               <div className="prep-calc-header">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
-                Pour {pf} mg
+                Pour {r.pf} mg
               </div>
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Prendre</span>
-                <span className="prep-calc-val prep-calc-highlight">{ampCount} ampoules soit {vol} mL</span>
+                <span className="prep-calc-val prep-calc-highlight">{r.ampCount} ampoules soit {r.vol} mL</span>
               </div>
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Injecter</span>
-                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{injectMl} mL</span>
+                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{r.injectMl} mL</span>
               </div>
             </div>
           );
@@ -192,25 +137,21 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
 
         // Table de dilution Sufentanil (1 mL/h = 0,1 µg/kg/h)
         if (prep.sufenta_table) {
-          let vi;
-          if (kg < 10) vi = 0.5;
-          else if (kg < 30) vi = 1;
-          else if (kg < 50) vi = 2;
-          else vi = 5;
-          const vf = Math.round((500 * vi) / kg);
+          const r = calcPrepSufentaTable(weight);
+          if (!r) return null;
           return (
             <div className="prep-calc-box">
               <div className="prep-calc-header">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
-                Pour {kg} kg
+                Pour {r.kg} kg
               </div>
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Vi (prélever)</span>
-                <span className="prep-calc-val prep-calc-highlight">{vi} mL d'ampoule pure</span>
+                <span className="prep-calc-val prep-calc-highlight">{r.vi} mL d'ampoule pure</span>
               </div>
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Vf (diluer à)</span>
-                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{vf} mL dans la seringue</span>
+                <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{r.vf} mL dans la seringue</span>
               </div>
               <div className="prep-calc-row">
                 <span className="prep-calc-step">Débit IVSE</span>
@@ -222,47 +163,42 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
 
         // Préparation multi-phases (ex : Hidonac)
         if (prep.phases && prep.phases.length > 0) {
+          const phases = calcPrepPhases(prep, weight);
+          if (!phases) return null;
           return (
             <div className="prep-calc-box">
               <div className="prep-calc-header">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
                 Pour {kg} kg
               </div>
-              {prep.phases.map((phase, i) => {
-                const dose   = +(phase.dose_kg * kg).toFixed(0);
-                const vol    = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
-                return (
-                  <div key={i} style={{marginTop: i > 0 ? 8 : 0, paddingTop: i > 0 ? 8 : 0, borderTop: i > 0 ? "1px solid var(--border)" : "none"}}>
-                    <div style={{fontSize:11,fontWeight:700,color:"var(--text-dim)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{phase.label} — {phase.duree}</div>
-                    <div className="prep-calc-row">
-                      <span className="prep-calc-step">Dose</span>
-                      <span className="prep-calc-val">{dose} mg</span>
-                    </div>
-                    {vol !== null && (
-                      <div className="prep-calc-row">
-                        <span className="prep-calc-step">Prélever</span>
-                        <span className="prep-calc-val prep-calc-highlight">{vol} mL</span>
-                      </div>
-                    )}
-                    <div className="prep-calc-row">
-                      <span className="prep-calc-step">Diluer dans</span>
-                      <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{phase.solvant_vol} mL G5%</span>
-                    </div>
+              {phases.map((phase, i) => (
+                <div key={i} style={{marginTop: i > 0 ? 8 : 0, paddingTop: i > 0 ? 8 : 0, borderTop: i > 0 ? "1px solid var(--border)" : "none"}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"var(--text-dim)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{phase.label} — {phase.duree}</div>
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">Dose</span>
+                    <span className="prep-calc-val">{phase.dose} mg</span>
                   </div>
-                );
-              })}
+                  {phase.vol !== null && (
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Prélever</span>
+                      <span className="prep-calc-val prep-calc-highlight">{phase.vol} mL</span>
+                    </div>
+                  )}
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">Diluer dans</span>
+                    <span className="prep-calc-val prep-calc-highlight" style={{color:"#60a5fa",fontWeight:800}}>{phase.solvantVol} mL G5%</span>
+                  </div>
+                </div>
+              ))}
             </div>
           );
         }
 
-        if (!prep.dose_kg) return null;
-        const dose = prep.dose_kg * kg;
-        const doseMax = prep.dose_max_kg ? prep.dose_max_kg * kg : null;
-        const volMin = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
-        const volMax = doseMax && prep.conc_produit ? +(doseMax / prep.conc_produit).toFixed(1) : null;
-        if (!volMin) return null;
+        const r = calcPrepDoseKg(prep, weight);
+        if (!r) return null;
+        const { volMin, volMax } = r;
         const volLabel = volMax && volMax !== volMin ? `${volMin}–${volMax} mL` : `${volMin} mL`;
-        const doseLabel = doseMax ? `${+dose.toFixed(1)}–${+doseMax.toFixed(1)} ${prep.unite}` : `${+dose.toFixed(1)} ${prep.unite}`;
+        const doseLabel = r.doseMax ? `${r.dose}–${r.doseMax} ${r.unite}` : `${r.dose} ${r.unite}`;
         const solvantVol = !prep.prelever_total && prep.volume_final ? prep.volume_final - volMin : null;
         return (
           <div className="prep-calc-box">
