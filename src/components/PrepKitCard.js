@@ -1,4 +1,12 @@
 import React, { useState } from "react";
+import { DRUGS } from "../data/drugs";
+
+const buildPrepFromDrug = (drug) => {
+  if (!drug) return null;
+  const cond = drug.cond?.[0] || null;
+  const etapes = drug.prep?.etapes || [];
+  return { cond, etapes };
+};
 
 const PrepKitCard = ({ kit }) => {
   const [open, setOpen] = useState(false);
@@ -64,28 +72,52 @@ const PrepKitCard = ({ kit }) => {
           <div className="tab-content">
             {activeTab === "drogues" && (
               <div className="prepkit-drugs">
-                {kit.drogues.map((d, i) => (
-                  <div key={i} className="prepkit-drug-card" style={{ borderLeftColor: kit.couleur }}>
-                    <div className="prepkit-drug-name">{d.nom}</div>
-                    <div className="prepkit-drug-role">{d.role}</div>
-                    <div className="prepkit-drug-row">
-                      <span className="prepkit-drug-label">Dose</span>
-                      <span className="prepkit-drug-value">{d.dose}</span>
-                    </div>
-                    <div className="prepkit-drug-row">
-                      <span className="prepkit-drug-label">Prép.</span>
-                      <span className="prepkit-drug-value">{d.prep}</span>
-                    </div>
-                    {d.note && (
-                      <div className="prepkit-drug-note">
-                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                        {d.note}
+                {kit.drogues.map((d, i) => {
+                  const drug = d.drugId ? DRUGS.find(x => x.id === d.drugId) : null;
+                  const fromDrug = buildPrepFromDrug(drug);
+                  const condText = fromDrug?.cond || null;
+                  const etapes = (fromDrug?.etapes && fromDrug.etapes.length > 0) ? fromDrug.etapes : null;
+                  const fallbackPrep = !etapes ? d.prep : null;
+                  return (
+                    <div key={i} className="prepkit-drug-card" style={{ borderLeftColor: kit.couleur }}>
+                      <div className="prepkit-drug-name">{d.nom}</div>
+                      <div className="prepkit-drug-role">{d.role}</div>
+                      <div className="prepkit-drug-row">
+                        <span className="prepkit-drug-label">Dose</span>
+                        <span className="prepkit-drug-value">{d.dose}</span>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      {condText && (
+                        <div className="prepkit-drug-row">
+                          <span className="prepkit-drug-label">Cond.</span>
+                          <span className="prepkit-drug-value">{condText}</span>
+                        </div>
+                      )}
+                      {etapes ? (
+                        <div className="prepkit-drug-row">
+                          <span className="prepkit-drug-label">Prép.</span>
+                          <span className="prepkit-drug-value">
+                            <ol style={{margin:0,paddingLeft:16}}>
+                              {etapes.map((step, j) => <li key={j}>{step}</li>)}
+                            </ol>
+                          </span>
+                        </div>
+                      ) : fallbackPrep ? (
+                        <div className="prepkit-drug-row">
+                          <span className="prepkit-drug-label">Prép.</span>
+                          <span className="prepkit-drug-value">{fallbackPrep}</span>
+                        </div>
+                      ) : null}
+                      {d.note && (
+                        <div className="prepkit-drug-note">
+                          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          {d.note}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
