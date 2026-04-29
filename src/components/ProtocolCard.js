@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { tokenizeProtocolText } from "../lib/protocolText";
 
 const SECTION_META = {
   inclusion:             { label: "Inclusion",     color: "#16a34a", short: "Inclusion" },
@@ -16,7 +17,7 @@ const SECTION_META = {
 // Ne pas terminer un pattern par un caractère non-word (%, espace) :
 // le \b de fin du regex échouerait — utiliser un nom court (« NaCl »
 // plutôt que « NaCl 0,9 % »), la recherche normalisée d'App.js fait le reste.
-const DRUG_PATTERNS = [
+export const DRUG_PATTERNS = [
   "adrénaline", "noradrénaline", "dobutamine", "dopamine",
   "midazolam", "propofol", "kétamine", "étomidate",
   "morphine", "sufentanil", "naloxone",
@@ -24,53 +25,38 @@ const DRUG_PATTERNS = [
   "terbutaline", "salbutamol", "ipratropium",
   "solumédrol", "méthylprednisolone", "bétaméthasone",
   "diazépam", "clonazépam", "rivotril",
-  "paracétamol", "kétoprofène", "nefopam",
+  "paracétamol", "nefopam",
   "acide tranexamique", "exacyl",
   "hydroxocobalamine", "cyanokit",
   "Ringer Lactate", "NaCl", "Glucose",
 ];
 
-const DRUG_REGEX = new RegExp(
-  `\\b(${DRUG_PATTERNS.map(d => d.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
-  "gi"
-);
-
-const DOSE_REGEX = /\b(\d+(?:[,.]\d+)?(?:\s*[-–]\s*\d+(?:[,.]\d+)?)?)\s*(mg\/kg|µg\/kg|mL\/kg|mg\/h|mL\/h|L\/min|gouttes\/kg|mg|µg|mcg|mL|g\/L|g)\b(?:\/(?:kg|h|min|j|24h))?/g;
-
-// Découpe un texte et renvoie du JSX avec doses colorées + médicaments cliquables
+// Rendu JSX d'un texte protocole : doses en gras, médicaments cliquables.
+// Le tokenizer pur vit dans src/lib/protocolText.js et est testé en isolation.
 const renderText = (text, onDrugSearch) => {
-  // Combine les deux regex en un seul passage
-  const combined = new RegExp(
-    `(${DRUG_REGEX.source})|(${DOSE_REGEX.source})`,
-    "gi"
+  const tokens = tokenizeProtocolText(text, DRUG_PATTERNS);
+  if (tokens.length <= 1) return text;
+  return (
+    <>
+      {tokens.map((tok, i) => {
+        if (tok.type === "drug") {
+          return (
+            <button
+              key={i}
+              className="proto-drug-link"
+              onClick={e => { e.stopPropagation(); onDrugSearch(tok.value); }}
+            >
+              {tok.value}
+            </button>
+          );
+        }
+        if (tok.type === "dose") {
+          return <strong key={i} className="proto-dose">{tok.value}</strong>;
+        }
+        return <React.Fragment key={i}>{tok.value}</React.Fragment>;
+      })}
+    </>
   );
-  const parts = [];
-  let last = 0;
-  let match;
-  combined.lastIndex = 0;
-
-  while ((match = combined.exec(text)) !== null) {
-    if (match.index > last) parts.push(text.slice(last, match.index));
-    if (match[1]) {
-      // Médicament
-      const name = match[1];
-      parts.push(
-        <button
-          key={match.index}
-          className="proto-drug-link"
-          onClick={e => { e.stopPropagation(); onDrugSearch(name); }}
-        >
-          {name}
-        </button>
-      );
-    } else {
-      // Dose
-      parts.push(<strong key={match.index} className="proto-dose">{match[0]}</strong>);
-    }
-    last = combined.lastIndex;
-  }
-  if (last < text.length) parts.push(text.slice(last));
-  return parts.length > 1 ? <>{parts}</> : text;
 };
 
 const ProtocolCard = ({ protocol: p, onDrugSearch }) => {

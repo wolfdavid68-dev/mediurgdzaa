@@ -2,6 +2,8 @@
 // Aucun import React, aucun accès DOM/localStorage.
 // Toute modification ici doit être validée par calc.test.js.
 
+import { normalize } from "./normalize";
+
 const KG_MIN = 0;
 const KG_MAX = 300;
 
@@ -41,7 +43,7 @@ export function calcDose(text, w) {
 
 // ── Sévérité contre-indication ────────────────────────────────
 export function ciSeverity(text) {
-  const t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const t = normalize(text);
 
   if (/\b(absolue?s?)\b/.test(t)) return "abs";
   if (/\b(relative?s?)\b/.test(t)) return "rel";

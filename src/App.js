@@ -3,6 +3,7 @@ import { DRUGS } from "./data/drugs";
 import { PROTOCOLS } from "./data/protocols";
 import { PREP_KITS } from "./data/prepKits";
 import { ALIASES } from "./data/aliases";
+import { normalize } from "./lib/normalize";
 import DrugList from "./components/DrugList";
 import ProtocolCard from "./components/ProtocolCard";
 import IncompatibilityList from "./components/IncompatibilityList";
@@ -10,9 +11,6 @@ import PrepKitCard from "./components/PrepKitCard";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
-
-const normalize = (str) =>
-  str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 const App = () => {
   const [page, setPage] = useState("medicaments");
