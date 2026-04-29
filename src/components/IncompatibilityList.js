@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
 
 const TYPE_META = {
-  precipitation: { label: "Précipitation",                short: "P",  color: "#ef4444" },
-  inactivation:  { label: "Inactivation",                  short: "I",  color: "#f97316" },
-  incompatible:  { label: "Incompatible",                  short: "✕",  color: "#6b7280" },
+  precipitation: { label: "Précipitation",                short: "P",  color: "#dc2626" },
+  inactivation:  { label: "Inactivation",                  short: "I",  color: "#dc2626" },
+  incompatible:  { label: "Incompatible",                  short: "✕",  color: "#dc2626" },
   pH:            { label: "Compatible — vigilance pH",     short: "pH", color: "#16a34a" },
   compatible:    { label: "Compatible validé",             short: "✓",  color: "#16a34a" },
 };
@@ -52,15 +52,17 @@ const IncompatibilityList = () => {
 
       {/* Légende */}
       <div className="incompat-legend">
-        {Object.entries(TYPE_META).map(([k, m]) => (
-          <span key={k} className="incompat-legend-item">
-            <span className="incompat-legend-swatch" style={{ background: m.color }} />
-            {m.label}
-          </span>
-        ))}
+        <span className="incompat-legend-item">
+          <span className="incompat-legend-swatch" style={{ background: "#dc2626" }} />
+          Incompatibilité (Rouge)
+        </span>
+        <span className="incompat-legend-item">
+          <span className="incompat-legend-swatch" style={{ background: "#16a34a" }} />
+          Compatibilité (Vert) / pH
+        </span>
         <span className="incompat-legend-item">
           <span className="incompat-legend-swatch incompat-legend-swatch-empty" />
-          Pas de données
+          Pas de données (Blanc)
         </span>
       </div>
 
@@ -107,11 +109,11 @@ const IncompatibilityList = () => {
                   const isSelected = selected?.drugA === rowDrug.drug && selected?.drugB === colDrug.drug;
 
                   if (cell) {
-                    const meta = TYPE_META[cell.type] || TYPE_META.incompatible;
+                    const cellColor = cell.type === "pH" ? "#16a34a" : "#dc2626";
                     return (
                       <td key={colDrug.drug}
                         className={`incompat-cell incompat-cell-hit ${isSelected ? "incompat-cell-selected" : ""}`}
-                        style={{ background: meta.color + "cc", textAlign:"center", color:"#fff", fontSize:9, fontWeight:800 }}
+                        style={{ background: cellColor + "cc", textAlign:"center", color:"#fff", fontSize:10, fontWeight:800 }}
                         onClick={() => handleCell(rowDrug.drug, colDrug.drug)}
                       >{cell.type === "pH" ? "pH" : ""}</td>
                     );
