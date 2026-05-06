@@ -261,7 +261,7 @@ export const DRUGS = [
       ],
       p: ["0,1-0,2 mg/kg SC ou IV lente /4-6h", "Titration : 0,05 mg/kg /5 min"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"1 mg/mL",conc_produit:10,unite:"mg",dose_kg:0.1,duree:"Titration bolus /5 min ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 10 mg/1 mL (10 mg/mL)","Titration : 1 ampoule qsp 10 mL NaCl 0,9% → 1 mg/mL","PSE : concentration 1 mg/mL NaCl 0,9% — régler selon kg/h"],notes:["Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules","Antagoniste : Naloxone","Surdosage : dépression respiratoire — avoir naloxone à portée"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"1 mg/mL",conc_produit:10,unite:"mg",dose_kg:0.1,duree:"Titration bolus /5 min ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 10 mg/1 mL (10 mg/mL)","Titration : 1 ampoule qsp 10 mL NaCl 0,9% → 1 mg/mL","PSE : concentration 1 mg/mL NaCl 0,9% — régler selon kg/h"],notes:["Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules","Antagoniste : Naloxone","Surdosage : dépression respiratoire — avoir naloxone à portée"],pedTable:{titre:"Table de dilution pédiatrique — Morphine 1 mg/mL",description:"1 ampoule 10 mg/1 mL diluée dans 9 mL NaCl 0,9% → 1 mg/mL. Garder le volume calculé puis diluer jusqu'à 4 mL avec NaCl 0,9%.",bandes:[{kg_min:1,kg_max:40,mode:"dilute",preparation:"Solution mère 1 mg/mL (10 mg dans 10 mL NaCl 0,9%)",vol_per_kg:0.1,volume_final:4,solvant:"NaCl 0,9%"}]}},
   },
   {
     id: 7,
@@ -530,7 +530,7 @@ export const DRUGS = [
         "< 15 kg : EpiPen Jr 0,15 mg",
       ],
     },
-    prep: {solvant:"G5%",volume_final:50,conc_finale:"0,2 mg/mL",conc_produit:1,unite:"mg",duree:"Continu IVSE",stabilite:"24h à 25°C",etapes:["ACR : ampoule 1 mg/mL utilisée pure — prélever 1 mL (= 1 mg)","Anaphylaxie : 0,5 mg IM pur — utiliser ampoule 1 mg/mL","PSE choc : 2 ampoules 5 mg/5 mL qsp 50 mL G5% → 0,2 mg/mL"],notes:["Administrer toujours au plus proche du patient","IVSE : débit constant — pas de bolus sur cette voie","À l'abri de la lumière"]},
+    prep: {solvant:"G5%",volume_final:50,conc_finale:"0,2 mg/mL",conc_produit:1,unite:"mg",duree:"Continu IVSE",stabilite:"24h à 25°C",etapes:["ACR : ampoule 1 mg/mL utilisée pure — prélever 1 mL (= 1 mg)","Anaphylaxie : 0,5 mg IM pur — utiliser ampoule 1 mg/mL","PSE choc : 2 ampoules 5 mg/5 mL qsp 50 mL G5% → 0,2 mg/mL"],notes:["Administrer toujours au plus proche du patient","IVSE : débit constant — pas de bolus sur cette voie","À l'abri de la lumière"],pedTable:{titre:"Table de dilution pédiatrique — Adrénaline (ampoule 5 mg/5 mL)",description:"Préparation dans une seringue de 10 mL — compléter avec NaCl 0,9%. Administration : 1 mL toutes les 4 minutes.",bandes:[{kg_min:1,kg_max:45,mode:"dilute",preparation:"Ampoule 5 mg/5 mL (1 mg/mL) — diluer dans NaCl 0,9% pour seringue 10 mL",vol_per_kg:0.1,volume_final:10,solvant:"NaCl 0,9%",admin:"1 mL / 4 min"}]}},
   },
   {
     id: 14,
@@ -846,7 +846,7 @@ export const DRUGS = [
       ],
       p: ["5 mg/kg IV sur 20-60 min (max 300 mg/dose)"],
     },
-    prep: {solvant:"G5% STRICT",volume_final:20,conc_finale:"15 mg/mL (ACR)",conc_produit:50,unite:"mg",dose_kg:5,duree:"20-60 min (charge) / continu IVSE",stabilite:"Utiliser immédiatement",etapes:["ACR 3e CEE : 300 mg qsp 20 mL G5% → 15 mg/mL — bolus IV","ACR 5e CEE : 150 mg qsp 10 mL G5% → 15 mg/mL — bolus IV","Charge : 5 mg/kg dans G5% sur 20-60 min","PSE entretien : max 600 mg/48 mL G5%"],notes:["G5% STRICT — incompatible NaCl 0,9%","Changer tubulures à chaque changement (corrosion PVC)","Phlébite sur VVP — VVC recommandée pour PSE"]},
+    prep: {solvant:"G5% STRICT",volume_final:20,conc_finale:"15 mg/mL (ACR)",conc_produit:50,unite:"mg",dose_kg:5,duree:"20-60 min (charge) / continu IVSE",stabilite:"Utiliser immédiatement",etapes:["ACR 3e CEE : 300 mg qsp 20 mL G5% → 15 mg/mL — bolus IV","ACR 5e CEE : 150 mg qsp 10 mL G5% → 15 mg/mL — bolus IV","Charge : 5 mg/kg dans G5% sur 20-60 min","PSE entretien : max 600 mg/48 mL G5%"],notes:["G5% STRICT — incompatible NaCl 0,9%","Changer tubulures à chaque changement (corrosion PVC)","Phlébite sur VVP — VVC recommandée pour PSE"],pedTable:{titre:"Table de dilution pédiatrique — Amiodarone (Cordarone)",description:"Dose 5 mg/kg en bolus IV. Préparation et volume à injecter selon le poids.",bandes:[{kg_min:1,kg_max:30,mode:"inject",preparation:"1 ampoule 150 mg/3 mL + 12 mL G5% → 10 mg/mL (15 mL au total)",vol_per_kg:0.5,step:0.1},{kg_min:31,kg_max:55,mode:"inject",preparation:"2 ampoules 300 mg/6 mL + 9 mL G5% → 20 mg/mL (15 mL au total)",vol_per_kg:0.25,step:0.5,round_mode:"down"}]}},
   },
   {
     id: 22,

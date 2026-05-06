@@ -4,6 +4,7 @@ import {
   calcPrepSufentaTable,
   calcPrepPhases,
   calcPrepDoseKg,
+  calcPedTable,
 } from "../lib/calc";
 
 const PrepIcon = () => (
@@ -165,6 +166,73 @@ const PrepBlock = ({ drug, weight, produitFinal }) => {
       )}
 
       {renderPrepCalc()}
+
+      {prep.pedTable && (() => {
+        const r = calcPedTable(prep, weight);
+        return (
+          <div className="prep-calc-box" style={{marginTop: 8, borderColor: "#ec4899"}}>
+            <div className="prep-calc-header" style={{color: "#ec4899"}}>
+              <PrepIcon />
+              {prep.pedTable.titre}
+            </div>
+            {prep.pedTable.description && (
+              <div style={{fontSize: 12, color: "var(--text-dim)", marginBottom: 6, lineHeight: 1.4}}>
+                {prep.pedTable.description}
+              </div>
+            )}
+            {!validKg && (
+              <div style={{fontSize: 12, color: "var(--text-dim)", fontStyle: "italic"}}>
+                Saisir le poids de l'enfant ci-dessus pour calculer.
+              </div>
+            )}
+            {validKg && !r && (
+              <div style={{fontSize: 12, color: "var(--text-dim)", fontStyle: "italic"}}>
+                Hors plage de la table — utiliser la posologie adulte.
+              </div>
+            )}
+            {validKg && r && (
+              <>
+                <div className="prep-calc-row">
+                  <span className="prep-calc-step">Préparation</span>
+                  <span className="prep-calc-val" style={{textAlign: "right", fontSize: 12}}>{r.preparation}</span>
+                </div>
+                {r.mode === "inject" && (
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">Volume à injecter ({r.kg} kg)</span>
+                    <span className="prep-calc-val prep-calc-highlight" style={{color: "#60a5fa", fontWeight: 800}}>
+                      {r.vol_inject} mL
+                    </span>
+                  </div>
+                )}
+                {r.mode === "dilute" && (
+                  <>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Volume médicament ({r.kg} kg)</span>
+                      <span className="prep-calc-val prep-calc-highlight">{r.vol_med} mL</span>
+                    </div>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Compléter avec {r.solvant}</span>
+                      <span className="prep-calc-val prep-calc-highlight">{r.vol_solvant} mL</span>
+                    </div>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Volume final</span>
+                      <span className="prep-calc-val prep-calc-highlight" style={{color: "#60a5fa", fontWeight: 800}}>
+                        {r.volume_final} mL
+                      </span>
+                    </div>
+                    {r.admin && (
+                      <div className="prep-calc-row">
+                        <span className="prep-calc-step">Administration</span>
+                        <span className="prep-calc-val">{r.admin}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {prep.dose_calc && prep.conc_produit && (
         <div className="prep-calc-box" style={{marginTop: 8}}>

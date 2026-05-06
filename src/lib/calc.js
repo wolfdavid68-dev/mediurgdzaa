@@ -118,6 +118,56 @@ export function calcPrepPhases(prep, weightKg) {
   });
 }
 
+// ── Préparation : table pédiatrique (ACR) ─────────────────────
+// Renvoie la bande applicable + volumes calculés selon le mode :
+// - mode "inject" : volume à injecter = vol_per_kg × kg (avec arrondi optionnel)
+// - mode "dilute" : volume médicament = vol_per_kg × kg, complété au volume_final
+export function calcPedTable(prep, weightKg) {
+  if (!isValidWeight(weightKg) || !prep?.pedTable?.bandes?.length) return null;
+  const kg = parseFloat(weightKg);
+  const bande = prep.pedTable.bandes.find(b =>
+    (b.kg_min == null || kg >= b.kg_min) &&
+    (b.kg_max == null || kg <= b.kg_max)
+  );
+  if (!bande) return null;
+
+  const roundStep = (val, step, mode) => {
+    const factor = 1 / step;
+    if (mode === "down") return Math.floor(val * factor) / factor;
+    if (mode === "up")   return Math.ceil(val * factor) / factor;
+    return Math.round(val * factor) / factor;
+  };
+
+  if (bande.mode === "inject") {
+    const raw = kg * bande.vol_per_kg;
+    const vol = bande.step ? roundStep(raw, bande.step, bande.round_mode) : +raw.toFixed(2);
+    return {
+      mode: "inject",
+      kg,
+      preparation: bande.preparation,
+      vol_inject: +vol.toFixed(2),
+    };
+  }
+
+  if (bande.mode === "dilute") {
+    const raw = kg * bande.vol_per_kg;
+    const volMed = roundStep(raw, bande.step || 0.1, bande.round_mode);
+    const volSolv = +(bande.volume_final - volMed).toFixed(1);
+    return {
+      mode: "dilute",
+      kg,
+      preparation: bande.preparation,
+      vol_med: +volMed.toFixed(1),
+      vol_solvant: volSolv,
+      volume_final: bande.volume_final,
+      solvant: bande.solvant,
+      admin: bande.admin,
+    };
+  }
+
+  return null;
+}
+
 // ── Préparation : dose_kg standard ────────────────────────────
 // Renvoie les volumes à prélever / compléter pour une dilution
 // dose_kg (+ option dose_max_kg pour les fourchettes).
