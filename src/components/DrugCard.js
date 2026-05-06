@@ -19,12 +19,14 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
   const [weight, setWeight] = useState("");
   const [produitFinal, setProduitFinal] = useState("");
 
+  // onOpen volontairement exclu des deps : addToHistory est recréé à chaque render
+  // parent, ce qui relancerait l'effet et écraserait l'onglet sélectionné par l'utilisateur.
   useEffect(() => {
     if (open) {
       setActiveTab("poso");
       if (onOpen) onOpen(drug.id);
     }
-  }, [open, drug.id, onOpen]);
+  }, [open, drug.id]); // eslint-disable-line
 
   const toggleTab = (key) => setActiveTab(activeTab === key ? null : key);
 
