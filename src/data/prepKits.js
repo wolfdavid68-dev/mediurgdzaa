@@ -31,7 +31,7 @@ export const PREP_KITS = [
       },
       {
         drugId: 4,
-        nom: "Kétamine (Kétalar)",
+        nom: "Kétamine",
         role: "Hypnotique alternatif (choc, asthme)",
         dose: "1,5–2 mg/kg IVD",
         prep: "Ampoule 250 mg/5 mL (50 mg/mL) — diluer 1 mL dans 5 mL NaCl 0,9% → 10 mg/mL pour bolus IV",

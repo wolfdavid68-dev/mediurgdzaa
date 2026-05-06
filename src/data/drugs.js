@@ -137,7 +137,7 @@ export const DRUGS = [
   },
   {
     id: 4,
-    nom: "KÉTALAR",
+    nom: "KÉTAMINE",
     commercial: "Kétamine",
     dci: "Kétamine chlorhydrate",
     classe: "Anesthésique dissociatif / Antagoniste NMDA",
