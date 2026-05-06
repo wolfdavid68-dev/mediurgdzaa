@@ -76,8 +76,11 @@ const PrepKitCard = ({ kit }) => {
                   const drug = d.drugId ? DRUGS.find(x => x.id === d.drugId) : null;
                   const fromDrug = buildPrepFromDrug(drug);
                   const condText = fromDrug?.cond || null;
-                  const etapes = (fromDrug?.etapes && fromDrug.etapes.length > 0) ? fromDrug.etapes : null;
-                  const fallbackPrep = !etapes ? d.prep : null;
+                  // Si le kit fournit sa propre prep, elle prime sur les etapes du drug
+                  // (sinon on affiche toutes les indications, ex : ACR + Anaphylaxie + PSE pour Adrénaline)
+                  const kitPrep = d.prep || null;
+                  const etapes = !kitPrep && fromDrug?.etapes && fromDrug.etapes.length > 0 ? fromDrug.etapes : null;
+                  const fallbackPrep = kitPrep;
                   return (
                     <div key={i} className="prepkit-drug-card" style={{ borderLeftColor: kit.couleur }}>
                       <div className="prepkit-drug-name">{d.nom}</div>
