@@ -47,7 +47,7 @@ export const DRUGS = [
       ],
       p: ["Induction : 2,5-3,5 mg/kg IV"],
     },
-    prep: {solvant:"Pur (émulsion)",volume_final:null,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1.5,dose_max_kg:2.5,duree:"Bolus lent ou IVSE",stabilite:"Utiliser dans les 12h après ouverture",etapes:["Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure","Induction : 1–2,5 mg/kg IV titration lente","Sédation procédurale : 0,5–1 mg/kg IV en titration","IVSE réa : 0,5–4 mg/kg/h — régler selon poids"],notes:["Attention : 2 concentrations (10 mg/mL et 20 mg/mL)","Apnée par myorelaxation : subluxation mandibulaire en 1ère intention"]},
+    prep: {solvant:"Pur (émulsion)",volume_final:null,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1.5,dose_max_kg:2.5,duree:"Bolus lent ou IVSE",stabilite:"Utiliser dans les 12h après ouverture",etapes:["Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure","Induction : 1–2,5 mg/kg IV titration lente","Sédation procédurale : 0,5–1 mg/kg IV en titration","IVSE réa : 0,5–4 mg/kg/h — régler selon poids"],notes:["Attention : 2 concentrations (10 mg/mL et 20 mg/mL)","Surveillance capno pendant sédation procédurale","Apnée par myorelaxation : subluxation mandibulaire en 1ère intention"]},
   },
   {
     id: 2,
