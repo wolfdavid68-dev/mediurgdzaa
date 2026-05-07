@@ -8,6 +8,8 @@ import DrugList from "./components/DrugList";
 import ProtocolCard from "./components/ProtocolCard";
 import IncompatibilityList from "./components/IncompatibilityList";
 import PrepKitCard from "./components/PrepKitCard";
+import ChangelogModal from "./components/ChangelogModal";
+import { APP_VERSION } from "./data/changelog";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -41,6 +43,7 @@ const App = () => {
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
+  const [showChangelog, setShowChangelog] = useState(false);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -361,28 +364,41 @@ const App = () => {
       </main>
 
       <nav className="bottom-nav">
+        <div className="bottom-nav-row">
+          <button
+            className={`bottom-tab ${page === "medicaments" ? "bottom-tab-active" : ""}`}
+            onClick={() => navigateTo("medicaments")}
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
+            </svg>
+            <span>Médicaments</span>
+          </button>
+          <button
+            className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
+            onClick={() => navigateTo("protocoles")}
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+              <rect x="9" y="3" width="6" height="4" rx="2" />
+              <line x1="9" y1="12" x2="15" y2="12" />
+              <line x1="9" y1="16" x2="13" y2="16" />
+            </svg>
+            <span>Protocoles</span>
+          </button>
+        </div>
         <button
-          className={`bottom-tab ${page === "medicaments" ? "bottom-tab-active" : ""}`}
-          onClick={() => navigateTo("medicaments")}
+          type="button"
+          className="version-badge-nav"
+          onClick={() => setShowChangelog(true)}
+          title="Voir les notes de version"
+          aria-label={`Version ${APP_VERSION} — voir les notes de version`}
         >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
-          </svg>
-          <span>Médicaments</span>
-        </button>
-        <button
-          className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
-          onClick={() => navigateTo("protocoles")}
-        >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-            <rect x="9" y="3" width="6" height="4" rx="2" />
-            <line x1="9" y1="12" x2="15" y2="12" />
-            <line x1="9" y1="16" x2="13" y2="16" />
-          </svg>
-          <span>Protocoles</span>
+          {APP_VERSION}
         </button>
       </nav>
+
+      <ChangelogModal open={showChangelog} onClose={() => setShowChangelog(false)} />
     </div>
   );
 };
