@@ -38,6 +38,20 @@ const App = () => {
     } catch { return []; }
   });
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator !== "undefined" ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
 
   const toggleFavorite = (id) => {
     setFavorites(prev => {
@@ -148,6 +162,14 @@ const App = () => {
                 <p>Pharmacologie d'urgence · SAUV · SMUR · SAU</p>
               </div>
             </div>
+            <span
+              className={`net-status ${isOnline ? "net-status-online" : "net-status-offline"}`}
+              aria-live="polite"
+              title={isOnline ? "Connecté au réseau" : "Hors ligne — données en cache"}
+            >
+              <span className="net-status-dot" aria-hidden="true" />
+              {isOnline ? "Online" : "Offline"}
+            </span>
             <button className={`font-toggle ${bigFont ? "font-toggle-active" : ""}`} onClick={toggleFont} aria-label={bigFont ? "Réduire la police" : "Agrandir la police"}>
               A+
             </button>

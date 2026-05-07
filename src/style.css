@@ -106,6 +106,61 @@ body {
   justify-content: space-between;
 }
 
+/* Network status badge */
+.net-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  margin-right: 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  user-select: none;
+  border: 1px solid transparent;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.net-status-online {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+  border-color: rgba(34, 197, 94, 0.45);
+}
+.net-status-offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.net-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.net-status-online .net-status-dot {
+  background: #16a34a;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+}
+.net-status-offline .net-status-dot {
+  background: #dc2626;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+  animation: net-status-pulse 1.4s ease-in-out infinite;
+}
+@keyframes net-status-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+@media (max-width: 480px) {
+  .net-status {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 10px;
+    margin-right: 6px;
+  }
+}
+
 /* Font size toggle button */
 .font-toggle {
   height: 36px;
