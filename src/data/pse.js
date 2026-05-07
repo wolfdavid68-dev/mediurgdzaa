@@ -26,10 +26,6 @@ export const PSE = {
     conc: 5000, unite: "µg/kg/min", min: 2, max: 20,
     steps: [5, 10, 15, 20],
   },
-  18: { // Dopamine — 1 amp 200 mg qsp 50 mL → 4 000 µg/mL
-    conc: 4000, unite: "µg/kg/min", min: 3, max: 20,
-    steps: [5, 10, 15, 20],
-  },
   16: { // Isuprel — 5 amp 0,2 mg qsp 50 mL G5% → 20 µg/mL
     conc: 20, unite: "µg/kg/min", min: 0.01, max: 0.1,
     steps: [0.02, 0.05, 0.08, 0.1],
@@ -57,6 +53,16 @@ export const PSE = {
   6: { // Morphine — 10 mg qsp 10 mL NaCl → 1 mg/mL
     conc: 1, unite: "mg/kg/h", min: 0.01, max: 0.05,
     steps: [0.02, 0.03, 0.04, 0.05],
+  },
+
+  // ── CARDIOLOGIE / VASODILATATEURS / ANTI-HTA ──────────────
+  26: { // Loxen (nicardipine) — ampoule 10 mg/10 mL pure → 1 mg/mL
+    conc: 1, unite: "mg/h", min: 1, max: 15,
+    steps: [1, 3, 5, 10, 15],
+  },
+  28: { // Risordan (dinitrate isosorbide) — ampoule 10 mg/10 mL pure → 1 mg/mL
+    conc: 1, unite: "mg/h", min: 1, max: 10,
+    steps: [1, 2, 3, 5, 10],
   },
 
   // ── ANTICOAGULANTS ────────────────────────────────────────

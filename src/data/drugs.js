@@ -15,7 +15,7 @@ export const DRUGS = [
     svc: ["SAUV", "SMUR"],
     couleur: "#F5D300",
     icon: "💤",
-    desc: "Sédatif d'action rapide, hypnotique et anticonvulsivant. Potentialise les récepteurs GABA-A. Délai d'action 10-50 sec, durée 3-10 min. Attention : existe en 2 concentrations (10 mg/mL et 20 mg/mL).",
+    desc: "Sédatif d'action rapide, hypnotique et anticonvulsivant. Potentialise les récepteurs GABA-A. Délai d'action 10-50 sec, durée 3-10 min. Attention : existe en 2 concentrations (10 mg/mL et 20 mg/mL). Surveillance capnographique obligatoire pendant la sédation procédurale.",
     indic: [
       "Sédation procédurale",
       "Induction anesthésique (patient stable)",
@@ -23,17 +23,14 @@ export const DRUGS = [
       "État de mal épileptique réfractaire",
     ],
     ci: [
-      "Allergie aux huiles de soja ou d'œuf",
       "Choc hémodynamique (hypotension sévère)",
-      "Hypertriglycéridémie sévère",
-      "Enfant < 3 ans pour sédation longue (PRIS)",
     ],
     ei: [
       "Hypotension sévère (injection rapide)",
       "Bradycardie",
-      "Apnée / dépression respiratoire",
+      "Apnée non centrale par myorelaxation (TTT : subluxation mandibulaire)",
+      "Dépression respiratoire",
       "Douleur au point d'injection",
-      "Syndrome de perfusion au propofol (PRIS) si > 4 mg/kg/h > 48h",
     ],
     cond: [
       "Ampoule 200 mg/20 mL (10 mg/mL)",
@@ -44,12 +41,13 @@ export const DRUGS = [
       a: [
         "IVD : administrer PUR",
         "Induction : 1-2,5 mg/kg IV",
+        "Sédation procédurale : 0,5-1 mg/kg IV en titration",
         "Entretien PSE : 0,5-4 mg/kg/h",
         "Voies : VVP ou VVC",
       ],
-      p: ["Induction : 2,5-3,5 mg/kg IV", "Non recommandé < 3 ans en sédation prolongée"],
+      p: ["Induction : 2,5-3,5 mg/kg IV"],
     },
-    prep: {solvant:"Pur (émulsion)",volume_final:null,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1.5,dose_max_kg:2.5,duree:"Bolus lent ou IVSE",stabilite:"Utiliser dans les 12h après ouverture",etapes:["Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure","Induction : 1–2,5 mg/kg IV titration lente","IVSE réa : 0,5–4 mg/kg/h — régler selon poids"],notes:["Attention : 2 concentrations (10 mg/mL et 20 mg/mL)","Émulsion lipidique — risque SIPP si > 4 mg/kg/h prolongé","Allergie œuf/soja : CI"]},
+    prep: {solvant:"Pur (émulsion)",volume_final:null,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1.5,dose_max_kg:2.5,duree:"Bolus lent ou IVSE",stabilite:"Utiliser dans les 12h après ouverture",etapes:["Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure","Induction : 1–2,5 mg/kg IV titration lente","Sédation procédurale : 0,5–1 mg/kg IV en titration","IVSE réa : 0,5–4 mg/kg/h — régler selon poids"],notes:["Attention : 2 concentrations (10 mg/mL et 20 mg/mL)","Surveillance capno pendant sédation procédurale","Apnée par myorelaxation : subluxation mandibulaire en 1ère intention"]},
   },
   {
     id: 2,
@@ -69,9 +67,8 @@ export const DRUGS = [
       "Cardioversion électrique",
     ],
     ci: [
-      "Insuffisance surrénalienne connue",
-      "Choc septique (relative — inhibe cortisol)",
-      "Porphyrie",
+      "Insuffisance surrénalienne (relative)",
+      "Porphyrie (relative)",
     ],
     ei: [
       "Myoclonies (injection rapide)",
@@ -110,7 +107,6 @@ export const DRUGS = [
     ],
     ci: [
       "Dépression respiratoire sévère non assistée",
-      "Myasthénie",
       "Insuffisance respiratoire aiguë non intubée (relative)",
     ],
     ei: [
@@ -124,8 +120,8 @@ export const DRUGS = [
       a: [
         "IVD : administrer PUR ou dilué",
         "PSE : 1 ampoule qsp 50 mL NaCl 0,9%",
-        "EME : 10 mg IM ou 5-10 mg IV lente",
-        "Sédation : 0,03-0,1 mg/kg IV (titration)",
+        "EME : 10 mg IM",
+        "Sédation : titration par bolus de 1-3 mg",
         "Voies : VVP ou VVC",
       ],
       p: [
@@ -158,6 +154,7 @@ export const DRUGS = [
       "Coronaropathie sévère",
       "Pathologie psychiatrique sévère (relative)",
       "HTA intracrânienne sévère (relative)",
+      "Enfant < 3 mois",
     ],
     ei: [
       "Emergence reactions (cauchemars, hallucinations)",
@@ -169,15 +166,15 @@ export const DRUGS = [
     poso: {
       a: [
         "IVD : administrer PUR ou dilué NaCl 0,9%",
-        "ISR : 1-2 mg/kg IV",
-        "Sédation : 1-2 mg/kg IV ou 4-6 mg/kg IM",
+        "ISR : 2-3 mg/kg IV",
+        "Sédation : 0,5-1 mg/kg IV ou 4-6 mg/kg IM",
         "Sous-dissociatif : 0,3-0,5 mg/kg IV lente",
         "PSE : 0,5-3 mg/kg/h",
         "Voies : VVP ou VVC",
       ],
-      p: ["ISR : 1-2 mg/kg IV", "Sédation procédurale : 1,5 mg/kg IV ou 4 mg/kg IM"],
+      p: ["ISR : 2-3 mg/kg IV", "Sédation procédurale : 0,5-1 mg/kg IV ou 4 mg/kg IM"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"10 mg/mL (50 mg/mL dispo)",conc_produit:50,unite:"mg",dose_kg:1.5,dose_max_kg:2,duree:"Bolus ou IVSE",stabilite:"Utiliser immédiatement après ouverture",etapes:["Ampoule 250 mg/5 mL (50 mg/mL) — peut être diluée","Diluer si nécessaire : 1 mL (50 mg) qsp 5 mL NaCl → 10 mg/mL","ISR : 1,5-2 mg/kg IV bolus (+ midazolam)","IM : injection pure à 50 mg/mL"],notes:["Stupéfiant : tracer dans le cahier","Hypersécrétion salivaire : prémédication atropine 0,01 mg/kg","Hallucinations : prémédiquer avec midazolam chez l'adulte"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"10 mg/mL (50 mg/mL dispo)",conc_produit:50,unite:"mg",dose_kg:2,dose_max_kg:3,duree:"Bolus ou IVSE",stabilite:"Utiliser immédiatement après ouverture",etapes:["Ampoule 250 mg/5 mL (50 mg/mL) — peut être diluée","Diluer si nécessaire : 1 mL (50 mg) qsp 5 mL NaCl → 10 mg/mL","ISR : 2-3 mg/kg IV bolus (+ midazolam)","Sédation : 0,5-1 mg/kg IV","IM : injection pure à 50 mg/mL"],notes:["Stupéfiant : tracer dans le cahier","Hallucinations : prémédiquer avec midazolam chez l'adulte"]},
   },
 
   // ──────────────── ANALGÉSIE ────────────────
@@ -194,7 +191,6 @@ export const DRUGS = [
     desc: "Analgésie centrale agoniste morphinique majeur. Opioïde 5-10× plus puissant que le fentanyl. Antalgique d'action rapide. STUPÉFIANT — traçabilité obligatoire, conserver l'ampoule.",
     indic: [
       "Analgésie préhospitalière forte (IN ou IV)",
-      "Induction anesthésique (co-induction ISR)",
       "Sédation-analgésie per-opératoire",
       "Douleur traumatique sévère",
     ],
@@ -214,7 +210,6 @@ export const DRUGS = [
         "IN : PUR selon dose/poids",
         "IVSE : 0,2 à 2 µg/kg/h (débit 2 à 20 mL/h)",
         "IV : 0,1-0,3 µg/kg IV lente",
-        "ISR : 0,3-0,5 µg/kg",
         "Voies : VVP ou VVC",
       ],
       p: ["0,2-0,3 µg/kg IV ou IN", "IVSE : 0,2 à 2 µg/kg/h"],
@@ -259,7 +254,7 @@ export const DRUGS = [
         "PSE : concentration 1 mg/mL",
         "Voies : VVP ou VVC",
       ],
-      p: ["0,1-0,2 mg/kg SC ou IV lente /4-6h", "Titration : 0,05 mg/kg /5 min"],
+      p: ["Bolus initial : 0,1 mg/kg IV", "Titration : bolus de 0,02 mg/kg /5-10 min"],
     },
     prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"1 mg/mL",conc_produit:10,unite:"mg",dose_kg:0.1,duree:"Titration bolus /5 min ou IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 10 mg/1 mL (10 mg/mL)","Titration : 1 ampoule qsp 10 mL NaCl 0,9% → 1 mg/mL","PSE : concentration 1 mg/mL NaCl 0,9% — régler selon kg/h"],notes:["Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules","Antagoniste : Naloxone","Surdosage : dépression respiratoire — avoir naloxone à portée"],pedTable:{titre:"Table de dilution pédiatrique — Morphine 1 mg/mL",description:"1 ampoule 10 mg/1 mL diluée dans 9 mL NaCl 0,9% → 1 mg/mL. Garder le volume calculé puis diluer jusqu'à 4 mL avec NaCl 0,9%.",bandes:[{kg_min:1,kg_max:40,mode:"dilute",preparation:"Solution mère 1 mg/mL (10 mg dans 10 mL NaCl 0,9%)",vol_per_kg:0.1,volume_final:4,solvant:"NaCl 0,9%"}]}},
   },
@@ -384,7 +379,7 @@ export const DRUGS = [
       ],
       p: ["ISR : 1,5-2 mg/kg IV", "Laryngospasme : 4 mg/kg IM"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1,duree:"Bolus ISR (< 5 sec)",stabilite:"Utiliser immédiatement",prelever_total:true,prelever_vol:2,etapes:["Ampoule 100 mg/2 mL (50 mg/mL)","Diluer : 2 mL d'ampoule qsp 10 mL NaCl 0,9% → 10 mg/mL","Posologie : 1 mg/kg IV bolus strict"],notes:["CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie","Stupéfiant : tracer dans le cahier + conserver l'ampoule","Risque choc anaphylactique — avoir adrénaline à portée"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:10,conc_finale:"10 mg/mL",conc_produit:10,unite:"mg",dose_kg:1,duree:"Bolus ISR (< 5 sec)",stabilite:"Utiliser immédiatement",prelever_total:true,prelever_vol:2,etapes:["Ampoule 100 mg/2 mL (50 mg/mL)","Diluer : 2 mL d'ampoule qsp 10 mL NaCl 0,9% → 10 mg/mL","Posologie : 1 mg/kg IV bolus strict"],notes:["CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie","Risque choc anaphylactique — avoir adrénaline à portée"]},
   },
   {
     id: 10,
@@ -444,13 +439,13 @@ export const DRUGS = [
       a: [
         "Administrer PUR",
         "Peut être administré en PSE",
-        "Induction : 0,15 mg/kg IV",
+        "Bolus initial : 0,15 mg/kg IV",
         "Entretien : 0,03 mg/kg /20-30 min",
         "Voies : VVP ou VVC",
       ],
       p: ["0,1 mg/kg IV"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:20,conc_finale:"1 mg/mL",conc_produit:1,unite:"mg",dose_kg:0.15,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",prelever_total:true,prelever_vol:10,etapes:["Ampoule 20 mg/10 mL (2 mg/mL)","Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL","Posologie : 0,15 mg/kg IV"],notes:["Administrer dilué pour éviter l'allergie","Pas d'hyperkaliémie — alternative à la Célocurine"]},
+    prep: {solvant:"NaCl 0,9%",volume_final:20,conc_finale:"1 mg/mL",conc_produit:1,unite:"mg",dose_kg:0.15,duree:"Bolus ou IVSE",stabilite:"24h à 25°C",prelever_total:true,prelever_vol:10,etapes:["Ampoule 20 mg/10 mL (2 mg/mL)","Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL","Posologie : 0,15 mg/kg IV"],notes:["Administrer dilué pour éviter l'allergie","Pas d'hyperkaliémie","Indication ≠ Célocurine : entretien de curarisation, pas l'ISR"]},
   },
   {
     id: 12,
@@ -465,7 +460,6 @@ export const DRUGS = [
     desc: "Agent de décurarisation sélectif. Encapsule le rocuronium et la vécuronium. Permet la décurarisation profonde en 2-3 min. Disponible en REA.",
     indic: [
       "Décurarisation urgente du rocuronium/vécuronium (CICO)",
-      "Décurarisation de routine post-opératoire",
       "Récupération neuromusculaire incomplète",
     ],
     ci: ["Allergie"],
@@ -473,12 +467,11 @@ export const DRUGS = [
     cond: ["Flacon 200 mg/2 mL", "Flacon 500 mg/5 mL"],
     poso: {
       a: [
-        "IVD — dose poids : 16 mg/kg (urgence CICO)",
-        "Décurarisation routinière : 2 mg/kg IV",
+        "IVD — urgence CICO : 16 mg/kg",
         "Décurarisation profonde : 4 mg/kg IV",
         "Voies : VVP ou VVC",
       ],
-      p: ["2-4 mg/kg IV selon profondeur du bloc"],
+      p: ["4-16 mg/kg IV selon profondeur du bloc"],
     },
   },
 
@@ -631,6 +624,7 @@ export const DRUGS = [
       "Tachycardie, arythmie ventriculaire",
       "Coronaropathie sévère",
       "Hyperthyroïdie",
+      "Intoxication aux digitaliques",
     ],
     ei: [
       "Tachycardie majeure",
@@ -666,7 +660,7 @@ export const DRUGS = [
       "Choc vasoplégique (anaphylactique, neurogène)",
       "Hypotension réfractaire après réanimation volumique",
     ],
-    ci: ["Hypovolémie non corrigée (relative)"],
+    ci: [],
     ei: [
       "Ischémie périphérique, mésentérique",
       "Nécrose tissulaire si extravasation",
@@ -678,49 +672,15 @@ export const DRUGS = [
       a: [
         "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP",
         "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP",
-        "PSE : 2 ampoules qsp 48 mL (soit 0,33 mg/mL) — VVC proximale",
+        "PSE : 2 ampoules qsp 48 mL (soit 0,33 mg/mL) — VVC conseillée",
         "Sur VVP : maximum 0,2 γ/kg/min (conversion à effectuer)",
         "Titrer selon PAM cible ≥ 65 mmHg",
         "Pas de bolus — débit constant",
       ],
       p: ["0,05-2 µg/kg/min IVSE"],
     },
-    prep: {solvant:"G5%",volume_final:48,conc_finale:"0,33 mg/mL",conc_produit:2,unite:"mg",duree:"Continu IVSE sur VVC dédiée",stabilite:"Stable 12h à 25°C à l'abri de la lumière",etapes:["Ampoule 8 mg/4 mL (2 mg/mL)","PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL","Démarrer à 0,1-0,2 µg/kg/min, titrer selon PAM cible"],notes:["Sur voie centrale dédiée — VVC OBLIGATOIRE","Pas de bolus sur cette voie — débit constant","À l'abri de la lumière — tubulure opaque"]},
+    prep: {solvant:"G5%",volume_final:48,conc_finale:"0,33 mg/mL",conc_produit:2,unite:"mg",duree:"Continu IVSE sur voie dédiée",stabilite:"Stable 12h à 25°C à l'abri de la lumière",etapes:["Ampoule 8 mg/4 mL (2 mg/mL)","PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL","Démarrer à 0,1-0,2 µg/kg/min, titrer selon PAM cible"],notes:["Voie dédiée — VVC conseillée mais pas obligatoire","Pas de bolus sur cette voie — débit constant","À l'abri de la lumière — tubulure opaque"]},
   },
-  {
-    id: 18,
-    nom: "DOPAMINE",
-    commercial: "Dopamine",
-    dci: "Dopamine chlorhydrate",
-    classe: "Catécholamine précurseur / Dopaminergique",
-    cat: "Catécholamines",
-    svc: ["SAUV"],
-    couleur: "#A78BFA",
-    icon: "⚗️",
-    desc: "Précurseur de la noradrénaline. Effets dose-dépendants : dopaminergiques (< 5 µg/kg/min), β1 (5-10 µg/kg/min), α1 (> 10 µg/kg/min).",
-    indic: [
-      "Choc cardiogénique (alternative dobutamine)",
-      "Bradycardie réfractaire atropine",
-    ],
-    ci: ["Phéochromocytome", "Fibrillation ventriculaire"],
-    ei: [
-      "Tachycardie, arythmies",
-      "Nausées, vomissements",
-      "Nécrose si extravasation",
-    ],
-    cond: ["Ampoule 200 mg/5 mL"],
-    poso: {
-      a: [
-        "PSE : reconstituer dans 50 mL NaCl 0,9% ou G5%",
-        "Débit : 2-20 µg/kg/min",
-        "Surveillance hémodynamique étroite",
-        "Voies : VVP ou VVC",
-      ],
-      p: ["2-20 µg/kg/min IVSE"],
-    },
-    prep: {solvant:"G5% ou NaCl 0,9%",volume_final:50,conc_finale:"4 mg/mL",conc_produit:40,unite:"mg",duree:"Continu IVSE",stabilite:"Stable 6h à 25°C",etapes:["Ampoule 200 mg/5 mL (40 mg/mL)","PSE : 200 mg (1 ampoule) qsp 50 mL G5% ou NaCl 0,9% → 4 mg/mL","Régler débit selon µg/kg/min cible"],notes:["Effets strictement dose-dépendants","Sur voie dédiée — VVC préférable","Pas de bolus sur cette voie"]},
-  },
-
   // ──────────────── TRAITEMENTS CARDIAQUES ────────────────
   {
     id: 19,
@@ -756,7 +716,7 @@ export const DRUGS = [
       a: [
         "IVD : administrer PUR (prélever 2 ampoules)",
         "Bradycardie : 0,5-1 mg IV, répéter /3-5 min (max 3 mg)",
-        "Organophosphorés : 2-4 mg IV, répéter /5-10 min",
+        "Organophosphorés : 0,5-2 mg IV, répéter /5-10 min",
         "Voies : VVP ou VVC",
       ],
       p: ["0,02 mg/kg IV (min 0,1 mg, max 0,5 mg/dose)"],
@@ -801,7 +761,7 @@ export const DRUGS = [
         "Sur VVP de gros calibre",
         "Surveillance hémodynamique",
       ],
-      p: ["100-500 µg/kg/min IVSE (usage limité)"],
+      p: ["Pas de données pédiatriques — avis spécialisé"],
     },
   },
   {
@@ -822,7 +782,7 @@ export const DRUGS = [
       "Tachycardie supraventriculaire mal tolérée",
     ],
     ci: [
-      "Dysthyroïdie non contrôlée",
+      "Hyperthyroïdie non contrôlée",
       "Bloc sino-auriculaire / BAV 2-3 sans pacemaker",
       "Allergie iode",
       "Grossesse (sauf urgence vitale)",
@@ -839,14 +799,14 @@ export const DRUGS = [
       a: [
         "IVL : sur 30 min dans G5% STRICT (pas de NaCl)",
         "Relais PSE : concentration max 600 mg/48 mL en G5%",
-        "ACR IVD — 3ème CEE : 300 mg qsp 20 mL G5%",
-        "ACR IVD — 5ème CEE : 150 mg qsp 10 mL G5%",
+        "ACR IVD — 3ème CEE : 300 mg PUR (2 ampoules de 150 mg/3 mL)",
+        "ACR IVD — 5ème CEE : 150 mg PUR (1 ampoule de 150 mg/3 mL)",
         "Changer les tubulures à chaque seringue",
         "Voies : VVP ou VVC",
       ],
       p: ["5 mg/kg IV sur 20-60 min (max 300 mg/dose)"],
     },
-    prep: {solvant:"G5% STRICT",volume_final:20,conc_finale:"15 mg/mL (ACR)",conc_produit:50,unite:"mg",dose_kg:5,duree:"20-60 min (charge) / continu IVSE",stabilite:"Utiliser immédiatement",etapes:["ACR 3e CEE : 300 mg qsp 20 mL G5% → 15 mg/mL — bolus IV","ACR 5e CEE : 150 mg qsp 10 mL G5% → 15 mg/mL — bolus IV","Charge : 5 mg/kg dans G5% sur 20-60 min","PSE entretien : max 600 mg/48 mL G5%"],notes:["G5% STRICT — incompatible NaCl 0,9%","Changer tubulures à chaque changement (corrosion PVC)","Phlébite sur VVP — VVC recommandée pour PSE"],pedTable:{titre:"Table de dilution pédiatrique — Amiodarone (Cordarone)",description:"Dose 5 mg/kg en bolus IV. Préparation et volume à injecter selon le poids.",bandes:[{kg_min:1,kg_max:30,mode:"inject",preparation:"1 ampoule 150 mg/3 mL + 12 mL G5% → 10 mg/mL (15 mL au total)",vol_per_kg:0.5,step:0.1},{kg_min:31,kg_max:55,mode:"inject",preparation:"2 ampoules 300 mg/6 mL + 9 mL G5% → 20 mg/mL (15 mL au total)",vol_per_kg:0.25,step:0.5,round_mode:"down"}]}},
+    prep: {solvant:"G5% STRICT",volume_final:20,conc_finale:"15 mg/mL (ACR)",conc_produit:50,unite:"mg",dose_kg:5,duree:"20-60 min (charge) / continu IVSE",stabilite:"Utiliser immédiatement",etapes:["ACR 3e CEE : 300 mg PUR (2 ampoules de 150 mg/3 mL) — bolus IV","ACR 5e CEE : 150 mg PUR (1 ampoule de 150 mg/3 mL) — bolus IV","Charge : 5 mg/kg dans G5% sur 20-60 min","PSE entretien : max 600 mg/48 mL G5%"],notes:["G5% STRICT — incompatible NaCl 0,9%","Changer tubulures à chaque changement (corrosion PVC)","Phlébite sur VVP — VVC recommandée pour PSE"],pedTable:{titre:"Table de dilution pédiatrique — Amiodarone (Cordarone)",description:"Dose 5 mg/kg en bolus IV. Préparation et volume à injecter selon le poids.",bandes:[{kg_min:1,kg_max:30,mode:"inject",preparation:"1 ampoule 150 mg/3 mL + 12 mL G5% → 10 mg/mL (15 mL au total)",vol_per_kg:0.5,step:0.1},{kg_min:31,kg_max:55,mode:"inject",preparation:"2 ampoules 300 mg/6 mL + 9 mL G5% → 20 mg/mL (15 mL au total)",vol_per_kg:0.25,step:0.5,round_mode:"down"}]}},
   },
   {
     id: 22,
@@ -916,12 +876,12 @@ export const DRUGS = [
     poso: {
       a: [
         "IVD : administrer PUR",
-        "20 mg IV bolus rapide (2-3 sec)",
+        "10 mg IV bolus rapide (2-3 sec)",
         "+ flush 20 mL NaCl 0,9%",
-        "Répéter 30 mg si inefficace après 2 min",
+        "Répéter 20 mg si inefficace après 2 min",
         "ECG long pendant l'injection — Atropine + adré à proximité",
       ],
-      p: ["0,1-0,2 mg/kg IV bolus rapide (max 6 mg/dose)"],
+      p: ["≥ 30 mois : 1 mg/kg IV bolus rapide (max 10 mg/dose)"],
     },
   },
   {
@@ -959,7 +919,7 @@ export const DRUGS = [
         "Reconstituer avec le solvant fourni (50 mL)",
         "PSE pour administration directe",
         "IDM : 15 mg bolus IV, puis 0,75 mg/kg /30 min, puis 0,5 mg/kg /60 min",
-        "EP massive : 100 mg IV sur 2h",
+        "EP massive : 10 mg IVL sur 1-2 min, puis 90 mg IV sur 2h",
         "AVC : 0,9 mg/kg IV dont 10% en bolus",
         "Surveillance hémodynamique",
       ],
@@ -1038,13 +998,14 @@ export const DRUGS = [
     poso: {
       a: [
         "IVD : administrer PUR en bolus de 1 mg",
-        "PSE : administrer PUR",
-        "Débit à adapter selon TA cible",
+        "PSE : administrer PUR (1 mg/mL)",
+        "Débit usuel : 1-15 mg/h selon TA cible",
         "Surveillance hémodynamique rapprochée",
         "Voies : VVP ou VVC",
       ],
       p: ["1-3 µg/kg/min IVSE"],
     },
+    prep: {solvant:"Pur (NaCl 0,9% si dilution)",volume_final:null,conc_finale:"1 mg/mL (pur)",conc_produit:1,unite:"mg",duree:"Bolus puis IVSE",stabilite:"24h à 25°C",etapes:["Ampoule 10 mg/10 mL (1 mg/mL) — utiliser pure","Bolus initial : 1 mg IV (= 1 mL)","PSE : 1-15 mg/h = 1-15 mL/h selon TA cible"],notes:["Conserver l'ampoule dans son emballage (photosensible)","Titrer par paliers — ne pas dépasser baisse PA > 25% en 1h"]},
   },
   {
     id: 27,
@@ -1104,18 +1065,19 @@ export const DRUGS = [
       "Hypotension, syncope orthostatique",
       "Tachycardie réflexe",
     ],
-    cond: ["Ampoule 10 mg/10 mL"],
+    cond: ["Ampoule 10 mg/10 mL (1 mg/mL)"],
     poso: {
       a: [
         "IVD en bolus : administrer PUR",
-        "PSE : administrer PUR",
+        "PSE : administrer PUR (1 mg/mL)",
+        "Débit usuel : 1-10 mg/h",
         "Titrer selon PAM",
         "Surveillance hémodynamique",
-        "Voies : VVP ou VCC",
+        "Voies : VVP ou VVC",
       ],
       p: ["1-3 µg/kg/min IVSE"],
     },
-    prep: {solvant:"NaCl 0,9%",volume_final:null,conc_finale:"1 mg/mL (pur)",conc_produit:1,unite:"mg",duree:"Continu IVSE",stabilite:"Utiliser immédiatement",etapes:["Ampoule 10 mg/10 mL (1 mg/mL) — utiliser pure en IVSE","Débuter à 1-2 mg/h = 1-2 mL/h","Titration par paliers 1-2 mg/h selon PA cible"],notes:["CI absolue si inhibiteurs PDE5 < 48h (effondrement PA MORTEL)","Surveiller PA en continu"]},
+    prep: {solvant:"Pur (NaCl 0,9% si dilution)",volume_final:null,conc_finale:"1 mg/mL (pur)",conc_produit:1,unite:"mg",duree:"Continu IVSE",stabilite:"Utiliser immédiatement",etapes:["Ampoule 10 mg/10 mL (1 mg/mL) — utiliser pure en IVSE","Débuter à 1-2 mg/h = 1-2 mL/h","Titration par paliers 1-2 mg/h selon PA cible (max 10 mg/h)"],notes:["CI absolue si inhibiteurs PDE5 < 48h (effondrement PA MORTEL)","Surveiller PA en continu"]},
   },
 
   // ──────────────── ANTIDOTES ────────────────
@@ -1259,9 +1221,9 @@ export const DRUGS = [
     cond: ["Ampoule 20 mg/2 mL (10 mg/mL)"],
     poso: {
       a: [
-        "IVD : 1 ampoule PUR en cas de crise convulsive",
-        "IVL : 1 ampoule en miniflac sur 30 min",
-        "IM : 1 ampoule PUR",
+        "IVD : 10 mg PUR en cas de crise convulsive",
+        "IVL : 10 mg en miniflac sur 30 min",
+        "IM : 10 mg PUR",
         "Intra-rectale possible (surtout enfant)",
         "Voies : VVP ou VVC",
       ],
@@ -1441,7 +1403,6 @@ export const DRUGS = [
     ],
     ci: [
       "Hypercalcémie",
-      "Digoxine en cours",
       "Extravasation (nécrose tissulaire)",
     ],
     ei: [
@@ -1604,9 +1565,9 @@ export const DRUGS = [
     cond: ["Ampoule 0,5 g/5 mL"],
     poso: {
       a: [
-        "IVL sur 15-20 min : 1 ampoule dans 100 mL NaCl 0,9%",
-        "PSE : 1 g/48 mL NaCl 0,9%",
-        "Trauma : 1 g IV sur 10 min (< 3h), puis 1 g sur 8h",
+        "IVL sur 10-15 min : 1 g (= 2 ampoules) dans 100 mL NaCl 0,9%",
+        "PSE entretien : 1 g/48 mL NaCl 0,9% sur 8h",
+        "Trauma : 1 g IVL sur 10 min (< 3h), puis 1 g sur 8h",
         "Voies : VVP ou VVC",
       ],
       p: ["15-20 mg/kg IV sur 20 min (max 1 g)"],
@@ -2515,10 +2476,10 @@ export const DRUGS = [
       "Entretien si suspicion pathologie cardiaque",
       "Vecteur de perfusion",
       "Hypoglycémie modérée (en complément)",
+      "Hypernatrémie (correction par apport en eau libre)",
     ],
     ci: [
       "Hyperglycémie",
-      "Hypernatrémie (risque si seul)",
     ],
     ei: [
       "Hyperglycémie",
@@ -2812,8 +2773,9 @@ export const DRUGS = [
     desc: "Médicament dérivé du sang. Concentré de facteurs vitamine K-dépendants. Traçabilité et commande à faire. Documents à envoyer à la pharma.",
     indic: [
       "Hémorragie grave sous AVK (+ Vitamine K1)",
-      "Hémorragie intracrânienne sous AVK",
-      "Chirurgie urgente sous AVK",
+      "Hémorragie grave sous AOD",
+      "Hémorragie intracrânienne sous AVK ou AOD",
+      "Chirurgie urgente sous AVK ou AOD",
     ],
     ci: [
       "ATCD de TIH",
@@ -2828,10 +2790,11 @@ export const DRUGS = [
       a: [
         "IVL — poudre + solvant à reconstituer",
         "Administrer en PSE",
-        "INR 2-3,9 : 25 UI/kg",
-        "INR 4-6 : 35 UI/kg",
-        "INR > 6 : 50 UI/kg (max 3000 UI)",
-        "Toujours associé à Vitamine K1 10 mg IV",
+        "AVK — INR 2-3,9 : 25 UI/kg",
+        "AVK — INR 4-6 : 35 UI/kg",
+        "AVK — INR > 6 : 50 UI/kg (max 3000 UI)",
+        "AOD : 50 UI/kg",
+        "Si AVK : associer Vitamine K1 10 mg IV",
         "Traçabilité + documents pharma",
         "Voies : VVP ou VVC",
       ],
