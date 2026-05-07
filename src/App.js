@@ -9,6 +9,7 @@ import ProtocolCard from "./components/ProtocolCard";
 import IncompatibilityList from "./components/IncompatibilityList";
 import PrepKitCard from "./components/PrepKitCard";
 import ChangelogModal from "./components/ChangelogModal";
+import AcrModeModal from "./components/AcrModeModal";
 import { APP_VERSION } from "./data/changelog";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
@@ -44,6 +45,7 @@ const App = () => {
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showAcr, setShowAcr] = useState(false);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -398,6 +400,25 @@ const App = () => {
         </button>
       </nav>
 
+      <button
+        type="button"
+        className="urgence-fab"
+        onClick={() => setShowAcr(true)}
+        aria-label="Ouvrir le mode urgence ACR"
+      >
+        <span className="urgence-fab-icon" aria-hidden="true">🚨</span>
+        <span className="urgence-fab-label">URGENCE</span>
+      </button>
+
+      <AcrModeModal
+        open={showAcr}
+        onClose={() => setShowAcr(false)}
+        onOpenDrug={(name) => {
+          setShowAcr(false);
+          navigateTo("medicaments");
+          setSearch(name);
+        }}
+      />
       <ChangelogModal open={showChangelog} onClose={() => setShowChangelog(false)} />
     </div>
   );

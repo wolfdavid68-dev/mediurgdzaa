@@ -1,11 +1,24 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v20";
+export const APP_VERSION = "v21";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v21",
+    date: "2026-05-07",
+    titre: "Mode URGENCE ACR",
+    changes: [
+      { type: "feat", text: "Bouton flottant 🚨 URGENCE accessible partout — ouvre le mode ACR plein écran (sélecteur Adulte / Enfant)." },
+      { type: "feat", text: "Chrono RCP guidé : cycles 2 min (analyse DSA) et 4 min (adrénaline) avec bips d'alerte, suggestions ERC selon le rythme choisi (choquable / non choquable)." },
+      { type: "feat", text: "Métronome MCE 100-120/min synchronisé sur la cadence ERC pour le massage cardiaque." },
+      { type: "feat", text: "Doses de référence Adré / Cordarone toujours visibles + clic = ouverture de la fiche complète Médicaments." },
+      { type: "feat", text: "Compteurs modifiables (chocs / adré / cordarone déjà donnés) — utile à l'arrivée si le DSA grand-public a déjà choqué." },
+      { type: "feat", text: "Bilan de fin de séance copiable (durée totale, totaux, détail des cycles) pour transmission." },
+    ],
+  },
   {
     version: "v20",
     date: "2026-05-07",
