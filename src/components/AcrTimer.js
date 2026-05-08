@@ -172,16 +172,25 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     setPendingActions(prev => prev.map((a, i) => {
       if (i !== idx) return a;
       const nextDone = !a.done;
-      // Mise à jour des compteurs globaux uniquement en cochant (pas en décochant)
       if (nextDone) {
+        // Cocher : incrémente et mémorise l'ancien lastAdreAt pour pouvoir l'annuler proprement
         if (a.type === "choc") setShocks(s => s + 1);
         if (a.type === "adre") {
           setAdres(c => c + 1);
           setLastAdreAt(elapsed);
         }
         if (a.type === "amio") setAmios(c => c + 1);
+        return { ...a, done: true, prevLastAdreAt: lastAdreAt };
+      } else {
+        // Décocher : annule l'incrément et restaure l'état d'avant le clic
+        if (a.type === "choc") setShocks(s => Math.max(0, s - 1));
+        if (a.type === "adre") {
+          setAdres(c => Math.max(0, c - 1));
+          setLastAdreAt(a.prevLastAdreAt ?? null);
+        }
+        if (a.type === "amio") setAmios(c => Math.max(0, c - 1));
+        return { ...a, done: false };
       }
-      return { ...a, done: nextDone };
     }));
   };
 
