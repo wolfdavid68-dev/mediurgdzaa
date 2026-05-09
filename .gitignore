@@ -6,3 +6,7 @@ build/
 npm-debug.log*
 
 .vercel
+
+# Claude Code config (peut contenir des clés API / MCP secrets)
+.claude/
+.mcp.json
