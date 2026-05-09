@@ -46,6 +46,7 @@ const App = () => {
   );
   const [showChangelog, setShowChangelog] = useState(false);
   const [showAcr, setShowAcr] = useState(false);
+  const [exitToast, setExitToast] = useState(false);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -105,24 +106,64 @@ const App = () => {
   };
 
   useEffect(() => {
+    // Sentinelle au fond + état actif au-dessus.
+    // Quand l'utilisateur revient à la racine, on tombe sur la sentinelle → toast "appuyer 2× pour quitter"
+    // au lieu de laisser Chrome standalone afficher une fenêtre vide.
     try {
       if (!window.history.state?.mediurg) {
         window.history.replaceState(
+          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null, sentinel: true } },
+          ""
+        );
+        window.history.pushState(
           { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
           ""
         );
       }
     } catch {}
+
+    let lastBackAt = 0;
+    let toastTimer = null;
+
     const onPopState = (e) => {
       const s = e.state?.mediurg;
       if (!s) return;
+
+      if (s.sentinel) {
+        const now = Date.now();
+        if (now - lastBackAt < 2000) {
+          // 2e appui dans les 2s → on laisse Chrome fermer la fenêtre standalone
+          try { window.history.back(); } catch {}
+          return;
+        }
+        lastBackAt = now;
+        setExitToast(true);
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => setExitToast(false), 2000);
+        // Re-pousse l'état racine pour rester dans l'app
+        try {
+          window.history.pushState(
+            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
+            ""
+          );
+        } catch {}
+        setPage("medicaments");
+        setProtoCategory("PISU");
+        setShowChangelog(false);
+        setShowAcr(false);
+        return;
+      }
+
       setPage(s.page || "medicaments");
       setProtoCategory(s.protoCategory || "PISU");
       setShowChangelog(s.modal === "changelog");
       setShowAcr(s.modal === "acr");
     };
     window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      if (toastTimer) clearTimeout(toastTimer);
+    };
   }, []);
 
   const navigateTo = (newPage) => {
@@ -459,6 +500,12 @@ const App = () => {
         }}
       />
       <ChangelogModal open={showChangelog} onClose={closeOverlay} />
+
+      {exitToast && (
+        <div className="exit-toast" role="status" aria-live="polite">
+          Appuyez à nouveau sur retour pour quitter
+        </div>
+      )}
     </div>
   );
 };
