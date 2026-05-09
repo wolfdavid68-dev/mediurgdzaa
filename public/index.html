@@ -6,14 +6,18 @@
   <meta name="theme-color" content="#FF3B30" />
   <meta name="description" content="MediURG - Livret pharmacologique d'urgence pour SAUV, SMUR et SAU. Accès hors ligne à plus de 70 médicaments critiques." />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="MediURG" />
+  <meta name="color-scheme" content="dark light" />
   <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32" />
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
   <title>MediURG - Pharmacologie d'Urgence Hors Ligne</title>
   <style>
+    /* Fond peint avant le chargement du CSS bundle pour éviter le flash gris/blanc
+       au lancement de la PWA (entre la fin du splash et l'hydratation React). */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #0a0a12; color: #e8e8f0; }
     #root { min-height: 100vh; }
   </style>
 </head>

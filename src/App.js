@@ -88,27 +88,63 @@ const App = () => {
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
   const toggleFont = () => setBigFont(f => !f);
 
-  // Synchronisation du state `page` avec l'historique navigateur
-  // → permet au bouton retour de revenir à la page précédente au lieu de quitter l'app
-  const navigateTo = (newPage) => {
-    if (newPage === page) return;
-    try { window.history.pushState({ page: newPage }, ""); } catch {}
-    setPage(newPage);
+  // === Navigation par couches alignée sur l'historique navigateur ===
+  // Chaque ouverture de modale, changement de sous-onglet ou de page pousse une entrée.
+  // Bouton retour Android : 1er appui ferme la modale → sous-onglet précédent → page précédente → quitter.
+  const pushNav = (patch) => {
+    const current = window.history.state?.mediurg
+      || { page: "medicaments", protoCategory: "PISU", modal: null };
+    const next = { ...current, ...patch };
+    try { window.history.pushState({ mediurg: next }, ""); } catch {}
+  };
+  const replaceNav = (patch) => {
+    const current = window.history.state?.mediurg
+      || { page: "medicaments", protoCategory: "PISU", modal: null };
+    const next = { ...current, ...patch };
+    try { window.history.replaceState({ mediurg: next }, ""); } catch {}
   };
 
   useEffect(() => {
     try {
-      if (!window.history.state || !window.history.state.page) {
-        window.history.replaceState({ page: "medicaments" }, "");
+      if (!window.history.state?.mediurg) {
+        window.history.replaceState(
+          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
+          ""
+        );
       }
     } catch {}
     const onPopState = (e) => {
-      const target = (e.state && e.state.page) ? e.state.page : "medicaments";
-      setPage(target);
+      const s = e.state?.mediurg;
+      if (!s) return;
+      setPage(s.page || "medicaments");
+      setProtoCategory(s.protoCategory || "PISU");
+      setShowChangelog(s.modal === "changelog");
+      setShowAcr(s.modal === "acr");
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  const navigateTo = (newPage) => {
+    if (newPage === page && !showAcr && !showChangelog) return;
+    pushNav({ page: newPage, modal: null });
+    setPage(newPage);
+    setShowAcr(false);
+    setShowChangelog(false);
+  };
+
+  const changeProtoCategory = (newCat) => {
+    if (newCat === protoCategory) return;
+    pushNav({ protoCategory: newCat });
+    setProtoCategory(newCat);
+  };
+
+  const openChangelog = () => { pushNav({ modal: "changelog" }); setShowChangelog(true); };
+  const openAcr = () => { pushNav({ modal: "acr" }); setShowAcr(true); };
+  const closeOverlay = () => {
+    try { window.history.back(); }
+    catch { setShowChangelog(false); setShowAcr(false); }
+  };
 
   const filteredProtocols = useMemo(() => {
     if (protoFilter === "Tout") return PROTOCOLS;
@@ -309,20 +345,20 @@ const App = () => {
             <div className="proto-category-bar">
               <button
                 className={`proto-category-tab ${protoCategory === "PISU" ? "proto-category-active" : ""}`}
-                onClick={() => setProtoCategory("PISU")}
+                onClick={() => changeProtoCategory("PISU")}
               >
                 PISU
                 <span className="proto-category-count">{filteredProtocols.length}</span>
               </button>
               <button
                 className={`proto-category-tab ${protoCategory === "incompatibilites" ? "proto-category-active" : ""}`}
-                onClick={() => setProtoCategory("incompatibilites")}
+                onClick={() => changeProtoCategory("incompatibilites")}
               >
                 Incompatibilité Médicamenteuse
               </button>
               <button
                 className={`proto-category-tab ${protoCategory === "kits" ? "proto-category-active" : ""}`}
-                onClick={() => setProtoCategory("kits")}
+                onClick={() => changeProtoCategory("kits")}
               >
                 Kits de préparation
                 <span className="proto-category-count">{PREP_KITS.length}</span>
@@ -392,7 +428,7 @@ const App = () => {
         <button
           type="button"
           className="version-badge-nav"
-          onClick={() => setShowChangelog(true)}
+          onClick={openChangelog}
           title="Voir les notes de version"
           aria-label={`Version ${APP_VERSION} — voir les notes de version`}
         >
@@ -403,7 +439,7 @@ const App = () => {
       <button
         type="button"
         className="urgence-fab"
-        onClick={() => setShowAcr(true)}
+        onClick={openAcr}
         aria-label="Ouvrir le mode urgence ACR"
       >
         <span className="urgence-fab-icon" aria-hidden="true">🚨</span>
@@ -412,14 +448,17 @@ const App = () => {
 
       <AcrModeModal
         open={showAcr}
-        onClose={() => setShowAcr(false)}
+        onClose={closeOverlay}
         onOpenDrug={(name) => {
+          // On remplace l'entrée d'historique de l'ACR par la nouvelle vue
+          // → bouton retour ramène à l'écran d'avant l'ouverture du mode urgence (pas dans la modale).
+          replaceNav({ page: "medicaments", modal: null });
           setShowAcr(false);
-          navigateTo("medicaments");
+          setPage("medicaments");
           setSearch(name);
         }}
       />
-      <ChangelogModal open={showChangelog} onClose={() => setShowChangelog(false)} />
+      <ChangelogModal open={showChangelog} onClose={closeOverlay} />
     </div>
   );
 };
