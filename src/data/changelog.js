@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v30";
+export const APP_VERSION = "v31";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v31",
+    date: "2026-05-10",
+    titre: "Chrono ACR : prompt analyse au démarrage + cycle 2 min relatif",
+    changes: [
+      { type: "feat", text: "Au tout 1er Démarrer (pas une reprise après pause), le chrono bascule directement en phase analyse pour le rythme initial — workflow ACLS standard (pads collés → analyse). Le bouton Reprendre conserve la phase courante." },
+      { type: "fix", text: "Le cycle 2 min de RCP est désormais ancré sur le début du cycle courant (mis à jour à chaque « Passer au cycle suivant »), pas sur l'elapsed absolu. Avant : si tu mettais 30 s à choisir le rythme + cocher les actions, la RCP du cycle suivant n'avait que 1:30 réelle. Maintenant : pile 2 min de massage entre 2 analyses, peu importe le temps passé en analyse/actions." },
+      { type: "fix", text: "Le zoom T-15s et les annonces vocales se calent automatiquement sur le bon moment du cycle courant (clé voicedRef = cycleStartedAt)." },
+    ],
+  },
   {
     version: "v30",
     date: "2026-05-10",
