@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v24";
+export const APP_VERSION = "v29";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v29",
+    date: "2026-05-10",
+    titre: "Coach RCP 3 modes + zoom préparation DSA (ACLS)",
+    changes: [
+      { type: "feat", text: "Coach RCP 3 modes cyclables persistés : 🔊 Complet (visuel + bips + voix française), 👁 Visuel (visuel + bips, voix coupée — sweet spot SAUV bruyante), 🔇 Muet (aucun feedback). Picto pill libellé en haut à droite du chrono, mémorisé entre sessions." },
+      { type: "feat", text: "Zoom plein cadre 15 secondes avant l'analyse rythme : compte à rebours géant (blanc → orange ≤10s → rouge ≤5s → GO), checklist ACLS High-Performance CPR à 4 étapes — charger défib pendant compressions, relève masseur, « on s'écarte » + arrêt MCE, analyse ≤ 10 s + reprise MCE immédiate." },
+      { type: "feat", text: "Annonces vocales fr-FR aux moments critiques (mode 🔊) : « Préparation analyse, charger le défibrillateur sans arrêter le massage » à T-15s, « On s'écarte » à T-5s, « Analyser le rythme » à T-0, « Prochaine adrénaline » au cycle 4 min." },
+      { type: "feat", text: "Bips countdown discrets T-5 → T-1 + vibration mobile pour repérer la pause coordonnée sans regarder l'écran." },
+    ],
+  },
   {
     version: "v24",
     date: "2026-05-09",
