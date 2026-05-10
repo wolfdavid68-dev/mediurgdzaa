@@ -50,7 +50,68 @@ const beep = (freq = 880, ms = 220, gainVal = 0.18, type = "sine") => {
 // Tick métronome court et sec (clic plutôt que bip)
 const metroTick = () => beep(1600, 35, 0.25, "square");
 
+// Synthèse vocale FR (Web Speech API). Indépendant du Web Audio.
+// Sur iOS/Android, le 1er appel doit suivre un geste utilisateur — la bascule
+// vers "full" via le picto coach déclenche un warm-up speak("Coach activé").
+const speak = (text) => {
+  try {
+    if (typeof window === "undefined") return;
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "fr-FR";
+    u.rate = 1.05;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    synth.cancel(); // évite l'empilement si une annonce précédente n'a pas fini
+    synth.speak(u);
+  } catch {}
+};
+
 const BPM_OPTIONS = [100, 110, 120];
+
+// ─────────────────────────────────────────────────────────
+// Coach mode : 3 états cyclables persistés en localStorage
+//   full   = visuel + bips + métronome + voix (TTS)
+//   visual = visuel + bips + métronome (sans voix) — sweet spot SAUV bruyante
+//   silent = aucun feedback (pas de bip, pas de zoom, pas de voix)
+// ─────────────────────────────────────────────────────────
+const COACH_LS_KEY = "mediurg-acr-coach";
+const COACH_NEXT   = { full: "visual", visual: "silent", silent: "full" };
+const COACH_ICON   = { full: "🔊",     visual: "👁",     silent: "🔇" };
+const COACH_NAME   = { full: "Complet", visual: "Visuel", silent: "Muet" };
+const COACH_TITLE  = {
+  full:   "Coach complet (visuel + bips + voix) — clic pour visuel sans voix",
+  visual: "Coach visuel (bips, voix coupée) — clic pour silencieux",
+  silent: "Silencieux (aucun feedback) — clic pour coach complet",
+};
+const readCoach = () => {
+  try {
+    const v = localStorage.getItem(COACH_LS_KEY);
+    if (v === "full" || v === "visual" || v === "silent") return v;
+  } catch {}
+  return "full";
+};
+
+// ─────────────────────────────────────────────────────────
+// Préparation DSA — checklist ACLS High-Performance CPR
+// Affichée en overlay « zoom » 15s avant l'analyse rythme.
+// Principe ACLS clé : Charging during compressions
+// (anticiper la charge sans interrompre le MCE) + minimiser
+// la pause péri-choc et le post-shock pause = 0.
+// Chaque étape a une fenêtre [from..to] (en s avant T-0).
+// ─────────────────────────────────────────────────────────
+const ACLS_PREP_STEPS = [
+  { icon: "⚡", label: "Charger le défib · MCE continue",        from: 15, to: 11 },
+  { icon: "🔄", label: "Préparer relève masseur · cycle 2 min",  from: 10, to: 6  },
+  { icon: "🗣", label: "Annoncer « on s'écarte » · arrêt MCE",   from: 5,  to: 2  },
+  { icon: "👁", label: "Analyse ≤ 10 s · reprise MCE immédiate", from: 1,  to: 0  },
+];
+const stepState = (step, t) => {
+  if (t > step.from) return "pending";
+  if (t >= step.to)  return "active";
+  return "done";
+};
 
 // Calcule les actions suggérées pour un cycle, sachant l'historique.
 // Le médecin reste décideur — on n'affiche que les rappels ERC.
@@ -107,7 +168,14 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   const [amios, setAmios] = useState(0);
   const [lastAdreAt, setLastAdreAt] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [coachMode, setCoachMode] = useState(readCoach);
+  // Dérivés alignés sur la table : seul "voix" distingue full ↔ visual
+  const audioOn  = coachMode !== "silent"; // bips + métronome
+  const visualOn = coachMode !== "silent"; // zoom DSA + flashs
+  const voiceOn  = coachMode === "full";   // annonces TTS françaises
+  useEffect(() => {
+    try { localStorage.setItem(COACH_LS_KEY, coachMode); } catch {}
+  }, [coachMode]);
   const [showHistory, setShowHistory] = useState(false);
   const [metroOn, setMetroOn]   = useState(false);
   const [metroBpm, setMetroBpm] = useState(110); // ERC : 100-120 / min, défaut au milieu
@@ -132,12 +200,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
 
   // Métronome MCE — indépendant du chrono pour pouvoir s'entraîner sans démarrer la session
   useEffect(() => {
-    if (!metroOn || muted) return;
+    if (!metroOn || !audioOn) return;
     const periodMs = Math.round(60000 / metroBpm);
     metroTick(); // premier tick immédiat
     const id = setInterval(metroTick, periodMs);
     return () => clearInterval(id);
-  }, [metroOn, metroBpm, muted]);
+  }, [metroOn, metroBpm, audioOn]);
 
   // Compteurs de cycle (rappels temporels)
   const analyseIdx    = Math.floor(elapsed / CYCLE_ANALYSE_S);
@@ -147,19 +215,57 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
 
   // Bips au passage de cycle
   useEffect(() => {
-    if (!running || muted) return;
+    if (!running) return;
     if (elapsed > 0 && analyseIdx > lastAnalyseAlertRef.current) {
       lastAnalyseAlertRef.current = analyseIdx;
-      beep(660, 180);
-      setTimeout(() => beep(660, 180), 280);
+      if (audioOn) {
+        beep(660, 180);
+        setTimeout(() => beep(660, 180), 280);
+      }
+      if (voiceOn) speak("Analyser le rythme");
       // Auto bascule en phase "analyse" si on est en RCP — laisse le médecin reprendre la main
       setPhase(prev => prev === "rcp" ? "analyse" : prev);
     }
     if (lastAdreAt !== null && adreIdx > lastAdreAlertRef.current && adreIdx >= 1) {
       lastAdreAlertRef.current = adreIdx;
-      beep(880, 220);
+      if (audioOn) beep(880, 220);
+      if (voiceOn) speak("Prochaine adrénaline");
     }
-  }, [elapsed, running, muted, analyseIdx, adreIdx, lastAdreAt]);
+  }, [elapsed, running, audioOn, voiceOn, analyseIdx, adreIdx, lastAdreAt]);
+
+  // Compte à rebours préparation DSA — bips/vibration discrets de T-5 à T-1
+  const lastZoomCueRef = useRef(-1);
+  useEffect(() => {
+    if (!running || !visualOn || phase !== "rcp") {
+      lastZoomCueRef.current = -1;
+      return;
+    }
+    if (nextAnalyseIn > 5) {
+      lastZoomCueRef.current = -1;
+      return;
+    }
+    if (nextAnalyseIn >= 1 && nextAnalyseIn !== lastZoomCueRef.current) {
+      lastZoomCueRef.current = nextAnalyseIn;
+      if (audioOn) beep(1000, 60, 0.18, "square");
+      try {
+        if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(40);
+      } catch {}
+    }
+  }, [nextAnalyseIn, running, audioOn, visualOn, phase]);
+
+  // Annonces vocales préparation DSA — une seule fois par cycle d'analyse
+  const voicedRef = useRef({ t15: -1, t5: -1 });
+  useEffect(() => {
+    if (!running || !voiceOn || phase !== "rcp") return;
+    if (nextAnalyseIn === 15 && voicedRef.current.t15 !== analyseIdx) {
+      voicedRef.current.t15 = analyseIdx;
+      speak("Préparation analyse. Charger le défibrillateur sans arrêter le massage.");
+    }
+    if (nextAnalyseIn === 5 && voicedRef.current.t5 !== analyseIdx) {
+      voicedRef.current.t5 = analyseIdx;
+      speak("On s'écarte");
+    }
+  }, [nextAnalyseIn, running, voiceOn, phase, analyseIdx]);
 
   const onRhythm = (rhythm) => {
     setCurrentRhythm(rhythm);
@@ -229,6 +335,8 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
 
   const analyseAlert = running && phase === "rcp" && nextAnalyseIn <= 10;
   const adreAlert    = running && nextAdreIn !== null && nextAdreIn <= 10;
+  const showZoom     = running && phase === "rcp" && elapsed > 0 && visualOn
+                       && nextAnalyseIn <= 15 && nextAnalyseIn >= 0;
 
   return (
     <div className="acr-timer" role="region" aria-label="Chrono RCP">
@@ -241,12 +349,21 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
         <div className="acr-timer-elapsed">{fmt(elapsed)}</div>
         <button
           type="button"
-          className="acr-mute"
-          onClick={() => setMuted(m => !m)}
-          aria-label={muted ? "Activer le son" : "Couper le son"}
-          title={muted ? "Activer le son" : "Couper le son"}
+          className={`acr-coach-toggle acr-coach-${coachMode}`}
+          onClick={() => {
+            const next = COACH_NEXT[coachMode];
+            // Réveille les moteurs audio dans le geste utilisateur :
+            // - AudioContext (bips, métronome) dès qu'on quitte "silent"
+            // - Speech synthesis (voix) si on bascule vers "full"
+            if (next !== "silent") ensureAudio();
+            if (next === "full") speak("Coach activé");
+            setCoachMode(next);
+          }}
+          aria-label={COACH_TITLE[coachMode]}
+          title={COACH_TITLE[coachMode]}
         >
-          {muted ? "🔇" : "🔊"}
+          <span className="acr-coach-icon" aria-hidden="true">{COACH_ICON[coachMode]}</span>
+          <span className="acr-coach-name">{COACH_NAME[coachMode]}</span>
         </button>
       </div>
 
@@ -565,6 +682,55 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
           </div>
         )}
       </div>
+
+      {/* Overlay « zoom préparation DSA » — checklist ACLS High-Performance CPR */}
+      {showZoom && (
+        <div className="acr-zoom" role="alert" aria-live="assertive" aria-label="Préparation analyse DSA">
+          <div className="acr-zoom-header">
+            <span className="acr-zoom-header-title">⚡ Coach ACR · Préparation DSA</span>
+            <button
+              type="button"
+              className="acr-zoom-skip"
+              onClick={skipToAnalyse}
+              aria-label="Passer à l'analyse maintenant"
+            >
+              Analyser maintenant ↗
+            </button>
+          </div>
+          <div className="acr-zoom-body">
+            <div className="acr-zoom-label">Analyse rythme dans</div>
+            <div
+              className={`acr-zoom-count ${nextAnalyseIn <= 5 ? "acr-zoom-count-danger" : nextAnalyseIn <= 10 ? "acr-zoom-count-warn" : "acr-zoom-count-info"}`}
+              aria-hidden="true"
+            >
+              {nextAnalyseIn === 0 ? "GO" : nextAnalyseIn}
+            </div>
+            {nextAnalyseIn > 0 && <div className="acr-zoom-unit">secondes</div>}
+            <div className="acr-zoom-bar" aria-hidden="true">
+              <div
+                className="acr-zoom-bar-fill"
+                style={{ width: `${Math.min(100, ((15 - nextAnalyseIn) / 15) * 100)}%` }}
+              />
+            </div>
+          </div>
+          <ul className="acr-zoom-checklist">
+            {ACLS_PREP_STEPS.map((step, i) => {
+              const state = stepState(step, nextAnalyseIn);
+              return (
+                <li key={i} className={`acr-zoom-step acr-zoom-step-${state}`}>
+                  <span className="acr-zoom-step-icon" aria-hidden="true">{step.icon}</span>
+                  <span className="acr-zoom-step-label">{step.label}</span>
+                  {state === "done"   && <span className="acr-zoom-step-mark" aria-hidden="true">✓</span>}
+                  {state === "active" && <span className="acr-zoom-step-dot"  aria-hidden="true" />}
+                </li>
+              );
+            })}
+          </ul>
+          <div className="acr-zoom-foot">
+            ACLS · High-Performance CPR · <em>Charging during compressions</em>
+          </div>
+        </div>
+      )}
 
       {/* Historique */}
       {history.length > 0 && (
