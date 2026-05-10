@@ -11,7 +11,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "node scripts/check-versions.js && react-scripts build",
+    "check-versions": "node scripts/check-versions.js",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
