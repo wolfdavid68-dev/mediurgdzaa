@@ -216,7 +216,10 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   // Bips au passage de cycle
   useEffect(() => {
     if (!running) return;
-    if (elapsed > 0 && analyseIdx > lastAnalyseAlertRef.current) {
+    // analyseIdx >= 1 : ne déclencher qu'au VRAI 1er passage de cycle (elapsed >= 120s).
+    // Sans ce garde, à elapsed=1s la condition (0 > -1) flippait phase en "analyse"
+    // immédiatement après Démarrer → le zoom T-15s ne s'affichait jamais.
+    if (analyseIdx >= 1 && analyseIdx > lastAnalyseAlertRef.current) {
       lastAnalyseAlertRef.current = analyseIdx;
       if (audioOn) {
         beep(660, 180);
