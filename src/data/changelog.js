@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v40";
+export const APP_VERSION = "v41";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v41",
+    date: "2026-05-11",
+    titre: "Fix garde 2× retour : exit enchaîné après CloseWatcher close",
+    changes: [
+      { type: "fix", text: "En v40, CloseWatcher catchait bien le 1er retour (toast affiché) mais le 2e retour ne fermait pas la PWA — sur Chrome PWA Android, quand cancel n'est pas preventDefault, close fire mais le navigateur ne déclenche pas automatiquement la nav de fermeture qui suivrait. Fix : flag pendingExit posé au 2e cancel, lu dans le handler close pour appeler manuellement window.history.back() — ça enchaîne sur le popstate sentinelle qui exit via 2e history.back. Maintenant 1er = toast, 2e dans 2 s = quitte. Sur tous les navigateurs supportant CloseWatcher." },
+    ],
+  },
   {
     version: "v40",
     date: "2026-05-11",

@@ -180,10 +180,17 @@ const App = () => {
     // CloseWatcher (Chrome 120+, Firefox 149+) — API conçue spécifiquement
     // pour intercepter les « close requests » (Esc Windows, geste retour iOS,
     // bouton retour Android). preventDefault sur l'event 'cancel' rejette le
-    // close. Plus fiable que Navigation API pour ce cas, qui était bypassé
-    // dans Chrome PWA root back (preventDefault not honored).
+    // close. Plus fiable que Navigation API pour ce cas.
+    //
+    // Note importante : quand cancel n'est PAS preventDefault, l'event close
+    // fire mais le navigateur ne déclenche PAS automatiquement l'action de
+    // fermeture suivante (au moins sur Chrome PWA Android). Il faut donc
+    // appeler window.history.back() manuellement pour enchaîner vers
+    // l'exit (popstate avec sentinel → 2nd history.back → quitte la PWA).
     let watcher = null;
     let watcherDestroyed = false;
+    let pendingExit = false; // 2e retour validé, exit à enchaîner dans 'close'
+
     const setupWatcher = () => {
       if (watcherDestroyed) return;
       if (typeof window.CloseWatcher !== "function") return;
@@ -193,21 +200,32 @@ const App = () => {
 
       watcher.addEventListener("cancel", (e) => {
         // En modal/sous-écran : laisser le close passer pour que popstate
-        // ferme le modal via history. La hiérarchie pushNav le gère.
+        // ferme le modal via history.
         const inDeepState = showAcrRef.current || showChangelogRef.current;
         if (inDeepState) return;
 
-        // À la racine : 1er retour = toast ; 2e dans 2 s = on laisse fermer.
+        // À la racine : 1er retour = toast ; 2e dans 2 s = on flag pour exit.
         const now = Date.now();
-        if (now - lastBackAt < 2000) return; // 2e → laisser close fire → exit
+        if (now - lastBackAt < 2000) {
+          pendingExit = true;
+          return; // laisser close fire → handler exit ci-dessous
+        }
         e.preventDefault();
         lastBackAt = now;
         showExitToast();
       });
       watcher.addEventListener("close", () => {
-        // Watcher consommé après un close non préventé. On en recrée un
-        // pour catcher le PROCHAIN retour si l'app est encore en vie.
         watcher = null;
+        if (pendingExit) {
+          // 2e retour : on enchaîne manuellement l'exit. Le navigateur ne
+          // le fait pas automatiquement après close non-préventé.
+          pendingExit = false;
+          watcherDestroyed = true; // empêche le recreate juste avant l'exit
+          try { window.history.back(); } catch {}
+          return;
+        }
+        // close fire à cause d'une nav interne (modal qui ferme via history.back).
+        // Recreate pour catcher le prochain retour.
         Promise.resolve().then(setupWatcher);
       });
     };
