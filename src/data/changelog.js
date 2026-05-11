@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v52";
+export const APP_VERSION = "v53";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v53",
+    date: "2026-05-11",
+    titre: "Migration TypeScript (mode pragmatique loose)",
+    changes: [
+      { type: "chore", text: "Mise en place de TypeScript en mode pragmatique : tsconfig.json avec strict: false, allowJs: true, noImplicitAny: false. Tous les composants React passent de .jsx à .tsx (15 fichiers : 13 composants + index + App + ProtocolesPage). Tous les modules lib/ passent de .js à .ts (calc, normalize, protocolText). Les data files (drugs, protocols, prepKits, etc.) restent en .js — ce sont des lookup tables denses qui n'ont pas besoin d'être annotées une à une. allowJs leur permet de coexister." },
+      { type: "chore", text: "src/global.d.ts pour les APIs non standardisées (CloseWatcher, webkitAudioContext). vite.config.js → vite.config.ts. ESLint étendu avec typescript-eslint plugin. Scripts npm : nouveau `npm run typecheck` (tsc --noEmit). Lint et format reconnaissent désormais .ts/.tsx." },
+      { type: "chore", text: "Zéro erreur tsc. Aucune migration UI, comportement identique en prod. Le bénéfice se manifestera progressivement : auto-complétion IDE, refacto safe, et tightening incrémental des types (sur les schémas Drug, Protocol, et les calculatrices ACR) dans les versions futures." },
+    ],
+  },
   {
     version: "v52",
     date: "2026-05-11",

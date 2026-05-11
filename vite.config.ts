@@ -2,6 +2,10 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+// (defineConfig de vite ne connaît pas la clé `test` que vitest étend. On
+// pourrait passer par `vitest/config` mais ça crée un conflit de versions
+// Vite imbriquées. Le simplest : cast la config en `any` à la fin.)
+
 // Migration v46 : CRA → Vite + React 19.
 // Phase B (v49) : SW artisanal → Workbox via vite-plugin-pwa.
 // Le manifest PWA et la liste de précache sont désormais générés depuis
@@ -74,9 +78,10 @@ export default defineConfig({
       },
     },
   },
+  // @ts-expect-error — clé `test` ajoutée par vitest, pas dans le type de Vite
   test: {
     environment: "jsdom",
     globals: true,
-    include: ["src/**/*.test.{js,jsx}"],
+    include: ["src/**/*.test.{js,jsx,ts,tsx}"],
   },
 });

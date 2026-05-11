@@ -4,20 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**MediURG** — offline-first PWA (Vite, React 19) for French emergency-medicine pharmacology (services SAUV / SMUR / SAU / REA). UI text and data are in French; keep that convention when editing or adding content.
+**MediURG** — offline-first PWA (Vite, React 19, TypeScript loose) for French emergency-medicine pharmacology (services SAUV / SMUR / SAU / REA). UI text and data are in French; keep that convention when editing or adding content.
 
 ## Commands
 
 ```bash
 npm install        # install deps
 npm start          # dev server (Vite) on http://localhost:5173
-npm run build      # check-versions + vite build → build/ + post-build asset-manifest
+npm run build      # check-versions + vite build → build/
 npm test           # vitest run (jsdom) — tests under src/lib/*.test.js
-npm run lint       # ESLint 9 flat config (react, react-hooks, jsx-a11y)
+npm run lint       # ESLint 9 flat config (react, react-hooks, jsx-a11y, typescript-eslint)
+npm run typecheck  # tsc --noEmit — vérifie les types sans émettre de JS
 npm run format     # Prettier — formate src/, racine. Data files (drugs.js etc.) ignorés.
 ```
 
-Tests are under `src/lib/*.test.js` (calc, normalize, protocolText, data integrity). Globals (`describe`, `test`, `expect`) are auto-injected by vitest via `vite.config.js → test.globals`.
+TypeScript en mode **loose pragmatique** : `tsconfig.json` avec `strict: false, allowJs: true`. Tous les composants en `.tsx`, les utilitaires `lib/` en `.ts`. Les data files (`src/data/*.js`) restent JS — ce sont des lookup tables denses. Les APIs non standardisées (CloseWatcher, webkitAudioContext) sont déclarées dans `src/global.d.ts`.
+
+Tests are under `src/lib/*.test.js` (calc, normalize, protocolText, data integrity). Globals (`describe`, `test`, `expect`) are auto-injected by vitest via `vite.config.ts → test.globals`.
 
 `deployer.bat` (Windows-only) commits, pushes to `origin main`, and runs `vercel --prod`. Do not invoke it from Claude Code; it's an interactive helper for the user.
 

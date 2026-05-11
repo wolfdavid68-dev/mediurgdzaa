@@ -1,7 +1,8 @@
-// ESLint 9 flat config — lint + a11y pour MediURG.
+// ESLint 9 flat config — lint + a11y + TypeScript pour MediURG.
 // Activé via `npm run lint`. Désactivé sur build/, node_modules/, scripts/.
 
 import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import jsxA11y from "eslint-plugin-jsx-a11y";
@@ -11,8 +12,9 @@ import globals from "globals";
 export default [
   { ignores: ["build/**", "node_modules/**", "scripts/**", "*.config.js", "*.config.cjs"] },
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    files: ["src/**/*.{js,jsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: "module",
@@ -41,7 +43,7 @@ export default [
       // Hooks — règles essentielles
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      // A11y — alignées sur ce qu'on vient d'auditer en v51
+      // A11y
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/anchor-is-valid": "error",
       "jsx-a11y/aria-props": "error",
@@ -49,20 +51,22 @@ export default [
       "jsx-a11y/click-events-have-key-events": "warn",
       "jsx-a11y/no-static-element-interactions": "warn",
       "jsx-a11y/label-has-associated-control": "warn",
-      // Hygiène générale
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      // Hygiène
+      "no-unused-vars": "off", // remplacé par la version TS
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
       "no-undef": "error",
-      // Les catch {} sont intentionnels pour les API web optionnelles
-      // (Wake Lock, Vibration, Web Audio, CloseWatcher, etc.) — on ignore
-      // silencieusement quand non supportées plutôt que de crasher.
       "no-empty": ["error", { allowEmptyCatch: true }],
+      // Migration TS « loose pragmatique » : on autorise temporairement les any
+      // et les @ts-ignore. Tightening progressif dans les versions suivantes.
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-empty-function": "off",
     },
   },
   {
-    files: ["src/**/*.test.{js,jsx}"],
+    files: ["src/**/*.test.{js,jsx,ts,tsx}"],
     languageOptions: {
       globals: {
-        // Vitest globals
         describe: "readonly",
         test: "readonly",
         it: "readonly",
