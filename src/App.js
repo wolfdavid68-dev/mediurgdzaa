@@ -106,35 +106,27 @@ const App = () => {
   };
 
   useEffect(() => {
-    // Détection du mode standalone (PWA installée) — la garde « 2× retour pour quitter »
-    // n'a de sens qu'en standalone où la fenêtre Chrome reste ouverte vide après le
-    // dernier retour. En onglet (Firefox, Chrome tab), le navigateur gère lui-même
-    // le retour (page précédente / fermeture d'onglet) et le sentinel cassait Firefox.
-    const isStandalone =
-      (typeof window.matchMedia === "function" &&
-        window.matchMedia("(display-mode: standalone)").matches) ||
-      window.navigator.standalone === true;
-
-    // Sentinelle au fond + état actif au-dessus (standalone uniquement).
-    // En onglet : juste un replaceState pour amorcer notre key mediurg dans l'history,
-    // afin que les popstate suivants (modales, sous-onglets) soient reconnus.
+    // Garde « 2× retour pour quitter » universelle (standalone PWA + onglet Firefox/Chrome).
+    // Pattern : sentinelle au fond + état actif au-dessus. Quand on revient à la racine
+    // (popstate avec state.sentinel), on re-pousse l'état actif AVANT toute autre op
+    // (pour que Firefox ne « blank » pas la page entre popstate et le re-push) et on
+    // affiche le toast. 2e retour dans les 2 s = window.history.back() = navigation
+    // hors de l'app (fermeture standalone OU retour à la page navigateur précédente).
+    // URL explicite passée à pushState/replaceState : certaines versions de Firefox
+    // mobile mishandle l'URL si on passe "" — on lit window.location.href.
     try {
       if (!window.history.state?.mediurg) {
-        if (isStandalone) {
-          window.history.replaceState(
-            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null, sentinel: true } },
-            ""
-          );
-          window.history.pushState(
-            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
-            ""
-          );
-        } else {
-          window.history.replaceState(
-            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
-            ""
-          );
-        }
+        const here = window.location.href;
+        window.history.replaceState(
+          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null, sentinel: true } },
+          "",
+          here
+        );
+        window.history.pushState(
+          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
+          "",
+          here
+        );
       }
     } catch {}
 
@@ -148,21 +140,25 @@ const App = () => {
       if (s.sentinel) {
         const now = Date.now();
         if (now - lastBackAt < 2000) {
-          // 2e appui dans les 2s → on laisse Chrome fermer la fenêtre standalone
+          // 2e appui dans les 2 s → on laisse le navigateur quitter (close standalone
+          // ou retour à la page précédente / fermer l'onglet en mode browser).
           try { window.history.back(); } catch {}
           return;
         }
+        // 1er appui : on RE-POUSSE l'état actif EN PREMIER (avant tout setState
+        // React), pour que la pile history soit en état valide tout de suite —
+        // évite l'écran vide sous Firefox mobile entre popstate et re-render.
+        try {
+          window.history.pushState(
+            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
+            "",
+            window.location.href
+          );
+        } catch {}
         lastBackAt = now;
         setExitToast(true);
         if (toastTimer) clearTimeout(toastTimer);
         toastTimer = setTimeout(() => setExitToast(false), 2000);
-        // Re-pousse l'état racine pour rester dans l'app
-        try {
-          window.history.pushState(
-            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
-            ""
-          );
-        } catch {}
         setPage("medicaments");
         setProtoCategory("PISU");
         setShowChangelog(false);

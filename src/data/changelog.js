@@ -1,21 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v33";
+export const APP_VERSION = "v34";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
   {
-    version: "v33",
+    version: "v34",
     date: "2026-05-11",
-    titre: "Fix Firefox : écran vide après 1er retour en mode onglet",
+    titre: "Garde 2× retour pour quitter — Firefox onglet inclus",
     changes: [
-      { type: "fix", text: "Le pattern « sentinelle + état actif » poussé dans l'history pour la garde « 2× retour pour quitter » est désormais réservé au mode PWA standalone (où la fenêtre Chrome reste vide après le dernier retour). En mode onglet (Firefox, Chrome tab classique), seul un replaceState minimal amorce notre clé d'historique — le navigateur gère ensuite le retour comme prévu (page précédente ou fermeture d'onglet). La navigation interne (modales, sous-onglets) continue de fonctionner via popstate dans les deux modes." },
+      { type: "feat", text: "Le toast « Appuyez à nouveau sur retour pour quitter » s'affiche désormais aussi en mode onglet navigateur (Firefox, Chrome tab), plus seulement en PWA standalone. Le 1er retour reste dans l'app, le 2e (dans les 2 s) ferme proprement. Évite de quitter MediURG par accident en cours de réa." },
+      { type: "fix", text: "Plus d'écran vide sous Firefox mobile au 1er retour : le re-pushState de l'état actif s'exécute maintenant AVANT tout setState React dans le handler popstate, pour que la pile history soit en état valide instantanément. URL explicite passée à pushState/replaceState (window.location.href) au lieu de \"\" — certaines versions de Firefox mobile mishandlent l'URL vide." },
     ],
   },
   {
-    version: "v32",
+    version: "v33",
     date: "2026-05-10",
     titre: "Chrono ACR : passage de cycle automatique à 2 min",
     changes: [
