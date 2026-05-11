@@ -202,6 +202,42 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     return () => clearInterval(id);
   }, [running]);
 
+  // Wake Lock — empêche l'écran de s'éteindre pendant que le chrono tourne.
+  // Sans ça, Android coupe l'écran après ~30 s sans toucher, le tempo de
+  // massage et le chrono disparaissent en plein cycle. Reverrouille au
+  // retour de foreground (le verrou est auto-libéré quand l'app passe en
+  // arrière-plan). API supportée Chrome 84+, Safari 16.4+, Firefox 126+.
+  useEffect(() => {
+    if (!running) return;
+    if (typeof navigator === "undefined" || !navigator.wakeLock) return;
+
+    let sentinel = null;
+    let cancelled = false;
+
+    const acquire = async () => {
+      try {
+        const lock = await navigator.wakeLock.request("screen");
+        if (cancelled) { try { await lock.release(); } catch {} return; }
+        sentinel = lock;
+      } catch {}
+    };
+
+    const onVis = () => {
+      if (document.visibilityState === "visible" && (!sentinel || sentinel.released)) {
+        acquire();
+      }
+    };
+
+    acquire();
+    document.addEventListener("visibilitychange", onVis);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVis);
+      if (sentinel) { try { sentinel.release(); } catch {} }
+    };
+  }, [running]);
+
   // Métronome MCE — indépendant du chrono pour pouvoir s'entraîner sans démarrer la session
   useEffect(() => {
     if (!metroOn || !audioOn) return;

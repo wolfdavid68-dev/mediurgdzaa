@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v44";
+export const APP_VERSION = "v45";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v45",
+    date: "2026-05-11",
+    titre: "Chrono ACR : écran maintenu allumé pendant la RCP (Wake Lock)",
+    changes: [
+      { type: "feat", text: "Tant que le chrono ACR tourne, le tel/tablette ne s'éteint plus tout seul — Wake Lock API activée pendant que le chrono est en marche, relâchée à la pause ou à la fermeture du mode urgence. Évite l'écran noir au milieu d'un cycle de 2 min de RCP quand personne n'a touché l'écran. Le verrou est ré-acquis automatiquement si l'app passe en arrière-plan puis revient au premier plan. Supporté Chrome 84+, Safari 16.4+, Firefox 126+ ; ignoré silencieusement sur navigateurs plus anciens." },
+    ],
+  },
   {
     version: "v44",
     date: "2026-05-11",
