@@ -1,11 +1,20 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v34";
+export const APP_VERSION = "v35";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v35",
+    date: "2026-05-11",
+    titre: "Garde 2× retour : robustesse Firefox PWA Android",
+    changes: [
+      { type: "fix", text: "Le setup history (sentinelle + état actif) s'exécute désormais dans un script inline d'index.html AVANT le mount React, pour que la pile soit en place même si l'user tape retour pendant le chargement initial." },
+      { type: "fix", text: "Le handler popstate intercepte aussi le cas où e.state est null (et pas seulement la sentinelle explicite). Firefox PWA Android peut perdre notre state custom lors d'un retour ; on traite ce cas comme « veut quitter » → toast au 1er tap, fermeture au 2e dans les 2 s." },
+    ],
+  },
   {
     version: "v34",
     date: "2026-05-11",

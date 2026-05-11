@@ -106,14 +106,10 @@ const App = () => {
   };
 
   useEffect(() => {
-    // Garde « 2× retour pour quitter » universelle (standalone PWA + onglet Firefox/Chrome).
-    // Pattern : sentinelle au fond + état actif au-dessus. Quand on revient à la racine
-    // (popstate avec state.sentinel), on re-pousse l'état actif AVANT toute autre op
-    // (pour que Firefox ne « blank » pas la page entre popstate et le re-push) et on
-    // affiche le toast. 2e retour dans les 2 s = window.history.back() = navigation
-    // hors de l'app (fermeture standalone OU retour à la page navigateur précédente).
-    // URL explicite passée à pushState/replaceState : certaines versions de Firefox
-    // mobile mishandle l'URL si on passe "" — on lit window.location.href.
+    // Setup de l'history a déjà été fait dans un <script> inline d'index.html
+    // (sentinelle + état actif), AVANT le mount React. Filet de sécurité si
+    // jamais ce script a été bypassé (ouverture directe via un outil de test,
+    // etc.) — on s'assure qu'on a au moins notre clé mediurg dans le state.
     try {
       if (!window.history.state?.mediurg) {
         const here = window.location.href;
@@ -135,18 +131,19 @@ const App = () => {
 
     const onPopState = (e) => {
       const s = e.state?.mediurg;
-      if (!s) return;
 
-      if (s.sentinel) {
+      // Cas « veut quitter » : soit on est tombé sur la sentinelle (architecture
+      // prévue), soit Firefox PWA Android a perdu le state custom et nous donne
+      // e.state === null (cas observé). Dans les deux cas, on intercepte.
+      if (!s || s.sentinel) {
         const now = Date.now();
         if (now - lastBackAt < 2000) {
-          // 2e appui dans les 2 s → on laisse le navigateur quitter (close standalone
-          // ou retour à la page précédente / fermer l'onglet en mode browser).
+          // 2e appui dans les 2 s → on laisse le navigateur quitter
           try { window.history.back(); } catch {}
           return;
         }
         // 1er appui : on RE-POUSSE l'état actif EN PREMIER (avant tout setState
-        // React), pour que la pile history soit en état valide tout de suite —
+        // React), pour que la pile history soit en état valide instantanément —
         // évite l'écran vide sous Firefox mobile entre popstate et re-render.
         try {
           window.history.pushState(

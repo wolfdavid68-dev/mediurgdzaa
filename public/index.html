@@ -24,6 +24,29 @@
 <body>
   <div id="root"></div>
   <script>
+    /* Setup de l'history AVANT React (évite l'écran vide sous Firefox PWA Android
+       quand l'user tape retour avant que React ait monté son popstate handler).
+       Pattern : sentinelle au fond + état actif au-dessus. Le popstate React
+       (App.js) prendra le relais une fois monté. */
+    (function () {
+      try {
+        if (!window.history.state || !window.history.state.mediurg) {
+          var here = window.location.href;
+          window.history.replaceState(
+            { mediurg: { page: 'medicaments', protoCategory: 'PISU', modal: null, sentinel: true } },
+            '',
+            here
+          );
+          window.history.pushState(
+            { mediurg: { page: 'medicaments', protoCategory: 'PISU', modal: null } },
+            '',
+            here
+          );
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('%PUBLIC_URL%/service-worker.js')
