@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { CHANGELOG } from "../data/changelog";
 
 const TYPE_LABEL = {

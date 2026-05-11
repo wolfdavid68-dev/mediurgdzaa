@@ -1,0 +1,8 @@
+build/
+node_modules/
+package-lock.json
+src/data/drugs.js
+src/data/protocols.js
+src/data/prepKits.js
+src/data/incompatibilities.js
+src/data/pse.js

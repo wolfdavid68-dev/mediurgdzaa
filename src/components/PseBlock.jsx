@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PSE } from "../data/pse";
 import { calcDebit } from "../lib/calc";
 

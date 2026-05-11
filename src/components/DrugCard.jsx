@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { calcDose, ciSeverity } from "../lib/calc";
 import DrugNote from "./DrugNote";
 import PrepBlock from "./PrepBlock";

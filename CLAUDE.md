@@ -13,18 +13,24 @@ npm install        # install deps
 npm start          # dev server (Vite) on http://localhost:5173
 npm run build      # check-versions + vite build → build/ + post-build asset-manifest
 npm test           # vitest run (jsdom) — tests under src/lib/*.test.js
+npm run lint       # ESLint 9 flat config (react, react-hooks, jsx-a11y)
+npm run format     # Prettier — formate src/, racine. Data files (drugs.js etc.) ignorés.
 ```
 
-Tests are under `src/lib/*.test.js` (calc, normalize, protocolText, data integrity). Globals (`describe`, `test`, `expect`) are auto-injected by vitest via `vite.config.js → test.globals`. JSX in `.js` files works thanks to esbuild loader config (CRA legacy).
+Tests are under `src/lib/*.test.js` (calc, normalize, protocolText, data integrity). Globals (`describe`, `test`, `expect`) are auto-injected by vitest via `vite.config.js → test.globals`.
 
 `deployer.bat` (Windows-only) commits, pushes to `origin main`, and runs `vercel --prod`. Do not invoke it from Claude Code; it's an interactive helper for the user.
 
 ## Architecture
 
-### Single-file state, two pages
-`src/App.js` owns all top-level state (current page, search, filters, theme, font size, protocol sub-tab). There is no router and no global store — pages are conditionally rendered based on `page === "medicaments" | "protocoles"`. The "Protocoles" page itself has three sub-tabs (`PISU`, `incompatibilites`, `kits`) controlled by `protoCategory`.
+### State central + pages extraites
+`src/App.jsx` owns le state global (current page, search, filters Médicaments, theme, font size, protocol sub-tab) et la navigation (popstate, CloseWatcher, sentinelle). Pas de router, pas de store global — les pages sont rendues conditionnellement selon `page === "medicaments" | "protocoles"`.
 
-When editing navigation, expect to touch `App.js` directly rather than adding routing infrastructure.
+Pages dans `src/pages/` :
+- **Médicaments** : rendu inline dans App.jsx (search bar dans le header sticky).
+- **`ProtocolesPage.jsx`** : extrait, lazy-loadé via `React.lazy`. Importe `PROTOCOLS`, `PREP_KITS` en interne → ces ~100 kB sortent du bundle initial. Gère son propre `protoFilter` (Adulte/Enfant). Reçoit `protoCategory` + `onDrugSearch` d'App.
+
+La page Protocoles a trois sous-onglets (`PISU`, `incompatibilites`, `kits`) contrôlés par `protoCategory` (état global pour rester dans l'historique navigateur).
 
 ### Static data layer
 All clinical content is hand-curated JS in `src/data/`:

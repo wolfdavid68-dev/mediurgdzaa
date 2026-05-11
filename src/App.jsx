@@ -1,22 +1,18 @@
-import React, { useMemo, useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useMemo, useState, useEffect, useRef, lazy, Suspense } from "react";
 import { DRUGS } from "./data/drugs";
-import { PROTOCOLS } from "./data/protocols";
-import { PREP_KITS } from "./data/prepKits";
 import { ALIASES } from "./data/aliases";
 import { normalize } from "./lib/normalize";
 import DrugList from "./components/DrugList";
-import ProtocolCard from "./components/ProtocolCard";
 import UpdatePrompt from "./components/UpdatePrompt";
 import { APP_VERSION } from "./data/changelog";
 
-// Code-splitting : les modales (ACR, changelog) et les sous-onglets Protocoles
-// (incompat, kits) ne sont importés que quand l'utilisateur les ouvre. Sort
-// les bundles correspondants du chargement initial → premier paint plus rapide
-// sur mobile, et l'ACR ne consomme du JS qu'au moment où l'urgence est lancée.
-const AcrModeModal        = lazy(() => import("./components/AcrModeModal"));
-const ChangelogModal      = lazy(() => import("./components/ChangelogModal"));
-const IncompatibilityList = lazy(() => import("./components/IncompatibilityList"));
-const PrepKitCard         = lazy(() => import("./components/PrepKitCard"));
+// Code-splitting : les modales (ACR, changelog) sont importées à la demande,
+// et la page Protocoles entière (avec ses data PROTOCOLS + PREP_KITS et ses
+// sous-onglets IncompatibilityList + PrepKitCard) est lazy aussi. Tout ce
+// poids sort du bundle initial → premier paint plus rapide.
+const AcrModeModal   = lazy(() => import("./components/AcrModeModal"));
+const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
+const ProtocolesPage = lazy(() => import("./pages/ProtocolesPage"));
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -26,7 +22,9 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("Tout");
   const [svc, setSvc] = useState("Tout");
-  const [protoFilter, setProtoFilter] = useState("Tout");
+  // protoFilter (filtre Adulte/Enfant) est maintenant géré en interne par
+  // ProtocolesPage. App garde uniquement protoCategory parce qu'il est dans
+  // l'historique navigateur (pushNav { protoCategory: ... }).
   const [protoCategory, setProtoCategory] = useState("PISU");
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem("mediurg-theme") || "dark"; } catch { return "dark"; }
@@ -302,18 +300,6 @@ const App = () => {
     catch { setShowChangelog(false); setShowAcr(false); }
   };
 
-  const filteredProtocols = useMemo(() => {
-    if (protoFilter === "Tout") return PROTOCOLS;
-    return PROTOCOLS.filter(p => {
-      const isEnfant = p.code.includes("ENF") || p.titre.includes("Enfant");
-      const isAdulte = !isEnfant && p.titre.includes("Adulte");
-      const isTous   = !isEnfant && !isAdulte;
-      if (protoFilter === "Enfant") return isEnfant || isTous;
-      if (protoFilter === "Adulte") return isAdulte || isTous;
-      return true;
-    });
-  }, [protoFilter]);
-
   const filtered = useMemo(() => {
     const q = normalize(search.trim());
 
@@ -497,67 +483,16 @@ const App = () => {
         )}
 
         {page === "protocoles" && (
-          <>
-            <div className="proto-category-bar">
-              <button
-                className={`proto-category-tab ${protoCategory === "PISU" ? "proto-category-active" : ""}`}
-                onClick={() => changeProtoCategory("PISU")}
-              >
-                PISU
-                <span className="proto-category-count">{filteredProtocols.length}</span>
-              </button>
-              <button
-                className={`proto-category-tab ${protoCategory === "incompatibilites" ? "proto-category-active" : ""}`}
-                onClick={() => changeProtoCategory("incompatibilites")}
-              >
-                Incompatibilité Médicamenteuse
-              </button>
-              <button
-                className={`proto-category-tab ${protoCategory === "kits" ? "proto-category-active" : ""}`}
-                onClick={() => changeProtoCategory("kits")}
-              >
-                Kits de préparation
-                <span className="proto-category-count">{PREP_KITS.length}</span>
-              </button>
-            </div>
-
-            {protoCategory === "incompatibilites" && (
-              <Suspense fallback={null}><IncompatibilityList /></Suspense>
-            )}
-
-            {protoCategory === "kits" && (
-              <Suspense fallback={null}>
-                <div className="protocol-list">
-                  {PREP_KITS.map(k => <PrepKitCard key={k.id} kit={k} />)}
-                </div>
-              </Suspense>
-            )}
-
-            {protoCategory === "PISU" && (
-              <>
-                <div className="proto-filter-bar">
-                  {["Tout", "Adulte", "Enfant"].map(f => (
-                    <button
-                      key={f}
-                      className={`proto-filter-chip ${protoFilter === f ? "proto-filter-active" : ""}`}
-                      onClick={() => setProtoFilter(f)}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-                <div className="protocol-list">
-                  {filteredProtocols.map(p => (
-                    <ProtocolCard
-                      key={p.id}
-                      protocol={p}
-                      onDrugSearch={(name) => { navigateTo("medicaments"); setSearch(name); }}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </>
+          <Suspense fallback={null}>
+            <ProtocolesPage
+              protoCategory={protoCategory}
+              changeProtoCategory={changeProtoCategory}
+              onDrugSearch={(name) => {
+                navigateTo("medicaments");
+                setSearch(name);
+              }}
+            />
+          </Suspense>
         )}
       </main>
 

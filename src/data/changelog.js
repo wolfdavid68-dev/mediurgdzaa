@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v51";
+export const APP_VERSION = "v52";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v52",
+    date: "2026-05-11",
+    titre: "Setup ESLint + extraction ProtocolesPage (data splitting)",
+    changes: [
+      { type: "chore", text: "ESLint 9 flat config + plugins (react, react-hooks, jsx-a11y) + Prettier 3 + eslint-config-prettier. Le repo n'avait aucun lint depuis la migration Vite. npm run lint et npm run format dispos. 0 erreur, 10 warnings restants (a11y sur backdrops <dialog> qui sont gérés autrement, unused vars dans tests). Nettoyage : suppression de tous les import React inutiles (React 19 JSX transform les rend obsolètes — 13 fichiers concernés). StrictMode activé dans index.jsx (sécurise le dev, no-op en prod)." },
+      { type: "feat", text: "Page Protocoles extraite dans src/pages/ProtocolesPage.jsx et lazy-loadée via React.lazy. Les imports PROTOCOLS, PREP_KITS, INCOMPATIBILITIES sont désormais à l'intérieur de cette page (et des sous-composants lazy IncompatibilityList, PrepKitCard) → toutes ces data sortent du bundle initial. Le filtre Adulte/Enfant est maintenant géré en interne par ProtocolesPage." },
+      { type: "chore", text: "Bundle initial allégé : 412 kB → 351 kB (gzip 124 → 107 kB, soit -14 %). ProtocolesPage est maintenant un chunk de 63 kB / 19 kB gzip téléchargé seulement quand l'utilisateur visite l'onglet Protocoles. Premier paint plus rapide sur mobile, surtout pour qui ne va jamais sur Protocoles." },
+    ],
+  },
   {
     version: "v51",
     date: "2026-05-11",

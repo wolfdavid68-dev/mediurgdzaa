@@ -1,4 +1,3 @@
-import React from "react";
 import DrugCard from "./DrugCard";
 
 const DrugList = ({ drugs, favorites, onToggleFavorite, onOpen }) => {

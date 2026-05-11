@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 // Note personnelle par drug, persistée dans localStorage (mediurg-note-{id}).
 // onChange(hasContent) permet au parent d'afficher l'indicateur ✎ dans l'en-tête.

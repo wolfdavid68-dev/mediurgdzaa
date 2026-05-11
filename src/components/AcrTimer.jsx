@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Cycles RCP (recommandations ERC/AHA 2021)
 const CYCLE_ANALYSE_S = 120; // analyse rythme DSA toutes les 2 min
