@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v53";
+export const APP_VERSION = "v54";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v54",
+    date: "2026-05-11",
+    titre: "Retrait pattern \"dopamine\" sans drug correspondant",
+    changes: [
+      { type: "fix", text: "« dopamine » figurait dans DRUG_PATTERNS (ProtocolCard.tsx — liste des mots-clés cliquables dans les protocoles) sans entrée correspondante dans drugs.js. Conséquence : si un protocole mentionnait « dopamine », le mot devenait théoriquement cliquable mais ne menait à rien. Retrait du pattern. Effet bonus : le test data.test.js d'intégrité passe maintenant à 121/121 (vs 120/121 jusqu'ici)." },
+    ],
+  },
   {
     version: "v53",
     date: "2026-05-11",

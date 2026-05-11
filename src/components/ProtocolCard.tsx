@@ -18,7 +18,7 @@ const SECTION_META = {
 // le \b de fin du regex échouerait — utiliser un nom court (« NaCl »
 // plutôt que « NaCl 0,9 % »), la recherche normalisée d'App.js fait le reste.
 export const DRUG_PATTERNS = [
-  "adrénaline", "noradrénaline", "dobutamine", "dopamine",
+  "adrénaline", "noradrénaline", "dobutamine",
   "midazolam", "propofol", "kétamine", "étomidate",
   "morphine", "sufentanil", "naloxone",
   "amiodarone", "atropine", "adénosine",
