@@ -106,19 +106,35 @@ const App = () => {
   };
 
   useEffect(() => {
-    // Sentinelle au fond + état actif au-dessus.
-    // Quand l'utilisateur revient à la racine, on tombe sur la sentinelle → toast "appuyer 2× pour quitter"
-    // au lieu de laisser Chrome standalone afficher une fenêtre vide.
+    // Détection du mode standalone (PWA installée) — la garde « 2× retour pour quitter »
+    // n'a de sens qu'en standalone où la fenêtre Chrome reste ouverte vide après le
+    // dernier retour. En onglet (Firefox, Chrome tab), le navigateur gère lui-même
+    // le retour (page précédente / fermeture d'onglet) et le sentinel cassait Firefox.
+    const isStandalone =
+      (typeof window.matchMedia === "function" &&
+        window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true;
+
+    // Sentinelle au fond + état actif au-dessus (standalone uniquement).
+    // En onglet : juste un replaceState pour amorcer notre key mediurg dans l'history,
+    // afin que les popstate suivants (modales, sous-onglets) soient reconnus.
     try {
       if (!window.history.state?.mediurg) {
-        window.history.replaceState(
-          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null, sentinel: true } },
-          ""
-        );
-        window.history.pushState(
-          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
-          ""
-        );
+        if (isStandalone) {
+          window.history.replaceState(
+            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null, sentinel: true } },
+            ""
+          );
+          window.history.pushState(
+            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
+            ""
+          );
+        } else {
+          window.history.replaceState(
+            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
+            ""
+          );
+        }
       }
     } catch {}
 

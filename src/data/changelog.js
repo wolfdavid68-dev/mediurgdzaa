@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v32";
+export const APP_VERSION = "v33";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v33",
+    date: "2026-05-11",
+    titre: "Fix Firefox : écran vide après 1er retour en mode onglet",
+    changes: [
+      { type: "fix", text: "Le pattern « sentinelle + état actif » poussé dans l'history pour la garde « 2× retour pour quitter » est désormais réservé au mode PWA standalone (où la fenêtre Chrome reste vide après le dernier retour). En mode onglet (Firefox, Chrome tab classique), seul un replaceState minimal amorce notre clé d'historique — le navigateur gère ensuite le retour comme prévu (page précédente ou fermeture d'onglet). La navigation interne (modales, sous-onglets) continue de fonctionner via popstate dans les deux modes." },
+    ],
+  },
   {
     version: "v32",
     date: "2026-05-10",
