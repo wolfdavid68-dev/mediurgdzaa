@@ -128,26 +128,27 @@ const App = () => {
 
     let lastBackAt = 0;
     let toastTimer = null;
+    let allowNextExit = false;
+
+    const showExitToast = () => {
+      setExitToast(true);
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => setExitToast(false), 2000);
+    };
 
     const onPopState = (e) => {
       const s = e.state?.mediurg;
 
-      // Cas « veut quitter » : soit on est tombé sur la sentinelle (architecture
-      // prévue), soit Firefox onglet a perdu le state custom et nous donne
-      // e.state === null. Dans les deux cas, on intercepte.
-      // À noter : sous Firefox PWA Android, popstate n'est PAS fire au tap retour
-      // (l'OS court-circuite notre JS et laisse la fenêtre figée). Limitation
-      // Firefox connue, recommander Chrome PWA pour la garde 2× retour fiable.
+      // Cas « veut quitter » : soit on est tombé sur la sentinelle, soit le
+      // navigateur nous donne e.state === null. Dans les deux cas, on intercepte.
+      // Note : sous Firefox PWA Android, popstate ne fire pas au hardware back —
+      // la Navigation API ci-dessous prend le relais quand elle est dispo.
       if (!s || s.sentinel) {
         const now = Date.now();
         if (now - lastBackAt < 2000) {
-          // 2e appui dans les 2 s → on laisse le navigateur quitter
           try { window.history.back(); } catch {}
           return;
         }
-        // 1er appui : on RE-POUSSE l'état actif EN PREMIER (avant tout setState
-        // React), pour que la pile history soit en état valide instantanément —
-        // évite l'écran vide sous Firefox mobile entre popstate et re-render.
         try {
           window.history.pushState(
             { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
@@ -156,9 +157,7 @@ const App = () => {
           );
         } catch {}
         lastBackAt = now;
-        setExitToast(true);
-        if (toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => setExitToast(false), 2000);
+        showExitToast();
         setPage("medicaments");
         setProtoCategory("PISU");
         setShowChangelog(false);
@@ -172,8 +171,43 @@ const App = () => {
       setShowAcr(s.modal === "acr");
     };
     window.addEventListener("popstate", onPopState);
+
+    // Navigation API (Firefox 144+, Chrome, Edge) — fire pour TOUTES les
+    // navigations (same-document ET cross-document), contrairement à popstate
+    // qui est same-document only. Couvre le cas où Firefox PWA Android route
+    // le hardware back en cross-document (donc popstate ne fire pas).
+    let onNavigate = null;
+    if (typeof window.navigation !== "undefined" &&
+        typeof window.navigation.addEventListener === "function") {
+      onNavigate = (e) => {
+        // On ne touche qu'aux navigations user-initiated de type traverse
+        // (back/forward) qu'on peut canceller.
+        if (e.navigationType !== "traverse" || !e.userInitiated || !e.cancelable) return;
+        if (allowNextExit) { allowNextExit = false; return; }
+
+        let destState = null;
+        try { destState = e.destination?.getState?.(); } catch {}
+        const isExitAttempt = !destState?.mediurg || destState.mediurg.sentinel === true;
+        if (!isExitAttempt) return;
+
+        const now = Date.now();
+        if (now - lastBackAt < 2000) {
+          // 2e appui dans les 2 s → on laisse partir cette navigation
+          allowNextExit = true;
+          return;
+        }
+        e.preventDefault();
+        lastBackAt = now;
+        showExitToast();
+      };
+      window.navigation.addEventListener("navigate", onNavigate);
+    }
+
     return () => {
       window.removeEventListener("popstate", onPopState);
+      if (onNavigate && window.navigation) {
+        window.navigation.removeEventListener("navigate", onNavigate);
+      }
       if (toastTimer) clearTimeout(toastTimer);
     };
   }, []);

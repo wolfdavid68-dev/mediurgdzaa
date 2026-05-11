@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v37";
+export const APP_VERSION = "v38";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v38",
+    date: "2026-05-11",
+    titre: "Garde 2× retour : ajout Navigation API (fix Firefox PWA Android)",
+    changes: [
+      { type: "feat", text: "Le handler de la garde 2× retour utilise désormais la Navigation API (window.navigation, dispo Firefox 144+, Chrome, Edge) en couche au-dessus de popstate. Contrairement à popstate qui ne fire QUE pour les navigations same-document, l'event navigate de la Navigation API fire pour TOUTES les navigations — y compris quand Firefox PWA Android route le hardware back en cross-document (qui était la cause du « écran figé » observé en v34-v37). preventDefault() sur navigate annule la navigation et garde la PWA active. Fallback automatique sur popstate pour les navigateurs sans Navigation API." },
+    ],
+  },
   {
     version: "v37",
     date: "2026-05-11",
