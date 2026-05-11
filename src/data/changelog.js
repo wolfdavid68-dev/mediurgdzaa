@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v64";
+export const APP_VERSION = "v65";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v65",
+    date: "2026-05-11",
+    titre: "Icônes thématiques sur les raccourcis Android",
+    changes: [
+      {
+        type: "feat",
+        text: "Chaque raccourci manifest a maintenant sa propre icône SVG 96×96 affichée dans le menu long-press de l'icône MediURG sur Android : croix blanche sur rouge plein pour URGENCE ACR (identité visuelle réa), deux cercles entrecroisés rouge+orange avec X pour Incompatibilités, fiole stylisée pour Kits, clipboard avec liste à puces pour PISU. Files sources dans public/shortcuts/ — précachées par Workbox automatiquement via globPatterns. À noter : Android lit le manifest au moment de l'install de la PWA, pas à chaque refresh. Pour voir les nouvelles icônes après cette version, il faut désinstaller/réinstaller la PWA depuis le browser.",
+      },
+    ],
+  },
   {
     version: "v64",
     date: "2026-05-11",
