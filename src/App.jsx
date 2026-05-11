@@ -270,18 +270,29 @@ const App = () => {
     };
   }, []);
 
+  // View Transitions API (Chrome 111+, Safari 18+) : enveloppe les changements
+  // de page/sous-onglet pour que le navigateur produise un cross-fade fluide
+  // entre l'ancienne et la nouvelle vue. Fallback silencieux sur les browsers
+  // qui n'exposent pas startViewTransition (tout se passe instantanément, comme avant).
+  const withTransition = (mutator) => {
+    if (typeof document.startViewTransition !== "function") return mutator();
+    document.startViewTransition(mutator);
+  };
+
   const navigateTo = (newPage) => {
     if (newPage === page && !showAcr && !showChangelog) return;
     pushNav({ page: newPage, modal: null });
-    setPage(newPage);
-    setShowAcr(false);
-    setShowChangelog(false);
+    withTransition(() => {
+      setPage(newPage);
+      setShowAcr(false);
+      setShowChangelog(false);
+    });
   };
 
   const changeProtoCategory = (newCat) => {
     if (newCat === protoCategory) return;
     pushNav({ protoCategory: newCat });
-    setProtoCategory(newCat);
+    withTransition(() => setProtoCategory(newCat));
   };
 
   const openChangelog = () => { pushNav({ modal: "changelog" }); setShowChangelog(true); };

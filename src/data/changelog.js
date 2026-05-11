@@ -1,11 +1,24 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v49";
+export const APP_VERSION = "v50";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v50",
+    date: "2026-05-11",
+    titre: "Modernisation visuelle : View Transitions, <dialog> natif, @starting-style, @layer, oklch()",
+    changes: [
+      { type: "feat", text: "View Transitions API (Chrome 111+, Safari 18+, Firefox 142+) : les changements de page (Médicaments ↔ Protocoles) et de sous-onglet (PISU / Incompat / Kits) sont désormais cross-fadés par le navigateur. Fallback silencieux instantané sur les browsers sans support." },
+      { type: "feat", text: "Modales en élément <dialog> natif (AcrModeModal + ChangelogModal) : focus trap, gestion ESC, scroll lock, backdrop click — tout géré par le navigateur sans useEffect custom. Le ::backdrop est animé via @starting-style. ~50 lignes de boilerplate retirées des deux composants." },
+      { type: "feat", text: "Animations d'entrée déclaratives via CSS @starting-style (Chrome 117+, Safari 17.5+, Firefox 129+) sur les toasts (exit, update prompt) et les modales — plus de @keyframes JS à orchestrer, juste une transition CSS qui s'amorce à l'insertion DOM." },
+      { type: "chore", text: "Déclaration @layer reset, base, components, utilities, overrides en tête de style.css : la précédence de cascade est maintenant explicite et documentée. Rétrocompatible (les règles non-wrapped restent au sommet de la cascade)." },
+      { type: "chore", text: "Palette de thèmes en oklch() avec fallback hex pour Safari < 15.4. Luminance perceptuelle uniforme entre danger/success/info/warn/accent → les variantes (bordures, fonds 16 %, ombres) gardent une parité visuelle propre. Modifier le hue d'une couleur met à jour cohéremment toutes ses dérivées." },
+      { type: "chore", text: "Container queries (container-type: inline-size) sur DrugCard : la carte est désormais responsive à son conteneur (liste étroite vs détail large), pas au viewport. Infrastructure prête pour un futur split-pane tablette sans toucher au composant." },
+    ],
+  },
   {
     version: "v49",
     date: "2026-05-11",

@@ -1,7 +1,20 @@
 /* ============================================================
    MediURG — Dark theme, fully responsive (mobile → desktop)
    Mobile-first, fluid typography with clamp()
+   ============================================================
+
+   Cascade layers (CSS @layer) : déclaration des couches dans l'ordre
+   souhaité de précédence (du moins prioritaire au plus prioritaire).
+   - reset      : * { box-sizing }, html/body normalisation
+   - base       : variables globales (:root), data-theme, fonts
+   - components : .drug-card, .acr-*, .changelog-*, etc.
+   - utilities  : helpers atomiques s'il y en a
+   - overrides  : règles unscoped tout en bas, prennent toujours le dessus
+   Toutes les règles non-layer sont implicitement au sommet de la cascade,
+   donc cette déclaration ne casse rien si on n'enveloppe pas tout — elle
+   permet juste de gagner en ordre quand on enveloppe des sections.
    ============================================================ */
+@layer reset, base, components, utilities, overrides;
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -20,11 +33,15 @@ html {
   --text: #e8e8f0;
   --text-dim: #9a9ab0;
   --text-mute: #65657a;
-  --accent: #ff4757;
-  --info: #4da6ff;
-  --warn: #ffaa33;
-  --danger: #ff5555;
-  --success: #4ade80;
+  /* Palette en oklch() : luminance perceptuelle uniforme entre couleurs,
+     pour que les variantes (bordures, fonds 16 %, ombres) gardent une
+     parité visuelle propre. Les fallbacks hex restent dans les vieux
+     browsers qui n'ont pas oklch() (Safari < 15.4). */
+  --accent: #ff4757;  --accent: oklch(67% 0.22 22);
+  --info: #4da6ff;    --info: oklch(70% 0.16 250);
+  --warn: #ffaa33;    --warn: oklch(78% 0.16 70);
+  --danger: #ff5555;  --danger: oklch(67% 0.22 27);
+  --success: #4ade80; --success: oklch(78% 0.18 145);
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --mono: 'SF Mono', 'Consolas', 'Fira Mono', 'Courier New', monospace;
 
@@ -51,10 +68,10 @@ html {
   --text: #1a1a2a;
   --text-dim: #44445e;
   --text-mute: #84849c;
-  --info: #0a7ae0;
-  --warn: #c47a00;
-  --danger: #d42b2b;
-  --success: #1a9440;
+  --info: #0a7ae0;    --info: oklch(55% 0.20 245);
+  --warn: #c47a00;    --warn: oklch(60% 0.13 65);
+  --danger: #d42b2b;  --danger: oklch(55% 0.22 27);
+  --success: #1a9440; --success: oklch(53% 0.18 145);
 
   --header-bg: rgba(238, 240, 245, 0.92);
   --nav-bg: rgba(238, 240, 245, 0.96);
@@ -458,11 +475,28 @@ body {
   border-radius: 12px;
   overflow: hidden;
   transition: border 0.15s, background 0.15s;
+  /* Container queries : la carte sait s'adapter à la largeur de SON
+     conteneur (liste étroite vs détail large), pas à celle du viewport.
+     Évite de devoir bricoler des media queries quand on insère DrugCard
+     dans des contextes différents (futur split-pane tablette p. ex.). */
+  container-type: inline-size;
 }
 .drug-card:hover { border-color: var(--border-strong); }
 .drug-card-open {
   border-color: var(--border-strong);
   background: var(--bg-elevated);
+}
+
+/* Sur une carte dont le conteneur dépasse 520 px (donc en tablette ou
+   en mode détail large), on autorise une mise en page côte à côte des
+   sections prep + posologies. À ~360-480 px (mobile en liste), tout
+   reste empilé verticalement comme avant. */
+@container (min-width: 520px) {
+  .drug-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 }
 
 .drug-header {
@@ -2485,7 +2519,6 @@ body {
   position: fixed;
   left: 50%;
   bottom: calc(96px + var(--safe-bottom));
-  transform: translateX(-50%);
   background: rgba(20, 20, 28, 0.94);
   color: #fff;
   padding: 11px 20px;
@@ -2497,11 +2530,16 @@ body {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.08);
   pointer-events: none;
-  animation: exitToastIn 0.18s ease-out;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
 }
-@keyframes exitToastIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* @starting-style : le navigateur applique ces déclarations à l'instant où
+   l'élément entre dans le DOM, puis la transition normale fait le tween vers
+   l'état final. Remplace les @keyframes d'entrée — pas de JS, pas d'animation
+   à orchestrer manuellement. Chrome 117+, Safari 17.5+, Firefox 129+. */
+@starting-style {
+  .exit-toast { opacity: 0; transform: translateX(-50%) translateY(8px); }
 }
 
 /* Bandeau « Nouvelle version dispo · Mettre à jour » piloté par useRegisterSW
@@ -2510,7 +2548,6 @@ body {
   position: fixed;
   left: 50%;
   bottom: calc(96px + var(--safe-bottom));
-  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -2524,7 +2561,12 @@ body {
   z-index: 350;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(74, 222, 128, 0.45);
-  animation: exitToastIn 0.22s ease-out;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition: opacity 0.22s ease-out, transform 0.22s ease-out;
+}
+@starting-style {
+  .update-prompt { opacity: 0; transform: translateX(-50%) translateY(8px); }
 }
 .update-prompt-text { color: #e8e8f0; }
 .update-prompt-action {
@@ -2551,17 +2593,35 @@ body {
 .update-prompt-close:hover { color: #fff; }
 
 /* Modale plein écran */
-.acr-mode-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+/* <dialog> plein écran pour le mode URGENCE. Le ::backdrop natif assure
+   l'assombrissement, on n'a plus à créer notre propre overlay div. */
+.acr-mode-dialog {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  height: 100%;
+  border: none;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
   align-items: stretch;
   justify-content: center;
-  animation: changelog-fade 0.18s ease-out;
+  opacity: 1;
+  transition: opacity 0.18s;
+}
+.acr-mode-dialog:not([open]) { display: none; }
+.acr-mode-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 1;
+  transition: opacity 0.18s;
+}
+@starting-style {
+  .acr-mode-dialog[open] { opacity: 0; }
+  .acr-mode-dialog::backdrop { opacity: 0; }
 }
 .acr-mode-modal {
   background: var(--bg);
@@ -3684,25 +3744,9 @@ body {
 .version-badge-nav:hover { color: var(--text-dim); }
 .version-badge-nav:active { color: var(--text); }
 
-.changelog-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  animation: changelog-fade 0.18s ease-out;
-}
-@keyframes changelog-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.changelog-modal {
+/* <dialog> natif : reset des styles UA + nos propres réglages.
+   Le backdrop est stylé via le pseudo-élément ::backdrop natif. */
+.changelog-dialog {
   background: var(--bg-elevated);
   color: var(--text);
   border: 1px solid var(--border);
@@ -3710,15 +3754,28 @@ body {
   width: 100%;
   max-width: 640px;
   max-height: 85vh;
+  padding: 0;
+  margin: auto;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  animation: changelog-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  /* Anim d'entrée via @starting-style (entrée DOM → état final transitionné) */
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.22s, transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
-@keyframes changelog-pop {
-  from { opacity: 0; transform: translateY(12px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+.changelog-dialog:not([open]) { display: none; }
+.changelog-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 1;
+  transition: opacity 0.18s;
+}
+@starting-style {
+  .changelog-dialog[open] { opacity: 0; transform: translateY(12px) scale(0.97); }
+  .changelog-dialog::backdrop { opacity: 0; }
 }
 
 .changelog-header {

@@ -1,33 +1,44 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AcrTimer from "./AcrTimer";
 
 // Modale plein écran déclenchée par le bouton URGENCE.
 // Étape 1 : choix Adulte / Enfant.
 // Étape 2 : chrono RCP guidé.
+//
+// <dialog> natif : focus trap, ESC, scroll lock côté navigateur. Plus de
+// useEffect ESC ni d'override sur document.body.style.overflow.
 const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
+  const dialogRef = useRef(null);
   const [pediatric, setPediatric] = useState(null); // null tant que pas choisi
 
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open, onClose]);
+    const d = dialogRef.current;
+    if (!d) return;
+    if (open && !d.open) {
+      try { d.showModal(); } catch {}
+    } else if (!open && d.open) {
+      try { d.close(); } catch {}
+    }
+  }, [open]);
 
   // Reset du choix à la fermeture pour repartir propre la prochaine fois
   useEffect(() => {
     if (!open) setPediatric(null);
   }, [open]);
 
-  if (!open) return null;
+  // Clic backdrop = ferme. Le clic intérieur ne déclenche pas (event sur l'enfant).
+  const onBackdropClick = (e) => {
+    if (e.target === dialogRef.current) onClose();
+  };
 
   return (
-    <div className="acr-mode-overlay" role="dialog" aria-modal="true" aria-label="Mode urgence ACR">
+    <dialog
+      ref={dialogRef}
+      className="acr-mode-dialog"
+      aria-label="Mode urgence ACR"
+      onClose={onClose}
+      onClick={onBackdropClick}
+    >
       <div className="acr-mode-modal">
         <header className="acr-mode-header">
           <div className="acr-mode-title">
@@ -95,7 +106,7 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
           )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };
 
