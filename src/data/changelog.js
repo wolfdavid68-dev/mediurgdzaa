@@ -1,11 +1,20 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v45";
+export const APP_VERSION = "v46";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v46",
+    date: "2026-05-11",
+    titre: "Migration CRA → Vite + upgrade React 19",
+    changes: [
+      { type: "chore", text: "Build chain remplacé : Create React App (déprécié depuis février 2023) → Vite 6. Le build de production passe de ~30 s à <1 s, le HMR en dev est instantané, et le bundle final est de taille équivalente. node_modules ~10× plus petit (159 packages au lieu de ~1500). React 18 → React 19 (aucun breaking visible côté MediURG : pas de propTypes, defaultProps, forwardRef ou class components dans le code). lucide-react retiré (n'était importée nulle part)." },
+      { type: "chore", text: "Layout de sortie identique à CRA (build/static/js + build/static/css + build/asset-manifest.json) pour ne rien casser côté service worker ni Vercel. Script post-build dédié (scripts/generate-asset-manifest.cjs) produit le manifest au format CRA attendu par le SW pour le précache offline." },
+    ],
+  },
   {
     version: "v45",
     date: "2026-05-11",

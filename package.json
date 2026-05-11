@@ -3,24 +3,24 @@
   "version": "1.0.0",
   "description": "Application PWA hors ligne de pharmacologie d'urgence pour SAUV, SMUR et SAU",
   "private": true,
-  "homepage": ".",
+  "type": "module",
   "dependencies": {
-    "lucide-react": "^1.8.0",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "node scripts/check-versions.js && react-scripts build",
-    "check-versions": "node scripts/check-versions.js",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "start": "vite",
+    "dev": "vite",
+    "build": "node scripts/check-versions.cjs && vite build && node scripts/generate-asset-manifest.cjs",
+    "preview": "vite preview",
+    "check-versions": "node scripts/check-versions.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "react-scripts": "^5.0.1"
-  },
-  "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
   }
 }

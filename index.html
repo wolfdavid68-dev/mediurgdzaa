@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="MediURG" />
   <meta name="color-scheme" content="dark light" />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32" />
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
+  <link rel="manifest" href="./manifest.json" />
   <title>MediURG - Pharmacologie d'Urgence Hors Ligne</title>
   <style>
     /* Fond peint avant le chargement du CSS bundle pour éviter le flash gris/blanc
@@ -46,10 +46,11 @@
       } catch (e) {}
     })();
   </script>
+  <script type="module" src="/src/index.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('%PUBLIC_URL%/service-worker.js')
+        navigator.serviceWorker.register('./service-worker.js')
           .then(r => console.log('✓ Service Worker enregistré:', r))
           .catch(e => console.warn('Service Worker échoué:', e));
       });

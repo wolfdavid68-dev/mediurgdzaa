@@ -4,18 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**MediURG** — offline-first PWA (Create React App, React 18) for French emergency-medicine pharmacology (services SAUV / SMUR / SAU / REA). UI text and data are in French; keep that convention when editing or adding content.
+**MediURG** — offline-first PWA (Vite, React 19) for French emergency-medicine pharmacology (services SAUV / SMUR / SAU / REA). UI text and data are in French; keep that convention when editing or adding content.
 
 ## Commands
 
 ```bash
 npm install        # install deps
-npm start          # dev server on http://localhost:3000
-npm run build      # production bundle in build/
-npm test           # react-scripts test (Jest + jsdom)
+npm start          # dev server (Vite) on http://localhost:5173
+npm run build      # check-versions + vite build → build/ + post-build asset-manifest
+npm test           # vitest run (jsdom) — tests under src/lib/*.test.js
 ```
 
-There is no lint script and no test files in `src/` — `npm test` will report "No tests found." Don't add a test runner config unless explicitly asked.
+Tests are under `src/lib/*.test.js` (calc, normalize, protocolText, data integrity). Globals (`describe`, `test`, `expect`) are auto-injected by vitest via `vite.config.js → test.globals`. JSX in `.js` files works thanks to esbuild loader config (CRA legacy).
 
 `deployer.bat` (Windows-only) commits, pushes to `origin main`, and runs `vercel --prod`. Do not invoke it from Claude Code; it's an interactive helper for the user.
 
