@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
+import checker from "vite-plugin-checker";
 
 // (defineConfig de vite ne connaît pas la clé `test` que vitest étend. On
 // pourrait passer par `vitest/config` mais ça crée un conflit de versions
@@ -14,6 +15,17 @@ import { VitePWA } from "vite-plugin-pwa";
 // à maintenir à la main.
 export default defineConfig({
   plugins: [
+    // vite-plugin-checker : remonte les erreurs tsc + oxlint dans l'overlay
+    // Vite en dev (le rond rouge en bas à droite). Plus besoin de garder un
+    // terminal séparé sur `npm run typecheck` ou `npm run lint:fast` — les
+    // erreurs apparaissent en live au-dessus du browser pendant qu'on code.
+    // Le checker tourne en worker thread, n'impacte pas le HMR.
+    // ESLint full type-aware reste sur le run manuel + pre-commit ; oxlint
+    // (12 ms) suffit largement pour l'overlay dev.
+    checker({
+      typescript: true,
+      oxlint: { lintCommand: "oxlint src" },
+    }),
     react(),
     // React Compiler (stable v1.0) : analyse les composants et insère
     // automatiquement la mémoïsation (useMemo/useCallback implicites)

@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v63";
+export const APP_VERSION = "v64";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v64",
+    date: "2026-05-11",
+    titre: "vite-plugin-checker — erreurs tsc + oxlint dans l'overlay dev",
+    changes: [
+      {
+        type: "chore",
+        text: "vite-plugin-checker ajouté : pendant `npm start`, les erreurs TypeScript et oxlint apparaissent directement dans l'overlay Vite (rond rouge en bas à droite du browser) au lieu de rester silencieuses dans le terminal. Plus besoin de garder 3 terminaux ouverts (vite + typecheck --watch + lint --watch) — un seul `npm start` suffit. Le checker tourne en worker thread, zéro impact sur le HMR. Combo choisi : tsc (full typecheck en arrière-plan) + oxlint (12 ms, donne un feedback quasi-instantané). ESLint complet reste sur le run manuel + le pre-commit hook, où ses règles type-aware (~2 s) ont leur place.",
+      },
+    ],
+  },
   {
     version: "v63",
     date: "2026-05-11",
