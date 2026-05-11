@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v36";
+export const APP_VERSION = "v37";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v37",
+    date: "2026-05-11",
+    titre: "Nettoyage diag + limitation Firefox PWA Android documentée",
+    changes: [
+      { type: "chore", text: "Retrait du badge diagnostique v36. Diagnostic concluant : Firefox PWA Android ne fire PAS l'event popstate au tap retour Android — l'OS unmount React directement et laisse la fenêtre PWA figée sur un écran vide. Aucun fix possible côté JavaScript (pushState, beforeunload, popstate, pagehide → tous court-circuités). Limitation Firefox connue (bugs Mozilla 1742059, 1745793). Recommandation : pour la garde « 2× retour pour quitter » fiable + meilleur support PWA hors ligne, installer MediURG via Chrome (Add to Home Screen). La garde marche normalement en Chrome PWA, Chrome onglet, et Firefox onglet." },
+    ],
+  },
   {
     version: "v36",
     date: "2026-05-11",
