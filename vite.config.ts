@@ -73,6 +73,36 @@ export default defineConfig({
         categories: ["medical", "productivity"],
         // icons[] injectées au build par pwaAssets.overrideManifestIcons
         // (cf. pwa-assets.config.ts). Ne pas ré-ajouter ici.
+        // Raccourcis : long-press de l'icône MediURG sur Android (≥ Chrome 84)
+        // affiche un menu avec ces entrées. Cas SMUR : pendant qu'on court vers
+        // le patient, on long-press l'icône → URGENCE ACR ouvre direct le mode
+        // chronométrage compressions. App.tsx lit ?mode et ?tab au mount.
+        shortcuts: [
+          {
+            name: "Mode URGENCE ACR",
+            short_name: "URGENCE",
+            description: "Ouvre directement le chrono ACR avec drogues + cycles",
+            url: "./?mode=acr",
+          },
+          {
+            name: "Incompatibilités médicamenteuses",
+            short_name: "Incompat",
+            description: "Matrice de compatibilité entre drogues IV",
+            url: "./?page=protocoles&tab=incompatibilites",
+          },
+          {
+            name: "Kits de préparation",
+            short_name: "Kits",
+            description: "ISR, ACR — séquences et doses prêtes",
+            url: "./?page=protocoles&tab=kits",
+          },
+          {
+            name: "Protocoles PISU",
+            short_name: "PISU",
+            description: "Protocoles de soins d'urgence",
+            url: "./?page=protocoles",
+          },
+        ],
       },
       injectRegister: false, // on garde notre propre registration pour piloter le toast d'update
     }),

@@ -1,11 +1,24 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v60";
+export const APP_VERSION = "v61";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v61",
+    date: "2026-05-11",
+    titre: "Wake Lock ACR, raccourcis Android, partage protocoles, titres dynamiques",
+    changes: [
+      { type: "feat", text: "Wake Lock API : pendant que la modale URGENCE ACR est ouverte, l'écran reste allumé tout du long de la réa (10-30 min typique). Plus de verrouillage automatique après 30 s pendant qu'on suit le chrono compressions ou qu'on lit la dose adrénaline pédiatrique. Auto-release quand l'app passe en arrière-plan (sécurité du navigateur), re-acquire au retour. Support Chrome 84+, Edge 84+, Safari 16.4+, Firefox 126+. Fallback silencieux sur les vieux navigateurs." },
+      { type: "feat", text: "Raccourcis manifest PWA : long-press de l'icône MediURG sur Android affiche 4 raccourcis directs — URGENCE ACR (ouvre la modale chrono), Incompatibilités, Kits de préparation, Protocoles PISU. App.tsx lit ?mode / ?page / ?tab au mount et applique l'état correspondant. Cas SMUR : pendant qu'on court vers le patient, on long-press → URGENCE en 1 tap, sans attendre que l'app finisse de monter." },
+      { type: "feat", text: "Web Share API sur chaque carte protocole : bouton 🔗 dans le header du body — sur Android/iOS, ouvre la share sheet système (WhatsApp, SMS, Mail, etc.) avec titre + code + version du protocole. Sur desktop sans navigator.share, fallback presse-papier avec feedback « Copié ✓ ». Permet d'envoyer rapidement un protocole à un collègue ou de l'imprimer pour l'archiver." },
+      { type: "feat", text: "Titres d'onglet dynamiques via React 19 document metadata : le titre du tab navigateur (et le label dans la liste des tâches récentes Android) reflète maintenant la vue active — « MediURG — Protocoles PISU », « MediURG — Incompatibilités », « MediURG — « adrenaline » » pendant une recherche, « MediURG — URGENCE ACR » en mode urgence. Cas d'usage : poste partagé avec plusieurs onglets MediURG ouverts (rare mais possible en SAU)." },
+      { type: "chore", text: "oxlint (linter Rust) ajouté à côté d'ESLint : `npm run lint:fast` passe sur les 31 fichiers en 12 ms vs ~2 s pour ESLint. Sert de check pré-commit rapide ; ESLint reste la source de vérité avec ses règles type-aware. oxlint a relevé un useless length check dans App.tsx (corrigé) que l'ESLint ne flagait pas." },
+      { type: "chore", text: "vitest 2.1.8 → 4.1.5 + jsdom 25 → 29. Vitest 4 requiert Vite 6+ (on est sur 7.3.3 depuis v60) et Node 20+. Aucun changement de config nécessaire : `globals: true` + `environment: 'jsdom'` toujours supportés. Bonus : 5 vulnérabilités modérées du package-lock disparues (étaient dans des deps transitives de vitest 2)." },
+    ],
+  },
   {
     version: "v60",
     date: "2026-05-11",

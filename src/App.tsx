@@ -70,6 +70,28 @@ const App = () => {
     };
   }, []);
 
+  // Lecture des query params au mount pour les raccourcis manifest (long-press
+  // de l'icône Android). ?mode=acr ouvre direct la modale URGENCE, ?page +
+  // ?tab basculent sur Protocoles + sous-onglet. Une fois appliqué, on nettoie
+  // l'URL via replaceState pour éviter qu'un refresh reproduise le raccourci.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+    const pageParam = params.get("page");
+    const tab = params.get("tab");
+    let dirty = false;
+    if (mode === "acr") { setShowAcr(true); dirty = true; }
+    if (pageParam === "protocoles") { setPage("protocoles"); dirty = true; }
+    if (tab === "incompatibilites" || tab === "kits" || tab === "PISU") {
+      setProtoCategory(tab); dirty = true;
+    }
+    if (dirty) {
+      try {
+        window.history.replaceState(window.history.state, "", window.location.pathname);
+      } catch {}
+    }
+  }, []);
+
   const toggleFavorite = (id) => {
     setFavorites(prev => {
       const next = new Set(prev);
@@ -273,8 +295,9 @@ const App = () => {
       .filter((d) => {
         const fields = [d.nom, d.commercial, d.dci, d.classe].map(normalize);
         const matchDirect = !q || fields.some(f => f.includes(q));
-        const matchAlias = aliasTargets.length > 0
-          && aliasTargets.some(t => fields.some(f => f.includes(t)));
+        // Array#some retourne false sur tableau vide → pas besoin du
+        // .length > 0 préalable (relevé par oxlint unicorn/no-useless-length-check).
+        const matchAlias = aliasTargets.some(t => fields.some(f => f.includes(t)));
         const matchQ = matchDirect || matchAlias;
         const matchC = cat === "Tout" || d.cat === cat;
         const matchS = svc === "Tout" || d.svc.includes(svc);
@@ -289,8 +312,27 @@ const App = () => {
     return history.map(id => DRUGS.find(d => d.id === id)).filter(Boolean);
   }, [history, deferredSearch, cat, svc, showFavoritesOnly]);
 
+  // React 19 : <title> rendu dans le tree est hissé automatiquement dans <head>.
+  // Onglet navigateur et listes de tâches récentes Android affichent un titre
+  // contextuel au lieu du nom statique → un user qui a 3 onglets MediURG ouverts
+  // (rare mais possible en SAU avec un poste partagé) distingue Médicaments,
+  // Protocoles, et la recherche en cours.
+  const docTitle = (() => {
+    if (showAcr) return "MediURG — URGENCE ACR";
+    if (showChangelog) return "MediURG — Notes de version";
+    if (page === "protocoles") {
+      if (protoCategory === "incompatibilites") return "MediURG — Incompatibilités";
+      if (protoCategory === "kits") return "MediURG — Kits de préparation";
+      return "MediURG — Protocoles PISU";
+    }
+    const q = deferredSearch.trim();
+    if (q) return `MediURG — « ${q} »`;
+    return "MediURG — Pharmacologie d'urgence";
+  })();
+
   return (
     <div className="app" data-testid="app">
+      <title>{docTitle}</title>
       <header className="app-header">
         <div className="header-inner">
           <div className="logo-row">

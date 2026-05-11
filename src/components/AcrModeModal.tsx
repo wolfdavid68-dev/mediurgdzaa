@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import AcrTimer from "./AcrTimer";
+import { useWakeLock } from "../lib/useWakeLock";
 
 // Modale plein écran déclenchée par le bouton URGENCE.
 // Étape 1 : choix Adulte / Enfant.
@@ -10,6 +11,12 @@ import AcrTimer from "./AcrTimer";
 const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
   const dialogRef = useRef(null);
   const [pediatric, setPediatric] = useState(null); // null tant que pas choisi
+
+  // Wake Lock : tant que la modale URGENCE est ouverte, l'écran reste allumé.
+  // Une réa typique = 10-30 min. Pas question que l'écran se verrouille en
+  // plein milieu pendant qu'on suit le chrono compressions ou qu'on lit la
+  // dose adrénaline pédiatrique.
+  useWakeLock(open);
 
   useEffect(() => {
     const d = dialogRef.current;

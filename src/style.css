@@ -1808,6 +1808,38 @@ body {
   font-style: italic;
 }
 
+.protocol-body-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.protocol-share {
+  flex-shrink: 0;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-mute);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+
+.protocol-share:hover,
+.protocol-share:focus-visible {
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+}
+
 .protocol-sections {
   display: flex;
   flex-direction: column;

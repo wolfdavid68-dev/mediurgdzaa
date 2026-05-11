@@ -62,6 +62,8 @@ const renderText = (text, onDrugSearch) => {
 const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
+  // "shared" / "copied" / null — feedback transitoire après clic partage.
+  const [shareState, setShareState] = useState(null);
 
   useEffect(() => {
     if (open) {
@@ -69,6 +71,33 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
       setActiveTab(idx >= 0 ? idx : 0);
     }
   }, [open, p.sections]);
+
+  // Web Share API : permet d'envoyer un protocole à un collègue via WhatsApp,
+  // SMS, ou n'importe quelle target système (Android iOS Chrome Safari). Sur
+  // desktop sans navigator.share, fallback : copie du résumé dans le presse-papier.
+  const handleShare = async (e) => {
+    e.stopPropagation();
+    const data = {
+      title: `MediURG — ${p.titre}`,
+      text: `Protocole ${p.code} · ${p.service} · v${p.version}`,
+      url: window.location.href,
+    };
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share(data);
+        setShareState("shared");
+      } catch {
+        // AbortError quand l'user annule la sheet système → on n'affiche rien
+        return;
+      }
+    } else if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(`${data.title}\n${data.text}\n${data.url}`);
+        setShareState("copied");
+      } catch { return; }
+    } else { return; }
+    setTimeout(() => setShareState(null), 2000);
+  };
 
   const sec = activeTab !== null ? p.sections[activeTab] : null;
   const meta = sec ? (SECTION_META[sec.type] || { color: "#888" }) : null;
@@ -98,12 +127,29 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
 
       {open && (
         <div className="protocol-body">
-          {p.ref && (
-            <div className="protocol-authors">
-              {p.auteurs.join(" · ")}
-              <span className="protocol-ref"> — {p.ref}</span>
-            </div>
-          )}
+          <div className="protocol-body-top">
+            {p.ref ? (
+              <div className="protocol-authors">
+                {p.auteurs.join(" · ")}
+                <span className="protocol-ref"> — {p.ref}</span>
+              </div>
+            ) : <span />}
+            <button
+              type="button"
+              className="protocol-share"
+              onClick={handleShare}
+              aria-label={`Partager le protocole ${p.titre}`}
+              title="Partager"
+            >
+              {shareState === "copied" ? "Copié ✓" : shareState === "shared" ? "✓" : (
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+              )}
+            </button>
+          </div>
 
           <div className="proto-tabs">
             {p.sections.map((s, i) => {
