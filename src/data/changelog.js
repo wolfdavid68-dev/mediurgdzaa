@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v41";
+export const APP_VERSION = "v42";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v42",
+    date: "2026-05-11",
+    titre: "Firefox PWA Android : bloque aussi le 2e retour (évite écran rouge vide)",
+    changes: [
+      { type: "fix", text: "Sur Firefox PWA Android spécifiquement, le 2e retour qui laissait le navigateur fermer naturellement aboutissait à un écran rouge vide (limitation OS : Firefox unmount le document sans fermer la fenêtre PWA). Détection UA + display-mode standalone, et sur cette config on preventDefault aussi le 2e back, en affichant un toast explicite : « Utilisez le bouton app récente Android pour fermer MediURG ». Chrome PWA et navigateurs en onglet conservent l'exit propre au 2e back." },
+    ],
+  },
   {
     version: "v41",
     date: "2026-05-11",

@@ -46,7 +46,9 @@ const App = () => {
   );
   const [showChangelog, setShowChangelog] = useState(false);
   const [showAcr, setShowAcr] = useState(false);
-  const [exitToast, setExitToast] = useState(false);
+  // null | "default" | "firefox-no-exit" — null = caché ; sinon affiche le toast
+  // avec le bon message (variante Firefox PWA = ne peut pas quitter via back).
+  const [exitToast, setExitToast] = useState(null);
 
   // Refs miroirs pour que le handler CloseWatcher (closure attachée 1 seule fois
   // au mount) lise la dernière valeur — sinon il garde la valeur initiale (false).
@@ -136,10 +138,22 @@ const App = () => {
     let lastBackAt = 0;
     let toastTimer = null;
 
-    const showExitToast = () => {
-      setExitToast(true);
+    // Détection Firefox PWA Android : seul cas où le 2e back via back hardware
+    // laisse un écran rouge vide (limitation OS, le navigateur unmount le doc
+    // sans fermer la fenêtre PWA). Sur cette config on bloque AUSSI le 2e back
+    // et on affiche un toast explicatif pour rediriger vers l'app récente.
+    const ua = (typeof navigator !== "undefined" && navigator.userAgent) || "";
+    const isFirefoxPwaAndroid =
+      /Firefox/i.test(ua) && /Android/i.test(ua) &&
+      ((typeof window.matchMedia === "function" &&
+        window.matchMedia("(display-mode: standalone)").matches) ||
+        window.navigator.standalone === true);
+
+    const showExitToast = (variant) => {
+      setExitToast(variant);
       if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => setExitToast(false), 2000);
+      // Le message Firefox est plus long → laisser plus de temps
+      toastTimer = setTimeout(() => setExitToast(null), variant === "firefox-no-exit" ? 3500 : 2000);
     };
 
     // popstate gère :
@@ -163,7 +177,7 @@ const App = () => {
           );
         } catch {}
         lastBackAt = now;
-        showExitToast();
+        showExitToast("default");
         setPage("medicaments");
         setProtoCategory("PISU");
         setShowChangelog(false);
@@ -204,15 +218,26 @@ const App = () => {
         const inDeepState = showAcrRef.current || showChangelogRef.current;
         if (inDeepState) return;
 
-        // À la racine : 1er retour = toast ; 2e dans 2 s = on flag pour exit.
         const now = Date.now();
         if (now - lastBackAt < 2000) {
+          // 2e retour dans 2 s
+          if (isFirefoxPwaAndroid) {
+            // Sur Firefox PWA Android, laisser le close fire = écran rouge vide
+            // (limitation OS). On bloque aussi le 2e back et on redirige
+            // l'utilisateur vers l'app récente Android pour fermer proprement.
+            e.preventDefault();
+            lastBackAt = now;
+            showExitToast("firefox-no-exit");
+            return;
+          }
+          // Autres navigateurs : on flag pour exit dans le handler close
           pendingExit = true;
-          return; // laisser close fire → handler exit ci-dessous
+          return;
         }
+        // 1er retour : toast standard
         e.preventDefault();
         lastBackAt = now;
-        showExitToast();
+        showExitToast("default");
       });
       watcher.addEventListener("close", () => {
         watcher = null;
@@ -576,7 +601,9 @@ const App = () => {
 
       {exitToast && (
         <div className="exit-toast" role="status" aria-live="polite">
-          Appuyez à nouveau sur retour pour quitter
+          {exitToast === "firefox-no-exit"
+            ? "Sur Firefox PWA, utilisez le bouton app récente Android pour fermer MediURG."
+            : "Appuyez à nouveau sur retour pour quitter"}
         </div>
       )}
     </div>
