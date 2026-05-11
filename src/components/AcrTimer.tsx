@@ -310,7 +310,7 @@ const POST_ROSC_TARGETS = [
     icon: "🩸",
     cat: "Hémodynamique",
     cible: "PAM ≥ 65 mmHg",
-    action: "Remplissage puis Noradré IVSE si PAM basse",
+    action: "Remplissage · Noradré IVSE · push-dose adré 10-20 µg si hypoTA transitoire",
   },
   {
     icon: "🫁",
@@ -367,6 +367,15 @@ const suggestActions = ({
     }
     if (lastAdreAt !== null && elapsed - lastAdreAt >= 240 - 10) {
       out.push({ type: "adre", label: adreLabel, hint: "cycle 4 min" });
+    }
+    // ACLS Focused Update 2024 : FV/TV réfractaire après 3 chocs → changement
+    // de position des palettes (antéro-postérieur) ou DSED. DOSE-VF trial.
+    if (protocol === "acls" && totalShocks >= 3) {
+      out.push({
+        type: "tech",
+        label: "Changer position palettes (antéro-postérieur)",
+        hint: "FV/TV réfractaire — ACLS 2024 · ou DSED si dispo",
+      });
     }
   } else if (rhythm === "non_choquable") {
     if (lastAdreAt === null) {

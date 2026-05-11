@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v69";
+export const APP_VERSION = "v70";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v70",
+    date: "2026-05-11",
+    titre: "ACLS Focused Update 2024 — vector change + push-dose adré",
+    changes: [
+      {
+        type: "feat",
+        text: "Mode ACR · protocole ACLS aligné sur l'AHA Focused Update 2024 : en FV/TV réfractaire (après 3 chocs inefficaces), suggestion automatique de changer la position des palettes en antéro-postérieur — ou DSED (Double External Sequential Defibrillation, DOSE-VF trial 2022) si l'équipement le permet. Apparaît comme une action cochable au cycle 4+ uniquement en mode ACLS.",
+      },
+      {
+        type: "feat",
+        text: "Carte « Hémodynamique » de la phase post-ROSC enrichie : mention de la push-dose adrénaline 10-20 µg en bolus IV pour les hypotensions transitoires, en complément du remplissage et de la Noradré IVSE. Pratique standard moderne post-arrêt cardiaque.",
+      },
+      {
+        type: "chore",
+        text: "Label du picker mis à jour : « ACLS 2020 » → « ACLS 2024 ». Le hint d'écran d'accueil indique maintenant « AHA / ACLS — Focused Update 2024 » quand le mode ACLS est sélectionné.",
+      },
+    ],
+  },
   {
     version: "v69",
     date: "2026-05-11",

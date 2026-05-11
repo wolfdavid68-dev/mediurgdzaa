@@ -110,7 +110,7 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
                   className={`acr-mode-protocol-btn ${protocol === "acls" ? "acr-mode-protocol-active" : ""}`}
                   onClick={() => setProtocol("acls")}
                 >
-                  <span className="acr-mode-protocol-name">ACLS 2020</span>
+                  <span className="acr-mode-protocol-name">ACLS 2024</span>
                   <span className="acr-mode-protocol-sub">Adré dès 2e CEE · AHA</span>
                 </button>
               </div>
@@ -138,7 +138,7 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
               </div>
               <div className="acr-mode-picker-hint">
                 {protocol === "acls"
-                  ? "Recommandations AHA/ACLS 2020."
+                  ? "AHA / ACLS — Focused Update 2024."
                   : "Recommandations ERC 2021."}{" "}
                 Le médecin reste décideur.
               </div>
