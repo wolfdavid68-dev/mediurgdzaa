@@ -63,7 +63,12 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
             />
             <span className="poso-calc-unit">mg</span>
             {produitFinal && (
-              <button className="poso-calc-clear" onClick={() => setProduitFinal("")}>×</button>
+              <button
+                type="button"
+                className="poso-calc-clear"
+                onClick={() => setProduitFinal("")}
+                aria-label="Effacer la dose"
+              >×</button>
             )}
           </div>
         ) : (
@@ -85,7 +90,12 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen }) => {
             />
             <span className="poso-calc-unit">kg</span>
             {weight && (
-              <button className="poso-calc-clear" onClick={() => setWeight("")}>×</button>
+              <button
+                type="button"
+                className="poso-calc-clear"
+                onClick={() => setWeight("")}
+                aria-label="Effacer le poids"
+              >×</button>
             )}
           </div>
         )}

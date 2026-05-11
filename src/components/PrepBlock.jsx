@@ -249,7 +249,14 @@ const PrepBlock = ({ drug, weight, produitFinal }) => {
               style={{width:80, padding:"3px 6px", borderRadius:6, border:"1px solid var(--border)", background:"var(--bg)", color:"var(--text)", fontSize:13}}
             />
             <span style={{fontSize:12, color:"var(--text-dim)"}}>mg</span>
-            {doseLibre && <button style={{background:"transparent",border:"none",color:"var(--text-dim)",cursor:"pointer",fontSize:14}} onClick={() => setDoseLibre("")}>×</button>}
+            {doseLibre && (
+              <button
+                type="button"
+                style={{background:"transparent",border:"none",color:"var(--text-dim)",cursor:"pointer",fontSize:14}}
+                onClick={() => setDoseLibre("")}
+                aria-label="Effacer la dose"
+              >×</button>
+            )}
           </div>
           {doseLibre && parseFloat(doseLibre) > 0 && (
             <div className="prep-calc-row">

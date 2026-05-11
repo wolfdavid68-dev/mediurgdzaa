@@ -32,7 +32,10 @@ html {
   --border-strong: #3a3a4d;
   --text: #e8e8f0;
   --text-dim: #9a9ab0;
-  --text-mute: #65657a;
+  /* WCAG AA : 4.5:1 minimum sur --bg pour le texte normal. #65657a était
+     à 3.5:1, échouait l'audit. #8a8aa0 passe à ~4.8:1 sur #0a0a12 et reste
+     suffisamment estompé pour rester clairement secondaire. */
+  --text-mute: #8a8aa0;
   /* Palette en oklch() : luminance perceptuelle uniforme entre couleurs,
      pour que les variantes (bordures, fonds 16 %, ombres) gardent une
      parité visuelle propre. Les fallbacks hex restent dans les vieux
@@ -67,7 +70,8 @@ html {
   --border-strong: #b8bcd0;
   --text: #1a1a2a;
   --text-dim: #44445e;
-  --text-mute: #84849c;
+  /* WCAG AA : #84849c sur #eef0f5 était à 3.4:1. #5e5e74 atteint ~6:1. */
+  --text-mute: #5e5e74;
   --info: #0a7ae0;    --info: oklch(55% 0.20 245);
   --warn: #c47a00;    --warn: oklch(60% 0.13 65);
   --danger: #d42b2b;  --danger: oklch(55% 0.22 27);
@@ -91,6 +95,23 @@ body {
 #root { min-height: 100vh; min-height: 100dvh; }
 
 .app { min-height: 100vh; min-height: 100dvh; }
+
+/* ── Focus visible global ───────────────────────────────────
+   :focus-visible cible uniquement les focus pertinents pour l'accessibilité
+   clavier (Tab, flèches), pas les clics souris. Un outline clair sur tout
+   contrôle interactif est obligatoire pour la navigation au clavier — sans
+   ça les utilisateurs ne savent pas où ils sont. La couleur reprend --info
+   qui contraste bien sur les fonds clairs et sombres.
+   ─────────────────────────────────────────────────────────── */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Inputs / textareas : les outlines de focus sont gérés inline par les
+   règles existantes (.search-bar input:focus, .poso-calc-input:focus,
+   etc.). On garde leur design custom mais on s'assure qu'ils sont aussi
+   couverts par focus-visible avec un fallback discret. */
 
 /* ── Sticky header ──────────────────────────────────────── */
 
@@ -986,6 +1007,7 @@ body {
 }
 
 .poso-calc-clear {
+  position: relative;
   margin-left: auto;
   width: 20px;
   height: 20px;
@@ -1002,6 +1024,14 @@ body {
   flex-shrink: 0;
 }
 .poso-calc-clear:hover { background: var(--border-strong); color: var(--text); }
+/* Étend la hit area à 44×44 px (WCAG 2.5.5) sans changer le rendu visuel
+   du bouton 20×20 px. Le pseudo-élément absolu déborde mais reste
+   transparent ; les events click/hover remontent au bouton parent. */
+.poso-calc-clear::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
 
 .calc-result {
   display: inline-block;
@@ -2222,14 +2252,19 @@ body {
 
 .incompat-detail-close {
   position: absolute;
-  top: 8px;
-  right: 10px;
+  top: 4px;
+  right: 4px;
   background: transparent;
   border: none;
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
-  padding: 2px 6px;
+  /* min-width/height pour atteindre 44×44 px effective (WCAG 2.5.5) */
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .incompat-detail-title {
@@ -3897,4 +3932,37 @@ body {
   .changelog-header { padding: 12px 16px; }
   .changelog-body { padding: 12px 16px 16px; }
   .changelog-item { font-size: 13px; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   prefers-reduced-motion : respecter le réglage système de l'utilisateur
+   (sensibilité vestibulaire, vertige, fatigue oculaire en garde…). On
+   réduit drastiquement les durées d'animation/transition et on coupe
+   les animations infinies (pulse, alert-flash, metro-beat) — l'info
+   reste véhiculée par les couleurs et les changements de texte, sans
+   le mouvement.
+   ════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  /* Animations/transitions globales : durées minimales, pas de smooth-scroll */
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Coupe les animations infinies critiques pour éviter le clignotement */
+  .acr-timer-pulse,
+  .acr-cycle-alert,
+  .acr-mode-flash,
+  .acr-zoom-count-danger,
+  .acr-zoom-step-dot,
+  .acr-metro-on .acr-metro-icon,
+  .acr-coach-toggle {
+    animation: none !important;
+  }
+  /* View Transitions API : skip le cross-fade entre pages */
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }

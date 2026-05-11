@@ -1,11 +1,23 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v50";
+export const APP_VERSION = "v51";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v51",
+    date: "2026-05-11",
+    titre: "Accessibilité : audit + fixes ciblés (WCAG AA)",
+    changes: [
+      { type: "fix", text: "Aria-labels ajoutés sur 4 boutons icône-seul qui n'en avaient pas (× effacer dose, × effacer poids, ✕ fermer détail incompatibilité, × effacer dose libre kit). Les lecteurs d'écran annoncent maintenant l'action de chaque bouton." },
+      { type: "fix", text: "prefers-reduced-motion : bloc global qui respecte le réglage système des utilisateurs sensibles au mouvement. Réduit toutes les transitions/animations à 0.01 ms, coupe les animations infinies (pulse, alert-flash, métronome battant), désactive les View Transitions et les @starting-style. L'info reste véhiculée par les couleurs et les changements de texte." },
+      { type: "fix", text: "Contraste WCAG AA : --text-mute échouait sur les deux thèmes (3.4-3.5:1, besoin 4.5:1). Dark theme passé de #65657a à #8a8aa0 (~4.8:1), light theme de #84849c à #5e5e74 (~6:1)." },
+      { type: "fix", text: "Outline focus-visible global sur tous les contrôles interactifs (button, a, input, textarea, select, [tabindex]). Les utilisateurs navigant au clavier voient maintenant clairement où ils sont — invisible à la souris grâce à :focus-visible (vs :focus)." },
+      { type: "fix", text: "Tap targets agrandis pour WCAG 2.5.5 (44×44 px) : .poso-calc-clear (20×20 visuel mais hit area étendue via pseudo-élément), .incompat-detail-close (min-width/height 44px)." },
+    ],
+  },
   {
     version: "v50",
     date: "2026-05-11",

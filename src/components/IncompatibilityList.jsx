@@ -139,7 +139,12 @@ const IncompatibilityList = () => {
         const entryA = INCOMPATIBILITIES.find(d => d.drug === selected.drugA);
         return (
           <div className="incompat-detail" style={{ borderColor: meta.color, background: meta.color + "14" }}>
-            <button className="incompat-detail-close" onClick={() => setSelected(null)}>✕</button>
+            <button
+              type="button"
+              className="incompat-detail-close"
+              onClick={() => setSelected(null)}
+              aria-label="Fermer le détail"
+            >✕</button>
             <div className="incompat-detail-title">
               <span className="incompat-detail-badge" style={{ background: meta.color }}>
                 {meta.short}
