@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, lazy, Suspense } from "react";
+import { useMemo, useState, useEffect, useDeferredValue, lazy, Suspense } from "react";
 import { DRUGS } from "./data/drugs";
 import { ALIASES } from "./data/aliases";
 import { normalize } from "./lib/normalize";
@@ -20,6 +20,11 @@ const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
 const App = () => {
   const [page, setPage] = useState("medicaments");
   const [search, setSearch] = useState("");
+  // useDeferredValue : l'input reste réactif à 60 fps (priorité urgente)
+  // pendant que le filtrage de DRUGS sur la valeur différée reste en arrière-plan
+  // (priorité non urgente, interruptible). Sur smartphones lents (SAMU, vieux
+  // Android), évite que la frappe rapide ne lag pendant que useMemo recalcule.
+  const deferredSearch = useDeferredValue(search);
   const [cat, setCat] = useState("Tout");
   const [svc, setSvc] = useState("Tout");
   // protoFilter (filtre Adulte/Enfant) est maintenant géré en interne par
@@ -252,7 +257,7 @@ const App = () => {
   };
 
   const filtered = useMemo(() => {
-    const q = normalize(search.trim());
+    const q = normalize(deferredSearch.trim());
 
     // Trouve toutes les cibles d'alias dont la clé contient (ou est contenue dans) la requête
     const aliasTargets = q
@@ -277,12 +282,12 @@ const App = () => {
         return matchQ && matchC && matchS && matchF;
       })
       .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
-  }, [search, cat, svc, showFavoritesOnly, favorites]);
+  }, [deferredSearch, cat, svc, showFavoritesOnly, favorites]);
 
   const recentDrugs = useMemo(() => {
-    if (search.trim() || cat !== "Tout" || svc !== "Tout" || showFavoritesOnly) return [];
+    if (deferredSearch.trim() || cat !== "Tout" || svc !== "Tout" || showFavoritesOnly) return [];
     return history.map(id => DRUGS.find(d => d.id === id)).filter(Boolean);
-  }, [history, search, cat, svc, showFavoritesOnly]);
+  }, [history, deferredSearch, cat, svc, showFavoritesOnly]);
 
   return (
     <div className="app" data-testid="app">

@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v59";
+export const APP_VERSION = "v60";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v60",
+    date: "2026-05-11",
+    titre: "Perf : useDeferredValue, bundle splitté, icônes auto-générées",
+    changes: [
+      { type: "feat", text: "useDeferredValue sur la barre de recherche Médicaments : la frappe reste prioritaire à 60 fps pendant que le filtrage des 73 drugs (normalize + alias + tri français) tourne en arrière-plan, interruptible. Sur smartphones bas-de-gamme (vieux Android utilisé en SMUR), plus de saccades à chaque caractère. Complémentaire au React Compiler ajouté en v57 : le compiler évite les recalculs redondants, useDeferredValue marque le calcul restant comme non urgent." },
+      { type: "chore", text: "Bundle splitté en 3 chunks via rollupOptions.manualChunks : vendor-react (60 kB gzip, React + scheduler), data-medic (28 kB gzip, drugs/pse/aliases) et index (24 kB gzip, App + composants). Avant : un seul chunk de 112 kB gzip ré-invalidé à chaque release, même pour un simple bump de poso. Maintenant : modifier une poso n'invalide que data-medic, modifier le code n'invalide que index. Bénéfice surtout pour les retours sur l'app installée (cache navigateur + précache SW)." },
+      { type: "chore", text: "@vite-pwa/assets-generator ajouté : public/logo.svg devient l'unique source de vérité pour toutes les icônes PWA (favicon.ico, pwa-64/192/512, maskable-512, apple-touch-180). Le manifest est auto-injecté au build via pwaAssets.overrideManifestIcons. Plus de 6 PNG à éditer à la main quand on retouche le logo — un seul SVG suffit, et `npm run generate-pwa-assets` regénère le tout. Migration des filenames : icon-192.png → pwa-192x192.png etc. (Workbox précache le nouveau set au prochain SW update)." },
+      { type: "chore", text: "Vite 6.0.7 → 7.3.3, @vitejs/plugin-react 4.3.4 → 5.2.0. Aucun breaking change pour MediURG (pas de Sass legacy, pas de splitVendorChunkPlugin). Build toujours ~2,4 s. Vite 7 prépare le terrain pour Rolldown (bundler Rust, build 3-10× plus rapide) qui arrive en preview avec Vite 8." },
+    ],
+  },
   {
     version: "v59",
     date: "2026-05-11",

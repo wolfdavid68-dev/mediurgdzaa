@@ -29,6 +29,15 @@ export default defineConfig({
       // réa). En v55 on avait 'autoUpdate' mais ça contournait le toast
       // (needRefresh ne fire que brièvement) → bouton invisible.
       registerType: "prompt",
+      // Génération auto des icônes PWA depuis public/logo.svg via le preset
+      // minimal-2023 (cf. pwa-assets.config.ts). overrideManifestIcons
+      // remplace le bloc `icons:` du manifest ci-dessous par les entrées
+      // générées (pwa-64x64, pwa-192x192, pwa-512x512, maskable-icon-512x512).
+      // Plus de PNG à maintenir à la main — un seul logo.svg = source de vérité.
+      pwaAssets: {
+        config: true,
+        overrideManifestIcons: true,
+      },
       // Conserve le filename `service-worker.js` pour que les utilisateurs
       // déjà sur v48 (SW artisanal) trouvent le nouveau SW au même URL
       // quand leur browser fait sa check d'update périodique.
@@ -62,14 +71,8 @@ export default defineConfig({
         theme_color: "#FF3B30",
         background_color: "#0A0A0F",
         categories: ["medical", "productivity"],
-        icons: [
-          { src: "favicon-32x32.png", sizes: "32x32", type: "image/png" },
-          { src: "icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: "icon-192-maskable.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-          { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-          { src: "icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-          { src: "apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-        ],
+        // icons[] injectées au build par pwaAssets.overrideManifestIcons
+        // (cf. pwa-assets.config.ts). Ne pas ré-ajouter ici.
       },
       injectRegister: false, // on garde notre propre registration pour piloter le toast d'update
     }),
@@ -85,6 +88,19 @@ export default defineConfig({
         assetFileNames: ({ name }) => {
           if (name && /\.css$/.test(name)) return "static/css/[name].[hash][extname]";
           return "static/media/[name].[hash][extname]";
+        },
+        // Split chunks pour que les data files (drugs/pse/aliases — ~150 kB,
+        // contenu clinique modifié à chaque release) soient cacheables
+        // indépendamment du code app (React + composants). Quand on bump
+        // une poso sans toucher au code, le navigateur ne ré-télécharge
+        // que `data-medic.[hash].js` au lieu du bundle principal entier.
+        manualChunks(id) {
+          if (id.includes("node_modules/react") || id.includes("node_modules/scheduler")) {
+            return "vendor-react";
+          }
+          if (id.includes("/src/data/drugs") || id.includes("/src/data/pse") || id.includes("/src/data/aliases")) {
+            return "data-medic";
+          }
         },
       },
     },
