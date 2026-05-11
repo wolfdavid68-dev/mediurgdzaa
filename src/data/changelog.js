@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v54";
+export const APP_VERSION = "v55";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v55",
+    date: "2026-05-11",
+    titre: "Cleanup final : AcrSummary en <dialog>, dead CSS, 0 lint warning",
+    changes: [
+      { type: "fix", text: "Migration de la modale Bilan ACR en <dialog> natif (était restée en div + role=\"dialog\" custom depuis le début, oubliée lors de la migration v50 qui a fait les 2 autres modales). Maintenant : ESC ferme, focus trap natif, scroll lock auto, backdrop animé via @starting-style. Aligne le Bilan sur ChangelogModal et AcrModeModal." },
+      { type: "chore", text: "Retrait de la règle CSS .drug-card-grid qui était posée en v50 comme exemple d'usage des container queries mais qui n'était référencée par aucun JSX. Dead code en moins. Le container-type: inline-size sur .drug-card reste — infrastructure prête pour un futur layout tablette quand on s'en servira vraiment." },
+      { type: "chore", text: "Cleanup de 7 warnings ESLint : 4 try/catch (err) → try/catch sans paramètre, 1 eslint-disable inutile, 2 variables de test inutilisées. Les 3 derniers warnings (a11y sur onClick des <dialog>) supprimés via eslint-disable-next-line commenté (faux positifs : <dialog> a son propre support clavier ESC). Résultat : 0 warning lint." },
+    ],
+  },
   {
     version: "v54",
     date: "2026-05-11",

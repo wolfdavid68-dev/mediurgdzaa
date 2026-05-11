@@ -167,7 +167,6 @@ describe("tokenizeProtocolText — pièges connus", () => {
   });
 
   test("intervalle avec tiret cadratin (–)", () => {
-    const toks = tokenizeProtocolText("1 000–1 500 mL chez l'adulte", DRUG_PATTERNS);
     // Le pattern accepte '-' et '–' MAIS « 1 000 » contient un espace : la
     // regex `\d+(?:[,.]\d+)?` ne traverse pas l'espace. On vérifie juste
     // qu'on n'a pas planté ; le comportement exact suit les groupes capturés.

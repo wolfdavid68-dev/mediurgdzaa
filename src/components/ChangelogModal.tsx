@@ -39,6 +39,10 @@ const ChangelogModal = ({ open, onClose }) => {
   };
 
   return (
+    // <dialog> supporte nativement ESC pour fermer — l'onClick ici n'est qu'un
+    // raccourci souris/tactile pour cliquer le backdrop. Le plugin jsx-a11y
+    // s'en méfie sur les éléments génériques, mais sur <dialog> c'est OK.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <dialog
       ref={dialogRef}
       className="changelog-dialog"

@@ -13,7 +13,7 @@ const DrugNote = ({ drugId, onChange }) => {
         setNote(saved);
         if (onChange) onChange(true);
       }
-    } catch (err) {
+    } catch {
       // localStorage indisponible (mode privé, restrictions)
     }
   }, [drugId, onChange]);
@@ -29,7 +29,7 @@ const DrugNote = ({ drugId, onChange }) => {
       }
       setNoteSaved(true);
       setTimeout(() => setNoteSaved(false), 1500);
-    } catch (err) {
+    } catch {
       // ignore
     }
     if (onChange) onChange(!!value.trim());

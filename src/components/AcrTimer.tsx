@@ -841,17 +841,17 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
 // ─────────────────────────────────────────────────────────
 const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, onClose }) => {
   const [copied, setCopied] = useState(false);
+  const dialogRef = useRef(null);
 
+  // <dialog> natif : focus trap, ESC, scroll lock automatiques par le navigateur.
+  // Plus de useEffect ESC/overflow custom.
   useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [onClose]);
+    const d = dialogRef.current;
+    if (!d) return;
+    if (!d.open) {
+      try { d.showModal(); } catch {}
+    }
+  }, []);
 
   const lines = [];
   lines.push(`BILAN ACR — ${pediatric ? "Enfant" : "Adulte"}`);
@@ -888,12 +888,24 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
     } catch {}
   };
 
+  const onBackdropClick = (e) => {
+    if (e.target === dialogRef.current) onClose();
+  };
+
   return (
-    <div className="acr-summary-overlay" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="acr-summary-modal" onClick={(e) => e.stopPropagation()}>
+    // ESC est géré nativement par <dialog>, l'onClick ne fait que le clic backdrop.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <dialog
+      ref={dialogRef}
+      className="acr-summary-dialog"
+      aria-labelledby="acr-summary-title"
+      onClose={onClose}
+      onClick={onBackdropClick}
+    >
+      <div className="acr-summary-modal">
         <header className="acr-summary-header">
-          <h3>📋 Bilan ACR — {pediatric ? "Enfant" : "Adulte"}</h3>
-          <button type="button" className="acr-summary-close" onClick={onClose} aria-label="Fermer">×</button>
+          <h3 id="acr-summary-title">📋 Bilan ACR — {pediatric ? "Enfant" : "Adulte"}</h3>
+          <button type="button" className="acr-summary-close" onClick={onClose} aria-label="Fermer le bilan">×</button>
         </header>
 
         <div className="acr-summary-body">
@@ -955,7 +967,7 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
           </button>
         </footer>
       </div>
-    </div>
+    </dialog>
   );
 };
 

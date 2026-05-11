@@ -240,7 +240,6 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
   // (entre 0,05 mL — sinon imprécis à la seringue — et 200 mL — sinon
   // c'est qu'une unité est fausse de 1000×).
   const SANE_VOL_MIN = 0.05;
-  const SANE_VOL_MAX = 200;
 
   test("dose_kg × 70 kg / conc_produit donne un volume entre 0,05 et 500 mL", () => {
     // 500 mL = borne haute pour antibios en perfusion lente diluée

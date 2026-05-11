@@ -32,6 +32,9 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
   };
 
   return (
+    // <dialog> a son propre support clavier (ESC) ; l'onClick gère juste le
+    // clic backdrop pour souris/tactile. Le warning a11y est ici un faux positif.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <dialog
       ref={dialogRef}
       className="acr-mode-dialog"
