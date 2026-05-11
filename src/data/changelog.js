@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v58";
+export const APP_VERSION = "v59";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v59",
+    date: "2026-05-11",
+    titre: "Retour Android : 1 = page précédente, 2 rapides en moins d'1s = quitte",
+    changes: [
+      { type: "feat", text: "Nouveau comportement du bouton retour Android : un seul appui revient à la page précédente (Médicaments ↔ Protocoles, fermeture d'un modal), deux appuis rapides (moins d'1 seconde l'un après l'autre) court-circuitent la garde toast et ferment l'app immédiatement. Convention native Android où le double-tap rapide signifie « je veux vraiment quitter, ne demande pas ». Le toast classique « Appuyez à nouveau » s'affiche toujours pour un seul retour à la racine ; il n'est court-circuité que si l'user mash le bouton." },
+      { type: "chore", text: "Architecture back-handling refactorée et simplifiée d'environ 80 lignes : popstate-first pour tous les navigateurs, CloseWatcher conservé uniquement pour Firefox Android (cas où popstate ne fire pas sur hardware back). Plus de flags pendingExit/watcherDestroyed/setupWatcher recreate. Refs miroirs showAcrRef/showChangelogRef supprimés (plus nécessaires). Comportement Firefox Android préservé : retour bloqué + toast « Utilisez le bouton app récente »." },
+      { type: "chore", text: "Re-introduction de pushNav pour navigateTo (v58 l'avait passé en replaceNav, ce qui éliminait la navigation entre pages via back). Désormais : 1 back depuis Protocoles → retour à Médicaments. Les sous-onglets PISU/Incompat/Kits restent en replaceNav (convention Material : tabs not in back stack)." },
+    ],
+  },
   {
     version: "v58",
     date: "2026-05-11",
