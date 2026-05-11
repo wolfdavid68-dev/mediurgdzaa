@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v67";
+export const APP_VERSION = "v68";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v68",
+    date: "2026-05-11",
+    titre: "Mode ACR · overlay préparation rapide (Adré / Cordarone)",
+    changes: [
+      {
+        type: "fix",
+        text: "Cliquer sur Adrénaline ou Cordarone pendant le mode ACR ne quitte plus le chrono. À la place, un overlay « Préparation rapide » s'affiche par-dessus le compte à rebours, avec la dose, la dilution (PUR pour adulte, table de dilution pour enfant) et les notes critiques (G5% strict pour la Cordarone, NaCl flush pour l'adrénaline). L'overlay s'adapte automatiquement au mode Adulte/Enfant choisi au démarrage. Bouton « Fiche complète ↗ » disponible si l'utilisateur veut vraiment quitter le mode ACR.",
+      },
+    ],
+  },
   {
     version: "v67",
     date: "2026-05-11",

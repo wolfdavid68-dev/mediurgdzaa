@@ -4861,6 +4861,177 @@ body {
   color: rgba(255, 255, 255, 0.55);
 }
 
+/* ─ Overlay préparation rapide Adré/Cordarone — au-dessus du chrono ACR ─
+   z-index supérieur à .acr-zoom (5) pour rester accessible même pendant
+   le compte à rebours préparation DSA. */
+.acr-prep-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.985), rgba(2, 6, 23, 0.985));
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  overflow: hidden;
+  animation: acr-zoom-in 0.18s ease-out;
+  color: #f1f5f9;
+}
+.acr-prep-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.acr-prep-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.acr-prep-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.acr-prep-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.acr-prep-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.acr-prep-dose {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.acr-prep-dose-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(241, 245, 249, 0.55);
+}
+.acr-prep-dose-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+.acr-prep-mode-tag {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.acr-prep-mode-pure {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+}
+.acr-prep-mode-dilute {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+.acr-prep-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(241, 245, 249, 0.6);
+  margin-bottom: 6px;
+}
+.acr-prep-steps {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.acr-prep-step {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+.acr-prep-notes {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: "• ";
+}
+.acr-prep-note {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(241, 245, 249, 0.75);
+}
+.acr-prep-footer {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(2, 6, 23, 0.6);
+}
+.acr-prep-back,
+.acr-prep-full {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    border-color 0.16s;
+}
+.acr-prep-back {
+  background: rgba(148, 163, 184, 0.1);
+  color: #f1f5f9;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+.acr-prep-back:hover {
+  background: rgba(148, 163, 184, 0.2);
+  border-color: rgba(148, 163, 184, 0.55);
+}
+.acr-prep-full {
+  background: rgba(96, 165, 250, 0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+}
+.acr-prep-full:hover {
+  background: rgba(96, 165, 250, 0.22);
+  border-color: rgba(96, 165, 250, 0.7);
+}
+
 /* ─ Bilan ACR (modale) ─ */
 /* <dialog> natif pour le Bilan ACR (migré en v55). Le ::backdrop natif
    assure l'assombrissement, focus trap + ESC + scroll lock sont gérés

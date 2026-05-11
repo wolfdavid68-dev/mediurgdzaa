@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 // Cycles RCP (recommandations ERC/AHA 2021)
 const CYCLE_ANALYSE_S = 120; // analyse rythme DSA toutes les 2 min
-const CYCLE_ADRE_S    = 240; // adrénaline toutes les 4 min après la 1re dose
+const CYCLE_ADRE_S = 240; // adrénaline toutes les 4 min après la 1re dose
 
 const fmt = (s) => {
   if (s < 0) s = 0;
@@ -26,7 +26,9 @@ const ensureAudio = () => {
       _audioCtx.resume().catch(() => {});
     }
     return _audioCtx;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 };
 
 const beep = (freq = 880, ms = 220, gainVal = 0.18, type = "sine") => {
@@ -41,7 +43,8 @@ const beep = (freq = 880, ms = 220, gainVal = 0.18, type = "sine") => {
     const dur = ms / 1000;
     gain.gain.setValueAtTime(gainVal, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-    osc.connect(gain); gain.connect(ctx.destination);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
     osc.start(now);
     osc.stop(now + dur);
   } catch {}
@@ -77,11 +80,11 @@ const BPM_OPTIONS = [100, 110, 120];
 //   silent = aucun feedback (pas de bip, pas de zoom, pas de voix)
 // ─────────────────────────────────────────────────────────
 const COACH_LS_KEY = "mediurg-acr-coach";
-const COACH_NEXT   = { full: "visual", visual: "silent", silent: "full" };
-const COACH_ICON   = { full: "🔊",     visual: "👁",     silent: "🔇" };
-const COACH_NAME   = { full: "Complet", visual: "Visuel", silent: "Muet" };
-const COACH_TITLE  = {
-  full:   "Coach complet (visuel + bips + voix) — clic pour visuel sans voix",
+const COACH_NEXT = { full: "visual", visual: "silent", silent: "full" };
+const COACH_ICON = { full: "🔊", visual: "👁", silent: "🔇" };
+const COACH_NAME = { full: "Complet", visual: "Visuel", silent: "Muet" };
+const COACH_TITLE = {
+  full: "Coach complet (visuel + bips + voix) — clic pour visuel sans voix",
   visual: "Coach visuel (bips, voix coupée) — clic pour silencieux",
   silent: "Silencieux (aucun feedback) — clic pour coach complet",
 };
@@ -102,23 +105,85 @@ const readCoach = () => {
 // Chaque étape a une fenêtre [from..to] (en s avant T-0).
 // ─────────────────────────────────────────────────────────
 const ACLS_PREP_STEPS = [
-  { icon: "⚡", label: "Charger le défib · MCE continue",        from: 15, to: 11 },
-  { icon: "🔄", label: "Préparer relève masseur · cycle 2 min",  from: 10, to: 6  },
-  { icon: "🗣", label: "Annoncer « on s'écarte » · arrêt MCE",   from: 5,  to: 2  },
-  { icon: "👁", label: "Analyse ≤ 10 s · reprise MCE immédiate", from: 1,  to: 0  },
+  { icon: "⚡", label: "Charger le défib · MCE continue", from: 15, to: 11 },
+  { icon: "🔄", label: "Préparer relève masseur · cycle 2 min", from: 10, to: 6 },
+  { icon: "🗣", label: "Annoncer « on s'écarte » · arrêt MCE", from: 5, to: 2 },
+  { icon: "👁", label: "Analyse ≤ 10 s · reprise MCE immédiate", from: 1, to: 0 },
 ];
 const stepState = (step, t) => {
   if (t > step.from) return "pending";
-  if (t >= step.to)  return "active";
+  if (t >= step.to) return "active";
   return "done";
+};
+
+// ─────────────────────────────────────────────────────────
+// Mini-fiches préparation pour overlay rapide pendant le chrono.
+// Source : PREP_KITS.acr.drogues + DRUGS[Adrénaline/Cordarone].prep.pedTable.
+// Volontairement condensé : pendant une ACR, on n'a pas le temps de lire 700
+// lignes de fiche médicament — juste la dose, comment la préparer, comment
+// l'injecter. Bouton « Fiche complète ↗ » disponible pour le détail.
+// ─────────────────────────────────────────────────────────
+const PREP_CONTENT = {
+  Adrénaline: {
+    icon: "⚡",
+    couleur: "#7C3AED",
+    adulte: {
+      dose: "1 mg IV/IO toutes les 3-5 min",
+      pure: true,
+      etapes: [
+        "Ampoule 1 mg/1 mL (1:1000)",
+        "Prélever 1 mL = 1 mg — administrer PUR en IVD",
+        "Flush 20 mL NaCl 0,9% après chaque dose",
+      ],
+      notes: ["Au plus proche du patient (VVP ou IO proximale)", "Compatible NaCl 0,9% et G5%"],
+    },
+    enfant: {
+      dose: "10 µg/kg IV/IO (max 1 mg/dose) toutes les 4 min",
+      pure: false,
+      etapes: [
+        "Ampoule 1 mg/1 mL — prélever 1 mL + qsp 10 mL NaCl 0,9%",
+        "Concentration finale : 0,1 mg/mL = 100 µg/mL",
+        "Injecter 0,1 mL/kg = 10 µg/kg en IVD",
+        "Flush 5-10 mL NaCl 0,9% après",
+      ],
+      notes: ["Renouveler toutes les 4 min (= tous les 2 cycles RCP)"],
+    },
+  },
+  Amiodarone: {
+    icon: "💓",
+    couleur: "#0EA5E9",
+    adulte: {
+      dose: "300 mg après 3e CEE · 150 mg après 5e CEE",
+      pure: true,
+      etapes: [
+        "1ère dose : 2 ampoules 150 mg/3 mL = 300 mg PUR — bolus IV",
+        "Récidive : 1 ampoule 150 mg/3 mL = 150 mg PUR — bolus IV",
+        "Flush G5% après — PAS de NaCl 0,9%",
+      ],
+      notes: [
+        "G5% STRICT — précipite avec NaCl 0,9%",
+        "Changer tubulures à chaque seringue (corrosion PVC)",
+      ],
+    },
+    enfant: {
+      dose: "5 mg/kg IV après 3e CEE (max 300 mg/dose)",
+      pure: false,
+      etapes: [
+        "1 ampoule 150 mg/3 mL + 12 mL G5% → 10 mg/mL (15 mL total)",
+        "Injecter 0,5 mL/kg = 5 mg/kg en bolus IV",
+        "Flush G5% après",
+      ],
+      notes: ["G5% STRICT — incompatible NaCl 0,9%", "Répéter après 5e CEE si FV/TV persistante"],
+    },
+  },
 };
 
 // Calcule les actions suggérées pour un cycle, sachant l'historique.
 // Le médecin reste décideur — on n'affiche que les rappels ERC.
 const suggestActions = ({ rhythm, totalShocks, lastAdreAt, elapsed, pediatric }) => {
   const adreLabel = pediatric ? "Adrénaline 0,01 mg/kg IV" : "Adrénaline 1 mg IV";
-  const amio300 = pediatric ? "Amiodarone 5 mg/kg IV"   : "Amiodarone 300 mg IV";
-  const amio150 = pediatric ? "Amiodarone 5 mg/kg IV"   : "Amiodarone 150 mg IV";
+  const amio300 = pediatric ? "Amiodarone 5 mg/kg IV" : "Amiodarone 300 mg IV";
+  const amio150 = pediatric ? "Amiodarone 5 mg/kg IV" : "Amiodarone 150 mg IV";
   const out = [];
 
   if (rhythm === "choquable") {
@@ -130,13 +195,13 @@ const suggestActions = ({ rhythm, totalShocks, lastAdreAt, elapsed, pediatric })
     } else if (nextShockNum === 5) {
       out.push({ type: "adre", label: adreLabel, hint: "après 5e choc" });
       out.push({ type: "amio", label: amio150, hint: "après 5e choc" });
-    } else if (nextShockNum > 5 && (lastAdreAt === null || (elapsed - lastAdreAt) >= 240 - 10)) {
+    } else if (nextShockNum > 5 && (lastAdreAt === null || elapsed - lastAdreAt >= 240 - 10)) {
       out.push({ type: "adre", label: adreLabel, hint: "cycle 4 min" });
     }
   } else if (rhythm === "non_choquable") {
     if (lastAdreAt === null) {
       out.push({ type: "adre", label: adreLabel, hint: "ASAP en non choquable" });
-    } else if ((elapsed - lastAdreAt) >= 240 - 10) {
+    } else if (elapsed - lastAdreAt >= 240 - 10) {
       out.push({ type: "adre", label: adreLabel, hint: "cycle 4 min" });
     }
   }
@@ -148,12 +213,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   // Doses de référence ERC pour ce patient — affichées en permanence
   const refDoses = pediatric
     ? [
-        { drug: "Adrénaline", dose: "0,01 mg/kg",        note: "IV / IO" },
-        { drug: "Amiodarone", dose: "5 mg/kg",           note: "3e + 5e choc" },
+        { drug: "Adrénaline", dose: "0,01 mg/kg", note: "IV / IO" },
+        { drug: "Amiodarone", dose: "5 mg/kg", note: "3e + 5e choc" },
       ]
     : [
-        { drug: "Adrénaline", dose: "1 mg",              note: "IV / IO · q4 min" },
-        { drug: "Amiodarone", dose: "300 mg → 150 mg",   note: "3e puis 5e choc" },
+        { drug: "Adrénaline", dose: "1 mg", note: "IV / IO · q4 min" },
+        { drug: "Amiodarone", dose: "300 mg → 150 mg", note: "3e puis 5e choc" },
       ];
 
   const [running, setRunning] = useState(false);
@@ -164,9 +229,9 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   // RCP courant (mis à jour à chaque finishCycle), pas à l'elapsed absolu.
   // Sinon le temps passé en analyse/actions raccourcit la RCP du cycle suivant.
   const [cycleStartedAt, setCycleStartedAt] = useState(0);
-  const [currentRhythm, setCurrentRhythm] = useState(null);  // "choquable" | "non_choquable" | null
-  const [pendingActions, setPendingActions] = useState([]);  // [{type, label, hint?, done}]
-  const [history, setHistory] = useState([]);                 // [{cycle, t, rhythm, actions:[]}]
+  const [currentRhythm, setCurrentRhythm] = useState(null); // "choquable" | "non_choquable" | null
+  const [pendingActions, setPendingActions] = useState([]); // [{type, label, hint?, done}]
+  const [history, setHistory] = useState([]); // [{cycle, t, rhythm, actions:[]}]
   const [shocks, setShocks] = useState(0);
   const [adres, setAdres] = useState(0);
   const [amios, setAmios] = useState(0);
@@ -174,21 +239,27 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   const [showSummary, setShowSummary] = useState(false);
   const [coachMode, setCoachMode] = useState(readCoach);
   // Dérivés alignés sur la table : seul "voix" distingue full ↔ visual
-  const audioOn  = coachMode !== "silent"; // bips + métronome
+  const audioOn = coachMode !== "silent"; // bips + métronome
   const visualOn = coachMode !== "silent"; // zoom DSA + flashs
-  const voiceOn  = coachMode === "full";   // annonces TTS françaises
+  const voiceOn = coachMode === "full"; // annonces TTS françaises
   useEffect(() => {
-    try { localStorage.setItem(COACH_LS_KEY, coachMode); } catch {}
+    try {
+      localStorage.setItem(COACH_LS_KEY, coachMode);
+    } catch {}
   }, [coachMode]);
   const [showHistory, setShowHistory] = useState(false);
-  const [metroOn, setMetroOn]   = useState(false);
+  const [metroOn, setMetroOn] = useState(false);
   const [metroBpm, setMetroBpm] = useState(110); // ERC : 100-120 / min, défaut au milieu
   const [editingTally, setEditingTally] = useState(false);
+  // Overlay préparation rapide (Adré / Cordarone) — affiché par-dessus le
+  // chrono. Permet de consulter la dilution sans quitter le mode ACR.
+  // null = pas d'overlay. Clé = "Adrénaline" | "Amiodarone".
+  const [prepDrug, setPrepDrug] = useState(null);
 
   const startedAtRef = useRef(null);
-  const elapsedRef   = useRef(0);
+  const elapsedRef = useRef(0);
   const lastAnalyseAlertRef = useRef(-1);
-  const lastAdreAlertRef    = useRef(-1);
+  const lastAdreAlertRef = useRef(-1);
 
   // Tick wall-clock
   useEffect(() => {
@@ -217,7 +288,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     const acquire = async () => {
       try {
         const lock = await navigator.wakeLock.request("screen");
-        if (cancelled) { try { await lock.release(); } catch {} return; }
+        if (cancelled) {
+          try {
+            await lock.release();
+          } catch {}
+          return;
+        }
         sentinel = lock;
       } catch {}
     };
@@ -234,7 +310,11 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     return () => {
       cancelled = true;
       document.removeEventListener("visibilitychange", onVis);
-      if (sentinel) { try { sentinel.release(); } catch {} }
+      if (sentinel) {
+        try {
+          sentinel.release();
+        } catch {}
+      }
     };
   }, [running]);
 
@@ -249,11 +329,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
 
   // Compteurs de cycle (rappels temporels)
   // Cycle analyse : relatif au début du cycle RCP courant (cycleStartedAt)
-  const rcpInCycle    = Math.max(0, elapsed - cycleStartedAt);
+  const rcpInCycle = Math.max(0, elapsed - cycleStartedAt);
   const nextAnalyseIn = Math.max(0, CYCLE_ANALYSE_S - rcpInCycle);
   // Cycle adré : relatif à la dernière dose (4 min)
-  const adreIdx       = lastAdreAt === null ? -1 : Math.floor((elapsed - lastAdreAt) / CYCLE_ADRE_S);
-  const nextAdreIn    = lastAdreAt === null ? null : CYCLE_ADRE_S - ((elapsed - lastAdreAt) - adreIdx * CYCLE_ADRE_S);
+  const adreIdx = lastAdreAt === null ? -1 : Math.floor((elapsed - lastAdreAt) / CYCLE_ADRE_S);
+  const nextAdreIn =
+    lastAdreAt === null ? null : CYCLE_ADRE_S - (elapsed - lastAdreAt - adreIdx * CYCLE_ADRE_S);
 
   // Bip au passage de cycle (toutes les 2 min DE RCP, pas elapsed absolu)
   useEffect(() => {
@@ -262,7 +343,11 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     // les phases "rcp" et "actions" (= RCP avec checklist) pour que l'user
     // n'ait pas à cliquer manuellement « Passer au cycle X+1 ».
     const inCycleRcp = phase === "rcp" || phase === "actions";
-    if (inCycleRcp && rcpInCycle >= CYCLE_ANALYSE_S && lastAnalyseAlertRef.current !== cycleStartedAt) {
+    if (
+      inCycleRcp &&
+      rcpInCycle >= CYCLE_ANALYSE_S &&
+      lastAnalyseAlertRef.current !== cycleStartedAt
+    ) {
       lastAnalyseAlertRef.current = cycleStartedAt;
       if (audioOn) {
         beep(660, 180);
@@ -271,9 +356,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
       if (voiceOn) speak("Analyser le rythme");
       // Si actions : on archive le cycle complet avant de passer à l'analyse suivante
       if (phase === "actions") {
-        const doneActions = pendingActions.filter(a => a.done).map(a => a.label);
-        setHistory(h => [...h, { cycle, t: elapsed, rhythm: currentRhythm, actions: doneActions }]);
-        setCycle(c => c + 1);
+        const doneActions = pendingActions.filter((a) => a.done).map((a) => a.label);
+        setHistory((h) => [
+          ...h,
+          { cycle, t: elapsed, rhythm: currentRhythm, actions: doneActions },
+        ]);
+        setCycle((c) => c + 1);
         setCurrentRhythm(null);
         setPendingActions([]);
       }
@@ -284,7 +372,20 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
       if (audioOn) beep(880, 220);
       if (voiceOn) speak("Prochaine adrénaline");
     }
-  }, [elapsed, running, phase, audioOn, voiceOn, rcpInCycle, cycleStartedAt, adreIdx, lastAdreAt, cycle, currentRhythm, pendingActions]);
+  }, [
+    elapsed,
+    running,
+    phase,
+    audioOn,
+    voiceOn,
+    rcpInCycle,
+    cycleStartedAt,
+    adreIdx,
+    lastAdreAt,
+    cycle,
+    currentRhythm,
+    pendingActions,
+  ]);
 
   // Compte à rebours préparation DSA — bips/vibration discrets de T-5 à T-1
   const lastZoomCueRef = useRef(-1);
@@ -325,7 +426,7 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   const onRhythm = (rhythm) => {
     setCurrentRhythm(rhythm);
     const sugg = suggestActions({ rhythm, totalShocks: shocks, lastAdreAt, elapsed, pediatric });
-    setPendingActions(sugg.map(a => ({ ...a, done: false })));
+    setPendingActions(sugg.map((a) => ({ ...a, done: false })));
     setPhase("actions");
     // Le MCE reprend pile maintenant → le chrono 2 min de RCP du nouveau cycle
     // démarre ici (et non au moment de l'analyse précédente). Garantit 2 min
@@ -334,41 +435,40 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   };
 
   const toggleAction = (idx) => {
-    setPendingActions(prev => prev.map((a, i) => {
-      if (i !== idx) return a;
-      const nextDone = !a.done;
-      if (nextDone) {
-        // Cocher : incrémente et mémorise l'ancien lastAdreAt pour pouvoir l'annuler proprement
-        if (a.type === "choc") setShocks(s => s + 1);
-        if (a.type === "adre") {
-          setAdres(c => c + 1);
-          setLastAdreAt(elapsed);
+    setPendingActions((prev) =>
+      prev.map((a, i) => {
+        if (i !== idx) return a;
+        const nextDone = !a.done;
+        if (nextDone) {
+          // Cocher : incrémente et mémorise l'ancien lastAdreAt pour pouvoir l'annuler proprement
+          if (a.type === "choc") setShocks((s) => s + 1);
+          if (a.type === "adre") {
+            setAdres((c) => c + 1);
+            setLastAdreAt(elapsed);
+          }
+          if (a.type === "amio") setAmios((c) => c + 1);
+          return { ...a, done: true, prevLastAdreAt: lastAdreAt };
+        } else {
+          // Décocher : annule l'incrément et restaure l'état d'avant le clic
+          if (a.type === "choc") setShocks((s) => Math.max(0, s - 1));
+          if (a.type === "adre") {
+            setAdres((c) => Math.max(0, c - 1));
+            setLastAdreAt(a.prevLastAdreAt ?? null);
+          }
+          if (a.type === "amio") setAmios((c) => Math.max(0, c - 1));
+          return { ...a, done: false };
         }
-        if (a.type === "amio") setAmios(c => c + 1);
-        return { ...a, done: true, prevLastAdreAt: lastAdreAt };
-      } else {
-        // Décocher : annule l'incrément et restaure l'état d'avant le clic
-        if (a.type === "choc") setShocks(s => Math.max(0, s - 1));
-        if (a.type === "adre") {
-          setAdres(c => Math.max(0, c - 1));
-          setLastAdreAt(a.prevLastAdreAt ?? null);
-        }
-        if (a.type === "amio") setAmios(c => Math.max(0, c - 1));
-        return { ...a, done: false };
-      }
-    }));
+      })
+    );
   };
 
   // Bouton manuel « Cycle suivant maintenant » — utile si tout est coché avant 2 min.
   // Comportement aligné sur l'auto-passage (à 2 min) : archive + cycle++ + phase=analyse.
   // cycleStartedAt sera mis à jour au prochain onRhythm (= reprise MCE).
   const finishCycle = () => {
-    const doneActions = pendingActions.filter(a => a.done).map(a => a.label);
-    setHistory(h => [
-      ...h,
-      { cycle, t: elapsed, rhythm: currentRhythm, actions: doneActions },
-    ]);
-    setCycle(c => c + 1);
+    const doneActions = pendingActions.filter((a) => a.done).map((a) => a.label);
+    setHistory((h) => [...h, { cycle, t: elapsed, rhythm: currentRhythm, actions: doneActions }]);
+    setCycle((c) => c + 1);
     setCurrentRhythm(null);
     setPendingActions([]);
     setPhase("analyse");
@@ -396,11 +496,11 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     lastAdreAlertRef.current = -1;
   };
 
-  const inCycleRcp   = phase === "rcp" || phase === "actions";
+  const inCycleRcp = phase === "rcp" || phase === "actions";
   const analyseAlert = running && inCycleRcp && nextAnalyseIn <= 10;
-  const adreAlert    = running && nextAdreIn !== null && nextAdreIn <= 10;
-  const showZoom     = running && inCycleRcp && elapsed > 0 && visualOn
-                       && nextAnalyseIn <= 15 && nextAnalyseIn >= 0;
+  const adreAlert = running && nextAdreIn !== null && nextAdreIn <= 10;
+  const showZoom =
+    running && inCycleRcp && elapsed > 0 && visualOn && nextAnalyseIn <= 15 && nextAnalyseIn >= 0;
 
   return (
     <div className="acr-timer" role="region" aria-label="Chrono RCP">
@@ -426,7 +526,9 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
           aria-label={COACH_TITLE[coachMode]}
           title={COACH_TITLE[coachMode]}
         >
-          <span className="acr-coach-icon" aria-hidden="true">{COACH_ICON[coachMode]}</span>
+          <span className="acr-coach-icon" aria-hidden="true">
+            {COACH_ICON[coachMode]}
+          </span>
           <span className="acr-coach-name">{COACH_NAME[coachMode]}</span>
         </button>
       </div>
@@ -441,9 +543,13 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
         <div className={`acr-cycle ${adreAlert ? "acr-cycle-alert" : ""}`}>
           <div className="acr-cycle-label">Adrénaline</div>
           <div className="acr-cycle-value">
-            {lastAdreAt === null
-              ? <span className="acr-cycle-none">après 1re dose</span>
-              : (running ? fmt(nextAdreIn) : "—")}
+            {lastAdreAt === null ? (
+              <span className="acr-cycle-none">après 1re dose</span>
+            ) : running ? (
+              fmt(nextAdreIn)
+            ) : (
+              "—"
+            )}
           </div>
           <div className="acr-cycle-sub">cycle 4 min</div>
         </div>
@@ -453,21 +559,31 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
       <div className="acr-doses">
         <div className="acr-doses-label">Doses {pediatric ? "Enfant" : "Adulte"}</div>
         <div className="acr-doses-pills">
-          {refDoses.map((d, i) => (
-            <button
-              key={i}
-              type="button"
-              className="acr-dose-pill"
-              onClick={() => onOpenDrug && onOpenDrug(d.drug)}
-              disabled={!onOpenDrug}
-              title={onOpenDrug ? `Voir la fiche ${d.drug}` : d.drug}
-            >
-              <span className="acr-dose-pill-name">{d.drug}</span>
-              <span className="acr-dose-pill-dose">{d.dose}</span>
-              <span className="acr-dose-pill-note">{d.note}</span>
-              {onOpenDrug && <span className="acr-dose-pill-arrow" aria-hidden="true">↗</span>}
-            </button>
-          ))}
+          {refDoses.map((d, i) => {
+            const hasPrep = !!PREP_CONTENT[d.drug];
+            return (
+              <button
+                key={i}
+                type="button"
+                className="acr-dose-pill"
+                onClick={() => {
+                  if (hasPrep) setPrepDrug(d.drug);
+                  else if (onOpenDrug) onOpenDrug(d.drug);
+                }}
+                disabled={!hasPrep && !onOpenDrug}
+                title={hasPrep ? `Préparation ${d.drug}` : d.drug}
+              >
+                <span className="acr-dose-pill-name">{d.drug}</span>
+                <span className="acr-dose-pill-dose">{d.dose}</span>
+                <span className="acr-dose-pill-note">{d.note}</span>
+                {(hasPrep || onOpenDrug) && (
+                  <span className="acr-dose-pill-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -479,16 +595,18 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
           onClick={() => {
             // Réveille l'AudioContext dans le geste utilisateur (politiques d'autoplay)
             ensureAudio();
-            setMetroOn(o => !o);
+            setMetroOn((o) => !o);
           }}
           aria-pressed={metroOn}
           aria-label={metroOn ? "Arrêter le métronome MCE" : "Démarrer le métronome MCE"}
         >
-          <span className="acr-metro-icon" aria-hidden="true">{metroOn ? "■" : "▶"}</span>
+          <span className="acr-metro-icon" aria-hidden="true">
+            {metroOn ? "■" : "▶"}
+          </span>
           <span className="acr-metro-label">Métronome MCE</span>
         </button>
         <div className="acr-metro-bpm" role="radiogroup" aria-label="Cadence">
-          {BPM_OPTIONS.map(b => (
+          {BPM_OPTIONS.map((b) => (
             <button
               key={b}
               type="button"
@@ -516,8 +634,8 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
           <div className="acr-step-rcp">
             <div className="acr-step-title">RCP en cours</div>
             <div className="acr-step-text">
-              Prochaine analyse rythme dans <strong>{fmt(nextAnalyseIn)}</strong>.
-              Le médecin annonce le rythme à l'arrêt du MCE.
+              Prochaine analyse rythme dans <strong>{fmt(nextAnalyseIn)}</strong>. Le médecin
+              annonce le rythme à l'arrêt du MCE.
             </div>
             <button type="button" className="acr-step-link" onClick={skipToAnalyse}>
               Analyser maintenant ↗
@@ -528,9 +646,7 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
         {running && phase === "analyse" && (
           <div className="acr-step-analyse">
             <div className="acr-step-title acr-step-title-alert">Analyser le rythme</div>
-            <div className="acr-step-text">
-              Stop MCE 5 sec, lecture du tracé. Quel rythme ?
-            </div>
+            <div className="acr-step-text">Stop MCE 5 sec, lecture du tracé. Quel rythme ?</div>
             <div className="acr-step-rhythms">
               <button
                 type="button"
@@ -567,8 +683,9 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
             ) : (
               <ul className="acr-action-list">
                 {pendingActions.map((a, i) => {
-                  const drugName = a.type === "adre" ? "Adrénaline" : a.type === "amio" ? "Amiodarone" : null;
-                  const canLink = drugName && typeof onOpenDrug === "function";
+                  const drugName =
+                    a.type === "adre" ? "Adrénaline" : a.type === "amio" ? "Amiodarone" : null;
+                  const hasPrep = drugName && !!PREP_CONTENT[drugName];
                   return (
                     <li key={i} className={`acr-action ${a.done ? "acr-action-done" : ""}`}>
                       <button
@@ -580,12 +697,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
                         {a.done ? "✓" : ""}
                       </button>
                       <div className="acr-action-text">
-                        {canLink ? (
+                        {hasPrep ? (
                           <button
                             type="button"
                             className="acr-action-label acr-action-link"
-                            onClick={() => onOpenDrug(drugName)}
-                            title={`Voir la fiche ${drugName}`}
+                            onClick={() => setPrepDrug(drugName)}
+                            title={`Préparation ${drugName}`}
                           >
                             {a.label} <span aria-hidden="true">↗</span>
                           </button>
@@ -629,7 +746,9 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
           type="button"
           className="acr-btn acr-btn-bilan"
           onClick={() => setShowSummary(true)}
-          disabled={elapsed === 0 && shocks === 0 && adres === 0 && amios === 0 && history.length === 0}
+          disabled={
+            elapsed === 0 && shocks === 0 && adres === 0 && amios === 0 && history.length === 0
+          }
         >
           📋 Bilan
         </button>
@@ -637,7 +756,9 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
           type="button"
           className="acr-btn acr-btn-reset"
           onClick={reset}
-          disabled={elapsed === 0 && shocks === 0 && adres === 0 && amios === 0 && history.length === 0}
+          disabled={
+            elapsed === 0 && shocks === 0 && adres === 0 && amios === 0 && history.length === 0
+          }
         >
           ↻ Reset
         </button>
@@ -661,13 +782,21 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
       <div className={`acr-tally ${editingTally ? "acr-tally-editing" : ""}`}>
         {!editingTally ? (
           <>
-            <span><strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}</span>
+            <span>
+              <strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}
+            </span>
             <span className="acr-tally-sep">·</span>
-            <span><strong>{adres}</strong> adré</span>
+            <span>
+              <strong>{adres}</strong> adré
+            </span>
             <span className="acr-tally-sep">·</span>
-            <span><strong>{amios}</strong> cordarone</span>
+            <span>
+              <strong>{amios}</strong> cordarone
+            </span>
             <span className="acr-tally-sep">·</span>
-            <span><strong>{history.length}</strong> cycle{history.length > 1 ? "s" : ""}</span>
+            <span>
+              <strong>{history.length}</strong> cycle{history.length > 1 ? "s" : ""}
+            </span>
             <button
               type="button"
               className="acr-tally-edit-btn"
@@ -684,16 +813,20 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
               <div className="acr-tally-stepper">
                 <button
                   type="button"
-                  onClick={() => setShocks(s => Math.max(0, s - 1))}
+                  onClick={() => setShocks((s) => Math.max(0, s - 1))}
                   aria-label="Moins un choc"
                   disabled={shocks === 0}
-                >−</button>
+                >
+                  −
+                </button>
                 <span className="acr-tally-num">{shocks}</span>
                 <button
                   type="button"
-                  onClick={() => setShocks(s => s + 1)}
+                  onClick={() => setShocks((s) => s + 1)}
                   aria-label="Plus un choc"
-                >+</button>
+                >
+                  +
+                </button>
               </div>
             </div>
             <div className="acr-tally-edit-row">
@@ -709,18 +842,22 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
                   }}
                   aria-label="Moins une adrénaline"
                   disabled={adres === 0}
-                >−</button>
+                >
+                  −
+                </button>
                 <span className="acr-tally-num">{adres}</span>
                 <button
                   type="button"
                   onClick={() => {
-                    setAdres(a => a + 1);
+                    setAdres((a) => a + 1);
                     // On considère la dose ajoutée comme « venant juste d'être donnée » :
                     // ça relance correctement le timer 4 min.
                     setLastAdreAt(elapsed);
                   }}
                   aria-label="Plus une adrénaline"
-                >+</button>
+                >
+                  +
+                </button>
               </div>
             </div>
             <div className="acr-tally-edit-row">
@@ -728,27 +865,28 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
               <div className="acr-tally-stepper">
                 <button
                   type="button"
-                  onClick={() => setAmios(a => Math.max(0, a - 1))}
+                  onClick={() => setAmios((a) => Math.max(0, a - 1))}
                   aria-label="Moins une cordarone"
                   disabled={amios === 0}
-                >−</button>
+                >
+                  −
+                </button>
                 <span className="acr-tally-num">{amios}</span>
                 <button
                   type="button"
-                  onClick={() => setAmios(a => a + 1)}
+                  onClick={() => setAmios((a) => a + 1)}
                   aria-label="Plus une cordarone"
-                >+</button>
+                >
+                  +
+                </button>
               </div>
             </div>
             <div className="acr-tally-edit-hint">
-              À l'arrivée, ajuste les chocs déjà délivrés par le DSA et toute adré déjà reçue.
-              Le prochain choc sera proposé en cohérence (ex : si chocs = 2, le suivant est le 3e → suggestion Amio 300 mg).
+              À l'arrivée, ajuste les chocs déjà délivrés par le DSA et toute adré déjà reçue. Le
+              prochain choc sera proposé en cohérence (ex : si chocs = 2, le suivant est le 3e →
+              suggestion Amio 300 mg).
             </div>
-            <button
-              type="button"
-              className="acr-tally-done"
-              onClick={() => setEditingTally(false)}
-            >
+            <button type="button" className="acr-tally-done" onClick={() => setEditingTally(false)}>
               Terminé
             </button>
           </div>
@@ -757,7 +895,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
 
       {/* Overlay « zoom préparation DSA » — checklist ACLS High-Performance CPR */}
       {showZoom && (
-        <div className="acr-zoom" role="alert" aria-live="assertive" aria-label="Préparation analyse DSA">
+        <div
+          className="acr-zoom"
+          role="alert"
+          aria-live="assertive"
+          aria-label="Préparation analyse DSA"
+        >
           <div className="acr-zoom-header">
             <span className="acr-zoom-header-title">⚡ Coach ACR · Préparation DSA</span>
             <button
@@ -790,10 +933,16 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
               const state = stepState(step, nextAnalyseIn);
               return (
                 <li key={i} className={`acr-zoom-step acr-zoom-step-${state}`}>
-                  <span className="acr-zoom-step-icon" aria-hidden="true">{step.icon}</span>
+                  <span className="acr-zoom-step-icon" aria-hidden="true">
+                    {step.icon}
+                  </span>
                   <span className="acr-zoom-step-label">{step.label}</span>
-                  {state === "done"   && <span className="acr-zoom-step-mark" aria-hidden="true">✓</span>}
-                  {state === "active" && <span className="acr-zoom-step-dot"  aria-hidden="true" />}
+                  {state === "done" && (
+                    <span className="acr-zoom-step-mark" aria-hidden="true">
+                      ✓
+                    </span>
+                  )}
+                  {state === "active" && <span className="acr-zoom-step-dot" aria-hidden="true" />}
                 </li>
               );
             })}
@@ -804,13 +953,31 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
         </div>
       )}
 
+      {/* Overlay « Préparation rapide » — Adré / Cordarone, sans quitter le mode ACR */}
+      {prepDrug && PREP_CONTENT[prepDrug] && (
+        <AcrPrepOverlay
+          drugName={prepDrug}
+          content={PREP_CONTENT[prepDrug]}
+          pediatric={pediatric}
+          onClose={() => setPrepDrug(null)}
+          onOpenFullSheet={
+            onOpenDrug
+              ? () => {
+                  onOpenDrug(prepDrug);
+                  setPrepDrug(null);
+                }
+              : null
+          }
+        />
+      )}
+
       {/* Historique */}
       {history.length > 0 && (
         <div className="acr-history">
           <button
             type="button"
             className="acr-history-toggle"
-            onClick={() => setShowHistory(s => !s)}
+            onClick={() => setShowHistory((s) => !s)}
           >
             {showHistory ? "▾" : "▸"} Historique ({history.length})
           </button>
@@ -849,7 +1016,9 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
     const d = dialogRef.current;
     if (!d) return;
     if (!d.open) {
-      try { d.showModal(); } catch {}
+      try {
+        d.showModal();
+      } catch {}
     }
   }, []);
 
@@ -905,7 +1074,14 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
       <div className="acr-summary-modal">
         <header className="acr-summary-header">
           <h3 id="acr-summary-title">📋 Bilan ACR — {pediatric ? "Enfant" : "Adulte"}</h3>
-          <button type="button" className="acr-summary-close" onClick={onClose} aria-label="Fermer le bilan">×</button>
+          <button
+            type="button"
+            className="acr-summary-close"
+            onClick={onClose}
+            aria-label="Fermer le bilan"
+          >
+            ×
+          </button>
         </header>
 
         <div className="acr-summary-body">
@@ -940,7 +1116,9 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
                   <li key={h.cycle} className="acr-summary-cycle">
                     <span className="acr-summary-cycle-num">C{h.cycle}</span>
                     <span className="acr-summary-cycle-time">{fmt(h.t)}</span>
-                    <span className={`acr-summary-cycle-rhythm acr-summary-cycle-rhythm-${h.rhythm}`}>
+                    <span
+                      className={`acr-summary-cycle-rhythm acr-summary-cycle-rhythm-${h.rhythm}`}
+                    >
                       {h.rhythm === "choquable" ? "Choquable" : "Non choquable"}
                     </span>
                     <span className="acr-summary-cycle-actions">
@@ -968,6 +1146,89 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
         </footer>
       </div>
     </dialog>
+  );
+};
+
+// ─────────────────────────────────────────────────────────
+// Overlay préparation rapide d'une drogue ACR (Adré / Cordarone).
+// Affiché par-dessus le chrono (position: absolute, z-index plus haut que
+// .acr-zoom) pour ne pas perdre le décompte. L'utilisateur peut toujours
+// basculer vers la fiche complète si besoin (= ancien comportement).
+// ─────────────────────────────────────────────────────────
+const AcrPrepOverlay = ({ drugName, content, pediatric, onClose, onOpenFullSheet }) => {
+  const data = pediatric ? content.enfant : content.adulte;
+  const mode = pediatric ? "Enfant" : "Adulte";
+  return (
+    <div
+      className="acr-prep-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Préparation ${drugName} ${mode}`}
+    >
+      <div className="acr-prep-header" style={{ background: content.couleur }}>
+        <span className="acr-prep-header-title">
+          <span aria-hidden="true">{content.icon}</span> {drugName} · {mode}
+        </span>
+        <button
+          type="button"
+          className="acr-prep-close"
+          onClick={onClose}
+          aria-label="Fermer la fiche préparation"
+        >
+          ×
+        </button>
+      </div>
+      <div className="acr-prep-body">
+        <div className="acr-prep-dose">
+          <div className="acr-prep-dose-label">Dose</div>
+          <div className="acr-prep-dose-value">{data.dose}</div>
+          <div
+            className={`acr-prep-mode-tag ${data.pure ? "acr-prep-mode-pure" : "acr-prep-mode-dilute"}`}
+          >
+            {data.pure ? "PUR (sans dilution)" : "DILUER avant injection"}
+          </div>
+        </div>
+
+        <div className="acr-prep-section">
+          <div className="acr-prep-section-title">Préparation</div>
+          <ol className="acr-prep-steps">
+            {data.etapes.map((step, i) => (
+              <li key={i} className="acr-prep-step">
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {data.notes && data.notes.length > 0 && (
+          <div className="acr-prep-section">
+            <div className="acr-prep-section-title">À retenir</div>
+            <ul className="acr-prep-notes">
+              {data.notes.map((n, i) => (
+                <li key={i} className="acr-prep-note">
+                  {n}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      <div className="acr-prep-footer">
+        <button type="button" className="acr-prep-back" onClick={onClose}>
+          ← Retour au chrono
+        </button>
+        {onOpenFullSheet && (
+          <button
+            type="button"
+            className="acr-prep-full"
+            onClick={onOpenFullSheet}
+            title="Quitter le mode ACR pour voir la fiche complète"
+          >
+            Fiche complète ↗
+          </button>
+        )}
+      </div>
+    </div>
   );
 };
 
