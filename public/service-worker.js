@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mediurg-v43';
+const CACHE_NAME = 'mediurg-v44';
 
 // Assets statiques précachés à l'install (offline complet)
 const BASE_URLS = [

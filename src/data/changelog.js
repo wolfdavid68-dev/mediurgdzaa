@@ -1,91 +1,20 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v43";
+export const APP_VERSION = "v44";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
   {
-    version: "v43",
+    version: "v44",
     date: "2026-05-11",
-    titre: "Détection Firefox Android élargie (sans check standalone)",
+    titre: "Garde « 2× retour pour quitter »",
     changes: [
-      { type: "fix", text: "En v42, le filtre Firefox PWA Android exigeait display-mode standalone, mais Firefox Android ne se déclare pas toujours en standalone même quand l'app est installée à l'écran d'accueil. Du coup le 2e back tombait dans le chemin Chrome (history.back manuel) qui enchaîne les écrans morts sur Firefox (noir/rouge puis gris/rouge, 4 taps pour exit). Détection simplifiée à Firefox + Android (couvre PWA ET onglet) → preventDefault systématique au 2e back avec toast « Utilisez le bouton app récente Android pour fermer ». Chrome PWA et autres navigateurs conservent leur exit propre." },
-    ],
-  },
-  {
-    version: "v42",
-    date: "2026-05-11",
-    titre: "Firefox PWA Android : bloque aussi le 2e retour (évite écran rouge vide)",
-    changes: [
-      { type: "fix", text: "Sur Firefox PWA Android spécifiquement, le 2e retour qui laissait le navigateur fermer naturellement aboutissait à un écran rouge vide (limitation OS : Firefox unmount le document sans fermer la fenêtre PWA). Détection UA + display-mode standalone, et sur cette config on preventDefault aussi le 2e back, en affichant un toast explicite : « Utilisez le bouton app récente Android pour fermer MediURG ». Chrome PWA et navigateurs en onglet conservent l'exit propre au 2e back." },
-    ],
-  },
-  {
-    version: "v41",
-    date: "2026-05-11",
-    titre: "Fix garde 2× retour : exit enchaîné après CloseWatcher close",
-    changes: [
-      { type: "fix", text: "En v40, CloseWatcher catchait bien le 1er retour (toast affiché) mais le 2e retour ne fermait pas la PWA — sur Chrome PWA Android, quand cancel n'est pas preventDefault, close fire mais le navigateur ne déclenche pas automatiquement la nav de fermeture qui suivrait. Fix : flag pendingExit posé au 2e cancel, lu dans le handler close pour appeler manuellement window.history.back() — ça enchaîne sur le popstate sentinelle qui exit via 2e history.back. Maintenant 1er = toast, 2e dans 2 s = quitte. Sur tous les navigateurs supportant CloseWatcher." },
-    ],
-  },
-  {
-    version: "v40",
-    date: "2026-05-11",
-    titre: "Garde 2× retour : CloseWatcher API (fix Chrome PWA + Firefox PWA)",
-    changes: [
-      { type: "feat", text: "Bascule de Navigation API vers CloseWatcher API (Chrome 120+, Firefox 149+) pour intercepter le bouton retour. CloseWatcher est l'API conçue spécifiquement pour les « close requests » (Esc Windows, geste retour iOS, bouton retour Android), plus fiable que navigate event pour ce cas — preventDefault sur 'cancel' est honoré sur Chrome PWA root back, là où navigate.preventDefault ne l'était pas. popstate reste actif en parallèle pour la nav interne (modales, sous-onglets) et le fallback browsers anciens via sentinelle. Le watcher est recréé après chaque close (consumé) pour catcher le retour suivant." },
-    ],
-  },
-  {
-    version: "v39",
-    date: "2026-05-11",
-    titre: "Fix garde 2× retour Chrome PWA (régression v38)",
-    changes: [
-      { type: "fix", text: "En v38, Chrome PWA fermait l'app au 1er retour : navigate event fait son preventDefault et pose lastBackAt, MAIS popstate fire quand même (contrairement à la spec) et croit que c'est le 2e retour → exit immédiat. Ajout d'un flag navigateIntercepted qui dit à popstate « déjà géré par navigate, skip ». Firefox PWA Android continue de marcher via la Navigation API, et Chrome PWA + Firefox onglet retrouvent le comportement v37 (toast au 1er retour, fermeture au 2e dans les 2 s)." },
-    ],
-  },
-  {
-    version: "v38",
-    date: "2026-05-11",
-    titre: "Garde 2× retour : ajout Navigation API (fix Firefox PWA Android)",
-    changes: [
-      { type: "feat", text: "Le handler de la garde 2× retour utilise désormais la Navigation API (window.navigation, dispo Firefox 144+, Chrome, Edge) en couche au-dessus de popstate. Contrairement à popstate qui ne fire QUE pour les navigations same-document, l'event navigate de la Navigation API fire pour TOUTES les navigations — y compris quand Firefox PWA Android route le hardware back en cross-document (qui était la cause du « écran figé » observé en v34-v37). preventDefault() sur navigate annule la navigation et garde la PWA active. Fallback automatique sur popstate pour les navigateurs sans Navigation API." },
-    ],
-  },
-  {
-    version: "v37",
-    date: "2026-05-11",
-    titre: "Nettoyage diag + limitation Firefox PWA Android documentée",
-    changes: [
-      { type: "chore", text: "Retrait du badge diagnostique v36. Diagnostic concluant : Firefox PWA Android ne fire PAS l'event popstate au tap retour Android — l'OS unmount React directement et laisse la fenêtre PWA figée sur un écran vide. Aucun fix possible côté JavaScript (pushState, beforeunload, popstate, pagehide → tous court-circuités). Limitation Firefox connue (bugs Mozilla 1742059, 1745793). Recommandation : pour la garde « 2× retour pour quitter » fiable + meilleur support PWA hors ligne, installer MediURG via Chrome (Add to Home Screen). La garde marche normalement en Chrome PWA, Chrome onglet, et Firefox onglet." },
-    ],
-  },
-  {
-    version: "v36",
-    date: "2026-05-11",
-    titre: "[DIAG TEMP] Badge popstate visible pour debug Firefox PWA",
-    changes: [
-      { type: "chore", text: "Version diagnostique temporaire : un petit badge jaune en haut à gauche affiche init/pop/sent/null = compteurs des events popstate captés. Permet de confirmer si Firefox PWA Android les fire réellement ou les bypasse. Sera retiré à la prochaine version une fois la cause identifiée." },
-    ],
-  },
-  {
-    version: "v35",
-    date: "2026-05-11",
-    titre: "Garde 2× retour : robustesse Firefox PWA Android",
-    changes: [
-      { type: "fix", text: "Le setup history (sentinelle + état actif) s'exécute désormais dans un script inline d'index.html AVANT le mount React, pour que la pile soit en place même si l'user tape retour pendant le chargement initial." },
-      { type: "fix", text: "Le handler popstate intercepte aussi le cas où e.state est null (et pas seulement la sentinelle explicite). Firefox PWA Android peut perdre notre state custom lors d'un retour ; on traite ce cas comme « veut quitter » → toast au 1er tap, fermeture au 2e dans les 2 s." },
-    ],
-  },
-  {
-    version: "v34",
-    date: "2026-05-11",
-    titre: "Garde 2× retour pour quitter — Firefox onglet inclus",
-    changes: [
-      { type: "feat", text: "Le toast « Appuyez à nouveau sur retour pour quitter » s'affiche désormais aussi en mode onglet navigateur (Firefox, Chrome tab), plus seulement en PWA standalone. Le 1er retour reste dans l'app, le 2e (dans les 2 s) ferme proprement. Évite de quitter MediURG par accident en cours de réa." },
-      { type: "fix", text: "Plus d'écran vide sous Firefox mobile au 1er retour : le re-pushState de l'état actif s'exécute maintenant AVANT tout setState React dans le handler popstate, pour que la pile history soit en état valide instantanément. URL explicite passée à pushState/replaceState (window.location.href) au lieu de \"\" — certaines versions de Firefox mobile mishandlent l'URL vide." },
+      { type: "feat", text: "Le 1er appui sur le bouton retour (Android, geste retour iOS, Esc clavier) affiche un toast en bas d'écran « Appuyez à nouveau sur retour pour quitter » et garde l'app active. Le 2e appui dans les 2 s ferme proprement. Évite de quitter MediURG par accident en cours de réa." },
+      { type: "feat", text: "Implémentation universelle : CloseWatcher API en primaire (Chrome 120+, Firefox 149+, l'API conçue exactement pour ce cas), fallback popstate avec sentinelle d'history pour les navigateurs plus anciens. Fonctionne en Chrome PWA installée, Chrome onglet, Firefox onglet, Safari onglet." },
+      { type: "fix", text: "Limitation Firefox Android (PWA ou onglet) : la fermeture programmatique via hardware back enchaîne des écrans morts intermédiaires (bug Mozilla 1742059 / 1745793, non corrigé à ce jour). Sur cette config, le 2e back affiche un toast spécifique « Utilisez le bouton app récente Android pour fermer MediURG » au lieu de tenter une fermeture qui casserait l'affichage. Fermeture propre par le multitâche Android." },
+      { type: "chore", text: "Itérations diagnostiques v34→v43 fusionnées dans cette entrée pour clarté de l'historique." },
     ],
   },
   {
