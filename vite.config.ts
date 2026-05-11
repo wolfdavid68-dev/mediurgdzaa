@@ -15,9 +15,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // 'autoUpdate' : le nouveau SW skip waiting + claim immédiatement à
-      // l'install. Plus de problèmes de cache désaligné comme en v32-v44.
-      registerType: "autoUpdate",
+      // 'prompt' : le nouveau SW reste en waiting jusqu'à ce que l'user
+      // clique sur le toast « Mettre à jour ». UX explicite — l'user
+      // contrôle le moment de la mise à jour (pas en plein milieu d'une
+      // réa). En v55 on avait 'autoUpdate' mais ça contournait le toast
+      // (needRefresh ne fire que brièvement) → bouton invisible.
+      registerType: "prompt",
       // Conserve le filename `service-worker.js` pour que les utilisateurs
       // déjà sur v48 (SW artisanal) trouvent le nouveau SW au même URL
       // quand leur browser fait sa check d'update périodique.

@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v55";
+export const APP_VERSION = "v56";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v56",
+    date: "2026-05-11",
+    titre: "Fix toast « Mettre à jour » invisible (registerType prompt)",
+    changes: [
+      { type: "fix", text: "Le bouton « Nouvelle version disponible · Mettre à jour » ne s'affichait jamais en v49-v55 : vite-plugin-pwa était en registerType: 'autoUpdate' qui skip-waiting immédiatement. Du coup needRefresh ne fire que brièvement et le toast disparaît avant d'apparaître. Bascule en registerType: 'prompt' : le nouveau SW reste en waiting jusqu'à ce que l'user clique sur le toast → la mise à jour est explicite et contrôlée par l'utilisateur (jamais d'auto-update en plein milieu d'une réa). C'est désormais cette v56 et les suivantes qui déclencheront le toast chez les utilisateurs." },
+    ],
+  },
   {
     version: "v55",
     date: "2026-05-11",

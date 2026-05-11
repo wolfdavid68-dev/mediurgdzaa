@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 
 // Bandeau discret affiché en bas quand vite-plugin-pwa détecte qu'un nouveau
-// service worker est prêt à prendre la main. Avec registerType: 'autoUpdate'
-// dans vite.config.js, le nouveau SW skipWaiting+claim tout seul → il suffit
-// que l'utilisateur reload la page (ou redémarre la PWA) pour avoir le
-// nouveau contenu. On lui propose de le faire tout de suite via un bouton.
+// service worker est prêt à prendre la main. Avec registerType: 'prompt'
+// (vite.config.ts), le nouveau SW reste en waiting jusqu'à ce que l'user
+// clique sur « Mettre à jour » → updateServiceWorker(true) déclenche le
+// skipWaiting + reload. L'user contrôle le moment de la mise à jour
+// (jamais d'auto-update en plein milieu d'une réa).
 const UpdatePrompt = () => {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
