@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v42";
+export const APP_VERSION = "v43";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v43",
+    date: "2026-05-11",
+    titre: "Détection Firefox Android élargie (sans check standalone)",
+    changes: [
+      { type: "fix", text: "En v42, le filtre Firefox PWA Android exigeait display-mode standalone, mais Firefox Android ne se déclare pas toujours en standalone même quand l'app est installée à l'écran d'accueil. Du coup le 2e back tombait dans le chemin Chrome (history.back manuel) qui enchaîne les écrans morts sur Firefox (noir/rouge puis gris/rouge, 4 taps pour exit). Détection simplifiée à Firefox + Android (couvre PWA ET onglet) → preventDefault systématique au 2e back avec toast « Utilisez le bouton app récente Android pour fermer ». Chrome PWA et autres navigateurs conservent leur exit propre." },
+    ],
+  },
   {
     version: "v42",
     date: "2026-05-11",

@@ -138,16 +138,16 @@ const App = () => {
     let lastBackAt = 0;
     let toastTimer = null;
 
-    // Détection Firefox PWA Android : seul cas où le 2e back via back hardware
-    // laisse un écran rouge vide (limitation OS, le navigateur unmount le doc
-    // sans fermer la fenêtre PWA). Sur cette config on bloque AUSSI le 2e back
-    // et on affiche un toast explicatif pour rediriger vers l'app récente.
+    // Détection Firefox Android : sur cette config, le 2e back qui laisse la
+    // navigation proceeder aboutit à des écrans morts (noir/rouge puis gris/rouge),
+    // qu'on soit en PWA installée ou en onglet — Firefox Android ne sait pas
+    // fermer proprement sa surface via hardware back une fois l'history vidée.
+    // On bloque donc aussi le 2e back et on redirige vers l'app récente Android.
+    // (Le check display-mode: standalone était trop restrictif — Firefox ne se
+    // déclare pas toujours en standalone même quand l'app est ajoutée à l'écran
+    // d'accueil. Couvre les deux cas ici.)
     const ua = (typeof navigator !== "undefined" && navigator.userAgent) || "";
-    const isFirefoxPwaAndroid =
-      /Firefox/i.test(ua) && /Android/i.test(ua) &&
-      ((typeof window.matchMedia === "function" &&
-        window.matchMedia("(display-mode: standalone)").matches) ||
-        window.navigator.standalone === true);
+    const isFirefoxAndroid = /Firefox/i.test(ua) && /Android/i.test(ua);
 
     const showExitToast = (variant) => {
       setExitToast(variant);
@@ -221,10 +221,10 @@ const App = () => {
         const now = Date.now();
         if (now - lastBackAt < 2000) {
           // 2e retour dans 2 s
-          if (isFirefoxPwaAndroid) {
-            // Sur Firefox PWA Android, laisser le close fire = écran rouge vide
-            // (limitation OS). On bloque aussi le 2e back et on redirige
-            // l'utilisateur vers l'app récente Android pour fermer proprement.
+          if (isFirefoxAndroid) {
+            // Sur Firefox Android (PWA ou onglet), laisser le close fire ou
+            // history.back manuel = écrans morts (noir/rouge puis gris/rouge).
+            // On bloque aussi le 2e back et on redirige vers l'app récente.
             e.preventDefault();
             lastBackAt = now;
             showExitToast("firefox-no-exit");
@@ -602,7 +602,7 @@ const App = () => {
       {exitToast && (
         <div className="exit-toast" role="status" aria-live="polite">
           {exitToast === "firefox-no-exit"
-            ? "Sur Firefox PWA, utilisez le bouton app récente Android pour fermer MediURG."
+            ? "Sur Firefox Android, utilisez le bouton app récente pour fermer MediURG."
             : "Appuyez à nouveau sur retour pour quitter"}
         </div>
       )}
