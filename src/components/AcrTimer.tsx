@@ -178,24 +178,194 @@ const PREP_CONTENT = {
   },
 };
 
+// ─────────────────────────────────────────────────────────
+// Causes réversibles (H&T) — affichées en collapsible dans la phase actions.
+// Différence majeure ERC vs ACLS :
+//   ERC 4H/4T : regroupe acidose dans "métabolique", regroupe thrombose en un seul T
+//   ACLS 5H/5T : sépare H+ acidose, sépare thrombose pulmonaire / coronaire
+// Volontairement courts (1 phrase d'intervention) — en réa pas le temps de lire.
+// ─────────────────────────────────────────────────────────
+const HT_CAUSES = {
+  erc: [
+    {
+      id: "hypoxie",
+      icon: "🫁",
+      nom: "Hypoxie",
+      action: "O2 100%, vérifier IOT/ventilation/auscultation",
+    },
+    {
+      id: "hypovol",
+      icon: "💧",
+      nom: "Hypovolémie",
+      action: "Remplissage cristalloïdes 500 mL, hémorragie ?",
+    },
+    {
+      id: "metab",
+      icon: "⚗️",
+      nom: "Métabolique / K+",
+      action: "Iono, gaz : Ca²⁺ + bicarb si K+, insuline + G30%",
+    },
+    {
+      id: "hypotherm",
+      icon: "❄️",
+      nom: "Hypothermie",
+      action: "Température centrale, réchauffement actif",
+    },
+    {
+      id: "pneumo",
+      icon: "🎈",
+      nom: "Pneumothorax suffocant",
+      action: "Exsufflation 2e EIC LMC + drainage thoracique",
+    },
+    {
+      id: "tampon",
+      icon: "❤️",
+      nom: "Tamponnade",
+      action: "Écho FAST, péricardiocentèse écho-guidée",
+    },
+    {
+      id: "toxiques",
+      icon: "☠️",
+      nom: "Toxiques",
+      action: "Antidote ciblé (bicarb 8,4% si tricycliques, glucagon...)",
+    },
+    {
+      id: "thrombo",
+      icon: "🩸",
+      nom: "Thrombose (pulm/coro)",
+      action: "Fibrinolyse si EP / coro si IDM probable",
+    },
+  ],
+  acls: [
+    {
+      id: "hypoxie",
+      icon: "🫁",
+      nom: "Hypoxia",
+      action: "O2 100%, vérifier IOT/ventilation/auscultation",
+    },
+    {
+      id: "hypovol",
+      icon: "💧",
+      nom: "Hypovolemia",
+      action: "Remplissage cristalloïdes 500 mL, hémorragie ?",
+    },
+    {
+      id: "hion",
+      icon: "⚗️",
+      nom: "H⁺ (acidose)",
+      action: "Gaz, bicarb 1 mEq/kg si pH < 7,1 ou TCA tricycliques",
+    },
+    {
+      id: "kalemie",
+      icon: "⚡",
+      nom: "Hypo/Hyperkaliémie",
+      action: "Iono : Ca²⁺ + bicarb + insuline si K+ élevé",
+    },
+    {
+      id: "hypotherm",
+      icon: "❄️",
+      nom: "Hypothermia",
+      action: "Température centrale, réchauffement actif",
+    },
+    {
+      id: "pneumo",
+      icon: "🎈",
+      nom: "Tension pneumothorax",
+      action: "Exsufflation 2e EIC LMC + drainage thoracique",
+    },
+    {
+      id: "tampon",
+      icon: "❤️",
+      nom: "Tamponade cardiaque",
+      action: "Écho FAST, péricardiocentèse écho-guidée",
+    },
+    {
+      id: "toxiques",
+      icon: "☠️",
+      nom: "Toxins",
+      action: "Antidote ciblé (bicarb 8,4%, glucagon, naloxone...)",
+    },
+    {
+      id: "thrombo-p",
+      icon: "🫁",
+      nom: "Thrombose pulmonaire",
+      action: "Fibrinolyse (alteplase 50 mg IVD) si EP probable",
+    },
+    {
+      id: "thrombo-c",
+      icon: "💔",
+      nom: "Thrombose coronaire",
+      action: "Coronarographie en urgence post-ROSC",
+    },
+  ],
+};
+
+// ─────────────────────────────────────────────────────────
+// Post-ROSC — 4 cartes compactes (objectifs chiffrés affichés d'un coup d'œil)
+// Source : ILCOR 2022 + ERC 2021 post-resuscitation care.
+// Volontairement très court : une cible chiffrée + une action.
+// ─────────────────────────────────────────────────────────
+const POST_ROSC_TARGETS = [
+  {
+    icon: "🩸",
+    cat: "Hémodynamique",
+    cible: "PAM ≥ 65 mmHg",
+    action: "Remplissage puis Noradré IVSE si PAM basse",
+  },
+  {
+    icon: "🫁",
+    cat: "Ventilation",
+    cible: "SpO₂ 94-98% · EtCO₂ 35-45",
+    action: "Éviter hyperO₂ et hyperventilation",
+  },
+  {
+    icon: "🧠",
+    cat: "Neuro / température",
+    cible: "T° ≤ 37,7 °C",
+    action: "Contrôle ciblé température · pas de sédation profonde si neuro évaluable",
+  },
+  {
+    icon: "📊",
+    cat: "ECG & cause",
+    cible: "ECG 12 dériv · gaz · lactates",
+    action: "Coronarographie en urgence si STEMI ou choc cardiogénique",
+  },
+];
+
 // Calcule les actions suggérées pour un cycle, sachant l'historique.
-// Le médecin reste décideur — on n'affiche que les rappels ERC.
-const suggestActions = ({ rhythm, totalShocks, lastAdreAt, elapsed, pediatric }) => {
+// Le médecin reste décideur — on n'affiche que les rappels protocolaires.
+// ERC : Adré + Amio après 3e CEE.
+// ACLS : Adré dès le 2e CEE (q3-5 min), Amio 300 après 3e CEE, 150 après 5e.
+const suggestActions = ({
+  rhythm,
+  totalShocks,
+  lastAdreAt,
+  elapsed,
+  pediatric,
+  protocol = "erc",
+}) => {
   const adreLabel = pediatric ? "Adrénaline 0,01 mg/kg IV" : "Adrénaline 1 mg IV";
   const amio300 = pediatric ? "Amiodarone 5 mg/kg IV" : "Amiodarone 300 mg IV";
   const amio150 = pediatric ? "Amiodarone 5 mg/kg IV" : "Amiodarone 150 mg IV";
   const out = [];
+  const adreFirstShock = protocol === "acls" ? 2 : 3;
 
   if (rhythm === "choquable") {
     const nextShockNum = totalShocks + 1;
     out.push({ type: "choc", label: `Choc n°${nextShockNum}` });
+    if (nextShockNum === adreFirstShock && lastAdreAt === null) {
+      out.push({
+        type: "adre",
+        label: adreLabel,
+        hint: `1re dose · ${protocol === "acls" ? "après 2e" : "après 3e"} choc`,
+      });
+    }
     if (nextShockNum === 3) {
-      out.push({ type: "adre", label: adreLabel, hint: "après 3e choc" });
       out.push({ type: "amio", label: amio300, hint: "après 3e choc" });
     } else if (nextShockNum === 5) {
-      out.push({ type: "adre", label: adreLabel, hint: "après 5e choc" });
       out.push({ type: "amio", label: amio150, hint: "après 5e choc" });
-    } else if (nextShockNum > 5 && (lastAdreAt === null || elapsed - lastAdreAt >= 240 - 10)) {
+    }
+    if (lastAdreAt !== null && elapsed - lastAdreAt >= 240 - 10) {
       out.push({ type: "adre", label: adreLabel, hint: "cycle 4 min" });
     }
   } else if (rhythm === "non_choquable") {
@@ -208,8 +378,8 @@ const suggestActions = ({ rhythm, totalShocks, lastAdreAt, elapsed, pediatric })
   return out;
 };
 
-// phase ∈ "rcp" (RCP en cours, attente analyse) | "analyse" (rythme à choisir) | "actions" (actions à confirmer)
-const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
+// phase ∈ "rcp" | "analyse" | "actions" | "post-rosc"
+const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
   // Doses de référence ERC pour ce patient — affichées en permanence
   const refDoses = pediatric
     ? [
@@ -255,6 +425,12 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   // chrono. Permet de consulter la dilution sans quitter le mode ACR.
   // null = pas d'overlay. Clé = "Adrénaline" | "Amiodarone".
   const [prepDrug, setPrepDrug] = useState(null);
+  // Causes réversibles (H&T) : Set d'ids d'items investigués/exclus. Persiste
+  // au sein de la session (pas reset entre cycles — c'est le but).
+  const [htChecked, setHtChecked] = useState(() => new Set());
+  const [htExpanded, setHtExpanded] = useState(false);
+  const [htDetail, setHtDetail] = useState(null); // id de l'item dont on affiche l'action
+  const htCauses = HT_CAUSES[protocol] || HT_CAUSES.erc;
 
   const startedAtRef = useRef(null);
   const elapsedRef = useRef(0);
@@ -425,13 +601,47 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
 
   const onRhythm = (rhythm) => {
     setCurrentRhythm(rhythm);
-    const sugg = suggestActions({ rhythm, totalShocks: shocks, lastAdreAt, elapsed, pediatric });
+    const sugg = suggestActions({
+      rhythm,
+      totalShocks: shocks,
+      lastAdreAt,
+      elapsed,
+      pediatric,
+      protocol,
+    });
     setPendingActions(sugg.map((a) => ({ ...a, done: false })));
     setPhase("actions");
     // Le MCE reprend pile maintenant → le chrono 2 min de RCP du nouveau cycle
     // démarre ici (et non au moment de l'analyse précédente). Garantit 2 min
     // pleines de massage entre 2 analyses, peu importe le délai de décision.
     setCycleStartedAt(elapsedRef.current);
+  };
+
+  // ROSC obtenu : on archive l'historique et on passe en phase post-rosc.
+  // Le chrono continue (compte le temps post-ROSC, utile pour TTM/coro timing).
+  const onRosc = () => {
+    setHistory((h) => [...h, { cycle, t: elapsed, rhythm: "rosc", actions: ["ROSC obtenu"] }]);
+    setCurrentRhythm("rosc");
+    setPendingActions([]);
+    setPhase("post-rosc");
+  };
+
+  // Retour ACR depuis post-ROSC (re-arrêt) : on relance un cycle d'analyse.
+  const onReAcr = () => {
+    setCycle((c) => c + 1);
+    setCurrentRhythm(null);
+    setPendingActions([]);
+    setPhase("analyse");
+    setCycleStartedAt(elapsedRef.current);
+  };
+
+  const toggleHt = (id) => {
+    setHtChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const toggleAction = (idx) => {
@@ -492,6 +702,9 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     setAdres(0);
     setAmios(0);
     setLastAdreAt(null);
+    setHtChecked(new Set());
+    setHtExpanded(false);
+    setHtDetail(null);
     lastAnalyseAlertRef.current = -1;
     lastAdreAlertRef.current = -1;
   };
@@ -555,9 +768,14 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
         </div>
       </div>
 
-      {/* Doses de référence ERC */}
+      {/* Doses de référence (adaptées au protocole) */}
       <div className="acr-doses">
-        <div className="acr-doses-label">Doses {pediatric ? "Enfant" : "Adulte"}</div>
+        <div className="acr-doses-label">
+          Doses {pediatric ? "Enfant" : "Adulte"}
+          <span className={`acr-protocol-badge acr-protocol-${protocol}`}>
+            {protocol === "acls" ? "ACLS" : "ERC"}
+          </span>
+        </div>
         <div className="acr-doses-pills">
           {refDoses.map((d, i) => {
             const hasPrep = !!PREP_CONTENT[d.drug];
@@ -666,6 +884,11 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
                 <span className="acr-rhythm-label">Non choquable</span>
                 <span className="acr-rhythm-sub">Asystole / AESP</span>
               </button>
+              <button type="button" className="acr-rhythm-btn acr-rhythm-rosc" onClick={onRosc}>
+                <span className="acr-rhythm-icon">❤️</span>
+                <span className="acr-rhythm-label">ROSC</span>
+                <span className="acr-rhythm-sub">Pouls retrouvé · post-réa</span>
+              </button>
             </div>
           </div>
         )}
@@ -721,7 +944,91 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
             </button>
           </div>
         )}
+
+        {running && phase === "post-rosc" && (
+          <div className="acr-step-postrosc">
+            <div className="acr-step-title acr-step-title-rosc">❤️ ROSC obtenu · Post-réa</div>
+            <div className="acr-postrosc-grid">
+              {POST_ROSC_TARGETS.map((t, i) => (
+                <div key={i} className="acr-postrosc-card">
+                  <div className="acr-postrosc-icon" aria-hidden="true">
+                    {t.icon}
+                  </div>
+                  <div className="acr-postrosc-cat">{t.cat}</div>
+                  <div className="acr-postrosc-cible">{t.cible}</div>
+                  <div className="acr-postrosc-action">{t.action}</div>
+                </div>
+              ))}
+            </div>
+            <button type="button" className="acr-step-next acr-step-reacr" onClick={onReAcr}>
+              ↻ Re-arrêt — relancer un cycle
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Causes réversibles (H&T) — collapsible, masqué en post-ROSC */}
+      {running && phase !== "post-rosc" && (
+        <div className={`acr-ht ${htExpanded ? "acr-ht-open" : ""}`}>
+          <button
+            type="button"
+            className="acr-ht-toggle"
+            onClick={() => setHtExpanded((x) => !x)}
+            aria-expanded={htExpanded}
+          >
+            <span aria-hidden="true">🔍</span>
+            <span className="acr-ht-toggle-label">
+              Causes réversibles ({protocol === "acls" ? "5H/5T" : "4H/4T"})
+            </span>
+            <span className="acr-ht-count">
+              {htChecked.size}/{htCauses.length}
+            </span>
+            <span className="acr-ht-chevron" aria-hidden="true">
+              {htExpanded ? "▾" : "▸"}
+            </span>
+          </button>
+          {htExpanded && (
+            <div className="acr-ht-body">
+              <ul className="acr-ht-list">
+                {htCauses.map((c) => {
+                  const checked = htChecked.has(c.id);
+                  const open = htDetail === c.id;
+                  return (
+                    <li
+                      key={c.id}
+                      className={`acr-ht-item ${checked ? "acr-ht-item-checked" : ""}`}
+                    >
+                      <button
+                        type="button"
+                        className="acr-ht-pill"
+                        onClick={() => setHtDetail(open ? null : c.id)}
+                        title={c.action}
+                      >
+                        <span className="acr-ht-pill-icon" aria-hidden="true">
+                          {c.icon}
+                        </span>
+                        <span className="acr-ht-pill-name">{c.nom}</span>
+                        <span className="acr-ht-pill-chevron" aria-hidden="true">
+                          {open ? "▾" : "▸"}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="acr-ht-check"
+                        onClick={() => toggleHt(c.id)}
+                        aria-label={checked ? "Décocher" : "Marquer comme vu/exclu"}
+                      >
+                        {checked ? "✓" : ""}
+                      </button>
+                      {open && <div className="acr-ht-action">{c.action}</div>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Boutons généraux */}
       <div className="acr-timer-controls">

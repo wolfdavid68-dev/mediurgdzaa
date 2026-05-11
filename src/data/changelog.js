@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v68";
+export const APP_VERSION = "v69";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v69",
+    date: "2026-05-11",
+    titre: "Mode ACR · ACLS, causes réversibles H&T, phase post-ROSC",
+    changes: [
+      {
+        type: "feat",
+        text: "Toggle ERC ↔ ACLS dans le picker du mode urgence ACR, au-dessus du choix Adulte/Enfant. Persiste en localStorage. La différence opérationnelle : en ACLS l'adrénaline est suggérée dès le 2e CEE (vs 3e en ERC). Un badge ERC/ACLS visible dans le chrono rappelle le protocole actif. Bouton « ↔ ACLS/ERC » à côté du « ↔ Adulte/Enfant » pour rebasculer en cours de session (confirmation requise, retour au picker).",
+      },
+      {
+        type: "feat",
+        text: "Checklist « Causes réversibles » dépliable dans la phase actions du chrono ACR — 4H/4T en ERC, 5H/5T en ACLS (split acidose et thromboses pulmonaire/coronaire). Chaque cause = bouton court qui révèle l'action ciblée (ex: « Pneumothorax suffocant → exsufflation 2e EIC LMC »). Compteur visible dans le toggle (X/8 ou X/10) et bouton check pour marquer vu/exclu, persistant sur toute la session.",
+      },
+      {
+        type: "feat",
+        text: "Nouvelle phase « ROSC » accessible depuis l'analyse rythme — 3e bouton à côté de Choquable/Non choquable. Bascule en écran post-réa avec 4 cartes compactes affichant les cibles chiffrées d'un coup d'œil : PAM ≥ 65 mmHg (Noradré), SpO₂ 94-98% + EtCO₂ 35-45 (éviter hyperO₂), T° ≤ 37,7 °C (contrôle ciblé), ECG 12 dériv + coro si STEMI. Bouton « Re-arrêt » pour relancer un cycle si re-ACR. Le chrono continue de tourner (utile pour timing TTM/coronarographie).",
+      },
+    ],
+  },
   {
     version: "v68",
     date: "2026-05-11",

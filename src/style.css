@@ -3774,8 +3774,78 @@ body {
   font-style: italic;
 }
 
-.acr-mode-switch {
+/* Toggle ERC ↔ ACLS dans le picker — au-dessus du choix patient */
+.acr-mode-protocol-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.acr-mode-protocol-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.acr-mode-protocol-btn:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+.acr-mode-protocol-active {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--text);
+}
+.acr-mode-protocol-name {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.acr-mode-protocol-sub {
+  font-size: 10px;
+  color: var(--text-mute);
+}
+
+/* Badge ERC/ACLS visible dans le chrono à côté du label des doses */
+.acr-protocol-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+.acr-protocol-erc {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+.acr-protocol-acls {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.acr-mode-switch-row {
   margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.acr-mode-switch {
+  margin-top: 0;
   width: 100%;
   padding: 10px;
   border-radius: 8px;
@@ -3788,6 +3858,9 @@ body {
 .acr-mode-switch:hover {
   color: var(--text);
   border-color: var(--border-strong);
+}
+.acr-mode-switch-protocol {
+  font-weight: 700;
 }
 
 /* ── Chrono ACR/RCP ──────────────────────────────────────── */
@@ -4252,6 +4325,17 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+/* Le 3e bouton ROSC s'étale sur 2 colonnes sous les 2 choix de rythme.
+   Visuellement séparé : c'est un événement spécial qui sort du cycle RCP. */
+.acr-rhythm-rosc {
+  grid-column: 1 / -1;
+  border-color: rgba(244, 114, 182, 0.55);
+  background: linear-gradient(180deg, rgba(244, 114, 182, 0.1), rgba(244, 114, 182, 0.04));
+}
+.acr-rhythm-rosc:hover {
+  background: rgba(244, 114, 182, 0.18);
+  border-color: #f472b6;
 }
 .acr-rhythm-btn {
   display: flex;
@@ -5030,6 +5114,197 @@ body {
 .acr-prep-full:hover {
   background: rgba(96, 165, 250, 0.22);
   border-color: rgba(96, 165, 250, 0.7);
+}
+
+/* ─ Phase post-ROSC : 4 cartes compactes (cibles chiffrées d'un coup d'œil) ─ */
+.acr-step-title-rosc {
+  color: #f472b6;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 15px;
+}
+.acr-step-postrosc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.acr-postrosc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.acr-postrosc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.acr-postrosc-icon {
+  font-size: 18px;
+}
+.acr-postrosc-cat {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.acr-postrosc-cible {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+  font-family: var(--mono);
+}
+.acr-postrosc-action {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  line-height: 1.3;
+}
+.acr-step-reacr {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+  font-weight: 800;
+}
+.acr-step-reacr:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
+}
+@media (max-width: 420px) {
+  .acr-postrosc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─ Causes réversibles (H&T) — collapsible compact ─
+   Affiché en phase actions/rcp/analyse. Toggle au tap ; chaque item ouvre
+   son action sur 1-2 lignes. Bouton check séparé pour marquer vu/exclu. */
+.acr-ht {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  overflow: hidden;
+}
+.acr-ht-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+.acr-ht-toggle:hover {
+  background: var(--card-hover);
+}
+.acr-ht-toggle-label {
+  flex: 1;
+}
+.acr-ht-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+}
+.acr-ht-chevron {
+  font-size: 12px;
+  color: var(--text-mute);
+}
+.acr-ht-body {
+  padding: 4px 8px 10px;
+  border-top: 1px solid var(--border);
+}
+.acr-ht-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.acr-ht-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+.acr-ht-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.acr-ht-pill:hover {
+  background: var(--card-hover);
+}
+.acr-ht-pill-icon {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+}
+.acr-ht-pill-name {
+  flex: 1;
+}
+.acr-ht-pill-chevron {
+  font-size: 11px;
+  color: var(--text-mute);
+}
+.acr-ht-check {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: transparent;
+  color: var(--success);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.acr-ht-check:hover {
+  border-color: var(--success);
+}
+.acr-ht-item-checked .acr-ht-pill {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+.acr-ht-item-checked .acr-ht-check {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+.acr-ht-action {
+  grid-column: 1 / -1;
+  padding: 8px 10px;
+  margin: 2px 0 4px;
+  border-radius: 8px;
+  background: rgba(96, 165, 250, 0.1);
+  border-left: 3px solid rgba(96, 165, 250, 0.6);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.4;
 }
 
 /* ─ Bilan ACR (modale) ─ */
