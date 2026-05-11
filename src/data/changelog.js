@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v38";
+export const APP_VERSION = "v39";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v39",
+    date: "2026-05-11",
+    titre: "Fix garde 2× retour Chrome PWA (régression v38)",
+    changes: [
+      { type: "fix", text: "En v38, Chrome PWA fermait l'app au 1er retour : navigate event fait son preventDefault et pose lastBackAt, MAIS popstate fire quand même (contrairement à la spec) et croit que c'est le 2e retour → exit immédiat. Ajout d'un flag navigateIntercepted qui dit à popstate « déjà géré par navigate, skip ». Firefox PWA Android continue de marcher via la Navigation API, et Chrome PWA + Firefox onglet retrouvent le comportement v37 (toast au 1er retour, fermeture au 2e dans les 2 s)." },
+    ],
+  },
   {
     version: "v38",
     date: "2026-05-11",

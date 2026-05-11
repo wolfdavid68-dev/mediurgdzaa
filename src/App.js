@@ -129,6 +129,12 @@ const App = () => {
     let lastBackAt = 0;
     let toastTimer = null;
     let allowNextExit = false;
+    // Flag : navigate vient juste d'intercepter et a fait son preventDefault.
+    // Sur Chrome, popstate fire QUAND MÊME après le preventDefault (alors que la
+    // spec dit l'inverse), et sans ce flag, popstate verrait lastBackAt fraîchement
+    // posé par navigate, croirait que c'est un 2e back, et trigger window.history.back()
+    // → exit immédiat au 1er appui. Le flag dit à popstate « skip, déjà géré ».
+    let navigateIntercepted = false;
 
     const showExitToast = () => {
       setExitToast(true);
@@ -137,12 +143,14 @@ const App = () => {
     };
 
     const onPopState = (e) => {
-      const s = e.state?.mediurg;
+      // Si navigate vient de gérer ce back, ne rien faire ici (sinon double-traitement
+      // et exit immédiat au 1er appui sur Chrome).
+      if (navigateIntercepted) {
+        navigateIntercepted = false;
+        return;
+      }
 
-      // Cas « veut quitter » : soit on est tombé sur la sentinelle, soit le
-      // navigateur nous donne e.state === null. Dans les deux cas, on intercepte.
-      // Note : sous Firefox PWA Android, popstate ne fire pas au hardware back —
-      // la Navigation API ci-dessous prend le relais quand elle est dispo.
+      const s = e.state?.mediurg;
       if (!s || s.sentinel) {
         const now = Date.now();
         if (now - lastBackAt < 2000) {
@@ -180,8 +188,6 @@ const App = () => {
     if (typeof window.navigation !== "undefined" &&
         typeof window.navigation.addEventListener === "function") {
       onNavigate = (e) => {
-        // On ne touche qu'aux navigations user-initiated de type traverse
-        // (back/forward) qu'on peut canceller.
         if (e.navigationType !== "traverse" || !e.userInitiated || !e.cancelable) return;
         if (allowNextExit) { allowNextExit = false; return; }
 
@@ -192,12 +198,15 @@ const App = () => {
 
         const now = Date.now();
         if (now - lastBackAt < 2000) {
-          // 2e appui dans les 2 s → on laisse partir cette navigation
+          // 2e appui dans les 2 s → on laisse partir
           allowNextExit = true;
           return;
         }
         e.preventDefault();
         lastBackAt = now;
+        // Signaler à popstate de skip si Chrome le fire quand même
+        navigateIntercepted = true;
+        setTimeout(() => { navigateIntercepted = false; }, 100);
         showExitToast();
       };
       window.navigation.addEventListener("navigate", onNavigate);
