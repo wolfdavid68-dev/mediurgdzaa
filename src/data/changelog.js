@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v48";
+export const APP_VERSION = "v49";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v49",
+    date: "2026-05-11",
+    titre: "Service worker artisanal → Workbox via vite-plugin-pwa",
+    changes: [
+      { type: "chore", text: "Remplacement de notre service-worker.js hand-rolled (~160 lignes : install + activate + 3 fetch handlers + asset-manifest custom) par vite-plugin-pwa avec Workbox sous le capot. La liste de précache est régénérée automatiquement à chaque build avec les hashes Vite — fini les soucis de cache désaligné entre versions (v32 vs v44, etc.). cleanupOutdatedCaches: true purge les anciens caches au passage." },
+      { type: "feat", text: "Notification de mise à jour : quand un nouveau service worker est prêt, un petit bandeau « Nouvelle version disponible · Mettre à jour » apparaît en bas. Un clic recharge proprement sur la dernière version. registerType: 'autoUpdate' fait que le nouveau SW skip waiting + claim immédiatement, donc le passage à la nouvelle version est instantané dès qu'on accepte." },
+      { type: "feat", text: "Vérification d'update toutes les heures pour les sessions longues (entre 2 réas, le tel reste sur l'app). Sans ça il fallait que l'utilisateur ferme/rouvre la PWA pour récupérer le nouveau contenu." },
+      { type: "chore", text: "Nettoyage : suppression de public/service-worker.js, public/manifest.json (le plugin génère manifest.webmanifest depuis vite.config.js), scripts/generate-asset-manifest.cjs (plus utile). Le script check-versions.cjs ne vérifie plus que l'alignement APP_VERSION / CHANGELOG[0].version (Workbox gère le versioning du SW)." },
+    ],
+  },
   {
     version: "v48",
     date: "2026-05-11",

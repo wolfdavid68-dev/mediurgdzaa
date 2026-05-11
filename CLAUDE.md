@@ -47,10 +47,10 @@ All clinical content is hand-curated JS in `src/data/`:
 A single global stylesheet `src/style.css` (~52 KB) drives everything. `DrugCard.css` is intentionally near-empty. Components use plain className strings — no CSS modules, no Tailwind, no styled-components. New visual styles belong in `style.css`.
 
 ### PWA / service worker
-`public/service-worker.js` uses a cache name `mediurg-vN`. The install handler reads the CRA-emitted `asset-manifest.json` to precache hashed JS/CSS. **When shipping a release, bump `CACHE_NAME`** (e.g. `mediurg-v4` → `mediurg-v5`) — otherwise users see stale assets after deploy. Document strategy: cache-first for `/static/`, network-first with cache fallback for HTML documents, stale-while-revalidate for everything else.
+Service worker généré par **vite-plugin-pwa** (Workbox sous le capot) — configuré dans `vite.config.js`. À chaque build, Workbox produit `build/service-worker.js` avec un precache manifest contenant les hashes Vite de tous les assets ; l'invalidation cache est donc automatique, pas de `CACHE_NAME` à bumper. `registerType: 'autoUpdate'` skip waiting + claim. La registration côté client est dans `src/components/UpdatePrompt.jsx` (via `virtual:pwa-register/react`) qui affiche un toast « Nouvelle version disponible · Mettre à jour » quand un nouveau SW est prêt. Le manifest PWA est aussi défini dans `vite.config.js` (clé `manifest`) et émis comme `manifest.webmanifest`.
 
-### Calculators in `DrugCard.js`
-`DrugCard.js` is the largest component (~700 lines) and contains three independent calculators driven by the same weight input: `calcDose` (regex-parses dose strings like `1-2,5 mg/kg` from `poso` text and applies `max X mg` caps), the preparation calculator (`prep` object → mL to draw / dilute), and `calcDebit` (PSE flow rate in mL/h). When changing dose-text formatting in `drugs.js`, verify the regex in `calcDose` still matches.
+### Calculators in `DrugCard.jsx`
+`DrugCard.jsx` is the largest component (~700 lines) and contains three independent calculators driven by the same weight input: `calcDose` (regex-parses dose strings like `1-2,5 mg/kg` from `poso` text and applies `max X mg` caps), the preparation calculator (`prep` object → mL to draw / dilute), and `calcDebit` (PSE flow rate in mL/h). When changing dose-text formatting in `drugs.js`, verify the regex in `calcDose` still matches.
 
 ## Conventions
 

@@ -11,7 +11,7 @@
   <meta name="color-scheme" content="dark light" />
   <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
-  <link rel="manifest" href="./manifest.json" />
+  <!-- <link rel="manifest"> injecté par vite-plugin-pwa au build -->
   <title>MediURG - Pharmacologie d'Urgence Hors Ligne</title>
   <style>
     /* Fond peint avant le chargement du CSS bundle pour éviter le flash gris/blanc
@@ -46,15 +46,9 @@
       } catch (e) {}
     })();
   </script>
+  <!-- L'enregistrement du Service Worker est piloté par useRegisterSW dans
+       le bundle React (src/components/UpdatePrompt.jsx), pour qu'on puisse
+       afficher un toast quand un nouveau SW est prêt. -->
   <script type="module" src="/src/index.jsx"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(r => console.log('✓ Service Worker enregistré:', r))
-          .catch(e => console.warn('Service Worker échoué:', e));
-      });
-    }
-  </script>
 </body>
 </html>

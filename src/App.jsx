@@ -6,6 +6,7 @@ import { ALIASES } from "./data/aliases";
 import { normalize } from "./lib/normalize";
 import DrugList from "./components/DrugList";
 import ProtocolCard from "./components/ProtocolCard";
+import UpdatePrompt from "./components/UpdatePrompt";
 import { APP_VERSION } from "./data/changelog";
 
 // Code-splitting : les modales (ACR, changelog) et les sous-onglets Protocoles
@@ -623,6 +624,7 @@ const App = () => {
             : "Appuyez à nouveau sur retour pour quitter"}
         </div>
       )}
+      <UpdatePrompt />
     </div>
   );
 };
