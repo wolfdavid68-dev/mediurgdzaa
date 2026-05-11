@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v66";
+export const APP_VERSION = "v67";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v67",
+    date: "2026-05-11",
+    titre: "Échelles dépliables + Cushman officiel (PA par tranche d'âge)",
+    changes: [
+      {
+        type: "feat",
+        text: "Chaque échelle de l'onglet Échelles est maintenant dépliable (clic sur le header). Quand collapsée, on voit titre + description courte + chevron. Quand un score est complété, un badge couleur s'affiche dans le header même replié → on voit le résultat sans déplier. Évite que 3 calculateurs entiers occupent tout l'écran en même temps.",
+      },
+      {
+        type: "feat",
+        text: "Score de Cushman repris à l'identique du document NPEM officiel (libellés exacts et bornes corrigées) : Pouls 81-100 au lieu de 80-100, FR 16-25/26-35/>35 au lieu de 16-20/21-25/>25, Agitation « Aucune/Discrète/Généralisée contrôlable/incontrôlable », Sueurs « Aucune/Paumes/Paumes et front/Généralisées », Troubles sensoriels « Photo-/phonophobie, prurit » et « Hallucinations critiquées/non critiquées », Tremblements « Main uniquement/Tout le membre supérieur/Généralisés ». Seuils d'interprétation alignés : < 7 état contrôlé, 7-14 sevrage modéré, > 14 sevrage sévère.",
+      },
+      {
+        type: "feat",
+        text: "PA systolique du Cushman maintenant ajustée par tranche d'âge : 3 chips (18-30 ans, 31-50 ans, > 50 ans) à choisir en premier, puis les 4 options de scoring s'adaptent automatiquement au barème de cette tranche (ex: 18-30 ans = < 125 / 126-135 / 136-145 / > 145, > 50 ans = < 145 / 146-155 / 156-165 / > 165). Le ScaleCard supporte génériquement les `variants` dans le data model pour réutiliser le pattern sur d'autres scores age-dépendants à l'avenir.",
+      },
+    ],
+  },
   {
     version: "v66",
     date: "2026-05-11",

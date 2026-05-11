@@ -111,77 +111,106 @@ export const SCALES = [
     nom: "Score de Cushman",
     icon: "🍺",
     description:
-      "Sévérité du syndrome de sevrage alcoolique. 7 items × 0-3 = total 0-21. Score ≥ 7 → benzodiazépine ; ≥ 15 → risque de delirium tremens, USI à envisager.",
+      "Détermine la nécessité de l'adjonction d'une benzodiazépine et sa posologie chez un patient en sevrage alcoolique. Cochez l'item correspondant à la situation. Interprétation : < 7 état clinique contrôlé · 7-14 sevrage modéré · > 14 sevrage sévère.",
     type: "sum",
     items: [
       {
-        label: "Fréquence cardiaque (bpm)",
+        label: "Pouls (bpm/min)",
         options: [
           { score: 0, label: "< 80" },
-          { score: 1, label: "80-100" },
+          { score: 1, label: "81-100" },
           { score: 2, label: "101-120" },
           { score: 3, label: "> 120" },
         ],
       },
       {
+        // Les bornes de PA dépendent de l'âge du patient : on demande de
+        // choisir la tranche en premier (les chips d'âge en haut), puis les
+        // options affichées correspondent au barème de cette tranche.
         label: "PA systolique (mmHg)",
-        options: [
-          { score: 0, label: "< 135" },
-          { score: 1, label: "135-145" },
-          { score: 2, label: "146-155" },
-          { score: 3, label: "> 155" },
+        variants: [
+          {
+            id: "18-30",
+            label: "18-30 ans",
+            options: [
+              { score: 0, label: "< 125" },
+              { score: 1, label: "126-135" },
+              { score: 2, label: "136-145" },
+              { score: 3, label: "> 145" },
+            ],
+          },
+          {
+            id: "31-50",
+            label: "31-50 ans",
+            options: [
+              { score: 0, label: "< 135" },
+              { score: 1, label: "136-145" },
+              { score: 2, label: "146-155" },
+              { score: 3, label: "> 155" },
+            ],
+          },
+          {
+            id: ">50",
+            label: "> 50 ans",
+            options: [
+              { score: 0, label: "< 145" },
+              { score: 1, label: "146-155" },
+              { score: 2, label: "156-165" },
+              { score: 3, label: "> 165" },
+            ],
+          },
         ],
       },
       {
-        label: "Fréquence respiratoire (/min)",
+        label: "Fréquence respiratoire",
         options: [
           { score: 0, label: "< 16" },
-          { score: 1, label: "16-20" },
-          { score: 2, label: "21-25" },
-          { score: 3, label: "> 25" },
-        ],
-      },
-      {
-        label: "Tremblements",
-        options: [
-          { score: 0, label: "Absent" },
-          { score: 1, label: "Mains" },
-          { score: 2, label: "Membres supérieurs" },
-          { score: 3, label: "Généralisés" },
-        ],
-      },
-      {
-        label: "Sueurs",
-        options: [
-          { score: 0, label: "Absentes" },
-          { score: 1, label: "Paumes moites" },
-          { score: 2, label: "Face / front" },
-          { score: 3, label: "Profuses, généralisées" },
+          { score: 1, label: "16-25" },
+          { score: 2, label: "26-35" },
+          { score: 3, label: "> 35" },
         ],
       },
       {
         label: "Agitation",
         options: [
-          { score: 0, label: "Calme" },
-          { score: 1, label: "Légère" },
-          { score: 2, label: "Marquée" },
-          { score: 3, label: "Incontrôlable" },
+          { score: 0, label: "Aucune" },
+          { score: 1, label: "Discrète" },
+          { score: 2, label: "Généralisée / contrôlable" },
+          { score: 3, label: "Généralisée / incontrôlable" },
         ],
       },
       {
-        label: "Troubles sensoriels / hallucinations",
+        label: "Sueurs",
         options: [
-          { score: 0, label: "Absents" },
-          { score: 1, label: "Doute, perceptions floues" },
-          { score: 2, label: "Hallucinations nettes" },
-          { score: 3, label: "Panique, hallucinations terrifiantes" },
+          { score: 0, label: "Aucune" },
+          { score: 1, label: "Paumes" },
+          { score: 2, label: "Paumes et front" },
+          { score: 3, label: "Généralisées" },
+        ],
+      },
+      {
+        label: "Troubles sensoriels",
+        options: [
+          { score: 0, label: "Aucun" },
+          { score: 1, label: "Photo-/phonophobie, prurit" },
+          { score: 2, label: "Hallucinations critiquées" },
+          { score: 3, label: "Hallucinations non critiquées" },
+        ],
+      },
+      {
+        label: "Tremblements",
+        options: [
+          { score: 0, label: "Aucun" },
+          { score: 1, label: "Main uniquement" },
+          { score: 2, label: "Tout le membre supérieur" },
+          { score: 3, label: "Généralisés" },
         ],
       },
     ],
     interpret: (total) => {
-      if (total <= 6) return { severity: "Mineur (≤ 6)", color: "#16a34a" };
-      if (total <= 14) return { severity: "Modéré (7-14)", color: "#f97316" };
-      return { severity: "Sévère / risque DT (≥ 15)", color: "#dc2626" };
+      if (total < 7) return { severity: "État clinique contrôlé (< 7)", color: "#16a34a" };
+      if (total <= 14) return { severity: "Sevrage modéré (7-14)", color: "#f97316" };
+      return { severity: "Sevrage sévère (> 14)", color: "#dc2626" };
     },
   },
 ];
