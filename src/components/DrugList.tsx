@@ -7,7 +7,7 @@ import CardErrorFallback from "./CardErrorFallback";
 // affiche le fallback ; toutes les autres restent fonctionnelles. En réa, c'est
 // la différence entre « 1 médicament temporairement indisponible » et « l'app
 // est dead, je dois la fermer pour la rouvrir ».
-const DrugList = ({ drugs, favorites, onToggleFavorite, onOpen }) => {
+const DrugList = ({ drugs, favorites, onToggleFavorite, onOpen, onProtocolOpen }) => {
   return (
     <div className="drug-list-grid">
       {drugs.map((drug) => (
@@ -17,6 +17,7 @@ const DrugList = ({ drugs, favorites, onToggleFavorite, onOpen }) => {
             isFavorite={favorites?.has(drug.id) || false}
             onToggleFavorite={onToggleFavorite}
             onOpen={onOpen}
+            onProtocolOpen={onProtocolOpen}
           />
         </ErrorBoundary>
       ))}

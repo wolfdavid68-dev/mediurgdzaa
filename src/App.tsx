@@ -10,9 +10,10 @@ import { APP_VERSION } from "./data/changelog";
 // et la page Protocoles entière (avec ses data PROTOCOLS + PREP_KITS et ses
 // sous-onglets IncompatibilityList + PrepKitCard) est lazy aussi. Tout ce
 // poids sort du bundle initial → premier paint plus rapide.
-const AcrModeModal   = lazy(() => import("./components/AcrModeModal"));
+const AcrModeModal = lazy(() => import("./components/AcrModeModal"));
 const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
 const ProtocolesPage = lazy(() => import("./pages/ProtocolesPage"));
+const EchellesPage = lazy(() => import("./pages/EchellesPage"));
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -32,22 +33,34 @@ const App = () => {
   // l'historique navigateur (pushNav { protoCategory: ... }).
   const [protoCategory, setProtoCategory] = useState("PISU");
   const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem("mediurg-theme") || "dark"; } catch { return "dark"; }
+    try {
+      return localStorage.getItem("mediurg-theme") || "dark";
+    } catch {
+      return "dark";
+    }
   });
   const [bigFont, setBigFont] = useState(() => {
-    try { return localStorage.getItem("mediurg-bigfont") === "1"; } catch { return false; }
+    try {
+      return localStorage.getItem("mediurg-bigfont") === "1";
+    } catch {
+      return false;
+    }
   });
   const [favorites, setFavorites] = useState(() => {
     try {
       const raw = localStorage.getItem("mediurg-favorites");
       return raw ? new Set(JSON.parse(raw)) : new Set();
-    } catch { return new Set(); }
+    } catch {
+      return new Set();
+    }
   });
   const [history, setHistory] = useState(() => {
     try {
       const raw = localStorage.getItem("mediurg-history");
       return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   });
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [isOnline, setIsOnline] = useState(() =>
@@ -80,10 +93,21 @@ const App = () => {
     const pageParam = params.get("page");
     const tab = params.get("tab");
     let dirty = false;
-    if (mode === "acr") { setShowAcr(true); dirty = true; }
-    if (pageParam === "protocoles") { setPage("protocoles"); dirty = true; }
+    if (mode === "acr") {
+      setShowAcr(true);
+      dirty = true;
+    }
+    if (pageParam === "protocoles") {
+      setPage("protocoles");
+      dirty = true;
+    }
+    if (pageParam === "echelles") {
+      setPage("echelles");
+      dirty = true;
+    }
     if (tab === "incompatibilites" || tab === "kits" || tab === "PISU") {
-      setProtoCategory(tab); dirty = true;
+      setProtoCategory(tab);
+      dirty = true;
     }
     if (dirty) {
       try {
@@ -93,49 +117,68 @@ const App = () => {
   }, []);
 
   const toggleFavorite = (id) => {
-    setFavorites(prev => {
+    setFavorites((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      try { localStorage.setItem("mediurg-favorites", JSON.stringify([...next])); } catch {}
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try {
+        localStorage.setItem("mediurg-favorites", JSON.stringify([...next]));
+      } catch {}
       return next;
     });
   };
 
   const addToHistory = (id) => {
-    setHistory(prev => {
-      const next = [id, ...prev.filter(x => x !== id)].slice(0, 5);
-      try { localStorage.setItem("mediurg-history", JSON.stringify(next)); } catch {}
+    setHistory((prev) => {
+      const next = [id, ...prev.filter((x) => x !== id)].slice(0, 5);
+      try {
+        localStorage.setItem("mediurg-history", JSON.stringify(next));
+      } catch {}
       return next;
     });
   };
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    try { localStorage.setItem("mediurg-theme", theme); } catch {}
+    try {
+      localStorage.setItem("mediurg-theme", theme);
+    } catch {}
   }, [theme]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-fontsize", bigFont ? "large" : "normal");
-    try { localStorage.setItem("mediurg-bigfont", bigFont ? "1" : "0"); } catch {}
+    try {
+      localStorage.setItem("mediurg-bigfont", bigFont ? "1" : "0");
+    } catch {}
   }, [bigFont]);
 
-  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
-  const toggleFont = () => setBigFont(f => !f);
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+  const toggleFont = () => setBigFont((f) => !f);
 
   // === Navigation par couches alignée sur l'historique navigateur ===
   // Chaque ouverture de modale, changement de sous-onglet ou de page pousse une entrée.
   // Bouton retour Android : 1er appui ferme la modale → sous-onglet précédent → page précédente → quitter.
   const pushNav = (patch) => {
-    const current = window.history.state?.mediurg
-      || { page: "medicaments", protoCategory: "PISU", modal: null };
+    const current = window.history.state?.mediurg || {
+      page: "medicaments",
+      protoCategory: "PISU",
+      modal: null,
+    };
     const next = { ...current, ...patch };
-    try { window.history.pushState({ mediurg: next }, ""); } catch {}
+    try {
+      window.history.pushState({ mediurg: next }, "");
+    } catch {}
   };
   const replaceNav = (patch) => {
-    const current = window.history.state?.mediurg
-      || { page: "medicaments", protoCategory: "PISU", modal: null };
+    const current = window.history.state?.mediurg || {
+      page: "medicaments",
+      protoCategory: "PISU",
+      modal: null,
+    };
     const next = { ...current, ...patch };
-    try { window.history.replaceState({ mediurg: next }, ""); } catch {}
+    try {
+      window.history.replaceState({ mediurg: next }, "");
+    } catch {}
   };
 
   useEffect(() => {
@@ -172,7 +215,10 @@ const App = () => {
     const showExitToast = (variant) => {
       setExitToast(variant);
       if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => setExitToast(null), variant === "firefox-no-exit" ? 3500 : 2000);
+      toastTimer = setTimeout(
+        () => setExitToast(null),
+        variant === "firefox-no-exit" ? 3500 : 2000
+      );
     };
 
     // Architecture popstate-first (depuis v59) :
@@ -194,7 +240,9 @@ const App = () => {
         // Sentinelle = tentative de sortie de l'app
         if (isRapidDouble) {
           // 2e back rapide → on laisse vraiment partir
-          try { window.history.back(); } catch {}
+          try {
+            window.history.back();
+          } catch {}
           return;
         }
         // 1er back à la racine → toast + re-push pour rester dans l'app
@@ -235,7 +283,11 @@ const App = () => {
 
     return () => {
       window.removeEventListener("popstate", onPopState);
-      if (watcher) { try { watcher.destroy(); } catch {} }
+      if (watcher) {
+        try {
+          watcher.destroy();
+        } catch {}
+      }
       if (toastTimer) clearTimeout(toastTimer);
     };
   }, []);
@@ -271,11 +323,21 @@ const App = () => {
     withTransition(() => setProtoCategory(newCat));
   };
 
-  const openChangelog = () => { pushNav({ modal: "changelog" }); setShowChangelog(true); };
-  const openAcr = () => { pushNav({ modal: "acr" }); setShowAcr(true); };
+  const openChangelog = () => {
+    pushNav({ modal: "changelog" });
+    setShowChangelog(true);
+  };
+  const openAcr = () => {
+    pushNav({ modal: "acr" });
+    setShowAcr(true);
+  };
   const closeOverlay = () => {
-    try { window.history.back(); }
-    catch { setShowChangelog(false); setShowAcr(false); }
+    try {
+      window.history.back();
+    } catch {
+      setShowChangelog(false);
+      setShowAcr(false);
+    }
   };
 
   const filtered = useMemo(() => {
@@ -291,25 +353,23 @@ const App = () => {
           .map(([, target]) => normalize(target))
       : [];
 
-    return DRUGS
-      .filter((d) => {
-        const fields = [d.nom, d.commercial, d.dci, d.classe].map(normalize);
-        const matchDirect = !q || fields.some(f => f.includes(q));
-        // Array#some retourne false sur tableau vide → pas besoin du
-        // .length > 0 préalable (relevé par oxlint unicorn/no-useless-length-check).
-        const matchAlias = aliasTargets.some(t => fields.some(f => f.includes(t)));
-        const matchQ = matchDirect || matchAlias;
-        const matchC = cat === "Tout" || d.cat === cat;
-        const matchS = svc === "Tout" || d.svc.includes(svc);
-        const matchF = !showFavoritesOnly || favorites.has(d.id);
-        return matchQ && matchC && matchS && matchF;
-      })
-      .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+    return DRUGS.filter((d) => {
+      const fields = [d.nom, d.commercial, d.dci, d.classe].map(normalize);
+      const matchDirect = !q || fields.some((f) => f.includes(q));
+      // Array#some retourne false sur tableau vide → pas besoin du
+      // .length > 0 préalable (relevé par oxlint unicorn/no-useless-length-check).
+      const matchAlias = aliasTargets.some((t) => fields.some((f) => f.includes(t)));
+      const matchQ = matchDirect || matchAlias;
+      const matchC = cat === "Tout" || d.cat === cat;
+      const matchS = svc === "Tout" || d.svc.includes(svc);
+      const matchF = !showFavoritesOnly || favorites.has(d.id);
+      return matchQ && matchC && matchS && matchF;
+    }).sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
   }, [deferredSearch, cat, svc, showFavoritesOnly, favorites]);
 
   const recentDrugs = useMemo(() => {
     if (deferredSearch.trim() || cat !== "Tout" || svc !== "Tout" || showFavoritesOnly) return [];
-    return history.map(id => DRUGS.find(d => d.id === id)).filter(Boolean);
+    return history.map((id) => DRUGS.find((d) => d.id === id)).filter(Boolean);
   }, [history, deferredSearch, cat, svc, showFavoritesOnly]);
 
   // React 19 : <title> rendu dans le tree est hissé automatiquement dans <head>.
@@ -320,6 +380,7 @@ const App = () => {
   const docTitle = (() => {
     if (showAcr) return "MediURG — URGENCE ACR";
     if (showChangelog) return "MediURG — Notes de version";
+    if (page === "echelles") return "MediURG — Échelles cliniques";
     if (page === "protocoles") {
       if (protoCategory === "incompatibilites") return "MediURG — Incompatibilités";
       if (protoCategory === "kits") return "MediURG — Kits de préparation";
@@ -351,12 +412,27 @@ const App = () => {
               <span className="net-status-dot" aria-hidden="true" />
               {isOnline ? "Online" : "Offline"}
             </span>
-            <button className={`font-toggle ${bigFont ? "font-toggle-active" : ""}`} onClick={toggleFont} aria-label={bigFont ? "Réduire la police" : "Agrandir la police"}>
+            <button
+              className={`font-toggle ${bigFont ? "font-toggle-active" : ""}`}
+              onClick={toggleFont}
+              aria-label={bigFont ? "Réduire la police" : "Agrandir la police"}
+            >
               A+
             </button>
-            <button className="theme-toggle" onClick={toggleTheme} aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}>
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+            >
               {theme === "dark" ? (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <circle cx="12" cy="12" r="5" />
                   <line x1="12" y1="1" x2="12" y2="3" />
                   <line x1="12" y1="21" x2="12" y2="23" />
@@ -368,7 +444,14 @@ const App = () => {
                   <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               )}
@@ -378,7 +461,14 @@ const App = () => {
           {page === "medicaments" && (
             <>
               <div className="search-bar">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
                 </svg>
@@ -391,7 +481,11 @@ const App = () => {
                   spellCheck="false"
                 />
                 {search && (
-                  <button className="search-clear" onClick={() => setSearch("")} aria-label="Effacer">
+                  <button
+                    className="search-clear"
+                    onClick={() => setSearch("")}
+                    aria-label="Effacer"
+                  >
                     ×
                   </button>
                 )}
@@ -403,10 +497,15 @@ const App = () => {
                   <div className="filter-chips">
                     <button
                       className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
-                      onClick={() => setShowFavoritesOnly(v => !v)}
-                      title={showFavoritesOnly ? "Désactiver le filtre favoris" : "Afficher seulement les favoris"}
+                      onClick={() => setShowFavoritesOnly((v) => !v)}
+                      title={
+                        showFavoritesOnly
+                          ? "Désactiver le filtre favoris"
+                          : "Afficher seulement les favoris"
+                      }
                     >
-                      ★ Favoris {favorites.size > 0 && <span className="chip-count">{favorites.size}</span>}
+                      ★ Favoris{" "}
+                      {favorites.size > 0 && <span className="chip-count">{favorites.size}</span>}
                     </button>
                     {CATEGORIES.map((c) => (
                       <button
@@ -445,20 +544,32 @@ const App = () => {
       </header>
 
       <main className="main-content">
-        {page === "medicaments" && (
-          filtered.length === 0 ? (
+        {page === "medicaments" &&
+          (filtered.length === 0 ? (
             <div className="empty">
               <div className="empty-icon">🔍</div>
               <p>Aucun médicament trouvé</p>
-              <small>{showFavoritesOnly ? "Aucun favori — étoilez un médicament avec ☆" : "Essayez un autre terme ou réinitialisez les filtres"}</small>
+              <small>
+                {showFavoritesOnly
+                  ? "Aucun favori — étoilez un médicament avec ☆"
+                  : "Essayez un autre terme ou réinitialisez les filtres"}
+              </small>
             </div>
           ) : (
             <>
               {recentDrugs.length > 0 && (
                 <div className="recent-section">
                   <div className="recent-header">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="13"
+                      height="13"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
                     </svg>
                     <span>Récents</span>
                   </div>
@@ -467,6 +578,7 @@ const App = () => {
                     favorites={favorites}
                     onToggleFavorite={toggleFavorite}
                     onOpen={addToHistory}
+                    onProtocolOpen={() => navigateTo("protocoles")}
                   />
                 </div>
               )}
@@ -475,10 +587,10 @@ const App = () => {
                 favorites={favorites}
                 onToggleFavorite={toggleFavorite}
                 onOpen={addToHistory}
+                onProtocolOpen={() => navigateTo("protocoles")}
               />
             </>
-          )
-        )}
+          ))}
 
         {page === "protocoles" && (
           <Suspense fallback={null}>
@@ -492,6 +604,12 @@ const App = () => {
             />
           </Suspense>
         )}
+
+        {page === "echelles" && (
+          <Suspense fallback={null}>
+            <EchellesPage />
+          </Suspense>
+        )}
       </main>
 
       <nav className="bottom-nav">
@@ -500,7 +618,14 @@ const App = () => {
             className={`bottom-tab ${page === "medicaments" ? "bottom-tab-active" : ""}`}
             onClick={() => navigateTo("medicaments")}
           >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
               <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
             </svg>
             <span>Médicaments</span>
@@ -509,13 +634,41 @@ const App = () => {
             className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
             onClick={() => navigateTo("protocoles")}
           >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
               <rect x="9" y="3" width="6" height="4" rx="2" />
               <line x1="9" y1="12" x2="15" y2="12" />
               <line x1="9" y1="16" x2="13" y2="16" />
             </svg>
             <span>Protocoles</span>
+          </button>
+          <button
+            className={`bottom-tab ${page === "echelles" ? "bottom-tab-active" : ""}`}
+            onClick={() => navigateTo("echelles")}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="18" x2="20" y2="18" />
+              <circle cx="9" cy="6" r="1.5" fill="currentColor" />
+              <circle cx="15" cy="12" r="1.5" fill="currentColor" />
+              <circle cx="7" cy="18" r="1.5" fill="currentColor" />
+            </svg>
+            <span>Échelles</span>
           </button>
         </div>
         <button
@@ -535,7 +688,9 @@ const App = () => {
         onClick={openAcr}
         aria-label="Ouvrir le mode urgence ACR"
       >
-        <span className="urgence-fab-icon" aria-hidden="true">🚨</span>
+        <span className="urgence-fab-icon" aria-hidden="true">
+          🚨
+        </span>
         <span className="urgence-fab-label">URGENCE</span>
       </button>
 

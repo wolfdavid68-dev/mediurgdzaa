@@ -41,6 +41,7 @@ describe("DrugList", () => {
         favorites={new Set()}
         onToggleFavorite={() => {}}
         onOpen={() => {}}
+        onProtocolOpen={() => {}}
       />
     );
     // getAllByRole heading récupère les <h-X> rendus par chaque DrugCard
@@ -57,6 +58,7 @@ describe("DrugList", () => {
         favorites={new Set()}
         onToggleFavorite={onToggleFavorite}
         onOpen={() => {}}
+        onProtocolOpen={() => {}}
       />
     );
     // Le bouton favori est libellé "Ajouter aux favoris" / "Retirer..." dans DrugCard
@@ -73,6 +75,7 @@ describe("DrugList", () => {
         favorites={new Set()}
         onToggleFavorite={() => {}}
         onOpen={() => {}}
+        onProtocolOpen={() => {}}
       />
     );
     // Avant clic : l'onglet "Posologie" du body collapsé n'est pas visible

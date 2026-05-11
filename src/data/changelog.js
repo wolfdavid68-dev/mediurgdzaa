@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v65";
+export const APP_VERSION = "v66";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v66",
+    date: "2026-05-11",
+    titre: "Échelles cliniques (Glasgow / RASS / Cushman) + cross-ref drug → protocoles",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouvel onglet « Échelles » dans la bottom-nav (3e tab à côté de Médicaments et Protocoles). Trois calculateurs interactifs : Glasgow Coma Scale (E+V+M, total 3-15 avec interprétation mineur/modéré/coma), RASS Richmond Agitation-Sedation Scale (-5 à +4, sélection unique avec description de chaque niveau), Score de Cushman (7 items × 0-3 pour le sevrage alcoolique, total 0-21 avec seuils benzo et risque DT). Chaque item se sélectionne d'un tap, le score total s'incrémente en direct et affiche un badge couleur de sévérité. État réinitialisé à chaque ouverture — un score n'est jamais associé à un patient précis.",
+      },
+      {
+        type: "feat",
+        text: "Cross-référence drug → protocoles sur chaque carte médicament. Quand la fiche est expandée, une section « Utilisée dans » liste les protocoles qui mentionnent la drogue, sous forme de chips cliquables qui basculent vers la page Protocoles. Le match est normalisé (insensible aux accents et à la casse). Index inversé mémoïsé au niveau module dans src/lib/crossref.js — le scan complet de PROTOCOLS ne se fait qu'une fois par drug pendant la session.",
+      },
+      {
+        type: "chore",
+        text: "+8 tests : 5 sur crossref.js (lookup vide, match insensible aux accents, structure du résultat), 3 sur AcrTimer (état initial 00:00 + cycle 1, bascule Démarrer→Pause au clic, advance timers + Date.now mocké → chrono affiche 00:05 après 5s simulées). Total 124 → 132 tests. Note : sur le test fake-timers d'AcrTimer, fireEvent (sync) au lieu d'userEvent (async) — le couple userEvent.setup({advanceTimers}) + happy-dom est connu pour se bloquer.",
+      },
+    ],
+  },
   {
     version: "v65",
     date: "2026-05-11",
