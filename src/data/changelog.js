@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v46";
+export const APP_VERSION = "v47";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v47",
+    date: "2026-05-11",
+    titre: "Nettoyage post-Vite : 13 composants .js → .jsx",
+    changes: [
+      { type: "chore", text: "Tous les fichiers React contenant du JSX (App + 12 composants + entrypoint index) renommés en .jsx. vite.config.js simplifié — suppression du hack esbuild loader 'jsx' pour les .js qui n'est plus nécessaire. Aucun changement runtime, juste de l'hygiène : Vite a maintenant la convention propre attendue, et les outils tiers (eslint, IDE, code-splitters) détectent correctement les fichiers JSX par extension." },
+    ],
+  },
   {
     version: "v46",
     date: "2026-05-11",
