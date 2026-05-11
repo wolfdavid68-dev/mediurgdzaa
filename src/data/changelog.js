@@ -1,19 +1,55 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v62";
+export const APP_VERSION = "v63";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
   {
+    version: "v63",
+    date: "2026-05-11",
+    titre: "Error boundaries par carte, testing-library, happy-dom, pre-commit auto",
+    changes: [
+      {
+        type: "feat",
+        text: "react-error-boundary : chaque DrugCard et ProtocolCard est isolée dans son propre ErrorBoundary. Cas d'usage : si une fiche crashe au render (data malformée, regex inattendue dans calcDose, parsing prep cassé), seule cette carte affiche un fallback « Fiche temporairement indisponible · Réessayer » ; toutes les autres restent fonctionnelles. En réa, c'est la différence entre « 1 médicament temporairement indisponible » et « l'app entière est dead ». Le fallback respecte la palette d'erreur (rouge MediURG #FF3B30).",
+      },
+      {
+        type: "chore",
+        text: "@testing-library/react + @testing-library/jest-dom + @testing-library/user-event ajoutés. Avant : 121 tests, tous sur fonctions pures (calc, normalize, protocolText, data integrity) — 0 test de composant. Maintenant : +3 tests de DrugList qui couvrent le pipeline de rendu (DrugCard reçoit les props, étoile favori déclenche onToggleFavorite avec le bon id, clic sur header expand la carte). Setup file src/test-setup.ts ajouté pour les matchers jest-dom (toBeInTheDocument, etc.).",
+      },
+      {
+        type: "chore",
+        text: "happy-dom remplace jsdom comme environnement vitest. Suite de tests passe de ~2,4 s à ~1,9 s (l'env DOM seul tombe de 4,3 s à 2,2 s — gain x2). happy-dom est écrit en TypeScript natif (vs jsdom en JS), spécifiquement conçu pour les tests rapides — APIs DOM standard 100% couvertes pour MediURG.",
+      },
+      {
+        type: "chore",
+        text: "husky + lint-staged : hook git pre-commit auto-créé. Sur chaque `git commit`, lint-staged lance oxlint puis prettier --write uniquement sur les fichiers stagés (.ts/.tsx/.js/.jsx/.css/.html/.json). Setup quasi-instantané (oxlint = 12 ms). Empêche les commits avec code lint-broken ou unformatted, sans ralentir le commit lui-même contrairement à un `npm test` complet.",
+      },
+      {
+        type: "chore",
+        text: "knip ajouté : détecteur de dead code (fichiers/exports/deps non utilisés). Premier run = 0 problème détecté — la codebase est genuinely propre après les ménages des v55, v60-v62. Whitelist minimale dans knip.json pour pwa-assets.config.ts (chargé via la convention pwaAssets:{config:true}). `npm run knip` à l'avenir avant chaque release majeure.",
+      },
+    ],
+  },
+  {
     version: "v62",
     date: "2026-05-11",
     titre: "Vite 8 + Rolldown — bundler Rust, builds plus rapides",
     changes: [
-      { type: "chore", text: "Vite 7.3.3 → 8.0.12. Vite 8 embarque Rolldown (bundler Rust écrit par les auteurs de Rollup et Oxc) à la place de Rollup pour la production. Pour MediURG : build local passe de ~2,4 s à ~1,6 s avec React Compiler actif, et tombe à ~290 ms sans (référence interne). Bundle quasi-identique en taille — Rolldown produit du code équivalent. Compatibilité préservée via une couche qui auto-convertit rollupOptions → rolldownOptions ; aucun changement nécessaire à notre manualChunks." },
-      { type: "chore", text: "@vitejs/plugin-react 5.2.0 → 6.0.1. La v6 retire Babel du plugin (React Refresh utilise désormais Oxc directement, sans transform Babel). Conséquence : le React Compiler ne se configure plus via l'option `babel: { plugins: [...] }` retirée. Migration : @rolldown/plugin-babel ajouté en devDep + helper `reactCompilerPreset` exporté par plugin-react v6, qui inclut un filtre intelligent (ne babelifie que les fichiers contenant un composant majuscule ou un hook `use*`)." },
-      { type: "chore", text: "0 vulnérabilité dans le package-lock après bump (les 5 modérées de v60 étaient déjà parties avec vitest 4 en v61 ; v62 ne réintroduit rien)." },
+      {
+        type: "chore",
+        text: "Vite 7.3.3 → 8.0.12. Vite 8 embarque Rolldown (bundler Rust écrit par les auteurs de Rollup et Oxc) à la place de Rollup pour la production. Pour MediURG : build local passe de ~2,4 s à ~1,6 s avec React Compiler actif, et tombe à ~290 ms sans (référence interne). Bundle quasi-identique en taille — Rolldown produit du code équivalent. Compatibilité préservée via une couche qui auto-convertit rollupOptions → rolldownOptions ; aucun changement nécessaire à notre manualChunks.",
+      },
+      {
+        type: "chore",
+        text: "@vitejs/plugin-react 5.2.0 → 6.0.1. La v6 retire Babel du plugin (React Refresh utilise désormais Oxc directement, sans transform Babel). Conséquence : le React Compiler ne se configure plus via l'option `babel: { plugins: [...] }` retirée. Migration : @rolldown/plugin-babel ajouté en devDep + helper `reactCompilerPreset` exporté par plugin-react v6, qui inclut un filtre intelligent (ne babelifie que les fichiers contenant un composant majuscule ou un hook `use*`).",
+      },
+      {
+        type: "chore",
+        text: "0 vulnérabilité dans le package-lock après bump (les 5 modérées de v60 étaient déjà parties avec vitest 4 en v61 ; v62 ne réintroduit rien).",
+      },
     ],
   },
   {
@@ -21,12 +57,30 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Wake Lock ACR, raccourcis Android, partage protocoles, titres dynamiques",
     changes: [
-      { type: "feat", text: "Wake Lock API : pendant que la modale URGENCE ACR est ouverte, l'écran reste allumé tout du long de la réa (10-30 min typique). Plus de verrouillage automatique après 30 s pendant qu'on suit le chrono compressions ou qu'on lit la dose adrénaline pédiatrique. Auto-release quand l'app passe en arrière-plan (sécurité du navigateur), re-acquire au retour. Support Chrome 84+, Edge 84+, Safari 16.4+, Firefox 126+. Fallback silencieux sur les vieux navigateurs." },
-      { type: "feat", text: "Raccourcis manifest PWA : long-press de l'icône MediURG sur Android affiche 4 raccourcis directs — URGENCE ACR (ouvre la modale chrono), Incompatibilités, Kits de préparation, Protocoles PISU. App.tsx lit ?mode / ?page / ?tab au mount et applique l'état correspondant. Cas SMUR : pendant qu'on court vers le patient, on long-press → URGENCE en 1 tap, sans attendre que l'app finisse de monter." },
-      { type: "feat", text: "Web Share API sur chaque carte protocole : bouton 🔗 dans le header du body — sur Android/iOS, ouvre la share sheet système (WhatsApp, SMS, Mail, etc.) avec titre + code + version du protocole. Sur desktop sans navigator.share, fallback presse-papier avec feedback « Copié ✓ ». Permet d'envoyer rapidement un protocole à un collègue ou de l'imprimer pour l'archiver." },
-      { type: "feat", text: "Titres d'onglet dynamiques via React 19 document metadata : le titre du tab navigateur (et le label dans la liste des tâches récentes Android) reflète maintenant la vue active — « MediURG — Protocoles PISU », « MediURG — Incompatibilités », « MediURG — « adrenaline » » pendant une recherche, « MediURG — URGENCE ACR » en mode urgence. Cas d'usage : poste partagé avec plusieurs onglets MediURG ouverts (rare mais possible en SAU)." },
-      { type: "chore", text: "oxlint (linter Rust) ajouté à côté d'ESLint : `npm run lint:fast` passe sur les 31 fichiers en 12 ms vs ~2 s pour ESLint. Sert de check pré-commit rapide ; ESLint reste la source de vérité avec ses règles type-aware. oxlint a relevé un useless length check dans App.tsx (corrigé) que l'ESLint ne flagait pas." },
-      { type: "chore", text: "vitest 2.1.8 → 4.1.5 + jsdom 25 → 29. Vitest 4 requiert Vite 6+ (on est sur 7.3.3 depuis v60) et Node 20+. Aucun changement de config nécessaire : `globals: true` + `environment: 'jsdom'` toujours supportés. Bonus : 5 vulnérabilités modérées du package-lock disparues (étaient dans des deps transitives de vitest 2)." },
+      {
+        type: "feat",
+        text: "Wake Lock API : pendant que la modale URGENCE ACR est ouverte, l'écran reste allumé tout du long de la réa (10-30 min typique). Plus de verrouillage automatique après 30 s pendant qu'on suit le chrono compressions ou qu'on lit la dose adrénaline pédiatrique. Auto-release quand l'app passe en arrière-plan (sécurité du navigateur), re-acquire au retour. Support Chrome 84+, Edge 84+, Safari 16.4+, Firefox 126+. Fallback silencieux sur les vieux navigateurs.",
+      },
+      {
+        type: "feat",
+        text: "Raccourcis manifest PWA : long-press de l'icône MediURG sur Android affiche 4 raccourcis directs — URGENCE ACR (ouvre la modale chrono), Incompatibilités, Kits de préparation, Protocoles PISU. App.tsx lit ?mode / ?page / ?tab au mount et applique l'état correspondant. Cas SMUR : pendant qu'on court vers le patient, on long-press → URGENCE en 1 tap, sans attendre que l'app finisse de monter.",
+      },
+      {
+        type: "feat",
+        text: "Web Share API sur chaque carte protocole : bouton 🔗 dans le header du body — sur Android/iOS, ouvre la share sheet système (WhatsApp, SMS, Mail, etc.) avec titre + code + version du protocole. Sur desktop sans navigator.share, fallback presse-papier avec feedback « Copié ✓ ». Permet d'envoyer rapidement un protocole à un collègue ou de l'imprimer pour l'archiver.",
+      },
+      {
+        type: "feat",
+        text: "Titres d'onglet dynamiques via React 19 document metadata : le titre du tab navigateur (et le label dans la liste des tâches récentes Android) reflète maintenant la vue active — « MediURG — Protocoles PISU », « MediURG — Incompatibilités », « MediURG — « adrenaline » » pendant une recherche, « MediURG — URGENCE ACR » en mode urgence. Cas d'usage : poste partagé avec plusieurs onglets MediURG ouverts (rare mais possible en SAU).",
+      },
+      {
+        type: "chore",
+        text: "oxlint (linter Rust) ajouté à côté d'ESLint : `npm run lint:fast` passe sur les 31 fichiers en 12 ms vs ~2 s pour ESLint. Sert de check pré-commit rapide ; ESLint reste la source de vérité avec ses règles type-aware. oxlint a relevé un useless length check dans App.tsx (corrigé) que l'ESLint ne flagait pas.",
+      },
+      {
+        type: "chore",
+        text: "vitest 2.1.8 → 4.1.5 + jsdom 25 → 29. Vitest 4 requiert Vite 6+ (on est sur 7.3.3 depuis v60) et Node 20+. Aucun changement de config nécessaire : `globals: true` + `environment: 'jsdom'` toujours supportés. Bonus : 5 vulnérabilités modérées du package-lock disparues (étaient dans des deps transitives de vitest 2).",
+      },
     ],
   },
   {
@@ -34,10 +88,22 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Perf : useDeferredValue, bundle splitté, icônes auto-générées",
     changes: [
-      { type: "feat", text: "useDeferredValue sur la barre de recherche Médicaments : la frappe reste prioritaire à 60 fps pendant que le filtrage des 73 drugs (normalize + alias + tri français) tourne en arrière-plan, interruptible. Sur smartphones bas-de-gamme (vieux Android utilisé en SMUR), plus de saccades à chaque caractère. Complémentaire au React Compiler ajouté en v57 : le compiler évite les recalculs redondants, useDeferredValue marque le calcul restant comme non urgent." },
-      { type: "chore", text: "Bundle splitté en 3 chunks via rollupOptions.manualChunks : vendor-react (60 kB gzip, React + scheduler), data-medic (28 kB gzip, drugs/pse/aliases) et index (24 kB gzip, App + composants). Avant : un seul chunk de 112 kB gzip ré-invalidé à chaque release, même pour un simple bump de poso. Maintenant : modifier une poso n'invalide que data-medic, modifier le code n'invalide que index. Bénéfice surtout pour les retours sur l'app installée (cache navigateur + précache SW)." },
-      { type: "chore", text: "@vite-pwa/assets-generator ajouté : public/logo.svg devient l'unique source de vérité pour toutes les icônes PWA (favicon.ico, pwa-64/192/512, maskable-512, apple-touch-180). Le manifest est auto-injecté au build via pwaAssets.overrideManifestIcons. Plus de 6 PNG à éditer à la main quand on retouche le logo — un seul SVG suffit, et `npm run generate-pwa-assets` regénère le tout. Migration des filenames : icon-192.png → pwa-192x192.png etc. (Workbox précache le nouveau set au prochain SW update)." },
-      { type: "chore", text: "Vite 6.0.7 → 7.3.3, @vitejs/plugin-react 4.3.4 → 5.2.0. Aucun breaking change pour MediURG (pas de Sass legacy, pas de splitVendorChunkPlugin). Build toujours ~2,4 s. Vite 7 prépare le terrain pour Rolldown (bundler Rust, build 3-10× plus rapide) qui arrive en preview avec Vite 8." },
+      {
+        type: "feat",
+        text: "useDeferredValue sur la barre de recherche Médicaments : la frappe reste prioritaire à 60 fps pendant que le filtrage des 73 drugs (normalize + alias + tri français) tourne en arrière-plan, interruptible. Sur smartphones bas-de-gamme (vieux Android utilisé en SMUR), plus de saccades à chaque caractère. Complémentaire au React Compiler ajouté en v57 : le compiler évite les recalculs redondants, useDeferredValue marque le calcul restant comme non urgent.",
+      },
+      {
+        type: "chore",
+        text: "Bundle splitté en 3 chunks via rollupOptions.manualChunks : vendor-react (60 kB gzip, React + scheduler), data-medic (28 kB gzip, drugs/pse/aliases) et index (24 kB gzip, App + composants). Avant : un seul chunk de 112 kB gzip ré-invalidé à chaque release, même pour un simple bump de poso. Maintenant : modifier une poso n'invalide que data-medic, modifier le code n'invalide que index. Bénéfice surtout pour les retours sur l'app installée (cache navigateur + précache SW).",
+      },
+      {
+        type: "chore",
+        text: "@vite-pwa/assets-generator ajouté : public/logo.svg devient l'unique source de vérité pour toutes les icônes PWA (favicon.ico, pwa-64/192/512, maskable-512, apple-touch-180). Le manifest est auto-injecté au build via pwaAssets.overrideManifestIcons. Plus de 6 PNG à éditer à la main quand on retouche le logo — un seul SVG suffit, et `npm run generate-pwa-assets` regénère le tout. Migration des filenames : icon-192.png → pwa-192x192.png etc. (Workbox précache le nouveau set au prochain SW update).",
+      },
+      {
+        type: "chore",
+        text: "Vite 6.0.7 → 7.3.3, @vitejs/plugin-react 4.3.4 → 5.2.0. Aucun breaking change pour MediURG (pas de Sass legacy, pas de splitVendorChunkPlugin). Build toujours ~2,4 s. Vite 7 prépare le terrain pour Rolldown (bundler Rust, build 3-10× plus rapide) qui arrive en preview avec Vite 8.",
+      },
     ],
   },
   {
@@ -45,9 +111,18 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Retour Android : 1 = page précédente, 2 rapides en moins d'1s = quitte",
     changes: [
-      { type: "feat", text: "Nouveau comportement du bouton retour Android : un seul appui revient à la page précédente (Médicaments ↔ Protocoles, fermeture d'un modal), deux appuis rapides (moins d'1 seconde l'un après l'autre) court-circuitent la garde toast et ferment l'app immédiatement. Convention native Android où le double-tap rapide signifie « je veux vraiment quitter, ne demande pas ». Le toast classique « Appuyez à nouveau » s'affiche toujours pour un seul retour à la racine ; il n'est court-circuité que si l'user mash le bouton." },
-      { type: "chore", text: "Architecture back-handling refactorée et simplifiée d'environ 80 lignes : popstate-first pour tous les navigateurs, CloseWatcher conservé uniquement pour Firefox Android (cas où popstate ne fire pas sur hardware back). Plus de flags pendingExit/watcherDestroyed/setupWatcher recreate. Refs miroirs showAcrRef/showChangelogRef supprimés (plus nécessaires). Comportement Firefox Android préservé : retour bloqué + toast « Utilisez le bouton app récente »." },
-      { type: "chore", text: "Re-introduction de pushNav pour navigateTo (v58 l'avait passé en replaceNav, ce qui éliminait la navigation entre pages via back). Désormais : 1 back depuis Protocoles → retour à Médicaments. Les sous-onglets PISU/Incompat/Kits restent en replaceNav (convention Material : tabs not in back stack)." },
+      {
+        type: "feat",
+        text: "Nouveau comportement du bouton retour Android : un seul appui revient à la page précédente (Médicaments ↔ Protocoles, fermeture d'un modal), deux appuis rapides (moins d'1 seconde l'un après l'autre) court-circuitent la garde toast et ferment l'app immédiatement. Convention native Android où le double-tap rapide signifie « je veux vraiment quitter, ne demande pas ». Le toast classique « Appuyez à nouveau » s'affiche toujours pour un seul retour à la racine ; il n'est court-circuité que si l'user mash le bouton.",
+      },
+      {
+        type: "chore",
+        text: "Architecture back-handling refactorée et simplifiée d'environ 80 lignes : popstate-first pour tous les navigateurs, CloseWatcher conservé uniquement pour Firefox Android (cas où popstate ne fire pas sur hardware back). Plus de flags pendingExit/watcherDestroyed/setupWatcher recreate. Refs miroirs showAcrRef/showChangelogRef supprimés (plus nécessaires). Comportement Firefox Android préservé : retour bloqué + toast « Utilisez le bouton app récente ».",
+      },
+      {
+        type: "chore",
+        text: "Re-introduction de pushNav pour navigateTo (v58 l'avait passé en replaceNav, ce qui éliminait la navigation entre pages via back). Désormais : 1 back depuis Protocoles → retour à Médicaments. Les sous-onglets PISU/Incompat/Kits restent en replaceNav (convention Material : tabs not in back stack).",
+      },
     ],
   },
   {
@@ -55,7 +130,10 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Fix double-retour : ne plus traverser pages/sous-onglets",
     changes: [
-      { type: "fix", text: "Le bouton retour Android traversait toutes les pages visitées (Médicaments ↔ Protocoles) et tous les sous-onglets (PISU/Incompat/Kits) avant d'atteindre la sentinelle de sortie. Conséquence : il fallait parfois 4-6 backs pour voir le toast, puis 2 de plus pour quitter. Convention Android moderne : les tabs et changements de page de premier niveau n'entrent pas dans le back stack. Maintenant : navigateTo() et changeProtoCategory() utilisent replaceNav() au lieu de pushNav() — seuls les modaux (URGENCE ACR, notes de version) créent une entrée d'historique. Depuis n'importe quelle vue non-modale, 1er back = toast, 2e dans 2 s = quitte. Le back dans un modal continue de fermer le modal." },
+      {
+        type: "fix",
+        text: "Le bouton retour Android traversait toutes les pages visitées (Médicaments ↔ Protocoles) et tous les sous-onglets (PISU/Incompat/Kits) avant d'atteindre la sentinelle de sortie. Conséquence : il fallait parfois 4-6 backs pour voir le toast, puis 2 de plus pour quitter. Convention Android moderne : les tabs et changements de page de premier niveau n'entrent pas dans le back stack. Maintenant : navigateTo() et changeProtoCategory() utilisent replaceNav() au lieu de pushNav() — seuls les modaux (URGENCE ACR, notes de version) créent une entrée d'historique. Depuis n'importe quelle vue non-modale, 1er back = toast, 2e dans 2 s = quitte. Le back dans un modal continue de fermer le modal.",
+      },
     ],
   },
   {
@@ -63,9 +141,18 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "React Compiler 1.0 — auto-mémoïsation automatique",
     changes: [
-      { type: "feat", text: "babel-plugin-react-compiler 1.0 (stable) ajouté à la chaîne Vite. Le compilateur React analyse chaque composant et insère automatiquement la mémoïsation (équivalent useMemo/useCallback) là où c'est sûr — sans avoir à le faire à la main. Bénéfice principal : pendant que l'user tape dans la search bar, App.jsx ne refait plus les filtres et tris coûteux sur les 73 drugs à chaque caractère. Plus réactif sur mobile bas-de-gamme." },
-      { type: "chore", text: "eslint-plugin-react-compiler ajouté à la config ESLint pour signaler les patterns que le compiler ne peut pas optimiser (mutations directes, fonctions non pures). Verdict actuel : 0 warning — tous nos composants sont déjà compiler-compatibles, donc le compiler les optimise tous." },
-      { type: "chore", text: "Coût bundle : +16 kB raw / +5 kB gzip (le code de mémoïsation inséré). Build local passe de ~800 ms à ~2.3 s (le Babel transform du compiler est plus lent), mais c'est invisible côté user." },
+      {
+        type: "feat",
+        text: "babel-plugin-react-compiler 1.0 (stable) ajouté à la chaîne Vite. Le compilateur React analyse chaque composant et insère automatiquement la mémoïsation (équivalent useMemo/useCallback) là où c'est sûr — sans avoir à le faire à la main. Bénéfice principal : pendant que l'user tape dans la search bar, App.jsx ne refait plus les filtres et tris coûteux sur les 73 drugs à chaque caractère. Plus réactif sur mobile bas-de-gamme.",
+      },
+      {
+        type: "chore",
+        text: "eslint-plugin-react-compiler ajouté à la config ESLint pour signaler les patterns que le compiler ne peut pas optimiser (mutations directes, fonctions non pures). Verdict actuel : 0 warning — tous nos composants sont déjà compiler-compatibles, donc le compiler les optimise tous.",
+      },
+      {
+        type: "chore",
+        text: "Coût bundle : +16 kB raw / +5 kB gzip (le code de mémoïsation inséré). Build local passe de ~800 ms à ~2.3 s (le Babel transform du compiler est plus lent), mais c'est invisible côté user.",
+      },
     ],
   },
   {
@@ -73,7 +160,10 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Fix toast « Mettre à jour » invisible (registerType prompt)",
     changes: [
-      { type: "fix", text: "Le bouton « Nouvelle version disponible · Mettre à jour » ne s'affichait jamais en v49-v55 : vite-plugin-pwa était en registerType: 'autoUpdate' qui skip-waiting immédiatement. Du coup needRefresh ne fire que brièvement et le toast disparaît avant d'apparaître. Bascule en registerType: 'prompt' : le nouveau SW reste en waiting jusqu'à ce que l'user clique sur le toast → la mise à jour est explicite et contrôlée par l'utilisateur (jamais d'auto-update en plein milieu d'une réa). C'est désormais cette v56 et les suivantes qui déclencheront le toast chez les utilisateurs." },
+      {
+        type: "fix",
+        text: "Le bouton « Nouvelle version disponible · Mettre à jour » ne s'affichait jamais en v49-v55 : vite-plugin-pwa était en registerType: 'autoUpdate' qui skip-waiting immédiatement. Du coup needRefresh ne fire que brièvement et le toast disparaît avant d'apparaître. Bascule en registerType: 'prompt' : le nouveau SW reste en waiting jusqu'à ce que l'user clique sur le toast → la mise à jour est explicite et contrôlée par l'utilisateur (jamais d'auto-update en plein milieu d'une réa). C'est désormais cette v56 et les suivantes qui déclencheront le toast chez les utilisateurs.",
+      },
     ],
   },
   {
@@ -81,17 +171,29 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Cleanup final : AcrSummary en <dialog>, dead CSS, 0 lint warning",
     changes: [
-      { type: "fix", text: "Migration de la modale Bilan ACR en <dialog> natif (était restée en div + role=\"dialog\" custom depuis le début, oubliée lors de la migration v50 qui a fait les 2 autres modales). Maintenant : ESC ferme, focus trap natif, scroll lock auto, backdrop animé via @starting-style. Aligne le Bilan sur ChangelogModal et AcrModeModal." },
-      { type: "chore", text: "Retrait de la règle CSS .drug-card-grid qui était posée en v50 comme exemple d'usage des container queries mais qui n'était référencée par aucun JSX. Dead code en moins. Le container-type: inline-size sur .drug-card reste — infrastructure prête pour un futur layout tablette quand on s'en servira vraiment." },
-      { type: "chore", text: "Cleanup de 7 warnings ESLint : 4 try/catch (err) → try/catch sans paramètre, 1 eslint-disable inutile, 2 variables de test inutilisées. Les 3 derniers warnings (a11y sur onClick des <dialog>) supprimés via eslint-disable-next-line commenté (faux positifs : <dialog> a son propre support clavier ESC). Résultat : 0 warning lint." },
+      {
+        type: "fix",
+        text: 'Migration de la modale Bilan ACR en <dialog> natif (était restée en div + role="dialog" custom depuis le début, oubliée lors de la migration v50 qui a fait les 2 autres modales). Maintenant : ESC ferme, focus trap natif, scroll lock auto, backdrop animé via @starting-style. Aligne le Bilan sur ChangelogModal et AcrModeModal.',
+      },
+      {
+        type: "chore",
+        text: "Retrait de la règle CSS .drug-card-grid qui était posée en v50 comme exemple d'usage des container queries mais qui n'était référencée par aucun JSX. Dead code en moins. Le container-type: inline-size sur .drug-card reste — infrastructure prête pour un futur layout tablette quand on s'en servira vraiment.",
+      },
+      {
+        type: "chore",
+        text: "Cleanup de 7 warnings ESLint : 4 try/catch (err) → try/catch sans paramètre, 1 eslint-disable inutile, 2 variables de test inutilisées. Les 3 derniers warnings (a11y sur onClick des <dialog>) supprimés via eslint-disable-next-line commenté (faux positifs : <dialog> a son propre support clavier ESC). Résultat : 0 warning lint.",
+      },
     ],
   },
   {
     version: "v54",
     date: "2026-05-11",
-    titre: "Retrait pattern \"dopamine\" sans drug correspondant",
+    titre: 'Retrait pattern "dopamine" sans drug correspondant',
     changes: [
-      { type: "fix", text: "« dopamine » figurait dans DRUG_PATTERNS (ProtocolCard.tsx — liste des mots-clés cliquables dans les protocoles) sans entrée correspondante dans drugs.js. Conséquence : si un protocole mentionnait « dopamine », le mot devenait théoriquement cliquable mais ne menait à rien. Retrait du pattern. Effet bonus : le test data.test.js d'intégrité passe maintenant à 121/121 (vs 120/121 jusqu'ici)." },
+      {
+        type: "fix",
+        text: "« dopamine » figurait dans DRUG_PATTERNS (ProtocolCard.tsx — liste des mots-clés cliquables dans les protocoles) sans entrée correspondante dans drugs.js. Conséquence : si un protocole mentionnait « dopamine », le mot devenait théoriquement cliquable mais ne menait à rien. Retrait du pattern. Effet bonus : le test data.test.js d'intégrité passe maintenant à 121/121 (vs 120/121 jusqu'ici).",
+      },
     ],
   },
   {
@@ -99,9 +201,18 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Migration TypeScript (mode pragmatique loose)",
     changes: [
-      { type: "chore", text: "Mise en place de TypeScript en mode pragmatique : tsconfig.json avec strict: false, allowJs: true, noImplicitAny: false. Tous les composants React passent de .jsx à .tsx (15 fichiers : 13 composants + index + App + ProtocolesPage). Tous les modules lib/ passent de .js à .ts (calc, normalize, protocolText). Les data files (drugs, protocols, prepKits, etc.) restent en .js — ce sont des lookup tables denses qui n'ont pas besoin d'être annotées une à une. allowJs leur permet de coexister." },
-      { type: "chore", text: "src/global.d.ts pour les APIs non standardisées (CloseWatcher, webkitAudioContext). vite.config.js → vite.config.ts. ESLint étendu avec typescript-eslint plugin. Scripts npm : nouveau `npm run typecheck` (tsc --noEmit). Lint et format reconnaissent désormais .ts/.tsx." },
-      { type: "chore", text: "Zéro erreur tsc. Aucune migration UI, comportement identique en prod. Le bénéfice se manifestera progressivement : auto-complétion IDE, refacto safe, et tightening incrémental des types (sur les schémas Drug, Protocol, et les calculatrices ACR) dans les versions futures." },
+      {
+        type: "chore",
+        text: "Mise en place de TypeScript en mode pragmatique : tsconfig.json avec strict: false, allowJs: true, noImplicitAny: false. Tous les composants React passent de .jsx à .tsx (15 fichiers : 13 composants + index + App + ProtocolesPage). Tous les modules lib/ passent de .js à .ts (calc, normalize, protocolText). Les data files (drugs, protocols, prepKits, etc.) restent en .js — ce sont des lookup tables denses qui n'ont pas besoin d'être annotées une à une. allowJs leur permet de coexister.",
+      },
+      {
+        type: "chore",
+        text: "src/global.d.ts pour les APIs non standardisées (CloseWatcher, webkitAudioContext). vite.config.js → vite.config.ts. ESLint étendu avec typescript-eslint plugin. Scripts npm : nouveau `npm run typecheck` (tsc --noEmit). Lint et format reconnaissent désormais .ts/.tsx.",
+      },
+      {
+        type: "chore",
+        text: "Zéro erreur tsc. Aucune migration UI, comportement identique en prod. Le bénéfice se manifestera progressivement : auto-complétion IDE, refacto safe, et tightening incrémental des types (sur les schémas Drug, Protocol, et les calculatrices ACR) dans les versions futures.",
+      },
     ],
   },
   {
@@ -109,9 +220,18 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Setup ESLint + extraction ProtocolesPage (data splitting)",
     changes: [
-      { type: "chore", text: "ESLint 9 flat config + plugins (react, react-hooks, jsx-a11y) + Prettier 3 + eslint-config-prettier. Le repo n'avait aucun lint depuis la migration Vite. npm run lint et npm run format dispos. 0 erreur, 10 warnings restants (a11y sur backdrops <dialog> qui sont gérés autrement, unused vars dans tests). Nettoyage : suppression de tous les import React inutiles (React 19 JSX transform les rend obsolètes — 13 fichiers concernés). StrictMode activé dans index.jsx (sécurise le dev, no-op en prod)." },
-      { type: "feat", text: "Page Protocoles extraite dans src/pages/ProtocolesPage.jsx et lazy-loadée via React.lazy. Les imports PROTOCOLS, PREP_KITS, INCOMPATIBILITIES sont désormais à l'intérieur de cette page (et des sous-composants lazy IncompatibilityList, PrepKitCard) → toutes ces data sortent du bundle initial. Le filtre Adulte/Enfant est maintenant géré en interne par ProtocolesPage." },
-      { type: "chore", text: "Bundle initial allégé : 412 kB → 351 kB (gzip 124 → 107 kB, soit -14 %). ProtocolesPage est maintenant un chunk de 63 kB / 19 kB gzip téléchargé seulement quand l'utilisateur visite l'onglet Protocoles. Premier paint plus rapide sur mobile, surtout pour qui ne va jamais sur Protocoles." },
+      {
+        type: "chore",
+        text: "ESLint 9 flat config + plugins (react, react-hooks, jsx-a11y) + Prettier 3 + eslint-config-prettier. Le repo n'avait aucun lint depuis la migration Vite. npm run lint et npm run format dispos. 0 erreur, 10 warnings restants (a11y sur backdrops <dialog> qui sont gérés autrement, unused vars dans tests). Nettoyage : suppression de tous les import React inutiles (React 19 JSX transform les rend obsolètes — 13 fichiers concernés). StrictMode activé dans index.jsx (sécurise le dev, no-op en prod).",
+      },
+      {
+        type: "feat",
+        text: "Page Protocoles extraite dans src/pages/ProtocolesPage.jsx et lazy-loadée via React.lazy. Les imports PROTOCOLS, PREP_KITS, INCOMPATIBILITIES sont désormais à l'intérieur de cette page (et des sous-composants lazy IncompatibilityList, PrepKitCard) → toutes ces data sortent du bundle initial. Le filtre Adulte/Enfant est maintenant géré en interne par ProtocolesPage.",
+      },
+      {
+        type: "chore",
+        text: "Bundle initial allégé : 412 kB → 351 kB (gzip 124 → 107 kB, soit -14 %). ProtocolesPage est maintenant un chunk de 63 kB / 19 kB gzip téléchargé seulement quand l'utilisateur visite l'onglet Protocoles. Premier paint plus rapide sur mobile, surtout pour qui ne va jamais sur Protocoles.",
+      },
     ],
   },
   {
@@ -119,24 +239,58 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Accessibilité : audit + fixes ciblés (WCAG AA)",
     changes: [
-      { type: "fix", text: "Aria-labels ajoutés sur 4 boutons icône-seul qui n'en avaient pas (× effacer dose, × effacer poids, ✕ fermer détail incompatibilité, × effacer dose libre kit). Les lecteurs d'écran annoncent maintenant l'action de chaque bouton." },
-      { type: "fix", text: "prefers-reduced-motion : bloc global qui respecte le réglage système des utilisateurs sensibles au mouvement. Réduit toutes les transitions/animations à 0.01 ms, coupe les animations infinies (pulse, alert-flash, métronome battant), désactive les View Transitions et les @starting-style. L'info reste véhiculée par les couleurs et les changements de texte." },
-      { type: "fix", text: "Contraste WCAG AA : --text-mute échouait sur les deux thèmes (3.4-3.5:1, besoin 4.5:1). Dark theme passé de #65657a à #8a8aa0 (~4.8:1), light theme de #84849c à #5e5e74 (~6:1)." },
-      { type: "fix", text: "Outline focus-visible global sur tous les contrôles interactifs (button, a, input, textarea, select, [tabindex]). Les utilisateurs navigant au clavier voient maintenant clairement où ils sont — invisible à la souris grâce à :focus-visible (vs :focus)." },
-      { type: "fix", text: "Tap targets agrandis pour WCAG 2.5.5 (44×44 px) : .poso-calc-clear (20×20 visuel mais hit area étendue via pseudo-élément), .incompat-detail-close (min-width/height 44px)." },
+      {
+        type: "fix",
+        text: "Aria-labels ajoutés sur 4 boutons icône-seul qui n'en avaient pas (× effacer dose, × effacer poids, ✕ fermer détail incompatibilité, × effacer dose libre kit). Les lecteurs d'écran annoncent maintenant l'action de chaque bouton.",
+      },
+      {
+        type: "fix",
+        text: "prefers-reduced-motion : bloc global qui respecte le réglage système des utilisateurs sensibles au mouvement. Réduit toutes les transitions/animations à 0.01 ms, coupe les animations infinies (pulse, alert-flash, métronome battant), désactive les View Transitions et les @starting-style. L'info reste véhiculée par les couleurs et les changements de texte.",
+      },
+      {
+        type: "fix",
+        text: "Contraste WCAG AA : --text-mute échouait sur les deux thèmes (3.4-3.5:1, besoin 4.5:1). Dark theme passé de #65657a à #8a8aa0 (~4.8:1), light theme de #84849c à #5e5e74 (~6:1).",
+      },
+      {
+        type: "fix",
+        text: "Outline focus-visible global sur tous les contrôles interactifs (button, a, input, textarea, select, [tabindex]). Les utilisateurs navigant au clavier voient maintenant clairement où ils sont — invisible à la souris grâce à :focus-visible (vs :focus).",
+      },
+      {
+        type: "fix",
+        text: "Tap targets agrandis pour WCAG 2.5.5 (44×44 px) : .poso-calc-clear (20×20 visuel mais hit area étendue via pseudo-élément), .incompat-detail-close (min-width/height 44px).",
+      },
     ],
   },
   {
     version: "v50",
     date: "2026-05-11",
-    titre: "Modernisation visuelle : View Transitions, <dialog> natif, @starting-style, @layer, oklch()",
+    titre:
+      "Modernisation visuelle : View Transitions, <dialog> natif, @starting-style, @layer, oklch()",
     changes: [
-      { type: "feat", text: "View Transitions API (Chrome 111+, Safari 18+, Firefox 142+) : les changements de page (Médicaments ↔ Protocoles) et de sous-onglet (PISU / Incompat / Kits) sont désormais cross-fadés par le navigateur. Fallback silencieux instantané sur les browsers sans support." },
-      { type: "feat", text: "Modales en élément <dialog> natif (AcrModeModal + ChangelogModal) : focus trap, gestion ESC, scroll lock, backdrop click — tout géré par le navigateur sans useEffect custom. Le ::backdrop est animé via @starting-style. ~50 lignes de boilerplate retirées des deux composants." },
-      { type: "feat", text: "Animations d'entrée déclaratives via CSS @starting-style (Chrome 117+, Safari 17.5+, Firefox 129+) sur les toasts (exit, update prompt) et les modales — plus de @keyframes JS à orchestrer, juste une transition CSS qui s'amorce à l'insertion DOM." },
-      { type: "chore", text: "Déclaration @layer reset, base, components, utilities, overrides en tête de style.css : la précédence de cascade est maintenant explicite et documentée. Rétrocompatible (les règles non-wrapped restent au sommet de la cascade)." },
-      { type: "chore", text: "Palette de thèmes en oklch() avec fallback hex pour Safari < 15.4. Luminance perceptuelle uniforme entre danger/success/info/warn/accent → les variantes (bordures, fonds 16 %, ombres) gardent une parité visuelle propre. Modifier le hue d'une couleur met à jour cohéremment toutes ses dérivées." },
-      { type: "chore", text: "Container queries (container-type: inline-size) sur DrugCard : la carte est désormais responsive à son conteneur (liste étroite vs détail large), pas au viewport. Infrastructure prête pour un futur split-pane tablette sans toucher au composant." },
+      {
+        type: "feat",
+        text: "View Transitions API (Chrome 111+, Safari 18+, Firefox 142+) : les changements de page (Médicaments ↔ Protocoles) et de sous-onglet (PISU / Incompat / Kits) sont désormais cross-fadés par le navigateur. Fallback silencieux instantané sur les browsers sans support.",
+      },
+      {
+        type: "feat",
+        text: "Modales en élément <dialog> natif (AcrModeModal + ChangelogModal) : focus trap, gestion ESC, scroll lock, backdrop click — tout géré par le navigateur sans useEffect custom. Le ::backdrop est animé via @starting-style. ~50 lignes de boilerplate retirées des deux composants.",
+      },
+      {
+        type: "feat",
+        text: "Animations d'entrée déclaratives via CSS @starting-style (Chrome 117+, Safari 17.5+, Firefox 129+) sur les toasts (exit, update prompt) et les modales — plus de @keyframes JS à orchestrer, juste une transition CSS qui s'amorce à l'insertion DOM.",
+      },
+      {
+        type: "chore",
+        text: "Déclaration @layer reset, base, components, utilities, overrides en tête de style.css : la précédence de cascade est maintenant explicite et documentée. Rétrocompatible (les règles non-wrapped restent au sommet de la cascade).",
+      },
+      {
+        type: "chore",
+        text: "Palette de thèmes en oklch() avec fallback hex pour Safari < 15.4. Luminance perceptuelle uniforme entre danger/success/info/warn/accent → les variantes (bordures, fonds 16 %, ombres) gardent une parité visuelle propre. Modifier le hue d'une couleur met à jour cohéremment toutes ses dérivées.",
+      },
+      {
+        type: "chore",
+        text: "Container queries (container-type: inline-size) sur DrugCard : la carte est désormais responsive à son conteneur (liste étroite vs détail large), pas au viewport. Infrastructure prête pour un futur split-pane tablette sans toucher au composant.",
+      },
     ],
   },
   {
@@ -144,10 +298,22 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Service worker artisanal → Workbox via vite-plugin-pwa",
     changes: [
-      { type: "chore", text: "Remplacement de notre service-worker.js hand-rolled (~160 lignes : install + activate + 3 fetch handlers + asset-manifest custom) par vite-plugin-pwa avec Workbox sous le capot. La liste de précache est régénérée automatiquement à chaque build avec les hashes Vite — fini les soucis de cache désaligné entre versions (v32 vs v44, etc.). cleanupOutdatedCaches: true purge les anciens caches au passage." },
-      { type: "feat", text: "Notification de mise à jour : quand un nouveau service worker est prêt, un petit bandeau « Nouvelle version disponible · Mettre à jour » apparaît en bas. Un clic recharge proprement sur la dernière version. registerType: 'autoUpdate' fait que le nouveau SW skip waiting + claim immédiatement, donc le passage à la nouvelle version est instantané dès qu'on accepte." },
-      { type: "feat", text: "Vérification d'update toutes les heures pour les sessions longues (entre 2 réas, le tel reste sur l'app). Sans ça il fallait que l'utilisateur ferme/rouvre la PWA pour récupérer le nouveau contenu." },
-      { type: "chore", text: "Nettoyage : suppression de public/service-worker.js, public/manifest.json (le plugin génère manifest.webmanifest depuis vite.config.js), scripts/generate-asset-manifest.cjs (plus utile). Le script check-versions.cjs ne vérifie plus que l'alignement APP_VERSION / CHANGELOG[0].version (Workbox gère le versioning du SW)." },
+      {
+        type: "chore",
+        text: "Remplacement de notre service-worker.js hand-rolled (~160 lignes : install + activate + 3 fetch handlers + asset-manifest custom) par vite-plugin-pwa avec Workbox sous le capot. La liste de précache est régénérée automatiquement à chaque build avec les hashes Vite — fini les soucis de cache désaligné entre versions (v32 vs v44, etc.). cleanupOutdatedCaches: true purge les anciens caches au passage.",
+      },
+      {
+        type: "feat",
+        text: "Notification de mise à jour : quand un nouveau service worker est prêt, un petit bandeau « Nouvelle version disponible · Mettre à jour » apparaît en bas. Un clic recharge proprement sur la dernière version. registerType: 'autoUpdate' fait que le nouveau SW skip waiting + claim immédiatement, donc le passage à la nouvelle version est instantané dès qu'on accepte.",
+      },
+      {
+        type: "feat",
+        text: "Vérification d'update toutes les heures pour les sessions longues (entre 2 réas, le tel reste sur l'app). Sans ça il fallait que l'utilisateur ferme/rouvre la PWA pour récupérer le nouveau contenu.",
+      },
+      {
+        type: "chore",
+        text: "Nettoyage : suppression de public/service-worker.js, public/manifest.json (le plugin génère manifest.webmanifest depuis vite.config.js), scripts/generate-asset-manifest.cjs (plus utile). Le script check-versions.cjs ne vérifie plus que l'alignement APP_VERSION / CHANGELOG[0].version (Workbox gère le versioning du SW).",
+      },
     ],
   },
   {
@@ -155,7 +321,10 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Code splitting : modales et sous-onglets chargés à la demande",
     changes: [
-      { type: "feat", text: "AcrModeModal (23 kB), IncompatibilityList (19 kB), PrepKitCard (5 kB) et ChangelogModal (2 kB) passent en React.lazy + Suspense. Leur JS n'est plus dans le bundle initial — il se télécharge en arrière-plan dès que l'utilisateur clique URGENCE, ouvre le sous-onglet Incompatibilités/Kits, ou affiche les notes de version. Bundle de démarrage allégé de 454 kB à 407 kB (gzip 131 → 122 kB) : premier paint plus rapide, surtout sur mobile bas-de-gamme." },
+      {
+        type: "feat",
+        text: "AcrModeModal (23 kB), IncompatibilityList (19 kB), PrepKitCard (5 kB) et ChangelogModal (2 kB) passent en React.lazy + Suspense. Leur JS n'est plus dans le bundle initial — il se télécharge en arrière-plan dès que l'utilisateur clique URGENCE, ouvre le sous-onglet Incompatibilités/Kits, ou affiche les notes de version. Bundle de démarrage allégé de 454 kB à 407 kB (gzip 131 → 122 kB) : premier paint plus rapide, surtout sur mobile bas-de-gamme.",
+      },
     ],
   },
   {
@@ -163,7 +332,10 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Nettoyage post-Vite : 13 composants .js → .jsx",
     changes: [
-      { type: "chore", text: "Tous les fichiers React contenant du JSX (App + 12 composants + entrypoint index) renommés en .jsx. vite.config.js simplifié — suppression du hack esbuild loader 'jsx' pour les .js qui n'est plus nécessaire. Aucun changement runtime, juste de l'hygiène : Vite a maintenant la convention propre attendue, et les outils tiers (eslint, IDE, code-splitters) détectent correctement les fichiers JSX par extension." },
+      {
+        type: "chore",
+        text: "Tous les fichiers React contenant du JSX (App + 12 composants + entrypoint index) renommés en .jsx. vite.config.js simplifié — suppression du hack esbuild loader 'jsx' pour les .js qui n'est plus nécessaire. Aucun changement runtime, juste de l'hygiène : Vite a maintenant la convention propre attendue, et les outils tiers (eslint, IDE, code-splitters) détectent correctement les fichiers JSX par extension.",
+      },
     ],
   },
   {
@@ -171,8 +343,14 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Migration CRA → Vite + upgrade React 19",
     changes: [
-      { type: "chore", text: "Build chain remplacé : Create React App (déprécié depuis février 2023) → Vite 6. Le build de production passe de ~30 s à <1 s, le HMR en dev est instantané, et le bundle final est de taille équivalente. node_modules ~10× plus petit (159 packages au lieu de ~1500). React 18 → React 19 (aucun breaking visible côté MediURG : pas de propTypes, defaultProps, forwardRef ou class components dans le code). lucide-react retiré (n'était importée nulle part)." },
-      { type: "chore", text: "Layout de sortie identique à CRA (build/static/js + build/static/css + build/asset-manifest.json) pour ne rien casser côté service worker ni Vercel. Script post-build dédié (scripts/generate-asset-manifest.cjs) produit le manifest au format CRA attendu par le SW pour le précache offline." },
+      {
+        type: "chore",
+        text: "Build chain remplacé : Create React App (déprécié depuis février 2023) → Vite 6. Le build de production passe de ~30 s à <1 s, le HMR en dev est instantané, et le bundle final est de taille équivalente. node_modules ~10× plus petit (159 packages au lieu de ~1500). React 18 → React 19 (aucun breaking visible côté MediURG : pas de propTypes, defaultProps, forwardRef ou class components dans le code). lucide-react retiré (n'était importée nulle part).",
+      },
+      {
+        type: "chore",
+        text: "Layout de sortie identique à CRA (build/static/js + build/static/css + build/asset-manifest.json) pour ne rien casser côté service worker ni Vercel. Script post-build dédié (scripts/generate-asset-manifest.cjs) produit le manifest au format CRA attendu par le SW pour le précache offline.",
+      },
     ],
   },
   {
@@ -180,7 +358,10 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Chrono ACR : écran maintenu allumé pendant la RCP (Wake Lock)",
     changes: [
-      { type: "feat", text: "Tant que le chrono ACR tourne, le tel/tablette ne s'éteint plus tout seul — Wake Lock API activée pendant que le chrono est en marche, relâchée à la pause ou à la fermeture du mode urgence. Évite l'écran noir au milieu d'un cycle de 2 min de RCP quand personne n'a touché l'écran. Le verrou est ré-acquis automatiquement si l'app passe en arrière-plan puis revient au premier plan. Supporté Chrome 84+, Safari 16.4+, Firefox 126+ ; ignoré silencieusement sur navigateurs plus anciens." },
+      {
+        type: "feat",
+        text: "Tant que le chrono ACR tourne, le tel/tablette ne s'éteint plus tout seul — Wake Lock API activée pendant que le chrono est en marche, relâchée à la pause ou à la fermeture du mode urgence. Évite l'écran noir au milieu d'un cycle de 2 min de RCP quand personne n'a touché l'écran. Le verrou est ré-acquis automatiquement si l'app passe en arrière-plan puis revient au premier plan. Supporté Chrome 84+, Safari 16.4+, Firefox 126+ ; ignoré silencieusement sur navigateurs plus anciens.",
+      },
     ],
   },
   {
@@ -188,10 +369,22 @@ export const CHANGELOG = [
     date: "2026-05-11",
     titre: "Garde « 2× retour pour quitter »",
     changes: [
-      { type: "feat", text: "Le 1er appui sur le bouton retour (Android, geste retour iOS, Esc clavier) affiche un toast en bas d'écran « Appuyez à nouveau sur retour pour quitter » et garde l'app active. Le 2e appui dans les 2 s ferme proprement. Évite de quitter MediURG par accident en cours de réa." },
-      { type: "feat", text: "Implémentation universelle : CloseWatcher API en primaire (Chrome 120+, Firefox 149+, l'API conçue exactement pour ce cas), fallback popstate avec sentinelle d'history pour les navigateurs plus anciens. Fonctionne en Chrome PWA installée, Chrome onglet, Firefox onglet, Safari onglet." },
-      { type: "fix", text: "Limitation Firefox Android (PWA ou onglet) : la fermeture programmatique via hardware back enchaîne des écrans morts intermédiaires (bug Mozilla 1742059 / 1745793, non corrigé à ce jour). Sur cette config, le 2e back affiche un toast spécifique « Utilisez le bouton app récente Android pour fermer MediURG » au lieu de tenter une fermeture qui casserait l'affichage. Fermeture propre par le multitâche Android." },
-      { type: "chore", text: "Itérations diagnostiques v34→v43 fusionnées dans cette entrée pour clarté de l'historique." },
+      {
+        type: "feat",
+        text: "Le 1er appui sur le bouton retour (Android, geste retour iOS, Esc clavier) affiche un toast en bas d'écran « Appuyez à nouveau sur retour pour quitter » et garde l'app active. Le 2e appui dans les 2 s ferme proprement. Évite de quitter MediURG par accident en cours de réa.",
+      },
+      {
+        type: "feat",
+        text: "Implémentation universelle : CloseWatcher API en primaire (Chrome 120+, Firefox 149+, l'API conçue exactement pour ce cas), fallback popstate avec sentinelle d'history pour les navigateurs plus anciens. Fonctionne en Chrome PWA installée, Chrome onglet, Firefox onglet, Safari onglet.",
+      },
+      {
+        type: "fix",
+        text: "Limitation Firefox Android (PWA ou onglet) : la fermeture programmatique via hardware back enchaîne des écrans morts intermédiaires (bug Mozilla 1742059 / 1745793, non corrigé à ce jour). Sur cette config, le 2e back affiche un toast spécifique « Utilisez le bouton app récente Android pour fermer MediURG » au lieu de tenter une fermeture qui casserait l'affichage. Fermeture propre par le multitâche Android.",
+      },
+      {
+        type: "chore",
+        text: "Itérations diagnostiques v34→v43 fusionnées dans cette entrée pour clarté de l'historique.",
+      },
     ],
   },
   {
@@ -199,9 +392,18 @@ export const CHANGELOG = [
     date: "2026-05-10",
     titre: "Chrono ACR : passage de cycle automatique à 2 min",
     changes: [
-      { type: "feat", text: "Plus besoin de cliquer « Passer au cycle X+1 → » : à 2 min de RCP réelle (phase actions), le timer archive le cycle, incrémente le compteur et bascule en analyse pour le rythme suivant — pile dans le tempo ACLS. Le bouton manuel reste dispo pour avancer plus tôt si tout est coché." },
-      { type: "fix", text: "Ancrage du chrono 2 min repositionné sur la reprise du MCE (= choix du rythme), pas sur le clic « cycle suivant » manuel. Garantit pile 2 min de massage entre 2 analyses, même si le médecin met 20 s à décider du rythme." },
-      { type: "feat", text: "Zoom T-15s et annonces vocales s'affichent désormais aussi pendant la phase actions (où l'user passe l'essentiel du cycle), pas uniquement en phase rcp pure." },
+      {
+        type: "feat",
+        text: "Plus besoin de cliquer « Passer au cycle X+1 → » : à 2 min de RCP réelle (phase actions), le timer archive le cycle, incrémente le compteur et bascule en analyse pour le rythme suivant — pile dans le tempo ACLS. Le bouton manuel reste dispo pour avancer plus tôt si tout est coché.",
+      },
+      {
+        type: "fix",
+        text: "Ancrage du chrono 2 min repositionné sur la reprise du MCE (= choix du rythme), pas sur le clic « cycle suivant » manuel. Garantit pile 2 min de massage entre 2 analyses, même si le médecin met 20 s à décider du rythme.",
+      },
+      {
+        type: "feat",
+        text: "Zoom T-15s et annonces vocales s'affichent désormais aussi pendant la phase actions (où l'user passe l'essentiel du cycle), pas uniquement en phase rcp pure.",
+      },
     ],
   },
   {
@@ -209,9 +411,18 @@ export const CHANGELOG = [
     date: "2026-05-10",
     titre: "Chrono ACR : prompt analyse au démarrage + cycle 2 min relatif",
     changes: [
-      { type: "feat", text: "Au tout 1er Démarrer (pas une reprise après pause), le chrono bascule directement en phase analyse pour le rythme initial — workflow ACLS standard (pads collés → analyse). Le bouton Reprendre conserve la phase courante." },
-      { type: "fix", text: "Le cycle 2 min de RCP est désormais ancré sur le début du cycle courant (mis à jour à chaque « Passer au cycle suivant »), pas sur l'elapsed absolu. Avant : si tu mettais 30 s à choisir le rythme + cocher les actions, la RCP du cycle suivant n'avait que 1:30 réelle. Maintenant : pile 2 min de massage entre 2 analyses, peu importe le temps passé en analyse/actions." },
-      { type: "fix", text: "Le zoom T-15s et les annonces vocales se calent automatiquement sur le bon moment du cycle courant (clé voicedRef = cycleStartedAt)." },
+      {
+        type: "feat",
+        text: "Au tout 1er Démarrer (pas une reprise après pause), le chrono bascule directement en phase analyse pour le rythme initial — workflow ACLS standard (pads collés → analyse). Le bouton Reprendre conserve la phase courante.",
+      },
+      {
+        type: "fix",
+        text: "Le cycle 2 min de RCP est désormais ancré sur le début du cycle courant (mis à jour à chaque « Passer au cycle suivant »), pas sur l'elapsed absolu. Avant : si tu mettais 30 s à choisir le rythme + cocher les actions, la RCP du cycle suivant n'avait que 1:30 réelle. Maintenant : pile 2 min de massage entre 2 analyses, peu importe le temps passé en analyse/actions.",
+      },
+      {
+        type: "fix",
+        text: "Le zoom T-15s et les annonces vocales se calent automatiquement sur le bon moment du cycle courant (clé voicedRef = cycleStartedAt).",
+      },
     ],
   },
   {
@@ -219,7 +430,10 @@ export const CHANGELOG = [
     date: "2026-05-10",
     titre: "Fix critique chrono ACR : phase ne flippait plus dès la 1re seconde",
     changes: [
-      { type: "fix", text: "Bug pré-existant depuis le mode URGENCE ACR initial : à elapsed=1s, la garde de passage de cycle (analyseIdx > -1) était trop laxe et basculait immédiatement la phase en « analyse » 1 seconde après Démarrer. Conséquences invisibles si on tapait choquable/non choquable tout de suite, mais le zoom T-15s ACLS ajouté en v29 ne s'affichait jamais et le passage auto de cycle à 2:00 paraissait inactif. Garde alignée sur celle de l'adrénaline (analyseIdx >= 1)." },
+      {
+        type: "fix",
+        text: "Bug pré-existant depuis le mode URGENCE ACR initial : à elapsed=1s, la garde de passage de cycle (analyseIdx > -1) était trop laxe et basculait immédiatement la phase en « analyse » 1 seconde après Démarrer. Conséquences invisibles si on tapait choquable/non choquable tout de suite, mais le zoom T-15s ACLS ajouté en v29 ne s'affichait jamais et le passage auto de cycle à 2:00 paraissait inactif. Garde alignée sur celle de l'adrénaline (analyseIdx >= 1).",
+      },
     ],
   },
   {
@@ -227,10 +441,22 @@ export const CHANGELOG = [
     date: "2026-05-10",
     titre: "Coach RCP 3 modes + zoom préparation DSA (ACLS)",
     changes: [
-      { type: "feat", text: "Coach RCP 3 modes cyclables persistés : 🔊 Complet (visuel + bips + voix française), 👁 Visuel (visuel + bips, voix coupée — sweet spot SAUV bruyante), 🔇 Muet (aucun feedback). Picto pill libellé en haut à droite du chrono, mémorisé entre sessions." },
-      { type: "feat", text: "Zoom plein cadre 15 secondes avant l'analyse rythme : compte à rebours géant (blanc → orange ≤10s → rouge ≤5s → GO), checklist ACLS High-Performance CPR à 4 étapes — charger défib pendant compressions, relève masseur, « on s'écarte » + arrêt MCE, analyse ≤ 10 s + reprise MCE immédiate." },
-      { type: "feat", text: "Annonces vocales fr-FR aux moments critiques (mode 🔊) : « Préparation analyse, charger le défibrillateur sans arrêter le massage » à T-15s, « On s'écarte » à T-5s, « Analyser le rythme » à T-0, « Prochaine adrénaline » au cycle 4 min." },
-      { type: "feat", text: "Bips countdown discrets T-5 → T-1 + vibration mobile pour repérer la pause coordonnée sans regarder l'écran." },
+      {
+        type: "feat",
+        text: "Coach RCP 3 modes cyclables persistés : 🔊 Complet (visuel + bips + voix française), 👁 Visuel (visuel + bips, voix coupée — sweet spot SAUV bruyante), 🔇 Muet (aucun feedback). Picto pill libellé en haut à droite du chrono, mémorisé entre sessions.",
+      },
+      {
+        type: "feat",
+        text: "Zoom plein cadre 15 secondes avant l'analyse rythme : compte à rebours géant (blanc → orange ≤10s → rouge ≤5s → GO), checklist ACLS High-Performance CPR à 4 étapes — charger défib pendant compressions, relève masseur, « on s'écarte » + arrêt MCE, analyse ≤ 10 s + reprise MCE immédiate.",
+      },
+      {
+        type: "feat",
+        text: "Annonces vocales fr-FR aux moments critiques (mode 🔊) : « Préparation analyse, charger le défibrillateur sans arrêter le massage » à T-15s, « On s'écarte » à T-5s, « Analyser le rythme » à T-0, « Prochaine adrénaline » au cycle 4 min.",
+      },
+      {
+        type: "feat",
+        text: "Bips countdown discrets T-5 → T-1 + vibration mobile pour repérer la pause coordonnée sans regarder l'écran.",
+      },
     ],
   },
   {
@@ -238,7 +464,10 @@ export const CHANGELOG = [
     date: "2026-05-09",
     titre: "Quitter l'app : appuyer 2× sur retour",
     changes: [
-      { type: "fix", text: "Plus d'écran vide gris/rouge persistant en quittant la PWA Android : le 1er appui sur retour à la racine affiche un toast \"Appuyez à nouveau sur retour pour quitter\", le 2e appui dans les 2 secondes ferme proprement la fenêtre. Évite la fenêtre standalone vide laissée par Chrome / Samsung Internet." },
+      {
+        type: "fix",
+        text: 'Plus d\'écran vide gris/rouge persistant en quittant la PWA Android : le 1er appui sur retour à la racine affiche un toast "Appuyez à nouveau sur retour pour quitter", le 2e appui dans les 2 secondes ferme proprement la fenêtre. Évite la fenêtre standalone vide laissée par Chrome / Samsung Internet.',
+      },
     ],
   },
   {
@@ -246,8 +475,14 @@ export const CHANGELOG = [
     date: "2026-05-09",
     titre: "Bouton retour Android + flash gris au lancement",
     changes: [
-      { type: "feat", text: "Bouton retour Android (et geste retour iOS) : ferme d'abord la modale ouverte (URGENCE ACR, notes de version), puis revient au sous-onglet précédent (PISU / Incompatibilités / Kits), puis à la page précédente — l'app se quitte uniquement à la racine." },
-      { type: "fix", text: "Plus d'écran gris/blanc au lancement de la PWA : le fond sombre est maintenant peint dès le HTML, avant le chargement du bundle React (status bar iOS également alignée sur le thème)." },
+      {
+        type: "feat",
+        text: "Bouton retour Android (et geste retour iOS) : ferme d'abord la modale ouverte (URGENCE ACR, notes de version), puis revient au sous-onglet précédent (PISU / Incompatibilités / Kits), puis à la page précédente — l'app se quitte uniquement à la racine.",
+      },
+      {
+        type: "fix",
+        text: "Plus d'écran gris/blanc au lancement de la PWA : le fond sombre est maintenant peint dès le HTML, avant le chargement du bundle React (status bar iOS également alignée sur le thème).",
+      },
     ],
   },
   {
@@ -255,12 +490,30 @@ export const CHANGELOG = [
     date: "2026-05-07",
     titre: "Mode URGENCE ACR",
     changes: [
-      { type: "feat", text: "Bouton flottant 🚨 URGENCE accessible partout — ouvre le mode ACR plein écran (sélecteur Adulte / Enfant)." },
-      { type: "feat", text: "Chrono RCP guidé : cycles 2 min (analyse DSA) et 4 min (adrénaline) avec bips d'alerte, suggestions ERC selon le rythme choisi (choquable / non choquable)." },
-      { type: "feat", text: "Métronome MCE 100-120/min synchronisé sur la cadence ERC pour le massage cardiaque." },
-      { type: "feat", text: "Doses de référence Adré / Cordarone toujours visibles + clic = ouverture de la fiche complète Médicaments." },
-      { type: "feat", text: "Compteurs modifiables (chocs / adré / cordarone déjà donnés) — utile à l'arrivée si le DSA grand-public a déjà choqué." },
-      { type: "feat", text: "Bilan de fin de séance copiable (durée totale, totaux, détail des cycles) pour transmission." },
+      {
+        type: "feat",
+        text: "Bouton flottant 🚨 URGENCE accessible partout — ouvre le mode ACR plein écran (sélecteur Adulte / Enfant).",
+      },
+      {
+        type: "feat",
+        text: "Chrono RCP guidé : cycles 2 min (analyse DSA) et 4 min (adrénaline) avec bips d'alerte, suggestions ERC selon le rythme choisi (choquable / non choquable).",
+      },
+      {
+        type: "feat",
+        text: "Métronome MCE 100-120/min synchronisé sur la cadence ERC pour le massage cardiaque.",
+      },
+      {
+        type: "feat",
+        text: "Doses de référence Adré / Cordarone toujours visibles + clic = ouverture de la fiche complète Médicaments.",
+      },
+      {
+        type: "feat",
+        text: "Compteurs modifiables (chocs / adré / cordarone déjà donnés) — utile à l'arrivée si le DSA grand-public a déjà choqué.",
+      },
+      {
+        type: "feat",
+        text: "Bilan de fin de séance copiable (durée totale, totaux, détail des cycles) pour transmission.",
+      },
     ],
   },
   {
@@ -268,7 +521,10 @@ export const CHANGELOG = [
     date: "2026-05-07",
     titre: "Numéro de version + notes",
     changes: [
-      { type: "feat", text: "Numéro de version cliquable sous la barre de navigation — ouvre les notes de version (ce que tu lis)." },
+      {
+        type: "feat",
+        text: "Numéro de version cliquable sous la barre de navigation — ouvre les notes de version (ce que tu lis).",
+      },
     ],
   },
   {
@@ -276,7 +532,10 @@ export const CHANGELOG = [
     date: "2026-05-07",
     titre: "Badge état réseau",
     changes: [
-      { type: "feat", text: "Badge état réseau Online/Offline en header (vert/rouge) au lieu du bandeau plein écran." },
+      {
+        type: "feat",
+        text: "Badge état réseau Online/Offline en header (vert/rouge) au lieu du bandeau plein écran.",
+      },
     ],
   },
   {
@@ -284,7 +543,10 @@ export const CHANGELOG = [
     date: "2026-05-06",
     titre: "Propofol — surveillance capno (préparation)",
     changes: [
-      { type: "fix", text: "Propofol : remise de la note « surveillance capno » dans le bloc préparation." },
+      {
+        type: "fix",
+        text: "Propofol : remise de la note « surveillance capno » dans le bloc préparation.",
+      },
     ],
   },
   {
@@ -292,7 +554,10 @@ export const CHANGELOG = [
     date: "2026-05-06",
     titre: "Propofol — surveillance capno (sédation procédurale)",
     changes: [
-      { type: "fix", text: "Propofol : surveillance capno ajoutée à la ligne sédation procédurale (poso adulte)." },
+      {
+        type: "fix",
+        text: "Propofol : surveillance capno ajoutée à la ligne sédation procédurale (poso adulte).",
+      },
       { type: "fix", text: "Retrait de la note de préparation redondante." },
     ],
   },
@@ -301,23 +566,27 @@ export const CHANGELOG = [
     date: "2026-05-05",
     titre: "Revue clinique batch",
     changes: [
-      { type: "fix", text: "Revue clinique : Propofol, Etomidate, Midazolam, Kétamine, Cordarone, Octaplex, Striadyne, etc." },
+      {
+        type: "fix",
+        text: "Revue clinique : Propofol, Etomidate, Midazolam, Kétamine, Cordarone, Octaplex, Striadyne, etc.",
+      },
     ],
   },
   {
     version: "v15",
     date: "2026-05-04",
     titre: "Renommage KÉTALAR → KÉTAMINE",
-    changes: [
-      { type: "chore", text: "KÉTALAR renommé en KÉTAMINE (DCI)." },
-    ],
+    changes: [{ type: "chore", text: "KÉTALAR renommé en KÉTAMINE (DCI)." }],
   },
   {
     version: "v14",
     date: "2026-05-03",
     titre: "Tables de dilution pédiatrique ACR",
     changes: [
-      { type: "feat", text: "Tables de dilution pédiatrique pour ACR : Adrénaline, Cordarone, Morphine." },
+      {
+        type: "feat",
+        text: "Tables de dilution pédiatrique pour ACR : Adrénaline, Cordarone, Morphine.",
+      },
     ],
   },
   {
@@ -325,7 +594,10 @@ export const CHANGELOG = [
     date: "2026-05-02",
     titre: "Kits — affichage contextuel",
     changes: [
-      { type: "fix", text: "Kits : afficher uniquement la préparation du contexte du kit (pas tous les usages du drug)." },
+      {
+        type: "fix",
+        text: "Kits : afficher uniquement la préparation du contexte du kit (pas tous les usages du drug).",
+      },
     ],
   },
   {
@@ -333,7 +605,10 @@ export const CHANGELOG = [
     date: "2026-05-01",
     titre: "Nouveaux kits",
     changes: [
-      { type: "feat", text: "Ajout des kits VNI et Réchauffeur-Accélérateur (transfusion massive)." },
+      {
+        type: "feat",
+        text: "Ajout des kits VNI et Réchauffeur-Accélérateur (transfusion massive).",
+      },
     ],
   },
   {
@@ -341,9 +616,18 @@ export const CHANGELOG = [
     date: "2026-04-30",
     titre: "Refactor & tests",
     changes: [
-      { type: "refactor", text: "Extraction des composants DrugNote, PrepBlock, PseBlock + utilitaires (normalize, protocolText) + tests." },
-      { type: "refactor", text: "Extraction des calculateurs DrugCard → src/lib/calc + tests Jest." },
-      { type: "refactor", text: "Kits de préparation utilisent les vraies données prep depuis drugs.js (par drugId)." },
+      {
+        type: "refactor",
+        text: "Extraction des composants DrugNote, PrepBlock, PseBlock + utilitaires (normalize, protocolText) + tests.",
+      },
+      {
+        type: "refactor",
+        text: "Extraction des calculateurs DrugCard → src/lib/calc + tests Jest.",
+      },
+      {
+        type: "refactor",
+        text: "Kits de préparation utilisent les vraies données prep depuis drugs.js (par drugId).",
+      },
     ],
   },
   {
@@ -351,12 +635,24 @@ export const CHANGELOG = [
     date: "2026-04-29",
     titre: "Favoris, historique & alias",
     changes: [
-      { type: "feat", text: "Recherche : alias / synonymes (FR + EN + noms commerciaux alternatifs)." },
-      { type: "feat", text: "Favoris (étoile + filtre) + historique des 5 derniers médicaments consultés." },
+      {
+        type: "feat",
+        text: "Recherche : alias / synonymes (FR + EN + noms commerciaux alternatifs).",
+      },
+      {
+        type: "feat",
+        text: "Favoris (étoile + filtre) + historique des 5 derniers médicaments consultés.",
+      },
       { type: "feat", text: "Mode hors-ligne complet : précache exhaustif (icônes/JS/CSS)." },
-      { type: "feat", text: "Contre-indications : 3 niveaux de sévérité (Absolue / Relative / Précaution)." },
+      {
+        type: "feat",
+        text: "Contre-indications : 3 niveaux de sévérité (Absolue / Relative / Précaution).",
+      },
       { type: "feat", text: "Layout 2-3 colonnes sur tablette paysage / desktop." },
-      { type: "fix", text: "Navigation Médicaments ↔ Protocoles synchronisée avec l'historique navigateur (back button)." },
+      {
+        type: "fix",
+        text: "Navigation Médicaments ↔ Protocoles synchronisée avec l'historique navigateur (back button).",
+      },
     ],
   },
 ];

@@ -58,7 +58,10 @@ export default [
       "jsx-a11y/label-has-associated-control": "warn",
       // Hygiène
       "no-unused-vars": "off", // remplacé par la version TS
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
       "no-undef": "error",
       "no-empty": ["error", { allowEmptyCatch: true }],
       // Migration TS « loose pragmatique » : on autorise temporairement les any
@@ -80,6 +83,9 @@ export default [
         beforeEach: "readonly",
         afterAll: "readonly",
         afterEach: "readonly",
+        // vi : namespace de mocking/spying spécifique à vitest (vi.fn, vi.mock,
+        // vi.useFakeTimers...). Pas dans globals.jest.
+        vi: "readonly",
       },
     },
   },

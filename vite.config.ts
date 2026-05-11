@@ -132,7 +132,11 @@ export default defineConfig({
           if (id.includes("node_modules/react") || id.includes("node_modules/scheduler")) {
             return "vendor-react";
           }
-          if (id.includes("/src/data/drugs") || id.includes("/src/data/pse") || id.includes("/src/data/aliases")) {
+          if (
+            id.includes("/src/data/drugs") ||
+            id.includes("/src/data/pse") ||
+            id.includes("/src/data/aliases")
+          ) {
             return "data-medic";
           }
         },
@@ -141,8 +145,16 @@ export default defineConfig({
   },
   // @ts-expect-error — clé `test` ajoutée par vitest, pas dans le type de Vite
   test: {
-    environment: "jsdom",
+    // happy-dom au lieu de jsdom : implémentation DOM en TS (vs jsdom en JS),
+    // ~2-3× plus rapide pour les tests React. Compatible avec tout ce dont on
+    // a besoin (matchers jest-dom, user-event, fireEvent, etc.). Si on touchait
+    // à des APIs très bordées (XMLHttpRequest avancé, fetch streams), il faudrait
+    // re-vérifier — pour MediURG on est sur du DOM standard, no-op.
+    environment: "happy-dom",
     globals: true,
     include: ["src/**/*.test.{js,jsx,ts,tsx}"],
+    // setupFiles est exécuté avant chaque suite : importe les matchers
+    // @testing-library/jest-dom (toBeInTheDocument, toHaveClass, etc.).
+    setupFiles: ["src/test-setup.ts"],
   },
 });

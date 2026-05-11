@@ -1,11 +1,13 @@
 import { useMemo, lazy, Suspense, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import ProtocolCard from "../components/ProtocolCard";
+import CardErrorFallback from "../components/CardErrorFallback";
 import { PROTOCOLS } from "../data/protocols";
 import { PREP_KITS } from "../data/prepKits";
 
 // Sous-onglets lourds : lazy par-dessus, leur data se charge avec eux.
 const IncompatibilityList = lazy(() => import("../components/IncompatibilityList"));
-const PrepKitCard         = lazy(() => import("../components/PrepKitCard"));
+const PrepKitCard = lazy(() => import("../components/PrepKitCard"));
 
 // Page Protocoles avec ses 3 sous-onglets (PISU, Incompatibilités, Kits).
 // Imports data en interne → quand App.jsx la lazy-load, PROTOCOLS et
@@ -81,7 +83,9 @@ const ProtocolesPage = ({ protoCategory, changeProtoCategory, onDrugSearch }) =>
           </div>
           <div className="protocol-list">
             {filteredProtocols.map((p) => (
-              <ProtocolCard key={p.id} protocol={p} onDrugSearch={onDrugSearch} />
+              <ErrorBoundary key={p.id} FallbackComponent={CardErrorFallback}>
+                <ProtocolCard protocol={p} onDrugSearch={onDrugSearch} />
+              </ErrorBoundary>
             ))}
           </div>
         </>

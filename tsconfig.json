@@ -22,7 +22,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
 
-    "types": ["vite/client", "vite-plugin-pwa/client"]
+    "types": ["vite/client", "vite-plugin-pwa/client", "vitest/globals"]
   },
   "include": ["src", "vite.config.ts"],
   "exclude": ["node_modules", "build", "dist"]
