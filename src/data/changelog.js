@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v31";
+export const APP_VERSION = "v32";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v32",
+    date: "2026-05-10",
+    titre: "Chrono ACR : passage de cycle automatique à 2 min",
+    changes: [
+      { type: "feat", text: "Plus besoin de cliquer « Passer au cycle X+1 → » : à 2 min de RCP réelle (phase actions), le timer archive le cycle, incrémente le compteur et bascule en analyse pour le rythme suivant — pile dans le tempo ACLS. Le bouton manuel reste dispo pour avancer plus tôt si tout est coché." },
+      { type: "fix", text: "Ancrage du chrono 2 min repositionné sur la reprise du MCE (= choix du rythme), pas sur le clic « cycle suivant » manuel. Garantit pile 2 min de massage entre 2 analyses, même si le médecin met 20 s à décider du rythme." },
+      { type: "feat", text: "Zoom T-15s et annonces vocales s'affichent désormais aussi pendant la phase actions (où l'user passe l'essentiel du cycle), pas uniquement en phase rcp pure." },
+    ],
+  },
   {
     version: "v31",
     date: "2026-05-10",

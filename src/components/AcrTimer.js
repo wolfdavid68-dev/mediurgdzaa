@@ -222,15 +222,25 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   // Bip au passage de cycle (toutes les 2 min DE RCP, pas elapsed absolu)
   useEffect(() => {
     if (!running) return;
-    // On déclenche dès qu'on est en phase RCP et que rcpInCycle a atteint 120s,
-    // une seule fois par cycle (lastAnalyseAlertRef stocke cycleStartedAt déjà alerté).
-    if (phase === "rcp" && rcpInCycle >= CYCLE_ANALYSE_S && lastAnalyseAlertRef.current !== cycleStartedAt) {
+    // À 2 min RCP : alerter ET auto-passer au cycle suivant (analyse). Inclut
+    // les phases "rcp" et "actions" (= RCP avec checklist) pour que l'user
+    // n'ait pas à cliquer manuellement « Passer au cycle X+1 ».
+    const inCycleRcp = phase === "rcp" || phase === "actions";
+    if (inCycleRcp && rcpInCycle >= CYCLE_ANALYSE_S && lastAnalyseAlertRef.current !== cycleStartedAt) {
       lastAnalyseAlertRef.current = cycleStartedAt;
       if (audioOn) {
         beep(660, 180);
         setTimeout(() => beep(660, 180), 280);
       }
       if (voiceOn) speak("Analyser le rythme");
+      // Si actions : on archive le cycle complet avant de passer à l'analyse suivante
+      if (phase === "actions") {
+        const doneActions = pendingActions.filter(a => a.done).map(a => a.label);
+        setHistory(h => [...h, { cycle, t: elapsed, rhythm: currentRhythm, actions: doneActions }]);
+        setCycle(c => c + 1);
+        setCurrentRhythm(null);
+        setPendingActions([]);
+      }
       setPhase("analyse");
     }
     if (lastAdreAt !== null && adreIdx > lastAdreAlertRef.current && adreIdx >= 1) {
@@ -238,12 +248,13 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
       if (audioOn) beep(880, 220);
       if (voiceOn) speak("Prochaine adrénaline");
     }
-  }, [elapsed, running, phase, audioOn, voiceOn, rcpInCycle, cycleStartedAt, adreIdx, lastAdreAt]);
+  }, [elapsed, running, phase, audioOn, voiceOn, rcpInCycle, cycleStartedAt, adreIdx, lastAdreAt, cycle, currentRhythm, pendingActions]);
 
   // Compte à rebours préparation DSA — bips/vibration discrets de T-5 à T-1
   const lastZoomCueRef = useRef(-1);
   useEffect(() => {
-    if (!running || !visualOn || phase !== "rcp") {
+    const inCycleRcp = phase === "rcp" || phase === "actions";
+    if (!running || !visualOn || !inCycleRcp) {
       lastZoomCueRef.current = -1;
       return;
     }
@@ -263,7 +274,8 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
   // Annonces vocales préparation DSA — une seule fois par cycle (clé = cycleStartedAt)
   const voicedRef = useRef({ t15: -1, t5: -1 });
   useEffect(() => {
-    if (!running || !voiceOn || phase !== "rcp") return;
+    const inCycleRcp = phase === "rcp" || phase === "actions";
+    if (!running || !voiceOn || !inCycleRcp) return;
     if (nextAnalyseIn === 15 && voicedRef.current.t15 !== cycleStartedAt) {
       voicedRef.current.t15 = cycleStartedAt;
       speak("Préparation analyse. Charger le défibrillateur sans arrêter le massage.");
@@ -279,6 +291,10 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     const sugg = suggestActions({ rhythm, totalShocks: shocks, lastAdreAt, elapsed, pediatric });
     setPendingActions(sugg.map(a => ({ ...a, done: false })));
     setPhase("actions");
+    // Le MCE reprend pile maintenant → le chrono 2 min de RCP du nouveau cycle
+    // démarre ici (et non au moment de l'analyse précédente). Garantit 2 min
+    // pleines de massage entre 2 analyses, peu importe le délai de décision.
+    setCycleStartedAt(elapsedRef.current);
   };
 
   const toggleAction = (idx) => {
@@ -307,6 +323,9 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     }));
   };
 
+  // Bouton manuel « Cycle suivant maintenant » — utile si tout est coché avant 2 min.
+  // Comportement aligné sur l'auto-passage (à 2 min) : archive + cycle++ + phase=analyse.
+  // cycleStartedAt sera mis à jour au prochain onRhythm (= reprise MCE).
   const finishCycle = () => {
     const doneActions = pendingActions.filter(a => a.done).map(a => a.label);
     setHistory(h => [
@@ -316,9 +335,7 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     setCycle(c => c + 1);
     setCurrentRhythm(null);
     setPendingActions([]);
-    setPhase("rcp");
-    // Le chrono RCP du cycle suivant repart pile maintenant — analyse à +2 min
-    setCycleStartedAt(elapsedRef.current);
+    setPhase("analyse");
   };
 
   const skipToAnalyse = () => setPhase("analyse");
@@ -343,9 +360,10 @@ const AcrTimer = ({ pediatric = false, onOpenDrug }) => {
     lastAdreAlertRef.current = -1;
   };
 
-  const analyseAlert = running && phase === "rcp" && nextAnalyseIn <= 10;
+  const inCycleRcp   = phase === "rcp" || phase === "actions";
+  const analyseAlert = running && inCycleRcp && nextAnalyseIn <= 10;
   const adreAlert    = running && nextAdreIn !== null && nextAdreIn <= 10;
-  const showZoom     = running && phase === "rcp" && elapsed > 0 && visualOn
+  const showZoom     = running && inCycleRcp && elapsed > 0 && visualOn
                        && nextAnalyseIn <= 15 && nextAnalyseIn >= 0;
 
   return (
