@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v57";
+export const APP_VERSION = "v58";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v58",
+    date: "2026-05-11",
+    titre: "Fix double-retour : ne plus traverser pages/sous-onglets",
+    changes: [
+      { type: "fix", text: "Le bouton retour Android traversait toutes les pages visitées (Médicaments ↔ Protocoles) et tous les sous-onglets (PISU/Incompat/Kits) avant d'atteindre la sentinelle de sortie. Conséquence : il fallait parfois 4-6 backs pour voir le toast, puis 2 de plus pour quitter. Convention Android moderne : les tabs et changements de page de premier niveau n'entrent pas dans le back stack. Maintenant : navigateTo() et changeProtoCategory() utilisent replaceNav() au lieu de pushNav() — seuls les modaux (URGENCE ACR, notes de version) créent une entrée d'historique. Depuis n'importe quelle vue non-modale, 1er back = toast, 2e dans 2 s = quitte. Le back dans un modal continue de fermer le modal." },
+    ],
+  },
   {
     version: "v57",
     date: "2026-05-11",

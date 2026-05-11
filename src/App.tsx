@@ -277,9 +277,16 @@ const App = () => {
     document.startViewTransition(mutator);
   };
 
+  // Navigation entre pages (Médicaments ↔ Protocoles) et entre sous-onglets
+  // (PISU / Incompat / Kits) : on REMPLACE l'entrée d'historique courante
+  // au lieu d'en pousser une nouvelle (convention Android moderne — les
+  // tabs ne sont pas dans le back stack). Seuls les modaux pushent.
+  // Conséquence : depuis n'importe quelle page/sous-onglet, le 1er back
+  // tombe directement sur la sentinelle (toast), le 2e ferme l'app.
+  // Plus besoin de traverser un historique de 4-6 entrées.
   const navigateTo = (newPage) => {
     if (newPage === page && !showAcr && !showChangelog) return;
-    pushNav({ page: newPage, modal: null });
+    replaceNav({ page: newPage, modal: null });
     withTransition(() => {
       setPage(newPage);
       setShowAcr(false);
@@ -289,7 +296,7 @@ const App = () => {
 
   const changeProtoCategory = (newCat) => {
     if (newCat === protoCategory) return;
-    pushNav({ protoCategory: newCat });
+    replaceNav({ protoCategory: newCat });
     withTransition(() => setProtoCategory(newCat));
   };
 
