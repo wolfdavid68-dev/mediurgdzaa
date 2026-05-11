@@ -47,6 +47,10 @@ const App = () => {
   const [showChangelog, setShowChangelog] = useState(false);
   const [showAcr, setShowAcr] = useState(false);
   const [exitToast, setExitToast] = useState(false);
+  // Diagnostic v36 : compteur visible des events popstate pour confirmer si
+  // Firefox PWA Android les fire bien (sinon impossible à intercepter en JS).
+  // Retiré dans une version suivante une fois la cause identifiée.
+  const [debugLog, setDebugLog] = useState({ init: 0, pop: 0, sentinel: 0, nullState: 0, lastTime: 0 });
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -110,6 +114,7 @@ const App = () => {
     // (sentinelle + état actif), AVANT le mount React. Filet de sécurité si
     // jamais ce script a été bypassé (ouverture directe via un outil de test,
     // etc.) — on s'assure qu'on a au moins notre clé mediurg dans le state.
+    let initDone = false;
     try {
       if (!window.history.state?.mediurg) {
         const here = window.location.href;
@@ -124,13 +129,24 @@ const App = () => {
           here
         );
       }
+      initDone = true;
     } catch {}
+    // Diag v36 : on note si le state initial est en place après le setup
+    setDebugLog(d => ({ ...d, init: initDone ? (window.history.state?.mediurg ? 1 : 0) : -1 }));
 
     let lastBackAt = 0;
     let toastTimer = null;
 
     const onPopState = (e) => {
       const s = e.state?.mediurg;
+      // Diag v36 : comptage des popstate + cas (sentinel / null / normal)
+      setDebugLog(d => ({
+        ...d,
+        pop: d.pop + 1,
+        sentinel: d.sentinel + (s?.sentinel ? 1 : 0),
+        nullState: d.nullState + (s ? 0 : 1),
+        lastTime: Date.now(),
+      }));
 
       // Cas « veut quitter » : soit on est tombé sur la sentinelle (architecture
       // prévue), soit Firefox PWA Android a perdu le state custom et nous donne
@@ -515,6 +531,14 @@ const App = () => {
           Appuyez à nouveau sur retour pour quitter
         </div>
       )}
+
+      {/* Diagnostic v36 : badge popstate visible — RETIRER après debug FF PWA */}
+      <div className="debug-popstate" aria-hidden="true">
+        <div>init:{debugLog.init}</div>
+        <div>pop:{debugLog.pop}</div>
+        <div>sent:{debugLog.sentinel}</div>
+        <div>null:{debugLog.nullState}</div>
+      </div>
     </div>
   );
 };

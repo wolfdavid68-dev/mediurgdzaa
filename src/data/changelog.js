@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v35";
+export const APP_VERSION = "v36";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v36",
+    date: "2026-05-11",
+    titre: "[DIAG TEMP] Badge popstate visible pour debug Firefox PWA",
+    changes: [
+      { type: "chore", text: "Version diagnostique temporaire : un petit badge jaune en haut à gauche affiche init/pop/sent/null = compteurs des events popstate captés. Permet de confirmer si Firefox PWA Android les fire réellement ou les bypasse. Sera retiré à la prochaine version une fois la cause identifiée." },
+    ],
+  },
   {
     version: "v35",
     date: "2026-05-11",
