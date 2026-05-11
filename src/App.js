@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { DRUGS } from "./data/drugs";
 import { PROTOCOLS } from "./data/protocols";
 import { PREP_KITS } from "./data/prepKits";
@@ -47,6 +47,13 @@ const App = () => {
   const [showChangelog, setShowChangelog] = useState(false);
   const [showAcr, setShowAcr] = useState(false);
   const [exitToast, setExitToast] = useState(false);
+
+  // Refs miroirs pour que le handler CloseWatcher (closure attachée 1 seule fois
+  // au mount) lise la dernière valeur — sinon il garde la valeur initiale (false).
+  const showAcrRef = useRef(showAcr);
+  const showChangelogRef = useRef(showChangelog);
+  useEffect(() => { showAcrRef.current = showAcr; }, [showAcr]);
+  useEffect(() => { showChangelogRef.current = showChangelog; }, [showChangelog]);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -128,13 +135,6 @@ const App = () => {
 
     let lastBackAt = 0;
     let toastTimer = null;
-    let allowNextExit = false;
-    // Flag : navigate vient juste d'intercepter et a fait son preventDefault.
-    // Sur Chrome, popstate fire QUAND MÊME après le preventDefault (alors que la
-    // spec dit l'inverse), et sans ce flag, popstate verrait lastBackAt fraîchement
-    // posé par navigate, croirait que c'est un 2e back, et trigger window.history.back()
-    // → exit immédiat au 1er appui. Le flag dit à popstate « skip, déjà géré ».
-    let navigateIntercepted = false;
 
     const showExitToast = () => {
       setExitToast(true);
@@ -142,14 +142,12 @@ const App = () => {
       toastTimer = setTimeout(() => setExitToast(false), 2000);
     };
 
+    // popstate gère :
+    //   - la nav interne (modales, sous-onglets, page changes) — toujours
+    //   - le fallback « garde 2× retour pour quitter » via sentinelle — uniquement
+    //     pour les navigateurs sans CloseWatcher. Quand CloseWatcher est dispo,
+    //     elle intercepte AVANT popstate, donc cette branche ne s'exécute pas.
     const onPopState = (e) => {
-      // Si navigate vient de gérer ce back, ne rien faire ici (sinon double-traitement
-      // et exit immédiat au 1er appui sur Chrome).
-      if (navigateIntercepted) {
-        navigateIntercepted = false;
-        return;
-      }
-
       const s = e.state?.mediurg;
       if (!s || s.sentinel) {
         const now = Date.now();
@@ -172,7 +170,6 @@ const App = () => {
         setShowAcr(false);
         return;
       }
-
       setPage(s.page || "medicaments");
       setProtoCategory(s.protoCategory || "PISU");
       setShowChangelog(s.modal === "changelog");
@@ -180,43 +177,46 @@ const App = () => {
     };
     window.addEventListener("popstate", onPopState);
 
-    // Navigation API (Firefox 144+, Chrome, Edge) — fire pour TOUTES les
-    // navigations (same-document ET cross-document), contrairement à popstate
-    // qui est same-document only. Couvre le cas où Firefox PWA Android route
-    // le hardware back en cross-document (donc popstate ne fire pas).
-    let onNavigate = null;
-    if (typeof window.navigation !== "undefined" &&
-        typeof window.navigation.addEventListener === "function") {
-      onNavigate = (e) => {
-        if (e.navigationType !== "traverse" || !e.userInitiated || !e.cancelable) return;
-        if (allowNextExit) { allowNextExit = false; return; }
+    // CloseWatcher (Chrome 120+, Firefox 149+) — API conçue spécifiquement
+    // pour intercepter les « close requests » (Esc Windows, geste retour iOS,
+    // bouton retour Android). preventDefault sur l'event 'cancel' rejette le
+    // close. Plus fiable que Navigation API pour ce cas, qui était bypassé
+    // dans Chrome PWA root back (preventDefault not honored).
+    let watcher = null;
+    let watcherDestroyed = false;
+    const setupWatcher = () => {
+      if (watcherDestroyed) return;
+      if (typeof window.CloseWatcher !== "function") return;
+      try {
+        watcher = new window.CloseWatcher();
+      } catch { return; }
 
-        let destState = null;
-        try { destState = e.destination?.getState?.(); } catch {}
-        const isExitAttempt = !destState?.mediurg || destState.mediurg.sentinel === true;
-        if (!isExitAttempt) return;
+      watcher.addEventListener("cancel", (e) => {
+        // En modal/sous-écran : laisser le close passer pour que popstate
+        // ferme le modal via history. La hiérarchie pushNav le gère.
+        const inDeepState = showAcrRef.current || showChangelogRef.current;
+        if (inDeepState) return;
 
+        // À la racine : 1er retour = toast ; 2e dans 2 s = on laisse fermer.
         const now = Date.now();
-        if (now - lastBackAt < 2000) {
-          // 2e appui dans les 2 s → on laisse partir
-          allowNextExit = true;
-          return;
-        }
+        if (now - lastBackAt < 2000) return; // 2e → laisser close fire → exit
         e.preventDefault();
         lastBackAt = now;
-        // Signaler à popstate de skip si Chrome le fire quand même
-        navigateIntercepted = true;
-        setTimeout(() => { navigateIntercepted = false; }, 100);
         showExitToast();
-      };
-      window.navigation.addEventListener("navigate", onNavigate);
-    }
+      });
+      watcher.addEventListener("close", () => {
+        // Watcher consommé après un close non préventé. On en recrée un
+        // pour catcher le PROCHAIN retour si l'app est encore en vie.
+        watcher = null;
+        Promise.resolve().then(setupWatcher);
+      });
+    };
+    setupWatcher();
 
     return () => {
       window.removeEventListener("popstate", onPopState);
-      if (onNavigate && window.navigation) {
-        window.navigation.removeEventListener("navigate", onNavigate);
-      }
+      watcherDestroyed = true;
+      if (watcher) { try { watcher.destroy(); } catch {} }
       if (toastTimer) clearTimeout(toastTimer);
     };
   }, []);

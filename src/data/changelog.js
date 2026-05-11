@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v39";
+export const APP_VERSION = "v40";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v40",
+    date: "2026-05-11",
+    titre: "Garde 2× retour : CloseWatcher API (fix Chrome PWA + Firefox PWA)",
+    changes: [
+      { type: "feat", text: "Bascule de Navigation API vers CloseWatcher API (Chrome 120+, Firefox 149+) pour intercepter le bouton retour. CloseWatcher est l'API conçue spécifiquement pour les « close requests » (Esc Windows, geste retour iOS, bouton retour Android), plus fiable que navigate event pour ce cas — preventDefault sur 'cancel' est honoré sur Chrome PWA root back, là où navigate.preventDefault ne l'était pas. popstate reste actif en parallèle pour la nav interne (modales, sous-onglets) et le fallback browsers anciens via sentinelle. Le watcher est recréé après chaque close (consumé) pour catcher le retour suivant." },
+    ],
+  },
   {
     version: "v39",
     date: "2026-05-11",
