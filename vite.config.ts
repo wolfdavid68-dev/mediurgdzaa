@@ -13,7 +13,15 @@ import { VitePWA } from "vite-plugin-pwa";
 // à maintenir à la main.
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // React Compiler (stable v1.0) : analyse les composants et insère
+      // automatiquement la mémoïsation (useMemo/useCallback implicites)
+      // partout où c'est sûr. Évite les re-renders inutiles lors du
+      // filtrage drugs/protocols quand l'user tape dans la search bar.
+      babel: {
+        plugins: [["babel-plugin-react-compiler", { target: "19" }]],
+      },
+    }),
     VitePWA({
       // 'prompt' : le nouveau SW reste en waiting jusqu'à ce que l'user
       // clique sur le toast « Mettre à jour ». UX explicite — l'user

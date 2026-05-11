@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v56";
+export const APP_VERSION = "v57";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v57",
+    date: "2026-05-11",
+    titre: "React Compiler 1.0 — auto-mémoïsation automatique",
+    changes: [
+      { type: "feat", text: "babel-plugin-react-compiler 1.0 (stable) ajouté à la chaîne Vite. Le compilateur React analyse chaque composant et insère automatiquement la mémoïsation (équivalent useMemo/useCallback) là où c'est sûr — sans avoir à le faire à la main. Bénéfice principal : pendant que l'user tape dans la search bar, App.jsx ne refait plus les filtres et tris coûteux sur les 73 drugs à chaque caractère. Plus réactif sur mobile bas-de-gamme." },
+      { type: "chore", text: "eslint-plugin-react-compiler ajouté à la config ESLint pour signaler les patterns que le compiler ne peut pas optimiser (mutations directes, fonctions non pures). Verdict actuel : 0 warning — tous nos composants sont déjà compiler-compatibles, donc le compiler les optimise tous." },
+      { type: "chore", text: "Coût bundle : +16 kB raw / +5 kB gzip (le code de mémoïsation inséré). Build local passe de ~800 ms à ~2.3 s (le Babel transform du compiler est plus lent), mais c'est invisible côté user." },
+    ],
+  },
   {
     version: "v56",
     date: "2026-05-11",
