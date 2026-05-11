@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef, lazy, Suspense } from "react";
 import { DRUGS } from "./data/drugs";
 import { PROTOCOLS } from "./data/protocols";
 import { PREP_KITS } from "./data/prepKits";
@@ -6,11 +6,16 @@ import { ALIASES } from "./data/aliases";
 import { normalize } from "./lib/normalize";
 import DrugList from "./components/DrugList";
 import ProtocolCard from "./components/ProtocolCard";
-import IncompatibilityList from "./components/IncompatibilityList";
-import PrepKitCard from "./components/PrepKitCard";
-import ChangelogModal from "./components/ChangelogModal";
-import AcrModeModal from "./components/AcrModeModal";
 import { APP_VERSION } from "./data/changelog";
+
+// Code-splitting : les modales (ACR, changelog) et les sous-onglets Protocoles
+// (incompat, kits) ne sont importés que quand l'utilisateur les ouvre. Sort
+// les bundles correspondants du chargement initial → premier paint plus rapide
+// sur mobile, et l'ACR ne consomme du JS qu'au moment où l'urgence est lancée.
+const AcrModeModal        = lazy(() => import("./components/AcrModeModal"));
+const ChangelogModal      = lazy(() => import("./components/ChangelogModal"));
+const IncompatibilityList = lazy(() => import("./components/IncompatibilityList"));
+const PrepKitCard         = lazy(() => import("./components/PrepKitCard"));
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -504,12 +509,16 @@ const App = () => {
               </button>
             </div>
 
-            {protoCategory === "incompatibilites" && <IncompatibilityList />}
+            {protoCategory === "incompatibilites" && (
+              <Suspense fallback={null}><IncompatibilityList /></Suspense>
+            )}
 
             {protoCategory === "kits" && (
-              <div className="protocol-list">
-                {PREP_KITS.map(k => <PrepKitCard key={k.id} kit={k} />)}
-              </div>
+              <Suspense fallback={null}>
+                <div className="protocol-list">
+                  {PREP_KITS.map(k => <PrepKitCard key={k.id} kit={k} />)}
+                </div>
+              </Suspense>
             )}
 
             {protoCategory === "PISU" && (
@@ -585,19 +594,27 @@ const App = () => {
         <span className="urgence-fab-label">URGENCE</span>
       </button>
 
-      <AcrModeModal
-        open={showAcr}
-        onClose={closeOverlay}
-        onOpenDrug={(name) => {
-          // On remplace l'entrée d'historique de l'ACR par la nouvelle vue
-          // → bouton retour ramène à l'écran d'avant l'ouverture du mode urgence (pas dans la modale).
-          replaceNav({ page: "medicaments", modal: null });
-          setShowAcr(false);
-          setPage("medicaments");
-          setSearch(name);
-        }}
-      />
-      <ChangelogModal open={showChangelog} onClose={closeOverlay} />
+      {/* Modales lazy-loadées : l'import ne déclenche que quand showXxx passe
+          à true pour la 1ère fois — pas inclus dans le bundle initial. */}
+      {showAcr && (
+        <Suspense fallback={null}>
+          <AcrModeModal
+            open={showAcr}
+            onClose={closeOverlay}
+            onOpenDrug={(name) => {
+              replaceNav({ page: "medicaments", modal: null });
+              setShowAcr(false);
+              setPage("medicaments");
+              setSearch(name);
+            }}
+          />
+        </Suspense>
+      )}
+      {showChangelog && (
+        <Suspense fallback={null}>
+          <ChangelogModal open={showChangelog} onClose={closeOverlay} />
+        </Suspense>
+      )}
 
       {exitToast && (
         <div className="exit-toast" role="status" aria-live="polite">

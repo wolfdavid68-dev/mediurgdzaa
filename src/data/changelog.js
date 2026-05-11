@@ -1,11 +1,19 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v47";
+export const APP_VERSION = "v48";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v48",
+    date: "2026-05-11",
+    titre: "Code splitting : modales et sous-onglets chargés à la demande",
+    changes: [
+      { type: "feat", text: "AcrModeModal (23 kB), IncompatibilityList (19 kB), PrepKitCard (5 kB) et ChangelogModal (2 kB) passent en React.lazy + Suspense. Leur JS n'est plus dans le bundle initial — il se télécharge en arrière-plan dès que l'utilisateur clique URGENCE, ouvre le sous-onglet Incompatibilités/Kits, ou affiche les notes de version. Bundle de démarrage allégé de 454 kB à 407 kB (gzip 131 → 122 kB) : premier paint plus rapide, surtout sur mobile bas-de-gamme." },
+    ],
+  },
   {
     version: "v47",
     date: "2026-05-11",
