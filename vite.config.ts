@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
 
 // (defineConfig de vite ne connaît pas la clé `test` que vitest étend. On
@@ -13,15 +14,18 @@ import { VitePWA } from "vite-plugin-pwa";
 // à maintenir à la main.
 export default defineConfig({
   plugins: [
-    react({
-      // React Compiler (stable v1.0) : analyse les composants et insère
-      // automatiquement la mémoïsation (useMemo/useCallback implicites)
-      // partout où c'est sûr. Évite les re-renders inutiles lors du
-      // filtrage drugs/protocols quand l'user tape dans la search bar.
-      babel: {
-        plugins: [["babel-plugin-react-compiler", { target: "19" }]],
-      },
-    }),
+    react(),
+    // React Compiler (stable v1.0) : analyse les composants et insère
+    // automatiquement la mémoïsation (useMemo/useCallback implicites)
+    // partout où c'est sûr. Évite les re-renders inutiles lors du
+    // filtrage drugs/protocols quand l'user tape dans la search bar.
+    //
+    // Vite 8 / plugin-react 6 : Babel n'est plus embarqué (React Refresh
+    // utilise Oxc maintenant). Le React Compiler passe par un plugin Babel
+    // dédié + le helper reactCompilerPreset qui filtre intelligemment :
+    // ne transforme que les fichiers contenant une fonction commençant par
+    // une majuscule (composant) ou « use » (hook) — au lieu de tout babelifier.
+    babel({ presets: [reactCompilerPreset({ target: "19" })] }),
     VitePWA({
       // 'prompt' : le nouveau SW reste en waiting jusqu'à ce que l'user
       // clique sur le toast « Mettre à jour ». UX explicite — l'user

@@ -1,11 +1,21 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v61";
+export const APP_VERSION = "v62";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v62",
+    date: "2026-05-11",
+    titre: "Vite 8 + Rolldown — bundler Rust, builds plus rapides",
+    changes: [
+      { type: "chore", text: "Vite 7.3.3 → 8.0.12. Vite 8 embarque Rolldown (bundler Rust écrit par les auteurs de Rollup et Oxc) à la place de Rollup pour la production. Pour MediURG : build local passe de ~2,4 s à ~1,6 s avec React Compiler actif, et tombe à ~290 ms sans (référence interne). Bundle quasi-identique en taille — Rolldown produit du code équivalent. Compatibilité préservée via une couche qui auto-convertit rollupOptions → rolldownOptions ; aucun changement nécessaire à notre manualChunks." },
+      { type: "chore", text: "@vitejs/plugin-react 5.2.0 → 6.0.1. La v6 retire Babel du plugin (React Refresh utilise désormais Oxc directement, sans transform Babel). Conséquence : le React Compiler ne se configure plus via l'option `babel: { plugins: [...] }` retirée. Migration : @rolldown/plugin-babel ajouté en devDep + helper `reactCompilerPreset` exporté par plugin-react v6, qui inclut un filtre intelligent (ne babelifie que les fichiers contenant un composant majuscule ou un hook `use*`)." },
+      { type: "chore", text: "0 vulnérabilité dans le package-lock après bump (les 5 modérées de v60 étaient déjà parties avec vitest 4 en v61 ; v62 ne réintroduit rien)." },
+    ],
+  },
   {
     version: "v61",
     date: "2026-05-11",
