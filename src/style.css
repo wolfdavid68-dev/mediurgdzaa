@@ -5571,6 +5571,20 @@ a,
 .acr-summary-event-amio {
   border-left-color: #0ea5e9;
 }
+/* Transitions d'état : ROSC en vert, re-arrêt en orange */
+.acr-summary-event-rosc {
+  border-left-color: #4ade80;
+}
+.acr-summary-event-reacr {
+  border-left-color: #f97316;
+}
+/* Marqueurs chrono : start/pause/resume en gris discret (informationnels) */
+.acr-summary-event-start,
+.acr-summary-event-pause,
+.acr-summary-event-resume {
+  border-left-color: var(--border-strong);
+  opacity: 0.85;
+}
 .acr-summary-event-wall {
   font-family: var(--mono);
   font-weight: 700;

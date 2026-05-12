@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v82";
+export const APP_VERSION = "v83";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v83",
+    date: "2026-05-12",
+    titre: "Bilan ACR · horodatage des transitions d'état (ROSC, re-arrêt, pause)",
+    changes: [
+      {
+        type: "feat",
+        text: "L'horodatage du bilan couvre maintenant TOUTES les actions importantes, pas seulement chocs / adré / cordarone : ROSC obtenu (❤️ vert), re-arrêt (↻ orange), début ACR (▶), pause (⏸) et reprise (⏯). Code couleur par type dans le bord gauche de chaque ligne, idem dans l'image partagée. Chronologie complète disponible pour la transmission et le dossier patient.",
+      },
+    ],
+  },
   {
     version: "v82",
     date: "2026-05-12",

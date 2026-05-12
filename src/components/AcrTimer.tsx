@@ -276,6 +276,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
     setCurrentRhythm("rosc");
     setPendingActions([]);
     setPhase("post-rosc");
+    addEvent("rosc", "ROSC obtenu · post-réa");
   };
 
   // Retour ACR depuis post-ROSC (re-arrêt) : on relance un cycle d'analyse.
@@ -285,6 +286,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
     setPendingActions([]);
     setPhase("analyse");
     setCycleStartedAt(elapsedRef.current);
+    addEvent("reacr", "Re-arrêt — relance cycle");
   };
 
   const toggleHt = (id) => {
@@ -713,14 +715,24 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
             className="acr-btn acr-btn-start"
             onClick={() => {
               // 1er démarrage (pas une reprise après pause) : prompt analyse rythme initial
-              if (elapsed === 0 && phase === "rcp") setPhase("analyse");
+              const isFirstStart = elapsed === 0 && phase === "rcp";
+              if (isFirstStart) setPhase("analyse");
               setRunning(true);
+              // Horodatage : « Début ACR » au 1er démarrage, « Reprise » sinon
+              addEvent(isFirstStart ? "start" : "resume", isFirstStart ? "Début ACR" : "Reprise");
             }}
           >
             ▶ {elapsed === 0 ? "Démarrer" : "Reprendre"}
           </button>
         ) : (
-          <button type="button" className="acr-btn acr-btn-pause" onClick={() => setRunning(false)}>
+          <button
+            type="button"
+            className="acr-btn acr-btn-pause"
+            onClick={() => {
+              setRunning(false);
+              addEvent("pause", "Pause");
+            }}
+          >
             ⏸ Pause
           </button>
         )}

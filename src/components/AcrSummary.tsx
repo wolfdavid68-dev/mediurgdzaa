@@ -2,6 +2,20 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { toPng } from "html-to-image";
 import { fmt, fmtWall } from "./AcrTimer.helpers";
 
+// Icône par type d'event horodaté. Étendu en v83 pour couvrir aussi les
+// transitions d'état (ROSC, re-arrêt) et les marqueurs chrono (start, pause,
+// reprise) en plus des actions thérapeutiques (choc / adré / amio).
+const EVENT_ICON: Record<string, string> = {
+  choc: "⚡",
+  adre: "💉",
+  amio: "💓",
+  rosc: "❤️",
+  reacr: "↻",
+  start: "▶",
+  pause: "⏸",
+  resume: "⏯",
+};
+
 // Bilan de fin de séance ACR — récap copiable + exportable en image (pour
 // glisser dans le dossier patient ou partager via Android share sheet).
 // Extrait de AcrTimer.tsx (v81) pour alléger le composant principal.
@@ -228,7 +242,7 @@ const AcrSummary = ({
                     <span className="acr-summary-event-wall">{fmtWall(e.at)}</span>
                     <span className="acr-summary-event-elapsed">T+{fmt(e.t)}</span>
                     <span className="acr-summary-event-icon" aria-hidden="true">
-                      {e.type === "choc" ? "⚡" : e.type === "adre" ? "💉" : "💓"}
+                      {EVENT_ICON[e.type] || "•"}
                     </span>
                     <span className="acr-summary-event-label">{e.label}</span>
                   </li>
