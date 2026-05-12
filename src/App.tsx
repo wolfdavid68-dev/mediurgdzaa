@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useDeferredValue, lazy, Suspense } from "
 import { DRUGS } from "./data/drugs";
 import { ALIASES } from "./data/aliases";
 import { normalize } from "./lib/normalize";
+import { fuzzyIncludes } from "./lib/fuzzy";
 import DrugList from "./components/DrugList";
 import UpdatePrompt from "./components/UpdatePrompt";
 import { APP_VERSION } from "./data/changelog";
@@ -439,10 +440,10 @@ const App = () => {
 
     return DRUGS.filter((d) => {
       const fields = [d.nom, d.commercial, d.dci, d.classe].map(normalize);
-      const matchDirect = !q || fields.some((f) => f.includes(q));
-      // Array#some retourne false sur tableau vide → pas besoin du
-      // .length > 0 préalable (relevé par oxlint unicorn/no-useless-length-check).
-      const matchAlias = aliasTargets.some((t) => fields.some((f) => f.includes(t)));
+      // fuzzyIncludes : substring d'abord (rapide), Levenshtein en fallback
+      // pour les requêtes ≥ 4 chars. Tolère « amidaron » → amiodarone.
+      const matchDirect = !q || fields.some((f) => fuzzyIncludes(f, q));
+      const matchAlias = aliasTargets.some((t) => fields.some((f) => fuzzyIncludes(f, t)));
       const matchQ = matchDirect || matchAlias;
       const matchC = cat === "Tout" || d.cat === cat;
       const matchS = svc === "Tout" || d.svc.includes(svc);

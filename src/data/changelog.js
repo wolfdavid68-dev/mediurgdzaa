@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v79";
+export const APP_VERSION = "v80";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v80",
+    date: "2026-05-12",
+    titre: "Recherche tolérante aux fautes de frappe (Levenshtein)",
+    changes: [
+      {
+        type: "feat",
+        text: "La barre de recherche tolère désormais les typos. Substring exact d'abord (cas commun, rapide), puis fallback fuzzy avec distance de Levenshtein : 1 erreur autorisée pour 4-5 caractères, 2 erreurs au-delà. « amidaron » trouve amiodarone, « adrenalin » trouve adrenaline, « atrropin » trouve atropine. Critique en stress : pas besoin d'orthographier parfaitement. Pas de nouvelle dépendance, ~30 lignes dans src/lib/fuzzy.ts avec 12 tests.",
+      },
+    ],
+  },
   {
     version: "v79",
     date: "2026-05-12",
