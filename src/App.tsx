@@ -72,6 +72,37 @@ const App = () => {
   // avec le bon message (variante Firefox PWA = ne peut pas quitter via back).
   const [exitToast, setExitToast] = useState(null);
 
+  // ─── DEBUG TEMPORAIRE — back button instrumentation ───────────
+  // Activé via ?debug-back dans l'URL. Affiche un overlay listant les events
+  // popstate + CloseWatcher pour identifier pourquoi le 1er back ne montre
+  // pas le toast d'exit sur certains téléphones. À retirer après diagnostic.
+  const debugBackEnabled =
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug-back");
+  const [debugBackLog, setDebugBackLog] = useState(() => {
+    if (!debugBackEnabled) return [];
+    try {
+      const histState = window.history.state?.mediurg;
+      const stateDesc = histState
+        ? histState.sentinel
+          ? "sentinel"
+          : `page:${histState.page || "?"}`
+        : "null";
+      return [
+        `${new Date().toLocaleTimeString("fr-FR", { hour12: false })} ready · histLen=${window.history.length} · state=${stateDesc}`,
+      ];
+    } catch {
+      return [];
+    }
+  });
+  const logBackEvent = (msg) => {
+    if (!debugBackEnabled) return;
+    setDebugBackLog((log) => {
+      const ts = new Date().toLocaleTimeString("fr-FR", { hour12: false });
+      return [...log, `${ts} ${msg}`].slice(-10);
+    });
+  };
+  // ─────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
     const onOffline = () => setIsOnline(false);
@@ -236,6 +267,11 @@ const App = () => {
       const isRapidDouble = now - lastBackAt < 1000;
       lastBackAt = now;
 
+      // DEBUG : trace chaque popstate
+      logBackEvent(
+        `popstate · state=${s ? (s.sentinel ? "sentinel" : `page:${s.page || "?"}`) : "null"} · rapid=${isRapidDouble} · histLen=${window.history.length}`
+      );
+
       if (!s || s.sentinel) {
         // Sentinelle = tentative de sortie de l'app
         if (isRapidDouble) {
@@ -281,6 +317,31 @@ const App = () => {
       } catch {}
     }
 
+    // DEBUG : observer CloseWatcher en parallèle pour voir s'il fire sur les
+    // browsers non-Firefox (Chrome/Samsung Internet). Recrée le watcher à
+    // chaque cancel pour qu'il continue de logger. NE preventDefault PAS
+    // (pour ne pas changer le comportement actuel pendant le diag).
+    let debugWatcher = null;
+    const setupDebugWatcher = () => {
+      if (!debugBackEnabled) return;
+      if (isFirefoxAndroid) return; // already handled above
+      if (typeof window.CloseWatcher !== "function") {
+        logBackEvent("CloseWatcher API absente");
+        return;
+      }
+      try {
+        debugWatcher = new window.CloseWatcher();
+        debugWatcher.addEventListener("cancel", () => {
+          logBackEvent("CloseWatcher cancel fired");
+          // Pas de preventDefault → le watcher se referme, on en crée un nouveau
+          setTimeout(setupDebugWatcher, 0);
+        });
+      } catch (err) {
+        logBackEvent(`CloseWatcher erreur: ${String(err).slice(0, 40)}`);
+      }
+    };
+    setupDebugWatcher();
+
     return () => {
       window.removeEventListener("popstate", onPopState);
       if (watcher) {
@@ -288,8 +349,14 @@ const App = () => {
           watcher.destroy();
         } catch {}
       }
+      if (debugWatcher) {
+        try {
+          debugWatcher.destroy();
+        } catch {}
+      }
       if (toastTimer) clearTimeout(toastTimer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // View Transitions API (Chrome 111+, Safari 18+) : enveloppe les changements
@@ -721,6 +788,21 @@ const App = () => {
           {exitToast === "firefox-no-exit"
             ? "Sur Firefox Android, utilisez le bouton app récente pour fermer MediURG."
             : "Appuyez à nouveau sur retour pour quitter"}
+        </div>
+      )}
+      {debugBackEnabled && (
+        <div className="debug-back-panel">
+          <div className="debug-back-header">
+            DEBUG back · {debugBackLog.length} events
+            <button type="button" className="debug-back-clear" onClick={() => setDebugBackLog([])}>
+              clear
+            </button>
+          </div>
+          {debugBackLog.map((line, i) => (
+            <div key={i} className="debug-back-line">
+              {line}
+            </div>
+          ))}
         </div>
       )}
       <UpdatePrompt />

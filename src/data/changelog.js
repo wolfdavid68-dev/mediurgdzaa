@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v74";
+export const APP_VERSION = "v75";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v75",
+    date: "2026-05-12",
+    titre: "Debug temporaire · instrumentation du bouton retour Android",
+    changes: [
+      {
+        type: "chore",
+        text: "Diagnostic d'un bug où le 1er back ne déclenche pas le toast d'exit sur certains téléphones. Activable via l'URL ?debug-back — affiche un overlay vert en haut listant les events popstate et CloseWatcher en temps réel. Ne change pas le comportement actuel du bouton retour. Sera retiré une fois la cause identifiée.",
+      },
+    ],
+  },
   {
     version: "v74",
     date: "2026-05-12",

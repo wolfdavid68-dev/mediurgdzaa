@@ -3534,6 +3534,48 @@ a,
 }
 
 /* Toast "Appuyez 2× pour quitter" */
+/* DEBUG TEMPORAIRE — overlay back instrumentation (?debug-back) */
+.debug-back-panel {
+  position: fixed;
+  top: var(--safe-top);
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.88);
+  color: #4ade80;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.45;
+  z-index: 9999;
+  max-height: 55vh;
+  overflow-y: auto;
+  border-bottom: 2px solid #4ade80;
+}
+.debug-back-header {
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(74, 222, 128, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.debug-back-clear {
+  background: transparent;
+  border: 1px solid #4ade80;
+  color: #4ade80;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--mono);
+  cursor: pointer;
+}
+.debug-back-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 .exit-toast {
   position: fixed;
   left: 50%;
