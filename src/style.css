@@ -5607,15 +5607,16 @@ a,
 
 .acr-summary-footer {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 12px 18px calc(12px + var(--safe-bottom));
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
-/* Bouton « Image » : export PNG via html-to-image + Web Share API.
-   Placé en 1er pour mettre en avant le partage natif sur Android. */
+/* Bouton « Partager » : Web Share API → menu Android (Photos, WhatsApp...).
+   Vert success, en 1er pour mettre en avant le partage natif. */
 .acr-summary-share {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 11px;
   border-radius: 8px;
   border: 1px solid var(--success);
@@ -5628,12 +5629,31 @@ a,
 .acr-summary-share:hover:not(:disabled) {
   filter: brightness(1.1);
 }
-.acr-summary-share:disabled {
+.acr-summary-share:disabled,
+.acr-summary-download:disabled {
   opacity: 0.6;
   cursor: progress;
 }
+/* Bouton « Télécharger » : download direct dans Downloads/ (sans menu de
+   partage). La plupart des galeries Android scannent Downloads/ donc l'image
+   y apparaît automatiquement. Style "outline" success pour rester cohérent
+   avec « Partager » tout en restant secondaire. */
+.acr-summary-download {
+  flex: 1 1 auto;
+  padding: 11px;
+  border-radius: 8px;
+  border: 1px solid var(--success);
+  background: transparent;
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.acr-summary-download:hover:not(:disabled) {
+  background: rgba(74, 222, 128, 0.1);
+}
 .acr-summary-copy {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 11px;
   border-radius: 8px;
   border: 1px solid var(--info);

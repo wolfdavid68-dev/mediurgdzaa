@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v81";
+export const APP_VERSION = "v82";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v82",
+    date: "2026-05-12",
+    titre: "Bilan ACR · 2 boutons distincts Partager + Télécharger",
+    changes: [
+      {
+        type: "feat",
+        text: "Split du bouton « Image » de v81 en deux actions claires : « 🖼 Partager » (vert plein) ouvre le menu de partage natif Android — Photos, WhatsApp, Drive — et « 📥 Télécharger » (vert outline) force le download direct dans Downloads/. Sur la plupart des téléphones (Samsung Gallery, MIUI, etc.), les apps galerie scannent automatiquement Downloads/ donc l'image y apparaît sans manipulation. Pratique quand le partage natif ne propose pas l'option « Photos » sur ton tél.",
+      },
+    ],
+  },
   {
     version: "v81",
     date: "2026-05-12",

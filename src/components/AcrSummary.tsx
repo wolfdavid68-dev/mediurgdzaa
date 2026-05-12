@@ -76,28 +76,34 @@ const AcrSummary = ({
     } catch {}
   };
 
-  // Export en PNG via html-to-image. On utilise Web Share API si dispo (Android
-  // partage natif → permet de glisser dans WhatsApp / Drive / dossier patient
-  // sans passer par le téléchargement). Fallback : download du PNG.
-  const onExportImage = useCallback(async () => {
-    if (!captureRef.current || exporting) return;
+  // Capture le DOM en PNG. Retourne { dataUrl, filename } ou null en cas d'échec.
+  // Helper partagé entre le bouton « Partager » (Web Share API) et le bouton
+  // « Télécharger » (download direct dans Downloads/).
+  const generatePng = useCallback(async () => {
+    if (!captureRef.current) return null;
+    const bg =
+      getComputedStyle(document.documentElement).getPropertyValue("--card").trim() || "#161620";
+    const dataUrl = await toPng(captureRef.current, {
+      backgroundColor: bg,
+      pixelRatio: 2,
+      cacheBust: true,
+    });
+    const ts = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "_").substring(0, 19);
+    return { dataUrl, filename: `bilan-acr_${ts}.png` };
+  }, []);
+
+  // Bouton « Partager » : ouvre le menu de partage natif (Android share sheet,
+  // iOS share). L'utilisateur choisit l'app cible — Photos, WhatsApp, Drive...
+  // Si Web Share API absent (browsers anciens), tombe sur le download.
+  const onShareImage = useCallback(async () => {
+    if (exporting) return;
     setExporting(true);
     setExportStatus(null);
     try {
-      // Background = couleur du card du thème actuel (lu sur <html data-theme>)
-      const bg =
-        getComputedStyle(document.documentElement).getPropertyValue("--card").trim() || "#161620";
+      const result = await generatePng();
+      if (!result) throw new Error("capture failed");
+      const { dataUrl, filename } = result;
 
-      const dataUrl = await toPng(captureRef.current, {
-        backgroundColor: bg,
-        pixelRatio: 2, // qualité retina sans exploser la taille
-        cacheBust: true,
-      });
-
-      const ts = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "_").substring(0, 19);
-      const filename = `bilan-acr_${ts}.png`;
-
-      // Web Share API : tente de partager via le système d'abord
       try {
         const blob = await (await fetch(dataUrl)).blob();
         const file = new File([blob], filename, { type: "image/png" });
@@ -112,15 +118,13 @@ const AcrSummary = ({
           return;
         }
       } catch (shareErr) {
-        // AbortError = l'utilisateur a annulé le share, c'est OK
         if ((shareErr as Error).name === "AbortError") {
           setExportStatus(null);
           return;
         }
-        // Sinon on tombe en fallback download
       }
 
-      // Fallback : download direct
+      // Fallback download
       const link = document.createElement("a");
       link.download = filename;
       link.href = dataUrl;
@@ -133,7 +137,32 @@ const AcrSummary = ({
     } finally {
       setExporting(false);
     }
-  }, [exporting, elapsed, pediatric]);
+  }, [exporting, elapsed, pediatric, generatePng]);
+
+  // Bouton « Télécharger » : force le download direct dans Downloads/ sans
+  // passer par le menu de partage. Sur la plupart des Android, les apps
+  // Galerie (Samsung Gallery, MIUI, etc.) scannent automatiquement Downloads/
+  // donc l'image apparaît dans la galerie sans manipulation supplémentaire.
+  const onDownloadImage = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportStatus(null);
+    try {
+      const result = await generatePng();
+      if (!result) throw new Error("capture failed");
+      const link = document.createElement("a");
+      link.download = result.filename;
+      link.href = result.dataUrl;
+      link.click();
+      setExportStatus("downloaded");
+      setTimeout(() => setExportStatus(null), 2500);
+    } catch {
+      setExportStatus("error");
+      setTimeout(() => setExportStatus(null), 3000);
+    } finally {
+      setExporting(false);
+    }
+  }, [exporting, generatePng]);
 
   const onBackdropClick = (e) => {
     if (e.target === dialogRef.current) onClose();
@@ -240,19 +269,26 @@ const AcrSummary = ({
           <button
             type="button"
             className="acr-summary-share"
-            onClick={onExportImage}
+            onClick={onShareImage}
             disabled={exporting}
-            title="Exporter en image (partage natif sur Android)"
+            title="Partager l'image (menu Android : Photos, WhatsApp, Drive…)"
           >
             {exporting
               ? "..."
               : exportStatus === "shared"
                 ? "✓ Partagé"
-                : exportStatus === "downloaded"
-                  ? "✓ Téléchargé"
-                  : exportStatus === "error"
-                    ? "Erreur"
-                    : "🖼 Image"}
+                : exportStatus === "error"
+                  ? "Erreur"
+                  : "🖼 Partager"}
+          </button>
+          <button
+            type="button"
+            className="acr-summary-download"
+            onClick={onDownloadImage}
+            disabled={exporting}
+            title="Télécharger l'image dans Downloads/ (visible dans la Galerie)"
+          >
+            {exporting ? "..." : exportStatus === "downloaded" ? "✓ Téléchargé" : "📥 Télécharger"}
           </button>
           <button type="button" className="acr-summary-copy" onClick={onCopy}>
             {copied ? "✓ Copié" : "Copier"}
