@@ -108,6 +108,17 @@ body {
     color 0.2s;
 }
 
+/* touch-action: manipulation — désactive le double-tap-to-zoom d'Android Chrome
+   sur les éléments cliquables (300ms d'attente du 2e tap). Garde le pinch-to-zoom
+   global (accessibilité préservée). Critique sur les bottom-tabs où un re-tap
+   pendant le chargement d'un chunk lazy déclenchait le zoom (cas Protocoles). */
+button,
+a,
+[role="button"],
+[role="tab"] {
+  touch-action: manipulation;
+}
+
 #root {
   min-height: 100vh;
   min-height: 100dvh;

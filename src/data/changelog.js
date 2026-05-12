@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v72";
+export const APP_VERSION = "v73";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v73",
+    date: "2026-05-12",
+    titre: "Fix · plus de zoom Android au tap sur Protocoles",
+    changes: [
+      {
+        type: "fix",
+        text: "Sur téléphone Android, taper sur l'onglet Protocoles pouvait déclencher le double-tap-to-zoom du navigateur (chunk JS plus gros à charger, donc l'utilisateur retapait, et Chrome interprétait ça comme un double-tap). Ajout de touch-action: manipulation sur tous les boutons et tabs : le navigateur ne perd plus 300 ms à attendre un éventuel 2e tap. Le pinch-to-zoom reste actif pour l'accessibilité.",
+      },
+    ],
+  },
   {
     version: "v72",
     date: "2026-05-12",
