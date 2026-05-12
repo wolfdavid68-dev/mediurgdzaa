@@ -11,6 +11,15 @@ const fmt = (s) => {
   return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 };
 
+// Heure murale (téléphone) — format HH:MM:SS 24h FR pour transmission.
+const fmtWall = (ts) => {
+  try {
+    return new Date(ts).toLocaleTimeString("fr-FR", { hour12: false });
+  } catch {
+    return "—";
+  }
+};
+
 // Singleton AudioContext — créé/réveillé lors d'un geste utilisateur,
 // réutilisé pour tous les sons (sinon iOS/Chrome bloquent les contextes hors-geste).
 let _audioCtx = null;
@@ -415,6 +424,10 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
   const [adres, setAdres] = useState(0);
   const [amios, setAmios] = useState(0);
   const [lastAdreAt, setLastAdreAt] = useState(null);
+  // Horodatage des actions critiques pour le bilan/transmission.
+  // Chaque event = { id, type:'choc'|'adre'|'amio', label, t (s depuis début chrono), at (Date.now ms) }
+  // Permet d'afficher l'heure téléphone ET T+ depuis le début de la RCP.
+  const [events, setEvents] = useState([]);
   const [showSummary, setShowSummary] = useState(false);
   const [coachMode, setCoachMode] = useState(readCoach);
   // Dérivés alignés sur la table : seul "voix" distingue full ↔ visual
@@ -653,22 +666,44 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
     });
   };
 
+  // Horodatage : on capture l'heure téléphone ET T+ (depuis début chrono).
+  // elapsedRef.current = source de vérité (mis à jour à chaque tick), évite les
+  // races si plusieurs setX au même tick.
+  const addEvent = (type, label) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setEvents((es) => [...es, { id, type, label, t: elapsedRef.current, at: Date.now() }]);
+    return id;
+  };
+  const removeEvent = (id) => setEvents((es) => es.filter((e) => e.id !== id));
+  const removeLastEventOfType = (type) =>
+    setEvents((es) => {
+      for (let i = es.length - 1; i >= 0; i--) {
+        if (es[i].type === type) return [...es.slice(0, i), ...es.slice(i + 1)];
+      }
+      return es;
+    });
+
   const toggleAction = (idx) => {
     setPendingActions((prev) =>
       prev.map((a, i) => {
         if (i !== idx) return a;
         const nextDone = !a.done;
         if (nextDone) {
-          // Cocher : incrémente et mémorise l'ancien lastAdreAt pour pouvoir l'annuler proprement
+          // Cocher : incrémente, horodate et mémorise l'ancien lastAdreAt pour pouvoir l'annuler proprement
+          let evId = null;
+          if (a.type === "choc" || a.type === "adre" || a.type === "amio") {
+            evId = addEvent(a.type, a.label);
+          }
           if (a.type === "choc") setShocks((s) => s + 1);
           if (a.type === "adre") {
             setAdres((c) => c + 1);
             setLastAdreAt(elapsed);
           }
           if (a.type === "amio") setAmios((c) => c + 1);
-          return { ...a, done: true, prevLastAdreAt: lastAdreAt };
+          return { ...a, done: true, prevLastAdreAt: lastAdreAt, eventId: evId };
         } else {
-          // Décocher : annule l'incrément et restaure l'état d'avant le clic
+          // Décocher : annule l'incrément, retire l'event et restaure l'état d'avant le clic
+          if (a.eventId) removeEvent(a.eventId);
           if (a.type === "choc") setShocks((s) => Math.max(0, s - 1));
           if (a.type === "adre") {
             setAdres((c) => Math.max(0, c - 1));
@@ -711,6 +746,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
     setAdres(0);
     setAmios(0);
     setLastAdreAt(null);
+    setEvents([]);
     setHtChecked(new Set());
     setHtExpanded(false);
     setHtDetail(null);
@@ -1089,6 +1125,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
           adres={adres}
           amios={amios}
           history={history}
+          events={events}
           cycle={cycle}
           onClose={() => setShowSummary(false)}
         />
@@ -1129,7 +1166,10 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
               <div className="acr-tally-stepper">
                 <button
                   type="button"
-                  onClick={() => setShocks((s) => Math.max(0, s - 1))}
+                  onClick={() => {
+                    setShocks((s) => Math.max(0, s - 1));
+                    removeLastEventOfType("choc");
+                  }}
                   aria-label="Moins un choc"
                   disabled={shocks === 0}
                 >
@@ -1138,7 +1178,10 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
                 <span className="acr-tally-num">{shocks}</span>
                 <button
                   type="button"
-                  onClick={() => setShocks((s) => s + 1)}
+                  onClick={() => {
+                    setShocks((s) => s + 1);
+                    addEvent("choc", "Choc (DSA / manuel)");
+                  }}
                   aria-label="Plus un choc"
                 >
                   +
@@ -1155,6 +1198,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
                     const next = adres - 1;
                     setAdres(next);
                     if (next === 0) setLastAdreAt(null);
+                    removeLastEventOfType("adre");
                   }}
                   aria-label="Moins une adrénaline"
                   disabled={adres === 0}
@@ -1169,6 +1213,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
                     // On considère la dose ajoutée comme « venant juste d'être donnée » :
                     // ça relance correctement le timer 4 min.
                     setLastAdreAt(elapsed);
+                    addEvent("adre", pediatric ? "Adrénaline 0,01 mg/kg" : "Adrénaline 1 mg");
                   }}
                   aria-label="Plus une adrénaline"
                 >
@@ -1181,7 +1226,10 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
               <div className="acr-tally-stepper">
                 <button
                   type="button"
-                  onClick={() => setAmios((a) => Math.max(0, a - 1))}
+                  onClick={() => {
+                    setAmios((a) => Math.max(0, a - 1));
+                    removeLastEventOfType("amio");
+                  }}
                   aria-label="Moins une cordarone"
                   disabled={amios === 0}
                 >
@@ -1190,7 +1238,10 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
                 <span className="acr-tally-num">{amios}</span>
                 <button
                   type="button"
-                  onClick={() => setAmios((a) => a + 1)}
+                  onClick={() => {
+                    setAmios((a) => a + 1);
+                    addEvent("amio", pediatric ? "Amiodarone 5 mg/kg" : "Amiodarone");
+                  }}
                   aria-label="Plus une cordarone"
                 >
                   +
@@ -1322,7 +1373,17 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
 // ─────────────────────────────────────────────────────────
 // Bilan de fin de séance — récap copiable pour transmission
 // ─────────────────────────────────────────────────────────
-const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, onClose }) => {
+const AcrSummary = ({
+  pediatric,
+  elapsed,
+  shocks,
+  adres,
+  amios,
+  history,
+  events = [],
+  cycle,
+  onClose,
+}) => {
   const [copied, setCopied] = useState(false);
   const dialogRef = useRef(null);
 
@@ -1345,6 +1406,14 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
   lines.push(`Chocs        : ${shocks}`);
   lines.push(`Adrénaline   : ${adres} ${pediatric ? "× 0,01 mg/kg" : "× 1 mg"}`);
   lines.push(`Cordarone    : ${amios} ${pediatric ? "× 5 mg/kg" : "(300 puis 150 mg)"}`);
+  if (events.length > 0) {
+    lines.push("");
+    lines.push("Horodatage des actions :");
+    lines.push("  Heure tel · T+ RCP · Action");
+    events.forEach((e) => {
+      lines.push(`  ${fmtWall(e.at)} · T+${fmt(e.t)} · ${e.label}`);
+    });
+  }
   if (history.length > 0) {
     lines.push("");
     lines.push("Cycles :");
@@ -1423,6 +1492,29 @@ const AcrSummary = ({ pediatric, elapsed, shocks, adres, amios, history, cycle, 
               <span className="acr-summary-stat-label">Cycles</span>
             </div>
           </div>
+
+          {events.length > 0 && (
+            <div className="acr-summary-events">
+              <div className="acr-summary-section-title">Horodatage des actions</div>
+              <div className="acr-summary-events-head">
+                <span>Heure tel</span>
+                <span>T+ RCP</span>
+                <span>Action</span>
+              </div>
+              <ul className="acr-summary-event-list">
+                {events.map((e) => (
+                  <li key={e.id} className={`acr-summary-event acr-summary-event-${e.type}`}>
+                    <span className="acr-summary-event-wall">{fmtWall(e.at)}</span>
+                    <span className="acr-summary-event-elapsed">T+{fmt(e.t)}</span>
+                    <span className="acr-summary-event-icon" aria-hidden="true">
+                      {e.type === "choc" ? "⚡" : e.type === "adre" ? "💉" : "💓"}
+                    </span>
+                    <span className="acr-summary-event-label">{e.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {history.length > 0 && (
             <div className="acr-summary-cycles">

@@ -5482,6 +5482,70 @@ body {
   font-size: 12px;
 }
 
+/* Horodatage des actions (chocs / médicaments) — heure téléphone + T+ depuis début RCP */
+.acr-summary-events {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.acr-summary-events-head {
+  display: grid;
+  grid-template-columns: 80px 70px 24px 1fr;
+  gap: 8px;
+  padding: 0 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-mute);
+}
+.acr-summary-event-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+.acr-summary-event {
+  display: grid;
+  grid-template-columns: 80px 70px 24px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  background: var(--card);
+  border-radius: 6px;
+  border-left: 3px solid var(--border);
+  font-size: 12px;
+}
+.acr-summary-event-choc {
+  border-left-color: #facc15;
+}
+.acr-summary-event-adre {
+  border-left-color: #a855f7;
+}
+.acr-summary-event-amio {
+  border-left-color: #0ea5e9;
+}
+.acr-summary-event-wall {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--text);
+}
+.acr-summary-event-elapsed {
+  font-family: var(--mono);
+  color: var(--text-mute);
+  font-size: 11px;
+}
+.acr-summary-event-icon {
+  font-size: 14px;
+  text-align: center;
+}
+.acr-summary-event-label {
+  color: var(--text);
+  font-size: 12px;
+}
+
 .acr-summary-text {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -5544,6 +5608,18 @@ body {
     grid-template-columns: 28px 44px 90px 1fr;
     gap: 6px;
     font-size: 11px;
+  }
+  .acr-summary-events-head,
+  .acr-summary-event {
+    grid-template-columns: 68px 58px 20px 1fr;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .acr-summary-event-wall {
+    font-size: 11px;
+  }
+  .acr-summary-event-elapsed {
+    font-size: 10px;
   }
 }
 
