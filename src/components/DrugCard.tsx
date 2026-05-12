@@ -137,9 +137,11 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen, onProtocolOpen }
                   <div key={i} className="poso-item">
                     {p}
                     {res && (
-                      <span className={`calc-result ${res.capped ? "calc-over" : "calc-ok"}`}>
+                      <span
+                        className={`calc-result ${res.validation === "danger" ? "calc-danger" : res.capped ? "calc-over" : "calc-ok"}`}
+                      >
                         {res.value}
-                        {res.capped ? " ⚠ max" : ""}
+                        {res.validation === "danger" ? " 🚨 vérifier" : res.capped ? " ⚠ max" : ""}
                       </span>
                     )}
                   </div>
@@ -158,9 +160,11 @@ const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen, onProtocolOpen }
                   <div key={i} className="poso-item">
                     {p}
                     {res && (
-                      <span className={`calc-result ${res.capped ? "calc-over" : "calc-ok"}`}>
+                      <span
+                        className={`calc-result ${res.validation === "danger" ? "calc-danger" : res.capped ? "calc-over" : "calc-ok"}`}
+                      >
                         {res.value}
-                        {res.capped ? " ⚠ max" : ""}
+                        {res.validation === "danger" ? " 🚨 vérifier" : res.capped ? " ⚠ max" : ""}
                       </span>
                     )}
                   </div>

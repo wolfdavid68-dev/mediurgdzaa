@@ -7,6 +7,7 @@ import {
   calcPrepSufentaTable,
   calcPrepPhases,
   calcPrepDoseKg,
+  validateDoseValue,
 } from "./calc";
 
 // ════════════════════════════════════════════════════════════════
@@ -14,7 +15,7 @@ import {
 // ════════════════════════════════════════════════════════════════
 describe("isValidWeight", () => {
   test.each([
-    [3, true],   // nourrisson
+    [3, true], // nourrisson
     [10, true],
     [70, true],
     [300, true], // borne haute incluse
@@ -36,38 +37,38 @@ describe("isValidWeight", () => {
 describe("calcDose", () => {
   test("dose simple mg/kg : 0,3 mg/kg pour 70 kg", () => {
     const r = calcDose("ISR : 0,3 mg/kg IV en 30-60 sec", 70);
-    expect(r).toEqual({ value: "21 mg", capped: false });
+    expect(r).toEqual({ value: "21 mg", capped: false, validation: "ok" });
   });
 
   test("dose en fourchette : 1-2,5 mg/kg pour 70 kg", () => {
     const r = calcDose("Induction : 1-2,5 mg/kg IV", 70);
-    expect(r).toEqual({ value: "70–175 mg", capped: false });
+    expect(r).toEqual({ value: "70–175 mg", capped: false, validation: "ok" });
   });
 
   test("accepte le point décimal aussi : 0.3 mg/kg pour 70 kg", () => {
     const r = calcDose("0.3 mg/kg IV", 70);
-    expect(r).toEqual({ value: "21 mg", capped: false });
+    expect(r).toEqual({ value: "21 mg", capped: false, validation: "ok" });
   });
 
   test("dose en µg/kg/min : 0,1 µg/kg/min pour 70 kg", () => {
     const r = calcDose("0,1 µg/kg/min", 70);
-    expect(r).toEqual({ value: "7 µg/min", capped: false });
+    expect(r).toEqual({ value: "7 µg/min", capped: false, validation: "ok" });
   });
 
   test("cap 'max X mg' déclenché : 1 mg/kg max 100 mg pour 120 kg", () => {
     const r = calcDose("1 mg/kg IV max 100 mg", 120);
-    expect(r).toEqual({ value: "100 mg", capped: true });
+    expect(r).toEqual({ value: "100 mg", capped: true, validation: "ok" });
   });
 
   test("cap 'max X mg' non-déclenché : 1 mg/kg max 100 mg pour 50 kg", () => {
     const r = calcDose("1 mg/kg IV max 100 mg", 50);
-    expect(r).toEqual({ value: "50 mg", capped: false });
+    expect(r).toEqual({ value: "50 mg", capped: false, validation: "ok" });
   });
 
   test("cap dont l'unité diffère est ignoré (ne s'applique pas)", () => {
     // cap exprimé en mL alors que la dose est en mg → cap ignoré
     const r = calcDose("2 mg/kg max 50 mL", 80);
-    expect(r).toEqual({ value: "160 mg", capped: false });
+    expect(r).toEqual({ value: "160 mg", capped: false, validation: "ok" });
   });
 
   test("texte sans pattern dose/kg → null", () => {
@@ -83,7 +84,62 @@ describe("calcDose", () => {
 
   test("dose en UI/kg : 70 UI/kg pour 80 kg", () => {
     const r = calcDose("Bolus 70 UI/kg", 80);
-    expect(r).toEqual({ value: "5600 UI", capped: false });
+    expect(r).toEqual({ value: "5600 UI", capped: false, validation: "ok" });
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// validateDoseValue — détection des doses aberrantes
+// ════════════════════════════════════════════════════════════════
+describe("validateDoseValue", () => {
+  test("dose plausible mg → ok", () => {
+    expect(validateDoseValue(100, "mg")).toBe("ok");
+    expect(validateDoseValue(500, "mg")).toBe("ok");
+  });
+
+  test("dose négative → danger", () => {
+    expect(validateDoseValue(-1, "mg")).toBe("danger");
+  });
+
+  test("dose absurde (typo de virgule) → danger", () => {
+    // Ex: 25 mg au lieu de 0,25 → ×100 → en pédiatrie sur poso 25 mg/kg : 25 × 70 = 1750
+    // OK. Mais si on confond unité (mg vs µg) ou place mal virgule → 51000 mg
+    expect(validateDoseValue(51000, "mg")).toBe("danger"); // > 50g d'une drogue IV
+    expect(validateDoseValue(60, "g")).toBe("danger"); // 60 g d'une drogue
+  });
+
+  test("NaN / valeur non finie → danger", () => {
+    expect(validateDoseValue(NaN, "mg")).toBe("danger");
+    expect(validateDoseValue(Infinity, "mg")).toBe("danger");
+  });
+
+  test("unité inconnue → ok par défaut (pas de seuil défini)", () => {
+    expect(validateDoseValue(999999, "comprimé")).toBe("ok");
+  });
+
+  test("mL et ml traités pareil", () => {
+    expect(validateDoseValue(1500, "ml")).toBe("danger");
+    expect(validateDoseValue(1500, "mL")).toBe("danger");
+  });
+});
+
+describe("calcDose — validation intégrée", () => {
+  test("dose normale → validation ok", () => {
+    const r = calcDose("1 mg/kg", 70);
+    expect(r?.validation).toBe("ok");
+  });
+
+  test("dose absurde dans la data (50 mg/kg au lieu de 0,5) sur 80 kg → danger", () => {
+    // 50 mg/kg × 80 kg = 4000 mg — pas encore aberrant
+    // Mais 700 mg/kg (erreur grossière) × 80 = 56000 mg → danger
+    const r = calcDose("700 mg/kg IV", 80);
+    expect(r?.validation).toBe("danger");
+  });
+
+  test("incohérence min > max dans la data → danger explicite", () => {
+    const r = calcDose("5-1 mg/kg IV", 70);
+    expect(r?.validation).toBe("danger");
+    expect(r?.value).toContain("incohérent");
   });
 });
 
@@ -220,25 +276,36 @@ describe("calcDebit", () => {
 describe("calcPrepThreshold", () => {
   const prep = {
     dose_threshold: 2,
-    amp_low: 4, vol_low: 20,
-    amp_high: 8, vol_high: 40,
+    amp_low: 4,
+    vol_low: 20,
+    amp_high: 8,
+    vol_high: 40,
   };
 
   test("dose < seuil (1 mg) → 4 ampoules / 20 mL, injecter 10 mL", () => {
     expect(calcPrepThreshold(prep, 1)).toEqual({
-      pf: 1, ampCount: 4, vol: 20, injectMl: 10,
+      pf: 1,
+      ampCount: 4,
+      vol: 20,
+      injectMl: 10,
     });
   });
 
   test("dose = seuil (2 mg) → bascule en 'high'", () => {
     expect(calcPrepThreshold(prep, 2)).toEqual({
-      pf: 2, ampCount: 8, vol: 40, injectMl: 20,
+      pf: 2,
+      ampCount: 8,
+      vol: 40,
+      injectMl: 20,
     });
   });
 
   test("dose > seuil (3,5 mg) → 8 ampoules / 40 mL, injecter 35 mL", () => {
     expect(calcPrepThreshold(prep, 3.5)).toEqual({
-      pf: 3.5, ampCount: 8, vol: 40, injectMl: 35,
+      pf: 3.5,
+      ampCount: 8,
+      vol: 40,
+      injectMl: 35,
     });
   });
 
@@ -291,17 +358,23 @@ describe("calcPrepPhases", () => {
     conc_produit: 200,
     phases: [
       { label: "Phase 1", dose_kg: 150, duree: "60 min", solvant_vol: 500 },
-      { label: "Phase 2", dose_kg: 50,  duree: "4h",     solvant_vol: 500 },
-      { label: "Phase 3", dose_kg: 100, duree: "16h",    solvant_vol: 1000 },
+      { label: "Phase 2", dose_kg: 50, duree: "4h", solvant_vol: 500 },
+      { label: "Phase 3", dose_kg: 100, duree: "16h", solvant_vol: 1000 },
     ],
   };
 
   test("70 kg : doses 10500 / 3500 / 7000 mg, volumes 52,5 / 17,5 / 35 mL", () => {
     const r = calcPrepPhases(prep, 70);
     expect(r).toHaveLength(3);
-    expect(r[0]).toEqual({ label: "Phase 1", duree: "60 min", dose: 10500, vol: 52.5, solvantVol: 500 });
-    expect(r[1]).toEqual({ label: "Phase 2", duree: "4h",     dose: 3500,  vol: 17.5, solvantVol: 500 });
-    expect(r[2]).toEqual({ label: "Phase 3", duree: "16h",    dose: 7000,  vol: 35,   solvantVol: 1000 });
+    expect(r[0]).toEqual({
+      label: "Phase 1",
+      duree: "60 min",
+      dose: 10500,
+      vol: 52.5,
+      solvantVol: 500,
+    });
+    expect(r[1]).toEqual({ label: "Phase 2", duree: "4h", dose: 3500, vol: 17.5, solvantVol: 500 });
+    expect(r[2]).toEqual({ label: "Phase 3", duree: "16h", dose: 7000, vol: 35, solvantVol: 1000 });
   });
 
   test("sans conc_produit → vol = null", () => {
@@ -326,14 +399,24 @@ describe("calcPrepDoseKg", () => {
   test("Propofol — 1,5–2,5 mg/kg × 70 kg → 105–175 mg, 10,5–17,5 mL", () => {
     const prep = { dose_kg: 1.5, dose_max_kg: 2.5, conc_produit: 10, unite: "mg" };
     expect(calcPrepDoseKg(prep, 70)).toEqual({
-      kg: 70, dose: 105, doseMax: 175, volMin: 10.5, volMax: 17.5, unite: "mg",
+      kg: 70,
+      dose: 105,
+      doseMax: 175,
+      volMin: 10.5,
+      volMax: 17.5,
+      unite: "mg",
     });
   });
 
   test("dose unique (sans dose_max_kg)", () => {
     const prep = { dose_kg: 1, conc_produit: 10, unite: "mg" };
     expect(calcPrepDoseKg(prep, 70)).toEqual({
-      kg: 70, dose: 70, doseMax: null, volMin: 7, volMax: null, unite: "mg",
+      kg: 70,
+      dose: 70,
+      doseMax: null,
+      volMin: 7,
+      volMax: null,
+      unite: "mg",
     });
   });
 

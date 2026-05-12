@@ -1,11 +1,34 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v80";
+export const APP_VERSION = "v81";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v81",
+    date: "2026-05-12",
+    titre: "Validation doses · split AcrTimer · export bilan en image · tests",
+    changes: [
+      {
+        type: "feat",
+        text: "Validation défensive des doses calculées : si une dose dépasse un seuil aberrant (typo de virgule dans drugs.js, erreur d'unité, min > max) ou est négative, la pastille passe en rouge pulsant avec « 🚨 vérifier ». Seuils larges (50 g d'une drogue, 500 mg de µg…) pour ne flag que les valeurs manifestement fausses. Évite l'erreur médicamenteuse silencieuse en pédiatrie. +9 tests sur validateDoseValue.",
+      },
+      {
+        type: "feat",
+        text: "Export du bilan ACR en image PNG via html-to-image (5 kB gzip). Nouveau bouton « 🖼 Image » dans la modale Bilan — tente d'abord le partage natif Android via Web Share API (WhatsApp / Drive / dossier patient en 1 tap), fallback en téléchargement direct si non supporté. Capture en 2× pour la qualité retina. Section « Pour transmission » exclue du rendu (data-export-ignore) pour ne pas doublonner le texte.",
+      },
+      {
+        type: "refactor",
+        text: "Split de AcrTimer.tsx (1643 → 1006 lignes, -39%) : constantes (PREP_CONTENT, HT_CAUSES, POST_ROSC_TARGETS, ACLS_PREP_STEPS, COACH_*) extraites dans AcrTimer.constants.ts ; fonctions pures (fmt, fmtWall, beep, speak, suggestActions, stepState, readCoach) dans AcrTimer.helpers.ts ; sous-composants AcrSummary et AcrPrepOverlay dans leurs propres fichiers. Code plus reviewable, helpers testables isolément.",
+      },
+      {
+        type: "feat",
+        text: "+22 tests sur la logique AcrTimer (fmt, fmtWall, stepState, suggestActions, readCoach). Couvre les cas critiques de protocole : 1er choc sans adré, 3e choc avec adré + amio 300, 5e choc avec amio 150, ACLS vs ERC (adré au 2e choc, palettes antéro-postérieur après 3 chocs), pédiatrique (doses adaptées). Total tests projet : 132 → 175 (+33%).",
+      },
+    ],
+  },
   {
     version: "v80",
     date: "2026-05-12",

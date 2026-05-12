@@ -12,6 +12,34 @@ export function isValidWeight(w) {
   return Number.isFinite(kg) && kg > KG_MIN && kg <= KG_MAX;
 }
 
+// ── Validation défensive de dose ───────────────────────────────
+// Détecte les doses absurdement élevées (typo de virgule dans drugs.js,
+// erreur d'unité, etc.) qui pourraient passer silencieusement.
+// Seuils volontairement larges — on flag uniquement les valeurs
+// manifestement aberrantes (ex: 50 g d'une drogue IV).
+const DOSE_DANGER_THRESHOLDS = {
+  mg: 50000, // 50 g — au-dessus, c'est forcément une erreur
+  µg: 500000, // 500 mg
+  mcg: 500000,
+  g: 50,
+  mL: 1000,
+  ml: 1000,
+  UI: 5000000,
+  U: 5000000,
+  mmol: 500,
+  mEq: 500,
+};
+
+// "ok" : dose plausible · "danger" : valeur aberrante (donnée à vérifier)
+export function validateDoseValue(numericValue, unit) {
+  if (!Number.isFinite(numericValue)) return "danger";
+  if (numericValue < 0) return "danger";
+  const key = unit === "ml" ? "mL" : unit; // normalise mL/ml
+  const threshold = DOSE_DANGER_THRESHOLDS[key];
+  if (threshold && numericValue > threshold) return "danger";
+  return "ok";
+}
+
 // ── Dose poids-dépendante (parse un texte de poso) ────────────
 export function calcDose(text, w) {
   const kg = parseFloat(w);
@@ -22,23 +50,38 @@ export function calcDose(text, w) {
   );
   if (!match) return null;
 
-  const min  = parseFloat(match[1].replace(",", "."));
-  const max  = match[2] ? parseFloat(match[2].replace(",", ".")) : null;
+  const min = parseFloat(match[1].replace(",", "."));
+  const max = match[2] ? parseFloat(match[2].replace(",", ".")) : null;
   const unit = match[3];
-  const per  = match[4] ? `/${match[4]}` : "";
+  const per = match[4] ? `/${match[4]}` : "";
+
+  // Cohérence min/max : si données incohérentes (min > max), c'est un bug
+  // dans drugs.js — on flag explicitement plutôt que de calculer faux.
+  if (max !== null && min > max) {
+    return { value: "⚠ donnée incohérente", capped: false, validation: "danger" };
+  }
 
   let doseMin = +(min * kg).toFixed(2);
   let doseMax = max ? +(max * kg).toFixed(2) : null;
 
   const maxMatch = text.match(/max\s+(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)/i);
+  let capped = false;
   if (maxMatch && maxMatch[2].toLowerCase() === unit.toLowerCase()) {
     const cap = parseFloat(maxMatch[1].replace(",", "."));
-    const capped = doseMin > cap || (doseMax && doseMax > cap);
+    capped = doseMin > cap || (doseMax !== null && doseMax > cap);
     if (doseMin > cap) doseMin = cap;
-    if (doseMax && doseMax > cap) doseMax = cap;
-    if (capped) return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: true };
+    if (doseMax !== null && doseMax > cap) doseMax = cap;
   }
-  return { value: (doseMax ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`, capped: false };
+
+  // Validation finale sur la dose effective (après cap)
+  const refValue = doseMax !== null ? doseMax : doseMin;
+  const validation = validateDoseValue(refValue, unit);
+
+  return {
+    value: (doseMax !== null ? `${doseMin}–${doseMax}` : `${doseMin}`) + ` ${unit}${per}`,
+    capped,
+    validation,
+  };
 }
 
 // ── Sévérité contre-indication ────────────────────────────────
@@ -49,11 +92,26 @@ export function ciSeverity(text) {
   if (/\b(relative?s?)\b/.test(t)) return "rel";
   if (/\b(precaution|prudence)\b/.test(t)) return "prec";
 
-  if (/adapter\s+(la\s+)?dose|reduire\s+(la\s+)?dose|diminuer\s+(la\s+)?dose|surveillance|sujet\s+age|personne\s+age|grossesse|allaitement|insuffisance\s+(renal|hepati)(?!.*sever)|clairance|adapter|titrer/.test(t)) return "prec";
+  if (
+    /adapter\s+(la\s+)?dose|reduire\s+(la\s+)?dose|diminuer\s+(la\s+)?dose|surveillance|sujet\s+age|personne\s+age|grossesse|allaitement|insuffisance\s+(renal|hepati)(?!.*sever)|clairance|adapter|titrer/.test(
+      t
+    )
+  )
+    return "prec";
 
-  if (/allergi|hypersensibil|\bimao\b|porphyri|myastheni|hyperkalie|insuffisance\s+surrenal|brulure(s)?\s+etend|para.{0,4}tetrapleg|hemipleg|deficit\s+moteur|myopathi|dystrophie\s+musc|pseudocholinesteras|epilepsie\s+non\s+control|nouveau.ne|nourrisson|depression\s+respiratoire|glaucome|angle\s+ferme|choc\s+cardiogenique|bloc\s+av|bav\s+(2|3|haut)|pheochromocyt|hyperthermie\s+maligne|crush|hypovolemie\s+severe|intoxication\s+digital|wpw|wolff/.test(t)) return "abs";
+  if (
+    /allergi|hypersensibil|\bimao\b|porphyri|myastheni|hyperkalie|insuffisance\s+surrenal|brulure(s)?\s+etend|para.{0,4}tetrapleg|hemipleg|deficit\s+moteur|myopathi|dystrophie\s+musc|pseudocholinesteras|epilepsie\s+non\s+control|nouveau.ne|nourrisson|depression\s+respiratoire|glaucome|angle\s+ferme|choc\s+cardiogenique|bloc\s+av|bav\s+(2|3|haut)|pheochromocyt|hyperthermie\s+maligne|crush|hypovolemie\s+severe|intoxication\s+digital|wpw|wolff/.test(
+      t
+    )
+  )
+    return "abs";
 
-  if (/asthme|bpco|bronchospasme|hypotension|bradycardie|hypothyroid|hyperthyroid|qt\s+long|insuffisance\s+(renal|hepati|cardia).*sever|trouble\s+(coag|conduction)|porphyrie/.test(t)) return "rel";
+  if (
+    /asthme|bpco|bronchospasme|hypotension|bradycardie|hypothyroid|hyperthyroid|qt\s+long|insuffisance\s+(renal|hepati|cardia).*sever|trouble\s+(coag|conduction)|porphyrie/.test(
+      t
+    )
+  )
+    return "rel";
 
   return null;
 }
@@ -82,7 +140,7 @@ export function calcPrepThreshold(prep, produitFinalMg) {
   return {
     pf,
     ampCount: isHigh ? prep.amp_high : prep.amp_low,
-    vol:      isHigh ? prep.vol_high : prep.vol_low,
+    vol: isHigh ? prep.vol_high : prep.vol_low,
     injectMl: +(pf * 10).toFixed(1),
   };
 }
@@ -107,7 +165,7 @@ export function calcPrepPhases(prep, weightKg) {
   const kg = parseFloat(weightKg);
   return prep.phases.map((phase) => {
     const dose = +(phase.dose_kg * kg).toFixed(0);
-    const vol  = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
+    const vol = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
     return {
       label: phase.label,
       duree: phase.duree,
@@ -125,16 +183,15 @@ export function calcPrepPhases(prep, weightKg) {
 export function calcPedTable(prep, weightKg) {
   if (!isValidWeight(weightKg) || !prep?.pedTable?.bandes?.length) return null;
   const kg = parseFloat(weightKg);
-  const bande = prep.pedTable.bandes.find(b =>
-    (b.kg_min == null || kg >= b.kg_min) &&
-    (b.kg_max == null || kg <= b.kg_max)
+  const bande = prep.pedTable.bandes.find(
+    (b) => (b.kg_min == null || kg >= b.kg_min) && (b.kg_max == null || kg <= b.kg_max)
   );
   if (!bande) return null;
 
   const roundStep = (val, step, mode) => {
     const factor = 1 / step;
     if (mode === "down") return Math.floor(val * factor) / factor;
-    if (mode === "up")   return Math.ceil(val * factor) / factor;
+    if (mode === "up") return Math.ceil(val * factor) / factor;
     return Math.round(val * factor) / factor;
   };
 
@@ -174,14 +231,14 @@ export function calcPedTable(prep, weightKg) {
 export function calcPrepDoseKg(prep, weightKg) {
   if (!isValidWeight(weightKg) || !prep?.dose_kg) return null;
   const kg = parseFloat(weightKg);
-  const dose    = prep.dose_kg * kg;
+  const dose = prep.dose_kg * kg;
   const doseMax = prep.dose_max_kg ? prep.dose_max_kg * kg : null;
-  const volMin  = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
-  const volMax  = doseMax && prep.conc_produit ? +(doseMax / prep.conc_produit).toFixed(1) : null;
+  const volMin = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
+  const volMax = doseMax && prep.conc_produit ? +(doseMax / prep.conc_produit).toFixed(1) : null;
   if (!volMin) return null;
   return {
     kg,
-    dose:    +dose.toFixed(1),
+    dose: +dose.toFixed(1),
     doseMax: doseMax !== null ? +doseMax.toFixed(1) : null,
     volMin,
     volMax,
