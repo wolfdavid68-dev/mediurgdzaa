@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v75";
+export const APP_VERSION = "v76";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v76",
+    date: "2026-05-12",
+    titre: "Debug temporaire (suite) · log popstate uniquement",
+    changes: [
+      {
+        type: "chore",
+        text: "Le CloseWatcher passif de v75 consommait le back avant que popstate ne fire (Chrome traite l'event comme handled même sans preventDefault). Test isolé v76 : on log uniquement popstate via ?debug-back. Si popstate fire → bug ailleurs. Si toujours rien → confirmé que popstate ne fire pas en PWA Chrome, refactor CloseWatcher-first à faire.",
+      },
+    ],
+  },
   {
     version: "v75",
     date: "2026-05-12",

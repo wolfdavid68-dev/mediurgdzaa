@@ -317,41 +317,22 @@ const App = () => {
       } catch {}
     }
 
-    // DEBUG : observer CloseWatcher en parallèle pour voir s'il fire sur les
-    // browsers non-Firefox (Chrome/Samsung Internet). Recrée le watcher à
-    // chaque cancel pour qu'il continue de logger. NE preventDefault PAS
-    // (pour ne pas changer le comportement actuel pendant le diag).
-    let debugWatcher = null;
-    const setupDebugWatcher = () => {
-      if (!debugBackEnabled) return;
-      if (isFirefoxAndroid) return; // already handled above
-      if (typeof window.CloseWatcher !== "function") {
-        logBackEvent("CloseWatcher API absente");
-        return;
-      }
-      try {
-        debugWatcher = new window.CloseWatcher();
-        debugWatcher.addEventListener("cancel", () => {
-          logBackEvent("CloseWatcher cancel fired");
-          // Pas de preventDefault → le watcher se referme, on en crée un nouveau
-          setTimeout(setupDebugWatcher, 0);
-        });
-      } catch (err) {
-        logBackEvent(`CloseWatcher erreur: ${String(err).slice(0, 40)}`);
-      }
-    };
-    setupDebugWatcher();
+    // DEBUG v76 : on a vu que mon CloseWatcher de v75 consommait le back avant
+    // popstate (Chrome traite l'event comme handled même sans preventDefault).
+    // Test propre cette fois : on log SEULEMENT popstate, pas de CloseWatcher
+    // passif. Si popstate ne fire toujours pas → cassé sur ce navigateur,
+    // refactor CloseWatcher-first nécessaire.
+    if (debugBackEnabled) {
+      logBackEvent(
+        `CloseWatcher API: ${typeof window.CloseWatcher === "function" ? "OUI" : "NON"}`
+      );
+    }
 
     return () => {
       window.removeEventListener("popstate", onPopState);
       if (watcher) {
         try {
           watcher.destroy();
-        } catch {}
-      }
-      if (debugWatcher) {
-        try {
-          debugWatcher.destroy();
         } catch {}
       }
       if (toastTimer) clearTimeout(toastTimer);
