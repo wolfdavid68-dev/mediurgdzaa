@@ -72,37 +72,6 @@ const App = () => {
   // avec le bon message (variante Firefox PWA = ne peut pas quitter via back).
   const [exitToast, setExitToast] = useState(null);
 
-  // ─── DEBUG TEMPORAIRE — back button instrumentation ───────────
-  // Activé via ?debug-back dans l'URL. Affiche un overlay listant les events
-  // popstate + CloseWatcher pour identifier pourquoi le 1er back ne montre
-  // pas le toast d'exit sur certains téléphones. À retirer après diagnostic.
-  const debugBackEnabled =
-    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug-back");
-  const [debugBackLog, setDebugBackLog] = useState(() => {
-    if (!debugBackEnabled) return [];
-    try {
-      const histState = window.history.state?.mediurg;
-      const stateDesc = histState
-        ? histState.sentinel
-          ? "sentinel"
-          : `page:${histState.page || "?"}`
-        : "null";
-      return [
-        `${new Date().toLocaleTimeString("fr-FR", { hour12: false })} ready · histLen=${window.history.length} · state=${stateDesc}`,
-      ];
-    } catch {
-      return [];
-    }
-  });
-  const logBackEvent = (msg) => {
-    if (!debugBackEnabled) return;
-    setDebugBackLog((log) => {
-      const ts = new Date().toLocaleTimeString("fr-FR", { hour12: false });
-      return [...log, `${ts} ${msg}`].slice(-10);
-    });
-  };
-  // ─────────────────────────────────────────────────────────────
-
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
     const onOffline = () => setIsOnline(false);
@@ -244,16 +213,15 @@ const App = () => {
     const isFirefoxAndroid = /Firefox/i.test(ua) && /Android/i.test(ua);
 
     const showExitToast = (variant) => {
-      logBackEvent(`showExitToast called: ${variant}`);
       setExitToast(variant);
       if (toastTimer) clearTimeout(toastTimer);
-      // DEBUG v77 : si debug actif, on tient le toast 10s au lieu de 2s pour
-      // donner à l'user le temps de le voir clairement (ou de confirmer l'absence).
-      const duration = debugBackEnabled ? 10000 : variant === "firefox-no-exit" ? 3500 : 2000;
-      toastTimer = setTimeout(() => {
-        logBackEvent("toast hidden (timer)");
-        setExitToast(null);
-      }, duration);
+      // 4 s pour le toast d'exit standard (était 2 s, trop court : l'user
+      // avait l'impression que le 1er back ne faisait rien et retapait dans
+      // la foulée → exit imprévu via la fenêtre rapid-double <1 s).
+      toastTimer = setTimeout(
+        () => setExitToast(null),
+        variant === "firefox-no-exit" ? 4000 : 4000
+      );
     };
 
     // Architecture popstate-first (depuis v59) :
@@ -270,11 +238,6 @@ const App = () => {
       const now = Date.now();
       const isRapidDouble = now - lastBackAt < 1000;
       lastBackAt = now;
-
-      // DEBUG : trace chaque popstate
-      logBackEvent(
-        `popstate · state=${s ? (s.sentinel ? "sentinel" : `page:${s.page || "?"}`) : "null"} · rapid=${isRapidDouble} · histLen=${window.history.length}`
-      );
 
       if (!s || s.sentinel) {
         // Sentinelle = tentative de sortie de l'app
@@ -321,17 +284,6 @@ const App = () => {
       } catch {}
     }
 
-    // DEBUG v76 : on a vu que mon CloseWatcher de v75 consommait le back avant
-    // popstate (Chrome traite l'event comme handled même sans preventDefault).
-    // Test propre cette fois : on log SEULEMENT popstate, pas de CloseWatcher
-    // passif. Si popstate ne fire toujours pas → cassé sur ce navigateur,
-    // refactor CloseWatcher-first nécessaire.
-    if (debugBackEnabled) {
-      logBackEvent(
-        `CloseWatcher API: ${typeof window.CloseWatcher === "function" ? "OUI" : "NON"}`
-      );
-    }
-
     return () => {
       window.removeEventListener("popstate", onPopState);
       if (watcher) {
@@ -341,7 +293,6 @@ const App = () => {
       }
       if (toastTimer) clearTimeout(toastTimer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // View Transitions API (Chrome 111+, Safari 18+) : enveloppe les changements
@@ -773,21 +724,6 @@ const App = () => {
           {exitToast === "firefox-no-exit"
             ? "Sur Firefox Android, utilisez le bouton app récente pour fermer MediURG."
             : "Appuyez à nouveau sur retour pour quitter"}
-        </div>
-      )}
-      {debugBackEnabled && (
-        <div className="debug-back-panel">
-          <div className="debug-back-header">
-            DEBUG back · {debugBackLog.length} events
-            <button type="button" className="debug-back-clear" onClick={() => setDebugBackLog([])}>
-              clear
-            </button>
-          </div>
-          {debugBackLog.map((line, i) => (
-            <div key={i} className="debug-back-line">
-              {line}
-            </div>
-          ))}
         </div>
       )}
       <UpdatePrompt />

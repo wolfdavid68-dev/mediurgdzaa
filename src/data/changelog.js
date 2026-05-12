@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v77";
+export const APP_VERSION = "v78";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v78",
+    date: "2026-05-12",
+    titre: "Fix · toast d'exit plus long (4 s) + retrait instrumentation debug",
+    changes: [
+      {
+        type: "fix",
+        text: "Le toast « Appuyez à nouveau sur retour pour quitter » s'affichait bien au 1er back mais ne durait que 2 s — trop court pour être perçu clairement, surtout en situation de stress. Du coup l'utilisateur avait l'impression que le 1er back ne faisait rien et retapait dans la foulée, déclenchant l'exit imprévu via la fenêtre rapid-double (<1 s). Durée passée à 4 s pour laisser le temps de lire et de réagir.",
+      },
+      {
+        type: "chore",
+        text: "Retrait de l'instrumentation temporaire ?debug-back (overlay popstate/CloseWatcher des v75-v77). Le diagnostic a confirmé que popstate fire correctement sur Chrome Android et que le toast s'affiche bien — le problème était uniquement la durée.",
+      },
+    ],
+  },
   {
     version: "v77",
     date: "2026-05-12",
