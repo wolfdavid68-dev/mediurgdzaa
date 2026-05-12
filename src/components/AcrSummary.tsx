@@ -26,16 +26,17 @@ const formatAdre = (count: number, pediatric: boolean): string => {
 };
 
 // Cordarone adulte ERC/ACLS : 300 mg (3e choc) puis 150 mg (5e choc).
-// - 1 dose = 300 mg
-// - 2 doses = 300 + 150 mg = 450 mg
-// - ≥ 3 doses : cas rare, on calcule 300 + (count-1) × 150
+// Affichage en séquence brute des doses (pas de total cumulé) :
+// - 1 dose  → "300 mg"
+// - 2 doses → "300 + 150 mg"
+// - 3 doses → "300 + 150 + 150 mg"
 const formatAmio = (count: number, pediatric: boolean): string => {
   if (count === 0) return "0";
   if (pediatric) return `${count} × 5 mg/kg`;
   if (count === 1) return "300 mg";
-  if (count === 2) return "450 mg (300 + 150)";
-  const total = 300 + 150 * (count - 1);
-  return `${total} mg (300 + ${count - 1}×150)`;
+  // 1re dose = 300, doses suivantes = 150 chacune
+  const doses = ["300", ...Array.from({ length: count - 1 }, () => "150")];
+  return `${doses.join(" + ")} mg`;
 };
 
 // Bilan de fin de séance ACR — récap copiable + exportable en image (pour

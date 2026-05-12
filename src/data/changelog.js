@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v84";
+export const APP_VERSION = "v85";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v85",
+    date: "2026-05-12",
+    titre: "Bilan ACR · Cordarone en séquence brute (300 + 150 mg)",
+    changes: [
+      {
+        type: "fix",
+        text: "Format Cordarone dans le bilan : séquence brute des doses au lieu du total cumulé. 1 dose → « 300 mg », 2 doses → « 300 + 150 mg » (au lieu de « 450 mg (300 + 150) »). Plus lisible pour la transmission : on voit directement quelles doses ont été administrées sans calcul mental inverse.",
+      },
+    ],
+  },
   {
     version: "v84",
     date: "2026-05-12",
@@ -17,7 +28,7 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
-        text: "Bilan ACR affiche désormais les doses en milligrammes au lieu du compteur brut : « Adrénaline : 3 mg » (au lieu de « 3 »), « Cordarone : 450 mg (300 + 150) » (au lieu de « 2 »). Pour le pédiatrique, conservation du format dose/kg car le total dépend du poids. Idem dans la stats grid et l'image partagée. Label tally Cordarone précis selon le rang : 1re dose = 300 mg, 2e = 150 mg.",
+        text: "Bilan ACR affiche désormais les doses en milligrammes au lieu du compteur brut : « Adrénaline : 3 mg » (au lieu de « 3 »), « Cordarone : 300 + 150 mg » (au lieu de « 2 »). Pour le pédiatrique, conservation du format dose/kg car le total dépend du poids. Idem dans la stats grid et l'image partagée. Label tally Cordarone précis selon le rang : 1re dose = 300 mg, 2e = 150 mg.",
       },
     ],
   },
