@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v70";
+export const APP_VERSION = "v71";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v71",
+    date: "2026-05-12",
+    titre: "Mode ACR · bilan horodaté (heure téléphone + T+ depuis début RCP)",
+    changes: [
+      {
+        type: "feat",
+        text: "Chaque choc, dose d'adrénaline et dose de cordarone est désormais horodaté avec deux temps : l'heure murale du téléphone (HH:MM:SS) et le T+ depuis le démarrage du chrono RCP. Visible dans la modale Bilan dans une nouvelle section « Horodatage des actions » (4 colonnes : heure tel · T+ RCP · icône · libellé) avec un bord coloré par type (jaune choc, violet adré, bleu amio).",
+      },
+      {
+        type: "feat",
+        text: "Inclusion automatique dans le texte copiable de transmission. Exemple : « 14:32:18 · T+00:30 · Choc n°1 / 14:33:04 · T+01:16 · Adrénaline 1 mg IV ». Permet une transmission précise aux urgentistes / SMUR receveur avec la chronologie exacte des gestes.",
+      },
+      {
+        type: "feat",
+        text: "Tracking cohérent partout : cocher une action suggérée dans la phase actions ajoute un event, décocher le retire. Les boutons +/− du tally manuel (chocs DSA déjà donnés, adré/cordarone déjà reçue avant arrivée) ajoutent ou retirent aussi un event horodaté. Reset vide la liste.",
+      },
+    ],
+  },
   {
     version: "v70",
     date: "2026-05-11",
