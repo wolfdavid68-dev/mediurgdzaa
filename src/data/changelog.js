@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v71";
+export const APP_VERSION = "v72";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v72",
+    date: "2026-05-12",
+    titre: "Fix · BPM métronome lisible sur téléphone (sticky hover)",
+    changes: [
+      {
+        type: "fix",
+        text: "Mode ACR · sur téléphone, après avoir tapé un BPM (100/110/120), le chiffre devenait invisible (blanc sur blanc). Bug classique de « sticky hover » sur tactile : le :hover restait collé après le tap et écrasait la couleur du bouton actif (spécificité 0,2,0 > 0,1,0). Le :hover est désormais limité aux pointeurs fins (souris) via @media (hover: hover) and (pointer: fine). La pastille blanche est conservée.",
+      },
+    ],
+  },
   {
     version: "v71",
     date: "2026-05-12",

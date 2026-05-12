@@ -4243,9 +4243,14 @@ body {
     color 0.15s,
     border-color 0.15s;
 }
-.acr-metro-bpm-btn:hover {
-  color: var(--text);
-  border-color: var(--border-strong);
+/* @media (hover: hover) : évite le « sticky hover » sur tactile. Sans ça, après
+   tap sur 110 le :hover reste collé et écrase la couleur de .acr-metro-bpm-active
+   → texte blanc sur fond blanc, chiffre invisible. */
+@media (hover: hover) and (pointer: fine) {
+  .acr-metro-bpm-btn:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
 }
 .acr-metro-bpm-active {
   background: var(--text);
