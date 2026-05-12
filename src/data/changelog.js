@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v76";
+export const APP_VERSION = "v77";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v77",
+    date: "2026-05-12",
+    titre: "Debug temporaire (suite 2) · log showExitToast + toast 10s",
+    changes: [
+      {
+        type: "chore",
+        text: "Popstate fire bien (v76 a confirmé). Mais le toast d'exit ne s'affiche pas pour l'utilisateur — peut-être que showExitToast n'est pas appelé, ou que le rendu React ne suit pas. v77 log explicitement l'appel à showExitToast, ainsi que sa disparition par timer. En mode ?debug-back, le toast persiste 10s au lieu de 2s pour qu'on ait le temps de voir.",
+      },
+    ],
+  },
   {
     version: "v76",
     date: "2026-05-12",

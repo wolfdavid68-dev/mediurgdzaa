@@ -244,12 +244,16 @@ const App = () => {
     const isFirefoxAndroid = /Firefox/i.test(ua) && /Android/i.test(ua);
 
     const showExitToast = (variant) => {
+      logBackEvent(`showExitToast called: ${variant}`);
       setExitToast(variant);
       if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(
-        () => setExitToast(null),
-        variant === "firefox-no-exit" ? 3500 : 2000
-      );
+      // DEBUG v77 : si debug actif, on tient le toast 10s au lieu de 2s pour
+      // donner à l'user le temps de le voir clairement (ou de confirmer l'absence).
+      const duration = debugBackEnabled ? 10000 : variant === "firefox-no-exit" ? 3500 : 2000;
+      toastTimer = setTimeout(() => {
+        logBackEvent("toast hidden (timer)");
+        setExitToast(null);
+      }, duration);
     };
 
     // Architecture popstate-first (depuis v59) :
