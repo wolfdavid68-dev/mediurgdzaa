@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v73";
+export const APP_VERSION = "v74";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v74",
+    date: "2026-05-12",
+    titre: "Fix · plus de zoom Android au tap Protocoles (vrai fix)",
+    changes: [
+      {
+        type: "fix",
+        text: "Cause réelle identifiée : la barre des 3 sous-onglets Protocoles (PISU / Incompatibilité Médicamenteuse / Kits de préparation) débordait la largeur du viewport sur petits écrans. Android Chrome détectait le contenu plus large que la fenêtre et appliquait le « Wide Viewport Adjustment » (zoom auto pour afficher tout le contenu). flex: 1 1 0 + min-width: 0 sur les onglets : les 3 se partagent équitablement la largeur disponible et les labels longs wrap en interne. Plus d'overflow, plus de zoom.",
+      },
+    ],
+  },
   {
     version: "v73",
     date: "2026-05-12",

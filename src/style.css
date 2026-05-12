@@ -1935,10 +1935,19 @@ a,
 }
 
 .proto-category-tab {
+  /* flex: 1 1 0 + min-width: 0 → les 3 onglets se partagent équitablement le
+     viewport et les labels longs (« Incompatibilité Médicamenteuse ») wrap
+     en interne. Sans ça, la barre dépasse la largeur du téléphone, ce qui
+     déclenche le Wide Viewport Adjustment d'Android Chrome (zoom auto à
+     l'affichage de la page). */
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 10px 14px;
   border-radius: 10px 10px 0 0;
   border: 1px solid transparent;
   border-bottom: none;
