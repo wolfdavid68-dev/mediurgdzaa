@@ -23,6 +23,12 @@ declare global {
      *  pour Safari < 14 qui n'exposait que webkitAudioContext. */
     webkitAudioContext?: typeof AudioContext;
   }
+
+  interface Navigator {
+    /** iOS Safari : true quand l'app est ouverte depuis l'écran d'accueil (mode standalone PWA).
+     *  Non standard — l'équivalent web standard est window.matchMedia("(display-mode: standalone)"). */
+    standalone?: boolean;
+  }
 }
 
 // Indispensable pour transformer ce fichier en module ambient (sinon il pollue le scope global)

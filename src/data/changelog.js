@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v78";
+export const APP_VERSION = "v79";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v79",
+    date: "2026-05-12",
+    titre: "Fix · toast back en PWA standalone Chrome (CloseWatcher)",
+    changes: [
+      {
+        type: "fix",
+        text: "Sur Chrome/Samsung Internet en PWA installée (display-mode: standalone), popstate ne fire PAS pour le back depuis la racine — Chrome ferme la PWA directement sans event. Le mode navigateur (browser tab) marche bien car popstate y fire normalement. CloseWatcher étendu à toute PWA standalone (auparavant Firefox Android uniquement) : intercepte le back, délègue les nav internes (modales/pages) au popstate via history.back(), affiche le toast à la racine, et laisse le 2e back rapide fermer la PWA naturellement.",
+      },
+    ],
+  },
   {
     version: "v78",
     date: "2026-05-12",

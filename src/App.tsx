@@ -284,11 +284,92 @@ const App = () => {
       } catch {}
     }
 
+    // Chrome / Samsung Internet en PWA installée (display-mode: standalone) :
+    // popstate ne fire PAS pour le back-at-root → Chrome ferme la PWA direct
+    // sans qu'on puisse afficher le toast d'exit. Le mode browser tab marche
+    // bien (popstate fire normalement). Détecté en standalone, on installe
+    // un CloseWatcher pour intercepter le back :
+    //   - Modal/page profonde : preventDefault + history.back() → popstate
+    //     existant gère le retour
+    //   - À la racine, 1er back : preventDefault + toast (reste dans l'app)
+    //   - À la racine, 2e back <1s : ne preventDefault PAS → Chrome ferme
+    //     la PWA via son flux natif
+    const isStandalonePWA = (() => {
+      try {
+        if (typeof window === "undefined" || !window.matchMedia) return false;
+        return (
+          window.matchMedia("(display-mode: standalone)").matches ||
+          window.matchMedia("(display-mode: fullscreen)").matches ||
+          window.matchMedia("(display-mode: minimal-ui)").matches ||
+          window.navigator.standalone === true // iOS
+        );
+      } catch {
+        return false;
+      }
+    })();
+
+    let pwaWatcher = null;
+    const setupPwaWatcher = () => {
+      if (!isStandalonePWA) return;
+      if (isFirefoxAndroid) return; // déjà géré au-dessus
+      if (typeof window.CloseWatcher !== "function") return;
+      try {
+        pwaWatcher = new window.CloseWatcher();
+        pwaWatcher.addEventListener("cancel", (e) => {
+          const s = window.history.state?.mediurg;
+          const now = Date.now();
+          const isRapidDouble = now - lastBackAt < 1000;
+
+          // Modal ouverte → on délègue à popstate via history.back()
+          if (s?.modal === "acr" || s?.modal === "changelog") {
+            e.preventDefault();
+            lastBackAt = now;
+            try {
+              window.history.back();
+            } catch {}
+            setupPwaWatcher();
+            return;
+          }
+
+          // Page profonde (Protocoles, Échelles) → idem, on délègue
+          if (s?.page && s.page !== "medicaments") {
+            e.preventDefault();
+            lastBackAt = now;
+            try {
+              window.history.back();
+            } catch {}
+            setupPwaWatcher();
+            return;
+          }
+
+          // À la racine
+          if (isRapidDouble) {
+            // 2e back rapide → on laisse la PWA se fermer (pas de preventDefault)
+            // → le watcher s'auto-détruit, le close action procède
+            lastBackAt = now;
+            return;
+          }
+
+          // 1er back à la racine → toast + bloquer l'exit + recréer le watcher
+          e.preventDefault();
+          lastBackAt = now;
+          showExitToast("default");
+          setupPwaWatcher();
+        });
+      } catch {}
+    };
+    setupPwaWatcher();
+
     return () => {
       window.removeEventListener("popstate", onPopState);
       if (watcher) {
         try {
           watcher.destroy();
+        } catch {}
+      }
+      if (pwaWatcher) {
+        try {
+          pwaWatcher.destroy();
         } catch {}
       }
       if (toastTimer) clearTimeout(toastTimer);
