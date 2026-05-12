@@ -54,11 +54,16 @@ export const PREP_CONTENT = {
       dose: "1 mg IV/IO toutes les 3-5 min",
       pure: true,
       etapes: [
-        "Ampoule 1 mg/1 mL (1:1000)",
-        "Prélever 1 mL = 1 mg — administrer PUR en IVD",
+        "Préparer une seringue de 10 mL : 10 ampoules 1 mg/1 mL (1:1000)",
+        "Seringue finale : 10 mL = 10 mg · concentration 1 mg/mL",
+        "Injecter 1 mL = 1 mg PUR en IVD à chaque dose (toutes les 3-5 min)",
         "Flush 20 mL NaCl 0,9% après chaque dose",
       ],
-      notes: ["Au plus proche du patient (VVP ou IO proximale)", "Compatible NaCl 0,9% et G5%"],
+      notes: [
+        "Au plus proche du patient (VVP ou IO proximale)",
+        "Seringue prête = 10 doses d'avance (≈ 40 min de RCP)",
+        "Compatible NaCl 0,9% et G5%",
+      ],
     },
     enfant: {
       dose: "10 µg/kg IV/IO (max 1 mg/dose) toutes les 4 min",

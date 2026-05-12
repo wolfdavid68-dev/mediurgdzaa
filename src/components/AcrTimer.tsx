@@ -881,8 +881,15 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
                 <button
                   type="button"
                   onClick={() => {
+                    // Adulte ERC/ACLS : 1re dose = 300 mg (3e choc), 2e = 150 mg (5e choc).
+                    // Le label est précis selon le rang pour cohérence dans le bilan.
+                    const label = pediatric
+                      ? "Amiodarone 5 mg/kg"
+                      : amios === 0
+                        ? "Amiodarone 300 mg"
+                        : "Amiodarone 150 mg";
                     setAmios((a) => a + 1);
-                    addEvent("amio", pediatric ? "Amiodarone 5 mg/kg" : "Amiodarone");
+                    addEvent("amio", label);
                   }}
                   aria-label="Plus une cordarone"
                 >

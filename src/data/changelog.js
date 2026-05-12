@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v83";
+export const APP_VERSION = "v84";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v84",
+    date: "2026-05-12",
+    titre: "Préparation Adré seringue 10 mL + bilan en doses (mg)",
+    changes: [
+      {
+        type: "feat",
+        text: "Préparation Adrénaline adulte en mode ACR mise à jour : seringue de 10 mL = 10 mg (10 ampoules 1 mg/1 mL groupées) → concentration 1 mg/mL → injecter 1 mL = 1 mg par dose. Pratique SAUV/SMUR courante : seringue prête = 10 doses d'avance, soit ≈ 40 min de RCP.",
+      },
+      {
+        type: "feat",
+        text: "Bilan ACR affiche désormais les doses en milligrammes au lieu du compteur brut : « Adrénaline : 3 mg » (au lieu de « 3 »), « Cordarone : 450 mg (300 + 150) » (au lieu de « 2 »). Pour le pédiatrique, conservation du format dose/kg car le total dépend du poids. Idem dans la stats grid et l'image partagée. Label tally Cordarone précis selon le rang : 1re dose = 300 mg, 2e = 150 mg.",
+      },
+    ],
+  },
   {
     version: "v83",
     date: "2026-05-12",

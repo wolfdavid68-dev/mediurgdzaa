@@ -16,6 +16,28 @@ const EVENT_ICON: Record<string, string> = {
   resume: "⏯",
 };
 
+// Affiche la dose totale au lieu du nombre brut de doses.
+// - Adulte : 1 mg × N doses → "N mg"
+// - Pédiatrique : dose dépend du poids → "N × 0,01 mg/kg"
+const formatAdre = (count: number, pediatric: boolean): string => {
+  if (count === 0) return "0";
+  if (pediatric) return `${count} × 0,01 mg/kg`;
+  return `${count} mg`;
+};
+
+// Cordarone adulte ERC/ACLS : 300 mg (3e choc) puis 150 mg (5e choc).
+// - 1 dose = 300 mg
+// - 2 doses = 300 + 150 mg = 450 mg
+// - ≥ 3 doses : cas rare, on calcule 300 + (count-1) × 150
+const formatAmio = (count: number, pediatric: boolean): string => {
+  if (count === 0) return "0";
+  if (pediatric) return `${count} × 5 mg/kg`;
+  if (count === 1) return "300 mg";
+  if (count === 2) return "450 mg (300 + 150)";
+  const total = 300 + 150 * (count - 1);
+  return `${total} mg (300 + ${count - 1}×150)`;
+};
+
 // Bilan de fin de séance ACR — récap copiable + exportable en image (pour
 // glisser dans le dossier patient ou partager via Android share sheet).
 // Extrait de AcrTimer.tsx (v81) pour alléger le composant principal.
@@ -52,8 +74,8 @@ const AcrSummary = ({
   lines.push(`Durée totale : ${fmt(elapsed)}`);
   lines.push(`Cycles clos  : ${history.length} (cycle en cours : ${cycle})`);
   lines.push(`Chocs        : ${shocks}`);
-  lines.push(`Adrénaline   : ${adres} ${pediatric ? "× 0,01 mg/kg" : "× 1 mg"}`);
-  lines.push(`Cordarone    : ${amios} ${pediatric ? "× 5 mg/kg" : "(300 puis 150 mg)"}`);
+  lines.push(`Adrénaline   : ${formatAdre(adres, pediatric)}`);
+  lines.push(`Cordarone    : ${formatAmio(amios, pediatric)}`);
   if (events.length > 0) {
     lines.push("");
     lines.push("Horodatage des actions :");
@@ -215,11 +237,11 @@ const AcrSummary = ({
               <span className="acr-summary-stat-label">Choc{shocks > 1 ? "s" : ""}</span>
             </div>
             <div className="acr-summary-stat">
-              <span className="acr-summary-stat-num">{adres}</span>
+              <span className="acr-summary-stat-num">{formatAdre(adres, pediatric)}</span>
               <span className="acr-summary-stat-label">Adré</span>
             </div>
             <div className="acr-summary-stat">
-              <span className="acr-summary-stat-num">{amios}</span>
+              <span className="acr-summary-stat-num">{formatAmio(amios, pediatric)}</span>
               <span className="acr-summary-stat-label">Cordarone</span>
             </div>
             <div className="acr-summary-stat">
