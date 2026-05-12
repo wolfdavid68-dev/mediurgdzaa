@@ -54,7 +54,7 @@ export const PREP_CONTENT = {
       dose: "1 mg IV/IO toutes les 3-5 min",
       pure: true,
       etapes: [
-        "Préparer une seringue de 10 mL : 10 ampoules 1 mg/1 mL (1:1000)",
+        "Préparer une seringue de 10 mL : 2 ampoules 5 mg/5 mL",
         "Seringue finale : 10 mL = 10 mg · concentration 1 mg/mL",
         "Injecter 1 mL = 1 mg PUR en IVD à chaque dose (toutes les 3-5 min)",
         "Flush 20 mL NaCl 0,9% après chaque dose",

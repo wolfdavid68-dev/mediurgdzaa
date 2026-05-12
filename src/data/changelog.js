@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v85";
+export const APP_VERSION = "v86";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v86",
+    date: "2026-05-12",
+    titre: "Préparation Adré ACR · conditionnement réel (2 amp 5 mg/5 mL)",
+    changes: [
+      {
+        type: "fix",
+        text: "Préparation Adrénaline adulte en mode ACR : remplacement de « 10 ampoules 1 mg/1 mL » par « 2 ampoules 5 mg/5 mL » — conditionnement effectivement utilisé en SAUV/SMUR. Concentration finale inchangée (10 mL = 10 mg = 1 mg/mL), 1 mL = 1 mg par dose, seringue prête = 10 doses d'avance.",
+      },
+    ],
+  },
   {
     version: "v85",
     date: "2026-05-12",
