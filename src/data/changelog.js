@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v86";
+export const APP_VERSION = "v87";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v87",
+    date: "2026-05-12",
+    titre: "Mode ACR · Adré toutes les 4 min (aligné sur le cycle chrono)",
+    changes: [
+      {
+        type: "fix",
+        text: "Préparation Adrénaline adulte en mode ACR : « toutes les 3-5 min » remplacé par « toutes les 4 min ». S'aligne sur le cycle de rappel de 4 min déjà utilisé par le chrono (= tous les 2 cycles RCP de 2 min). Une seule cadence affichée dans le mode ACR → moins d'ambiguïté en stress.",
+      },
+    ],
+  },
   {
     version: "v86",
     date: "2026-05-12",
