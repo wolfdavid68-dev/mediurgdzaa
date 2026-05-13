@@ -45,11 +45,10 @@ export default defineConfig({
       // réa). En v55 on avait 'autoUpdate' mais ça contournait le toast
       // (needRefresh ne fire que brièvement) → bouton invisible.
       registerType: "prompt",
-      // Génération auto des icônes PWA depuis public/logo.svg via le preset
-      // minimal-2023 (cf. pwa-assets.config.ts). overrideManifestIcons
+      // Génération auto des icônes PWA depuis public/logo_urgences_mulhouse_HD_transparent.png
+      // via le preset minimal-2023 (cf. pwa-assets.config.ts). overrideManifestIcons
       // remplace le bloc `icons:` du manifest ci-dessous par les entrées
       // générées (pwa-64x64, pwa-192x192, pwa-512x512, maskable-icon-512x512).
-      // Plus de PNG à maintenir à la main — un seul logo.svg = source de vérité.
       pwaAssets: {
         config: true,
         overrideManifestIcons: true,
@@ -84,8 +83,8 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         orientation: "portrait-primary",
-        theme_color: "#FF3B30",
-        background_color: "#0A0A0F",
+        theme_color: "#0a0a12",
+        background_color: "#ffffff",
         categories: ["medical", "productivity"],
         // icons[] injectées au build par pwaAssets.overrideManifestIcons
         // (cf. pwa-assets.config.ts). Ne pas ré-ajouter ici.

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#FF3B30" />
+    <meta name="theme-color" content="#0a0a12" />
     <meta
       name="description"
       content="MediURG - Livret pharmacologique d'urgence pour SAUV, SMUR et SAU. Accès hors ligne à plus de 70 médicaments critiques."
@@ -16,7 +16,7 @@
     <link rel="icon" href="./favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/png" href="./pwa-192x192.png" sizes="192x192" />
     <!-- <link rel="manifest"> injecté par vite-plugin-pwa au build -->
-    <!-- Icônes générées par @vite-pwa/assets-generator depuis logo_ghrmsa_HD_transparent.png.
+    <!-- Icônes générées par @vite-pwa/assets-generator depuis logo_urgences_mulhouse_HD_transparent.png.
        Pour régénérer après retouche du logo : `npm run generate-pwa-assets`. -->
     <title>MediURG - Pharmacologie d'Urgence Hors Ligne</title>
     <style>
@@ -35,11 +35,99 @@
       #root {
         min-height: 100vh;
       }
+      /* Splash de lancement : affiche le logo GHR avant l'hydratation React.
+         Retiré par hideSplash() une fois (min 900ms + React monté). */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+        transition:
+          opacity 0.3s ease-out,
+          visibility 0.3s ease-out;
+      }
+      #splash.fade-out {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      #splash img {
+        width: clamp(180px, 55vw, 280px);
+        height: auto;
+        display: block;
+        animation: splash-pop 0.6s ease-out both;
+      }
+      #splash .splash-app {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 14px;
+        letter-spacing: 2px;
+        color: #888;
+        text-transform: uppercase;
+        opacity: 0;
+        animation: splash-fade-in 0.5s ease-out 0.3s forwards;
+      }
+      @keyframes splash-pop {
+        from {
+          opacity: 0;
+          transform: scale(0.92);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes splash-fade-in {
+        to {
+          opacity: 1;
+        }
+      }
     </style>
   </head>
   <body>
+    <div id="splash" aria-hidden="true">
+      <img src="./logo_ghrmsa_HD_transparent.png" alt="GHR Mulhouse Sud-Alsace" />
+      <div class="splash-app">MediURG</div>
+    </div>
     <div id="root"></div>
     <script>
+      /* Splash : minimum 1000 ms d'affichage + attente du signal `mediurg:ready`
+         (dispatch depuis src/index.tsx après le mount React). Le min évite que
+         le splash flashe et disparaisse trop vite ; l'attente du ready évite
+         le flash inverse (splash retiré avant que l'app soit prête). */
+      (function () {
+        var minDelayDone = false;
+        var appReady = false;
+        function tryHide() {
+          if (!minDelayDone || !appReady) return;
+          var el = document.getElementById("splash");
+          if (!el) return;
+          el.classList.add("fade-out");
+          setTimeout(function () {
+            if (el.parentNode) el.parentNode.removeChild(el);
+          }, 350);
+        }
+        setTimeout(function () {
+          minDelayDone = true;
+          tryHide();
+        }, 1000);
+        window.addEventListener("mediurg:ready", function () {
+          appReady = true;
+          tryHide();
+        });
+        // Fallback : si pour une raison X React ne dispatche pas (erreur de
+        // bundle, etc.) on retire le splash après 4 s pour ne pas bloquer l'écran.
+        setTimeout(function () {
+          appReady = true;
+          minDelayDone = true;
+          tryHide();
+        }, 4000);
+      })();
+
       /* Setup de l'history AVANT React (évite l'écran vide sous Firefox PWA Android
        quand l'user tape retour avant que React ait monté son popstate handler).
        Pattern : sentinelle au fond + état actif au-dessus. Le popstate React

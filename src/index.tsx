@@ -12,3 +12,11 @@ root.render(
     <App />
   </StrictMode>
 );
+
+// Signale au splash HTML (index.html) que l'app est montée pour qu'il puisse
+// se retirer. Le splash attend aussi un délai minimum de 900 ms (cf. inline JS).
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    window.dispatchEvent(new Event("mediurg:ready"));
+  });
+});
