@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v89";
+export const APP_VERSION = "v90";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v90",
+    date: "2026-05-13",
+    titre: "Onglet ECG · sélecteur interactif + matrice SMUR Sélestat",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouvel onglet « ECG » dans Protocoles, entre Incompatibilités et Kits. Sélecteur interactif en haut : 4 lignes de chips colorées (FC rouge / Rythme orange / QRS violet / Ondes P vert) — tapez vos 4 critères, le diagnostic apparaît dans un encadré vert en gros. Les lignes incompatibles du tableau s'estompent en parallèle, la ligne match s'illumine en vert.",
+      },
+      {
+        type: "feat",
+        text: "Tableau de référence fidèle au PDF SMUR Sélestat : matrice 9 colonnes (FC × Rythme × QRS × Ondes P) → Diagnostic. Croix colorées par catégorie (rouge/orange/violet/vert) pour le repérage au coup d'œil + séparateurs verticaux gras entre groupes de colonnes. Inclut les remarques sur flutter (toit d'usine) et BAV I/II/III.",
+      },
+    ],
+  },
   {
     version: "v89",
     date: "2026-05-13",

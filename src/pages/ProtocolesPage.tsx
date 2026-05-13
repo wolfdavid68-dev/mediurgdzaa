@@ -8,6 +8,7 @@ import { PREP_KITS } from "../data/prepKits";
 // Sous-onglets lourds : lazy par-dessus, leur data se charge avec eux.
 const IncompatibilityList = lazy(() => import("../components/IncompatibilityList"));
 const PrepKitCard = lazy(() => import("../components/PrepKitCard"));
+const EcgDiagnostic = lazy(() => import("../components/EcgDiagnostic"));
 
 // Page Protocoles avec ses 3 sous-onglets (PISU, Incompatibilités, Kits).
 // Imports data en interne → quand App.jsx la lazy-load, PROTOCOLS et
@@ -44,6 +45,12 @@ const ProtocolesPage = ({ protoCategory, changeProtoCategory, onDrugSearch }) =>
           Incompatibilité Médicamenteuse
         </button>
         <button
+          className={`proto-category-tab ${protoCategory === "ecg" ? "proto-category-active" : ""}`}
+          onClick={() => changeProtoCategory("ecg")}
+        >
+          ECG
+        </button>
+        <button
           className={`proto-category-tab ${protoCategory === "kits" ? "proto-category-active" : ""}`}
           onClick={() => changeProtoCategory("kits")}
         >
@@ -55,6 +62,12 @@ const ProtocolesPage = ({ protoCategory, changeProtoCategory, onDrugSearch }) =>
       {protoCategory === "incompatibilites" && (
         <Suspense fallback={null}>
           <IncompatibilityList />
+        </Suspense>
+      )}
+
+      {protoCategory === "ecg" && (
+        <Suspense fallback={null}>
+          <EcgDiagnostic />
         </Suspense>
       )}
 

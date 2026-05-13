@@ -106,7 +106,7 @@ const App = () => {
       setPage("echelles");
       dirty = true;
     }
-    if (tab === "incompatibilites" || tab === "kits" || tab === "PISU") {
+    if (tab === "incompatibilites" || tab === "kits" || tab === "PISU" || tab === "ecg") {
       setProtoCategory(tab);
       dirty = true;
     }
@@ -468,6 +468,7 @@ const App = () => {
     if (page === "echelles") return "MediURG — Échelles cliniques";
     if (page === "protocoles") {
       if (protoCategory === "incompatibilites") return "MediURG — Incompatibilités";
+      if (protoCategory === "ecg") return "MediURG — ECG";
       if (protoCategory === "kits") return "MediURG — Kits de préparation";
       return "MediURG — Protocoles PISU";
     }
