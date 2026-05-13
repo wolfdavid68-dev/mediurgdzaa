@@ -42,7 +42,7 @@ const ProtocolesPage = ({ protoCategory, changeProtoCategory, onDrugSearch }) =>
           className={`proto-category-tab ${protoCategory === "incompatibilites" ? "proto-category-active" : ""}`}
           onClick={() => changeProtoCategory("incompatibilites")}
         >
-          Incompatibilité Médicamenteuse
+          Incompat.
         </button>
         <button
           className={`proto-category-tab ${protoCategory === "ecg" ? "proto-category-active" : ""}`}
@@ -54,7 +54,7 @@ const ProtocolesPage = ({ protoCategory, changeProtoCategory, onDrugSearch }) =>
           className={`proto-category-tab ${protoCategory === "kits" ? "proto-category-active" : ""}`}
           onClick={() => changeProtoCategory("kits")}
         >
-          Kits de préparation
+          Kits
           <span className="proto-category-count">{PREP_KITS.length}</span>
         </button>
       </div>

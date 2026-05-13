@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v90";
+export const APP_VERSION = "v91";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v91",
+    date: "2026-05-13",
+    titre: "Onglets Protocoles · 4 tabs compacts + fix grille desktop",
+    changes: [
+      {
+        type: "fix",
+        text: "Onglets Protocoles : labels raccourcis (« Incompat. » et « Kits ») pour tenir à 4 onglets sur mobile sans chevaucher. Padding et taille de police adaptés (13 px sur mobile, 14 px à partir de 600 px).",
+      },
+      {
+        type: "fix",
+        text: "Liste des kits / protocoles en grille 2 colonnes à partir de 900 px et 3 colonnes à partir de 1280 px. Une règle CSS de pile verticale en arrivait plus tard dans le fichier et écrasait les règles @media — restreinte au mobile (max-width: 899 px) pour laisser la grille reprendre la main au desktop / tablette.",
+      },
+    ],
+  },
   {
     version: "v90",
     date: "2026-05-13",

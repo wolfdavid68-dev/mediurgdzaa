@@ -1959,39 +1959,48 @@ a,
 /* ── CATÉGORIES PROTOCOLES ───────────────────────────────── */
 .proto-category-bar {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   padding: 12px 0 4px;
   border-bottom: 2px solid var(--border);
   margin-bottom: 12px;
 }
 
 .proto-category-tab {
-  /* flex: 1 1 0 + min-width: 0 → les 3 onglets se partagent équitablement le
-     viewport et les labels longs (« Incompatibilité Médicamenteuse ») wrap
-     en interne. Sans ça, la barre dépasse la largeur du téléphone, ce qui
+  /* flex: 1 1 0 + min-width: 0 → les onglets se partagent équitablement le
+     viewport. Sans ça, la barre dépasse la largeur du téléphone, ce qui
      déclenche le Wide Viewport Adjustment d'Android Chrome (zoom auto à
-     l'affichage de la page). */
+     l'affichage de la page). Avec 4 onglets, labels courts obligatoires. */
   flex: 1 1 0;
   min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 10px 6px;
   border-radius: 10px 10px 0 0;
   border: 1px solid transparent;
   border-bottom: none;
   background: transparent;
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   transition:
     background 0.12s,
     color 0.12s;
   margin-bottom: -2px;
+}
+@media (min-width: 600px) {
+  .proto-category-bar {
+    gap: 6px;
+  }
+  .proto-category-tab {
+    font-size: 14px;
+    padding: 10px 14px;
+    gap: 8px;
+  }
 }
 
 .proto-category-tab:hover {
@@ -2068,10 +2077,17 @@ a,
 }
 
 /* ── PROTOCOLES ──────────────────────────────────────────── */
-.protocol-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* Base mobile : pile verticale. Les @media (min-width: 900px / 1280px)
+   plus haut dans le fichier basculent en grille 2/3 colonnes au desktop —
+   mais comme cette règle est déclarée plus loin dans le fichier, elle
+   gagne par source order et bloque la grille. Restriction explicite au
+   mobile pour laisser les @media reprendre la main. */
+@media (max-width: 899px) {
+  .protocol-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .protocol-card {
