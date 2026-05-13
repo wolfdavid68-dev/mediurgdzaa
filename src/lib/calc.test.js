@@ -254,6 +254,23 @@ describe("calcDebit", () => {
     expect(calcDebit(pse, 20000, null)).toBe(2);
   });
 
+  // ── mL/kg/min + cap maxMlH (Octaplex) ────────────────────
+  test("Octaplex (id 73) — mL/kg/min — 0,12 × 50 kg → 360 mL/h (sous cap)", () => {
+    const pse = { conc: 1, unite: "mL/kg/min", maxMlH: 480 };
+    expect(calcDebit(pse, 0.12, 50)).toBe(360);
+  });
+
+  test("Octaplex — 0,12 × 70 kg → 480 mL/h plafonné (8,4 mL/min → 8 mL/min)", () => {
+    const pse = { conc: 1, unite: "mL/kg/min", maxMlH: 480 };
+    // 0,12 × 70 × 60 = 504 mL/h non plafonné → 480 mL/h plafonné
+    expect(calcDebit(pse, 0.12, 70)).toBe(480);
+  });
+
+  test("Octaplex — débit faible 0,05 × 60 kg → 180 mL/h (sous cap)", () => {
+    const pse = { conc: 1, unite: "mL/kg/min", maxMlH: 480 };
+    expect(calcDebit(pse, 0.05, 60)).toBe(180);
+  });
+
   // ── Cas dégénérés ────────────────────────────────────────
   test("dose nulle ou négative → null", () => {
     const pse = { conc: 200, unite: "µg/kg/min" };

@@ -18,28 +18,30 @@ const REF_KG = 70;
 // ════════════════════════════════════════════════════════════════
 describe("DRUGS — intégrité", () => {
   test("aucun id dupliqué", () => {
-    const ids = DRUGS.map(d => d.id);
+    const ids = DRUGS.map((d) => d.id);
     const dups = ids.filter((id, i) => ids.indexOf(id) !== i);
     expect(dups).toEqual([]);
   });
 
   test("tous les ids sont des entiers > 0", () => {
-    const bad = DRUGS.filter(d => !Number.isInteger(d.id) || d.id <= 0);
+    const bad = DRUGS.filter((d) => !Number.isInteger(d.id) || d.id <= 0);
     expect(bad).toEqual([]);
   });
 
   test("champs obligatoires présents (id, nom, commercial, dci, cat, svc, poso)", () => {
     const required = ["id", "nom", "commercial", "dci", "cat", "svc", "poso"];
-    const broken = DRUGS
-      .map(d => ({ id: d.id, nom: d.nom, missing: required.filter(k => d[k] === undefined || d[k] === null) }))
-      .filter(x => x.missing.length > 0);
+    const broken = DRUGS.map((d) => ({
+      id: d.id,
+      nom: d.nom,
+      missing: required.filter((k) => d[k] === undefined || d[k] === null),
+    })).filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });
 
   test("poso a au moins une posologie adulte ou pédiatrique", () => {
-    const broken = DRUGS
-      .filter(d => !(d.poso?.a?.length > 0) && !(d.poso?.p?.length > 0))
-      .map(d => `${d.id} ${d.nom}`);
+    const broken = DRUGS.filter((d) => !(d.poso?.a?.length > 0) && !(d.poso?.p?.length > 0)).map(
+      (d) => `${d.id} ${d.nom}`
+    );
     expect(broken).toEqual([]);
   });
 });
@@ -48,25 +50,33 @@ describe("DRUGS — intégrité", () => {
 // PSE — chaque clé doit pointer sur un drug existant
 // ════════════════════════════════════════════════════════════════
 describe("PSE — cohérence avec DRUGS", () => {
-  const drugIds = new Set(DRUGS.map(d => d.id));
+  const drugIds = new Set(DRUGS.map((d) => d.id));
 
   test("toutes les clés PSE correspondent à un drug.id existant", () => {
     const orphan = Object.keys(PSE)
       .map(Number)
-      .filter(id => !drugIds.has(id));
+      .filter((id) => !drugIds.has(id));
     expect(orphan).toEqual([]);
   });
 
   test("chaque entrée PSE a conc, unite, min, max, steps", () => {
     const required = ["conc", "unite", "min", "max", "steps"];
     const broken = Object.entries(PSE)
-      .map(([id, p]) => ({ id, missing: required.filter(k => p[k] === undefined) }))
-      .filter(x => x.missing.length > 0);
+      .map(([id, p]) => ({ id, missing: required.filter((k) => p[k] === undefined) }))
+      .filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });
 
   test("unité PSE reconnue par calcDebit", () => {
-    const validUnits = ["µg/kg/min", "mg/kg/h", "µg/kg/h", "mg/h", "UI/kg/h", "UI/24h"];
+    const validUnits = [
+      "µg/kg/min",
+      "mg/kg/h",
+      "µg/kg/h",
+      "mg/h",
+      "UI/kg/h",
+      "UI/24h",
+      "mL/kg/min",
+    ];
     const bad = Object.entries(PSE)
       .filter(([, p]) => !validUnits.includes(p.unite))
       .map(([id, p]) => `${id} → "${p.unite}"`);
@@ -86,19 +96,17 @@ describe("PSE — cohérence avec DRUGS", () => {
 // CLAUDE.md : un nom mal orthographié = cellule fantôme silencieuse.
 // ════════════════════════════════════════════════════════════════
 describe("INCOMPATIBILITIES — cohérence symétrique", () => {
-  const drugSet = new Set(INCOMPATIBILITIES.map(e => e.drug));
+  const drugSet = new Set(INCOMPATIBILITIES.map((e) => e.drug));
 
   test("aucun drug dupliqué dans la matrice", () => {
-    const dups = INCOMPATIBILITIES
-      .map(e => e.drug)
-      .filter((n, i, arr) => arr.indexOf(n) !== i);
+    const dups = INCOMPATIBILITIES.map((e) => e.drug).filter((n, i, arr) => arr.indexOf(n) !== i);
     expect(dups).toEqual([]);
   });
 
   test("toutes les références 'with' pointent sur un drug connu", () => {
     const broken = [];
-    INCOMPATIBILITIES.forEach(entry => {
-      (entry.items || []).forEach(item => {
+    INCOMPATIBILITIES.forEach((entry) => {
+      (entry.items || []).forEach((item) => {
         if (!drugSet.has(item.with)) {
           broken.push(`"${entry.drug}" → with: "${item.with}"`);
         }
@@ -109,8 +117,8 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
 
   test("toutes les références 'compatibleWith' pointent sur un drug connu", () => {
     const broken = [];
-    INCOMPATIBILITIES.forEach(entry => {
-      (entry.compatibleWith || []).forEach(name => {
+    INCOMPATIBILITIES.forEach((entry) => {
+      (entry.compatibleWith || []).forEach((name) => {
         if (!drugSet.has(name)) {
           broken.push(`"${entry.drug}" → compatibleWith: "${name}"`);
         }
@@ -121,11 +129,11 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
 
   test("aucune référence à soi-même", () => {
     const selfRefs = [];
-    INCOMPATIBILITIES.forEach(entry => {
-      (entry.items || []).forEach(item => {
+    INCOMPATIBILITIES.forEach((entry) => {
+      (entry.items || []).forEach((item) => {
         if (item.with === entry.drug) selfRefs.push(`${entry.drug} → with self`);
       });
-      (entry.compatibleWith || []).forEach(name => {
+      (entry.compatibleWith || []).forEach((name) => {
         if (name === entry.drug) selfRefs.push(`${entry.drug} → compatibleWith self`);
       });
     });
@@ -135,8 +143,8 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
   test("type d'incompatibilité reconnu (pH | incompatible)", () => {
     const validTypes = ["pH", "incompatible"];
     const bad = [];
-    INCOMPATIBILITIES.forEach(entry => {
-      (entry.items || []).forEach(item => {
+    INCOMPATIBILITIES.forEach((entry) => {
+      (entry.items || []).forEach((item) => {
         if (!validTypes.includes(item.type)) {
           bad.push(`"${entry.drug}" + "${item.with}" → type: "${item.type}"`);
         }
@@ -151,33 +159,39 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
 // ════════════════════════════════════════════════════════════════
 describe("PROTOCOLS — intégrité", () => {
   test("aucun id dupliqué", () => {
-    const ids = PROTOCOLS.map(p => p.id);
+    const ids = PROTOCOLS.map((p) => p.id);
     const dups = ids.filter((id, i) => ids.indexOf(id) !== i);
     expect(dups).toEqual([]);
   });
 
   test("aucun code dupliqué", () => {
-    const codes = PROTOCOLS.map(p => p.code);
+    const codes = PROTOCOLS.map((p) => p.code);
     const dups = codes.filter((c, i) => codes.indexOf(c) !== i);
     expect(dups).toEqual([]);
   });
 
   test("chaque protocole a un titre, une couleur, des sections", () => {
-    const broken = PROTOCOLS
-      .filter(p => !p.titre || !p.couleur || !p.sections?.length)
-      .map(p => p.code);
+    const broken = PROTOCOLS.filter((p) => !p.titre || !p.couleur || !p.sections?.length).map(
+      (p) => p.code
+    );
     expect(broken).toEqual([]);
   });
 
   test("types de section reconnus par ProtocolCard.SECTION_META", () => {
     const validTypes = [
-      "inclusion", "exclusion", "gravite", "actions",
-      "surveillance", "recueil", "rythme_choquable",
-      "rythme_non_choquable", "reprise",
+      "inclusion",
+      "exclusion",
+      "gravite",
+      "actions",
+      "surveillance",
+      "recueil",
+      "rythme_choquable",
+      "rythme_non_choquable",
+      "reprise",
     ];
     const bad = [];
-    PROTOCOLS.forEach(p => {
-      p.sections.forEach(s => {
+    PROTOCOLS.forEach((p) => {
+      p.sections.forEach((s) => {
         if (!validTypes.includes(s.type)) {
           bad.push(`${p.code} → section type "${s.type}"`);
         }
@@ -189,9 +203,9 @@ describe("PROTOCOLS — intégrité", () => {
   test("convention Adulte/Enfant : titre 'Enfant' ⇒ code contient 'ENF'", () => {
     // Cf. CLAUDE.md : le filtrage Adulte/Enfant dans App.js dépend de
     // code.includes("ENF") + titre.includes("Adulte"/"Enfant").
-    const bad = PROTOCOLS
-      .filter(p => p.titre.includes("Enfant") !== p.code.includes("ENF"))
-      .map(p => `${p.code} — ${p.titre}`);
+    const bad = PROTOCOLS.filter((p) => p.titre.includes("Enfant") !== p.code.includes("ENF")).map(
+      (p) => `${p.code} — ${p.titre}`
+    );
     expect(bad).toEqual([]);
   });
 });
@@ -203,14 +217,14 @@ describe("PROTOCOLS — intégrité", () => {
 describe("DRUG_PATTERNS — couverture vers DRUGS", () => {
   const searchHits = (pattern) => {
     const q = normalize(pattern);
-    return DRUGS.filter(d => {
+    return DRUGS.filter((d) => {
       const fields = [d.nom, d.commercial, d.dci, d.classe].filter(Boolean).map(normalize);
-      return fields.some(f => f.includes(q));
+      return fields.some((f) => f.includes(q));
     });
   };
 
   test("chaque pattern matche au moins un drug existant", () => {
-    const orphan = DRUG_PATTERNS.filter(p => searchHits(p).length === 0);
+    const orphan = DRUG_PATTERNS.filter((p) => searchHits(p).length === 0);
     expect(orphan).toEqual([]);
   });
 
@@ -222,7 +236,7 @@ describe("DRUG_PATTERNS — couverture vers DRUGS", () => {
   test("aucun pattern ne se termine par un caractère non-word (% ou espace)", () => {
     // Cf. ProtocolCard.js : le \b de fin du DRUG_REGEX ne matche pas
     // après un caractère non-word — le pattern serait inopérant.
-    const bad = DRUG_PATTERNS.filter(p => /[^\w]$/.test(p) && !/[a-zA-Zé]$/.test(p.slice(-1)));
+    const bad = DRUG_PATTERNS.filter((p) => /[^\w]$/.test(p) && !/[a-zA-Zé]$/.test(p.slice(-1)));
     expect(bad).toEqual([]);
   });
 });
@@ -245,12 +259,14 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
     // 500 mL = borne haute pour antibios en perfusion lente diluée
     // (vanco, etc.). Au-dessus, c'est probablement une erreur d'unité 1000×.
     const bad = [];
-    DRUGS.forEach(d => {
+    DRUGS.forEach((d) => {
       const p = d.prep;
       if (!p?.dose_kg || !p?.conc_produit) return;
       const vol = (p.dose_kg * REF_KG) / p.conc_produit;
       if (vol < SANE_VOL_MIN || vol > 500) {
-        bad.push(`${d.id} ${d.nom} → ${vol.toFixed(2)} mL (dose_kg=${p.dose_kg}, conc=${p.conc_produit} ${p.unite}/mL)`);
+        bad.push(
+          `${d.id} ${d.nom} → ${vol.toFixed(2)} mL (dose_kg=${p.dose_kg}, conc=${p.conc_produit} ${p.unite}/mL)`
+        );
       }
     });
     expect(bad).toEqual([]);
@@ -260,7 +276,7 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
     // Hidonac autorise des volumes plus grands car les phases sont diluées
     // dans 500–1000 mL de G5%. On assouplit la borne haute.
     const bad = [];
-    DRUGS.forEach(d => {
+    DRUGS.forEach((d) => {
       const p = d.prep;
       if (!p?.phases?.length || !p.conc_produit) return;
       p.phases.forEach((phase, i) => {
@@ -277,15 +293,14 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
     // Les preps qui calculent autrement (sufenta_table = table Vi/Vf,
     // dose_threshold = seuil ampoules type Anexate) n'ont pas besoin de
     // conc_produit au niveau racine.
-    const bad = DRUGS
-      .filter(d => d.prep)
-      .filter(d => !d.prep.sufenta_table && d.prep.dose_threshold === undefined)
-      .filter(d => {
+    const bad = DRUGS.filter((d) => d.prep)
+      .filter((d) => !d.prep.sufenta_table && d.prep.dose_threshold === undefined)
+      .filter((d) => {
         const hasConc = d.prep.conc_produit !== undefined;
         const hasUnite = d.prep.unite !== undefined;
         return hasConc !== hasUnite;
       })
-      .map(d => `${d.id} ${d.nom} (conc=${d.prep.conc_produit}, unite=${d.prep.unite})`);
+      .map((d) => `${d.id} ${d.nom} (conc=${d.prep.conc_produit}, unite=${d.prep.unite})`);
     expect(bad).toEqual([]);
   });
 });
@@ -300,6 +315,11 @@ describe("Plausibilité — débits PSE (pse.js)", () => {
   test("dose mid-range × 70 kg → débit entre 0,05 et 100 mL/h", () => {
     const bad = [];
     Object.entries(PSE).forEach(([id, p]) => {
+      // Les unités « mL/kg/min » (Octaplex et autres push rapides de
+      // produits sanguins) ont volontairement des débits élevés (jusqu'au
+      // cap maxMlH) — on les exclut de cette borne 100 mL/h conçue pour
+      // les perfusions continues classiques.
+      if (p.unite === "mL/kg/min") return;
       const mid = (p.min + p.max) / 2;
       const rate = calcDebit(p, mid, REF_KG);
       if (rate === null) {
@@ -316,7 +336,7 @@ describe("Plausibilité — débits PSE (pse.js)", () => {
   test("steps[] sont toutes dans [min, max]", () => {
     const bad = [];
     Object.entries(PSE).forEach(([id, p]) => {
-      p.steps.forEach(s => {
+      p.steps.forEach((s) => {
         if (s < p.min || s > p.max) {
           bad.push(`${id} → step ${s} hors plage [${p.min}, ${p.max}]`);
         }
@@ -350,8 +370,8 @@ describe("Plausibilité — toutes les chaînes poso /kg sont parsables", () => 
 
   test("chaque poso adulte/péd contenant '/kg' est parsable par calcDose", () => {
     const unparsable = [];
-    DRUGS.forEach(d => {
-      ["a", "p"].forEach(group => {
+    DRUGS.forEach((d) => {
+      ["a", "p"].forEach((group) => {
         (d.poso?.[group] || []).forEach((line, i) => {
           if (!HAS_DOSE_PATTERN.test(line)) return; // ligne sans dose/kg, OK
           const res = calcDose(line, REF_KG);

@@ -77,4 +77,19 @@ export const PSE = {
     conc: 0.1, unite: "mg/h", min: 0.1, max: 1,
     steps: [0.1, 0.2, 0.3, 0.5, 1],
   },
+
+  // ── PRODUITS SANGUINS / FACTEURS DE COAGULATION ───────────
+  // Octaplex (CCP) — débit-volume direct (pas de concentration de substrat).
+  // Recommandation ANSM/Vidal : 0,12 mL/kg/min (≈ 3 UI/kg/min), cap absolu
+  // à 8 mL/min (≈ 210 UI/min) = 480 mL/h sur la PSE. Ex 70 kg :
+  // 0,12 × 70 = 8,4 mL/min → plafonné à 8 mL/min = 480 mL/h.
+  // L'unité « mL/kg/min » désactive la division par conc dans calcDebit ;
+  // maxMlH applique le plafond ; tag remplace l'affichage de concentration
+  // qui n'a pas de sens ici.
+  73: {
+    conc: 1, unite: "mL/kg/min", min: 0.05, max: 0.12,
+    maxMlH: 480,
+    tag: "0,12 mL/kg/min · max 8 mL/min (480 mL/h)",
+    steps: [0.05, 0.08, 0.12],
+  },
 };

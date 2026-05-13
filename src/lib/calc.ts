@@ -125,8 +125,18 @@ export function calcDebit(pse, dose, kg) {
   if (pse.unite === "UI/24h") return +(d / (pse.conc * 24)).toFixed(2);
   const w = parseFloat(kg);
   if (!w || w <= 0) return null;
-  if (pse.unite === "µg/kg/min") return +((d * w * 60) / pse.conc).toFixed(2);
-  return +((d * w) / pse.conc).toFixed(2);
+  let result;
+  if (pse.unite === "µg/kg/min") {
+    result = (d * w * 60) / pse.conc;
+  } else if (pse.unite === "mL/kg/min") {
+    // Prescription en débit-volume direct (Octaplex) : mL/h = dose × poids × 60
+    result = d * w * 60;
+  } else {
+    result = (d * w) / pse.conc;
+  }
+  // Cap absolu en mL/h si défini (ex: Octaplex 480 mL/h = 8 mL/min max)
+  if (pse.maxMlH && result > pse.maxMlH) result = pse.maxMlH;
+  return +result.toFixed(2);
 }
 
 // ── Préparation : seuil dose (Anexate) ────────────────────────

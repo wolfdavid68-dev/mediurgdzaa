@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v93";
+export const APP_VERSION = "v94";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v94",
+    date: "2026-05-13",
+    titre: "Octaplex · fiche PSE (0,12 mL/kg/min, cap 8 mL/min)",
+    changes: [
+      {
+        type: "feat",
+        text: "Octaplex (CCP) dispose désormais d'une fiche PSE selon les recommandations ANSM/Vidal : débit 0,12 mL/kg/min (≈ 3 UI/kg/min), avec cap absolu à 8 mL/min (≈ 210 UI/min) = 480 mL/h sur la PSE. Exemple 70 kg : 0,12 × 70 = 8,4 mL/min → plafonné à 8 mL/min = 480 mL/h. Nouvelle unité « mL/kg/min » et plafond `maxMlH` ajoutés au moteur de calcul PSE.",
+      },
+    ],
+  },
   {
     version: "v93",
     date: "2026-05-13",
