@@ -483,7 +483,9 @@ const App = () => {
         <div className="header-inner">
           <div className="logo-row">
             <div className="logo">
-              <div className="logo-mark">✚</div>
+              <div className="logo-mark">
+                <img src="/logo_urgences_mulhouse_HD_transparent.png" alt="Urgences Mulhouse" />
+              </div>
               <div className="logo-text">
                 <h1>MediURG</h1>
                 <p>Pharmacologie d'urgence · SAUV · SMUR · SAU</p>

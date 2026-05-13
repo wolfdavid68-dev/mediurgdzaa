@@ -1,57 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#FF3B30" />
-  <meta name="description" content="MediURG - Livret pharmacologique d'urgence pour SAUV, SMUR et SAU. Accès hors ligne à plus de 70 médicaments critiques." />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="MediURG" />
-  <meta name="color-scheme" content="dark light" />
-  <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
-  <link rel="icon" href="./favicon.ico" sizes="48x48" />
-  <link rel="icon" type="image/svg+xml" href="./logo.svg" sizes="any" />
-  <!-- <link rel="manifest"> injecté par vite-plugin-pwa au build -->
-  <!-- Icônes générées par @vite-pwa/assets-generator depuis logo.svg.
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#FF3B30" />
+    <meta
+      name="description"
+      content="MediURG - Livret pharmacologique d'urgence pour SAUV, SMUR et SAU. Accès hors ligne à plus de 70 médicaments critiques."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MediURG" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
+    <link rel="icon" href="./favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="./pwa-192x192.png" sizes="192x192" />
+    <!-- <link rel="manifest"> injecté par vite-plugin-pwa au build -->
+    <!-- Icônes générées par @vite-pwa/assets-generator depuis logo_ghrmsa_HD_transparent.png.
        Pour régénérer après retouche du logo : `npm run generate-pwa-assets`. -->
-  <title>MediURG - Pharmacologie d'Urgence Hors Ligne</title>
-  <style>
-    /* Fond peint avant le chargement du CSS bundle pour éviter le flash gris/blanc
+    <title>MediURG - Pharmacologie d'Urgence Hors Ligne</title>
+    <style>
+      /* Fond peint avant le chargement du CSS bundle pour éviter le flash gris/blanc
        au lancement de la PWA (entre la fin du splash et l'hydratation React). */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { background: #0a0a12; color: #e8e8f0; }
-    #root { min-height: 100vh; }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  <script>
-    /* Setup de l'history AVANT React (évite l'écran vide sous Firefox PWA Android
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        background: #0a0a12;
+        color: #e8e8f0;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      /* Setup de l'history AVANT React (évite l'écran vide sous Firefox PWA Android
        quand l'user tape retour avant que React ait monté son popstate handler).
        Pattern : sentinelle au fond + état actif au-dessus. Le popstate React
        (App.js) prendra le relais une fois monté. */
-    (function () {
-      try {
-        if (!window.history.state || !window.history.state.mediurg) {
-          var here = window.location.href;
-          window.history.replaceState(
-            { mediurg: { page: 'medicaments', protoCategory: 'PISU', modal: null, sentinel: true } },
-            '',
-            here
-          );
-          window.history.pushState(
-            { mediurg: { page: 'medicaments', protoCategory: 'PISU', modal: null } },
-            '',
-            here
-          );
-        }
-      } catch (e) {}
-    })();
-  </script>
-  <!-- L'enregistrement du Service Worker est piloté par useRegisterSW dans
+      (function () {
+        try {
+          if (!window.history.state || !window.history.state.mediurg) {
+            var here = window.location.href;
+            window.history.replaceState(
+              {
+                mediurg: {
+                  page: "medicaments",
+                  protoCategory: "PISU",
+                  modal: null,
+                  sentinel: true,
+                },
+              },
+              "",
+              here
+            );
+            window.history.pushState(
+              { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
+              "",
+              here
+            );
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <!-- L'enregistrement du Service Worker est piloté par useRegisterSW dans
        le bundle React (src/components/UpdatePrompt.jsx), pour qu'on puisse
        afficher un toast quand un nouveau SW est prêt. -->
-  <script type="module" src="/src/index.tsx"></script>
-</body>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
 </html>
