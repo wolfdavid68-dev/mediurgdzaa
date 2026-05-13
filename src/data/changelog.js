@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v91";
+export const APP_VERSION = "v92";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v92",
+    date: "2026-05-13",
+    titre: "PISU + Kits · retour à la pile verticale unique",
+    changes: [
+      {
+        type: "fix",
+        text: "PISU et Kits repassent en pile verticale unique colonne sur toutes les tailles d'écran (au lieu de la grille 2-3 colonnes au desktop introduite en v91). La liste des médicaments conserve sa grille au desktop — seule la liste des protocoles est concernée.",
+      },
+    ],
+  },
   {
     version: "v91",
     date: "2026-05-13",

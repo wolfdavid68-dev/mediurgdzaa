@@ -814,16 +814,14 @@ a,
     padding-right: 16px;
   }
 
-  .drug-list-grid,
-  .protocol-list {
+  .drug-list-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     align-items: start;
   }
 
-  .drug-list-grid > .drug-card-open,
-  .protocol-list > .protocol-card-open {
+  .drug-list-grid > .drug-card-open {
     grid-column: 1 / -1;
   }
 
@@ -838,12 +836,10 @@ a,
 }
 
 @media (min-width: 1280px) {
-  .drug-list-grid,
-  .protocol-list {
+  .drug-list-grid {
     grid-template-columns: 1fr 1fr 1fr;
   }
-  .drug-list-grid > .drug-card-open,
-  .protocol-list > .protocol-card-open {
+  .drug-list-grid > .drug-card-open {
     grid-column: 1 / -1;
   }
 }
@@ -2077,17 +2073,10 @@ a,
 }
 
 /* ── PROTOCOLES ──────────────────────────────────────────── */
-/* Base mobile : pile verticale. Les @media (min-width: 900px / 1280px)
-   plus haut dans le fichier basculent en grille 2/3 colonnes au desktop —
-   mais comme cette règle est déclarée plus loin dans le fichier, elle
-   gagne par source order et bloque la grille. Restriction explicite au
-   mobile pour laisser les @media reprendre la main. */
-@media (max-width: 899px) {
-  .protocol-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+.protocol-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .protocol-card {
