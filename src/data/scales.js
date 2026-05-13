@@ -107,6 +107,54 @@ export const SCALES = [
   },
 
   {
+    id: "ramsay",
+    nom: "Échelle de Ramsay",
+    icon: "💤",
+    description:
+      "Évaluation du niveau de sédation. Une seule valeur de 1 à 6. Cible habituelle pour patient ventilé : 2-4. Référence historique pour le suivi de la sédation en réanimation.",
+    type: "single-pick",
+    options: [
+      {
+        score: 1,
+        label: "Anxieux, agité, impatient",
+        description: "Sous-sédation — patient inconfortable",
+      },
+      {
+        score: 2,
+        label: "Coopérant, orienté, tranquille",
+        description: "Éveillé, calme, communique",
+      },
+      {
+        score: 3,
+        label: "Réveillé, répond aux ordres",
+        description: "Endormi mais répond aux ordres verbaux",
+      },
+      {
+        score: 4,
+        label: "Endormi, réponse vive",
+        description: "Réponse vive à percussion glabelle ou bruit fort",
+      },
+      {
+        score: 5,
+        label: "Endormi, réponse lente",
+        description: "Réponse lente à percussion glabelle ou bruit fort",
+      },
+      {
+        score: 6,
+        label: "Aucune réponse",
+        description: "Aucune réponse à percussion glabelle ou bruit fort — sédation profonde",
+      },
+    ],
+    interpret: (val) => {
+      if (val === null) return { severity: "—", color: "#888" };
+      if (val === 1) return { severity: "Sous-sédaté", color: "#dc2626" };
+      if (val <= 3) return { severity: "Cible idéale", color: "#16a34a" };
+      if (val <= 4) return { severity: "Sédation adaptée (ventilé)", color: "#f97316" };
+      return { severity: "Sédation profonde", color: "#dc2626" };
+    },
+  },
+
+  {
     id: "cushman",
     nom: "Score de Cushman",
     icon: "🍺",

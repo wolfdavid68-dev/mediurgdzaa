@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v92";
+export const APP_VERSION = "v93";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v93",
+    date: "2026-05-13",
+    titre: "Échelles · ajout de l'échelle de Ramsay",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouvelle échelle de Ramsay (1-6) ajoutée dans Échelles, après RASS. Évalue le niveau de sédation : 1 anxieux/agité (sous-sédaté), 2-3 cible idéale, 4 sédation adaptée pour patient ventilé, 5-6 sédation profonde. Code couleur de gravité automatique selon le score.",
+      },
+    ],
+  },
   {
     version: "v92",
     date: "2026-05-13",
