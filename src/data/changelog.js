@@ -1,11 +1,45 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v87";
+export const APP_VERSION = "v89";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v89",
+    date: "2026-05-13",
+    titre: "Splash GHR au lancement + retrait du thème rouge",
+    changes: [
+      {
+        type: "feat",
+        text: "Splash écran au lancement : logo GHR Mulhouse Sud-Alsace + « MediURG » sur fond blanc, affiché 1 s puis fade-out 300 ms. Géré inline dans index.html pour être visible dès le premier paint (avant l'hydratation React). Disparaît dès que React signale « ready » + minimum 1 s respecté.",
+      },
+      {
+        type: "feat",
+        text: "Couleur de thème PWA : rouge #FF3B30 remplacé par sombre #0a0a12. Plus de status bar / address bar rouge au lancement sur Android et iOS. background_color du manifest passé en blanc pour matcher le splash.",
+      },
+      {
+        type: "chore",
+        text: "Suppression de public/logo.svg (ancienne croix rouge) — les icônes PWA sont désormais générées depuis logo_urgences_mulhouse_HD_transparent.png.",
+      },
+    ],
+  },
+  {
+    version: "v88",
+    date: "2026-05-13",
+    titre: "Logo Urgences Mulhouse · en-tête + icônes PWA",
+    changes: [
+      {
+        type: "feat",
+        text: "Logo Urgences Mulhouse (caduceus + ECG + « URGENCES + MULHOUSE ») remplace la croix « ✚ » dans l'en-tête de l'app. En mode dark, pastille blanche circulaire derrière le logo pour que les éléments noirs (caduceus, ECG, contour) restent lisibles.",
+      },
+      {
+        type: "feat",
+        text: "Icônes PWA régénérées depuis le nouveau logo : favicon, apple-touch-icon, pwa-64/192/512, maskable-icon-512. L'icône sur l'écran d'accueil iOS/Android et le favicon onglet navigateur affichent maintenant le logo Urgences Mulhouse.",
+      },
+    ],
+  },
   {
     version: "v87",
     date: "2026-05-12",
