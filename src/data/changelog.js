@@ -9,7 +9,7 @@ export const CHANGELOG = [
   {
     version: "v89",
     date: "2026-05-13",
-    titre: "Splash GHR au lancement + retrait du thème rouge",
+    titre: "Splash GHR au lancement de l'app",
     changes: [
       {
         type: "feat",
@@ -17,7 +17,7 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
-        text: "Couleur de thème PWA : rouge #FF3B30 remplacé par sombre #0a0a12. Plus de status bar / address bar rouge au lancement sur Android et iOS. background_color du manifest passé en blanc pour matcher le splash.",
+        text: "background_color du manifest PWA passé en blanc pour matcher le splash GHR — plus de flash sombre derrière le logo au lancement de la PWA installée. theme_color (bandeau status bar) reste rouge #FF3B30, conformément à l'identité visuelle d'urgence.",
       },
       {
         type: "chore",

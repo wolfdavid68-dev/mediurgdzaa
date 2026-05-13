@@ -83,7 +83,7 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         orientation: "portrait-primary",
-        theme_color: "#0a0a12",
+        theme_color: "#FF3B30",
         background_color: "#ffffff",
         categories: ["medical", "productivity"],
         // icons[] injectées au build par pwaAssets.overrideManifestIcons
