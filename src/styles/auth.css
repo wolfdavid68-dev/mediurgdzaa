@@ -202,18 +202,20 @@
     radial-gradient(circle at 0% 0%, oklch(0.6 0.2 25 / 0.16), transparent 50%);
   border-right: 1px solid var(--auth-line-soft);
 }
+/* Dimensions du design handoff : Logo size={64} × logoScale 1.25 = 80px
+   sur l'écran login. Séparateur = 66% de la hauteur. SAU × 1.05 (légèrement
+   plus grand que GHR). Cf. desktop/app.jsx:102-117 + styles.css:.logo-row. */
 .auth-logo-row {
   display: inline-flex;
   align-items: center;
   gap: 18px;
-  height: 56px;
+  height: 80px;
 }
 .auth-logo-img {
   height: 100%;
   width: auto;
   filter: drop-shadow(0 4px 14px oklch(0 0 0 / 0.35));
 }
-/* SAU légèrement plus grand que le GHR (cf. design handoff) */
 .auth-logo-img-sau {
   height: 105%;
 }
@@ -226,8 +228,8 @@
 
 @media (max-width: 600px) {
   .auth-logo-row {
-    height: 44px;
-    gap: 12px;
+    height: 60px;
+    gap: 14px;
   }
 }
 .auth-side-eyebrow,
