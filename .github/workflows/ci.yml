@@ -31,9 +31,10 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          # Aligné sur le runtime Vercel (Node 20 LTS) — évite les surprises
-          # entre dev local, CI et prod.
-          node-version: "20"
+          # Node 22 LTS (Active LTS, Maintenance jusqu'à avril 2027). Aligné
+          # sur le runtime Vercel "Node.js 22.x". Node 20 'Iron' part en EOL
+          # avril 2026 → on bouge maintenant pour ne pas se faire surprendre.
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
