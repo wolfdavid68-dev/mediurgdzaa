@@ -33,7 +33,12 @@ import "./styles/acr-postrosc.css";
 import "./styles/acr-ht.css";
 import "./styles/acr-summary.css";
 import "./styles/ecg.css";
+// Styles isolés pour les écrans d'auth (login/register/admin/etc.) — palette
+// dark + rouge GHR différente de la palette MediURG. Charge les tokens via
+// .auth-stage / .admin-stage scopes pour ne pas polluer le reste de l'app.
+import "./styles/auth.css";
 import App from "./App";
+import AuthGate from "./components/auth/AuthGate";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("#root introuvable dans index.html");
@@ -41,7 +46,12 @@ const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
-    <App />
+    {/* AuthGate : transparent quand AUTH_ENABLED=false (mode actuel par
+        défaut), sinon affiche login/register/pending/banned/admin selon
+        l'état de session Supabase. Cf. src/lib/featureFlags.ts. */}
+    <AuthGate>
+      <App />
+    </AuthGate>
   </StrictMode>
 );
 

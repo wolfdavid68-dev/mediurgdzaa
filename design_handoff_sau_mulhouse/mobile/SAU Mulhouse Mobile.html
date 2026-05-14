@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SAU Mulhouse · Mobile</title>
+    <meta name="ext-resource-dependency" content="assets/logo-ghr.png" data-resource-id="logoGhr" />
+    <meta name="ext-resource-dependency" content="assets/logo-sau.png" data-resource-id="logoSau" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="mobile.css" />
+    <template id="__bundler_thumbnail" data-bg-color="#0a0a0e">
+      <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1200" height="800" fill="#0a0a0e" />
+        <rect
+          x="500"
+          y="180"
+          width="200"
+          height="440"
+          rx="34"
+          fill="#1a1a22"
+          stroke="#33333d"
+          stroke-width="2"
+        />
+        <circle cx="600" cy="350" r="38" fill="#E11D2A" />
+        <text
+          x="600"
+          y="500"
+          text-anchor="middle"
+          font-family="Geist, sans-serif"
+          font-size="22"
+          fill="white"
+          font-weight="300"
+          letter-spacing="-0.5"
+        >
+          SAU Mobile
+        </text>
+      </svg>
+    </template>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0a0a0e;
+        overflow: hidden;
+      }
+      body {
+        font-family:
+          "Geist",
+          -apple-system,
+          system-ui,
+          sans-serif;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        background:
+          radial-gradient(60% 50% at 100% 0%, oklch(0.6 0.2 25 / 0.12), transparent 70%),
+          radial-gradient(50% 50% at 0% 100%, oklch(0.5 0.12 280 / 0.15), transparent 70%), #0a0a0e;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script
+      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+      integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+      integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+      integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+      crossorigin="anonymous"
+    ></script>
+    <script type="text/babel" src="ios-frame.jsx"></script>
+    <script type="text/babel" src="mobile.jsx"></script>
+  </body>
+</html>
