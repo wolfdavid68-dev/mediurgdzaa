@@ -42,6 +42,7 @@
 .acr-ht-body {
   padding: 4px 8px 10px;
   border-top: 1px solid var(--border);
+  animation: panel-expand-in 0.18s ease;
 }
 .acr-ht-list {
   list-style: none;

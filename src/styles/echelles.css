@@ -148,6 +148,7 @@
   flex-direction: column;
   gap: 14px;
   padding: 14px 16px;
+  animation: panel-expand-in 0.18s ease;
 }
 
 .scale-item-label {
@@ -222,6 +223,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px 16px;
+  animation: panel-expand-in 0.18s ease;
 }
 
 .scale-pick {
@@ -431,6 +433,7 @@
 .proto-tab-content {
   border-top: 1px solid var(--border);
   padding-top: 8px;
+  animation: panel-expand-in 0.18s ease;
 }
 
 /* Section headers (supprimés — remplacés par tabs) */

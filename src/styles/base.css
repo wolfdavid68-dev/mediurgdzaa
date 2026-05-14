@@ -145,3 +145,38 @@ a,
    règles existantes (.search-bar input:focus, .poso-calc-input:focus,
    etc.). On garde leur design custom mais on s'assure qu'ils sont aussi
    couverts par focus-visible avec un fallback discret. */
+
+/* ── Animations partagées ───────────────────────────────────
+   panel-expand-in : utilisé par les conteneurs qui apparaissent
+   conditionnellement (open && <Panel/>). Léger fade + glissement
+   downward de 4px pour que l'apparition soit perceptible sans être
+   distrayante. Réutilisable dans tout fichier CSS via
+   `animation: panel-expand-in 0.18s ease;`.
+   ─────────────────────────────────────────────────────────── */
+@keyframes panel-expand-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect du réglage système « réduire les mouvements » (Android,
+   iOS, macOS, Windows, Ubuntu). Désactive globalement toutes les
+   animations et transitions pour les utilisateurs qui ont activé ce
+   réglage (vertige, photosensibilité). Override targeté possible si
+   un signal visuel critique repose sur un mouvement (ex: pulse de
+   l'alerte ACR à T-5 → cf. .acr-zoom-count qui garde son flash). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -23,6 +23,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  animation: panel-expand-in 0.18s ease;
 }
 .acr-history-item {
   display: grid;
