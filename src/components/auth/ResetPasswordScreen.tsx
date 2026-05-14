@@ -1,0 +1,154 @@
+import { useState, type FormEvent } from "react";
+import { isValidPassword, logout, passwordStrength, updatePassword } from "../../lib/auth";
+
+// Étape 2 du flow « mot de passe oublié » : l'user a cliqué sur le lien
+// envoyé par mail, Supabase a établi une session de récupération (event
+// PASSWORD_RECOVERY) et AuthGate nous a rendus. On demande un nouveau
+// mot de passe puis on déconnecte → retour à l'écran login normal.
+
+type Props = {
+  onDone: () => void;
+};
+
+const ResetPasswordScreen = ({ onDone }: Props) => {
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [shake, setShake] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const triggerShake = () => {
+    setShake(true);
+    window.setTimeout(() => setShake(false), 400);
+  };
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!isValidPassword(password)) {
+      setError("Mot de passe trop court (min 8 caractères)");
+      triggerShake();
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setError("Les mots de passe ne correspondent pas");
+      triggerShake();
+      return;
+    }
+    setLoading(true);
+    const result = await updatePassword(password);
+    if (!result.ok) {
+      setLoading(false);
+      setError(result.error);
+      triggerShake();
+      return;
+    }
+    // Mot de passe mis à jour : on déconnecte la session de récupération et
+    // on renvoie sur le login propre. Le token dans l'URL est consommé,
+    // l'user doit se reconnecter avec son nouveau mot de passe.
+    await logout();
+    setLoading(false);
+    setDone(true);
+    // Nettoie le hash de l'URL (#access_token=...&type=recovery) sinon
+    // un refresh redéclenche PASSWORD_RECOVERY.
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  };
+
+  const strength = passwordStrength(password);
+
+  return (
+    <div className="auth-stage">
+      <div className="auth-bg-decor" aria-hidden="true">
+        <div className="auth-bg-glow auth-bg-glow-1" />
+        <div className="auth-bg-glow auth-bg-glow-2" />
+        <div className="auth-bg-grid" />
+      </div>
+
+      <div className={`auth-shell auth-shell-single ${shake ? "auth-shake" : ""}`}>
+        <main className="auth-card auth-card-narrow">
+          {!done && (
+            <>
+              <div className="auth-eyebrow">Réinitialisation</div>
+              <h2 className="auth-card-title">Nouveau mot de passe</h2>
+              <p className="auth-card-sub">
+                Choisis un nouveau mot de passe d'au moins 8 caractères. Il remplacera l'ancien
+                immédiatement.
+              </p>
+
+              <form onSubmit={onSubmit} className="auth-form" noValidate>
+                <label className="auth-field">
+                  <span className="auth-field-label">Nouveau mot de passe</span>
+                  <input
+                    type="password"
+                    className="auth-input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    autoFocus
+                    disabled={loading}
+                  />
+                  <div className="auth-pw-strength" aria-label={`Force : ${strength}/5`}>
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <span
+                        key={i}
+                        className={`auth-pw-bar ${i < strength ? `auth-pw-bar-${strength}` : ""}`}
+                      />
+                    ))}
+                  </div>
+                </label>
+
+                <label className="auth-field">
+                  <span className="auth-field-label">Confirmer le mot de passe</span>
+                  <input
+                    type="password"
+                    className="auth-input"
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    autoComplete="new-password"
+                    disabled={loading}
+                  />
+                </label>
+
+                {error && (
+                  <div className="auth-error" role="alert">
+                    {error}
+                  </div>
+                )}
+
+                <button type="submit" className="auth-btn-primary" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <span className="auth-spinner" aria-hidden="true" /> Mise à jour…
+                    </>
+                  ) : (
+                    "Mettre à jour le mot de passe"
+                  )}
+                </button>
+              </form>
+            </>
+          )}
+
+          {done && (
+            <div className="auth-success">
+              <div className="auth-success-icon" aria-hidden="true">
+                ✓
+              </div>
+              <h2 className="auth-card-title">Mot de passe mis à jour</h2>
+              <p className="auth-card-sub">
+                Tu peux maintenant te connecter avec ton matricule et ton nouveau mot de passe.
+              </p>
+              <button type="button" className="auth-btn-primary" onClick={onDone}>
+                Retour à la connexion
+              </button>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default ResetPasswordScreen;

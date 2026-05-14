@@ -177,6 +177,51 @@ export const logout = async (): Promise<void> => {
   await supabase.auth.signOut();
 };
 
+// ─── Mot de passe oublié — étape 1 : envoi du mail ──────────
+// On résout matricule → email puis Supabase envoie un lien magique
+// pointant vers `redirectTo`. Au clic, le client Supabase détecte le
+// hash `#access_token=...&type=recovery` (cf. detectSessionInUrl) et
+// déclenche un event `PASSWORD_RECOVERY` qu'AuthGate écoute pour
+// afficher le ResetPasswordScreen.
+//
+// On retourne toujours { ok: true } même si le matricule est inconnu :
+// éviter la fuite d'info (énumération de matricules valides).
+export const requestPasswordReset = async (matricule: string): Promise<AuthResult> => {
+  const supabase = getSupabase();
+  if (!supabase) return { ok: false, error: "Backend non configuré" };
+  if (!isValidMatricule(matricule)) {
+    return { ok: false, error: "Matricule invalide (format : M + 6 chiffres)" };
+  }
+
+  const { data: lookup } = await supabase
+    .from("matricule_lookup")
+    .select("email")
+    .eq("matricule", matricule)
+    .maybeSingle();
+
+  // Matricule inconnu → on fait semblant de réussir (anti-énumération).
+  if (!lookup?.email) return { ok: true, data: undefined };
+
+  const redirectTo = `${window.location.origin}${window.location.pathname}`;
+  const { error } = await supabase.auth.resetPasswordForEmail(lookup.email, { redirectTo });
+  if (error) return { ok: false, error: humanizeError(error.message) };
+  return { ok: true, data: undefined };
+};
+
+// ─── Mot de passe oublié — étape 2 : nouveau mot de passe ────
+// Appelé depuis le ResetPasswordScreen après que Supabase a établi
+// la session de récupération via le lien email.
+export const updatePassword = async (newPassword: string): Promise<AuthResult> => {
+  const supabase = getSupabase();
+  if (!supabase) return { ok: false, error: "Backend non configuré" };
+  if (!isValidPassword(newPassword)) {
+    return { ok: false, error: "Mot de passe trop court (min 8 caractères)" };
+  }
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { ok: false, error: humanizeError(error.message) };
+  return { ok: true, data: undefined };
+};
+
 // ─── Récupération de la session courante ─────────────────────
 export const getCurrentSession = async (): Promise<Session | null> => {
   const supabase = getSupabase();
@@ -269,11 +314,21 @@ export const unbanProfile = async (profileId: string): Promise<AuthResult> => {
 
 // ─── Subscribe aux changements de session ───────────────────
 // Permet à AuthGate de re-render quand l'user se logout depuis un autre
-// onglet, ou quand le token expire.
-export const onAuthStateChange = (callback: (user: User | null) => void) => {
+// onglet, ou quand le token expire. `onRecovery` est appelé quand le
+// client détecte un retour depuis un lien « mot de passe oublié »
+// (event `PASSWORD_RECOVERY`) — dans ce cas, AuthGate doit afficher
+// le ResetPasswordScreen avant tout autre routing.
+export const onAuthStateChange = (
+  callback: (user: User | null) => void,
+  onRecovery?: () => void
+) => {
   const supabase = getSupabase();
   if (!supabase) return () => {};
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") {
+      onRecovery?.();
+      return;
+    }
     callback(session?.user ?? null);
   });
   return () => data.subscription.unsubscribe();

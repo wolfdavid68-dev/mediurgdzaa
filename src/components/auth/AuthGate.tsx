@@ -2,8 +2,10 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { fetchProfile, getCurrentSession, onAuthStateChange, type Profile } from "../../lib/auth";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { migrateAnonymousData } from "../../lib/userStorage";
+import ForgotPasswordScreen from "./ForgotPasswordScreen";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
+import ResetPasswordScreen from "./ResetPasswordScreen";
 import { BannedScreen, PendingApprovalScreen } from "./StatusScreens";
 
 // AdminDashboard est lazy-loadé : seuls les admins voient cet écran, et
@@ -23,7 +25,7 @@ const AdminDashboard = lazy(() => import("./AdminDashboard"));
 //   - Session + profile.status='active' + role='admin' → toggle App ↔ AdminDashboard
 //   - Session + profile.status='active' + role='user' → App (les enfants)
 
-type AuthScreen = "login" | "register";
+type AuthScreen = "login" | "register" | "forgot";
 
 type Props = {
   children: ReactNode;
@@ -39,6 +41,7 @@ const AuthGate = ({ children }: Props) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [recovering, setRecovering] = useState(false);
 
   useEffect(() => {
     if (!enabled) {
@@ -60,16 +63,23 @@ const AuthGate = ({ children }: Props) => {
       setLoading(false);
     };
     init();
-    const unsub = onAuthStateChange(async (user) => {
-      if (cancelled) return;
-      if (!user) {
-        setProfile(null);
-        setShowAdmin(false);
-        return;
+    const unsub = onAuthStateChange(
+      async (user) => {
+        if (cancelled) return;
+        if (!user) {
+          setProfile(null);
+          setShowAdmin(false);
+          return;
+        }
+        const result = await fetchProfile(user.id);
+        if (!cancelled && result.ok) setProfile(result.data);
+      },
+      () => {
+        // Lien « mot de passe oublié » cliqué : on bascule sur le ResetPasswordScreen
+        // avant tout autre routing (même si l'user a une session active).
+        if (!cancelled) setRecovering(true);
       }
-      const result = await fetchProfile(user.id);
-      if (!cancelled && result.ok) setProfile(result.data);
-    });
+    );
     return () => {
       cancelled = true;
       unsub();
@@ -102,10 +112,26 @@ const AuthGate = ({ children }: Props) => {
     );
   }
 
-  // Pas de session → écrans login / register
+  // Recovery (PASSWORD_RECOVERY) prend la priorité sur tout autre routing.
+  if (recovering) {
+    return (
+      <ResetPasswordScreen
+        onDone={() => {
+          setRecovering(false);
+          setProfile(null);
+          setScreen("login");
+        }}
+      />
+    );
+  }
+
+  // Pas de session → écrans login / register / forgot
   if (!profile) {
     if (screen === "register") {
       return <RegisterScreen onGoToLogin={() => setScreen("login")} />;
+    }
+    if (screen === "forgot") {
+      return <ForgotPasswordScreen onBackToLogin={() => setScreen("login")} />;
     }
     return (
       <LoginScreen
@@ -113,6 +139,7 @@ const AuthGate = ({ children }: Props) => {
           /* le useEffect onAuthStateChange recharge le profile */
         }}
         onGoToRegister={() => setScreen("register")}
+        onGoToForgot={() => setScreen("forgot")}
       />
     );
   }

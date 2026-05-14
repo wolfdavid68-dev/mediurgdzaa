@@ -12,9 +12,10 @@ import LegalModal from "../LegalModal";
 type Props = {
   onLoggedIn: () => void;
   onGoToRegister: () => void;
+  onGoToForgot: () => void;
 };
 
-const LoginScreen = ({ onLoggedIn, onGoToRegister }: Props) => {
+const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
   const [matriculeDigits, setMatriculeDigits] = useState("");
   const [password, setPassword] = useState("");
   const [keepSession, setKeepSession] = useState(true);
@@ -133,7 +134,7 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister }: Props) => {
                 />
                 <span>Maintenir la session</span>
               </label>
-              <button type="button" className="auth-link" disabled>
+              <button type="button" className="auth-link" onClick={onGoToForgot} disabled={loading}>
                 Mot de passe oublié
               </button>
             </div>
