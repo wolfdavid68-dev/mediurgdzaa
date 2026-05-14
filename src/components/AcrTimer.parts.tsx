@@ -62,7 +62,7 @@ type StepPanelProps = {
   cycle: number;
   pendingActions: Action[];
   nextAnalyseIn: number;
-  onRhythm: (r: string) => void;
+  onRhythm: (r: "choquable" | "non_choquable") => void;
   onRosc: () => void;
   onReAcr: () => void;
   onSkipToAnalyse: () => void;
