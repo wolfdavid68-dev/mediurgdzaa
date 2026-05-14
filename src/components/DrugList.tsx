@@ -7,10 +7,24 @@ import CardErrorFallback from "./CardErrorFallback";
 // affiche le fallback ; toutes les autres restent fonctionnelles. En réa, c'est
 // la différence entre « 1 médicament temporairement indisponible » et « l'app
 // est dead, je dois la fermer pour la rouvrir ».
-const DrugList = ({ drugs, favorites, onToggleFavorite, onOpen, onProtocolOpen }) => {
+type DrugListProps = {
+  drugs: any[];
+  favorites?: Set<number>;
+  onToggleFavorite?: (id: number) => void;
+  onOpen?: (id: number) => void;
+  onProtocolOpen?: () => void;
+};
+
+const DrugList = ({
+  drugs,
+  favorites,
+  onToggleFavorite,
+  onOpen,
+  onProtocolOpen,
+}: DrugListProps) => {
   return (
     <div className="drug-list-grid">
-      {drugs.map((drug) => (
+      {drugs.map((drug: any) => (
         <ErrorBoundary key={drug.id} FallbackComponent={CardErrorFallback}>
           <DrugCard
             drug={drug}

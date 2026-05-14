@@ -188,6 +188,22 @@ export default defineConfig({
     // Globals + setupFiles sont hérités via `extends: true`.
     globals: true,
     setupFiles: ["src/test-setup.ts"],
+    // Coverage v8 (provider natif Node) — `npm run test:coverage` produit un
+    // rapport HTML dans coverage/ et un récap dans la console. Pas de
+    // thresholds bloquants pour l'instant (à ajouter plus tard quand on
+    // aura un baseline stable).
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.{js,ts,tsx}",
+        "src/test-setup.ts",
+        "src/global.d.ts",
+        "src/index.tsx", // bootstrap pur
+        "src/data/**", // lookup tables JS, pas de logique
+      ],
+    },
     projects: [
       {
         extends: true,

@@ -21,9 +21,11 @@ const InfoIcon = () => (
   </svg>
 );
 
+type PrepBlockProps = { drug: any; weight: string; produitFinal: string };
+
 // Bloc Préparation : étapes + calculateur (4 variantes selon la shape de prep).
 // produitFinal vient du parent car son input vit au-dessus du bloc poso (input swap).
-const PrepBlock = ({ drug, weight, produitFinal }) => {
+const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   const [doseLibre, setDoseLibre] = useState("");
   const prep = drug.prep;
   if (!prep) return null;
@@ -98,7 +100,7 @@ const PrepBlock = ({ drug, weight, produitFinal }) => {
           <div className="prep-calc-header">
             <PrepIcon /> Pour {kg} kg
           </div>
-          {phases.map((phase, i) => (
+          {phases.map((phase: any, i: number) => (
             <div
               key={i}
               style={{
@@ -218,7 +220,7 @@ const PrepBlock = ({ drug, weight, produitFinal }) => {
 
       {prep.etapes && prep.etapes.length > 0 && (
         <ol className="prep-etapes">
-          {prep.etapes.map((e, i) => (
+          {prep.etapes.map((e: string, i: number) => (
             <li key={i} className="prep-etape">
               {e}
             </li>
@@ -371,7 +373,7 @@ const PrepBlock = ({ drug, weight, produitFinal }) => {
 
       {prep.notes && prep.notes.length > 0 && (
         <ul className="prep-notes">
-          {prep.notes.map((n, i) => (
+          {prep.notes.map((n: string, i: number) => (
             <li key={i} className="prep-note-item">
               <svg
                 viewBox="0 0 24 24"

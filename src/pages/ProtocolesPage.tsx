@@ -13,7 +13,17 @@ const EcgDiagnostic = lazy(() => import("../components/EcgDiagnostic"));
 // Page Protocoles avec ses 3 sous-onglets (PISU, Incompatibilités, Kits).
 // Imports data en interne → quand App.jsx la lazy-load, PROTOCOLS et
 // PREP_KITS sortent du bundle initial (gain ~100 kB).
-const ProtocolesPage = ({ protoCategory, changeProtoCategory, onDrugSearch }) => {
+type ProtocolesPageProps = {
+  protoCategory: string;
+  changeProtoCategory: (cat: string) => void;
+  onDrugSearch: (name: string) => void;
+};
+
+const ProtocolesPage = ({
+  protoCategory,
+  changeProtoCategory,
+  onDrugSearch,
+}: ProtocolesPageProps) => {
   const [protoFilter, setProtoFilter] = useState("Tout");
 
   const filteredProtocols = useMemo(() => {

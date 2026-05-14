@@ -4,7 +4,7 @@
 import { COACH_LS_KEY } from "./AcrTimer.constants";
 
 // Formate un nombre de secondes en MM:SS (≥ 0).
-export const fmt = (s) => {
+export const fmt = (s: number) => {
   if (s < 0) s = 0;
   const m = Math.floor(s / 60);
   const sec = s % 60;
@@ -12,7 +12,7 @@ export const fmt = (s) => {
 };
 
 // Heure murale (téléphone) — format HH:MM:SS 24h FR pour transmission.
-export const fmtWall = (ts) => {
+export const fmtWall = (ts: number) => {
   try {
     return new Date(ts).toLocaleTimeString("fr-FR", { hour12: false });
   } catch {
@@ -69,7 +69,7 @@ export const metroTick = () => beep(1600, 35, 0.25, "square");
 // Synthèse vocale FR (Web Speech API). Indépendant du Web Audio.
 // Sur iOS/Android, le 1er appel doit suivre un geste utilisateur — la bascule
 // vers "full" via le picto coach déclenche un warm-up speak("Coach activé").
-export const speak = (text) => {
+export const speak = (text: string) => {
   try {
     if (typeof window === "undefined") return;
     const synth = window.speechSynthesis;
@@ -94,7 +94,7 @@ export const readCoach = () => {
 };
 
 // État d'une étape de prep DSA (pending / active / done) selon le compte à rebours
-export const stepState = (step, t) => {
+export const stepState = (step: { from: number; to: number }, t: number) => {
   if (t > step.from) return "pending";
   if (t >= step.to) return "active";
   return "done";

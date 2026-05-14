@@ -12,6 +12,7 @@ import {
   useBackNavigation,
   type ExitToastVariant,
 } from "./lib/useBackNavigation";
+import { usePersistentStorage } from "./lib/usePersistentStorage";
 
 // Code-splitting : les modales (ACR, changelog) sont importées à la demande,
 // et la page Protocoles entière (avec ses data PROTOCOLS + PREP_KITS et ses
@@ -53,12 +54,12 @@ const App = () => {
       return false;
     }
   });
-  const [favorites, setFavorites] = useState(() => {
+  const [favorites, setFavorites] = useState<Set<number>>(() => {
     try {
       const raw = localStorage.getItem("mediurg-favorites");
-      return raw ? new Set(JSON.parse(raw)) : new Set();
+      return raw ? new Set<number>(JSON.parse(raw)) : new Set<number>();
     } catch {
-      return new Set();
+      return new Set<number>();
     }
   });
   const [history, setHistory] = useState(() => {
@@ -123,8 +124,8 @@ const App = () => {
     }
   }, []);
 
-  const toggleFavorite = (id) => {
-    setFavorites((prev) => {
+  const toggleFavorite = (id: number) => {
+    setFavorites((prev: Set<number>) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -135,9 +136,9 @@ const App = () => {
     });
   };
 
-  const addToHistory = (id) => {
-    setHistory((prev) => {
-      const next = [id, ...prev.filter((x) => x !== id)].slice(0, 5);
+  const addToHistory = (id: number) => {
+    setHistory((prev: number[]) => {
+      const next = [id, ...prev.filter((x: number) => x !== id)].slice(0, 5);
       try {
         localStorage.setItem("mediurg-history", JSON.stringify(next));
       } catch {}
@@ -170,11 +171,15 @@ const App = () => {
     setExitToast,
   });
 
+  // Demande au navigateur de garantir le précache PWA contre l'éviction
+  // automatique en cas de pression disque. Critique offline (SAU/SMUR).
+  usePersistentStorage();
+
   // View Transitions API (Chrome 111+, Safari 18+) : enveloppe les changements
   // de page/sous-onglet pour que le navigateur produise un cross-fade fluide
   // entre l'ancienne et la nouvelle vue. Fallback silencieux sur les browsers
   // qui n'exposent pas startViewTransition (tout se passe instantanément, comme avant).
-  const withTransition = (mutator) => {
+  const withTransition = (mutator: () => void) => {
     if (typeof document.startViewTransition !== "function") return mutator();
     document.startViewTransition(mutator);
   };
@@ -185,7 +190,7 @@ const App = () => {
   // (les tabs ne sont pas typiquement dans le back stack natif Android).
   // Le rapid-double-back dans le popstate handler (<1s) court-circuite cette
   // navigation pour permettre un exit rapide quand l'user mash le bouton.
-  const navigateTo = (newPage) => {
+  const navigateTo = (newPage: string) => {
     if (newPage === page && !showAcr && !showChangelog) return;
     pushNav({ page: newPage, modal: null });
     withTransition(() => {
@@ -195,7 +200,7 @@ const App = () => {
     });
   };
 
-  const changeProtoCategory = (newCat) => {
+  const changeProtoCategory = (newCat: string) => {
     if (newCat === protoCategory) return;
     replaceNav({ protoCategory: newCat });
     withTransition(() => setProtoCategory(newCat));
@@ -247,7 +252,7 @@ const App = () => {
 
   const recentDrugs = useMemo(() => {
     if (deferredSearch.trim() || cat !== "Tout" || svc !== "Tout" || showFavoritesOnly) return [];
-    return history.map((id) => DRUGS.find((d) => d.id === id)).filter(Boolean);
+    return history.map((id: number) => DRUGS.find((d: any) => d.id === id)).filter(Boolean);
   }, [history, deferredSearch, cat, svc, showFavoritesOnly]);
 
   // React 19 : <title> rendu dans le tree est hissé automatiquement dans <head>.
@@ -478,7 +483,7 @@ const App = () => {
             <ProtocolesPage
               protoCategory={protoCategory}
               changeProtoCategory={changeProtoCategory}
-              onDrugSearch={(name) => {
+              onDrugSearch={(name: string) => {
                 navigateTo("medicaments");
                 setSearch(name);
               }}
@@ -582,7 +587,7 @@ const App = () => {
           <AcrModeModal
             open={showAcr}
             onClose={closeOverlay}
-            onOpenDrug={(name) => {
+            onOpenDrug={(name: string) => {
               replaceNav({ page: "medicaments", modal: null });
               setShowAcr(false);
               setPage("medicaments");

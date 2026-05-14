@@ -15,7 +15,9 @@ import { useState } from "react";
 // alors choisir d'abord un variant (ex: tranche d'âge pour la PA dans Cushman),
 // puis l'option dans le barème de ce variant.
 
-const ScaleCard = ({ scale }) => {
+type ScaleCardProps = { scale: any };
+
+const ScaleCard = ({ scale }: ScaleCardProps) => {
   const [open, setOpen] = useState(false);
   const [sumSelections, setSumSelections] = useState<Record<number, number>>({});
   const [variantSelections, setVariantSelections] = useState<Record<number, string>>({});
@@ -30,7 +32,7 @@ const ScaleCard = ({ scale }) => {
     : pickedScore;
 
   const allAnswered = isSum
-    ? scale.items.every((_, i) => typeof sumSelections[i] === "number")
+    ? scale.items.every((_: any, i: number) => typeof sumSelections[i] === "number")
     : pickedScore !== null;
 
   // total est garanti non-null quand allAnswered=true (allAnswered le vérifie).
@@ -46,11 +48,11 @@ const ScaleCard = ({ scale }) => {
 
   // Pour un item avec variants : on n'autorise le clic sur les options que
   // si un variant a été choisi. Sinon les options ne s'affichent pas.
-  const getActiveOptions = (item, i) => {
+  const getActiveOptions = (item: any, i: number) => {
     if (!item.variants) return item.options;
     const variantId = variantSelections[i];
     if (!variantId) return null;
-    const v = item.variants.find((x) => x.id === variantId);
+    const v = item.variants.find((x: any) => x.id === variantId);
     return v ? v.options : null;
   };
 
@@ -93,7 +95,7 @@ const ScaleCard = ({ scale }) => {
 
           {isSum ? (
             <div className="scale-items">
-              {scale.items.map((item, i) => {
+              {scale.items.map((item: any, i: number) => {
                 const activeOptions = getActiveOptions(item, i);
                 return (
                   <div key={i} className="scale-item">
@@ -101,7 +103,7 @@ const ScaleCard = ({ scale }) => {
 
                     {item.variants && (
                       <div className="scale-variants">
-                        {item.variants.map((v) => {
+                        {item.variants.map((v: any) => {
                           const selected = variantSelections[i] === v.id;
                           return (
                             <button
@@ -125,7 +127,7 @@ const ScaleCard = ({ scale }) => {
 
                     {activeOptions ? (
                       <div className="scale-item-options">
-                        {activeOptions.map((opt) => {
+                        {activeOptions.map((opt: any) => {
                           const selected = sumSelections[i] === opt.score;
                           return (
                             <button
@@ -149,7 +151,7 @@ const ScaleCard = ({ scale }) => {
             </div>
           ) : (
             <div className="scale-pick-list">
-              {scale.options.map((opt) => {
+              {scale.options.map((opt: any) => {
                 const selected = pickedScore === opt.score;
                 return (
                   <button

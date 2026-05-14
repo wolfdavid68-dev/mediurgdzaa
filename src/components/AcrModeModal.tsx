@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import AcrTimer from "./AcrTimer";
 import { useWakeLock } from "../lib/useWakeLock";
 
@@ -16,7 +16,13 @@ const readProtocol = () => {
   } catch {}
   return "erc";
 };
-const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
+type AcrModeModalProps = {
+  open: boolean;
+  onClose: () => void;
+  onOpenDrug?: (name: string) => void;
+};
+
+const AcrModeModal = ({ open, onClose, onOpenDrug }: AcrModeModalProps) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [pediatric, setPediatric] = useState<boolean | null>(null); // null tant que pas choisi
   const [protocol, setProtocol] = useState(readProtocol);
@@ -52,7 +58,7 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
   }, [open]);
 
   // Clic backdrop = ferme. Le clic intérieur ne déclenche pas (event sur l'enfant).
-  const onBackdropClick = (e) => {
+  const onBackdropClick = (e: MouseEvent) => {
     if (e.target === dialogRef.current) onClose();
   };
 

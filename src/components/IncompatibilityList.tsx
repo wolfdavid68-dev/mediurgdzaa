@@ -7,20 +7,24 @@ const TYPE_META = {
   compatible: { label: "Compatible validé", short: "✓", color: "#16a34a" },
 };
 
+type CellInfo = { type: string; note: string };
+type Matrix = Record<string, Record<string, CellInfo>>;
+type CompatMatrix = Record<string, Record<string, true>>;
+
 const buildMatrix = () => {
-  const incomp = {},
-    compat = {};
-  INCOMPATIBILITIES.forEach((entry) => {
-    entry.items.forEach((item) => {
-      const target = INCOMPATIBILITIES.find((d) => d.drug === item.with);
+  const incomp: Matrix = {};
+  const compat: CompatMatrix = {};
+  INCOMPATIBILITIES.forEach((entry: any) => {
+    entry.items.forEach((item: any) => {
+      const target = INCOMPATIBILITIES.find((d: any) => d.drug === item.with);
       if (!target) return;
       if (!incomp[entry.drug]) incomp[entry.drug] = {};
       incomp[entry.drug][target.drug] = { type: item.type, note: item.note };
       if (!incomp[target.drug]) incomp[target.drug] = {};
       incomp[target.drug][entry.drug] = { type: item.type, note: item.note };
     });
-    (entry.compatibleWith || []).forEach((name) => {
-      const target = INCOMPATIBILITIES.find((d) => d.drug === name);
+    (entry.compatibleWith || []).forEach((name: string) => {
+      const target = INCOMPATIBILITIES.find((d: any) => d.drug === name);
       if (!target) return;
       if (!compat[entry.drug]) compat[entry.drug] = {};
       compat[entry.drug][target.drug] = true;
@@ -38,7 +42,7 @@ type Selected = { drugA: string; drugB: string; type: string; note: string };
 const IncompatibilityList = () => {
   const [selected, setSelected] = useState<Selected | null>(null);
 
-  const handleCell = (drugA, drugB) => {
+  const handleCell = (drugA: string, drugB: string) => {
     if (drugA === drugB) return;
     if (selected?.drugA === drugA && selected?.drugB === drugB) {
       setSelected(null);
@@ -166,8 +170,8 @@ const IncompatibilityList = () => {
       {/* Détail au tap */}
       {selected &&
         (() => {
-          const meta = TYPE_META[selected.type] || TYPE_META.incompatible;
-          const entryA = INCOMPATIBILITIES.find((d) => d.drug === selected.drugA);
+          const meta = TYPE_META[selected.type as keyof typeof TYPE_META] || TYPE_META.incompatible;
+          const entryA = INCOMPATIBILITIES.find((d: any) => d.drug === selected.drugA);
           return (
             <div
               className="incompat-detail"

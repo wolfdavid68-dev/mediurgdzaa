@@ -1,0 +1,58 @@
+name: CI
+
+# Filet de sécurité avant que le code arrive en prod via Vercel auto-deploy.
+# Tourne sur PR et sur push main : si quelqu'un commit avec --no-verify
+# (bypass du pre-commit hook husky), CI rattrape le coup.
+#
+# Étapes : lint + typecheck + format + knip (code mort) + test + build.
+# Pas de coverage thresholds bloquants pour l'instant — à activer quand
+# on aura un baseline stable (cf. vite.config.ts → test.coverage).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Annule les anciens runs quand un nouveau commit arrive sur la même branche
+# (évite la file d'attente si on push plusieurs fois rapidement).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # Aligné sur le runtime Vercel (Node 20 LTS) — évite les surprises
+          # entre dev local, CI et prod.
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Typecheck (tsc --noEmit)
+        run: npm run typecheck
+
+      - name: Format check (Prettier)
+        run: npm run format:check
+
+      - name: Dead code check (knip)
+        run: npm run knip
+
+      - name: Tests (vitest)
+        run: npm test
+
+      - name: Build (vite + workbox)
+        run: npm run build

@@ -4,9 +4,9 @@
 const DOSE_PATTERN =
   /\b(\d+(?:[,.]\d+)?(?:\s*[-–]\s*\d+(?:[,.]\d+)?)?)\s*(mg\/kg|µg\/kg|mL\/kg|mg\/h|mL\/h|L\/min|gouttes\/kg|mg|µg|mcg|mL|g\/L|g)\b(?:\/(?:kg|h|min|j|24h))?/g;
 
-function buildDrugPattern(drugPatterns) {
+function buildDrugPattern(drugPatterns: string[]) {
   return new RegExp(
-    `\\b(${drugPatterns.map((d) => d.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+    `\\b(${drugPatterns.map((d: string) => d.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
     "gi"
   );
 }

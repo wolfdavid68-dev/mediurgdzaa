@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type MouseEvent } from "react";
 import { toPng } from "html-to-image";
 import { fmt, fmtWall } from "./AcrTimer.helpers";
 
@@ -221,7 +221,7 @@ const AcrSummary = ({
     }
   }, [exporting, generatePng]);
 
-  const onBackdropClick = (e) => {
+  const onBackdropClick = (e: MouseEvent) => {
     if (e.target === dialogRef.current) onClose();
   };
 

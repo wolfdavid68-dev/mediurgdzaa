@@ -4,10 +4,12 @@ import { calcDebit } from "../lib/calc";
 
 // Bloc PSE (pousse-seringue électrique) : input dose cible + calcul mL/h
 // + table des paliers. Gère le mode "extra" (héparine UI/24h en plus).
-const PseBlock = ({ drug, weight }) => {
+type PseBlockProps = { drug: any; weight: string };
+
+const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const [pseTarget, setPseTarget] = useState("");
   const [pseTarget2, setPseTarget2] = useState("");
-  const pse = PSE[drug.id];
+  const pse = (PSE as Record<number, any>)[drug.id];
   if (!pse) return null;
 
   const kg = parseFloat(weight);
@@ -75,7 +77,7 @@ const PseBlock = ({ drug, weight }) => {
               </tr>
             </thead>
             <tbody>
-              {pse.steps.map((step) => {
+              {pse.steps.map((step: number) => {
                 const d = calcDebit(pse, step, weight);
                 const isActive = parseFloat(pseTarget) === step;
                 return (
@@ -96,7 +98,7 @@ const PseBlock = ({ drug, weight }) => {
       {pse.extra &&
         (() => {
           const ex = { unite: pse.extra.unite, conc: pse.conc };
-          const debit2 = calcDebit(ex, pseTarget2, null);
+          const debit2 = calcDebit(ex, pseTarget2, "");
           const outRange2 =
             debit2 &&
             (parseFloat(pseTarget2) < pse.extra.min || parseFloat(pseTarget2) > pse.extra.max);
@@ -134,8 +136,8 @@ const PseBlock = ({ drug, weight }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {pse.extra.steps.map((step) => {
-                    const d = calcDebit(ex, step, null);
+                  {pse.extra.steps.map((step: number) => {
+                    const d = calcDebit(ex, step, "");
                     const isActive = parseFloat(pseTarget2) === step;
                     return (
                       <tr key={step} className={isActive ? "pse-row-active" : ""}>

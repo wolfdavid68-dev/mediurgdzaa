@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import { CHANGELOG } from "../data/changelog";
 
 const TYPE_LABEL = {
@@ -9,7 +9,7 @@ const TYPE_LABEL = {
   docs: "Doc",
 };
 
-const formatDateFr = (iso) => {
+const formatDateFr = (iso: string) => {
   // iso = "AAAA-MM-JJ" — on évite le constructeur Date pour ne pas dépendre du fuseau
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!m) return iso;
@@ -33,7 +33,9 @@ const formatDateFr = (iso) => {
 
 // <dialog> natif (Chrome 37+, Firefox 98+, Safari 15.4+) : focus trap, ESC,
 // scroll lock côté navigateur, plus de useEffect à orchestrer.
-const ChangelogModal = ({ open, onClose }) => {
+type ChangelogModalProps = { open: boolean; onClose: () => void };
+
+const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const ChangelogModal = ({ open, onClose }) => {
   }, [open]);
 
   // Ferme si clic sur le backdrop (zone hors du <dialog> direct)
-  const onBackdropClick = (e) => {
+  const onBackdropClick = (e: MouseEvent) => {
     if (e.target === dialogRef.current) onClose();
   };
 
@@ -80,7 +82,7 @@ const ChangelogModal = ({ open, onClose }) => {
       </header>
 
       <div className="changelog-body">
-        {CHANGELOG.map((entry) => (
+        {CHANGELOG.map((entry: any) => (
           <section key={entry.version} className="changelog-entry">
             <div className="changelog-entry-head">
               <span className="changelog-version">{entry.version}</span>
@@ -88,10 +90,10 @@ const ChangelogModal = ({ open, onClose }) => {
             </div>
             {entry.titre && <h3 className="changelog-titre">{entry.titre}</h3>}
             <ul className="changelog-list">
-              {entry.changes.map((c, i) => (
+              {entry.changes.map((c: any, i: number) => (
                 <li key={i} className={`changelog-item changelog-item-${c.type}`}>
                   <span className={`changelog-tag changelog-tag-${c.type}`}>
-                    {TYPE_LABEL[c.type] || c.type}
+                    {TYPE_LABEL[c.type as keyof typeof TYPE_LABEL] || c.type}
                   </span>
                   <span className="changelog-text">{c.text}</span>
                 </li>

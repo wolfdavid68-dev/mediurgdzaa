@@ -53,7 +53,7 @@ export const DRUG_PATTERNS = [
 
 // Rendu JSX d'un texte protocole : doses en gras, médicaments cliquables.
 // Le tokenizer pur vit dans src/lib/protocolText.js et est testé en isolation.
-const renderText = (text, onDrugSearch) => {
+const renderText = (text: string, onDrugSearch: (name: string) => void) => {
   const tokens = tokenizeProtocolText(text, DRUG_PATTERNS);
   if (tokens.length <= 1) return text;
   return (
@@ -86,7 +86,12 @@ const renderText = (text, onDrugSearch) => {
   );
 };
 
-const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
+type ProtocolCardProps = {
+  protocol: any;
+  onDrugSearch: (name: string) => void;
+};
+
+const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<number | null>(null);
   // "shared" / "copied" / null — feedback transitoire après clic partage.
@@ -94,7 +99,7 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
 
   useEffect(() => {
     if (open) {
-      const idx = p.sections.findIndex((s) => s.type === "actions");
+      const idx = p.sections.findIndex((s: any) => s.type === "actions");
       setActiveTab(idx >= 0 ? idx : 0);
     }
   }, [open, p.sections]);
@@ -102,7 +107,7 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
   // Web Share API : permet d'envoyer un protocole à un collègue via WhatsApp,
   // SMS, ou n'importe quelle target système (Android iOS Chrome Safari). Sur
   // desktop sans navigator.share, fallback : copie du résumé dans le presse-papier.
-  const handleShare = async (e) => {
+  const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const data = {
       title: `MediURG — ${p.titre}`,
@@ -131,7 +136,9 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
   };
 
   const sec = activeTab !== null ? p.sections[activeTab] : null;
-  const meta = sec ? SECTION_META[sec.type] || { color: "#888" } : null;
+  const meta = sec
+    ? SECTION_META[sec.type as keyof typeof SECTION_META] || { color: "#888" }
+    : null;
   const isActions =
     sec?.type === "actions" ||
     sec?.type === "rythme_choquable" ||
@@ -209,8 +216,11 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
           </div>
 
           <div className="proto-tabs">
-            {p.sections.map((s, i) => {
-              const m = SECTION_META[s.type] || { short: s.titre, color: "#888" };
+            {p.sections.map((s: any, i: number) => {
+              const m = SECTION_META[s.type as keyof typeof SECTION_META] || {
+                short: s.titre,
+                color: "#888",
+              };
               const isActive = activeTab === i;
               return (
                 <button
@@ -233,27 +243,27 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }) => {
           {sec && (
             <div className="proto-tab-content">
               <ol className={`proto-items ${isActions ? "proto-items-numbered" : ""}`}>
-                {sec.items.map((item, j) => (
+                {sec.items.map((item: any, j: number) => (
                   <li key={j} className={`proto-item proto-item-${sec.type}`}>
                     {isActions ? (
-                      <span className="proto-item-num" style={{ background: meta.color }}>
+                      <span className="proto-item-num" style={{ background: meta?.color }}>
                         {j + 1}
                       </span>
                     ) : (
-                      <span className="proto-item-bullet" style={{ background: meta.color }} />
+                      <span className="proto-item-bullet" style={{ background: meta?.color }} />
                     )}
                     <div className="proto-item-content">
                       <span>{renderText(item.text, onDrugSearch || (() => {}))}</span>
                       {item.sub && (
                         <ul className="proto-sub-items">
-                          {item.sub.map((s, k) => (
+                          {item.sub.map((s: string, k: number) => (
                             <li key={k} className="proto-sub-item">
                               <svg
                                 viewBox="0 0 24 24"
                                 width="12"
                                 height="12"
                                 fill="none"
-                                stroke={meta.color}
+                                stroke={meta?.color}
                                 strokeWidth="2.5"
                               >
                                 <polyline points="20 6 9 17 4 12" />

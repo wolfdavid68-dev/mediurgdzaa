@@ -8,7 +8,15 @@ import { useEffect, useRef } from "react";
 // A11y : pas un <dialog> natif car position: absolute over chrono (et non
 // fixed centered). On gère manuellement focus auto + ESC pour rester
 // keyboard-friendly et cohérent avec aria-modal="true".
-const AcrPrepOverlay = ({ drugName, content, pediatric, onClose, onOpenFullSheet }) => {
+type Props = {
+  drugName: string;
+  content: any;
+  pediatric: boolean;
+  onClose: () => void;
+  onOpenFullSheet: (() => void) | null;
+};
+
+const AcrPrepOverlay = ({ drugName, content, pediatric, onClose, onOpenFullSheet }: Props) => {
   const data = pediatric ? content.enfant : content.adulte;
   const mode = pediatric ? "Enfant" : "Adulte";
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -65,7 +73,7 @@ const AcrPrepOverlay = ({ drugName, content, pediatric, onClose, onOpenFullSheet
         <div className="acr-prep-section">
           <div className="acr-prep-section-title">Préparation</div>
           <ol className="acr-prep-steps">
-            {data.etapes.map((step, i) => (
+            {data.etapes.map((step: string, i: number) => (
               <li key={i} className="acr-prep-step">
                 {step}
               </li>
@@ -77,7 +85,7 @@ const AcrPrepOverlay = ({ drugName, content, pediatric, onClose, onOpenFullSheet
           <div className="acr-prep-section">
             <div className="acr-prep-section-title">À retenir</div>
             <ul className="acr-prep-notes">
-              {data.notes.map((n, i) => (
+              {data.notes.map((n: string, i: number) => (
                 <li key={i} className="acr-prep-note">
                   {n}
                 </li>

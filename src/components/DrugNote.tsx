@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 
 // Note personnelle par drug, persistée dans localStorage (mediurg-note-{id}).
 // onChange(hasContent) permet au parent d'afficher l'indicateur ✎ dans l'en-tête.
-const DrugNote = ({ drugId, onChange }) => {
+type DrugNoteProps = { drugId: number; onChange?: (hasContent: boolean) => void };
+
+const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
 
@@ -18,7 +20,7 @@ const DrugNote = ({ drugId, onChange }) => {
     }
   }, [drugId, onChange]);
 
-  const handleNoteChange = (e) => {
+  const handleNoteChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setNote(value);
     try {

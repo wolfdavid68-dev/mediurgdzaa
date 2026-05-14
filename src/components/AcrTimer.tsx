@@ -32,8 +32,14 @@ import { useWakeLock } from "../lib/useWakeLock";
 import AcrSummary from "./AcrSummary";
 import AcrPrepOverlay from "./AcrPrepOverlay";
 
+type AcrTimerProps = {
+  pediatric?: boolean;
+  protocol?: string;
+  onOpenDrug?: (name: string) => void;
+};
+
 // phase ∈ "rcp" | "analyse" | "actions" | "post-rosc"
-const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
+const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerProps) => {
   // Doses de référence ERC pour ce patient — affichées en permanence
   const refDoses = pediatric
     ? [
@@ -66,7 +72,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
   } = session;
   const { elapsed, elapsedRef, resetChrono } = useAcrChrono(running);
   const [showSummary, setShowSummary] = useState(false);
-  const [coachMode, setCoachMode] = useState(readCoach);
+  const [coachMode, setCoachMode] = useState<"full" | "visual" | "silent">(readCoach);
   // Dérivés alignés sur la table : seul "voix" distingue full ↔ visual
   const audioOn = coachMode !== "silent"; // bips + métronome
   const visualOn = coachMode !== "silent"; // zoom DSA + flashs
@@ -89,7 +95,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
   const [htChecked, setHtChecked] = useState(() => new Set<string>());
   const [htExpanded, setHtExpanded] = useState(false);
   const [htDetail, setHtDetail] = useState<string | null>(null); // id de l'item dont on affiche l'action
-  const htCauses = HT_CAUSES[protocol] || HT_CAUSES.erc;
+  const htCauses = HT_CAUSES[protocol as keyof typeof HT_CAUSES] || HT_CAUSES.erc;
 
   // Wake Lock pendant que le chrono tourne (l'écran ne doit pas s'éteindre).
   // La modale parent tient déjà un lock global ; ce 2nd lock est défensif
@@ -216,8 +222,8 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
           </span>
         </div>
         <div className="acr-doses-pills">
-          {refDoses.map((d, i) => {
-            const hasPrep = !!PREP_CONTENT[d.drug];
+          {refDoses.map((d: { drug: string; dose: string; note: string }, i: number) => {
+            const hasPrep = !!PREP_CONTENT[d.drug as keyof typeof PREP_CONTENT];
             return (
               <button
                 key={i}
@@ -387,10 +393,10 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }) => {
       {showZoom && <AcrZoomOverlay nextAnalyseIn={nextAnalyseIn} onSkip={skipToAnalyse} />}
 
       {/* Overlay « Préparation rapide » — Adré / Cordarone, sans quitter le mode ACR */}
-      {prepDrug && PREP_CONTENT[prepDrug] && (
+      {prepDrug && PREP_CONTENT[prepDrug as keyof typeof PREP_CONTENT] && (
         <AcrPrepOverlay
           drugName={prepDrug}
-          content={PREP_CONTENT[prepDrug]}
+          content={PREP_CONTENT[prepDrug as keyof typeof PREP_CONTENT]}
           pediatric={pediatric}
           onClose={() => setPrepDrug(null)}
           onOpenFullSheet={

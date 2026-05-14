@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { DRUGS } from "../data/drugs";
 
-const buildPrepFromDrug = (drug) => {
+const buildPrepFromDrug = (drug: any) => {
   if (!drug) return null;
   const cond = drug.cond?.[0] || null;
   const etapes = drug.prep?.etapes || [];
   return { cond, etapes };
 };
 
-const PrepKitCard = ({ kit }) => {
+const PrepKitCard = ({ kit }: { kit: any }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("drogues");
 
@@ -86,8 +86,8 @@ const PrepKitCard = ({ kit }) => {
           <div className="tab-content">
             {activeTab === "drogues" && (
               <div className="prepkit-drugs">
-                {kit.drogues.map((d, i) => {
-                  const drug = d.drugId ? DRUGS.find((x) => x.id === d.drugId) : null;
+                {kit.drogues.map((d: any, i: number) => {
+                  const drug = d.drugId ? DRUGS.find((x: any) => x.id === d.drugId) : null;
                   const fromDrug = buildPrepFromDrug(drug);
                   const condText = fromDrug?.cond || null;
                   // Si le kit fournit sa propre prep, elle prime sur les etapes du drug
@@ -121,7 +121,7 @@ const PrepKitCard = ({ kit }) => {
                           <span className="prepkit-drug-label">Prép.</span>
                           <span className="prepkit-drug-value">
                             <ol style={{ margin: 0, paddingLeft: 16 }}>
-                              {etapes.map((step, j) => (
+                              {etapes.map((step: string, j: number) => (
                                 <li key={j}>{step}</li>
                               ))}
                             </ol>
@@ -158,7 +158,7 @@ const PrepKitCard = ({ kit }) => {
 
             {activeTab === "materiel" && (
               <ul className="item-list">
-                {kit.materiel.map((m, i) => (
+                {kit.materiel.map((m: string, i: number) => (
                   <li key={i}>{m}</li>
                 ))}
               </ul>
@@ -166,7 +166,7 @@ const PrepKitCard = ({ kit }) => {
 
             {activeTab === "sequence" && (
               <ol className="prep-etapes">
-                {kit.sequence.map((s, i) => (
+                {kit.sequence.map((s: string, i: number) => (
                   <li key={i} className="prep-etape">
                     {s}
                   </li>
@@ -176,7 +176,7 @@ const PrepKitCard = ({ kit }) => {
 
             {activeTab === "notes" && kit.notes && (
               <ul className="prep-notes">
-                {kit.notes.map((n, i) => (
+                {kit.notes.map((n: string, i: number) => (
                   <li key={i} className="prep-note-item">
                     <svg
                       viewBox="0 0 24 24"

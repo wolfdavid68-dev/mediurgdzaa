@@ -49,13 +49,13 @@ const DrugCard = ({
     }
   }, [open, drug.id]); // eslint-disable-line
 
-  const toggleTab = (key) => setActiveTab(activeTab === key ? null : key);
+  const toggleTab = (key: string) => setActiveTab(activeTab === key ? null : key);
 
-  const renderList = (items) => {
+  const renderList = (items: string[] | undefined) => {
     if (!items || items.length === 0) return <span className="na">Non renseigné</span>;
     return (
       <ul className="item-list">
-        {items.map((it, i) => (
+        {items.map((it: string, i: number) => (
           <li key={i}>{it}</li>
         ))}
       </ul>
@@ -145,7 +145,7 @@ const DrugCard = ({
           <div className="poso-box">
             <div className="poso-title">Adulte</div>
             {drug.poso.a && drug.poso.a.length ? (
-              drug.poso.a.map((p, i) => {
+              drug.poso.a.map((p: string, i: number) => {
                 const res = calcDose(p, weight);
                 return (
                   <div key={i} className="poso-item">
@@ -168,7 +168,7 @@ const DrugCard = ({
           <div className="poso-box">
             <div className="poso-title">Pédiatrique</div>
             {drug.poso.p && drug.poso.p.length ? (
-              drug.poso.p.map((p, i) => {
+              drug.poso.p.map((p: string, i: number) => {
                 const res = calcDose(p, weight);
                 return (
                   <div key={i} className="poso-item">
@@ -197,13 +197,13 @@ const DrugCard = ({
     );
   };
 
-  const renderContent = (key) => {
+  const renderContent = (key: string) => {
     if (key === "indic") return renderList(drug.indic);
     if (key === "ci") {
       if (!drug.ci || drug.ci.length === 0) return <span className="na">Non renseigné</span>;
       return (
         <ul className="ci-list">
-          {drug.ci.map((it, i) => {
+          {drug.ci.map((it: string, i: number) => {
             const sev = ciSeverity(it);
             return (
               <li key={i} className={`ci-item ${sev ? `ci-item-${sev}` : ""}`}>
@@ -224,7 +224,7 @@ const DrugCard = ({
       if (!drug.cond || drug.cond.length === 0) return <span className="na">Non renseigné</span>;
       return (
         <div className="cond-list">
-          {drug.cond.map((c, i) => (
+          {drug.cond.map((c: string, i: number) => (
             <span key={i} className="cond-tag">
               {c}
             </span>
@@ -255,7 +255,7 @@ const DrugCard = ({
             <span className="badge badge-cat" data-cat={drug.cat}>
               {drug.cat}
             </span>
-            {drug.svc.map((s) => (
+            {drug.svc.map((s: string) => (
               <span key={s} className="badge badge-svc">
                 {s}
               </span>
