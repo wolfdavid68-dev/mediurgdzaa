@@ -1,0 +1,317 @@
+{
+  "_comment": "Snapshot id->nom des drugs. Modifié par humain + test data.test.js. Sert à protéger localStorage mediurg-note-{id} : si on renumère, le test échoue.",
+  "drugs": [
+    {
+      "id": 1,
+      "nom": "DIPRIVAN"
+    },
+    {
+      "id": 2,
+      "nom": "HYPNOMIDATE"
+    },
+    {
+      "id": 3,
+      "nom": "HYPNOVEL"
+    },
+    {
+      "id": 4,
+      "nom": "KÉTAMINE"
+    },
+    {
+      "id": 5,
+      "nom": "SUFENTANIL"
+    },
+    {
+      "id": 6,
+      "nom": "MORPHINE"
+    },
+    {
+      "id": 7,
+      "nom": "ACUPAN"
+    },
+    {
+      "id": 8,
+      "nom": "NARCAN"
+    },
+    {
+      "id": 9,
+      "nom": "CÉLOCURINE"
+    },
+    {
+      "id": 10,
+      "nom": "ESMERON"
+    },
+    {
+      "id": 11,
+      "nom": "NIMBEX"
+    },
+    {
+      "id": 12,
+      "nom": "BRIDION"
+    },
+    {
+      "id": 13,
+      "nom": "ADRÉNALINE"
+    },
+    {
+      "id": 14,
+      "nom": "ÉPHÉDRINE"
+    },
+    {
+      "id": 15,
+      "nom": "DOBUTAMINE"
+    },
+    {
+      "id": 16,
+      "nom": "ISUPREL"
+    },
+    {
+      "id": 17,
+      "nom": "NORADRÉNALINE"
+    },
+    {
+      "id": 19,
+      "nom": "ATROPINE"
+    },
+    {
+      "id": 20,
+      "nom": "BREVIBLOC"
+    },
+    {
+      "id": 21,
+      "nom": "CORDARONE"
+    },
+    {
+      "id": 22,
+      "nom": "DIGOXINE NATIVELLE"
+    },
+    {
+      "id": 23,
+      "nom": "STRIADYNE"
+    },
+    {
+      "id": 24,
+      "nom": "ACTILYSE"
+    },
+    {
+      "id": 25,
+      "nom": "METALYSE"
+    },
+    {
+      "id": 26,
+      "nom": "LOXEN"
+    },
+    {
+      "id": 27,
+      "nom": "EUPRESSYL"
+    },
+    {
+      "id": 28,
+      "nom": "RISORDAN"
+    },
+    {
+      "id": 29,
+      "nom": "ANEXATE"
+    },
+    {
+      "id": 30,
+      "nom": "GLUCAGEN"
+    },
+    {
+      "id": 31,
+      "nom": "POLARAMINE"
+    },
+    {
+      "id": 32,
+      "nom": "VALIUM"
+    },
+    {
+      "id": 33,
+      "nom": "RIVOTRIL"
+    },
+    {
+      "id": 34,
+      "nom": "KEPPRA"
+    },
+    {
+      "id": 35,
+      "nom": "PRODILANTIN"
+    },
+    {
+      "id": 36,
+      "nom": "LASILIX"
+    },
+    {
+      "id": 37,
+      "nom": "CHLORURE DE CALCIUM"
+    },
+    {
+      "id": 38,
+      "nom": "GLUCONATE DE CALCIUM"
+    },
+    {
+      "id": 39,
+      "nom": "KCL"
+    },
+    {
+      "id": 40,
+      "nom": "SULFATE DE MAGNÉSIUM"
+    },
+    {
+      "id": 41,
+      "nom": "EXACYL"
+    },
+    {
+      "id": 42,
+      "nom": "HÉPARINE SODIQUE"
+    },
+    {
+      "id": 43,
+      "nom": "CLOTTAFACT"
+    },
+    {
+      "id": 44,
+      "nom": "VENTOLINE"
+    },
+    {
+      "id": 45,
+      "nom": "SOLUMEDROL"
+    },
+    {
+      "id": 46,
+      "nom": "GLUCOSE 30%"
+    },
+    {
+      "id": 47,
+      "nom": "OMÉPRAZOLE"
+    },
+    {
+      "id": 48,
+      "nom": "PRIMPERAN"
+    },
+    {
+      "id": 49,
+      "nom": "ZOPHREN"
+    },
+    {
+      "id": 50,
+      "nom": "SANDOSTATINE"
+    },
+    {
+      "id": 51,
+      "nom": "NIMOTOP"
+    },
+    {
+      "id": 52,
+      "nom": "AMIKLIN"
+    },
+    {
+      "id": 53,
+      "nom": "AUGMENTIN"
+    },
+    {
+      "id": 54,
+      "nom": "AMOXICILLINE"
+    },
+    {
+      "id": 55,
+      "nom": "ZOVIRAX"
+    },
+    {
+      "id": 56,
+      "nom": "CLAFORAN"
+    },
+    {
+      "id": 57,
+      "nom": "ROCÉPHINE"
+    },
+    {
+      "id": 58,
+      "nom": "GENTAMICINE"
+    },
+    {
+      "id": 59,
+      "nom": "LÉVOFLOXACINE"
+    },
+    {
+      "id": 60,
+      "nom": "FLAGYL"
+    },
+    {
+      "id": 61,
+      "nom": "TAZOCILLINE"
+    },
+    {
+      "id": 62,
+      "nom": "ROVAMYCINE"
+    },
+    {
+      "id": 63,
+      "nom": "VANCOMYCINE"
+    },
+    {
+      "id": 64,
+      "nom": "NaCl 0,9%"
+    },
+    {
+      "id": 65,
+      "nom": "G5%"
+    },
+    {
+      "id": 66,
+      "nom": "ISOFUNDINE"
+    },
+    {
+      "id": 67,
+      "nom": "RINGER LACTATE"
+    },
+    {
+      "id": 68,
+      "nom": "MANNITOL 20%"
+    },
+    {
+      "id": 69,
+      "nom": "CGR"
+    },
+    {
+      "id": 70,
+      "nom": "PFC"
+    },
+    {
+      "id": 71,
+      "nom": "CP"
+    },
+    {
+      "id": 72,
+      "nom": "VIALEBEX / ALBUMINE HUMAINE"
+    },
+    {
+      "id": 73,
+      "nom": "OCTAPLEX"
+    },
+    {
+      "id": 74,
+      "nom": "BRICANYL"
+    },
+    {
+      "id": 75,
+      "nom": "ATROVENT"
+    },
+    {
+      "id": 76,
+      "nom": "CÉLESTÈNE"
+    },
+    {
+      "id": 77,
+      "nom": "PERFALGAN"
+    },
+    {
+      "id": 78,
+      "nom": "CYANOKIT"
+    },
+    {
+      "id": 79,
+      "nom": "HIDONAC"
+    }
+  ]
+}

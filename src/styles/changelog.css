@@ -39,3 +39,69 @@
     margin-right: 6px;
   }
 }
+
+/* ── Backup notes utilisateur (export/import JSON) ───────────
+   Affiché dans la modale changelog, en bas. Permet à l'user de
+   sauvegarder/restaurer ses notes personnelles par médicament
+   (localStorage `mediurg-note-{id}`) — utile avant changement de
+   téléphone, désinstallation iOS, etc.
+   ─────────────────────────────────────────────────────────── */
+.notes-backup {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.notes-backup-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.notes-backup-text strong {
+  font-size: 13px;
+  color: var(--text);
+}
+.notes-backup-hint {
+  font-size: 12px;
+  color: var(--text-mute);
+  line-height: 1.4;
+}
+.notes-backup-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.notes-backup-btn {
+  flex: 1 1 120px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.notes-backup-btn:hover {
+  background: var(--card-hover);
+  border-color: var(--border-strong);
+}
+.notes-backup-btn:active {
+  transform: scale(0.98);
+}
+.notes-backup-status {
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--card);
+  padding: 8px 10px;
+  border-radius: 6px;
+  border-left: 3px solid var(--info);
+  animation: panel-expand-in 0.18s ease;
+}

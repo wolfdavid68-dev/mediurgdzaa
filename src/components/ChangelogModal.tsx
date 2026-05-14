@@ -1,5 +1,6 @@
 import { useEffect, useRef, type MouseEvent } from "react";
 import { CHANGELOG } from "../data/changelog";
+import NotesBackup from "./NotesBackup";
 
 const TYPE_LABEL = {
   feat: "Nouveau",
@@ -82,6 +83,7 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
       </header>
 
       <div className="changelog-body">
+        <NotesBackup />
         {CHANGELOG.map((entry: any) => (
           <section key={entry.version} className="changelog-entry">
             <div className="changelog-entry-head">

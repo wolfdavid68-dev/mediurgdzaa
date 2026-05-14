@@ -9,6 +9,7 @@ import { PROTOCOLS } from "../data/protocols";
 import { DRUG_PATTERNS } from "../components/ProtocolCard";
 import { normalize } from "./normalize";
 import { calcDose, calcDebit } from "./calc";
+import idsSnapshot from "../data/drug-ids.snapshot.json";
 
 // Poids de référence pour les tests de plausibilité clinique
 const REF_KG = 70;
@@ -36,6 +37,46 @@ describe("DRUGS — intégrité", () => {
       missing: required.filter((k) => d[k] === undefined || d[k] === null),
     })).filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
+  });
+
+  // ════════════════════════════════════════════════════════════════
+  // ANTI-RENUMÉRATION — protège les notes utilisateurs en localStorage
+  // (clé `mediurg-note-{id}`). Si quelqu'un renumère un drug existant,
+  // les notes pointent silencieusement sur le mauvais médicament en prod.
+  // Le snapshot src/data/drug-ids.snapshot.json fige le mapping id → nom ;
+  // toute modification doit être consciente (ajouter au snapshot quand on
+  // ajoute un drug, JAMAIS modifier un id existant).
+  // ════════════════════════════════════════════════════════════════
+  describe("snapshot ids ↔ noms (anti-renumération)", () => {
+    test("chaque entrée du snapshot existe encore avec le même nom", () => {
+      const drift = idsSnapshot.drugs
+        .map(({ id, nom }) => {
+          const found = DRUGS.find((d) => d.id === id);
+          if (!found) return { id, nom, error: "id supprimé du DRUGS" };
+          if (found.nom !== nom) {
+            return { id, nom, current: found.nom, error: "nom changé pour cet id" };
+          }
+          return null;
+        })
+        .filter(Boolean);
+      // Si ce test échoue : un drug a été renuméroté ou supprimé. Les notes
+      // localStorage `mediurg-note-{id}` des users en prod vont pointer sur
+      // le mauvais médicament. Ne pas modifier le snapshot pour faire passer
+      // le test sans avoir réfléchi aux conséquences.
+      expect(drift).toEqual([]);
+    });
+
+    test("aucun nouveau drug ne devrait être absent du snapshot (rappel à l'auteur)", () => {
+      const snapIds = new Set(idsSnapshot.drugs.map((d) => d.id));
+      const newDrugs = DRUGS.filter((d) => !snapIds.has(d.id)).map((d) => ({
+        id: d.id,
+        nom: d.nom,
+      }));
+      // Si ce test échoue : tu as ajouté un drug. Ajoute-le aussi dans
+      // src/data/drug-ids.snapshot.json (champ `drugs`) pour activer la
+      // protection anti-renumération sur ce nouvel id.
+      expect(newDrugs).toEqual([]);
+    });
   });
 
   test("poso a au moins une posologie adulte ou pédiatrique", () => {
