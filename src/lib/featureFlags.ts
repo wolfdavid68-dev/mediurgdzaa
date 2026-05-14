@@ -36,4 +36,16 @@ const isPreviewing = (flagName: string): boolean => {
 // ────────────────────────────────────────────────────────────
 const AUTH_ENABLED = false;
 
-export const isAuthEnabled = (): boolean => AUTH_ENABLED || isPreviewing("AUTH_ENABLED");
+// Détecte un retour de lien de récupération (mot de passe oublié) :
+// Supabase ajoute `#type=recovery&access_token=...` au hash. Si l'auth
+// est désactivée (flag false ET pas de ?auth=preview), l'user resterait
+// bloqué sur l'app sans jamais voir le ResetPasswordScreen. On force
+// l'activation dans ce cas.
+const isRecoveryReturn = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const hash = window.location.hash;
+  return hash.includes("type=recovery") && hash.includes("access_token=");
+};
+
+export const isAuthEnabled = (): boolean =>
+  AUTH_ENABLED || isPreviewing("AUTH_ENABLED") || isRecoveryReturn();
