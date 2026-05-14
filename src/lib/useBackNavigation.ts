@@ -30,6 +30,7 @@ type Callbacks = {
   setProtoCategory: (c: string) => void;
   setShowChangelog: (v: boolean) => void;
   setShowAcr: (v: boolean) => void;
+  setShowNotesBackup: (v: boolean) => void;
   setExitToast: (v: ExitToastVariant | null) => void;
 };
 
@@ -129,6 +130,7 @@ export const useBackNavigation = (cb: Callbacks) => {
         cbRef.current.setProtoCategory("PISU");
         cbRef.current.setShowChangelog(false);
         cbRef.current.setShowAcr(false);
+        cbRef.current.setShowNotesBackup(false);
         return;
       }
 
@@ -137,6 +139,7 @@ export const useBackNavigation = (cb: Callbacks) => {
       cbRef.current.setProtoCategory(s.protoCategory || "PISU");
       cbRef.current.setShowChangelog(s.modal === "changelog");
       cbRef.current.setShowAcr(s.modal === "acr");
+      cbRef.current.setShowNotesBackup(s.modal === "notesBackup");
     };
     window.addEventListener("popstate", onPopState);
 
@@ -189,7 +192,7 @@ export const useBackNavigation = (cb: Callbacks) => {
           const isRapidDouble = now - lastBackAt < 1000;
 
           // Modal ouverte → on délègue à popstate via history.back()
-          if (s?.modal === "acr" || s?.modal === "changelog") {
+          if (s?.modal === "acr" || s?.modal === "changelog" || s?.modal === "notesBackup") {
             e.preventDefault();
             lastBackAt = now;
             try {

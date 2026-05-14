@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v94";
+export const APP_VERSION = "v95";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v95",
+    date: "2026-05-14",
+    titre: "Sauvegarde / restauration des notes personnelles",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouveau bouton 💾 dans l'en-tête (à côté de A+ et 🌓) qui ouvre une mini-modale « Mes notes personnelles ». Bouton « ⇩ Exporter » qui télécharge un fichier JSON avec toutes les notes saisies sur les médicaments, et « ⇧ Importer » qui les réinjecte. Utile pour migrer entre téléphones, faire un backup avant changement d'appareil, ou restaurer après un vidage de cache. À l'import, match prioritaire par id du médicament, fallback par nom si l'id a changé entre versions.",
+      },
+      {
+        type: "chore",
+        text: "Protection anti-renumération des id de médicaments en CI : nouveau snapshot src/data/drug-ids.snapshot.json (78 drugs) + 2 tests dans data.test.js qui échouent si quelqu'un renumère ou supprime un drug existant. Garantit que la clé localStorage `mediurg-note-{id}` ne pointe jamais silencieusement sur le mauvais médicament après une mise à jour.",
+      },
+    ],
+  },
   {
     version: "v94",
     date: "2026-05-13",

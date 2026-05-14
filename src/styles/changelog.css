@@ -105,3 +105,93 @@
   border-left: 3px solid var(--info);
   animation: panel-expand-in 0.18s ease;
 }
+
+/* ── Modale dédiée NotesBackup (bouton 💾 du header) ───────── */
+.notes-backup-dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: min(520px, 92vw);
+  width: 100%;
+  border-radius: 14px;
+}
+.notes-backup-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+.notes-backup-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+.notes-backup-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+.notes-backup-modal-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.notes-backup-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-mute);
+  font-size: 24px;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.notes-backup-modal-close:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+.notes-backup-modal-body {
+  padding: 14px 16px 18px;
+}
+/* Dans la modale dédiée, on retire la marge top (déjà espacée par le body) */
+.notes-backup-modal-body .notes-backup {
+  margin-top: 0;
+}
+
+/* ── Bouton 💾 dans le header (à côté de A+ et 🌓) ──────────── */
+.notes-backup-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+}
+.notes-backup-toggle:hover {
+  background: var(--card-hover);
+  border-color: var(--border-strong);
+}
+.notes-backup-toggle:active {
+  transform: scale(0.94);
+}
+@media (max-width: 480px) {
+  .notes-backup-toggle {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}

@@ -20,6 +20,7 @@ import { usePersistentStorage } from "./lib/usePersistentStorage";
 // poids sort du bundle initial → premier paint plus rapide.
 const AcrModeModal = lazy(() => import("./components/AcrModeModal"));
 const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
+const NotesBackupModal = lazy(() => import("./components/NotesBackupModal"));
 const ProtocolesPage = lazy(() => import("./pages/ProtocolesPage"));
 const EchellesPage = lazy(() => import("./pages/EchellesPage"));
 
@@ -76,6 +77,7 @@ const App = () => {
   );
   const [showChangelog, setShowChangelog] = useState(false);
   const [showAcr, setShowAcr] = useState(false);
+  const [showNotesBackup, setShowNotesBackup] = useState(false);
   // null | "default" | "firefox-no-exit" — null = caché ; sinon affiche le toast
   // avec le bon message (variante Firefox PWA = ne peut pas quitter via back).
   const [exitToast, setExitToast] = useState<ExitToastVariant | null>(null);
@@ -168,6 +170,7 @@ const App = () => {
     setProtoCategory,
     setShowChangelog,
     setShowAcr,
+    setShowNotesBackup,
     setExitToast,
   });
 
@@ -191,12 +194,13 @@ const App = () => {
   // Le rapid-double-back dans le popstate handler (<1s) court-circuite cette
   // navigation pour permettre un exit rapide quand l'user mash le bouton.
   const navigateTo = (newPage: string) => {
-    if (newPage === page && !showAcr && !showChangelog) return;
+    if (newPage === page && !showAcr && !showChangelog && !showNotesBackup) return;
     pushNav({ page: newPage, modal: null });
     withTransition(() => {
       setPage(newPage);
       setShowAcr(false);
       setShowChangelog(false);
+      setShowNotesBackup(false);
     });
   };
 
@@ -220,6 +224,7 @@ const App = () => {
     } catch {
       setShowChangelog(false);
       setShowAcr(false);
+      setShowNotesBackup(false);
     }
   };
 
@@ -263,6 +268,7 @@ const App = () => {
   const docTitle = (() => {
     if (showAcr) return "MediURG — URGENCE ACR";
     if (showChangelog) return "MediURG — Notes de version";
+    if (showNotesBackup) return "MediURG — Sauvegarde des notes";
     if (page === "echelles") return "MediURG — Échelles cliniques";
     if (page === "protocoles") {
       if (protoCategory === "incompatibilites") return "MediURG — Incompatibilités";
@@ -298,6 +304,18 @@ const App = () => {
               <span className="net-status-dot" aria-hidden="true" />
               {isOnline ? "Online" : "Offline"}
             </span>
+            <button
+              type="button"
+              className="notes-backup-toggle"
+              onClick={() => {
+                pushNav({ modal: "notesBackup" });
+                setShowNotesBackup(true);
+              }}
+              aria-label="Sauvegarder mes notes personnelles"
+              title="Sauvegarder / restaurer mes notes"
+            >
+              💾
+            </button>
             <button
               className={`font-toggle ${bigFont ? "font-toggle-active" : ""}`}
               onClick={toggleFont}
@@ -599,6 +617,11 @@ const App = () => {
       {showChangelog && (
         <Suspense fallback={null}>
           <ChangelogModal open={showChangelog} onClose={closeOverlay} />
+        </Suspense>
+      )}
+      {showNotesBackup && (
+        <Suspense fallback={null}>
+          <NotesBackupModal open={showNotesBackup} onClose={closeOverlay} />
         </Suspense>
       )}
 
