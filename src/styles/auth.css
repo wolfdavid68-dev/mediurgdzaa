@@ -550,6 +550,29 @@
   line-height: 1.4;
 }
 
+/* Bandeau d'info contextuel (au-dessus d'un formulaire), distinct de
+   .auth-error qui est une erreur inline post-submit. */
+.auth-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: -4px 0 12px;
+}
+.auth-banner-warn {
+  background: oklch(0.78 0.14 80 / 0.12);
+  border: 1px solid oklch(0.78 0.14 80 / 0.4);
+  color: oklch(0.85 0.1 80);
+}
+.auth-banner-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
 /* ── Password strength ─────────────────────────────────────── */
 .auth-pw-strength {
   display: flex;

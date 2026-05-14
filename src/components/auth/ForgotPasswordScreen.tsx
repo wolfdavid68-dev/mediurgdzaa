@@ -12,9 +12,12 @@ import { isValidMatricule, requestPasswordReset } from "../../lib/auth";
 
 type Props = {
   onBackToLogin: () => void;
+  // Message à afficher en bandeau au-dessus du formulaire (e.g. retour
+  // d'un lien recovery expiré : `#error_code=otp_expired`).
+  initialError?: string | null;
 };
 
-const ForgotPasswordScreen = ({ onBackToLogin }: Props) => {
+const ForgotPasswordScreen = ({ onBackToLogin, initialError = null }: Props) => {
   const [matriculeDigits, setMatriculeDigits] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +79,15 @@ const ForgotPasswordScreen = ({ onBackToLogin }: Props) => {
                 Saisis ton matricule. Un lien de réinitialisation sera envoyé à l'adresse email
                 associée à ton compte.
               </p>
+
+              {initialError && (
+                <div className="auth-banner auth-banner-warn" role="alert">
+                  <span className="auth-banner-icon" aria-hidden="true">
+                    ⚠
+                  </span>
+                  <span>{initialError}</span>
+                </div>
+              )}
 
               <form onSubmit={onSubmit} className="auth-form" noValidate>
                 <label className="auth-field">

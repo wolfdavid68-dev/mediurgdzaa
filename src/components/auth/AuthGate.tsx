@@ -31,17 +31,41 @@ type Props = {
   children: ReactNode;
 };
 
+// Détecte une erreur de retour Supabase dans le hash, e.g. lien recovery
+// expiré : `#error=access_denied&error_code=otp_expired&error_description=...`.
+// Retourne un message FR lisible + nettoie l'URL pour ne pas re-déclencher.
+const consumeAuthHashError = (): string | null => {
+  if (typeof window === "undefined") return null;
+  const hash = window.location.hash;
+  if (!hash.includes("error=")) return null;
+  const params = new URLSearchParams(hash.replace(/^#/, ""));
+  const code = params.get("error_code") ?? "";
+  const desc = params.get("error_description") ?? "";
+  // Nettoie l'URL (sinon refresh = re-déclenche le toast)
+  window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  if (code === "otp_expired") {
+    return "Le lien de réinitialisation a expiré (valable 1 h). Demandez-en un nouveau.";
+  }
+  if (desc) return decodeURIComponent(desc.replace(/\+/g, " "));
+  return "Lien d'authentification invalide ou expiré.";
+};
+
 const AuthGate = ({ children }: Props) => {
   const enabled = isAuthEnabled();
 
   // Tous les hooks DOIVENT être appelés avant tout return conditionnel
   // (règle React). On les appelle inconditionnellement ; quand enabled=false,
   // ils sont juste no-op (pas de network call).
-  const [screen, setScreen] = useState<AuthScreen>("login");
+  // L'init est lazy pour éviter de toucher window.location avant le mount
+  // côté SSR (pas notre cas mais propre).
+  const [screen, setScreen] = useState<AuthScreen>(() =>
+    typeof window !== "undefined" && window.location.hash.includes("error=") ? "forgot" : "login"
+  );
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAdmin, setShowAdmin] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  const [hashError, setHashError] = useState<string | null>(() => consumeAuthHashError());
 
   useEffect(() => {
     if (!enabled) {
@@ -131,7 +155,15 @@ const AuthGate = ({ children }: Props) => {
       return <RegisterScreen onGoToLogin={() => setScreen("login")} />;
     }
     if (screen === "forgot") {
-      return <ForgotPasswordScreen onBackToLogin={() => setScreen("login")} />;
+      return (
+        <ForgotPasswordScreen
+          onBackToLogin={() => {
+            setHashError(null);
+            setScreen("login");
+          }}
+          initialError={hashError}
+        />
+      );
     }
     return (
       <LoginScreen
