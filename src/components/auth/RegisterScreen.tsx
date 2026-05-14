@@ -8,6 +8,7 @@ import {
   passwordStrength,
   EMAIL_DOMAIN,
 } from "../../lib/auth";
+import LegalModal from "../LegalModal";
 
 // Création de compte en 2 étapes + confirmation.
 // Cf. design_handoff_sau_mulhouse pour la fidélité visuelle.
@@ -41,6 +42,7 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showLegal, setShowLegal] = useState(false);
 
   const triggerShake = () => {
     setShake(true);
@@ -283,7 +285,20 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
                     checked={acceptCharte}
                     onChange={(e) => setAcceptCharte(e.target.checked)}
                   />
-                  <span>J'accepte la charte d'usage du SI hospitalier.</span>
+                  <span>
+                    J'accepte la charte d'usage du SI hospitalier et la{" "}
+                    <button
+                      type="button"
+                      className="auth-legal-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowLegal(true);
+                      }}
+                    >
+                      politique de confidentialité
+                    </button>
+                    .
+                  </span>
                 </label>
 
                 {error && (
@@ -340,6 +355,8 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
           )}
         </main>
       </div>
+
+      <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
     </div>
   );
 };

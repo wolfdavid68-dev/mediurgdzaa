@@ -570,6 +570,15 @@
   flex: 1;
 }
 
+.changelog-footer {
+  padding: 12px 20px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elevated);
+  text-align: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 480px) {
   .changelog-modal {
     max-height: 90vh;
@@ -582,6 +591,9 @@
   }
   .changelog-item {
     font-size: 13px;
+  }
+  .changelog-footer {
+    padding: 10px 16px 12px;
   }
 }
 

@@ -1,6 +1,7 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { CHANGELOG } from "../data/changelog";
 import NotesBackup from "./NotesBackup";
+import LegalModal from "./LegalModal";
 
 const TYPE_LABEL = {
   feat: "Nouveau",
@@ -38,6 +39,7 @@ type ChangelogModalProps = { open: boolean; onClose: () => void };
 
 const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const [showLegal, setShowLegal] = useState(false);
 
   useEffect(() => {
     const d = dialogRef.current;
@@ -104,6 +106,14 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
           </section>
         ))}
       </div>
+
+      <footer className="changelog-footer">
+        <button type="button" className="auth-legal-link" onClick={() => setShowLegal(true)}>
+          Mentions légales &amp; confidentialité
+        </button>
+      </footer>
+
+      <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
     </dialog>
   );
 };

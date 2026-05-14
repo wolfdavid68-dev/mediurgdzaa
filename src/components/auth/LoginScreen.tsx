@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import MatriculeInput from "./MatriculeInput";
 import { login, isValidMatricule } from "../../lib/auth";
+import LegalModal from "../LegalModal";
 
 // Écran de login — saisie matricule + mot de passe.
 // Cf. design_handoff_sau_mulhouse pour la fidélité visuelle.
@@ -20,6 +21,7 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister }: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
 
   const triggerShake = () => {
     setShake(true);
@@ -166,9 +168,17 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister }: Props) => {
             </button>
           </form>
 
-          <div className="auth-card-foot">Accès réservé au personnel autorisé du SAU.</div>
+          <div className="auth-card-foot">
+            Accès réservé au personnel autorisé du SAU.
+            <br />
+            <button type="button" className="auth-legal-link" onClick={() => setShowLegal(true)}>
+              Mentions légales &amp; confidentialité
+            </button>
+          </div>
         </main>
       </div>
+
+      <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
     </div>
   );
 };
