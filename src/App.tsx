@@ -289,7 +289,7 @@ const App = () => {
           <div className="logo-row">
             <div className="logo">
               <div className="logo-mark">
-                <img src="/logo_urgences_mulhouse_HD_transparent.png" alt="Urgences Mulhouse" />
+                <img src="/logo-sau.png" alt="Urgences Mulhouse" />
               </div>
               <div className="logo-text">
                 <h1>MediURG</h1>

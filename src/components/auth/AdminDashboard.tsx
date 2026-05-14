@@ -134,7 +134,7 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
     <div className="admin-stage">
       <header className="admin-topbar">
         <div className="admin-brand">
-          <img src="/logo_urgences_mulhouse_HD_transparent.png" alt="" width={28} height={28} />
+          <img src="/logo-sau.png" alt="" width={28} height={28} />
           <span className="admin-brand-title">Console d'administration</span>
           <span className="admin-brand-sep">·</span>
           <span className="admin-crumbs">{tabLabel[tab]}</span>

@@ -202,8 +202,33 @@
     radial-gradient(circle at 0% 0%, oklch(0.6 0.2 25 / 0.16), transparent 50%);
   border-right: 1px solid var(--auth-line-soft);
 }
-.auth-logo-row img {
+.auth-logo-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  height: 56px;
+}
+.auth-logo-img {
+  height: 100%;
+  width: auto;
   filter: drop-shadow(0 4px 14px oklch(0 0 0 / 0.35));
+}
+/* SAU légèrement plus grand que le GHR (cf. design handoff) */
+.auth-logo-img-sau {
+  height: 105%;
+}
+.auth-logo-sep {
+  width: 1px;
+  height: 66%;
+  background: linear-gradient(to bottom, transparent, var(--auth-line), transparent);
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .auth-logo-row {
+    height: 44px;
+    gap: 12px;
+  }
 }
 .auth-side-eyebrow,
 .auth-eyebrow {

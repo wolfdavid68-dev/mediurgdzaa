@@ -69,7 +69,13 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
         {/* Panneau gauche — branding + meta */}
         <aside className="auth-side">
           <div className="auth-logo-row">
-            <img src="/logo_urgences_mulhouse_HD_transparent.png" alt="" width={64} height={64} />
+            <img src="/logo-ghr.png" alt="GHR Mulhouse Sud-Alsace" className="auth-logo-img" />
+            <span className="auth-logo-sep" aria-hidden="true" />
+            <img
+              src="/logo-sau.png"
+              alt="Urgences Mulhouse"
+              className="auth-logo-img auth-logo-img-sau"
+            />
           </div>
           <div className="auth-side-eyebrow">SAU · Émile-Muller</div>
           <h1 className="auth-side-title">
