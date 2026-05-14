@@ -70,10 +70,11 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister }: Props) => {
           </div>
           <div className="auth-side-eyebrow">SAU · Émile-Muller</div>
           <h1 className="auth-side-title">
-            <span className="auth-side-title-dim">Pharmacologie</span>{" "}
-            <span className="auth-side-title-dim">d'urgence</span>
+            <span className="auth-side-title-dim">Votre espace</span>
             <br />
-            <span className="auth-side-title-strong">au service du soin.</span>
+            <span className="auth-side-title-dim">de travail, toujours</span>
+            <br />
+            <span className="auth-side-title-strong">à portée de main.</span>
           </h1>
           <p className="auth-side-body">
             MediURG est le livret pharmacologique numérique du SAU de Mulhouse. Accès réservé au

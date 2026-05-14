@@ -108,6 +108,70 @@
   }
 }
 
+/* ── Compactage mobile : tout doit tenir sur 1 viewport ───────
+   Réduit padding/gap/font-size pour que le login + register entrent
+   sans scroll sur les écrans iPhone / Android standards (~700px haut).
+   ─────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .auth-stage {
+    padding: 12px;
+    align-items: start;
+  }
+  .auth-shell {
+    border-radius: 18px;
+  }
+  .auth-card,
+  .auth-card-wide {
+    padding: 22px 20px;
+    gap: 12px;
+  }
+  .auth-card-title {
+    font-size: 26px;
+  }
+  .auth-card-sub {
+    font-size: 13px;
+  }
+  .auth-form {
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .auth-input,
+  .auth-matricule-input,
+  .auth-matricule-prefix {
+    padding: 10px 12px;
+    /* Garde 16px pour ne pas déclencher le zoom iOS sur les inputs */
+    font-size: 16px;
+  }
+  .auth-btn-primary,
+  .auth-btn-secondary {
+    padding: 11px 16px;
+    font-size: 14px;
+  }
+  .auth-sep {
+    margin: 2px 0;
+  }
+  .auth-card-foot {
+    margin-top: 6px;
+    font-size: 11px;
+  }
+  .auth-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+}
+
+/* Très petits écrans (iPhone SE et compagnie, < 380px) : compactage
+   supplémentaire. */
+@media (max-width: 380px) {
+  .auth-card,
+  .auth-card-wide {
+    padding: 18px 16px;
+  }
+  .auth-card-title {
+    font-size: 22px;
+  }
+}
+
 /* Shake animation on error */
 .auth-shake {
   animation: auth-shake 0.35s ease;
@@ -708,9 +772,9 @@
   .admin-body {
     grid-template-columns: 1fr;
   }
-  .admin-sidebar {
-    display: none;
-  }
+  /* La sidebar reste visible mais bascule en barre horizontale (cf. règle
+     mobile < 600px plus bas qui finalise le layout). Sur tablette, on
+     conserve la sidebar verticale par défaut, juste sans largeur fixe. */
 }
 .admin-sidebar {
   border-right: 1px solid var(--auth-line);
@@ -1029,6 +1093,98 @@
   to {
     transform: translate(-50%, 0);
     opacity: 1;
+  }
+}
+
+/* ── Compactage mobile de la console admin ─────────────────────
+   Sur mobile (< 600px), on transforme chaque .admin-row (qui était
+   une grid 6 colonnes) en card empilée verticale pour éviter le
+   débordement horizontal et le zoom forcé. */
+@media (max-width: 600px) {
+  .admin-stage {
+    overflow-x: hidden;
+  }
+  .admin-topbar {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .admin-brand {
+    flex: 1 1 100%;
+    font-size: 12px;
+  }
+  .admin-brand-title {
+    font-size: 13px;
+  }
+  .admin-user {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    font-size: 12px;
+  }
+  .admin-main {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+  .admin-main-title {
+    font-size: 22px;
+  }
+  .admin-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+  .admin-row-person {
+    grid-row: 1;
+  }
+  .admin-row-matricule,
+  .admin-row-fonction,
+  .admin-row-service,
+  .admin-row-meta {
+    font-size: 12px;
+  }
+  .admin-row-meta {
+    color: var(--auth-text-3);
+  }
+  .admin-row-actions {
+    grid-column: 1;
+    justify-self: stretch;
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .admin-row-actions button {
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+  /* Sidebar : en mobile, on bascule en barre horizontale en haut, on garde
+     les 3 onglets pour pouvoir naviguer. Les KPI sont masqués (place perdue). */
+  .admin-body {
+    grid-template-columns: 1fr;
+  }
+  .admin-sidebar {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--auth-line);
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .admin-sidebar-section-label {
+    display: none;
+  }
+  .admin-nav {
+    flex-direction: row;
+    gap: 4px;
+  }
+  .admin-nav-item {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .admin-kpi {
+    display: none;
   }
 }
 

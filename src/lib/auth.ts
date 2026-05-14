@@ -44,8 +44,25 @@ export type SignupPayload = {
 // ─── Validation ──────────────────────────────────────────────
 export const isValidMatricule = (m: string): boolean => MATRICULE_REGEX.test(m);
 
-export const isValidEmail = (e: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.toLowerCase().endsWith(EMAIL_DOMAIN);
+// Whitelist optionnelle : emails admins externes au domaine @ghrmsa.fr.
+// Renseigner VITE_ADMIN_EMAILS dans .env.local (séparés par virgules) pour
+// permettre à un admin GHR ayant un email perso de s'inscrire pendant le
+// rodage. À retirer / vider quand tous les admins auront un compte
+// @ghrmsa.fr officiel.
+const adminEmailsWhitelist = (): string[] => {
+  const raw = (import.meta.env.VITE_ADMIN_EMAILS as string | undefined) ?? "";
+  return raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+};
+
+export const isValidEmail = (e: string): boolean => {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return false;
+  const lower = e.toLowerCase();
+  if (lower.endsWith(EMAIL_DOMAIN)) return true;
+  return adminEmailsWhitelist().includes(lower);
+};
 
 export const isValidPassword = (p: string): boolean => p.length >= 8;
 

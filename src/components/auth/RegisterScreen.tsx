@@ -14,14 +14,7 @@ import {
 
 type Step = 1 | 2 | 3;
 
-const FONCTIONS = [
-  "Médecin urgentiste",
-  "Interne",
-  "Infirmier",
-  "Aide-soignant",
-  "Ambulancier SMUR",
-  "Cadre",
-];
+const FONCTIONS = ["Médecin urgentiste", "Interne", "Infirmier", "Aide-soignant", "Cadre"];
 
 const SERVICES = ["SAU", "SMUR", "UHCD", "Réanimation", "Régulation 15"];
 
