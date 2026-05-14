@@ -25,7 +25,9 @@ export const useWakeLock = (enabled: boolean) => {
         sentinel = await navigator.wakeLock.request("screen");
         // Si le browser libère le lock spontanément (background, batterie faible),
         // on apprend qu'il est tombé via cet event — utile pour debug.
-        sentinel.addEventListener("release", () => { sentinel = null; });
+        sentinel.addEventListener("release", () => {
+          sentinel = null;
+        });
       } catch {
         // NotAllowedError quand le doc n'est pas visible, ou batterie critique.
         // Pas de toast — c'est juste un best-effort.

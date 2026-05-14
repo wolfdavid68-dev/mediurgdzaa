@@ -1,0 +1,147 @@
+/* ============================================================
+   MediURG — Dark theme, fully responsive (mobile → desktop)
+   Mobile-first, fluid typography with clamp()
+   ============================================================
+
+   Cascade layers (CSS @layer) : déclaration des couches dans l'ordre
+   souhaité de précédence (du moins prioritaire au plus prioritaire).
+   - reset      : * { box-sizing }, html/body normalisation
+   - base       : variables globales (:root), data-theme, fonts
+   - components : .drug-card, .acr-*, .changelog-*, etc.
+   - utilities  : helpers atomiques s'il y en a
+   - overrides  : règles unscoped tout en bas, prennent toujours le dessus
+   Toutes les règles non-layer sont implicitement au sommet de la cascade,
+   donc cette déclaration ne casse rien si on n'enveloppe pas tout — elle
+   permet juste de gagner en ordre quand on enveloppe des sections.
+   ============================================================ */
+@layer reset, base, components, utilities, overrides;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+:root {
+  --bg: #0a0a12;
+  --bg-elevated: #12121c;
+  --card: #161620;
+  --card-hover: #1c1c28;
+  --border: #2a2a3a;
+  --border-strong: #3a3a4d;
+  --text: #e8e8f0;
+  --text-dim: #9a9ab0;
+  /* WCAG AA : 4.5:1 minimum sur --bg pour le texte normal. #65657a était
+     à 3.5:1, échouait l'audit. #8a8aa0 passe à ~4.8:1 sur #0a0a12 et reste
+     suffisamment estompé pour rester clairement secondaire. */
+  --text-mute: #8a8aa0;
+  /* Palette en oklch() : luminance perceptuelle uniforme entre couleurs,
+     pour que les variantes (bordures, fonds 16 %, ombres) gardent une
+     parité visuelle propre. Les fallbacks hex restent dans les vieux
+     browsers qui n'ont pas oklch() (Safari < 15.4). */
+  --accent: #ff4757;
+  --accent: oklch(67% 0.22 22);
+  --info: #4da6ff;
+  --info: oklch(70% 0.16 250);
+  --warn: #ffaa33;
+  --warn: oklch(78% 0.16 70);
+  --danger: #ff5555;
+  --danger: oklch(67% 0.22 27);
+  --success: #4ade80;
+  --success: oklch(78% 0.18 145);
+  --font:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "SF Mono", "Consolas", "Fira Mono", "Courier New", monospace;
+
+  --header-bg: rgba(10, 10, 18, 0.92);
+  --nav-bg: rgba(10, 10, 18, 0.96);
+
+  /* Fluid container width */
+  --content-max: 960px;
+
+  /* Safe area insets for iOS notch */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+[data-theme="light"] {
+  --bg: #eef0f5;
+  --bg-elevated: #e5e8f0;
+  --card: #f8f9fc;
+  --card-hover: #eef0f6;
+  --border: #d4d8e8;
+  --border-strong: #b8bcd0;
+  --text: #1a1a2a;
+  --text-dim: #44445e;
+  /* WCAG AA : #84849c sur #eef0f5 était à 3.4:1. #5e5e74 atteint ~6:1. */
+  --text-mute: #5e5e74;
+  --info: #0a7ae0;
+  --info: oklch(55% 0.2 245);
+  --warn: #c47a00;
+  --warn: oklch(60% 0.13 65);
+  --danger: #d42b2b;
+  --danger: oklch(55% 0.22 27);
+  --success: #1a9440;
+  --success: oklch(53% 0.18 145);
+
+  --header-bg: rgba(238, 240, 245, 0.92);
+  --nav-bg: rgba(238, 240, 245, 0.96);
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  overflow-x: hidden;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+/* touch-action: manipulation — désactive le double-tap-to-zoom d'Android Chrome
+   sur les éléments cliquables (300ms d'attente du 2e tap). Garde le pinch-to-zoom
+   global (accessibilité préservée). Critique sur les bottom-tabs où un re-tap
+   pendant le chargement d'un chunk lazy déclenchait le zoom (cas Protocoles). */
+button,
+a,
+[role="button"],
+[role="tab"] {
+  touch-action: manipulation;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ── Focus visible global ───────────────────────────────────
+   :focus-visible cible uniquement les focus pertinents pour l'accessibilité
+   clavier (Tab, flèches), pas les clics souris. Un outline clair sur tout
+   contrôle interactif est obligatoire pour la navigation au clavier — sans
+   ça les utilisateurs ne savent pas où ils sont. La couleur reprend --info
+   qui contraste bien sur les fonds clairs et sombres.
+   ─────────────────────────────────────────────────────────── */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Inputs / textareas : les outlines de focus sont gérés inline par les
+   règles existantes (.search-bar input:focus, .poso-calc-input:focus,
+   etc.). On garde leur design custom mais on s'assure qu'ils sont aussi
+   couverts par focus-visible avec un fallback discret. */

@@ -22,7 +22,7 @@ export const fmtWall = (ts) => {
 
 // Singleton AudioContext — créé/réveillé lors d'un geste utilisateur,
 // réutilisé pour tous les sons (sinon iOS/Chrome bloquent les contextes hors-geste).
-let _audioCtx = null;
+let _audioCtx: AudioContext | null = null;
 export const ensureAudio = () => {
   try {
     if (!_audioCtx) {
@@ -39,7 +39,12 @@ export const ensureAudio = () => {
   }
 };
 
-export const beep = (freq = 880, ms = 220, gainVal = 0.18, type = "sine") => {
+export const beep = (
+  freq = 880,
+  ms = 220,
+  gainVal = 0.18,
+  type: "sine" | "square" | "sawtooth" | "triangle" = "sine"
+) => {
   const ctx = ensureAudio();
   if (!ctx) return;
   try {
@@ -99,6 +104,7 @@ export const stepState = (step, t) => {
 // Le médecin reste décideur — on n'affiche que les rappels protocolaires.
 // ERC : Adré + Amio après 3e CEE.
 // ACLS : Adré dès le 2e CEE (q3-5 min), Amio 300 après 3e CEE, 150 après 5e.
+type SuggestedAction = { type: string; label: string; hint?: string };
 export const suggestActions = ({
   rhythm,
   totalShocks,
@@ -106,11 +112,18 @@ export const suggestActions = ({
   elapsed,
   pediatric,
   protocol = "erc",
-}) => {
+}: {
+  rhythm: "choquable" | "non_choquable";
+  totalShocks: number;
+  lastAdreAt: number | null;
+  elapsed: number;
+  pediatric: boolean;
+  protocol?: string;
+}): SuggestedAction[] => {
   const adreLabel = pediatric ? "Adrénaline 0,01 mg/kg IV" : "Adrénaline 1 mg IV";
   const amio300 = pediatric ? "Amiodarone 5 mg/kg IV" : "Amiodarone 300 mg IV";
   const amio150 = pediatric ? "Amiodarone 5 mg/kg IV" : "Amiodarone 150 mg IV";
-  const out = [];
+  const out: SuggestedAction[] = [];
   const adreFirstShock = protocol === "acls" ? 2 : 3;
 
   if (rhythm === "choquable") {

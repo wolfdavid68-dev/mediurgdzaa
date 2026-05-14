@@ -1,0 +1,103 @@
+/* ─ Métronome MCE ─ */
+.acr-metro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.acr-metro-on {
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.45);
+}
+.acr-metro-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.acr-metro-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--success);
+  font-size: 11px;
+  border: 1px solid var(--border);
+}
+.acr-metro-on .acr-metro-icon {
+  background: var(--success);
+  color: var(--bg);
+  border-color: var(--success);
+  animation: acr-metro-beat 0.55s ease-out infinite;
+}
+@keyframes acr-metro-beat {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.acr-metro-label {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.acr-metro-bpm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.acr-metro-bpm-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+/* @media (hover: hover) : évite le « sticky hover » sur tactile. Sans ça, après
+   tap sur 110 le :hover reste collé et écrase la couleur de .acr-metro-bpm-active
+   → texte blanc sur fond blanc, chiffre invisible. */
+@media (hover: hover) and (pointer: fine) {
+  .acr-metro-bpm-btn:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+}
+.acr-metro-bpm-active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.acr-metro-unit {
+  font-size: 11px;
+  color: var(--text-mute);
+  font-family: var(--mono);
+  margin-left: 2px;
+}

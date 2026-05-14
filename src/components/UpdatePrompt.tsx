@@ -27,7 +27,9 @@ const UpdatePrompt = () => {
   // Cache la nouvelle version après reload (l'utilisateur n'a pas besoin de
   // voir le toast s'il a déjà cliqué « Mettre à jour »).
   const [closed, setClosed] = useState(false);
-  useEffect(() => { if (needRefresh) setClosed(false); }, [needRefresh]);
+  useEffect(() => {
+    if (needRefresh) setClosed(false);
+  }, [needRefresh]);
 
   if (!needRefresh || closed) return null;
 
@@ -44,7 +46,10 @@ const UpdatePrompt = () => {
       <button
         type="button"
         className="update-prompt-close"
-        onClick={() => { setNeedRefresh(false); setClosed(true); }}
+        onClick={() => {
+          setNeedRefresh(false);
+          setClosed(true);
+        }}
         aria-label="Fermer"
       >
         ×

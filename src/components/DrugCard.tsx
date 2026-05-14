@@ -13,14 +13,28 @@ const TABS = [
   { key: "cond", label: "Conditionnements", type: "neutral" },
 ];
 
-const DrugCard = ({ drug, isFavorite, onToggleFavorite, onOpen, onProtocolOpen }) => {
+type DrugCardProps = {
+  drug: any;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: number) => void;
+  onOpen?: (id: number) => void;
+  onProtocolOpen?: () => void;
+};
+
+const DrugCard = ({
+  drug,
+  isFavorite,
+  onToggleFavorite,
+  onOpen,
+  onProtocolOpen,
+}: DrugCardProps) => {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(null);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState(false);
   const [weight, setWeight] = useState("");
   const [produitFinal, setProduitFinal] = useState("");
 
-  // Protocoles qui mentionnent cette drogue. Cache global dans crossref.js
+  // Protocoles qui mentionnent cette drogue. Cache global dans crossref.ts
   // — l'appel est instantané après le premier rendu de la session.
   // useMemo ici sert juste à éviter de relancer la lookup à chaque toggle
   // d'onglet ou changement de poids.

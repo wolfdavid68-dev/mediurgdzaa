@@ -1,0 +1,50 @@
+/* ============================================================
+   Cross-référence drug → protocoles (DrugCard expanded body)
+   ============================================================ */
+
+.drug-related {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  margin: 8px 0 12px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+}
+
+.drug-related-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-mute);
+  font-weight: 600;
+}
+
+.drug-related-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.drug-related-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    border-color 120ms;
+}
+
+.drug-related-chip:hover,
+.drug-related-chip:focus-visible {
+  background: rgba(255, 59, 48, 0.12);
+  border-color: var(--accent);
+}

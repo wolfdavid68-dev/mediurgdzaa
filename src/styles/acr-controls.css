@@ -1,0 +1,69 @@
+.acr-timer-controls {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  .acr-timer-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  .acr-timer-controls > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+.acr-btn {
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    opacity 0.15s;
+}
+.acr-btn-start {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+.acr-btn-start:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+.acr-btn-pause {
+  background: var(--warn);
+  color: #1a1a2a;
+  border-color: var(--warn);
+}
+.acr-btn-pause:hover {
+  filter: brightness(0.95);
+}
+.acr-btn-reset {
+  background: transparent;
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+.acr-btn-reset:hover:not(:disabled) {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.acr-btn-reset:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.acr-btn-bilan {
+  background: rgba(77, 166, 255, 0.12);
+  color: var(--info);
+  border-color: var(--info);
+}
+.acr-btn-bilan:hover:not(:disabled) {
+  background: rgba(77, 166, 255, 0.22);
+}
+.acr-btn-bilan:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

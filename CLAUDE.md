@@ -20,6 +20,11 @@ npm run format     # Prettier — formate src/, racine. Data files (drugs.js etc
 
 TypeScript en mode **loose pragmatique** : `tsconfig.json` avec `strict: false, allowJs: true`. Tous les composants en `.tsx`, les utilitaires `lib/` en `.ts`. Les data files (`src/data/*.js`) restent JS — ce sont des lookup tables denses. Les APIs non standardisées (CloseWatcher, webkitAudioContext) sont déclarées dans `src/global.d.ts`.
 
+**React Compiler** est actif (`babel-plugin-react-compiler` v1.0 stable, target 19) — il insère automatiquement la mémoïsation là où c'est sûr. Conséquences pour le code :
+- **Nouveau code** : ne pas ajouter de `useMemo`/`useCallback` par réflexe — le compiler s'en charge. Les écrire seulement quand on a besoin de stabilité référentielle pour des deps de `useEffect` (l'escape hatch officiel).
+- **Code existant** : NE PAS retirer les `useMemo`/`useCallback` en place — la doc officielle (oct. 2025) recommande de les laisser ou de tester très prudemment avant retrait, car ça change le compilation output.
+- `eslint-plugin-react-compiler` tourne en `warn` à chaque `npm run lint` ; tout pattern incompatible (mutation d'état, etc.) est signalé.
+
 Tests are under `src/lib/*.test.js` (calc, normalize, protocolText, data integrity). Globals (`describe`, `test`, `expect`) are auto-injected by vitest via `vite.config.ts → test.globals`.
 
 `deployer.bat` (Windows-only) commits, pushes to `origin main`, and runs `vercel --prod`. Do not invoke it from Claude Code; it's an interactive helper for the user.

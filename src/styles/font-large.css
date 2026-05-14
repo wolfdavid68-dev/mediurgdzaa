@@ -1,0 +1,111 @@
+/* ── MODE GRANDE POLICE ──────────────────────────────────── */
+[data-fontsize="large"] .drug-name {
+  font-size: 20px;
+}
+[data-fontsize="large"] .drug-commercial {
+  font-size: 15px;
+}
+[data-fontsize="large"] .drug-classe {
+  font-size: 13px;
+}
+[data-fontsize="large"] .drug-desc {
+  font-size: 15px;
+}
+[data-fontsize="large"] .badge {
+  font-size: 12px;
+  padding: 3px 8px;
+}
+[data-fontsize="large"] .tab-btn {
+  font-size: 13px;
+  padding: 7px 10px;
+}
+[data-fontsize="large"] .tab-label {
+  font-size: 13px;
+}
+[data-fontsize="large"] .poso-title {
+  font-size: 13px;
+}
+[data-fontsize="large"] .poso-item {
+  font-size: 16px;
+  line-height: 1.5;
+}
+[data-fontsize="large"] .calc-result {
+  font-size: 15px;
+  padding: 3px 9px;
+}
+[data-fontsize="large"] .item-list li {
+  font-size: 15px;
+  line-height: 1.6;
+}
+[data-fontsize="large"] .poso-calc-label {
+  font-size: 13px;
+}
+[data-fontsize="large"] .poso-calc-input {
+  font-size: 16px;
+  width: 72px;
+}
+[data-fontsize="large"] .poso-calc-unit {
+  font-size: 14px;
+}
+[data-fontsize="large"] .prep-etape {
+  font-size: 14px;
+  line-height: 1.6;
+}
+[data-fontsize="large"] .prep-meta-chip {
+  font-size: 12px;
+}
+[data-fontsize="large"] .pse-input-label {
+  font-size: 13px;
+}
+[data-fontsize="large"] .pse-input {
+  font-size: 17px;
+}
+[data-fontsize="large"] .pse-unit {
+  font-size: 13px;
+}
+[data-fontsize="large"] .pse-result-value {
+  font-size: 34px;
+}
+[data-fontsize="large"] .pse-result-unit {
+  font-size: 16px;
+}
+[data-fontsize="large"] .pse-table {
+  font-size: 14px;
+}
+[data-fontsize="large"] .pse-table td,
+[data-fontsize="large"] .pse-table th {
+  padding: 6px 8px;
+}
+[data-fontsize="large"] .chip {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+[data-fontsize="large"] .drug-header {
+  min-height: 70px;
+}
+[data-fontsize="large"] .cond-tag {
+  font-size: 13px;
+}
+[data-fontsize="large"] .poso-note-textarea {
+  font-size: 15px;
+}
+
+/* Hover supprimé sur écrans tactiles */
+@media (hover: none) {
+  .drug-card:hover {
+    border-color: var(--border);
+  }
+  .chip:hover {
+    background: var(--card);
+    color: var(--text-dim);
+  }
+  .chip-active:hover {
+    background: var(--text);
+    color: var(--bg);
+  }
+  .tab-btn:hover {
+    background: var(--card);
+    color: var(--text-dim);
+    border-color: var(--border);
+  }
+}

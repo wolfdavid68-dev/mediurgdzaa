@@ -24,7 +24,7 @@ describe("normalize — comparaison insensible casse + diacritiques", () => {
 
   test("idempotent : normalize(normalize(s)) === normalize(s)", () => {
     const inputs = ["Adrénaline", "MÉTHYL", "Énoxaparine"];
-    inputs.forEach(s => {
+    inputs.forEach((s) => {
       expect(normalize(normalize(s))).toBe(normalize(s));
     });
   });

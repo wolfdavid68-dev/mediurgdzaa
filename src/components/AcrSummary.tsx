@@ -39,6 +39,26 @@ const formatAmio = (count: number, pediatric: boolean): string => {
   return `${doses.join(" + ")} mg`;
 };
 
+type HistoryEntry = {
+  cycle: number;
+  t: number;
+  rhythm: string | null;
+  actions: string[];
+};
+type EventEntry = { id: string; type: string; label: string; t: number; at: number };
+
+type Props = {
+  pediatric: boolean;
+  elapsed: number;
+  shocks: number;
+  adres: number;
+  amios: number;
+  history: HistoryEntry[];
+  events?: EventEntry[];
+  cycle: number;
+  onClose: () => void;
+};
+
 // Bilan de fin de séance ACR — récap copiable + exportable en image (pour
 // glisser dans le dossier patient ou partager via Android share sheet).
 // Extrait de AcrTimer.tsx (v81) pour alléger le composant principal.
@@ -52,7 +72,7 @@ const AcrSummary = ({
   events = [],
   cycle,
   onClose,
-}) => {
+}: Props) => {
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<null | "shared" | "downloaded" | "error">(null);

@@ -14,22 +14,39 @@ const formatDateFr = (iso) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!m) return iso;
   const [, y, mo, d] = m;
-  const mois = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const mois = [
+    "janvier",
+    "février",
+    "mars",
+    "avril",
+    "mai",
+    "juin",
+    "juillet",
+    "août",
+    "septembre",
+    "octobre",
+    "novembre",
+    "décembre",
+  ];
   return `${parseInt(d, 10)} ${mois[parseInt(mo, 10) - 1]} ${y}`;
 };
 
 // <dialog> natif (Chrome 37+, Firefox 98+, Safari 15.4+) : focus trap, ESC,
 // scroll lock côté navigateur, plus de useEffect à orchestrer.
 const ChangelogModal = ({ open, onClose }) => {
-  const dialogRef = useRef(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   useEffect(() => {
     const d = dialogRef.current;
     if (!d) return;
     if (open && !d.open) {
-      try { d.showModal(); } catch {}
+      try {
+        d.showModal();
+      } catch {}
     } else if (!open && d.open) {
-      try { d.close(); } catch {}
+      try {
+        d.close();
+      } catch {}
     }
   }, [open]);
 

@@ -1,10 +1,36 @@
+import { useEffect, useRef } from "react";
+
 // Overlay préparation rapide d'une drogue ACR (Adré / Cordarone).
 // Affiché par-dessus le chrono (position: absolute, z-index plus haut que
 // .acr-zoom) pour ne pas perdre le décompte. L'utilisateur peut toujours
 // basculer vers la fiche complète si besoin (= ancien comportement).
+//
+// A11y : pas un <dialog> natif car position: absolute over chrono (et non
+// fixed centered). On gère manuellement focus auto + ESC pour rester
+// keyboard-friendly et cohérent avec aria-modal="true".
 const AcrPrepOverlay = ({ drugName, content, pediatric, onClose, onOpenFullSheet }) => {
   const data = pediatric ? content.enfant : content.adulte;
   const mode = pediatric ? "Enfant" : "Adulte";
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  // Focus auto sur le bouton « Retour » à l'ouverture pour permettre la
+  // fermeture clavier immédiate (Enter/Space). Utile pour screen readers.
+  useEffect(() => {
+    closeBtnRef.current?.focus();
+  }, []);
+
+  // ESC ferme l'overlay (cohérent avec le pattern <dialog> des autres modales).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
     <div
       className="acr-prep-overlay"
@@ -61,7 +87,7 @@ const AcrPrepOverlay = ({ drugName, content, pediatric, onClose, onOpenFullSheet
         )}
       </div>
       <div className="acr-prep-footer">
-        <button type="button" className="acr-prep-back" onClick={onClose}>
+        <button ref={closeBtnRef} type="button" className="acr-prep-back" onClick={onClose}>
           ← Retour au chrono
         </button>
         {onOpenFullSheet && (

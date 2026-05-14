@@ -1,0 +1,280 @@
+/* ── CATÉGORIES PROTOCOLES ───────────────────────────────── */
+.proto-category-bar {
+  display: flex;
+  gap: 4px;
+  padding: 12px 0 4px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.proto-category-tab {
+  /* flex: 1 1 0 + min-width: 0 → les onglets se partagent équitablement le
+     viewport. Sans ça, la barre dépasse la largeur du téléphone, ce qui
+     déclenche le Wide Viewport Adjustment d'Android Chrome (zoom auto à
+     l'affichage de la page). Avec 4 onglets, labels courts obligatoires. */
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition:
+    background 0.12s,
+    color 0.12s;
+  margin-bottom: -2px;
+}
+@media (min-width: 600px) {
+  .proto-category-bar {
+    gap: 6px;
+  }
+  .proto-category-tab {
+    font-size: 14px;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+}
+
+.proto-category-tab:hover {
+  background: var(--card);
+  color: var(--text);
+}
+
+.proto-category-active {
+  background: var(--card);
+  color: var(--accent);
+  border-color: var(--border);
+  border-bottom-color: var(--card);
+}
+
+.proto-category-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* ── FILTRE PROTOCOLES ───────────────────────────────────── */
+.proto-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 10px;
+  flex-wrap: wrap;
+}
+
+.proto-filter-chip {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.proto-filter-chip:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+.proto-filter-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.proto-filter-active:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.proto-filter-count {
+  font-size: 11px;
+  color: var(--text-mute);
+  margin-left: auto;
+}
+
+/* ── PROTOCOLES ──────────────────────────────────────────── */
+.protocol-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.protocol-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.protocol-card-open {
+  border-color: var(--border-strong);
+}
+
+.protocol-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.protocol-color-bar {
+  width: 4px;
+  align-self: stretch;
+  flex-shrink: 0;
+  border-radius: 12px 0 0 12px;
+}
+
+.protocol-main {
+  flex: 1;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.protocol-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.protocol-icon {
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.protocol-name {
+  font-size: clamp(14px, 1.6vw, 16px);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.protocol-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.protocol-code-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #1d4ed820;
+  color: #60a5fa;
+  letter-spacing: 0.04em;
+}
+
+[data-theme="light"] .protocol-code-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.protocol-version {
+  font-size: 10px;
+  color: var(--text-mute);
+}
+
+.protocol-body {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.protocol-authors {
+  font-size: 11px;
+  color: var(--text-mute);
+  padding: 10px 0 12px;
+  line-height: 1.4;
+}
+
+.protocol-ref {
+  font-style: italic;
+}
+
+.protocol-body-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin: 4px 0;
+  background: rgba(255, 59, 48, 0.08);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  border-radius: 12px;
+}
+
+.card-error-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-error-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.card-error-message {
+  font-size: 11px;
+  color: var(--text-mute);
+  font-family: ui-monospace, monospace;
+}
+
+.card-error-retry {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 1px solid #ff3b30;
+  border-radius: 8px;
+  background: transparent;
+  color: #ff3b30;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.card-error-retry:hover,
+.card-error-retry:focus-visible {
+  background: rgba(255, 59, 48, 0.15);
+}

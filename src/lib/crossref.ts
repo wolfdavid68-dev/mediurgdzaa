@@ -12,17 +12,25 @@ import { normalize } from "./normalize";
 // de la drogue dans chaque item.text et item.sub des sections. Mémoïsation par
 // nom de drogue — le scan complet ne se fait qu'une fois par drug.
 
-const cache = new Map();
+// icon = emoji unicode (ex : "🫁", "👶") ou absent. Cf. src/data/protocols.js.
+export type ProtocolRef = {
+  id: number;
+  code: string;
+  titre: string;
+  icon?: string;
+};
 
-const flattenSubText = (sub) => {
+const cache = new Map<string, ProtocolRef[]>();
+
+const flattenSubText = (sub: any): string => {
   if (typeof sub === "string") return sub;
   if (sub && typeof sub === "object" && typeof sub.text === "string") return sub.text;
   return "";
 };
 
-export const findProtocolsForDrug = (drugNom) => {
+export const findProtocolsForDrug = (drugNom: string | null | undefined): ProtocolRef[] => {
   if (!drugNom) return [];
-  if (cache.has(drugNom)) return cache.get(drugNom);
+  if (cache.has(drugNom)) return cache.get(drugNom)!;
 
   const target = normalize(drugNom);
   if (!target) {
@@ -30,7 +38,7 @@ export const findProtocolsForDrug = (drugNom) => {
     return [];
   }
 
-  const result = [];
+  const result: ProtocolRef[] = [];
   for (const p of PROTOCOLS) {
     let found = false;
     for (const sec of p.sections || []) {

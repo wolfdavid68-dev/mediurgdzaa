@@ -1,0 +1,94 @@
+/* ─ Doses de référence ERC (toujours visibles) ─ */
+.acr-doses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(77, 166, 255, 0.06);
+  border: 1px solid rgba(77, 166, 255, 0.3);
+  border-radius: 10px;
+}
+.acr-doses-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--info);
+}
+.acr-doses-pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.acr-dose-pill {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 8px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.08s;
+}
+.acr-dose-pill:hover:not(:disabled) {
+  background: var(--card-hover);
+  border-color: var(--info);
+}
+.acr-dose-pill:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.acr-dose-pill:disabled {
+  cursor: default;
+}
+.acr-dose-pill-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+.acr-dose-pill-dose {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  font-family: var(--mono);
+}
+.acr-dose-pill-note {
+  font-size: 10px;
+  color: var(--text-mute);
+  font-family: var(--mono);
+}
+.acr-dose-pill-arrow {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 11px;
+  color: var(--info);
+  opacity: 0.7;
+}
+
+/* Lien drug cliquable dans la liste d'actions */
+.acr-action-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--info);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.acr-action-link:hover {
+  color: var(--text);
+}

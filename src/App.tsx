@@ -6,6 +6,12 @@ import { fuzzyIncludes } from "./lib/fuzzy";
 import DrugList from "./components/DrugList";
 import UpdatePrompt from "./components/UpdatePrompt";
 import { APP_VERSION } from "./data/changelog";
+import {
+  pushNav,
+  replaceNav,
+  useBackNavigation,
+  type ExitToastVariant,
+} from "./lib/useBackNavigation";
 
 // Code-splitting : les modales (ACR, changelog) sont importées à la demande,
 // et la page Protocoles entière (avec ses data PROTOCOLS + PREP_KITS et ses
@@ -71,7 +77,7 @@ const App = () => {
   const [showAcr, setShowAcr] = useState(false);
   // null | "default" | "firefox-no-exit" — null = caché ; sinon affiche le toast
   // avec le bon message (variante Firefox PWA = ne peut pas quitter via back).
-  const [exitToast, setExitToast] = useState(null);
+  const [exitToast, setExitToast] = useState<ExitToastVariant | null>(null);
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -156,226 +162,13 @@ const App = () => {
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
   const toggleFont = () => setBigFont((f) => !f);
 
-  // === Navigation par couches alignée sur l'historique navigateur ===
-  // Chaque ouverture de modale, changement de sous-onglet ou de page pousse une entrée.
-  // Bouton retour Android : 1er appui ferme la modale → sous-onglet précédent → page précédente → quitter.
-  const pushNav = (patch) => {
-    const current = window.history.state?.mediurg || {
-      page: "medicaments",
-      protoCategory: "PISU",
-      modal: null,
-    };
-    const next = { ...current, ...patch };
-    try {
-      window.history.pushState({ mediurg: next }, "");
-    } catch {}
-  };
-  const replaceNav = (patch) => {
-    const current = window.history.state?.mediurg || {
-      page: "medicaments",
-      protoCategory: "PISU",
-      modal: null,
-    };
-    const next = { ...current, ...patch };
-    try {
-      window.history.replaceState({ mediurg: next }, "");
-    } catch {}
-  };
-
-  useEffect(() => {
-    // Setup de l'history a déjà été fait dans un <script> inline d'index.html
-    // (sentinelle + état actif), AVANT le mount React. Filet de sécurité si
-    // jamais ce script a été bypassé (ouverture directe via un outil de test,
-    // etc.) — on s'assure qu'on a au moins notre clé mediurg dans le state.
-    try {
-      if (!window.history.state?.mediurg) {
-        const here = window.location.href;
-        window.history.replaceState(
-          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null, sentinel: true } },
-          "",
-          here
-        );
-        window.history.pushState(
-          { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
-          "",
-          here
-        );
-      }
-    } catch {}
-
-    let lastBackAt = 0;
-    let toastTimer = null;
-
-    // Firefox Android : popstate n'est pas fire de manière fiable sur hardware
-    // back en PWA installée → on tombe sur des écrans morts (noir/rouge puis
-    // gris/rouge). On bloque tout exit via back avec CloseWatcher (qui fire bien)
-    // et on redirige vers l'app récente Android pour fermer proprement.
-    const ua = (typeof navigator !== "undefined" && navigator.userAgent) || "";
-    const isFirefoxAndroid = /Firefox/i.test(ua) && /Android/i.test(ua);
-
-    const showExitToast = (variant) => {
-      setExitToast(variant);
-      if (toastTimer) clearTimeout(toastTimer);
-      // 4 s pour le toast d'exit standard (était 2 s, trop court : l'user
-      // avait l'impression que le 1er back ne faisait rien et retapait dans
-      // la foulée → exit imprévu via la fenêtre rapid-double <1 s).
-      toastTimer = setTimeout(
-        () => setExitToast(null),
-        variant === "firefox-no-exit" ? 4000 : 4000
-      );
-    };
-
-    // Architecture popstate-first (depuis v59) :
-    //   - Pour TOUS les browsers sauf Firefox Android, on laisse les backs popper
-    //     naturellement via popstate (modales, pages, sentinelle).
-    //   - Une garde « rapid double-back » de moins d'1 s court-circuite la sentinelle
-    //     toast pour permettre un exit immédiat quand l'user mash le bouton retour.
-    //   - 1 back = retour à l'écran précédent (modal → page précédente, page → page
-    //     précédente, page racine → toast). 2 backs dans 1 s = exit.
-    //   - Pour Firefox Android, CloseWatcher.preventDefault bloque tout exit (cf.
-    //     bug Mozilla 1742059) et on demande à l'user d'utiliser l'app récente.
-    const onPopState = (e) => {
-      const s = e.state?.mediurg;
-      const now = Date.now();
-      const isRapidDouble = now - lastBackAt < 1000;
-      lastBackAt = now;
-
-      if (!s || s.sentinel) {
-        // Sentinelle = tentative de sortie de l'app
-        if (isRapidDouble) {
-          // 2e back rapide → on laisse vraiment partir
-          try {
-            window.history.back();
-          } catch {}
-          return;
-        }
-        // 1er back à la racine → toast + re-push pour rester dans l'app
-        try {
-          window.history.pushState(
-            { mediurg: { page: "medicaments", protoCategory: "PISU", modal: null } },
-            "",
-            window.location.href
-          );
-        } catch {}
-        showExitToast("default");
-        setPage("medicaments");
-        setProtoCategory("PISU");
-        setShowChangelog(false);
-        setShowAcr(false);
-        return;
-      }
-
-      // Nav interne (modal close, page change). State restoré depuis l'history.
-      setPage(s.page || "medicaments");
-      setProtoCategory(s.protoCategory || "PISU");
-      setShowChangelog(s.modal === "changelog");
-      setShowAcr(s.modal === "acr");
-    };
-    window.addEventListener("popstate", onPopState);
-
-    // CloseWatcher : uniquement pour Firefox Android où popstate ne suffit pas.
-    let watcher = null;
-    if (isFirefoxAndroid && typeof window.CloseWatcher === "function") {
-      try {
-        watcher = new window.CloseWatcher();
-        watcher.addEventListener("cancel", (e) => {
-          e.preventDefault();
-          showExitToast("firefox-no-exit");
-        });
-      } catch {}
-    }
-
-    // Chrome / Samsung Internet en PWA installée (display-mode: standalone) :
-    // popstate ne fire PAS pour le back-at-root → Chrome ferme la PWA direct
-    // sans qu'on puisse afficher le toast d'exit. Le mode browser tab marche
-    // bien (popstate fire normalement). Détecté en standalone, on installe
-    // un CloseWatcher pour intercepter le back :
-    //   - Modal/page profonde : preventDefault + history.back() → popstate
-    //     existant gère le retour
-    //   - À la racine, 1er back : preventDefault + toast (reste dans l'app)
-    //   - À la racine, 2e back <1s : ne preventDefault PAS → Chrome ferme
-    //     la PWA via son flux natif
-    const isStandalonePWA = (() => {
-      try {
-        if (typeof window === "undefined" || !window.matchMedia) return false;
-        return (
-          window.matchMedia("(display-mode: standalone)").matches ||
-          window.matchMedia("(display-mode: fullscreen)").matches ||
-          window.matchMedia("(display-mode: minimal-ui)").matches ||
-          window.navigator.standalone === true // iOS
-        );
-      } catch {
-        return false;
-      }
-    })();
-
-    let pwaWatcher = null;
-    const setupPwaWatcher = () => {
-      if (!isStandalonePWA) return;
-      if (isFirefoxAndroid) return; // déjà géré au-dessus
-      if (typeof window.CloseWatcher !== "function") return;
-      try {
-        pwaWatcher = new window.CloseWatcher();
-        pwaWatcher.addEventListener("cancel", (e) => {
-          const s = window.history.state?.mediurg;
-          const now = Date.now();
-          const isRapidDouble = now - lastBackAt < 1000;
-
-          // Modal ouverte → on délègue à popstate via history.back()
-          if (s?.modal === "acr" || s?.modal === "changelog") {
-            e.preventDefault();
-            lastBackAt = now;
-            try {
-              window.history.back();
-            } catch {}
-            setupPwaWatcher();
-            return;
-          }
-
-          // Page profonde (Protocoles, Échelles) → idem, on délègue
-          if (s?.page && s.page !== "medicaments") {
-            e.preventDefault();
-            lastBackAt = now;
-            try {
-              window.history.back();
-            } catch {}
-            setupPwaWatcher();
-            return;
-          }
-
-          // À la racine
-          if (isRapidDouble) {
-            // 2e back rapide → on laisse la PWA se fermer (pas de preventDefault)
-            // → le watcher s'auto-détruit, le close action procède
-            lastBackAt = now;
-            return;
-          }
-
-          // 1er back à la racine → toast + bloquer l'exit + recréer le watcher
-          e.preventDefault();
-          lastBackAt = now;
-          showExitToast("default");
-          setupPwaWatcher();
-        });
-      } catch {}
-    };
-    setupPwaWatcher();
-
-    return () => {
-      window.removeEventListener("popstate", onPopState);
-      if (watcher) {
-        try {
-          watcher.destroy();
-        } catch {}
-      }
-      if (pwaWatcher) {
-        try {
-          pwaWatcher.destroy();
-        } catch {}
-      }
-      if (toastTimer) clearTimeout(toastTimer);
-    };
-  }, []);
+  useBackNavigation({
+    setPage,
+    setProtoCategory,
+    setShowChangelog,
+    setShowAcr,
+    setExitToast,
+  });
 
   // View Transitions API (Chrome 111+, Safari 18+) : enveloppe les changements
   // de page/sous-onglet pour que le navigateur produise un cross-fade fluide

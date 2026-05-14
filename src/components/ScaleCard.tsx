@@ -17,21 +17,26 @@ import { useState } from "react";
 
 const ScaleCard = ({ scale }) => {
   const [open, setOpen] = useState(false);
-  const [sumSelections, setSumSelections] = useState({});
-  const [variantSelections, setVariantSelections] = useState({});
-  const [pickedScore, setPickedScore] = useState(null);
+  const [sumSelections, setSumSelections] = useState<Record<number, number>>({});
+  const [variantSelections, setVariantSelections] = useState<Record<number, string>>({});
+  const [pickedScore, setPickedScore] = useState<number | null>(null);
 
   const isSum = scale.type === "sum";
 
-  const total = isSum
-    ? (Object.values(sumSelections) as number[]).reduce((acc, v) => acc + v, 0)
+  // Total : null tant qu'aucune réponse en mode "pick" (allAnswered=false).
+  // En mode "sum", on commence à 0 et l'interprétation attend allAnswered.
+  const total: number | null = isSum
+    ? Object.values(sumSelections).reduce((acc, v) => acc + (v as number), 0)
     : pickedScore;
 
   const allAnswered = isSum
     ? scale.items.every((_, i) => typeof sumSelections[i] === "number")
     : pickedScore !== null;
 
-  const interp = allAnswered ? scale.interpret(total) : null;
+  // total est garanti non-null quand allAnswered=true (allAnswered le vérifie).
+  // Le ?? 0 est défensif : strictNullChecks ne peut pas inférer ce lien.
+  const totalSafe = total ?? 0;
+  const interp = allAnswered ? scale.interpret(totalSafe) : null;
 
   const reset = () => {
     setSumSelections({});
@@ -66,7 +71,7 @@ const ScaleCard = ({ scale }) => {
         </div>
         {allAnswered && (
           <span className="scale-header-score" style={{ background: interp.color }}>
-            {isSum ? total : total > 0 ? `+${total}` : total}
+            {isSum ? totalSafe : totalSafe > 0 ? `+${totalSafe}` : totalSafe}
           </span>
         )}
         <svg
@@ -172,7 +177,13 @@ const ScaleCard = ({ scale }) => {
             <div className="scale-total">
               <span className="scale-total-label">Total</span>
               <span className="scale-total-value">
-                {allAnswered ? (isSum ? total : total > 0 ? `+${total}` : total) : "—"}
+                {allAnswered
+                  ? isSum
+                    ? totalSafe
+                    : totalSafe > 0
+                      ? `+${totalSafe}`
+                      : totalSafe
+                  : "—"}
               </span>
               {interp && (
                 <span className="scale-badge" style={{ background: interp.color }}>

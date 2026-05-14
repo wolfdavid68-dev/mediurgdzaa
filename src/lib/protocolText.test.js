@@ -2,8 +2,8 @@ import { tokenizeProtocolText } from "./protocolText";
 import { DRUG_PATTERNS } from "../components/ProtocolCard";
 
 // Helpers pour rendre les assertions plus lisibles
-const types = (toks) => toks.map(t => t.type);
-const values = (toks) => toks.map(t => t.value);
+const types = (toks) => toks.map((t) => t.type);
+const values = (toks) => toks.map((t) => t.value);
 
 describe("tokenizeProtocolText — texte sans match", () => {
   test("texte vide → tableau vide", () => {
@@ -26,19 +26,19 @@ describe("tokenizeProtocolText — texte sans match", () => {
 describe("tokenizeProtocolText — détection des doses", () => {
   test("dose mg/kg simple", () => {
     const toks = tokenizeProtocolText("Posologie : 1 mg/kg IV bolus", DRUG_PATTERNS);
-    const dose = toks.find(t => t.type === "dose");
+    const dose = toks.find((t) => t.type === "dose");
     expect(dose.value).toBe("1 mg/kg");
   });
 
   test("fourchette de dose", () => {
     const toks = tokenizeProtocolText("Induction : 1-2,5 mg/kg IV", DRUG_PATTERNS);
-    const dose = toks.find(t => t.type === "dose");
+    const dose = toks.find((t) => t.type === "dose");
     expect(dose.value).toBe("1-2,5 mg/kg");
   });
 
   test("dose µg/kg/min", () => {
     const toks = tokenizeProtocolText("0,1 µg/kg/min IVSE", DRUG_PATTERNS);
-    const dose = toks.find(t => t.type === "dose");
+    const dose = toks.find((t) => t.type === "dose");
     // Le suffixe /min est capté via la 3e capture (?:\/(?:kg|h|min|j|24h))?
     expect(dose.value).toContain("0,1");
     expect(dose.value).toContain("µg/kg");
@@ -46,14 +46,14 @@ describe("tokenizeProtocolText — détection des doses", () => {
 
   test("dose en mL", () => {
     const toks = tokenizeProtocolText("Diluer dans 100 mL de NaCl", DRUG_PATTERNS);
-    const doses = toks.filter(t => t.type === "dose");
-    expect(doses.map(d => d.value)).toContain("100 mL");
+    const doses = toks.filter((t) => t.type === "dose");
+    expect(doses.map((d) => d.value)).toContain("100 mL");
   });
 
   test("doses multiples dans une phrase", () => {
     const t = "1 g d'acide tranexamique dilué dans 100 mL en 10 min";
     const toks = tokenizeProtocolText(t, DRUG_PATTERNS);
-    const doses = toks.filter(d => d.type === "dose").map(d => d.value);
+    const doses = toks.filter((d) => d.type === "dose").map((d) => d.value);
     expect(doses).toContain("1 g");
     expect(doses).toContain("100 mL");
     // « 10 min » n'est PAS une dose (min n'est pas une unité standalone)
@@ -70,18 +70,15 @@ describe("tokenizeProtocolText — détection des médicaments", () => {
 
   test("case insensitive : 'adrénaline' minuscule détecté", () => {
     const toks = tokenizeProtocolText("Renouveler l'adrénaline 1 mg", DRUG_PATTERNS);
-    const drugs = toks.filter(t => t.type === "drug").map(d => d.value);
+    const drugs = toks.filter((t) => t.type === "drug").map((d) => d.value);
     expect(drugs).toEqual(["adrénaline"]);
   });
 
   test("deux médicaments dans une phrase + dose", () => {
-    const toks = tokenizeProtocolText(
-      "Méthylprednisolone (Solumédrol®) 1 mg/kg",
-      DRUG_PATTERNS
-    );
-    const drugs = toks.filter(t => t.type === "drug").map(d => d.value);
+    const toks = tokenizeProtocolText("Méthylprednisolone (Solumédrol®) 1 mg/kg", DRUG_PATTERNS);
+    const drugs = toks.filter((t) => t.type === "drug").map((d) => d.value);
     expect(drugs).toEqual(["Méthylprednisolone", "Solumédrol"]);
-    const dose = toks.find(t => t.type === "dose");
+    const dose = toks.find((t) => t.type === "dose");
     expect(dose.value).toBe("1 mg/kg");
   });
 
@@ -90,18 +87,15 @@ describe("tokenizeProtocolText — détection des médicaments", () => {
       "1 g d'acide tranexamique (Exacyl®) en 10 min",
       DRUG_PATTERNS
     );
-    const drugs = toks.filter(t => t.type === "drug").map(d => d.value);
+    const drugs = toks.filter((t) => t.type === "drug").map((d) => d.value);
     expect(drugs).toEqual(["acide tranexamique", "Exacyl"]);
   });
 
   test("NaCl (pattern court) cliquable même suivi de '0,9 %'", () => {
-    const toks = tokenizeProtocolText(
-      "Poser une VVP avec NaCl 0,9 % 500 mL",
-      DRUG_PATTERNS
-    );
-    const drugs = toks.filter(t => t.type === "drug").map(d => d.value);
+    const toks = tokenizeProtocolText("Poser une VVP avec NaCl 0,9 % 500 mL", DRUG_PATTERNS);
+    const drugs = toks.filter((t) => t.type === "drug").map((d) => d.value);
     expect(drugs).toEqual(["NaCl"]);
-    const doses = toks.filter(t => t.type === "dose").map(d => d.value);
+    const doses = toks.filter((t) => t.type === "dose").map((d) => d.value);
     expect(doses).toEqual(["500 mL"]);
   });
 
@@ -110,16 +104,13 @@ describe("tokenizeProtocolText — détection des médicaments", () => {
       "VVP de gros calibre avec le Ringer Lactate 500 mL",
       DRUG_PATTERNS
     );
-    const drugs = toks.filter(t => t.type === "drug").map(d => d.value);
+    const drugs = toks.filter((t) => t.type === "drug").map((d) => d.value);
     expect(drugs).toEqual(["Ringer Lactate"]);
   });
 
   test("Glucose détecté sur G5%/G30% via pattern court", () => {
-    const toks = tokenizeProtocolText(
-      "VVP avec du Glucose 5 % 250 mL à 80 mL/h",
-      DRUG_PATTERNS
-    );
-    const drugs = toks.filter(t => t.type === "drug").map(d => d.value);
+    const toks = tokenizeProtocolText("VVP avec du Glucose 5 % 250 mL à 80 mL/h", DRUG_PATTERNS);
+    const drugs = toks.filter((t) => t.type === "drug").map((d) => d.value);
     expect(drugs).toEqual(["Glucose"]);
   });
 });
@@ -148,21 +139,18 @@ describe("tokenizeProtocolText — pièges connus", () => {
   test("un pattern fini par % serait inopérant (régression interdite)", () => {
     // Si on rajoutait par erreur "Glucose 30 %" avec % final, le \b de fin
     // ne matcherait pas. On vérifie qu'aucun pattern actuel n'est dans ce cas.
-    const bad = DRUG_PATTERNS.filter(p => /[^A-Za-zÀ-ÿ]$/.test(p));
+    const bad = DRUG_PATTERNS.filter((p) => /[^A-Za-zÀ-ÿ]$/.test(p));
     expect(bad).toEqual([]);
   });
 
   test("'5 %' n'est pas confondu avec une dose", () => {
-    const toks = tokenizeProtocolText(
-      "Surface brûlée > 20 % chez l'adulte",
-      DRUG_PATTERNS
-    );
-    expect(toks.filter(t => t.type === "dose")).toEqual([]);
+    const toks = tokenizeProtocolText("Surface brûlée > 20 % chez l'adulte", DRUG_PATTERNS);
+    expect(toks.filter((t) => t.type === "dose")).toEqual([]);
   });
 
   test("traitement des points d'intervalle '0,01 mg/kg'", () => {
     const toks = tokenizeProtocolText("Adrénaline 0,01 mg/kg IV bolus", DRUG_PATTERNS);
-    const dose = toks.find(t => t.type === "dose");
+    const dose = toks.find((t) => t.type === "dose");
     expect(dose.value).toBe("0,01 mg/kg");
   });
 

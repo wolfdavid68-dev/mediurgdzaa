@@ -23,10 +23,20 @@ const PrepKitCard = ({ kit }) => {
           </div>
           <div className="drug-subtitle">
             <span className="badge badge-cat">{kit.cat}</span>
-            <span className="drug-classe">{kit.drogues.length} médicament{kit.drogues.length > 1 ? "s" : ""}</span>
+            <span className="drug-classe">
+              {kit.drogues.length} médicament{kit.drogues.length > 1 ? "s" : ""}
+            </span>
           </div>
         </div>
-        <svg className={`chevron ${open ? "chevron-open" : ""}`} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          className={`chevron ${open ? "chevron-open" : ""}`}
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
@@ -38,7 +48,11 @@ const PrepKitCard = ({ kit }) => {
           <div className="tabs-row">
             <button
               className={`tab-btn tab-poso ${activeTab === "drogues" ? "tab-active" : ""}`}
-              style={activeTab === "drogues" ? { background: kit.couleur + "25", borderColor: kit.couleur, color: kit.couleur } : {}}
+              style={
+                activeTab === "drogues"
+                  ? { background: kit.couleur + "25", borderColor: kit.couleur, color: kit.couleur }
+                  : {}
+              }
               onClick={() => setActiveTab("drogues")}
             >
               <span className="dot dot-poso" style={{ background: kit.couleur }} />
@@ -73,16 +87,23 @@ const PrepKitCard = ({ kit }) => {
             {activeTab === "drogues" && (
               <div className="prepkit-drugs">
                 {kit.drogues.map((d, i) => {
-                  const drug = d.drugId ? DRUGS.find(x => x.id === d.drugId) : null;
+                  const drug = d.drugId ? DRUGS.find((x) => x.id === d.drugId) : null;
                   const fromDrug = buildPrepFromDrug(drug);
                   const condText = fromDrug?.cond || null;
                   // Si le kit fournit sa propre prep, elle prime sur les etapes du drug
                   // (sinon on affiche toutes les indications, ex : ACR + Anaphylaxie + PSE pour Adrénaline)
                   const kitPrep = d.prep || null;
-                  const etapes = !kitPrep && fromDrug?.etapes && fromDrug.etapes.length > 0 ? fromDrug.etapes : null;
+                  const etapes =
+                    !kitPrep && fromDrug?.etapes && fromDrug.etapes.length > 0
+                      ? fromDrug.etapes
+                      : null;
                   const fallbackPrep = kitPrep;
                   return (
-                    <div key={i} className="prepkit-drug-card" style={{ borderLeftColor: kit.couleur }}>
+                    <div
+                      key={i}
+                      className="prepkit-drug-card"
+                      style={{ borderLeftColor: kit.couleur }}
+                    >
                       <div className="prepkit-drug-name">{d.nom}</div>
                       <div className="prepkit-drug-role">{d.role}</div>
                       <div className="prepkit-drug-row">
@@ -99,8 +120,10 @@ const PrepKitCard = ({ kit }) => {
                         <div className="prepkit-drug-row">
                           <span className="prepkit-drug-label">Prép.</span>
                           <span className="prepkit-drug-value">
-                            <ol style={{margin:0,paddingLeft:16}}>
-                              {etapes.map((step, j) => <li key={j}>{step}</li>)}
+                            <ol style={{ margin: 0, paddingLeft: 16 }}>
+                              {etapes.map((step, j) => (
+                                <li key={j}>{step}</li>
+                              ))}
                             </ol>
                           </span>
                         </div>
@@ -112,8 +135,17 @@ const PrepKitCard = ({ kit }) => {
                       ) : null}
                       {d.note && (
                         <div className="prepkit-drug-note">
-                          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="11"
+                            height="11"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
                           </svg>
                           {d.note}
                         </div>
@@ -126,13 +158,19 @@ const PrepKitCard = ({ kit }) => {
 
             {activeTab === "materiel" && (
               <ul className="item-list">
-                {kit.materiel.map((m, i) => <li key={i}>{m}</li>)}
+                {kit.materiel.map((m, i) => (
+                  <li key={i}>{m}</li>
+                ))}
               </ul>
             )}
 
             {activeTab === "sequence" && (
               <ol className="prep-etapes">
-                {kit.sequence.map((s, i) => <li key={i} className="prep-etape">{s}</li>)}
+                {kit.sequence.map((s, i) => (
+                  <li key={i} className="prep-etape">
+                    {s}
+                  </li>
+                ))}
               </ol>
             )}
 
@@ -140,8 +178,17 @@ const PrepKitCard = ({ kit }) => {
               <ul className="prep-notes">
                 {kit.notes.map((n, i) => (
                   <li key={i} className="prep-note-item">
-                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="11"
+                      height="11"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                     {n}
                   </li>

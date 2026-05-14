@@ -6,25 +6,24 @@ const DOSE_PATTERN =
 
 function buildDrugPattern(drugPatterns) {
   return new RegExp(
-    `\\b(${drugPatterns.map(d => d.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+    `\\b(${drugPatterns.map((d) => d.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
     "gi"
   );
 }
 
+type Token = { type: "text" | "drug" | "dose"; value: string };
+
 // Découpe un texte protocole en tokens : { type: "text" | "drug" | "dose", value }
 // Les médicaments l'emportent sur les doses en cas de chevauchement (cf. regex
 // combinée — capture group 1 = drug, sinon dose).
-export function tokenizeProtocolText(text, drugPatterns) {
+export function tokenizeProtocolText(text: string, drugPatterns: string[]): Token[] {
   if (!text) return [];
   const drugRe = buildDrugPattern(drugPatterns);
-  const combined = new RegExp(
-    `(${drugRe.source})|(${DOSE_PATTERN.source})`,
-    "gi"
-  );
+  const combined = new RegExp(`(${drugRe.source})|(${DOSE_PATTERN.source})`, "gi");
 
-  const tokens = [];
+  const tokens: Token[] = [];
   let last = 0;
-  let match;
+  let match: RegExpExecArray | null;
   combined.lastIndex = 0;
   while ((match = combined.exec(text)) !== null) {
     if (match.index > last) {

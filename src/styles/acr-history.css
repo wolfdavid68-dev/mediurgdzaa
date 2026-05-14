@@ -1,0 +1,77 @@
+/* Historique */
+.acr-history {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.acr-history-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 0;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.acr-history-toggle:hover {
+  color: var(--text);
+}
+.acr-history-list {
+  list-style: none;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.acr-history-item {
+  display: grid;
+  grid-template-columns: 32px 50px 90px 1fr;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  padding: 6px 8px;
+  background: var(--card);
+  border-radius: 6px;
+  color: var(--text-dim);
+}
+.acr-history-cycle {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--text);
+}
+.acr-history-time {
+  font-family: var(--mono);
+  color: var(--text-mute);
+  font-size: 11px;
+}
+.acr-history-rhythm {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-align: center;
+}
+.acr-history-rhythm-choquable {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+.acr-history-rhythm-non_choquable {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--success);
+}
+.acr-history-actions {
+  color: var(--text);
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .acr-history-item {
+    grid-template-columns: 28px 44px 80px 1fr;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .acr-rhythm-icon {
+    font-size: 18px;
+  }
+}

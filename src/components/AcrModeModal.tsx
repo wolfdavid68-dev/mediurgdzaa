@@ -17,8 +17,8 @@ const readProtocol = () => {
   return "erc";
 };
 const AcrModeModal = ({ open, onClose, onOpenDrug }) => {
-  const dialogRef = useRef(null);
-  const [pediatric, setPediatric] = useState(null); // null tant que pas choisi
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const [pediatric, setPediatric] = useState<boolean | null>(null); // null tant que pas choisi
   const [protocol, setProtocol] = useState(readProtocol);
   useEffect(() => {
     try {

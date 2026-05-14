@@ -1,0 +1,504 @@
+/* ── Sticky header ──────────────────────────────────────── */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--header-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding-top: var(--safe-top);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+.header-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: clamp(12px, 2.5vw, 18px) clamp(14px, 3vw, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.8vw, 14px);
+}
+
+/* Logo row */
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Network status badge */
+.net-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  margin-right: 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  user-select: none;
+  border: 1px solid transparent;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+.net-status-online {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+  border-color: rgba(34, 197, 94, 0.45);
+}
+.net-status-offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.net-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.net-status-online .net-status-dot {
+  background: #16a34a;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+}
+.net-status-offline .net-status-dot {
+  background: #dc2626;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+  animation: net-status-pulse 1.4s ease-in-out infinite;
+}
+@keyframes net-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (max-width: 480px) {
+  .net-status {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 10px;
+    margin-right: 6px;
+  }
+}
+
+/* Font size toggle button */
+.font-toggle {
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.font-toggle:hover {
+  background: var(--card-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.font-toggle-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.font-toggle-active:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.theme-toggle:hover {
+  background: var(--card-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-mark {
+  width: clamp(36px, 4.5vw, 44px);
+  height: clamp(36px, 4.5vw, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* Le logo Urgences Mulhouse a des éléments noirs sur fond transparent.
+     En mode dark (défaut), on ajoute un fond blanc circulaire pour que
+     le caduceus et l'ECG restent lisibles. */
+  background: #fff;
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+[data-theme="light"] .logo-mark {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+.logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.logo-text h1 {
+  font-size: clamp(18px, 2.5vw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+  color: var(--text);
+}
+.logo-text p {
+  font-size: clamp(10px, 1.1vw, 12px);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  margin-top: 2px;
+}
+
+/* Bottom navigation bar */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--safe-bottom);
+}
+.bottom-nav-row {
+  display: flex;
+  width: 100%;
+}
+
+.bottom-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 8px;
+  min-height: 60px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font);
+  color: var(--text-mute);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.bottom-tab svg {
+  transition: stroke 0.15s;
+}
+.bottom-tab:hover {
+  color: var(--text-dim);
+}
+.bottom-tab-active {
+  color: var(--accent);
+  font-weight: 600;
+}
+.bottom-tab-active svg {
+  stroke: var(--accent);
+}
+
+/* Search bar */
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-bar svg {
+  position: absolute;
+  left: 12px;
+  color: var(--text-mute);
+  pointer-events: none;
+  width: clamp(16px, 1.8vw, 20px);
+  height: clamp(16px, 1.8vw, 20px);
+}
+.search-bar input {
+  width: 100%;
+  padding: clamp(10px, 1.3vw, 13px) 38px clamp(10px, 1.3vw, 13px) clamp(36px, 4vw, 42px);
+  font-size: clamp(14px, 1.5vw, 15px);
+  font-family: var(--font);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  outline: none;
+  transition:
+    border 0.15s,
+    background 0.15s;
+  min-height: 42px; /* touch target */
+}
+.search-bar input:focus {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+}
+.search-bar input::placeholder {
+  color: var(--text-mute);
+}
+.search-clear {
+  position: absolute;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--border);
+  color: var(--text-dim);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2px;
+}
+.search-clear:hover {
+  background: var(--border-strong);
+  color: var(--text);
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-mute);
+  font-family: var(--mono);
+  letter-spacing: 0.6px;
+  flex-shrink: 0;
+  width: 28px;
+}
+.filter-chips {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  padding: 5px 11px;
+  font-size: clamp(10px, 1.1vw, 12px);
+  font-weight: 700;
+  font-family: var(--font);
+  letter-spacing: 0.2px;
+  color: var(--text-dim);
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+  flex-shrink: 0;
+  min-height: 28px;
+  opacity: 0.72;
+}
+.chip:hover {
+  opacity: 1;
+}
+
+/* ── Couleurs SFAR par catégorie ──────────────────────────── */
+.chip[data-cat="Tout"] {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border-strong);
+  opacity: 1;
+}
+.chip[data-cat="Hypnotiques"] {
+  background: #f5d300;
+  color: #1a1a2e;
+  border-color: #f5d300;
+}
+.chip[data-cat="Analgésie"] {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+.chip[data-cat="Curares"] {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+.chip[data-cat="Catécholamines"] {
+  background: #7c3aed;
+  color: #fff;
+  border-color: #7c3aed;
+}
+.chip[data-cat="Cardiologie"] {
+  background: #0ea5e9;
+  color: #fff;
+  border-color: #0ea5e9;
+}
+.chip[data-cat="Neurologie"] {
+  background: #0d9488;
+  color: #fff;
+  border-color: #0d9488;
+}
+.chip[data-cat="Antidotes"] {
+  background: #fcd34d;
+  color: #1a1a2e;
+  border-color: #fcd34d;
+}
+.chip[data-cat="Antibiotiques"] {
+  background: #0284c7;
+  color: #fff;
+  border-color: #0284c7;
+}
+.chip[data-cat="Anticoagulants"] {
+  background: #ec4899;
+  color: #fff;
+  border-color: #ec4899;
+}
+.chip[data-cat="Électrolytes"] {
+  background: #34d399;
+  color: #1a1a2e;
+  border-color: #34d399;
+}
+.chip[data-cat="Métabolique"] {
+  background: #34d399;
+  color: #1a1a2e;
+  border-color: #34d399;
+}
+.chip[data-cat="Diurétiques"] {
+  background: #22d3ee;
+  color: #1a1a2e;
+  border-color: #22d3ee;
+}
+.chip[data-cat="Pneumologie"] {
+  background: #22d3ee;
+  color: #1a1a2e;
+  border-color: #22d3ee;
+}
+.chip[data-cat="Solutés"] {
+  background: #38bdf8;
+  color: #1a1a2e;
+  border-color: #38bdf8;
+}
+.chip[data-cat="Produits sanguins"] {
+  background: #b91c1c;
+  color: #fff;
+  border-color: #b91c1c;
+}
+.chip[data-cat="Urgence vitale"] {
+  background: #ff4757;
+  color: #fff;
+  border-color: #ff4757;
+}
+
+/* État actif : contour blanc + pleine opacité */
+.chip-active {
+  opacity: 1 !important;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px currentColor;
+  transform: scale(1.04);
+}
+.chip[data-cat="Tout"].chip-active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  box-shadow: none;
+}
+
+/* SVC chips — gardent le style pilule */
+.chip-svc {
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text-dim);
+  border-color: var(--border);
+  font-weight: 600;
+  opacity: 1;
+}
+.chip-svc.chip-active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: none;
+  transform: none;
+}
+
+.result-count {
+  font-size: clamp(10px, 1.1vw, 12px);
+  color: var(--text-mute);
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+}
+
+/* ── Main content ───────────────────────────────────────── */
+
+.main-content {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: clamp(12px, 2vw, 20px) clamp(12px, 2.5vw, 24px) calc(80px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vw, 12px);
+}

@@ -3,6 +3,7 @@ import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
 import checker from "vite-plugin-checker";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // (defineConfig de vite ne connaît pas la clé `test` que vitest étend. On
 // pourrait passer par `vitest/config` mais ça crée un conflit de versions
@@ -62,10 +63,18 @@ export default defineConfig({
       // automatiquement à chaque build.
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest}"],
+        // stats.html (généré par rollup-plugin-visualizer en mode analyze)
+        // ne doit jamais être précached ni servi aux users.
+        globIgnores: ["**/stats.html"],
         cleanupOutdatedCaches: true,
         // SPA : toute nav non-précachée renvoie index.html pour que React
         // route côté client.
         navigateFallback: "index.html",
+        // Workbox skip silencieusement les fichiers > 2 MB par défaut. On
+        // monte à 5 MB pour couvrir les futurs assets lourds (image hi-res
+        // ECG, PDF protocole) sans risquer un asset hors cache → 404 offline.
+        // Aujourd'hui le plus gros est vendor-react ≈ 191 kB, large marge.
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       // (Pas d'`includeAssets` : les .png/.webmanifest sont déjà capturés
       // par workbox.globPatterns plus haut. Listing redondant créait des
@@ -125,6 +134,17 @@ export default defineConfig({
       },
       injectRegister: false, // on garde notre propre registration pour piloter le toast d'update
     }),
+    // Analyseur de bundle — produit build/stats.html avec un treemap des
+    // chunks. Activé uniquement via `npm run analyze` (env ANALYZE=true) pour
+    // ne pas ralentir les builds normaux. Ouvre build/stats.html pour voir
+    // ce qui pèse dans index.js / vendor-react / data-medic.
+    process.env.ANALYZE === "true" &&
+      visualizer({
+        filename: "build/stats.html",
+        gzipSize: true,
+        brotliSize: true,
+        template: "treemap",
+      }),
   ],
   base: "./",
   build: {
@@ -160,16 +180,35 @@ export default defineConfig({
   },
   // @ts-expect-error — clé `test` ajoutée par vitest, pas dans le type de Vite
   test: {
-    // happy-dom au lieu de jsdom : implémentation DOM en TS (vs jsdom en JS),
-    // ~2-3× plus rapide pour les tests React. Compatible avec tout ce dont on
-    // a besoin (matchers jest-dom, user-event, fireEvent, etc.). Si on touchait
-    // à des APIs très bordées (XMLHttpRequest avancé, fetch streams), il faudrait
-    // re-vérifier — pour MediURG on est sur du DOM standard, no-op.
-    environment: "happy-dom",
+    // Projects : sépare les tests purs (logique métier, reducers) du test DOM.
+    // - "libs" tourne en environnement node pur → ~2× plus rapide qu'en happy-dom,
+    //   et garantit qu'aucun code testé n'a de dépendance DOM cachée.
+    // - "dom" tourne en happy-dom (~2-3× plus rapide que jsdom) pour les
+    //   composants React qui ont besoin de render/fireEvent/userEvent.
+    // Globals + setupFiles sont hérités via `extends: true`.
     globals: true,
-    include: ["src/**/*.test.{js,jsx,ts,tsx}"],
-    // setupFiles est exécuté avant chaque suite : importe les matchers
-    // @testing-library/jest-dom (toBeInTheDocument, toHaveClass, etc.).
     setupFiles: ["src/test-setup.ts"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: { label: "libs", color: "blue" },
+          // Tests purs : libs/ + le reducer ACR (pure function malgré son
+          // emplacement dans components/).
+          include: ["src/lib/**/*.test.{js,ts}", "src/components/AcrTimer.reducer.test.ts"],
+          environment: "node",
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: { label: "dom", color: "green" },
+          include: ["src/components/**/*.test.{js,ts,tsx}"],
+          // Le reducer pur tourne dans le projet "libs" pour la vitesse.
+          exclude: ["src/components/AcrTimer.reducer.test.ts"],
+          environment: "happy-dom",
+        },
+      },
+    ],
   },
 });
