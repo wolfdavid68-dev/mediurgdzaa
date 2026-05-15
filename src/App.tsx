@@ -13,6 +13,7 @@ import {
   type ExitToastVariant,
 } from "./lib/useBackNavigation";
 import { usePersistentStorage } from "./lib/usePersistentStorage";
+import { useLongPress } from "./lib/useLongPress";
 
 // Code-splitting : les modales (ACR, changelog) sont importées à la demande,
 // et la page Protocoles entière (avec ses data PROTOCOLS + PREP_KITS et ses
@@ -55,6 +56,12 @@ const App = () => {
       return false;
     }
   });
+  // Accès caché à la console admin : appui long (~600 ms) sur le logo
+  // émet un event intercepté par AuthGate (qui ne l'honore que pour un
+  // compte admin). Remplace l'ancienne roue crantée flottante, gênante
+  // car superposée au contenu.
+  const adminLongPress = useLongPress(() => window.dispatchEvent(new Event("mediurg:open-admin")));
+
   const [favorites, setFavorites] = useState<Set<number>>(() => {
     try {
       const raw = localStorage.getItem("mediurg-favorites");
@@ -287,9 +294,13 @@ const App = () => {
       <header className="app-header">
         <div className="header-inner">
           <div className="logo-row">
-            <div className="logo">
+            <div
+              className="logo"
+              {...adminLongPress}
+              style={{ WebkitUserSelect: "none", userSelect: "none" }}
+            >
               <div className="logo-mark">
-                <img src="/logo-sau.png" alt="Urgences Mulhouse" />
+                <img src="/logo-sau.png" alt="Urgences Mulhouse" draggable={false} />
               </div>
               <div className="logo-text">
                 <h1>MediURG</h1>

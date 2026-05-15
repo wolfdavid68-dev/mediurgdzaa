@@ -163,6 +163,16 @@ const AuthGate = ({ children }: Props) => {
     });
   }, [enabled, profileId, profileStatus]);
 
+  // Accès admin par geste caché : appui long sur le logo (App.tsx) émet
+  // `mediurg:open-admin`. On ouvre la console — le rendu ne l'affiche que
+  // si profile.role === "admin" (no-op pour un non-admin). Remplace
+  // l'ancienne roue crantée flottante.
+  useEffect(() => {
+    const open = () => setShowAdmin(true);
+    window.addEventListener("mediurg:open-admin", open);
+    return () => window.removeEventListener("mediurg:open-admin", open);
+  }, []);
+
   // Mode désactivé → bypass total, l'app fonctionne comme avant.
   if (!enabled) return <>{children}</>;
 
@@ -262,24 +272,9 @@ const AuthGate = ({ children }: Props) => {
     );
   }
 
-  // App normale — pour les admins, on ajoute un mini bouton qui leur permet
-  // d'ouvrir la console. Pour les users normaux, rien à signaler.
-  return (
-    <>
-      {children}
-      {profile.role === "admin" && (
-        <button
-          type="button"
-          className="auth-admin-fab"
-          onClick={() => setShowAdmin(true)}
-          aria-label="Ouvrir la console d'administration"
-          title="Console admin"
-        >
-          ⚙
-        </button>
-      )}
-    </>
-  );
+  // App normale. L'accès admin se fait par appui long sur le logo
+  // (cf. useEffect "mediurg:open-admin") — plus de bouton flottant.
+  return <>{children}</>;
 };
 
 export default AuthGate;

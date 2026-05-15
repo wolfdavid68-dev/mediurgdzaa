@@ -1399,24 +1399,6 @@
   color: oklch(0.97 0.004 90);
 }
 
-/* ── FAB admin (sur l'app pour bascule rapide vers la console) ── */
-.auth-admin-fab {
-  position: fixed;
-  /* S'affiche par-dessus l'app principale → respecte les safe-areas iOS
-     (home indicator / encoche en paysage) comme le reste de l'app. */
-  bottom: calc(16px + var(--safe-bottom, 0px));
-  left: calc(16px + var(--safe-left, 0px));
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: oklch(0.21 0.006 280);
-  border: 1px solid oklch(0.32 0.008 280);
-  color: oklch(0.97 0.004 90);
-  font-size: 18px;
-  cursor: pointer;
-  box-shadow: 0 8px 24px -8px oklch(0 0 0 / 0.5);
-  z-index: 300;
-}
-.auth-admin-fab:hover {
-  background: oklch(0.24 0.006 280);
-}
+/* (Ancienne roue crantée flottante .auth-admin-fab retirée : l'accès
+   admin se fait désormais par appui long sur le logo — cf. useLongPress
+   + event "mediurg:open-admin" dans AuthGate.) */

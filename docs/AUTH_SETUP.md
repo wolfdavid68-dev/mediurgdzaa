@@ -89,7 +89,8 @@ Une fois Supabase configuré, tester en local avec
   `test@ghrmsa.fr`) → demande créée en `pending`
 - [ ] Connexion impossible tant que `pending` → écran « En attente »
 - [ ] Promotion via SQL → connexion OK
-- [ ] Console admin visible (FAB ⚙ en bas-gauche pour role=admin)
+- [ ] Console admin accessible par **appui long (~600 ms) sur le logo**
+      (role=admin uniquement ; aucun bouton visible — accès discret)
 - [ ] Approve / reject / ban / unban depuis la console
 - [ ] Logout → retour à l'écran login
 
