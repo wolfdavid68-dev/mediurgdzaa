@@ -39,27 +39,20 @@ describe("resolveProfile — tolérance hors-ligne (par kind)", () => {
     expect(cacheProfileMock).toHaveBeenCalledWith(profile);
   });
 
-  test("échec kind=network → profil caché (pas de renvoi au login)", async () => {
-    fetchProfileMock.mockResolvedValue({ ok: false, error: "x", kind: "network" });
-    getCachedProfileMock.mockReturnValue(profile);
-    expect(await resolveProfile("user-1")).toEqual(profile);
-    expect(getCachedProfileMock).toHaveBeenCalledWith("user-1");
-  });
+  // Durcissement A : TOUT échec retombe sur le cache si dispo (appareil
+  // appairé → plus jamais de login sauf déconnexion explicite).
+  test.each(["network", "notfound", "config", "unknown"] as const)(
+    "échec kind=%s + cache présent → profil caché (pas de login)",
+    async (kind) => {
+      fetchProfileMock.mockResolvedValue({ ok: false, error: "x", kind });
+      getCachedProfileMock.mockReturnValue(profile);
+      expect(await resolveProfile("user-1")).toEqual(profile);
+      expect(getCachedProfileMock).toHaveBeenCalledWith("user-1");
+    }
+  );
 
-  test("échec kind=notfound → null (login légitime, pas de fallback)", async () => {
+  test("échec + aucun cache (jamais appairé) → null → login", async () => {
     fetchProfileMock.mockResolvedValue({ ok: false, error: "x", kind: "notfound" });
-    getCachedProfileMock.mockReturnValue(profile);
-    expect(await resolveProfile("user-1")).toBeNull();
-    expect(getCachedProfileMock).not.toHaveBeenCalled();
-  });
-
-  test("échec kind=config → null (backend non configuré)", async () => {
-    fetchProfileMock.mockResolvedValue({ ok: false, error: "x", kind: "config" });
-    expect(await resolveProfile("user-1")).toBeNull();
-  });
-
-  test("échec network mais aucun cache → null", async () => {
-    fetchProfileMock.mockResolvedValue({ ok: false, error: "x", kind: "network" });
     getCachedProfileMock.mockReturnValue(null);
     expect(await resolveProfile("user-1")).toBeNull();
   });

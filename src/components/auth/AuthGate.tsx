@@ -60,18 +60,21 @@ const consumeAuthHashError = (): string | null => {
 };
 
 // Récupère le profil avec tolérance hors-ligne (outil d'urgence offline-first).
+// Garantie « appairé une fois → plus jamais de login sauf déconnexion » :
 // - succès → on met le profil en cache et on le renvoie ;
-// - échec RÉSEAU (offline dur, wifi sans route, timeout — via result.kind
-//   "network", pas seulement navigator.onLine) → dernier profil caché de
-//   cet user (appareil déjà appairé → usage offline illimité) ;
-// - échec notfound/config/en ligne → null (écran login légitime).
+// - ÉCHEC, quelle qu'en soit la cause (réseau, serveur down, erreur non
+//   classée…) → on retombe sur le profil caché de cet user s'il existe.
+//   Seul un appareil JAMAIS appairé (aucun cache) tombe sur le login.
+// Compromis assumé : un compte banni reste détecté (le fetch réussit et
+// renvoie status:banned → écran suspendu) ; seul un compte SUPPRIMÉ
+// côté serveur garderait l'accès via cache jusqu'à purge (cf. AUTH_SETUP).
 export const resolveProfile = async (userId: string): Promise<Profile | null> => {
   const result = await fetchProfile(userId);
   if (result.ok) {
     cacheProfile(result.data);
     return result.data;
   }
-  return result.kind === "network" ? getCachedProfile(userId) : null;
+  return getCachedProfile(userId);
 };
 
 const AuthGate = ({ children }: Props) => {

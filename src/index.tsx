@@ -48,6 +48,11 @@ import "./styles/auth.css";
 import "./styles/auth-mobile.css";
 import App from "./App";
 import AuthGate from "./components/auth/AuthGate";
+import { requestPersistentStorage } from "./lib/persistStorage";
+
+// Réclame le stockage persistant au plus tôt (anti-éviction OS du cache
+// session/profil → garantie offline « appairé une fois »). Best-effort.
+void requestPersistentStorage();
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("#root introuvable dans index.html");
