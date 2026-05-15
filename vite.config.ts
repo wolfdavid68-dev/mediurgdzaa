@@ -187,7 +187,15 @@ export default defineConfig({
     //   composants React qui ont besoin de render/fireEvent/userEvent.
     // Globals + setupFiles sont hérités via `extends: true`.
     globals: true,
-    setupFiles: ["src/test-setup.ts"],
+    // setupFiles n'est PAS défini ici : jest-dom (`@testing-library/jest-dom`)
+    // étend `expect` avec des matchers DOM (toBeInTheDocument, …). Hérité par
+    // les DEUX projets via `extends: true`, il s'exécutait aussi dans le projet
+    // "libs" (environnement node, sans DOM) ; quand les deux projets
+    // s'entrelaçaient dans le pool de workers partagé, l'extension d'`expect`
+    // n'était parfois pas appliquée avant qu'un test "dom" tourne → échecs
+    // flaky « Invalid Chai property: toBeInTheDocument ». On scope donc le
+    // setup au seul projet "dom" qui en a besoin (cf. doc Vitest projects :
+    // setupFiles par projet plutôt qu'hérité globalement).
     // Coverage v8 (provider natif Node) — `npm run test:coverage` produit un
     // rapport HTML dans coverage/ et un récap dans la console. Pas de
     // thresholds bloquants pour l'instant (à ajouter plus tard quand on
@@ -223,6 +231,9 @@ export default defineConfig({
           // Le reducer pur tourne dans le projet "libs" pour la vitesse.
           exclude: ["src/components/AcrTimer.reducer.test.ts"],
           environment: "happy-dom",
+          // jest-dom scopé ici uniquement (cf. commentaire sur l'absence de
+          // setupFiles à la racine) — seul ce projet rend du DOM.
+          setupFiles: ["src/test-setup.ts"],
         },
       },
     ],
