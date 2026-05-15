@@ -1,5 +1,6 @@
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
+import { clearCachedProfile } from "./profileCache";
 
 // API d'authentification haut-niveau pour MediURG. Toute la logique est
 // regroupée ici : signup, login, logout, fetch profile, actions admin.
@@ -172,6 +173,9 @@ export const login = async (
 
 // ─── Logout ──────────────────────────────────────────────────
 export const logout = async (): Promise<void> => {
+  // Purge le profil caché : une déconnexion explicite ne doit pas laisser
+  // un fallback offline réactivable au prochain lancement.
+  clearCachedProfile();
   const supabase = getSupabase();
   if (!supabase) return;
   await supabase.auth.signOut();

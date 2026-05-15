@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { fetchProfile, getCurrentSession, onAuthStateChange, type Profile } from "../../lib/auth";
+import { cacheProfile, getCachedProfile } from "../../lib/profileCache";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
@@ -58,6 +59,21 @@ const consumeAuthHashError = (): string | null => {
   return "Lien d'authentification invalide ou expiré.";
 };
 
+// Récupère le profil avec tolérance hors-ligne (outil d'urgence offline-first).
+// - succès → on met le profil en cache et on le renvoie ;
+// - échec ALORS qu'on est hors-ligne → dernier profil caché de cet user
+//   (l'appareil a déjà été connecté une fois → usage offline illimité) ;
+// - échec en ligne → null (écran login légitime : il peut se ré-authentifier).
+export const resolveProfile = async (userId: string): Promise<Profile | null> => {
+  const result = await fetchProfile(userId);
+  if (result.ok) {
+    cacheProfile(result.data);
+    return result.data;
+  }
+  const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+  return offline ? getCachedProfile(userId) : null;
+};
+
 const AuthGate = ({ children }: Props) => {
   const enabled = isAuthEnabled();
   const isMobile = useIsMobile();
@@ -90,9 +106,9 @@ const AuthGate = ({ children }: Props) => {
         setLoading(false);
         return;
       }
-      const result = await fetchProfile(session.user.id);
+      const resolved = await resolveProfile(session.user.id);
       if (cancelled) return;
-      if (result.ok) setProfile(result.data);
+      if (resolved) setProfile(resolved);
       setLoading(false);
     };
     init();
@@ -104,8 +120,8 @@ const AuthGate = ({ children }: Props) => {
           setShowAdmin(false);
           return;
         }
-        const result = await fetchProfile(user.id);
-        if (!cancelled && result.ok) setProfile(result.data);
+        const resolved = await resolveProfile(user.id);
+        if (!cancelled && resolved) setProfile(resolved);
       },
       () => {
         // Lien « mot de passe oublié » cliqué : on bascule sur le ResetPasswordScreen

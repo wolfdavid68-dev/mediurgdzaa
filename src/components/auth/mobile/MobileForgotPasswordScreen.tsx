@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { isValidMatricule, requestPasswordReset } from "../../../lib/auth";
+import { useEffect, useState } from "react";
+import { useForgotPasswordForm } from "../hooks/useForgotPasswordForm";
 import { ArrowL, Arrow, Check, Spinner, Warn } from "./icons";
 
 // « Mot de passe oublié » — design mobile dédié (header back + hero).
@@ -12,12 +12,16 @@ type Props = {
 };
 
 const MobileForgotPasswordScreen = ({ onBackToLogin, initialError = null }: Props) => {
-  const [digits, setDigits] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
+  const {
+    matriculeDigits: digits,
+    setMatriculeDigits: setDigits,
+    loading,
+    error,
+    errorNonce,
+    sent,
+    submit: onSubmit,
+  } = useForgotPasswordForm();
   const [shake, setShake] = useState(false);
-  const [errorNonce, setErrorNonce] = useState(0);
 
   useEffect(() => {
     if (errorNonce === 0) return;
@@ -25,29 +29,6 @@ const MobileForgotPasswordScreen = ({ onBackToLogin, initialError = null }: Prop
     const t = window.setTimeout(() => setShake(false), 400);
     return () => window.clearTimeout(t);
   }, [errorNonce]);
-
-  const fail = (msg: string) => {
-    setError(msg);
-    setErrorNonce((n) => n + 1);
-  };
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const matricule = `M${digits}`;
-    if (!isValidMatricule(matricule)) {
-      fail("Format attendu : M + 6 chiffres (ex : M402100)");
-      return;
-    }
-    setLoading(true);
-    const result = await requestPasswordReset(matricule);
-    setLoading(false);
-    if (!result.ok) {
-      fail(result.error);
-      return;
-    }
-    setSent(true);
-  };
 
   return (
     <div className="m-app">

@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { isValidPassword, logout, passwordStrength, updatePassword } from "../../../lib/auth";
+import { useEffect, useState } from "react";
+import { useResetPasswordForm } from "../hooks/useResetPasswordForm";
 import { Arrow, Check, Spinner, Warn } from "./icons";
 
 // « Nouveau mot de passe » — design mobile dédié. Étape 2 du flow recovery :
@@ -13,15 +13,19 @@ type Props = {
 };
 
 const MobileResetPasswordScreen = ({ onDone }: Props) => {
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const {
+    password,
+    setPassword,
+    passwordConfirm,
+    setPasswordConfirm,
+    loading,
+    error,
+    errorNonce,
+    done,
+    strength,
+    submit: onSubmit,
+  } = useResetPasswordForm();
   const [shake, setShake] = useState(false);
-  const [errorNonce, setErrorNonce] = useState(0);
-
-  const strength = passwordStrength(password);
 
   useEffect(() => {
     if (errorNonce === 0) return;
@@ -29,37 +33,6 @@ const MobileResetPasswordScreen = ({ onDone }: Props) => {
     const t = window.setTimeout(() => setShake(false), 400);
     return () => window.clearTimeout(t);
   }, [errorNonce]);
-
-  const fail = (msg: string) => {
-    setError(msg);
-    setErrorNonce((n) => n + 1);
-  };
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!isValidPassword(password)) {
-      fail("Mot de passe trop court (min 8 caractères)");
-      return;
-    }
-    if (password !== passwordConfirm) {
-      fail("Les mots de passe ne correspondent pas");
-      return;
-    }
-    setLoading(true);
-    const result = await updatePassword(password);
-    if (!result.ok) {
-      setLoading(false);
-      fail(result.error);
-      return;
-    }
-    await logout();
-    setLoading(false);
-    setDone(true);
-    if (window.location.hash) {
-      window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
-  };
 
   return (
     <div className="m-app">

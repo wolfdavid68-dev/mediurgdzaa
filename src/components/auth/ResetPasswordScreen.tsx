@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { isValidPassword, logout, passwordStrength, updatePassword } from "../../lib/auth";
+import { useEffect, useState } from "react";
+import { useResetPasswordForm } from "./hooks/useResetPasswordForm";
 
 // Étape 2 du flow « mot de passe oublié » : l'user a cliqué sur le lien
 // envoyé par mail, Supabase a établi une session de récupération (event
@@ -11,53 +11,26 @@ type Props = {
 };
 
 const ResetPasswordScreen = ({ onDone }: Props) => {
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    password,
+    setPassword,
+    passwordConfirm,
+    setPasswordConfirm,
+    loading,
+    error,
+    errorNonce,
+    done,
+    strength,
+    submit: onSubmit,
+  } = useResetPasswordForm();
   const [shake, setShake] = useState(false);
-  const [done, setDone] = useState(false);
 
-  const triggerShake = () => {
+  useEffect(() => {
+    if (errorNonce === 0) return;
     setShake(true);
-    window.setTimeout(() => setShake(false), 400);
-  };
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!isValidPassword(password)) {
-      setError("Mot de passe trop court (min 8 caractères)");
-      triggerShake();
-      return;
-    }
-    if (password !== passwordConfirm) {
-      setError("Les mots de passe ne correspondent pas");
-      triggerShake();
-      return;
-    }
-    setLoading(true);
-    const result = await updatePassword(password);
-    if (!result.ok) {
-      setLoading(false);
-      setError(result.error);
-      triggerShake();
-      return;
-    }
-    // Mot de passe mis à jour : on déconnecte la session de récupération et
-    // on renvoie sur le login propre. Le token dans l'URL est consommé,
-    // l'user doit se reconnecter avec son nouveau mot de passe.
-    await logout();
-    setLoading(false);
-    setDone(true);
-    // Nettoie le hash de l'URL (#access_token=...&type=recovery) sinon
-    // un refresh redéclenche PASSWORD_RECOVERY.
-    if (window.location.hash) {
-      window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
-  };
-
-  const strength = passwordStrength(password);
+    const t = window.setTimeout(() => setShake(false), 400);
+    return () => window.clearTimeout(t);
+  }, [errorNonce]);
 
   return (
     <div className="auth-stage">

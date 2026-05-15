@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import MatriculeInput from "./MatriculeInput";
-import { isValidMatricule, requestPasswordReset } from "../../lib/auth";
+import { useForgotPasswordForm } from "./hooks/useForgotPasswordForm";
 
 // Étape 1 du flow « mot de passe oublié » : l'user saisit son matricule,
 // on envoie un mail contenant un lien magique (Supabase recovery). Le clic
@@ -18,36 +18,23 @@ type Props = {
 };
 
 const ForgotPasswordScreen = ({ onBackToLogin, initialError = null }: Props) => {
-  const [matriculeDigits, setMatriculeDigits] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
+  const {
+    matriculeDigits,
+    setMatriculeDigits,
+    loading,
+    error,
+    errorNonce,
+    sent,
+    submit: onSubmit,
+  } = useForgotPasswordForm();
   const [shake, setShake] = useState(false);
 
-  const triggerShake = () => {
+  useEffect(() => {
+    if (errorNonce === 0) return;
     setShake(true);
-    window.setTimeout(() => setShake(false), 400);
-  };
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const matricule = `M${matriculeDigits}`;
-    if (!isValidMatricule(matricule)) {
-      setError("Format attendu : M + 6 chiffres (ex : M402100)");
-      triggerShake();
-      return;
-    }
-    setLoading(true);
-    const result = await requestPasswordReset(matricule);
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      triggerShake();
-      return;
-    }
-    setSent(true);
-  };
+    const t = window.setTimeout(() => setShake(false), 400);
+    return () => window.clearTimeout(t);
+  }, [errorNonce]);
 
   return (
     <div className="auth-stage">
