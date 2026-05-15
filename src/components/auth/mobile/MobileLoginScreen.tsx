@@ -1,12 +1,12 @@
-import { useState, type FormEvent } from "react";
-import { login, isValidMatricule } from "../../../lib/auth";
+import { useEffect, useState } from "react";
+import { useLoginForm } from "../hooks/useLoginForm";
 import LegalModal from "../../LegalModal";
 import MobileLogo from "./MobileLogo";
 import { Arrow, Eye, EyeOff, Spinner, Warn } from "./icons";
 
 // Écran de login — design mobile dédié (hero plein écran, prefix matricule
 // figé, boutons full-width). Recréation fidèle de MLogin (design_handoff
-// mobile.jsx) branchée sur la vraie auth Supabase via auth.ts.
+// mobile.jsx). Logique partagée avec le desktop via useLoginForm.
 //
 // Différence assumée vs maquette : pas de lien « Accès administrateur » —
 // le rôle admin est porté par le compte (post-login), pas un écran séparé.
@@ -18,34 +18,27 @@ type Props = {
 };
 
 const MobileLoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
-  const [digits, setDigits] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    matriculeDigits,
+    setMatriculeDigits,
+    password,
+    setPassword,
+    loading,
+    error,
+    errorNonce,
+    submit,
+  } = useLoginForm(onLoggedIn);
   const [reveal, setReveal] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showLegal, setShowLegal] = useState(false);
+  const [shake, setShake] = useState(false);
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const matricule = `M${digits}`;
-    if (!isValidMatricule(matricule)) {
-      setError("Format attendu : M + 6 chiffres (ex : M402100)");
-      return;
-    }
-    if (!password) {
-      setError("Mot de passe requis");
-      return;
-    }
-    setLoading(true);
-    const result = await login(matricule, password);
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    onLoggedIn();
-  };
+  // Shake sur erreur (fidélité handoff : « shake 0.35s sur la card »).
+  useEffect(() => {
+    if (errorNonce === 0) return;
+    setShake(true);
+    const t = window.setTimeout(() => setShake(false), 400);
+    return () => window.clearTimeout(t);
+  }, [errorNonce]);
 
   return (
     <div className="m-app">
@@ -67,7 +60,7 @@ const MobileLoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) 
           </h1>
         </div>
 
-        <form className="m-form" onSubmit={onSubmit} noValidate>
+        <form className={`m-form ${shake ? "m-shake" : ""}`} onSubmit={submit} noValidate>
           <label className="m-field">
             <span className="m-field-lbl">Matricule</span>
             <div className="m-input-wrap m-mono">
@@ -79,8 +72,8 @@ const MobileLoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) 
                 inputMode="numeric"
                 autoComplete="username"
                 aria-label="Matricule professionnel (6 chiffres)"
-                value={digits}
-                onChange={(e) => setDigits(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                value={matriculeDigits}
+                onChange={(e) => setMatriculeDigits(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="402100"
                 disabled={loading}
               />

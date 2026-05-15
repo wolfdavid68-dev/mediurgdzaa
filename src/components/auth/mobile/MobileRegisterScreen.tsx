@@ -1,24 +1,14 @@
-import { useState, type FormEvent } from "react";
-import {
-  signup,
-  isValidMatricule,
-  isValidEmail,
-  isValidPassword,
-  passwordStrength,
-  EMAIL_DOMAIN,
-} from "../../../lib/auth";
+import { useEffect, useState } from "react";
+import { useRegisterForm } from "../hooks/useRegisterForm";
+import { FONCTIONS, SERVICES } from "../authConstants";
+import { EMAIL_DOMAIN } from "../../../lib/auth";
 import LegalModal from "../../LegalModal";
 import { ArrowL, Arrow, Check, Spinner, Warn } from "./icons";
 
 // Création de compte — design mobile dédié (header back + barre de
 // progression, 2 étapes + écran de confirmation). Recréation fidèle de
-// MRegister (design_handoff mobile.jsx), branchée sur signup() Supabase.
-// Listes fonctions/services alignées sur le desktop (RegisterScreen.tsx).
+// MRegister (design_handoff mobile.jsx). Logique partagée via useRegisterForm.
 
-type Step = 1 | 2 | 3;
-
-const FONCTIONS = ["Médecin urgentiste", "Interne", "Infirmier", "Aide-soignant", "Cadre"];
-const SERVICES = ["SAU", "SMUR", "UHCD", "Réanimation", "Régulation 15"];
 const STRENGTH_LABELS = ["Très faible", "Faible", "Moyen", "Bon", "Solide", "Excellent"];
 
 type Props = {
@@ -26,79 +16,43 @@ type Props = {
 };
 
 const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
-  const [step, setStep] = useState<Step>(1);
-  const [digits, setDigits] = useState("");
-  const [prenom, setPrenom] = useState("");
-  const [nom, setNom] = useState("");
-  const [email, setEmail] = useState("");
-  const [fonction, setFonction] = useState(FONCTIONS[0]);
-  const [service, setService] = useState(SERVICES[0]);
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [acceptCharte, setAcceptCharte] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    step,
+    matriculeDigits,
+    setMatriculeDigits,
+    prenom,
+    setPrenom,
+    nom,
+    setNom,
+    email,
+    setEmail,
+    fonction,
+    setFonction,
+    service,
+    setService,
+    password,
+    setPassword,
+    passwordConfirm,
+    setPasswordConfirm,
+    acceptCharte,
+    setAcceptCharte,
+    loading,
+    error,
+    errorNonce,
+    strength,
+    submitStep1,
+    submitStep2,
+    goBack,
+  } = useRegisterForm();
   const [showLegal, setShowLegal] = useState(false);
+  const [shake, setShake] = useState(false);
 
-  const strength = passwordStrength(password);
-
-  const validateStep1 = (): string | null => {
-    if (!isValidMatricule(`M${digits}`)) return "Matricule invalide (format : M + 6 chiffres)";
-    if (!prenom.trim()) return "Prénom requis";
-    if (!nom.trim()) return "Nom requis";
-    if (!isValidEmail(email)) return `Email invalide (doit se terminer par ${EMAIL_DOMAIN})`;
-    return null;
-  };
-
-  const onSubmitStep1 = (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const err = validateStep1();
-    if (err) {
-      setError(err);
-      return;
-    }
-    setStep(2);
-  };
-
-  const onSubmitStep2 = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!isValidPassword(password)) {
-      setError("Mot de passe trop court (min 8 caractères)");
-      return;
-    }
-    if (password !== passwordConfirm) {
-      setError("Les mots de passe ne correspondent pas");
-      return;
-    }
-    if (!acceptCharte) {
-      setError("Tu dois accepter la charte d'usage du SI hospitalier");
-      return;
-    }
-    setLoading(true);
-    const result = await signup({
-      matricule: `M${digits}`,
-      email: email.trim(),
-      password,
-      prenom: prenom.trim(),
-      nom: nom.trim(),
-      fonction,
-      service,
-    });
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    setStep(3);
-  };
-
-  const onBack = () => {
-    setError(null);
-    if (step === 2) setStep(1);
-    else onGoToLogin();
-  };
+  useEffect(() => {
+    if (errorNonce === 0) return;
+    setShake(true);
+    const t = window.setTimeout(() => setShake(false), 400);
+    return () => window.clearTimeout(t);
+  }, [errorNonce]);
 
   return (
     <div className="m-app">
@@ -109,7 +63,7 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
           <button
             type="button"
             className="m-back"
-            onClick={onBack}
+            onClick={() => goBack(onGoToLogin)}
             aria-label="Retour"
             disabled={loading || step === 3}
           >
@@ -137,7 +91,7 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
               <h2 className="m-h2">Vos informations</h2>
               <p className="m-sub">Tels qu'inscrits sur votre badge professionnel.</p>
             </div>
-            <form className="m-form" onSubmit={onSubmitStep1} noValidate>
+            <form className={`m-form ${shake ? "m-shake" : ""}`} onSubmit={submitStep1} noValidate>
               <label className="m-field">
                 <span className="m-field-lbl">Matricule</span>
                 <div className="m-input-wrap m-mono">
@@ -148,8 +102,10 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
                     className="m-input"
                     inputMode="numeric"
                     aria-label="Matricule professionnel (6 chiffres)"
-                    value={digits}
-                    onChange={(e) => setDigits(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    value={matriculeDigits}
+                    onChange={(e) =>
+                      setMatriculeDigits(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
                     placeholder="402100"
                   />
                 </div>
@@ -242,7 +198,7 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
               <h2 className="m-h2">Mot de passe</h2>
               <p className="m-sub">Au moins 8 caractères, unique à cette plateforme.</p>
             </div>
-            <form className="m-form" onSubmit={onSubmitStep2} noValidate>
+            <form className={`m-form ${shake ? "m-shake" : ""}`} onSubmit={submitStep2} noValidate>
               <label className="m-field">
                 <span className="m-field-lbl">Mot de passe</span>
                 <div className="m-input-wrap">
@@ -332,13 +288,13 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
               <b>
                 {prenom} {nom}
               </b>{" "}
-              (<span className="m-mono">M{digits}</span>) est en attente de validation par
+              (<span className="m-mono">M{matriculeDigits}</span>) est en attente de validation par
               l'administrateur du service.
             </p>
             <div className="m-recap">
               <div>
                 <span>Matricule</span>
-                <b className="m-mono">M{digits}</b>
+                <b className="m-mono">M{matriculeDigits}</b>
               </div>
               <div>
                 <span>Fonction</span>

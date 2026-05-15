@@ -9,15 +9,13 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  width: 100vw;
-  /* Paire vh/dvh (convention base.css) : dvh pour suivre la barre d'URL
-     iOS dynamique, vh en fallback pour iOS < 15.4. inset:0 ci-dessus
-     contraint déjà la taille — height reste un filet de sécurité. */
-  height: 100vh;
-  height: 100dvh;
+  /* position:fixed + inset:0 → la taille est gouvernée par l'inset, qui
+     suit le viewport (y compris la barre d'URL iOS dynamique). Pas de
+     height nécessaire (était neutralisé par inset). */
   background: #0f0f13;
   color: oklch(0.97 0.004 90);
   font-family:
+    "Geist Variable",
     "Geist",
     -apple-system,
     "SF Pro",
@@ -34,7 +32,7 @@
 }
 
 .m-mono {
-  font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: "Geist Mono Variable", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
   letter-spacing: -0.01em;
 }
 
@@ -166,14 +164,14 @@
   box-shadow: 0 0 0 4px oklch(0.6 0.2 25 / 0.14);
 }
 .m-mono .m-input {
-  font-family: "Geist Mono", ui-monospace, monospace;
+  font-family: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
   letter-spacing: 0.04em;
 }
 .m-prefix {
   display: grid;
   place-items: center;
   padding: 0 14px;
-  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono Variable", "Geist Mono", monospace;
   color: oklch(0.6 0.2 25);
   background: oklch(0.6 0.2 25 / 0.08);
   border-right: 1px solid oklch(0.3 0.008 280);
@@ -323,6 +321,26 @@ select.m-input {
   }
 }
 
+/* Shake sur erreur (fidélité handoff : « shake 0.35s sur la card »).
+   Appliqué au .m-form en login/register quand errorNonce change. */
+.m-shake {
+  animation: m-shake 0.35s ease;
+}
+@keyframes m-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
 .m-foot {
   margin-top: auto;
   padding: 18px 24px max(40px, env(safe-area-inset-bottom));
@@ -345,7 +363,7 @@ select.m-input {
 .m-foot-meta {
   font-size: 11px;
   color: oklch(0.5 0.008 70);
-  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono Variable", "Geist Mono", monospace;
 }
 .m-legal-link {
   background: transparent;
@@ -964,9 +982,23 @@ select.m-input {
   color: oklch(0.7 0.008 70);
 }
 
+/* Safari iOS en onglet (non installé en PWA) : la barre d'outils basse
+   recouvre ~10px de la tab bar (env(safe-area-inset-bottom) ne la compte
+   pas). En mode navigateur on ajoute une marge de sécurité ; en PWA
+   installée (standalone), pas de barre Safari → on garde le réglage exact. */
+@media (display-mode: browser) {
+  .m-tabbar {
+    padding-bottom: max(26px, calc(env(safe-area-inset-bottom) + 16px));
+  }
+  .m-admin-list {
+    padding-bottom: 126px;
+  }
+}
+
 /* Respect du prefers-reduced-motion (cohérent avec le reste de l'app) */
 @media (prefers-reduced-motion: reduce) {
   .m-spin,
+  .m-shake,
   .m-success-mark,
   .m-scrim,
   .m-sheet,

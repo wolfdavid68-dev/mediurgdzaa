@@ -1,111 +1,56 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import MatriculeInput from "./MatriculeInput";
-import {
-  signup,
-  isValidMatricule,
-  isValidEmail,
-  isValidPassword,
-  passwordStrength,
-  EMAIL_DOMAIN,
-} from "../../lib/auth";
+import { useRegisterForm } from "./hooks/useRegisterForm";
+import { FONCTIONS, SERVICES } from "./authConstants";
+import { EMAIL_DOMAIN } from "../../lib/auth";
 import LegalModal from "../LegalModal";
 
 // Création de compte en 2 étapes + confirmation.
 // Cf. design_handoff_sau_mulhouse pour la fidélité visuelle.
-
-type Step = 1 | 2 | 3;
-
-const FONCTIONS = ["Médecin urgentiste", "Interne", "Infirmier", "Aide-soignant", "Cadre"];
-
-const SERVICES = ["SAU", "SMUR", "UHCD", "Réanimation", "Régulation 15"];
+// Logique partagée avec le mobile via useRegisterForm.
 
 type Props = {
   onGoToLogin: () => void;
 };
 
 const RegisterScreen = ({ onGoToLogin }: Props) => {
-  const [step, setStep] = useState<Step>(1);
+  const {
+    step,
+    matriculeDigits,
+    setMatriculeDigits,
+    prenom,
+    setPrenom,
+    nom,
+    setNom,
+    email,
+    setEmail,
+    fonction,
+    setFonction,
+    service,
+    setService,
+    password,
+    setPassword,
+    passwordConfirm,
+    setPasswordConfirm,
+    acceptCharte,
+    setAcceptCharte,
+    loading,
+    error,
+    errorNonce,
+    strength,
+    submitStep1: onSubmitStep1,
+    submitStep2: onSubmitStep2,
+    goBack,
+  } = useRegisterForm();
   const [shake, setShake] = useState(false);
-
-  // Étape 1
-  const [matriculeDigits, setMatriculeDigits] = useState("");
-  const [prenom, setPrenom] = useState("");
-  const [nom, setNom] = useState("");
-  const [email, setEmail] = useState("");
-  const [fonction, setFonction] = useState(FONCTIONS[0]);
-  const [service, setService] = useState(SERVICES[0]);
-
-  // Étape 2
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [acceptCharte, setAcceptCharte] = useState(false);
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showLegal, setShowLegal] = useState(false);
 
-  const triggerShake = () => {
+  useEffect(() => {
+    if (errorNonce === 0) return;
     setShake(true);
-    window.setTimeout(() => setShake(false), 400);
-  };
-
-  const validateStep1 = (): string | null => {
-    const matricule = `M${matriculeDigits}`;
-    if (!isValidMatricule(matricule)) return "Matricule invalide (format : M + 6 chiffres)";
-    if (!prenom.trim()) return "Prénom requis";
-    if (!nom.trim()) return "Nom requis";
-    if (!isValidEmail(email)) return `Email invalide (doit se terminer par ${EMAIL_DOMAIN})`;
-    return null;
-  };
-
-  const validateStep2 = (): string | null => {
-    if (!isValidPassword(password)) return "Mot de passe trop court (min 8 caractères)";
-    if (password !== passwordConfirm) return "Les mots de passe ne correspondent pas";
-    if (!acceptCharte) return "Tu dois accepter la charte d'usage du SI hospitalier";
-    return null;
-  };
-
-  const onSubmitStep1 = (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const err = validateStep1();
-    if (err) {
-      setError(err);
-      triggerShake();
-      return;
-    }
-    setStep(2);
-  };
-
-  const onSubmitStep2 = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const err = validateStep2();
-    if (err) {
-      setError(err);
-      triggerShake();
-      return;
-    }
-    setLoading(true);
-    const result = await signup({
-      matricule: `M${matriculeDigits}`,
-      email: email.trim(),
-      password,
-      prenom: prenom.trim(),
-      nom: nom.trim(),
-      fonction,
-      service,
-    });
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      triggerShake();
-      return;
-    }
-    setStep(3);
-  };
-
-  const strength = passwordStrength(password);
+    const t = window.setTimeout(() => setShake(false), 400);
+    return () => window.clearTimeout(t);
+  }, [errorNonce]);
 
   return (
     <div className="auth-stage">
@@ -121,7 +66,7 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
             <button
               type="button"
               className="auth-back"
-              onClick={() => (step === 1 ? onGoToLogin() : setStep((step - 1) as Step))}
+              onClick={() => goBack(onGoToLogin)}
               aria-label="Retour"
             >
               ←

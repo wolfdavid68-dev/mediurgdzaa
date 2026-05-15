@@ -1,14 +1,7 @@
-import { useEffect, useState } from "react";
-import {
-  fetchProfilesByStatus,
-  approveProfile,
-  rejectProfile,
-  banProfile,
-  unbanProfile,
-  logout,
-  type Profile,
-  type ProfileStatus,
-} from "../../../lib/auth";
+import { useEffect, useRef, useState } from "react";
+import { type Profile } from "../../../lib/auth";
+import { useAdminProfiles, type AdminTab } from "../hooks/useAdminProfiles";
+import { BAN_REASONS } from "../authConstants";
 import MobileLogo from "./MobileLogo";
 import {
   BanIcon,
@@ -24,20 +17,10 @@ import {
 
 // Console d'administration — design mobile dédié : tab bar flottante en
 // bas (Demandes / Personnels / Suspendus) + bottom sheet de détail/action.
-// Recréation fidèle de MAdmin/MSheet (design_handoff mobile.jsx), branchée
-// sur les actions Supabase de auth.ts (mêmes fonctions que le desktop).
+// Recréation fidèle de MAdmin/MSheet (design_handoff mobile.jsx). Logique
+// partagée avec le desktop via useAdminProfiles.
 
-type Tab = "pending" | "active" | "banned";
-
-const BAN_REASONS = [
-  "Partage d'identifiants",
-  "Départ du service",
-  "Comportement inapproprié",
-  "Demande RH",
-  "Autre",
-];
-
-const TAB_TITLE: Record<Tab, string> = {
+const TAB_TITLE: Record<AdminTab, string> = {
   pending: "Demandes",
   active: "Personnels",
   banned: "Suspendus",
@@ -53,91 +36,24 @@ type Props = {
 };
 
 const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
-  const [tab, setTab] = useState<Tab>("pending");
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    tab,
+    setTab,
+    profiles,
+    pendingCount,
+    loading,
+    error,
+    selected,
+    setSelected,
+    busyId,
+    toast,
+    approve: onApprove,
+    reject: onReject,
+    ban: onBan,
+    unban: onUnban,
+    handleLogout,
+  } = useAdminProfiles(onLogout);
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Profile | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ kind: "ok" | "warn"; msg: string } | null>(null);
-
-  const reload = async (forStatus: ProfileStatus) => {
-    setLoading(true);
-    setError(null);
-    const result = await fetchProfilesByStatus(forStatus);
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    setProfiles(result.data);
-    if (forStatus === "pending") setPendingCount(result.data.length);
-  };
-
-  const refreshPendingCount = async () => {
-    const result = await fetchProfilesByStatus("pending");
-    if (result.ok) setPendingCount(result.data.length);
-  };
-
-  useEffect(() => {
-    reload(tab);
-  }, [tab]);
-
-  useEffect(() => {
-    refreshPendingCount();
-  }, []);
-
-  useEffect(() => {
-    if (!toast) return;
-    const t = window.setTimeout(() => setToast(null), 3200);
-    return () => window.clearTimeout(t);
-  }, [toast]);
-
-  const runAction = async (
-    p: Profile,
-    action: () => Promise<{ ok: true } | { ok: false; error: string }>,
-    msg: { kind: "ok" | "warn"; text: string }
-  ) => {
-    setBusyId(p.id);
-    const result = await action();
-    setBusyId(null);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    setProfiles((list) => list.filter((x) => x.id !== p.id));
-    setSelected(null);
-    setToast({ kind: msg.kind, msg: msg.text });
-    refreshPendingCount();
-  };
-
-  const onApprove = (p: Profile) =>
-    runAction(p, () => approveProfile(p.id), {
-      kind: "ok",
-      text: `${p.prenom} ${p.nom} approuvé(e)`,
-    });
-  const onReject = (p: Profile) =>
-    runAction(p, () => rejectProfile(p.id), {
-      kind: "warn",
-      text: `Demande de ${p.prenom} ${p.nom} refusée`,
-    });
-  const onBan = (p: Profile, reason: string) =>
-    runAction(p, () => banProfile(p.id, reason), {
-      kind: "warn",
-      text: `${p.prenom} ${p.nom} suspendu(e)`,
-    });
-  const onUnban = (p: Profile) =>
-    runAction(p, () => unbanProfile(p.id), {
-      kind: "ok",
-      text: `${p.prenom} ${p.nom} rétabli(e)`,
-    });
-
-  const handleLogout = async () => {
-    await logout();
-    onLogout();
-  };
 
   const q = query.trim().toLowerCase();
   const filtered = q
@@ -159,7 +75,7 @@ const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props)
       <div className="m-stage m-admin">
         <div className="m-bg-glow" aria-hidden="true" />
 
-        <header className="m-admin-head">
+        <header className="m-admin-head" inert={selected ? true : undefined}>
           <div className="m-admin-head-row">
             <MobileLogo size={40} />
             <div className="m-admin-head-actions">
@@ -198,7 +114,7 @@ const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props)
           </div>
         </header>
 
-        <main className="m-admin-list">
+        <main className="m-admin-list" inert={selected ? true : undefined}>
           {error && (
             <div className="m-err" role="alert">
               <Warn />
@@ -254,7 +170,7 @@ const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props)
           ))}
         </main>
 
-        <nav className="m-tabbar">
+        <nav className="m-tabbar" inert={selected ? true : undefined}>
           <button
             type="button"
             className={`m-tab ${tab === "pending" ? "on" : ""}`}
@@ -314,7 +230,7 @@ const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props)
 
 type SheetProps = {
   user: Profile;
-  tab: Tab;
+  tab: AdminTab;
   busy: boolean;
   onClose: () => void;
   onApprove: () => void;
@@ -335,6 +251,45 @@ const MobileSheet = ({
 }: SheetProps) => {
   const [confirm, setConfirm] = useState(false);
   const [reason, setReason] = useState("");
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // A11y bottom sheet : focus déplacé dans la feuille à l'ouverture, piégé
+  // dedans (Tab cyclique), Échap ferme, focus restauré sur l'élément
+  // déclencheur à la fermeture. L'arrière-plan (header/liste/tab bar) est
+  // `inert` côté parent → invisible pour le clavier et les lecteurs d'écran.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    const prevFocused = document.activeElement as HTMLElement | null;
+    sheet?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab" || !sheet) return;
+      const f = sheet.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (f.length === 0) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      prevFocused?.focus?.();
+    };
+  }, []);
 
   const eyebrow =
     tab === "pending"
@@ -346,7 +301,14 @@ const MobileSheet = ({
   return (
     <>
       <button type="button" className="m-scrim" onClick={onClose} aria-label="Fermer le panneau" />
-      <div className="m-sheet" role="dialog" aria-modal="true" aria-label={eyebrow}>
+      <div
+        ref={sheetRef}
+        className="m-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label={eyebrow}
+        tabIndex={-1}
+      >
         <div className="m-sheet-grip" aria-hidden="true" />
         <header>
           <div className="m-sheet-eyebrow">{eyebrow}</div>

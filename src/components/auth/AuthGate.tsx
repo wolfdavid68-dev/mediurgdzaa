@@ -10,6 +10,8 @@ import ResetPasswordScreen from "./ResetPasswordScreen";
 import { BannedScreen, PendingApprovalScreen } from "./StatusScreens";
 import MobileLoginScreen from "./mobile/MobileLoginScreen";
 import MobileRegisterScreen from "./mobile/MobileRegisterScreen";
+import MobileForgotPasswordScreen from "./mobile/MobileForgotPasswordScreen";
+import MobileResetPasswordScreen from "./mobile/MobileResetPasswordScreen";
 import { MobileBannedScreen, MobilePendingScreen } from "./mobile/MobileStatusScreens";
 
 // AdminDashboard est lazy-loadé : seuls les admins voient cet écran, et
@@ -150,14 +152,15 @@ const AuthGate = ({ children }: Props) => {
 
   // Recovery (PASSWORD_RECOVERY) prend la priorité sur tout autre routing.
   if (recovering) {
-    return (
-      <ResetPasswordScreen
-        onDone={() => {
-          setRecovering(false);
-          setProfile(null);
-          setScreen("login");
-        }}
-      />
+    const onDone = () => {
+      setRecovering(false);
+      setProfile(null);
+      setScreen("login");
+    };
+    return isMobile ? (
+      <MobileResetPasswordScreen onDone={onDone} />
+    ) : (
+      <ResetPasswordScreen onDone={onDone} />
     );
   }
 
@@ -173,14 +176,14 @@ const AuthGate = ({ children }: Props) => {
       );
     }
     if (screen === "forgot") {
-      return (
-        <ForgotPasswordScreen
-          onBackToLogin={() => {
-            setHashError(null);
-            setScreen("login");
-          }}
-          initialError={hashError}
-        />
+      const onBackToLogin = () => {
+        setHashError(null);
+        setScreen("login");
+      };
+      return isMobile ? (
+        <MobileForgotPasswordScreen onBackToLogin={onBackToLogin} initialError={hashError} />
+      ) : (
+        <ForgotPasswordScreen onBackToLogin={onBackToLogin} initialError={hashError} />
       );
     }
     const loginProps = {

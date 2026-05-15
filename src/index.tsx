@@ -36,6 +36,11 @@ import "./styles/ecg.css";
 // Styles isolés pour les écrans d'auth (login/register/admin/etc.) — palette
 // dark + rouge GHR différente de la palette MediURG. Charge les tokens via
 // .auth-stage / .admin-stage scopes pour ne pas polluer le reste de l'app.
+// Police Geist (Sans + Mono) self-hostée via @fontsource — spécifiée par le
+// design_handoff. Variable font (poids 100–900 en un fichier). Self-host =
+// pas de CDN Google Fonts → fonctionne hors-ligne (PWA offline-first).
+import "@fontsource-variable/geist/index.css";
+import "@fontsource-variable/geist-mono/index.css";
 import "./styles/auth.css";
 // Design mobile dédié des écrans d'auth (hero plein écran, tab bar, bottom
 // sheets) — recréation du design_handoff_sau_mulhouse/mobile. Activé sous

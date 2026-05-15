@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import MatriculeInput from "./MatriculeInput";
-import { login, isValidMatricule } from "../../lib/auth";
+import { useLoginForm } from "./hooks/useLoginForm";
 import LegalModal from "../LegalModal";
 
 // Écran de login — saisie matricule + mot de passe.
@@ -16,46 +16,30 @@ type Props = {
 };
 
 const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
-  const [matriculeDigits, setMatriculeDigits] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    matriculeDigits,
+    setMatriculeDigits,
+    password,
+    setPassword,
+    loading,
+    error,
+    errorNonce,
+    submit: onSubmit,
+  } = useLoginForm(onLoggedIn);
+  // keepSession n'est pas wired à Supabase (persistSession est déjà global) —
+  // placeholder UI pour usage futur (logout sur close de tab).
   const [keepSession, setKeepSession] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
 
-  const triggerShake = () => {
+  // Shake déclenché à chaque échec (validation ou login) via errorNonce.
+  useEffect(() => {
+    if (errorNonce === 0) return;
     setShake(true);
-    window.setTimeout(() => setShake(false), 400);
-  };
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const matricule = `M${matriculeDigits}`;
-    if (!isValidMatricule(matricule)) {
-      setError("Format attendu : M + 6 chiffres (ex : M402100)");
-      triggerShake();
-      return;
-    }
-    if (!password) {
-      setError("Mot de passe requis");
-      triggerShake();
-      return;
-    }
-    setLoading(true);
-    const result = await login(matricule, password);
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      triggerShake();
-      return;
-    }
-    // keepSession n'est pas wired à Supabase ici (persistSession est déjà
-    // global) — placeholder pour usage futur (logout sur close de tab).
-    void keepSession;
-    onLoggedIn();
-  };
+    const t = window.setTimeout(() => setShake(false), 400);
+    return () => window.clearTimeout(t);
+  }, [errorNonce]);
+  void keepSession;
 
   return (
     <div className="auth-stage">
