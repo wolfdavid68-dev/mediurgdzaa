@@ -4,10 +4,16 @@ import { useEffect, useState } from "react";
 // (split-screen) et le design mobile dédié du design_handoff_sau_mulhouse
 // (hero plein écran, tab bar flottante, bottom sheets).
 //
-// Breakpoint 600px : aligné sur le `@media (max-width: 600px)` historique de
-// auth.css. matchMedia + listener pour réagir à la rotation / resize.
+// Règle : « un téléphone reste un téléphone, même en paysage ». Un téléphone
+// a toujours son côté le plus court ≤ 600px (la largeur en portrait, la
+// hauteur en paysage). D'où la requête en deux branches :
+//   - (max-width: 600px)            → portrait étroit (tout device)
+//   - (max-height: 600px) + coarse  → paysage court SUR écran tactile
+// Le `pointer: coarse` empêche une fenêtre d'ordi peu haute (souris) de
+// basculer en mobile par erreur. Une tablette (côté court ≥ 768px) reste en
+// desktop. matchMedia + listener → réactif à la rotation / au resize.
 
-const MOBILE_QUERY = "(max-width: 600px)";
+const MOBILE_QUERY = "(max-width: 600px), (max-height: 600px) and (pointer: coarse)";
 
 const getMatch = (): boolean =>
   typeof window !== "undefined" && typeof window.matchMedia === "function"
