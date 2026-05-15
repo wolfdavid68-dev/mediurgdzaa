@@ -83,7 +83,7 @@ export const passwordStrength = (p: string): number => {
 // `kind` (optionnel) discrimine la cause d'échec — utilisé par le
 // fallback offline (cf. AuthGate.resolveProfile) : seul `network`
 // déclenche le repli sur le profil caché.
-export type AuthErrorKind = "network" | "notfound" | "config" | "unknown";
+type AuthErrorKind = "network" | "notfound" | "config" | "unknown";
 export type AuthResult<T = void> =
   | { ok: true; data: T }
   | { ok: false; error: string; kind?: AuthErrorKind };
