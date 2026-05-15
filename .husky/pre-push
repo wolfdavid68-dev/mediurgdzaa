@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
-# Lance la suite de tests avant chaque `git push`. CI rattrape ensuite mais
-# c'est plus rapide d'apprendre une régression localement avant que tout le
-# pipeline GitHub Actions tourne (lint + typecheck + format + knip + test +
-# build).
+# Verrou local aligné sur le CI (typecheck + lint + knip + test) AVANT
+# chaque `git push`. Évite les allers-retours « push → CI rouge → fix »
+# (ex. knip « dead code » non attrapé localement). Le build reste rattrapé
+# par le CI (le plus lent, rarement KO si typecheck passe).
 #
 # Pour bypass exceptionnel : `git push --no-verify`. À éviter — la mémoire
 # acr_ux signale que MediURG est utilisé en stress réel, on ne veut pas
 # pousser une régression dans le mode ACR.
-npm test
+npm run verify

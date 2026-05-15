@@ -89,8 +89,14 @@ export const useAdminProfiles = (onLogout: () => void) => {
     runAction(p, () => unbanProfile(p.id), "ok", `${p.prenom} ${p.nom} rétabli(e)`);
 
   const handleLogout = async () => {
-    await logout();
-    onLogout();
+    // onLogout DOIT s'exécuter même si logout() échoue (sinon « clic sur
+    // déconnexion, rien ne se passe »). logout() est déjà non-throw, le
+    // try/finally est une ceinture de sécurité supplémentaire.
+    try {
+      await logout();
+    } finally {
+      onLogout();
+    }
   };
 
   return {

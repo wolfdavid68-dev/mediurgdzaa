@@ -201,7 +201,16 @@ export const logout = async (): Promise<void> => {
   clearCachedProfile();
   const supabase = getSupabase();
   if (!supabase) return;
-  await supabase.auth.signOut();
+  // scope:"local" → vide la session locale (localStorage) SANS appel
+  // réseau. Le scope "global" par défaut révoque le refresh-token côté
+  // serveur → rejette hors-ligne, faisait throw logout() et bloquait la
+  // déconnexion (« clic, rien ne se passe »). Pour un outil offline-first
+  // la déco doit toujours réussir localement. .catch pour ne jamais throw.
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    /* hors-ligne / réseau KO : la session locale est tout de même purgée */
+  }
 };
 
 // ─── Mot de passe oublié — étape 1 : envoi du mail ──────────
