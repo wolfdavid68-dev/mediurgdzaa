@@ -1,11 +1,29 @@
 import {
   EMAIL_DOMAIN,
+  isNetworkError,
   isValidEmail,
   isValidMatricule,
   isValidPassword,
   MATRICULE_REGEX,
   passwordStrength,
 } from "./auth";
+
+describe("isNetworkError", () => {
+  test("messages réseau → true", () => {
+    expect(isNetworkError(new Error("TypeError: Failed to fetch"))).toBe(true);
+    expect(isNetworkError(new Error("NetworkError when attempting to fetch resource"))).toBe(true);
+    expect(isNetworkError(new Error("Load failed"))).toBe(true);
+    expect(isNetworkError("request timeout")).toBe(true);
+    expect(isNetworkError({ message: "fetch failed" })).toBe(true);
+  });
+
+  test("erreurs non réseau → false", () => {
+    expect(isNetworkError(new Error("row not found"))).toBe(false);
+    expect(isNetworkError({ message: "permission denied" })).toBe(false);
+    expect(isNetworkError(null)).toBe(false);
+    expect(isNetworkError(undefined)).toBe(false);
+  });
+});
 
 describe("isValidMatricule", () => {
   test("M + 6 chiffres → valide", () => {

@@ -1,4 +1,9 @@
-import { cacheProfile, getCachedProfile, clearCachedProfile } from "../lib/profileCache";
+import {
+  cacheProfile,
+  getCachedProfile,
+  getLastCachedProfile,
+  clearCachedProfile,
+} from "../lib/profileCache";
 import type { Profile } from "../lib/auth";
 
 // profileCache vit dans src/lib mais a besoin de localStorage → test dans
@@ -77,5 +82,28 @@ describe("profileCache", () => {
     cacheProfile(makeProfile({ id: "user-1", status: "active" }));
     cacheProfile(makeProfile({ id: "user-1", status: "banned", ban_reason: "Test" }));
     expect(getCachedProfile("user-1")?.status).toBe("banned");
+  });
+
+  describe("getLastCachedProfile (session expirée hors-ligne)", () => {
+    test("renvoie le profil caché SANS connaître l'id", () => {
+      const p = makeProfile({ id: "user-42" });
+      cacheProfile(p);
+      expect(getLastCachedProfile()).toEqual(p);
+    });
+
+    test("aucun cache → null (appareil jamais appairé → mur login)", () => {
+      expect(getLastCachedProfile()).toBeNull();
+    });
+
+    test("JSON corrompu → null (pas de crash)", () => {
+      localStorage.setItem("mediurg-profile-cache-v1", "{cassé");
+      expect(getLastCachedProfile()).toBeNull();
+    });
+
+    test("clearCachedProfile (logout) → getLastCachedProfile null", () => {
+      cacheProfile(makeProfile());
+      clearCachedProfile();
+      expect(getLastCachedProfile()).toBeNull();
+    });
   });
 });

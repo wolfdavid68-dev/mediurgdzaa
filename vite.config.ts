@@ -65,9 +65,19 @@ export default defineConfig({
         // woff2 inclus : la police Geist (@fontsource) doit être précachée
         // pour rester dispo hors-ligne (sinon fallback système en offline).
         globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest,woff2}"],
-        // stats.html (généré par rollup-plugin-visualizer en mode analyze)
-        // ne doit jamais être précached ni servi aux users.
-        globIgnores: ["**/stats.html"],
+        // stats.html (visualizer) jamais précaché. Subsets de police non
+        // utilisés exclus du precache : MediURG est FR only → seul le
+        // subset « latin » sert (les accents FR é è à ç ù sont en
+        // Latin-1, couverts par latin). cyrillic / latin-ext restent
+        // servis à la demande mais n'alourdissent pas l'install offline
+        // (~60 % de poids police en moins dans le precache).
+        globIgnores: [
+          "**/stats.html",
+          "**/geist-cyrillic-*.woff2",
+          "**/geist-latin-ext-*.woff2",
+          "**/geist-mono-cyrillic-*.woff2",
+          "**/geist-mono-latin-ext-*.woff2",
+        ],
         cleanupOutdatedCaches: true,
         // SPA : toute nav non-précachée renvoie index.html pour que React
         // route côté client.

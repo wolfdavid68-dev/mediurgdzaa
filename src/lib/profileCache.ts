@@ -40,6 +40,22 @@ export const getCachedProfile = (userId: string): Profile | null => {
   }
 };
 
+// Dernier profil caché SANS connaître le user id — pour le cas « session
+// expirée hors-ligne » : getSession() renvoie null (refresh impossible
+// offline), on n'a donc pas d'id, mais l'appareil a déjà été appairé
+// (un cache existe) → on autorise l'usage offline. Si aucun cache →
+// null → mur de login (appareil jamais appairé), conforme au modèle.
+export const getLastCachedProfile = (): Profile | null => {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const entry = JSON.parse(raw) as CachedEntry;
+    return entry?.profile ?? null;
+  } catch {
+    return null;
+  }
+};
+
 export const clearCachedProfile = (): void => {
   try {
     localStorage.removeItem(KEY);

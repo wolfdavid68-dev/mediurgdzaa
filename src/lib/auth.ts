@@ -80,7 +80,30 @@ export const passwordStrength = (p: string): number => {
 };
 
 // ─── Result type pour les opérations qui peuvent échouer ────
-export type AuthResult<T = void> = { ok: true; data: T } | { ok: false; error: string };
+// `kind` (optionnel) discrimine la cause d'échec — utilisé par le
+// fallback offline (cf. AuthGate.resolveProfile) : seul `network`
+// déclenche le repli sur le profil caché.
+export type AuthErrorKind = "network" | "notfound" | "config" | "unknown";
+export type AuthResult<T = void> =
+  | { ok: true; data: T }
+  | { ok: false; error: string; kind?: AuthErrorKind };
+
+// Heuristique « erreur réseau » : message fetch/timeout OU navigator
+// hors-ligne. Volontairement large — pour un outil d'urgence, mieux
+// vaut un faux positif (repli sur cache valide) qu'un mur de login.
+export const isNetworkError = (e: unknown): boolean => {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return true;
+  const msg = (
+    e instanceof Error
+      ? e.message
+      : typeof e === "string"
+        ? e
+        : ((e as { message?: string })?.message ?? "")
+  ).toLowerCase();
+  return /failed to fetch|fetch failed|networkerror|network error|load failed|timeout|err_(network|internet)|connection|offline/.test(
+    msg
+  );
+};
 
 // ─── Inscription ─────────────────────────────────────────────
 // Crée un compte auth Supabase + une ligne profile (status=pending).
@@ -242,14 +265,30 @@ export const getCurrentSession = async (): Promise<Session | null> => {
 // ─── Fetch profile par id ────────────────────────────────────
 export const fetchProfile = async (userId: string): Promise<AuthResult<Profile>> => {
   const supabase = getSupabase();
-  if (!supabase) return { ok: false, error: "Backend non configuré" };
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error || !data) return { ok: false, error: "Profil introuvable" };
-  return { ok: true, data: data as Profile };
+  if (!supabase) return { ok: false, error: "Backend non configuré", kind: "config" };
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) {
+      return {
+        ok: false,
+        error: "Profil introuvable",
+        kind: isNetworkError(error) ? "network" : "unknown",
+      };
+    }
+    if (!data) return { ok: false, error: "Profil introuvable", kind: "notfound" };
+    return { ok: true, data: data as Profile };
+  } catch (e) {
+    // supabase-js peut throw (fetch rejeté) plutôt que renvoyer {error}.
+    return {
+      ok: false,
+      error: "Connexion impossible",
+      kind: isNetworkError(e) ? "network" : "unknown",
+    };
+  }
 };
 
 // ─── Actions admin ───────────────────────────────────────────

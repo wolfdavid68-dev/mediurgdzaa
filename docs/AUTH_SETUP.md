@@ -110,14 +110,60 @@ src/
 ├── lib/
 │   ├── featureFlags.ts       ← AUTH_ENABLED + override ?auth=preview
 │   ├── supabase.ts           ← Singleton client
-│   ├── auth.ts               ← signup / login / logout / fetchProfile / actions admin
+│   ├── auth.ts               ← signup / login / logout / fetchProfile (+ kind) / actions admin
+│   ├── profileCache.ts       ← Cache profil localStorage (fallback offline)
+│   ├── useIsMobile.ts        ← Breakpoint desktop/mobile (côté court ≤ 600px)
 │   └── userStorage.ts        ← localStorage préfixé par userId + migration
 └── components/
     └── auth/
-        ├── AuthGate.tsx      ← Wrapper qui décide quoi rendre
-        ├── LoginScreen.tsx   ← Matricule + password
+        ├── AuthGate.tsx      ← Wrapper + resolveProfile (tolérance offline)
+        ├── authConstants.ts  ← FONCTIONS / SERVICES / BAN_REASONS
+        ├── hooks/            ← useLoginForm / useRegisterForm / useAdminProfiles
+        │                       useForgotPasswordForm / useResetPasswordForm
+        ├── LoginScreen.tsx   ← Matricule + password (desktop)
         ├── RegisterScreen.tsx← 2 étapes + confirmation
         ├── StatusScreens.tsx ← Pending / Banned
-        ├── AdminDashboard.tsx← Console admin (3 onglets)
-        └── MatriculeInput.tsx← Champ partagé (préfixe M figé)
+        ├── AdminDashboard.tsx← Console admin (3 onglets, drawer a11y)
+        ├── MatriculeInput.tsx← Champ partagé (préfixe M figé)
+        └── mobile/           ← Design mobile dédié (tab bar, bottom sheet)
+                                MobileLogin/Register/Admin/Forgot/Reset…
 ```
+
+## Comportement hors-ligne (offline-first)
+
+MediURG est un outil d'urgence : le contenu clinique doit rester
+accessible **sans réseau**. L'auth ne doit jamais le verrouiller.
+
+**Modèle « appairage en ligne une fois → usage offline illimité »**
+(comme un contenu téléchargé) :
+
+| Situation | Comportement |
+|---|---|
+| 1ʳᵉ connexion (appareil jamais appairé) | Réseau requis (seul moment incompressible) |
+| App rouverte hors-réseau, appareil déjà appairé | ✅ session localStorage + **profil caché** → entre |
+| `fetchProfile` échoue avec `kind:"network"` | → profil caché (offline dur, wifi sans route, timeout) |
+| `fetchProfile` échoue `notfound`/`config`/en ligne | → écran login (légitime, ré-auth/config possible) |
+| Session expirée + offline (refresh impossible) | → `getLastCachedProfile()` (appareil appairé → on garde l'accès) |
+| Déconnexion explicite | `logout()` purge le cache → mur login au prochain lancement |
+
+**Contrainte refresh-token à cadrer côté Supabase.** Le JWT expire
+(~1 h) ; son refresh exige le réseau. Le **refresh token** a sa propre
+durée de vie (Supabase → Auth → Sessions). Si un appareil reste
+hors-ligne plus longtemps que cette durée, la session est invalidée :
+le fallback `getLastCachedProfile()` prend alors le relais tant que le
+profil caché existe. Pour un usage SMUR (jours offline), augmenter le
+refresh-token TTL Supabase reste recommandé en complément.
+
+**Risque accepté — falsification du cache.** Le profil en localStorage
+(`mediurg-profile-cache-v1`) est éditable côté client : un utilisateur
+averti peut forcer `role:"admin"` ou `status:"active"` pour *voir* la
+console admin / l'app hors-ligne. Impact limité et assumé :
+
+- toute **action serveur** (approuver, bannir…) passe par Supabase +
+  **RLS** → échoue offline et est ré-vérifiée côté serveur en ligne ;
+- à la reconnexion, `fetchProfile` **écrase** le cache avec la vérité
+  serveur (réconciliation automatique) ;
+- le contenu clinique est de toute façon la finalité de l'app.
+
+Ne jamais faire confiance au profil caché pour autoriser une mutation —
+uniquement pour décider quel écran afficher hors-ligne.

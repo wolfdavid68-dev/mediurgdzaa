@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { fetchProfile, getCurrentSession, onAuthStateChange, type Profile } from "../../lib/auth";
-import { cacheProfile, getCachedProfile } from "../../lib/profileCache";
+import { cacheProfile, getCachedProfile, getLastCachedProfile } from "../../lib/profileCache";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
@@ -61,17 +61,17 @@ const consumeAuthHashError = (): string | null => {
 
 // Récupère le profil avec tolérance hors-ligne (outil d'urgence offline-first).
 // - succès → on met le profil en cache et on le renvoie ;
-// - échec ALORS qu'on est hors-ligne → dernier profil caché de cet user
-//   (l'appareil a déjà été connecté une fois → usage offline illimité) ;
-// - échec en ligne → null (écran login légitime : il peut se ré-authentifier).
+// - échec RÉSEAU (offline dur, wifi sans route, timeout — via result.kind
+//   "network", pas seulement navigator.onLine) → dernier profil caché de
+//   cet user (appareil déjà appairé → usage offline illimité) ;
+// - échec notfound/config/en ligne → null (écran login légitime).
 export const resolveProfile = async (userId: string): Promise<Profile | null> => {
   const result = await fetchProfile(userId);
   if (result.ok) {
     cacheProfile(result.data);
     return result.data;
   }
-  const offline = typeof navigator !== "undefined" && navigator.onLine === false;
-  return offline ? getCachedProfile(userId) : null;
+  return result.kind === "network" ? getCachedProfile(userId) : null;
 };
 
 const AuthGate = ({ children }: Props) => {
@@ -102,7 +102,12 @@ const AuthGate = ({ children }: Props) => {
       const session = await getCurrentSession();
       if (cancelled) return;
       if (!session) {
-        setProfile(null);
+        // Pas de session : soit jamais connecté, soit token expiré ET
+        // refresh impossible hors-ligne. Si on est offline ET que
+        // l'appareil a déjà été appairé (un profil est caché), on
+        // autorise l'usage offline plutôt qu'un mur de login infranchissable.
+        const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+        setProfile(offline ? getLastCachedProfile() : null);
         setLoading(false);
         return;
       }
@@ -116,7 +121,11 @@ const AuthGate = ({ children }: Props) => {
       async (user) => {
         if (cancelled) return;
         if (!user) {
-          setProfile(null);
+          // SIGNED_OUT : déco explicite (logout() a purgé le cache →
+          // getLastCachedProfile null → login) OU échec de refresh token
+          // hors-ligne (le cache survit → on garde l'accès offline).
+          const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+          setProfile(offline ? getLastCachedProfile() : null);
           setShowAdmin(false);
           return;
         }

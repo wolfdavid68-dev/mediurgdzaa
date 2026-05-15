@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Profile } from "../../lib/auth";
 import { useAdminProfiles, type AdminTab } from "./hooks/useAdminProfiles";
 import { BAN_REASONS } from "./authConstants";
@@ -35,6 +35,44 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
 
   const onBan = (p: Profile) => ban(p, banReason);
 
+  // A11y du drawer de suspension : focus déplacé dedans à l'ouverture,
+  // piège de focus (Tab cyclique), Échap ferme, focus restauré. L'arrière-
+  // plan (topbar/sidebar/main) passe `inert` (cf. JSX) → hors clavier/SR.
+  const drawerRef = useRef<HTMLElement>(null);
+  const drawerOpen = !!selected && tab === "active";
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const el = drawerRef.current;
+    const prev = document.activeElement as HTMLElement | null;
+    el?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setSelected(null);
+        return;
+      }
+      if (e.key !== "Tab" || !el) return;
+      const f = el.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (f.length === 0) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      prev?.focus?.();
+    };
+  }, [drawerOpen, setSelected]);
+
   // KPI : compteurs dérivés du lot courant (comme avant — affichage du seul
   // onglet chargé). Pas de fetch supplémentaire.
   const counts = {
@@ -51,7 +89,7 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
 
   return (
     <div className="admin-stage">
-      <header className="admin-topbar">
+      <header className="admin-topbar" inert={drawerOpen ? true : undefined}>
         <div className="admin-brand">
           <img src="/logo-sau.png" alt="" width={28} height={28} />
           <span className="admin-brand-title">Console d'administration</span>
@@ -76,7 +114,7 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
       </header>
 
       <div className="admin-body">
-        <aside className="admin-sidebar">
+        <aside className="admin-sidebar" inert={drawerOpen ? true : undefined}>
           <div className="admin-sidebar-section-label">Gestion des accès</div>
           <nav className="admin-nav">
             {(["pending", "active", "banned"] as const).map((t) => (
@@ -107,7 +145,7 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
           </div>
         </aside>
 
-        <main className="admin-main">
+        <main className="admin-main" inert={drawerOpen ? true : undefined}>
           <div className="admin-main-head">
             <h1 className="admin-main-title">{tabLabel[tab]}</h1>
             <div className="admin-main-pill">
@@ -233,7 +271,14 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
 
         {/* Drawer suspension */}
         {selected && tab === "active" && (
-          <aside className="admin-drawer">
+          <aside
+            ref={drawerRef}
+            className="admin-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Suspendre ${selected.prenom} ${selected.nom}`}
+            tabIndex={-1}
+          >
             <div className="admin-drawer-head">
               <h3>
                 Suspendre {selected.prenom} {selected.nom}
