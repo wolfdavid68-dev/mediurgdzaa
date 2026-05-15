@@ -90,13 +90,15 @@ export const useAdminProfiles = (onLogout: () => void) => {
 
   const handleLogout = async () => {
     // onLogout DOIT s'exécuter même si logout() échoue (sinon « clic sur
-    // déconnexion, rien ne se passe »). logout() est déjà non-throw, le
-    // try/finally est une ceinture de sécurité supplémentaire.
+    // déconnexion, rien ne se passe »). On AVALE l'erreur (catch, pas
+    // juste finally) sinon la rejection remonte non gérée. logout() est
+    // déjà non-throw — ceci est une ceinture de sécurité.
     try {
       await logout();
-    } finally {
-      onLogout();
+    } catch {
+      /* logout best-effort : on déconnecte l'UI quoi qu'il arrive */
     }
+    onLogout();
   };
 
   return {
