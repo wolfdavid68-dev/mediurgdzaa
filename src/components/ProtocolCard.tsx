@@ -36,7 +36,6 @@ export const DRUG_PATTERNS = [
   "ipratropium",
   "solumédrol",
   "méthylprednisolone",
-  "bétaméthasone",
   "diazépam",
   "clonazépam",
   "rivotril",

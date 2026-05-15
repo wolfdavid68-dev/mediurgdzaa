@@ -2887,41 +2887,6 @@ export const DRUGS = [
     },
   },
 
-  // ──────────────── CORTICOÏDES ORAUX ────────────────
-  {
-    id: 76,
-    nom: "CÉLESTÈNE",
-    commercial: "Bétaméthasone",
-    dci: "Bétaméthasone",
-    classe: "Corticostéroïde",
-    cat: "Métabolique",
-    svc: ["SMUR", "SAU"],
-    couleur: "#30D158",
-    icon: "💊",
-    desc: "Corticostéroïde de synthèse, voie orale. Solution buvable utilisée chez l'enfant (15 gouttes/kg per os). Alternative au Solumédrol IV dans les crises d'asthme légères à modérées ou quand la VVP n'est pas accessible.",
-    indic: [
-      "Crise d'asthme de l'enfant per os",
-      "Laryngite sous-glottique de l'enfant",
-      "Allergie légère à modérée",
-    ],
-    ci: [
-      "Pas de CI absolue si urgence vitale",
-      "Infection systémique non contrôlée (relative)",
-    ],
-    ei: [
-      "Hyperglycémie",
-      "Hypokaliémie",
-      "Insomnie, agitation chez l'enfant",
-    ],
-    cond: [
-      "Solution buvable 0,05 % : 0,5 mg/mL — flacon 30 mL (≈ 600 gouttes)",
-    ],
-    poso: {
-      a: ["Per os : 1-2 mg selon indication"],
-      p: ["Per os : 15 gouttes/kg (= 0,75 mg/kg) — dose max 60 gouttes"],
-    },
-  },
-
   // ──────────────── ANALGÉSIQUES NON OPIOÏDES ────────────────
   {
     id: 77,

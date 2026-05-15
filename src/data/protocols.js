@@ -130,7 +130,6 @@ export const PROTOCOLS = [
             text: "Administrer en cas d'antécédent d'asthme :",
             sub: [
               "Méthylprednisolone (Solumédrol®) 2 mg/kg IVD lente.",
-              "ou Bétaméthasone 15 gouttes/kg per os.",
             ],
           },
           { text: "Pratiquer une ventilation artificielle à l'aide de l'insufflateur manuel en présence de signes d'épuisement ou de troubles de la conscience." },
