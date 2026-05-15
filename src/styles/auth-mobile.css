@@ -567,7 +567,33 @@ select.m-input {
 .m-admin-head-actions {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+/* Boutons d'action du header admin : libellé TEXTE visible (pas d'icône
+   seule ambiguë) — en contexte d'urgence on ne devine pas une icône. */
+.m-admin-act {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: oklch(0.24 0.006 280);
+  border: 1px solid oklch(0.3 0.008 280);
+  color: oklch(0.92 0.005 90);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 40px;
+}
+.m-admin-act:active {
+  transform: scale(0.97);
+}
+.m-admin-act-danger {
+  background: oklch(0.6 0.2 25 / 0.12);
+  border-color: oklch(0.6 0.2 25 / 0.4);
+  color: oklch(0.82 0.14 25);
 }
 .m-admin-title {
   font-size: 30px;

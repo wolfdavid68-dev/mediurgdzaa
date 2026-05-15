@@ -4,9 +4,9 @@ import { useAdminProfiles, type AdminTab } from "../hooks/useAdminProfiles";
 import { BAN_REASONS } from "../authConstants";
 import MobileLogo from "./MobileLogo";
 import {
+  ArrowL,
   BanIcon,
   Check,
-  Close,
   Dots,
   ExitIcon,
   InboxIcon,
@@ -81,21 +81,21 @@ const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props)
             <div className="m-admin-head-actions">
               <button
                 type="button"
-                className="m-icn-btn"
+                className="m-admin-act"
                 onClick={onExitAdmin}
-                title="Vue utilisateur"
-                aria-label="Retour à l'application"
+                aria-label="Retour à l'application, rester connecté"
               >
-                <ExitIcon />
+                <ArrowL />
+                <span>App</span>
               </button>
               <button
                 type="button"
-                className="m-icn-btn"
+                className="m-admin-act m-admin-act-danger"
                 onClick={handleLogout}
-                title="Se déconnecter"
-                aria-label="Se déconnecter"
+                aria-label="Se déconnecter et revenir à l'écran de connexion"
               >
-                <Close />
+                <ExitIcon />
+                <span>Déconnexion</span>
               </button>
             </div>
           </div>

@@ -64,11 +64,6 @@ export const SearchIcon = ({ size = 16, ...p }: IconProps) => (
     <path d="m21 21-4.3-4.3" />
   </svg>
 );
-export const Close = ({ size = 20, ...p }: IconProps) => (
-  <svg {...base(size)} {...p}>
-    <path d="M18 6 6 18M6 6l12 12" />
-  </svg>
-);
 export const InboxIcon = ({ size = 20, ...p }: IconProps) => (
   <svg {...base(size)} {...p}>
     <path d="M22 12h-6l-2 3h-4l-2-3H2" />
