@@ -1,16 +1,22 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { fetchProfile, getCurrentSession, onAuthStateChange, type Profile } from "../../lib/auth";
 import { isAuthEnabled } from "../../lib/featureFlags";
+import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
 import ForgotPasswordScreen from "./ForgotPasswordScreen";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
 import ResetPasswordScreen from "./ResetPasswordScreen";
 import { BannedScreen, PendingApprovalScreen } from "./StatusScreens";
+import MobileLoginScreen from "./mobile/MobileLoginScreen";
+import MobileRegisterScreen from "./mobile/MobileRegisterScreen";
+import { MobileBannedScreen, MobilePendingScreen } from "./mobile/MobileStatusScreens";
 
 // AdminDashboard est lazy-loadé : seuls les admins voient cet écran, et
-// même pour eux il sort du bundle initial (~10 kB).
+// même pour eux il sort du bundle initial (~10 kB). Idem pour la variante
+// mobile (tab bar + bottom sheet), chargée seulement sur petit écran.
 const AdminDashboard = lazy(() => import("./AdminDashboard"));
+const MobileAdminDashboard = lazy(() => import("./mobile/MobileAdminDashboard"));
 
 // AuthGate — wrapper qui décide quoi rendre selon l'état d'auth.
 //
@@ -52,6 +58,7 @@ const consumeAuthHashError = (): string | null => {
 
 const AuthGate = ({ children }: Props) => {
   const enabled = isAuthEnabled();
+  const isMobile = useIsMobile();
 
   // Tous les hooks DOIVENT être appelés avant tout return conditionnel
   // (règle React). On les appelle inconditionnellement ; quand enabled=false,
@@ -111,15 +118,20 @@ const AuthGate = ({ children }: Props) => {
   }, [enabled]);
 
   // Migration des données locales anonymes vers le user au 1er login.
+  // On extrait id + status en primitifs : la migration ne doit se rejouer
+  // que si on change d'utilisateur ou qu'il passe « active », pas à chaque
+  // ré-hydratation de l'objet profile (nouvelle référence) — et ça garde
+  // les déps exhaustives sans désactiver de règle (React Compiler-friendly).
+  const profileId = profile?.id;
+  const profileStatus = profile?.status;
   useEffect(() => {
-    if (!enabled || !profile || profile.status !== "active") return;
-    // Liste des IDs de drugs connus pour migrer les notes — passe par l'import
-    // dynamique pour ne pas charger DRUGS si l'auth est désactivée.
+    if (!enabled || !profileId || profileStatus !== "active") return;
+    // Import dynamique pour ne pas charger DRUGS si l'auth est désactivée.
     import("../../data/drugs").then((m) => {
       const ids = (m.DRUGS as Array<{ id: number }>).map((d) => d.id);
-      migrateAnonymousData(profile.id, ids);
+      migrateAnonymousData(profileId, ids);
     });
-  }, [enabled, profile?.id, profile?.status]);
+  }, [enabled, profileId, profileStatus]);
 
   // Mode désactivé → bypass total, l'app fonctionne comme avant.
   if (!enabled) return <>{children}</>;
@@ -149,10 +161,16 @@ const AuthGate = ({ children }: Props) => {
     );
   }
 
-  // Pas de session → écrans login / register / forgot
+  // Pas de session → écrans login / register / forgot.
+  // Sous 600px : design mobile dédié (handoff). Forgot/Reset n'ont pas de
+  // maquette mobile spécifiée → on garde l'écran responsive desktop.
   if (!profile) {
     if (screen === "register") {
-      return <RegisterScreen onGoToLogin={() => setScreen("login")} />;
+      return isMobile ? (
+        <MobileRegisterScreen onGoToLogin={() => setScreen("login")} />
+      ) : (
+        <RegisterScreen onGoToLogin={() => setScreen("login")} />
+      );
     }
     if (screen === "forgot") {
       return (
@@ -165,29 +183,41 @@ const AuthGate = ({ children }: Props) => {
         />
       );
     }
-    return (
-      <LoginScreen
-        onLoggedIn={() => {
-          /* le useEffect onAuthStateChange recharge le profile */
-        }}
-        onGoToRegister={() => setScreen("register")}
-        onGoToForgot={() => setScreen("forgot")}
-      />
-    );
+    const loginProps = {
+      onLoggedIn: () => {
+        /* le useEffect onAuthStateChange recharge le profile */
+      },
+      onGoToRegister: () => setScreen("register"),
+      onGoToForgot: () => setScreen("forgot"),
+    };
+    return isMobile ? <MobileLoginScreen {...loginProps} /> : <LoginScreen {...loginProps} />;
   }
 
   // Session + profile pending
   if (profile.status === "pending") {
-    return <PendingApprovalScreen onLogout={() => setProfile(null)} />;
+    return isMobile ? (
+      <MobilePendingScreen onLogout={() => setProfile(null)} />
+    ) : (
+      <PendingApprovalScreen onLogout={() => setProfile(null)} />
+    );
   }
 
   // Session + profile banned
   if (profile.status === "banned") {
-    return <BannedScreen onLogout={() => setProfile(null)} reason={profile.ban_reason} />;
+    return isMobile ? (
+      <MobileBannedScreen onLogout={() => setProfile(null)} reason={profile.ban_reason} />
+    ) : (
+      <BannedScreen onLogout={() => setProfile(null)} reason={profile.ban_reason} />
+    );
   }
 
   // Active : si admin et showAdmin → console, sinon → app normale
   if (profile.role === "admin" && showAdmin) {
+    const adminProps = {
+      currentUserName: `${profile.prenom} ${profile.nom}`,
+      onLogout: () => setProfile(null),
+      onExitAdmin: () => setShowAdmin(false),
+    };
     return (
       <Suspense
         fallback={
@@ -196,11 +226,7 @@ const AuthGate = ({ children }: Props) => {
           </div>
         }
       >
-        <AdminDashboard
-          currentUserName={`${profile.prenom} ${profile.nom}`}
-          onLogout={() => setProfile(null)}
-          onExitAdmin={() => setShowAdmin(false)}
-        />
+        {isMobile ? <MobileAdminDashboard {...adminProps} /> : <AdminDashboard {...adminProps} />}
       </Suspense>
     );
   }

@@ -37,6 +37,10 @@ import "./styles/ecg.css";
 // dark + rouge GHR différente de la palette MediURG. Charge les tokens via
 // .auth-stage / .admin-stage scopes pour ne pas polluer le reste de l'app.
 import "./styles/auth.css";
+// Design mobile dédié des écrans d'auth (hero plein écran, tab bar, bottom
+// sheets) — recréation du design_handoff_sau_mulhouse/mobile. Activé sous
+// 600px par useIsMobile() côté AuthGate. Classes préfixées .m-.
+import "./styles/auth-mobile.css";
 import App from "./App";
 import AuthGate from "./components/auth/AuthGate";
 

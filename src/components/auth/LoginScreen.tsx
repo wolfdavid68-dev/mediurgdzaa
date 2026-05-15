@@ -106,7 +106,7 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
           <p className="auth-card-sub">Connecte-toi avec ton matricule professionnel.</p>
 
           <form onSubmit={onSubmit} className="auth-form" noValidate>
-            <label className="auth-field">
+            <label className="auth-field" htmlFor="login-matricule">
               <span className="auth-field-label">Matricule</span>
               <MatriculeInput
                 id="login-matricule"

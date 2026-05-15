@@ -150,9 +150,10 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
               </p>
 
               <form onSubmit={onSubmitStep1} className="auth-form" noValidate>
-                <label className="auth-field">
+                <label className="auth-field" htmlFor="register-matricule">
                   <span className="auth-field-label">Matricule</span>
                   <MatriculeInput
+                    id="register-matricule"
                     value={matriculeDigits}
                     onChange={setMatriculeDigits}
                     autoFocus

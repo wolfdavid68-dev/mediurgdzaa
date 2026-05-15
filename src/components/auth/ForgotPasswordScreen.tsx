@@ -90,9 +90,10 @@ const ForgotPasswordScreen = ({ onBackToLogin, initialError = null }: Props) => 
               )}
 
               <form onSubmit={onSubmit} className="auth-form" noValidate>
-                <label className="auth-field">
+                <label className="auth-field" htmlFor="forgot-matricule">
                   <span className="auth-field-label">Matricule</span>
                   <MatriculeInput
+                    id="forgot-matricule"
                     value={matriculeDigits}
                     onChange={setMatriculeDigits}
                     autoFocus

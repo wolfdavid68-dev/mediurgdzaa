@@ -219,7 +219,15 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
               <li
                 key={p.id}
                 className={`admin-row ${selected?.id === p.id ? "admin-row-selected" : ""}`}
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelected(p)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelected(p);
+                  }
+                }}
               >
                 <div className="admin-row-person">
                   <div className="admin-row-avatar">
@@ -245,14 +253,17 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
                     `Approuvé le ${new Date(p.approved_at).toLocaleDateString("fr-FR")}`}
                   {tab === "banned" && p.ban_reason}
                 </div>
-                <div className="admin-row-actions" onClick={(e) => e.stopPropagation()}>
+                <div className="admin-row-actions">
                   {tab === "pending" && (
                     <>
                       <button
                         type="button"
                         className="admin-btn-ghost"
                         disabled={busyId === p.id}
-                        onClick={() => onReject(p)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReject(p);
+                        }}
                       >
                         Refuser
                       </button>
@@ -260,7 +271,10 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
                         type="button"
                         className="admin-btn-primary"
                         disabled={busyId === p.id}
-                        onClick={() => onApprove(p)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onApprove(p);
+                        }}
                       >
                         Approuver
                       </button>
@@ -271,7 +285,10 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
                       type="button"
                       className="admin-btn-danger-soft"
                       disabled={busyId === p.id}
-                      onClick={() => setSelected(p)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelected(p);
+                      }}
                     >
                       Suspendre…
                     </button>
@@ -281,7 +298,10 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
                       type="button"
                       className="admin-btn-soft"
                       disabled={busyId === p.id}
-                      onClick={() => onUnban(p)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUnban(p);
+                      }}
                     >
                       Rétablir
                     </button>
