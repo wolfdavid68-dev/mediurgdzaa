@@ -13,12 +13,32 @@ const URL_PARAM_OVERRIDE: Record<string, string> = {
   AUTH_ENABLED: "auth",
 };
 
+// Override de session « collant » : dès que `?auth=preview` est vu une
+// fois, on le mémorise en sessionStorage. Sinon l'override serait perdu
+// au premier popstate/pushState de l'app (App.jsx réécrit l'URL et fait
+// sauter le query param) → isAuthEnabled() repasserait à false → AuthGate
+// bypasserait l'auth et réafficherait l'app (ex. après logout on revenait
+// sur l'app au lieu du login). Sticky pour toute la session d'onglet ;
+// fermer l'onglet « sort » du mode preview. N'affecte jamais la prod
+// (AUTH_ENABLED reste la source de vérité hors preview).
+const STICKY_PREFIX = "mediurg-preview-";
+
 const isPreviewing = (flagName: string): boolean => {
   if (typeof window === "undefined") return false;
   const param = URL_PARAM_OVERRIDE[flagName];
   if (!param) return false;
+  const stickyKey = STICKY_PREFIX + param;
   try {
-    return new URLSearchParams(window.location.search).get(param) === "preview";
+    const inUrl = new URLSearchParams(window.location.search).get(param) === "preview";
+    if (inUrl) {
+      try {
+        window.sessionStorage.setItem(stickyKey, "1");
+      } catch {
+        /* sessionStorage indispo : on reste sur la lecture URL */
+      }
+      return true;
+    }
+    return window.sessionStorage.getItem(stickyKey) === "1";
   } catch {
     return false;
   }
