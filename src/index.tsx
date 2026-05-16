@@ -33,6 +33,7 @@ import "./styles/acr-postrosc.css";
 import "./styles/acr-ht.css";
 import "./styles/acr-summary.css";
 import "./styles/ecg.css";
+import "./styles/ecg-reader.css";
 // Styles isolés pour les écrans d'auth (login/register/admin/etc.) — palette
 // dark + rouge GHR différente de la palette MediURG. Charge les tokens via
 // .auth-stage / .admin-stage scopes pour ne pas polluer le reste de l'app.

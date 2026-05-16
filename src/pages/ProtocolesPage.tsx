@@ -1,5 +1,6 @@
 import { useMemo, lazy, Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { isPreview } from "../lib/featureFlags";
 import ProtocolCard from "../components/ProtocolCard";
 import CardErrorFallback from "../components/CardErrorFallback";
 import { PROTOCOLS } from "../data/protocols";
@@ -9,6 +10,7 @@ import { PREP_KITS } from "../data/prepKits";
 const IncompatibilityList = lazy(() => import("../components/IncompatibilityList"));
 const PrepKitCard = lazy(() => import("../components/PrepKitCard"));
 const EcgDiagnostic = lazy(() => import("../components/EcgDiagnostic"));
+const EcgReader = lazy(() => import("../components/EcgReader"));
 
 // Page Protocoles avec ses 3 sous-onglets (PISU, Incompatibilités, Kits).
 // Imports data en interne → quand App.jsx la lazy-load, PROTOCOLS et
@@ -77,6 +79,13 @@ const ProtocolesPage = ({
 
       {protoCategory === "ecg" && (
         <Suspense fallback={null}>
+          {/* Lecteur ECG (photo → analyse) : PREVIEW uniquement
+              (?auth=preview). Public : seul le tableau diagnostique. */}
+          {isPreview() && (
+            <div style={{ marginBottom: 16 }}>
+              <EcgReader />
+            </div>
+          )}
           <EcgDiagnostic />
         </Suspense>
       )}

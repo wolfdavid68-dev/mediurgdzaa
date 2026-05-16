@@ -1,0 +1,637 @@
+/* ── LECTEUR ECG (preview) ────────────────────────────────────
+   Port du prototype Tailwind v4 → CSS scopé .ecg-reader, HARMONISÉ
+   avec le design system MediURG : on utilise les tokens (--card,
+   --border, --text, --accent, --warn, --danger…) au lieu de la
+   palette brute du prototype → cohérent avec le tableau ECG déjà
+   présent et compatible thème clair/sombre automatiquement.
+   Tout est préfixé .ecg-reader (aucune fuite globale, pas de reset).
+   Échelles d'espacement reprises de Tailwind v4 (vérifié Context7),
+   rayons alignés sur la norme projet (cartes 12px, boutons 8–10px). */
+
+.ecg-reader {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: var(--font);
+}
+
+.ecg-reader * {
+  box-sizing: border-box;
+}
+
+.ecgr-icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.125em;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.ecgr-mono {
+  font-family: var(--mono);
+}
+
+/* Grille ECG (papier millimétré — sur la photo blanche, réaliste) */
+.ecg-grid {
+  background-image:
+    linear-gradient(rgba(255, 71, 87, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 71, 87, 0.18) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Animations */
+@keyframes ecgr-fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.ecg-reader .fade-up {
+  animation: ecgr-fadeUp 0.35s ease-out both;
+}
+.ecg-reader .fade-up-1 {
+  animation-delay: 0.05s;
+}
+.ecg-reader .fade-up-2 {
+  animation-delay: 0.12s;
+}
+.ecg-reader .fade-up-3 {
+  animation-delay: 0.19s;
+}
+.ecg-reader .fade-up-4 {
+  animation-delay: 0.26s;
+}
+.ecg-reader .fade-up-5 {
+  animation-delay: 0.33s;
+}
+@keyframes ecgr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ecgr-spin {
+  display: inline-block;
+  color: var(--accent);
+  font-size: 24px;
+  animation: ecgr-spin 1s linear infinite;
+}
+@keyframes ecgr-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.ecgr-dot {
+  animation: ecgr-pulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecg-reader .fade-up,
+  .ecgr-spin,
+  .ecgr-dot {
+    animation: none;
+  }
+}
+
+/* Layout */
+.ecgr-pad {
+  padding: 1.25rem;
+}
+.ecgr-stack > * + * {
+  margin-top: 1.25rem;
+}
+.ecgr-stack-sm > * + * {
+  margin-top: 0.5rem;
+}
+
+/* Header écran capture */
+.ecgr-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.75rem;
+}
+.ecgr-head-ic {
+  color: var(--accent);
+  font-size: 22px;
+  display: flex;
+}
+.ecgr-h1 {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.ecgr-head-tag {
+  margin-left: auto;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  font-weight: 600;
+}
+
+/* Bouton CTA principal */
+.ecgr-cta {
+  width: 100%;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 0.625rem;
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 78%, #000));
+  box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.ecgr-cta-ic {
+  background: rgba(255, 255, 255, 0.16);
+  padding: 1.125rem;
+  border-radius: 12px;
+  font-size: 38px;
+  display: flex;
+}
+.ecgr-cta-title {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+.ecgr-cta-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 0.25rem;
+}
+
+/* Ligne « importer » */
+.ecgr-row-btn {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  color: var(--text);
+}
+.ecgr-row-btn:hover {
+  background: var(--card-hover);
+  border-color: var(--border-strong);
+}
+.ecgr-row-ic {
+  background: var(--card-hover);
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 20px;
+  display: flex;
+}
+.ecgr-row-body {
+  text-align: left;
+  flex: 1;
+}
+.ecgr-row-title {
+  display: block;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.ecgr-row-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-mute);
+  margin-top: 0.125rem;
+}
+.ecgr-row-chev {
+  color: var(--text-mute);
+  font-size: 20px;
+  display: flex;
+}
+
+/* Conseils */
+.ecgr-tips {
+  padding: 0.875rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.ecgr-tips-h {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+.ecgr-tips-list {
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ecgr-tips-list li {
+  display: flex;
+  gap: 0.5rem;
+}
+.ecgr-tips-list li + li {
+  margin-top: 0.5rem;
+}
+.ecgr-bullet {
+  color: var(--accent);
+}
+
+/* Bandeaux disclaimer (basés sur le token --warn) */
+.ecgr-disc {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+.ecgr-disc-ic {
+  color: var(--warn);
+  font-size: 18px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  display: flex;
+}
+.ecgr-disc-txt {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.ecgr-disc-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--warn);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+}
+.ecgr-disc-txt strong {
+  color: var(--warn);
+}
+.ecgr-warn {
+  margin-top: 1.5rem;
+  border-radius: 10px;
+  padding: 0.875rem;
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+}
+.ecgr-stack .ecgr-warn {
+  margin-top: 1.25rem;
+}
+.ecgr-banner {
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+  padding: 0.75rem 1.25rem;
+}
+
+/* Barre supérieure (preview / loading / results) */
+.ecgr-bar {
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--card) 95%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 10;
+}
+.ecgr-bar-close {
+  padding: 0.375rem;
+  margin-left: -0.375rem;
+  border-radius: 8px;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+}
+.ecgr-bar-close:hover {
+  background: var(--card-hover);
+}
+.ecgr-bar-h1 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.ecgr-bar-tag {
+  margin-left: auto;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  font-weight: 600;
+}
+
+/* Photo ECG (papier blanc — réaliste, hors thème) */
+.ecgr-photo {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--border);
+}
+.ecgr-photo-in {
+  padding: 1rem;
+  position: relative;
+  aspect-ratio: 4 / 3;
+}
+.ecgr-strip {
+  padding: 0.5rem;
+  aspect-ratio: 16 / 6;
+}
+.ecgr-svg {
+  width: 100%;
+  height: 100%;
+}
+.ecgr-photo-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 9px;
+  color: #71717a;
+  font-family: var(--mono);
+}
+
+/* Boutons d'action */
+.ecgr-analyze {
+  width: 100%;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.875rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.ecgr-secondary {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.ecgr-secondary:hover:not(:disabled) {
+  background: var(--card-hover);
+  color: var(--text);
+}
+.ecgr-secondary:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.ecgr-ico-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Loading */
+.ecgr-loadbox {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.ecgr-load-t {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.ecgr-load-s {
+  font-size: 0.75rem;
+  color: var(--text-mute);
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Verdict (danger) */
+.ecgr-verdict {
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.ecgr-verdict-ic {
+  color: var(--danger);
+  font-size: 20px;
+  margin-top: 2px;
+  display: flex;
+}
+.ecgr-verdict-k {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--danger);
+  margin-bottom: 0.25rem;
+}
+.ecgr-verdict-t {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.ecgr-verdict-s {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  color: var(--text-dim);
+}
+
+/* Cartes (rythme / intervalles / pistes) */
+.ecgr-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+.ecgr-card-h {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.ecgr-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+.ecgr-grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+.ecgr-k {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-mute);
+  margin-bottom: 0.25rem;
+}
+.ecgr-v {
+  font-size: 0.875rem;
+}
+.ecgr-card-foot {
+  font-size: 11px;
+  color: var(--text-mute);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+.ecgr-axe {
+  color: var(--text-dim);
+}
+
+/* Anomalies */
+.ecgr-sec-h {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding: 0 0.25rem;
+}
+.ecgr-anom {
+  border-radius: 10px;
+  padding: 0.75rem;
+  border: 1px solid;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.ecgr-sev-info {
+  background: var(--card-hover);
+  color: var(--text-dim);
+  border-color: var(--border-strong);
+}
+.ecgr-sev-attention {
+  background: color-mix(in srgb, var(--warn) 18%, transparent);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+}
+.ecgr-sev-critique {
+  background: color-mix(in srgb, var(--danger) 20%, transparent);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+}
+.ecgr-anom-ic {
+  font-size: 16px;
+  margin-top: 2px;
+  display: flex;
+}
+.ecgr-anom-t {
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+.ecgr-anom-d {
+  font-size: 11px;
+  margin-top: 0.25rem;
+  font-family: var(--mono);
+  opacity: 0.75;
+}
+
+/* Pistes thérapeutiques */
+.ecgr-piste {
+  width: 100%;
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.5rem;
+  margin: 0 -0.5rem;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+.ecgr-piste-chev {
+  color: var(--accent);
+  font-size: 16px;
+  display: flex;
+}
+.ecgr-piste-t {
+  flex: 1;
+}
+.ecgr-piste-ext {
+  color: var(--text-mute);
+  font-size: 14px;
+  display: flex;
+}
+
+/* Limites */
+.ecgr-limits {
+  font-size: 0.75rem;
+  color: var(--text-mute);
+  padding: 0.75rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  line-height: 1.5;
+}
+.ecgr-limits-h {
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.ecgr-foot {
+  font-size: 10px;
+  color: var(--text-mute);
+  text-align: center;
+  padding-top: 0.5rem;
+  padding-bottom: 1.25rem;
+  line-height: 1.5;
+}

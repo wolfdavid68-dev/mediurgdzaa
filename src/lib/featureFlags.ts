@@ -93,3 +93,9 @@ export const isAuthEnabled = (): boolean =>
 const PSE_PREVIEW = false;
 
 export const isPsePreview = (): boolean => PSE_PREVIEW || isPreviewing("AUTH_ENABLED");
+
+// Preview unifiée générique : true dès qu'on est en mode preview
+// (?auth/author/preview=preview, collant). Pour les features preview
+// qui ne sont pas pilotées par un flag de prod dédié (ex. lecteur ECG
+// expérimental). Public hors preview → toujours false.
+export const isPreview = (): boolean => isPreviewing("AUTH_ENABLED");
