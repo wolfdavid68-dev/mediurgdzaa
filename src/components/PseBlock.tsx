@@ -18,18 +18,8 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const [pseTarget, setPseTarget] = useState("");
   const [pseTarget2, setPseTarget2] = useState("");
   const [pseRate, setPseRate] = useState("");
-  const [dilIdx, setDilIdx] = useState(0);
-  const pseRaw = resolvePse()[drug.id];
-  if (!pseRaw) return null;
-
-  // Sélecteur de dilution : si l'entrée propose plusieurs préparations
-  // (`dilutions: [{ label, conc, detail? }]`), l'utilisateur choisit
-  // celle posée → on substitue `conc` (la dose cible reste pondérale,
-  // donc min/max/steps/unite inchangés). Entrée sans `dilutions` :
-  // comportement strictement identique à avant (rétro-compatible).
-  const dilutions: any[] | null = Array.isArray(pseRaw.dilutions) ? pseRaw.dilutions : null;
-  const sel = dilutions ? Math.min(dilIdx, dilutions.length - 1) : 0;
-  const pse = dilutions ? { ...pseRaw, conc: dilutions[sel].conc } : pseRaw;
+  const pse = resolvePse()[drug.id];
+  if (!pse) return null;
 
   const kg = parseFloat(weight);
   const validKg = kg > 0 && kg <= 300;
@@ -63,29 +53,12 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
         </svg>
         Débit PSE
         <span className="pse-conc-tag">
-          {dilutions
-            ? dilutions[sel].detail || `${pse.conc} µg/mL · seringue`
-            : pse.tag
-              ? pse.tag
-              : `${pse.conc}${pse.unite.includes("mg") ? " mg" : pse.unite.includes("UI") ? " UI" : " µg"}/mL · seringue`}
+          {pse.tag
+            ? pse.tag
+            : `${pse.conc}${pse.unite.includes("mg") ? " mg" : pse.unite.includes("UI") ? " UI" : " µg"}/mL · seringue`}
         </span>
       </div>
       <div className="pse-body">
-        {dilutions && (
-          <div className="pse-dilution-row">
-            <span className="pse-input-label">Dilution</span>
-            {dilutions.map((d, i) => (
-              <button
-                key={d.label}
-                type="button"
-                className={`pse-dil-btn ${i === sel ? "pse-dil-active" : ""}`}
-                onClick={() => setDilIdx(i)}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-        )}
         {pse.note && <div className="pse-note">{pse.note}</div>}
 
         {!pse.extra && reverse && (

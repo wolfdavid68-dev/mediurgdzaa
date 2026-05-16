@@ -297,7 +297,7 @@ describe("calcDoseFromRate", () => {
     expect(calcDoseFromRate(pse, 2.1, 70)).toBe(0.1);
   });
 
-  test("Adrénaline pure 1000 µg/mL — même 2,1 mL/h × 70 kg → 0,5 µg/kg/min", () => {
+  test("conc 1000 µg/mL — 2,1 mL/h × 70 kg → 0,5 µg/kg/min", () => {
     const pse = { conc: 1000, unite: "µg/kg/min" };
     expect(calcDoseFromRate(pse, 2.1, 70)).toBe(0.5);
   });
