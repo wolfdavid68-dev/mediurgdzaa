@@ -312,6 +312,15 @@ describe("calcDoseFromRate", () => {
     expect(calcDoseFromRate(pse, 1, 70)).toBe(0.071);
   });
 
+  test("precision : dixième / centième / millième", () => {
+    const pse = { conc: 5000, unite: "µg/kg/min" }; // Dobutamine
+    expect(calcDoseFromRate(pse, 5, 70, 1)).toBe(6); // 5,95… → 6,0 (dixième)
+    const nora = { conc: 333, unite: "µg/kg/min" };
+    expect(calcDoseFromRate(nora, 1.26, 70, 2)).toBe(0.1); // centième
+    const iso = { conc: 20, unite: "µg/kg/min" };
+    expect(calcDoseFromRate(iso, 5, 70, 3)).toBe(0.024); // millième
+  });
+
   test("round-trip : calcDoseFromRate ∘ calcDebit ≈ identité", () => {
     const pse = { conc: 333, unite: "µg/kg/min" };
     const mlh = calcDebit(pse, 0.2, 80);

@@ -33,6 +33,7 @@ export const PSE_PREVIEW = {
     min: 0.05,
     max: 1,
     inputMode: "mlh",
+    dosePrecision: 2, // centième
     mlhSteps: [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
     steps: [0.1, 0.2, 0.3, 0.5, 1],
     tag: "2 amp 5 mg qsp 50 mL G5% → 0,2 mg/mL",
@@ -44,6 +45,7 @@ export const PSE_PREVIEW = {
     min: 0.05,
     max: 2,
     inputMode: "mlh",
+    dosePrecision: 2, // centième
     mlhSteps: [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
     steps: [0.1, 0.2, 0.3, 0.5, 1],
     tag: "2 amp 8 mg qsp 48 mL G5% → 0,33 mg/mL",
@@ -56,6 +58,7 @@ export const PSE_PREVIEW = {
     min: 2,
     max: 20,
     inputMode: "mlh",
+    dosePrecision: 1, // dixième
     mlhSteps: [1, 2, 3, 5, 8, 10, 15, 20],
     steps: [5, 10, 15, 20],
     tag: "1 flacon 250 mg qsp 50 mL G5% → 5 mg/mL",
@@ -67,6 +70,7 @@ export const PSE_PREVIEW = {
     min: 0.01,
     max: 0.1,
     inputMode: "mlh",
+    dosePrecision: 3, // millième
     mlhSteps: [1, 2, 3, 5, 8, 10, 15],
     steps: [0.02, 0.05, 0.08, 0.1],
     tag: "5 amp 0,2 mg qsp 50 mL G5% → 20 µg/mL",
@@ -78,6 +82,7 @@ export const PSE_PREVIEW = {
     min: 0.2,
     max: 2,
     inputMode: "mlh",
+    dosePrecision: 2, // centième
     mlhSteps: [1, 2, 3, 5, 8, 10, 15, 20],
     steps: [0.2, 0.5, 1, 1.5, 2],
     tag: "1 amp 250 µg qsp 50 mL NaCl 0,9% → 5 µg/mL",

@@ -35,7 +35,11 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const debit = calcDebit(pse, pseTarget, weight);
   const outRange = debit && (parseFloat(pseTarget) < pse.min || parseFloat(pseTarget) > pse.max);
 
-  const dose = reverse ? calcDoseFromRate(pse, pseRate, weight) : null;
+  // Précision d'affichage de la dose (nb de décimales) par médicament.
+  const dosePrec: number = Number.isInteger(pse.dosePrecision) ? pse.dosePrecision : 3;
+  const fmtDose = (v: number | null): string | null => (v == null ? null : v.toFixed(dosePrec));
+
+  const dose = reverse ? calcDoseFromRate(pse, pseRate, weight, dosePrec) : null;
   const doseOut = dose != null && (dose < pse.min || dose > pse.max);
 
   return (
@@ -79,7 +83,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
             {dose != null && (
               <div className="pse-result-box">
                 <span className="pse-result-label">Dose</span>
-                <span className="pse-result-value">{dose}</span>
+                <span className="pse-result-value">{fmtDose(dose)}</span>
                 <span className="pse-result-unit">{pse.unite}</span>
                 {doseOut && <span className="pse-range-warn">⚠ hors plage</span>}
               </div>
@@ -129,12 +133,12 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
             </thead>
             <tbody>
               {mlhSteps.map((step: number) => {
-                const dv = calcDoseFromRate(pse, step, weight);
+                const dv = calcDoseFromRate(pse, step, weight, dosePrec);
                 const isActive = parseFloat(pseRate) === step;
                 return (
                   <tr key={step} className={isActive ? "pse-row-active" : ""}>
                     <td>{step}</td>
-                    <td>{dv}</td>
+                    <td>{fmtDose(dv)}</td>
                   </tr>
                 );
               })}
