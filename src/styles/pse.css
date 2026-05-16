@@ -63,6 +63,44 @@
   flex-wrap: wrap;
 }
 
+/* Sélecteur de dilution (plusieurs préparations possibles) */
+.pse-dilution-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pse-dil-btn {
+  padding: 7px 12px;
+  min-height: 34px;
+  border-radius: 7px;
+  border: 1px solid #1d4ed860;
+  background: #0a1628;
+  color: #93c5fd;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pse-dil-btn.pse-dil-active {
+  background: #1d4ed8;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+[data-theme="light"] .pse-dil-btn {
+  background: #fff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .pse-dil-btn.pse-dil-active {
+  background: #1d4ed8;
+  color: #fff;
+}
+
 .pse-input-label {
   font-size: 11px;
   color: var(--text-dim);
