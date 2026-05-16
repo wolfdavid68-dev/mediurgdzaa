@@ -1,4 +1,4 @@
-import { isAuthEnabled } from "../lib/featureFlags";
+import { isAuthEnabled, isPsePreview } from "../lib/featureFlags";
 
 // Régression : l'override ?auth=preview doit rester actif même quand l'app
 // réécrit l'URL et fait sauter le query param (sinon AuthGate bypassait
@@ -40,5 +40,28 @@ describe("isAuthEnabled — preview collant", () => {
     store.clear();
     window.history.replaceState(null, "", "/");
     expect(isAuthEnabled()).toBe(false);
+  });
+});
+
+describe("isPsePreview — preview unifiée (?auth=preview)", () => {
+  test("sans preview → false (public : PSE inchangé)", () => {
+    expect(isPsePreview()).toBe(false);
+  });
+
+  test("?auth=preview active AUSSI la PSE preview", () => {
+    window.history.replaceState(null, "", "/?auth=preview");
+    expect(isPsePreview()).toBe(true);
+  });
+
+  test("sticky : param perdu après coup → PSE preview reste active", () => {
+    window.history.replaceState(null, "", "/?auth=preview");
+    expect(isPsePreview()).toBe(true);
+    window.history.replaceState(null, "", "/");
+    expect(isPsePreview()).toBe(true);
+  });
+
+  test("?pse=preview seul ne fait RIEN (param unifié = auth)", () => {
+    window.history.replaceState(null, "", "/?pse=preview");
+    expect(isPsePreview()).toBe(false);
   });
 });

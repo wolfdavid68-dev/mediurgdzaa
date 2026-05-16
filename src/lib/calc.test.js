@@ -3,6 +3,7 @@ import {
   calcDose,
   ciSeverity,
   calcDebit,
+  calcDoseFromRate,
   calcPrepThreshold,
   calcPrepSufentaTable,
   calcPrepPhases,
@@ -284,6 +285,46 @@ describe("calcDebit", () => {
     expect(calcDebit(pse, 0.1, 0)).toBeNull();
     expect(calcDebit(pse, 0.1, null)).toBeNull();
     expect(calcDebit(pse, 0.1, "")).toBeNull();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// calcDoseFromRate — inverse de calcDebit (saisie mL/h → dose)
+// ════════════════════════════════════════════════════════════════
+describe("calcDoseFromRate", () => {
+  test("Adrénaline 200 µg/mL — 2,1 mL/h × 70 kg → 0,1 µg/kg/min", () => {
+    const pse = { conc: 200, unite: "µg/kg/min" };
+    expect(calcDoseFromRate(pse, 2.1, 70)).toBe(0.1);
+  });
+
+  test("Adrénaline pure 1000 µg/mL — même 2,1 mL/h × 70 kg → 0,5 µg/kg/min", () => {
+    const pse = { conc: 1000, unite: "µg/kg/min" };
+    expect(calcDoseFromRate(pse, 2.1, 70)).toBe(0.5);
+  });
+
+  test("Noradrénaline 333 µg/mL — 1,26 mL/h × 70 kg → ≈0,1 µg/kg/min", () => {
+    const pse = { conc: 333, unite: "µg/kg/min" };
+    expect(calcDoseFromRate(pse, 1.26, 70)).toBeCloseTo(0.1, 2);
+  });
+
+  test("Sufentanil 5 µg/mL — µg/kg/h — 1 mL/h × 70 kg → 0,071 µg/kg/h", () => {
+    const pse = { conc: 5, unite: "µg/kg/h" };
+    expect(calcDoseFromRate(pse, 1, 70)).toBe(0.071);
+  });
+
+  test("round-trip : calcDoseFromRate ∘ calcDebit ≈ identité", () => {
+    const pse = { conc: 333, unite: "µg/kg/min" };
+    const mlh = calcDebit(pse, 0.2, 80);
+    expect(calcDoseFromRate(pse, mlh, 80)).toBeCloseTo(0.2, 2);
+  });
+
+  test("cas dégénérés → null", () => {
+    const pse = { conc: 200, unite: "µg/kg/min" };
+    expect(calcDoseFromRate(pse, 0, 70)).toBeNull();
+    expect(calcDoseFromRate(pse, -1, 70)).toBeNull();
+    expect(calcDoseFromRate(pse, "", 70)).toBeNull();
+    expect(calcDoseFromRate(pse, 5, 0)).toBeNull();
+    expect(calcDoseFromRate(pse, 5, null)).toBeNull();
   });
 });
 

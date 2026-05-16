@@ -9,9 +9,11 @@
 // ajouter `?<flag-name>=preview` à l'URL → la feature est forcée à true
 // pour cette session (lue à chaque appel, pas mémorisée).
 
+// Preview UNIFIÉE : un seul point d'entrée `?auth=preview` active TOUTES
+// les features en preview (login + protocoles PSE). On ne multiplie pas
+// les params : tout ce qui est « en preview » se teste via la même URL.
 const URL_PARAM_OVERRIDE: Record<string, string> = {
   AUTH_ENABLED: "auth",
-  PSE_PREVIEW: "pse",
 };
 
 // Override de session « collant » : dès que `?auth=preview` est vu une
@@ -77,13 +79,13 @@ export const isAuthEnabled = (): boolean =>
 // vivent dans src/data/pse.preview.js (overlay fusionné par-dessus PSE
 // uniquement quand ce mode est actif).
 //
-// Public (flag false, pas de ?pse=preview) : PSE inchangé.
-// Preview : https://…/?pse=preview → PSE + pse.preview.js (collant sur
-//           la session d'onglet, comme ?auth=preview).
+// Activé par la MÊME preview unifiée que le login : `?auth=preview`
+// (sticky pour la session d'onglet). Public (flag false, pas de
+// ?auth=preview) : PSE strictement inchangé.
 //
 // Promotion en prod d'un protocole validé : déplacer son entrée de
 // pse.preview.js vers pse.js, puis commit/push (le flag reste false).
 // ────────────────────────────────────────────────────────────
 const PSE_PREVIEW = false;
 
-export const isPsePreview = (): boolean => PSE_PREVIEW || isPreviewing("PSE_PREVIEW");
+export const isPsePreview = (): boolean => PSE_PREVIEW || isPreviewing("AUTH_ENABLED");

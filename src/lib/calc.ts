@@ -139,6 +139,29 @@ export function calcDebit(pse: any, dose: string | number, kg: string | number) 
   return +result.toFixed(2);
 }
 
+// ── Calcul inverse : mL/h (+ poids) → dose ────────────────────
+// Inverse exact de calcDebit. Saisie = débit réellement réglé sur la
+// PSE ; sortie = dose pondérale correspondante, selon la dilution.
+// Utilisé par le mode "mlh" de PseBlock (entrée mL/h, on déduit la dose).
+export function calcDoseFromRate(pse: any, mlh: string | number, kg: string | number) {
+  const r = parseFloat(String(mlh));
+  if (!r || r <= 0) return null;
+  if (pse.factor) return +(r / pse.factor).toFixed(3);
+  if (pse.unite === "mg/h") return +(r * pse.conc).toFixed(3);
+  if (pse.unite === "UI/24h") return +(r * pse.conc * 24).toFixed(3);
+  const w = parseFloat(String(kg));
+  if (!w || w <= 0) return null;
+  let result;
+  if (pse.unite === "µg/kg/min") {
+    result = (r * pse.conc) / (w * 60);
+  } else if (pse.unite === "mL/kg/min") {
+    result = r / (w * 60);
+  } else {
+    result = (r * pse.conc) / w;
+  }
+  return +result.toFixed(3);
+}
+
 // ── Préparation : seuil dose (Anexate) ────────────────────────
 // Renvoie le nombre d'ampoules / volumes selon que le produit final
 // franchit ou non `prep.dose_threshold` mg.

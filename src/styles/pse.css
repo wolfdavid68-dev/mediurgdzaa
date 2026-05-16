@@ -56,6 +56,23 @@
   gap: 10px;
 }
 
+.pse-note {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fbbf24;
+  background: #78350f30;
+  border: 1px solid #f59e0b50;
+  border-radius: 7px;
+  padding: 7px 10px;
+}
+
+[data-theme="light"] .pse-note {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #fcd34d;
+}
+
 .pse-input-row {
   display: flex;
   align-items: center;
