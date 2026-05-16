@@ -155,20 +155,21 @@ export const login = async (
     return { ok: false, error: "Matricule invalide (format : M + 6 chiffres)" };
   }
 
-  // 1. Résolution matricule → email via la vue publique `matricule_lookup`
-  //    (ne révèle rien de sensible : juste l'email associé pour le login).
-  const { data: lookup, error: lookupErr } = await supabase
-    .from("matricule_lookup")
-    .select("email")
-    .eq("matricule", matricule)
-    .maybeSingle();
-  if (lookupErr || !lookup?.email) {
+  // 1. Résolution matricule → email via la fonction SECURITY DEFINER
+  //    `matricule_to_email` (ne révèle rien d'autre : juste l'email
+  //    associé, et seulement pour le matricule exact passé en argument —
+  //    aucune énumération possible, contrairement à l'ancienne vue qui
+  //    ouvrait toute la table profiles aux anonymes).
+  const { data: email, error: lookupErr } = await supabase.rpc("matricule_to_email", {
+    p_matricule: matricule,
+  });
+  if (lookupErr || !email) {
     return { ok: false, error: "Matricule inconnu ou mot de passe incorrect" };
   }
 
   // 2. Login standard via email + password
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: lookup.email,
+    email,
     password,
   });
   if (error || !data.session) {
@@ -229,14 +230,12 @@ export const requestPasswordReset = async (matricule: string): Promise<AuthResul
     return { ok: false, error: "Matricule invalide (format : M + 6 chiffres)" };
   }
 
-  const { data: lookup } = await supabase
-    .from("matricule_lookup")
-    .select("email")
-    .eq("matricule", matricule)
-    .maybeSingle();
+  const { data: email } = await supabase.rpc("matricule_to_email", {
+    p_matricule: matricule,
+  });
 
   // Matricule inconnu → on fait semblant de réussir (anti-énumération).
-  if (!lookup?.email) return { ok: true, data: undefined };
+  if (!email) return { ok: true, data: undefined };
 
   // On préserve `search` (notamment `?auth=preview` en local quand le flag
   // AUTH_ENABLED est false) — sinon l'utilisateur revient de son mail sur
@@ -244,7 +243,7 @@ export const requestPasswordReset = async (matricule: string): Promise<AuthResul
   // jamais traité.
   const { origin, pathname, search } = window.location;
   const redirectTo = `${origin}${pathname}${search}`;
-  const { error } = await supabase.auth.resetPasswordForEmail(lookup.email, { redirectTo });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) return { ok: false, error: humanizeError(error.message) };
   return { ok: true, data: undefined };
 };
@@ -333,7 +332,7 @@ export const rejectProfile = async (profileId: string): Promise<AuthResult> => {
   const supabase = getSupabase();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   // Reject = on supprime le profile (l'auth.user reste mais sans profile,
-  // il ne peut plus se login car notre login resolve via matricule_lookup).
+  // il ne peut plus se login car matricule_to_email ne le trouve plus).
   const { error } = await supabase.from("profiles").delete().eq("id", profileId);
   if (error) return { ok: false, error: humanizeError(error.message) };
   return { ok: true, data: undefined };

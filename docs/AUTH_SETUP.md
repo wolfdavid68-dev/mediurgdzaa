@@ -22,7 +22,7 @@ Dans le SQL Editor de Supabase, copier-coller [`docs/auth-schema.sql`](./auth-sc
 et exécuter. Cela crée :
 
 - Table `profiles` (matricule, email, prenom, nom, fonction, service, status, role, …)
-- Vue publique `matricule_lookup` (résolution matricule → email pour le login)
+- Fonction `matricule_to_email(text)` (résolution matricule → email pour le login, SECURITY DEFINER paramétrée — pas d'exposition de `profiles` aux anonymes)
 - Trigger `on_auth_user_created` : copie `raw_user_meta_data` de `auth.users` vers `profiles` au signup
 - Fonction `public.is_admin()` : utilisée dans les RLS pour les contrôles admin
 - Policies RLS : un user voit son profile, un admin voit tout

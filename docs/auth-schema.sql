@@ -10,8 +10,8 @@
 -- - SECURITY DEFINER + `set search_path = ''` sur les fonctions
 --   privilégiées (évite le hijacking de schéma)
 -- - `(select auth.uid())` dans les RLS policies (cache initPlan, perf)
--- - Vue `matricule_lookup` SECURITY INVOKER pour le login (résolution
---   matricule → email côté client sans exposer le reste du profile)
+-- - Fonction `matricule_to_email` SECURITY DEFINER paramétrée pour le
+--   login (résolution matricule → email sans exposer profiles aux anon)
 -- ════════════════════════════════════════════════════════════════
 
 -- ── ENUMS ────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ create index if not exists profiles_matricule_idx on public.profiles (matricule)
 -- Le trigger lit `raw_user_meta_data` (envoyé par signUp({ data: {...} })
 -- côté client) et insère la ligne profile correspondante. Sans ça, un
 -- nouveau auth.users serait créé sans profile et ne pourrait pas se login
--- (notre vue matricule_lookup ne le trouverait pas).
+-- (matricule_to_email ne le trouverait pas).
 --
 -- security definer + search_path = '' : pattern recommandé par Supabase
 -- pour éviter le détournement de schéma par un user malveillant.
@@ -141,39 +141,40 @@ create policy "admin_delete"
 -- Pas d'insert direct depuis le client : l'insertion se fait uniquement
 -- via le trigger handle_new_user() qui s'exécute en security definer.
 
--- ── Vue publique : matricule → email pour le login ──────────
+-- ── Résolution matricule → email pour le login ──────────────
 -- Le client login envoie un matricule, Supabase Auth attend un email :
--- on a besoin d'une résolution publique. Cette vue n'expose QUE
--- (matricule, email), rien d'autre du profile.
+-- on a besoin d'une résolution accessible AVANT d'être loggé (anon).
 --
--- Sécurité : cette vue est publique (anon + authenticated) car le login
--- doit pouvoir y accéder AVANT d'être loggé. Risque acceptable :
--- équivalent au login email/password classique qui révèle si un email
--- existe (pas plus). Pas de listing possible (RLS sur la table sous-jacente
--- empêche le SELECT * sans WHERE).
+-- Fonction SECURITY DEFINER paramétrée plutôt que vue + policy anon :
+-- l'ancienne approche (vue security_invoker + policy `using (true)`
+-- pour anon) ouvrait TOUTE la table profiles aux requêtes anonymes
+-- (la clé anon est publique → fuite matricule/email/nom/rôle de tous
+-- les users, RGPD). Ici la fonction ne retourne QUE l'email de la
+-- ligne dont le matricule est passé en argument : aucun listing /
+-- énumération possible, et profiles n'a aucune policy de lecture anon.
 --
--- security_invoker = true (Postgres 15+) → respecte la RLS de l'appelant.
--- Mais on grant SELECT à anon explicitement pour permettre le login.
-drop view if exists public.matricule_lookup;
-create view public.matricule_lookup
-with (security_invoker = true) as
-  select matricule, email
-  from public.profiles
-  where status in ('pending', 'active', 'banned');
-
--- Permet la lecture par anonyme et authentifié (mais la RLS sous-jacente
--- limite ce qui sort — on ajoute une policy ouverte juste pour cette vue).
+-- security definer + search_path = '' : lecture de profiles sans être
+-- bloquée par la RLS, sans hijacking de schéma (pattern Supabase).
+drop view   if exists public.matricule_lookup;
 drop policy if exists "matricule_lookup_anon" on public.profiles;
-create policy "matricule_lookup_anon"
-  on public.profiles for select
-  to anon
-  using (true);
--- ⚠ Note sécurité : cette policy expose tous les rows aux anonymes.
--- Pour la limiter à matricule_lookup, il faudrait wrapper la vue dans
--- une fonction `security definer` qui accepte un matricule en paramètre
--- et ne retourne que la ligne matchant. À considérer pour une v2.
 
-grant select on public.matricule_lookup to anon, authenticated;
+create or replace function public.matricule_to_email(p_matricule text)
+returns text
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select email
+  from public.profiles
+  where matricule = p_matricule
+  limit 1;
+$$;
+
+-- Exécutable par anon (login avant connexion) + authenticated. On révoque
+-- le grant PUBLIC implicite pour ne l'ouvrir qu'aux rôles voulus.
+revoke all     on function public.matricule_to_email(text) from public;
+grant  execute on function public.matricule_to_email(text) to anon, authenticated;
 
 -- ── Realtime (optionnel) ────────────────────────────────────
 -- Active les events realtime sur profiles : utile pour le dashboard
