@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v95";
+export const APP_VERSION = "v96";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v96",
+    date: "2026-05-16",
+    titre: "Médicaments · ajout de la Nalbuphine (Nubain) IV",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouvelle fiche Nalbuphine (ex-Nubain) dans Analgésie. Opioïde agoniste-antagoniste (agoniste κ / antagoniste partiel µ) à effet PLAFOND sur la dépression respiratoire — avantage vs morphine — et NON stupéfiant (pas de cahier des stups). Posologie adulte (IVL 0,2 mg/kg) et pédiatrique avec voie intrarectale (0,4 mg/kg si pas de VVP), calculateur de préparation (dilution qsp 20 mL → 1 mg/mL) et table de dilution pédiatrique 1 mg/mL. Rappel : ne pas associer à un agoniste µ pur (antagonisme), antagoniste = Naloxone.",
+      },
+      {
+        type: "chore",
+        text: "Snapshot anti-renumérotation des id mis à jour (drug-ids.snapshot.json) : ajout de l'id 80 (Nalbuphine) pour protéger la clé localStorage `mediurg-note-{id}`.",
+      },
+    ],
+  },
   {
     version: "v95",
     date: "2026-05-14",
