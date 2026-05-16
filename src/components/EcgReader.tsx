@@ -31,11 +31,13 @@ const MOCK = {
       severite: "attention",
     },
   ] as Anomalie[],
+  // label = texte affiché ; query = terme envoyé à la recherche
+  // Médicaments (même mécanisme que les liens drogue des protocoles).
   orientations_therapeutiques: [
-    "Aspirine 250 mg IVD",
-    "Ticagrelor 180 mg PO",
-    "Héparine non fractionnée",
-    "Morphine titrée si EVA > 3",
+    { label: "Aspirine 250 mg IVD", query: "Aspirine" },
+    { label: "Ticagrelor 180 mg PO", query: "Ticagrelor" },
+    { label: "Héparine non fractionnée", query: "Héparine" },
+    { label: "Morphine titrée si EVA > 3", query: "Morphine" },
   ],
   limites_lecture:
     "Calibration 25 mm/s, 10 mm/mV présumée. Tableau évocateur de SCA ST+ antérieur — coronarographie en urgence à discuter selon contexte clinique.",
@@ -171,7 +173,9 @@ const Disclaimer = ({ title, children }: { title: string; children: ReactNode })
   </div>
 );
 
-const EcgReader = () => {
+type EcgReaderProps = { onDrugSearch?: (name: string) => void };
+
+const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
   const [screen, setScreen] = useState<Screen>("capture");
 
   useEffect(() => {
@@ -420,11 +424,18 @@ const EcgReader = () => {
               </div>
               <div>
                 {a.orientations_therapeutiques.map((o) => (
-                  <button key={o} className="ecgr-piste" type="button" disabled>
+                  <button
+                    key={o.label}
+                    className="ecgr-piste"
+                    type="button"
+                    disabled={!onDrugSearch}
+                    onClick={onDrugSearch ? () => onDrugSearch(o.query) : undefined}
+                    title={onDrugSearch ? `Ouvrir la fiche ${o.query}` : undefined}
+                  >
                     <span className="ecgr-piste-chev">
                       <Ic n="chevron-right" />
                     </span>
-                    <span className="ecgr-piste-t">{o}</span>
+                    <span className="ecgr-piste-t">{o.label}</span>
                     <span className="ecgr-piste-ext">
                       <Ic n="external-link" />
                     </span>

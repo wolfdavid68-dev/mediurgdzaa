@@ -592,6 +592,12 @@
   border-radius: 8px;
   background: transparent;
   border: none;
+  cursor: pointer;
+}
+.ecgr-piste:hover:not(:disabled) {
+  background: var(--card-hover);
+}
+.ecgr-piste:disabled {
   cursor: default;
 }
 .ecgr-piste-chev {

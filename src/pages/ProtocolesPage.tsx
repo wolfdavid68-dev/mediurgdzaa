@@ -83,7 +83,7 @@ const ProtocolesPage = ({
               (?auth=preview). Public : seul le tableau diagnostique. */}
           {isPreview() && (
             <div style={{ marginBottom: 16 }}>
-              <EcgReader />
+              <EcgReader onDrugSearch={onDrugSearch} />
             </div>
           )}
           <EcgDiagnostic />
