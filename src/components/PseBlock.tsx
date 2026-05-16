@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { PSE } from "../data/pse";
+import { PSE_PREVIEW } from "../data/pse.preview";
+import { isPsePreview } from "../lib/featureFlags";
 import { calcDebit } from "../lib/calc";
+
+// PSE public, ou PSE + overlay preview si ?pse=preview (cf. featureFlags).
+// L'overlay remplace/ajoute par drug id ; le public ne voit jamais
+// pse.preview.js tant que le flag PSE_PREVIEW reste false.
+const resolvePse = (): Record<number, any> =>
+  isPsePreview() ? { ...PSE, ...PSE_PREVIEW } : (PSE as Record<number, any>);
 
 // Bloc PSE (pousse-seringue électrique) : input dose cible + calcul mL/h
 // + table des paliers. Gère le mode "extra" (héparine UI/24h en plus).
@@ -9,7 +17,7 @@ type PseBlockProps = { drug: any; weight: string };
 const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const [pseTarget, setPseTarget] = useState("");
   const [pseTarget2, setPseTarget2] = useState("");
-  const pse = (PSE as Record<number, any>)[drug.id];
+  const pse = resolvePse()[drug.id];
   if (!pse) return null;
 
   const kg = parseFloat(weight);

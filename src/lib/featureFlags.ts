@@ -11,6 +11,7 @@
 
 const URL_PARAM_OVERRIDE: Record<string, string> = {
   AUTH_ENABLED: "auth",
+  PSE_PREVIEW: "pse",
 };
 
 // Override de session « collant » : dès que `?auth=preview` est vu une
@@ -69,3 +70,20 @@ const isRecoveryReturn = (): boolean => {
 
 export const isAuthEnabled = (): boolean =>
   AUTH_ENABLED || isPreviewing("AUTH_ENABLED") || isRecoveryReturn();
+
+// ── PSE_PREVIEW ──────────────────────────────────────────────
+// Permet de tester de nouveaux protocoles PSE (ou des corrections)
+// sur la prod live SANS les exposer au public. Les entrées en attente
+// vivent dans src/data/pse.preview.js (overlay fusionné par-dessus PSE
+// uniquement quand ce mode est actif).
+//
+// Public (flag false, pas de ?pse=preview) : PSE inchangé.
+// Preview : https://…/?pse=preview → PSE + pse.preview.js (collant sur
+//           la session d'onglet, comme ?auth=preview).
+//
+// Promotion en prod d'un protocole validé : déplacer son entrée de
+// pse.preview.js vers pse.js, puis commit/push (le flag reste false).
+// ────────────────────────────────────────────────────────────
+const PSE_PREVIEW = false;
+
+export const isPsePreview = (): boolean => PSE_PREVIEW || isPreviewing("PSE_PREVIEW");

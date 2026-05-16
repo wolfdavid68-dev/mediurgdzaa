@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v96";
+export const APP_VERSION = "v97";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v97",
+    date: "2026-05-16",
+    titre: "Protocoles PSE en preview (non publics)",
+    changes: [
+      {
+        type: "chore",
+        text: "Nouveau mécanisme pour tester de nouveaux protocoles PSE (ou des corrections) directement sur la prod live sans les exposer au public. Les entrées en attente vivent dans src/data/pse.preview.js et ne sont fusionnées par-dessus PSE que si l'URL contient ?pse=preview (override collant pour la session d'onglet, même principe que ?auth=preview). Pour le public, aucun changement. Promotion d'un protocole validé : déplacer son entrée de pse.preview.js vers pse.js, commit/push.",
+      },
+    ],
+  },
   {
     version: "v96",
     date: "2026-05-16",
