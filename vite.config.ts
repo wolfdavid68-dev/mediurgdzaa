@@ -246,6 +246,18 @@ export default defineConfig({
           // jest-dom scopé ici uniquement (cf. commentaire sur l'absence de
           // setupFiles à la racine) — seul ce projet rend du DOM.
           setupFiles: ["src/test-setup.ts"],
+          // Fork unique pour le projet dom. Cause racine des échecs flaky
+          // « Invalid Chai property: toBeInTheDocument » : sous Vitest 4
+          // + projects, le parallélisme de fichiers fait courir
+          // `expect.extend` (jest-dom, side-effect du setupFile mis en
+          // cache module) entre workers du pool ; un fichier dom pouvait
+          // tourner avant que les matchers soient appliqués dans SON
+          // worker → ~89/210 tests KO de façon non déterministe (et le
+          // pre-push qui sautait aléatoirement). Un seul fork = setup
+          // appliqué puis persistant, aucune course inter-worker. Le
+          // projet "libs" (node pur, pas de DOM) reste parallèle et
+          // rapide ; seul dom (210 tests, ~20 s) passe en séquentiel.
+          poolOptions: { forks: { singleFork: true } },
         },
       },
     ],

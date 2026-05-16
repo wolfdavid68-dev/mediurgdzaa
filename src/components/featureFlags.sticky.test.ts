@@ -41,6 +41,18 @@ describe("isAuthEnabled — preview collant", () => {
     window.history.replaceState(null, "", "/");
     expect(isAuthEnabled()).toBe(false);
   });
+
+  test("alias ?author=preview (faute de frappe courante) → true", () => {
+    window.history.replaceState(null, "", "/?author=preview");
+    expect(isAuthEnabled()).toBe(true);
+    // clé sticky canonique = 1ᵉʳ alias, indépendante de l'alias tapé
+    expect(store.get("mediurg-preview-auth")).toBe("1");
+  });
+
+  test("alias ?preview=preview → true", () => {
+    window.history.replaceState(null, "", "/?preview=preview");
+    expect(isAuthEnabled()).toBe(true);
+  });
 });
 
 describe("isPsePreview — preview unifiée (?auth=preview)", () => {
@@ -60,7 +72,12 @@ describe("isPsePreview — preview unifiée (?auth=preview)", () => {
     expect(isPsePreview()).toBe(true);
   });
 
-  test("?pse=preview seul ne fait RIEN (param unifié = auth)", () => {
+  test("alias ?author=preview active AUSSI la PSE preview", () => {
+    window.history.replaceState(null, "", "/?author=preview");
+    expect(isPsePreview()).toBe(true);
+  });
+
+  test("?pse=preview seul ne fait RIEN (param unifié = auth/author/preview)", () => {
     window.history.replaceState(null, "", "/?pse=preview");
     expect(isPsePreview()).toBe(false);
   });

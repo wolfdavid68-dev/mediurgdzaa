@@ -9,11 +9,13 @@
 // ajouter `?<flag-name>=preview` à l'URL → la feature est forcée à true
 // pour cette session (lue à chaque appel, pas mémorisée).
 
-// Preview UNIFIÉE : un seul point d'entrée `?auth=preview` active TOUTES
-// les features en preview (login + protocoles PSE). On ne multiplie pas
-// les params : tout ce qui est « en preview » se teste via la même URL.
-const URL_PARAM_OVERRIDE: Record<string, string> = {
-  AUTH_ENABLED: "auth",
+// Preview UNIFIÉE : un seul point d'entrée active TOUTES les features en
+// preview (login + protocoles PSE). Plusieurs alias de param acceptés
+// (`auth`, `author`, `preview`) car la faute de frappe « author » au lieu
+// de « auth » est facile et silencieuse (rien ne s'affiche → on croit
+// que le déploiement a échoué). Le 1ᵉʳ alias est la clé sticky canonique.
+const URL_PARAM_OVERRIDE: Record<string, string[]> = {
+  AUTH_ENABLED: ["auth", "author", "preview"],
 };
 
 // Override de session « collant » : dès que `?auth=preview` est vu une
@@ -28,11 +30,13 @@ const STICKY_PREFIX = "mediurg-preview-";
 
 const isPreviewing = (flagName: string): boolean => {
   if (typeof window === "undefined") return false;
-  const param = URL_PARAM_OVERRIDE[flagName];
-  if (!param) return false;
-  const stickyKey = STICKY_PREFIX + param;
+  const params = URL_PARAM_OVERRIDE[flagName];
+  if (!params || params.length === 0) return false;
+  // Clé sticky canonique = 1ᵉʳ alias (indépendante de l'alias tapé).
+  const stickyKey = STICKY_PREFIX + params[0];
   try {
-    const inUrl = new URLSearchParams(window.location.search).get(param) === "preview";
+    const search = new URLSearchParams(window.location.search);
+    const inUrl = params.some((p) => search.get(p) === "preview");
     if (inUrl) {
       try {
         window.sessionStorage.setItem(stickyKey, "1");
