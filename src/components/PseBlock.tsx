@@ -37,7 +37,9 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
 
   // Précision d'affichage de la dose (nb de décimales) par médicament.
   const dosePrec: number = Number.isInteger(pse.dosePrecision) ? pse.dosePrecision : 3;
-  const fmtDose = (v: number | null): string | null => (v == null ? null : v.toFixed(dosePrec));
+  // Virgule décimale FR (convention clinique du projet) : « 6,0 » pas « 6.0 ».
+  const fmtDose = (v: number | null): string | null =>
+    v == null ? null : v.toFixed(dosePrec).replace(".", ",");
 
   const dose = reverse ? calcDoseFromRate(pse, pseRate, weight, dosePrec) : null;
   const doseOut = dose != null && (dose < pse.min || dose > pse.max);
