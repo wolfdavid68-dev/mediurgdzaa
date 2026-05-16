@@ -249,23 +249,29 @@ export default defineConfig({
           // Cause racine des échecs flaky « Invalid Chai property:
           // toBeInTheDocument » : sous Vitest 4 + projects, l'extension
           // d'`expect` par jest-dom (side-effect du setupFile) pouvait
-          // courir entre workers / ré-exécutions per-fichier ; un fichier
-          // dom tournait parfois avant que les matchers soient appliqués
-          // → ~89/210 tests KO de façon non déterministe (pre-push qui
-          // sautait au hasard). `singleFork` seul ne suffisait pas sous
-          // forte charge (npm run verify). Contexte UNIQUE persistant :
-          //   - singleFork → 1 seul process, fichiers dom en séquentiel ;
-          //   - isolate:false → modules NON réinitialisés entre fichiers
-          //     → `@testing-library/jest-dom/vitest` importé et
-          //     `expect.extend` exécuté UNE fois, puis conservé pour
-          //     toute la suite. Plus aucune course possible.
+          // courir entre workers parallèles ; un fichier dom tournait
+          // parfois avant que les matchers soient appliqués → ~89/210
+          // tests KO non déterministe (pre-push/CI qui sautaient).
+          //
+          // NE PAS utiliser isolate:false : ça partage le `document`
+          // happy-dom entre fichiers → pollution DOM (« Found multiple
+          // elements ») rouge en CI. L'isolation par fichier RESTE
+          // active (DOM remis à neuf entre fichiers).
+          //
+          // Fix déterministe ET propre :
+          //   - fileParallelism:false → fichiers dom en SÉQUENTIEL dans
+          //     un seul fork (singleFork) : setup ré-exécuté par fichier
+          //     mais jamais en concurrence → plus aucune course possible ;
+          //   - isolation conservée → aucune pollution inter-fichiers ;
+          //   - sequence.groupOrder distinct : Vitest 4 refuse deux
+          //     projets de maxWorkers différents (dom sérialisé vs libs
+          //     parallèle) dans le même groupe — on met dom en groupe 1.
           // Le projet "libs" (node pur) reste parallèle et rapide ; seul
-          // dom (210 tests, ~20 s) passe en séquentiel — coût accepté
-          // pour un pre-push déterministe (cf. mémoire ACR : on ne
+          // dom (~210 tests, ~15 s) passe en séquentiel — coût accepté
+          // pour un pre-push/CI déterministe (cf. mémoire ACR : on ne
           // pousse pas une régression dans un outil utilisé en réa).
-          // (fileParallelism:false serait redondant avec singleFork et
-          // casse Vitest 4 : maxWorkers ≠ libs → conflit groupOrder.)
-          isolate: false,
+          fileParallelism: false,
+          sequence: { groupOrder: 1 },
           poolOptions: { forks: { singleFork: true } },
         },
       },
