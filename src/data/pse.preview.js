@@ -15,13 +15,23 @@
  *  2. Tester sur la prod live via …/?pse=preview (collant pour l'onglet).
  *  3. Une fois validé : déplacer l'entrée vers pse.js, retirer d'ici,
  *     commit/push. Le public la voit alors normalement.
- *
- * Exemple (à dé-commenter / adapter) :
- *   80: { // Nalbuphine — exemple : 20 mg qsp 20 mL → 1 mg/mL
- *     conc: 1, unite: "mg/kg/h", min: 0.1, max: 0.4,
- *     steps: [0.1, 0.2, 0.3, 0.4],
- *   },
  */
 export const PSE_PREVIEW = {
-  // (vide) — ajouter ici les protocoles PSE en preview
+  // ── MEMO « nouvelle préparation des médicaments en PSE » ──────
+  // Source : memo papier service + Google Sheet de dilution (réf.
+  // patient 70 kg). Adré/Nora/Dobu/Isuprel/Héparine : la nouvelle
+  // prépa correspond DÉJÀ à pse.js (aucune modif de calcul).
+  //
+  // Sufentanil — SEUL changement réel. Ancienne fiche : table de
+  // dilution adaptée au poids (1 mL/h = 0,1 µg/kg/h, factor 10).
+  // Nouvelle prépa MEMO : dilution FIXE 1 ampoule 250 µg qsp 50 mL
+  // NaCl 0,9% → 5 µg/mL. Calcul standard µg/kg/h : mL/h = dose × kg
+  // / 5. Vérifié sur le Sheet (patient 70 kg) : 1 mL/h ≈ 0,07 µg/kg/h.
+  5: {
+    conc: 5,
+    unite: "µg/kg/h",
+    min: 0.2,
+    max: 2,
+    steps: [0.2, 0.5, 1, 1.5, 2],
+  },
 };
