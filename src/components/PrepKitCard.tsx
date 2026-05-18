@@ -1,5 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DRUGS } from "../data/drugs";
+
+const checkKey = (kitId: string) => `mediurg-kit-check-${kitId}`;
+
+// Au-delà de ce délai depuis la dernière coche, la check-list repart vierge
+// (évite de garder les coches d'une procédure/patient précédent entre 2 gardes).
+const CHECK_MAX_AGE_MS = 3 * 60 * 60 * 1000; // 3 h
+
+const loadChecked = (kitId: string): Record<number, boolean> => {
+  try {
+    const raw = localStorage.getItem(checkKey(kitId));
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    // Ancien format (objet plat) ou expiré → on repart vierge
+    if (!parsed || typeof parsed.ts !== "number" || !parsed.items) {
+      localStorage.removeItem(checkKey(kitId));
+      return {};
+    }
+    if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
+      localStorage.removeItem(checkKey(kitId));
+      return {};
+    }
+    return parsed.items;
+  } catch {
+    return {};
+  }
+};
 
 const buildPrepFromDrug = (drug: any) => {
   if (!drug) return null;
@@ -8,9 +34,36 @@ const buildPrepFromDrug = (drug: any) => {
   return { cond, etapes };
 };
 
+const isSectionLabel = (m: string) => {
+  const t = m.trim();
+  return t.startsWith("—") && t.endsWith("—");
+};
+
+// Kits dont le matériel s'affiche en check-list cochable (gestes invasifs)
+const CHECKLIST_KIT_IDS = ["drain-thoracique", "pa", "ktc"];
+
 const PrepKitCard = ({ kit }: { kit: any }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("drogues");
+  const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>(() =>
+    loadChecked(kit.id)
+  );
+
+  const isChecklist = CHECKLIST_KIT_IDS.includes(kit.id);
+
+  useEffect(() => {
+    if (!isChecklist) return;
+    try {
+      localStorage.setItem(
+        checkKey(kit.id),
+        JSON.stringify({ ts: Date.now(), items: checkedItems })
+      );
+    } catch {
+      /* quota / mode privé : on ignore, la session reste fonctionnelle */
+    }
+  }, [checkedItems, isChecklist, kit.id]);
+  const checkableCount = kit.materiel.filter((m: string) => !isSectionLabel(m)).length;
+  const checkedCount = Object.values(checkedItems).filter(Boolean).length;
 
   return (
     <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
@@ -156,12 +209,72 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
               </div>
             )}
 
-            {activeTab === "materiel" && (
+            {activeTab === "materiel" && !isChecklist && (
               <ul className="item-list">
                 {kit.materiel.map((m: string, i: number) => (
                   <li key={i}>{m}</li>
                 ))}
               </ul>
+            )}
+
+            {activeTab === "materiel" && isChecklist && (
+              <div className="materiel-checklist">
+                <div className="materiel-checklist-head">
+                  <span className="materiel-progress">
+                    {checkedCount}/{checkableCount} coché{checkedCount > 1 ? "s" : ""}
+                  </span>
+                  <button
+                    type="button"
+                    className="materiel-reset-btn"
+                    onClick={() => setCheckedItems({})}
+                    disabled={checkedCount === 0}
+                  >
+                    Réinitialiser
+                  </button>
+                </div>
+                <ul className="checklist">
+                  {kit.materiel.map((m: string, i: number) => {
+                    if (isSectionLabel(m)) {
+                      return (
+                        <li key={i} className="checklist-section">
+                          {m.trim().replace(/^—\s*/, "").replace(/\s*—$/, "")}
+                        </li>
+                      );
+                    }
+                    const checked = !!checkedItems[i];
+                    return (
+                      <li key={i} className="checklist-item">
+                        <label className={`checklist-label ${checked ? "checklist-checked" : ""}`}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => setCheckedItems((prev) => ({ ...prev, [i]: !prev[i] }))}
+                          />
+                          <span
+                            className="checklist-box"
+                            style={
+                              checked ? { background: kit.couleur, borderColor: kit.couleur } : {}
+                            }
+                            aria-hidden="true"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="13"
+                              height="13"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </span>
+                          <span className="checklist-text">{m}</span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             )}
 
             {activeTab === "sequence" && (

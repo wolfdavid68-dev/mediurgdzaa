@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v97";
+export const APP_VERSION = "v98";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v98",
+    date: "2026-05-18",
+    titre: "Kits invasifs · check-list matériel cochable",
+    changes: [
+      {
+        type: "feat",
+        text: "L'onglet Matériel des kits Drain Thoracique, PA (pression artérielle invasive) et KTC (cathéter veineux central) devient une véritable check-list : chaque ligne est cochable (texte barré quand fait), les séparateurs de tiroir/salle restent des en-têtes non cochables, compteur de progression et bouton « Réinitialiser » pour tout décocher. L'état est persisté en local (mediurg-kit-check-{kitId}) : il survit à la fermeture de la fiche, au changement de page et au rechargement hors-ligne.",
+      },
+      {
+        type: "feat",
+        text: "Auto-expiration des check-lists matériel après 3 h : à l'ouverture, si la dernière coche date de plus de 3 h, la liste repart vierge automatiquement (évite de garder les coches d'une procédure/patient précédent d'une garde à l'autre). Le bouton Réinitialiser reste disponible pour repartir propre immédiatement.",
+      },
+    ],
+  },
   {
     version: "v97",
     date: "2026-05-16",

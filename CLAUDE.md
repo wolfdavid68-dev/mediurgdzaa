@@ -55,7 +55,7 @@ All clinical content is hand-curated JS in `src/data/`:
 - Drug ID integers also key per-drug user notes in `localStorage` (`mediurg-note-{id}`) — never renumber existing IDs.
 
 ### LocalStorage keys
-`mediurg-theme` (`dark`/`light`), `mediurg-bigfont` (`0`/`1`), `mediurg-note-{drugId}`. Theme/font apply via `data-theme` and `data-fontsize` attributes on `<html>`; the matching CSS variables live in `src/style.css`.
+`mediurg-theme` (`dark`/`light`), `mediurg-bigfont` (`0`/`1`), `mediurg-note-{drugId}`, `mediurg-kit-check-{kitId}` (JSON `{ts, items:{itemIndex:bool}}` — état persistant des check-lists matériel des kits drain-thoracique/pa/ktc ; auto-expire 3 h après la dernière coche, voir `PrepKitCard.tsx`). Theme/font apply via `data-theme` and `data-fontsize` attributes on `<html>`; the matching CSS variables live in `src/style.css`.
 
 ### Styling
 A single global stylesheet `src/style.css` (~52 KB) drives everything. `DrugCard.css` is intentionally near-empty. Components use plain className strings — no CSS modules, no Tailwind, no styled-components. New visual styles belong in `style.css`.

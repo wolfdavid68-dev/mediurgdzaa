@@ -559,6 +559,106 @@
   font-size: 11px;
 }
 
+/* --- Checklist matériel des kits --- */
+.materiel-checklist-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.materiel-progress {
+  font-size: clamp(11px, 1.2vw, 13px);
+  font-family: var(--mono);
+  color: var(--text-mute);
+}
+.materiel-reset-btn {
+  font-size: clamp(11px, 1.2vw, 13px);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card-hover);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  min-height: 36px;
+}
+.materiel-reset-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.materiel-reset-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.checklist-section {
+  font-size: clamp(11px, 1.2vw, 12px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin: 12px 0 4px;
+}
+.checklist-section:first-child {
+  margin-top: 0;
+}
+.checklist-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 40px;
+}
+.checklist-label:hover {
+  background: var(--card-hover);
+}
+.checklist-label input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.checklist-box {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-strong);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  margin-top: 1px;
+}
+.checklist-box svg {
+  opacity: 0;
+}
+.checklist-checked .checklist-box svg {
+  opacity: 1;
+}
+.checklist-text {
+  font-size: clamp(12px, 1.3vw, 14px);
+  color: var(--text);
+  line-height: 1.5;
+}
+.checklist-checked .checklist-text {
+  color: var(--text-mute);
+  text-decoration: line-through;
+}
+.checklist-label input:focus-visible + .checklist-box {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .cond-list {
   display: flex;
   flex-wrap: wrap;
