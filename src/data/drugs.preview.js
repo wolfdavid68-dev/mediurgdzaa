@@ -72,7 +72,7 @@ export const DRUGS_PREVIEW = {
       notes: [
         "Nouvelle préparation service — dilution FIXE 0,33 mg/mL",
         "Objectif : PAM cible à atteindre — si PAM trop basse, augmenter le débit",
-        "Voie dédiée — VVC conseillée. Pas de bolus, débit constant. Tubulure opaque",
+        "Voie dédiée — VVC conseillée. Pas de bolus, débit constant",
       ],
     },
   },
