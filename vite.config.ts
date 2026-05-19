@@ -243,36 +243,36 @@ export default defineConfig({
           // Le reducer pur tourne dans le projet "libs" pour la vitesse.
           exclude: ["src/components/AcrTimer.reducer.test.ts"],
           environment: "happy-dom",
-          // jest-dom scopé ici uniquement (cf. commentaire sur l'absence de
-          // setupFiles à la racine) — seul ce projet rend du DOM.
+          // jest-dom scopé ici uniquement (seul ce projet rend du DOM).
+          // L'extension d'`expect` est faite explicitement dans le
+          // setup (expect.extend(matchers)), pas via le side-effect
+          // bare — cf. commentaire en tête de src/test-setup.ts.
           setupFiles: ["src/test-setup.ts"],
-          // Cause racine des échecs flaky « Invalid Chai property:
-          // toBeInTheDocument » : sous Vitest 4 + projects, l'extension
-          // d'`expect` par jest-dom (side-effect du setupFile) pouvait
-          // courir entre workers parallèles ; un fichier dom tournait
-          // parfois avant que les matchers soient appliqués → ~89/210
-          // tests KO non déterministe (pre-push/CI qui sautaient).
+          // ── Anti-flaky « Invalid Chai property: toBeInTheDocument » ──
+          // Cause racine : sous charge, le side-effect bare
+          // `import "@testing-library/jest-dom/vitest"` du setup n'était
+          // pas garanti d'avoir étendu `expect` avant l'évaluation d'un
+          // fichier → ~89/210 tests KO non déterministe (pre-push/CI).
           //
-          // NE PAS utiliser isolate:false : ça partage le `document`
-          // happy-dom entre fichiers → pollution DOM (« Found multiple
-          // elements ») rouge en CI. L'isolation par fichier RESTE
-          // active (DOM remis à neuf entre fichiers).
-          //
-          // Fix déterministe ET propre :
-          //   - fileParallelism:false → fichiers dom en SÉQUENTIEL dans
-          //     un seul fork (singleFork) : setup ré-exécuté par fichier
-          //     mais jamais en concurrence → plus aucune course possible ;
-          //   - isolation conservée → aucune pollution inter-fichiers ;
-          //   - sequence.groupOrder distinct : Vitest 4 refuse deux
+          // Fix en DEUX volets :
+          //  1. setup canonique : expect.extend(matchers) explicite +
+          //     cleanup() (cf. src/test-setup.ts) → enregistrement
+          //     déterministe des matchers, rejoué proprement par fichier.
+          //  2. fileParallelism:false → fichiers dom en SÉQUENTIEL :
+          //     plus aucune course de setup entre workers (combo prouvé
+          //     propre, équivalent à --no-file-parallelism : 210/210).
+          //     PAS de singleFork (process unique long = instable sous
+          //     charge avec Node 25). PAS de isolate:false (partage le
+          //     document happy-dom → « Found multiple elements » en CI) :
+          //     l'isolation par fichier RESTE active.
+          //  3. sequence.groupOrder distinct : Vitest 4 refuse deux
           //     projets de maxWorkers différents (dom sérialisé vs libs
-          //     parallèle) dans le même groupe — on met dom en groupe 1.
-          // Le projet "libs" (node pur) reste parallèle et rapide ; seul
-          // dom (~210 tests, ~15 s) passe en séquentiel — coût accepté
-          // pour un pre-push/CI déterministe (cf. mémoire ACR : on ne
-          // pousse pas une régression dans un outil utilisé en réa).
+          //     parallèle) dans le même groupe.
+          // libs (node pur) reste parallèle/rapide ; seul dom (~210
+          // tests) passe en séquentiel — coût accepté pour un pre-push
+          // /CI déterministe (mémoire ACR : pas de régression en réa).
           fileParallelism: false,
           sequence: { groupOrder: 1 },
-          poolOptions: { forks: { singleFork: true } },
         },
       },
     ],
