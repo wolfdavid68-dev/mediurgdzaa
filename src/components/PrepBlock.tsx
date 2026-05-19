@@ -5,7 +5,6 @@ import {
   calcPrepPhases,
   calcPrepDoseKg,
   calcPedTable,
-  calcDebit,
 } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
 import { DRUGS_PREVIEW } from "../data/drugs.preview";
@@ -46,13 +45,10 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     if (!validKg) return null;
 
     // Dilution FIXE (nouvelle prépa service) : préparation indépendante
-    // du poids (toujours la même seringue) ; seul le DÉBIT dépend du
-    // poids → on garde la boîte bleue « Pour X kg » mais on y affiche
-    // la recette fixe + la plage de débit calculée (réutilise calcDebit).
+    // du poids (toujours la même seringue). Boîte bleue « Pour X kg »
+    // = recette fixe uniquement. Le débit IVSE est géré par le bloc
+    // « Débit PSE » dédié (saisie mL/h ↔ dose) → on ne le duplique pas ici.
     if (prep.fixed_dilution) {
-      const ref = { conc: prep.fd_conc, unite: prep.fd_unit };
-      const dMin = calcDebit(ref, prep.fd_dose_min, weight);
-      const dMax = calcDebit(ref, prep.fd_dose_max, weight);
       return (
         <div className="prep-calc-box">
           <div className="prep-calc-header">
@@ -69,12 +65,6 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
               style={{ color: "#60a5fa", fontWeight: 800 }}
             >
               {prep.volume_final} mL avec {prep.solvant}
-            </span>
-          </div>
-          <div className="prep-calc-row">
-            <span className="prep-calc-step">Débit IVSE</span>
-            <span className="prep-calc-val">
-              {dMin}–{dMax} mL/h ({prep.fd_dose_min}–{prep.fd_dose_max} {prep.fd_unit})
             </span>
           </div>
         </div>

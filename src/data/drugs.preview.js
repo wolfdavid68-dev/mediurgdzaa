@@ -16,12 +16,10 @@
  *    Google Sheet de dilution) ───────────────────────────────────
  * Carte « Préparation » revue : dilution FIXE unique (plus de table
  * Vi/Vf par poids). On CONSERVE la boîte bleue « Pour X kg » via
- * `fixed_dilution:true` — elle montre la recette fixe + la plage de
- * débit IVSE calculée pour le poids (PrepBlock réutilise calcDebit) :
+ * `fixed_dilution:true` — recette fixe SEULEMENT (pas de ligne débit :
+ * géré par le bloc « Débit PSE » dédié, on ne le duplique pas) :
  *   fd_prelever  : ce qu'on prélève
  *   volume_final : volume final seringue · solvant : diluant
- *   fd_conc      : conc en µg/mL (pour calcDebit)
- *   fd_unit      : µg/kg/min ou µg/kg/h · fd_dose_min/max : plage
  */
 export const DRUGS_PREVIEW = {
   13: {
@@ -34,10 +32,6 @@ export const DRUGS_PREVIEW = {
       fixed_dilution: true,
       fd_prelever: "2 ampoules 5 mg (10 mL)",
       volume_final: 50,
-      fd_conc: 200,
-      fd_unit: "µg/kg/min",
-      fd_dose_min: 0.05,
-      fd_dose_max: 1,
       etapes: [
         "Ampoule 5 mg/5 mL (1 mg/mL)",
         "PSE : 2 ampoules (10 mg) qsp 50 mL G5% → 0,2 mg/mL",
@@ -60,10 +54,6 @@ export const DRUGS_PREVIEW = {
       fixed_dilution: true,
       fd_prelever: "2 ampoules 8 mg (8 mL)",
       volume_final: 48,
-      fd_conc: 333,
-      fd_unit: "µg/kg/min",
-      fd_dose_min: 0.05,
-      fd_dose_max: 2,
       etapes: [
         "Ampoule 8 mg/4 mL (2 mg/mL)",
         "PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL",
@@ -86,10 +76,6 @@ export const DRUGS_PREVIEW = {
       fixed_dilution: true,
       fd_prelever: "1 flacon 250 mg",
       volume_final: 50,
-      fd_conc: 5000,
-      fd_unit: "µg/kg/min",
-      fd_dose_min: 2,
-      fd_dose_max: 20,
       etapes: [
         "Flacon 250 mg/25 mL (10 mg/mL)",
         "PSE : 1 flacon 250 mg qsp 50 mL G5% → 5 mg/mL",
@@ -112,10 +98,6 @@ export const DRUGS_PREVIEW = {
       fixed_dilution: true,
       fd_prelever: "5 ampoules 0,2 mg (10 mL)",
       volume_final: 50,
-      fd_conc: 20,
-      fd_unit: "µg/kg/min",
-      fd_dose_min: 0.01,
-      fd_dose_max: 0.1,
       etapes: [
         "Ampoule 0,2 mg/2 mL",
         "PSE : 5 ampoules (1 mg) qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL",
@@ -138,10 +120,6 @@ export const DRUGS_PREVIEW = {
       fixed_dilution: true,
       fd_prelever: "1 ampoule 250 µg (5 mL)",
       volume_final: 50,
-      fd_conc: 5,
-      fd_unit: "µg/kg/h",
-      fd_dose_min: 0.2,
-      fd_dose_max: 2,
       etapes: [
         "Ampoule 250 µg/5 mL (50 µg/mL)",
         "Diluer 1 ampoule entière (250 µg / 5 mL) qsp 50 mL NaCl 0,9% → 5 µg/mL",
