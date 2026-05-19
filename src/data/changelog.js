@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v98";
+export const APP_VERSION = "v99";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v99",
+    date: "2026-05-19",
+    titre: "Kit KTC · schéma d'appareillage",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouvel onglet « Schéma » dans le kit KTC (cathéter veineux central) : le schéma officiel GHR d'appareillage des KTC en réanimation adulte. L'image (montage de référence : lumières Proximale / Médiane 2 / Distale / Médiane 1 → OCTOPUS 4 et 2 voies → pousse-seringues NAD ×2 et G5% 5 mL/h « seulement si perfusion d'amines », voies Remplissage/transfusion et IVD/miniflac) est zoomable en plein écran d'une touche pour vérifier le câblage exact. Une légende reprend toutes les étiquettes du document. Disponible hors-ligne (image précachée).",
+      },
+    ],
+  },
   {
     version: "v98",
     date: "2026-05-18",

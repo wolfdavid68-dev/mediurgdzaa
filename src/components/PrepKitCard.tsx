@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { DRUGS } from "../data/drugs";
-import { isPreview } from "../lib/featureFlags";
 
 const checkKey = (kitId: string) => `mediurg-kit-check-${kitId}`;
 
@@ -48,9 +47,9 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
   const [activeTab, setActiveTab] = useState("drogues");
   const [schemaZoom, setSchemaZoom] = useState(false);
 
-  // Onglet « Schéma » : preview only (validation avant public), et
-  // seulement si le kit fournit une image de schéma (kit.schema).
-  const showSchema = !!kit.schema && isPreview();
+  // Onglet « Schéma » : affiché dès que le kit fournit une image de
+  // schéma (kit.schema). Public depuis v99 (validé).
+  const showSchema = !!kit.schema;
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>(() =>
     loadChecked(kit.id)
   );
