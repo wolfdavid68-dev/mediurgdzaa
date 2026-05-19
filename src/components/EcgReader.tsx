@@ -404,8 +404,10 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
               pavés qui repoussaient le tableau diagnostic plus bas). */}
           <p className="ecgr-note">
             <Ic n="alert-triangle" cls="ecgr-note-ic" />
-            ECG entier visible avec calibration 1 mV. Aide <strong>non-diagnostique</strong> —
-            validation par un médecin obligatoire avant toute décision.
+            <span>
+              ECG entier visible avec calibration 1 mV. Aide <strong>non-diagnostique</strong> —
+              validation par un médecin obligatoire avant toute décision.
+            </span>
           </p>
         </div>
       )}
