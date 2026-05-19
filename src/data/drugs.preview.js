@@ -7,24 +7,21 @@
  *
  * Indexé par drug id. La valeur `prep` REMPLACE celle de drugs.js.
  * PrepBlock applique l'override (cf. PrepBlock.tsx → resolvePrep),
- * même contrat que pse.preview.js.
+ * même contrat que pse.preview.js. Public (drugs.js) inchangé.
  *
  * Workflow : tester via …/?auth=preview ; une fois validé sur le
  * terrain, reporter le `prep` dans drugs.js et retirer l'entrée d'ici.
  *
  * ── Nouvelle préparation des médicaments en PSE (MEMO service +
  *    Google Sheet de dilution) ───────────────────────────────────
- * Carte « Préparation » revue en fonction de la NOUVELLE dilution
- * FIXE (unique, plus de table Vi/Vf adaptée au poids pour le
- * Sufentanil). L'adaptation au poids se fait via le bloc Débit PSE
- * (mL/h ↔ µg/kg/min, cf. pse.preview.js). Recette épurée : étapes +
- * chips (solvant / durée / stabilité / conc finale), pas de calcul
- * volumétrique par poids.
- *   Adrénaline   2 amp 5 mg qsp 50 mL G5%  → 0,2 mg/mL (200 µg/mL)
- *   Noradrénal.  2 amp 8 mg qsp 48 mL G5%  → 0,33 mg/mL
- *   Dobutamine   1 flacon 250 mg qsp 50 mL → 5 mg/mL
- *   Isoprénal.   5 amp 0,2 mg qsp 50 mL G5%→ 0,02 mg/mL (20 µg/mL)
- *   Sufentanil   1 amp 250 µg qsp 50 mL NaCl→ 5 µg/mL
+ * Carte « Préparation » revue : dilution FIXE unique (plus de table
+ * Vi/Vf par poids). On CONSERVE la boîte bleue « Pour X kg » via
+ * `fixed_dilution:true` — elle montre la recette fixe + la plage de
+ * débit IVSE calculée pour le poids (PrepBlock réutilise calcDebit) :
+ *   fd_prelever  : ce qu'on prélève
+ *   volume_final : volume final seringue · solvant : diluant
+ *   fd_conc      : conc en µg/mL (pour calcDebit)
+ *   fd_unit      : µg/kg/min ou µg/kg/h · fd_dose_min/max : plage
  */
 export const DRUGS_PREVIEW = {
   13: {
@@ -34,13 +31,20 @@ export const DRUGS_PREVIEW = {
       unite: "µg",
       duree: "Continu IVSE",
       stabilite: "24h à 25°C — à l'abri de la lumière",
+      fixed_dilution: true,
+      fd_prelever: "2 ampoules 5 mg (10 mL)",
+      volume_final: 50,
+      fd_conc: 200,
+      fd_unit: "µg/kg/min",
+      fd_dose_min: 0.05,
+      fd_dose_max: 1,
       etapes: [
         "Ampoule 5 mg/5 mL (1 mg/mL)",
         "PSE : 2 ampoules (10 mg) qsp 50 mL G5% → 0,2 mg/mL",
         "Débit selon µg/kg/min — voir bloc « Débit PSE »",
       ],
       notes: [
-        "Nouvelle préparation service (MEMO PSE) — dilution fixe 0,2 mg/mL",
+        "Nouvelle préparation service — dilution FIXE 0,2 mg/mL",
         "Administrer au plus proche du patient — débit constant, pas de bolus sur cette voie",
         "À l'abri de la lumière — tubulure opaque",
       ],
@@ -53,13 +57,20 @@ export const DRUGS_PREVIEW = {
       unite: "µg",
       duree: "Continu IVSE sur voie dédiée",
       stabilite: "Stable 12h à 25°C à l'abri de la lumière",
+      fixed_dilution: true,
+      fd_prelever: "2 ampoules 8 mg (8 mL)",
+      volume_final: 48,
+      fd_conc: 333,
+      fd_unit: "µg/kg/min",
+      fd_dose_min: 0.05,
+      fd_dose_max: 2,
       etapes: [
         "Ampoule 8 mg/4 mL (2 mg/mL)",
         "PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL",
         "Démarrer à 0,1-0,2 µg/kg/min, titrer selon PAM cible",
       ],
       notes: [
-        "Nouvelle préparation service (MEMO PSE) — dilution fixe 0,33 mg/mL",
+        "Nouvelle préparation service — dilution FIXE 0,33 mg/mL",
         "Objectif : PAM cible à atteindre — si PAM trop basse, augmenter le débit",
         "Voie dédiée — VVC conseillée. Pas de bolus, débit constant. Tubulure opaque",
       ],
@@ -72,13 +83,20 @@ export const DRUGS_PREVIEW = {
       unite: "µg",
       duree: "Continu IVSE",
       stabilite: "Stable 6h à 25°C",
+      fixed_dilution: true,
+      fd_prelever: "1 flacon 250 mg",
+      volume_final: 50,
+      fd_conc: 5000,
+      fd_unit: "µg/kg/min",
+      fd_dose_min: 2,
+      fd_dose_max: 20,
       etapes: [
         "Flacon 250 mg/25 mL (10 mg/mL)",
         "PSE : 1 flacon 250 mg qsp 50 mL G5% → 5 mg/mL",
         "Débit selon µg/kg/min — voir bloc « Débit PSE »",
       ],
       notes: [
-        "Nouvelle préparation service (MEMO PSE) — dilution fixe 5 mg/mL",
+        "Nouvelle préparation service — dilution FIXE 5 mg/mL",
         "Surveillance cardiaque continue",
         "Débit constant — pas de bolus sur cette voie",
       ],
@@ -91,13 +109,20 @@ export const DRUGS_PREVIEW = {
       unite: "µg",
       duree: "Continu IVSE",
       stabilite: "Stable 6h — à l'abri de la lumière",
+      fixed_dilution: true,
+      fd_prelever: "5 ampoules 0,2 mg (10 mL)",
+      volume_final: 50,
+      fd_conc: 20,
+      fd_unit: "µg/kg/min",
+      fd_dose_min: 0.01,
+      fd_dose_max: 0.1,
       etapes: [
         "Ampoule 0,2 mg/2 mL",
         "PSE : 5 ampoules (1 mg) qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL",
         "Débit selon µg/kg/min — voir bloc « Débit PSE »",
       ],
       notes: [
-        "Nouvelle préparation service (MEMO PSE) — dilution fixe 20 µg/mL",
+        "Nouvelle préparation service — dilution FIXE 20 µg/mL",
         "À l'abri de la lumière — tubulure opaque",
         "Ne se conserve plus au réfrigérateur",
       ],
@@ -110,6 +135,13 @@ export const DRUGS_PREVIEW = {
       unite: "µg",
       duree: "IVSE 0,2 à 2 µg/kg/h",
       stabilite: "24h à 25°C",
+      fixed_dilution: true,
+      fd_prelever: "1 ampoule 250 µg (5 mL)",
+      volume_final: 50,
+      fd_conc: 5,
+      fd_unit: "µg/kg/h",
+      fd_dose_min: 0.2,
+      fd_dose_max: 2,
       etapes: [
         "Ampoule 250 µg/5 mL (50 µg/mL)",
         "Diluer 1 ampoule entière (250 µg / 5 mL) qsp 50 mL NaCl 0,9% → 5 µg/mL",
@@ -117,7 +149,7 @@ export const DRUGS_PREVIEW = {
         "Posologie : 0,2 à 2 µg/kg/h",
       ],
       notes: [
-        "Nouvelle préparation service (MEMO PSE) — dilution FIXE 5 µg/mL (remplace la table Vi/Vf adaptée au poids)",
+        "Nouvelle préparation service — dilution FIXE 5 µg/mL",
         "Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules",
         "Dépression respiratoire dose-dépendante",
         "Antidote : Naloxone",
