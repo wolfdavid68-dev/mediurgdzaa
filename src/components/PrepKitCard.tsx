@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { DRUGS } from "../data/drugs";
+import { isPreview } from "../lib/featureFlags";
 
 const checkKey = (kitId: string) => `mediurg-kit-check-${kitId}`;
 
@@ -45,6 +46,11 @@ const CHECKLIST_KIT_IDS = ["drain-thoracique", "pa", "ktc"];
 const PrepKitCard = ({ kit }: { kit: any }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("drogues");
+  const [schemaZoom, setSchemaZoom] = useState(false);
+
+  // Onglet « Schéma » : preview only (validation avant public), et
+  // seulement si le kit fournit une image de schéma (kit.schema).
+  const showSchema = !!kit.schema && isPreview();
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>(() =>
     loadChecked(kit.id)
   );
@@ -132,6 +138,24 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
               >
                 <span className="dot dot-danger" />
                 <span className="tab-label">Notes</span>
+              </button>
+            )}
+            {showSchema && (
+              <button
+                className={`tab-btn tab-poso ${activeTab === "schema" ? "tab-active" : ""}`}
+                style={
+                  activeTab === "schema"
+                    ? {
+                        background: kit.couleur + "25",
+                        borderColor: kit.couleur,
+                        color: kit.couleur,
+                      }
+                    : {}
+                }
+                onClick={() => setActiveTab("schema")}
+              >
+                <span className="dot dot-poso" style={{ background: kit.couleur }} />
+                <span className="tab-label">Schéma</span>
               </button>
             )}
           </div>
@@ -308,6 +332,84 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
                 ))}
               </ul>
             )}
+
+            {activeTab === "schema" && showSchema && (
+              <div className="kit-schema">
+                {kit.schema.intro && <p className="kit-schema-intro">{kit.schema.intro}</p>}
+                <button
+                  type="button"
+                  className="kit-schema-imgbtn"
+                  onClick={() => setSchemaZoom(true)}
+                  aria-label="Agrandir le schéma"
+                >
+                  <img src={kit.schema.img} alt={kit.schema.alt} className="kit-schema-img" />
+                  <span className="kit-schema-zoomhint">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="13"
+                      height="13"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3M11 8v6M8 11h6" />
+                    </svg>
+                    Toucher pour agrandir
+                  </span>
+                </button>
+
+                <div className="kit-schema-legend">
+                  {kit.schema.legende.map((sec: { titre: string; items: string[] }, i: number) => (
+                    <div key={i} className="kit-schema-legblock">
+                      <div className="kit-schema-legtitle">{sec.titre}</div>
+                      <ul className="kit-schema-leglist">
+                        {sec.items.map((it: string, j: number) => (
+                          <li key={j}>{it}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                {kit.schema.source && <p className="kit-schema-source">{kit.schema.source}</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {schemaZoom && kit.schema && (
+        <div
+          className="kit-schema-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={kit.schema.alt}
+          tabIndex={-1}
+          onClick={() => setSchemaZoom(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setSchemaZoom(false);
+          }}
+        >
+          <button
+            type="button"
+            className="kit-schema-lbclose"
+            aria-label="Fermer"
+            onClick={() => setSchemaZoom(false)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <div className="kit-schema-lbscroll">
+            <img src={kit.schema.img} alt={kit.schema.alt} className="kit-schema-lbimg" />
           </div>
         </div>
       )}

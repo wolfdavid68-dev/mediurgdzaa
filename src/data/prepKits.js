@@ -399,6 +399,35 @@ export const PREP_KITS = [
       "Délai d'utilisation : 7-10 jours max (jugulaire/sous-clav), 5 jours max (fémorale)",
       "Étiquetage clair de chaque lumière (proximale/médiane/distale)",
     ],
+    // Schéma d'appareillage officiel (GHR Mulhouse Sud-Alsace, réa adultes).
+    // L'image EST la source de vérité (montre le câblage exact lumière →
+    // octopus → voie) ; la légende reprend mot pour mot toutes les
+    // étiquettes du document pour lecture rapide. Image zoomable côté UI.
+    schema: {
+      img: "/ktc-schema.jpg",
+      alt: "Schéma d'appareillage des KTC — réanimations adultes (GHR)",
+      source: "GHR — Schéma d'appareillage des KTC · Réanimations adultes (p. 3)",
+      intro:
+        "Montage de référence d'un KTC 4 lumières en réanimation adulte. Toucher l'image pour l'agrandir. Respecter l'étiquetage de chaque lumière.",
+      legende: [
+        {
+          titre: "Lumières du KTC (de haut en bas)",
+          items: ["Proximale", "Médiane 2", "Distale", "Médiane 1"],
+        },
+        {
+          titre: "Rampes prolongatrices",
+          items: ["OCTOPUS 4 VOIES", "OCTOPUS 2 VOIES"],
+        },
+        {
+          titre: "Pousse-seringues",
+          items: ["NAD", "NAD", "G5% 5 mL/h — seulement si perfusion d'amines"],
+        },
+        {
+          titre: "Voies de perfusion",
+          items: ["Remplissage, transfusion", "IVD, miniflac"],
+        },
+      ],
+    },
   },
   {
     id: "anaphylaxie",
