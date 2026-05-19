@@ -1,50 +1,34 @@
-import { useEffect, useState, type ReactElement, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 // Lecteur ECG — module d'aide à la lecture (PREVIEW uniquement, cf.
-// ProtocolesPage / isPreview). Mock non-diagnostique : flux photo →
-// analyse simulée. Aucune IA réelle, aucune dépendance externe.
-// Port React du prototype HTML/Tailwind → CSS scopé .ecg-reader
-// (le projet n'utilise pas Tailwind). Valeurs d'échelle alignées
-// sur Tailwind v4 (vérifiées via Context7).
+// ProtocolesPage / isPreview). Flux RÉEL : photo/galerie → compression
+// client → POST /api/analyze-ecg (proxy serverless Vercel, clés API
+// secrètes côté serveur, Gemini 2.5 Flash + repli Mistral Pixtral) →
+// rendu data-driven. Contenu NON-DIAGNOSTIQUE : disclaimers + validation
+// médicale obligatoire conservés. CSS scopé .ecg-reader (pas de Tailwind).
 
 type Severite = "info" | "attention" | "critique";
-type Anomalie = { libelle: string; derivations: string[]; severite: Severite };
+type Anomalie = { libelle: string; derivations?: string[]; severite?: Severite };
+type Orientation = { label: string; query: string };
 
-const MOCK = {
-  rythme: { type: "Rythme sinusal", regulier: true, frequence_estimee_bpm: 88 },
-  axe: "normal",
-  intervalles: { PR_ms: 160, QRS_ms: 90, QT_ms: 380 },
-  anomalies_visibles: [
-    {
-      libelle: "Sus-décalage ST 3 mm en V2-V4",
-      derivations: ["V2", "V3", "V4"],
-      severite: "critique",
-    },
-    {
-      libelle: "Onde Q de nécrose débutante en V2",
-      derivations: ["V2"],
-      severite: "attention",
-    },
-    {
-      libelle: "Miroir : sous-décalage ST en DII-DIII-aVF",
-      derivations: ["DII", "DIII", "aVF"],
-      severite: "attention",
-    },
-  ] as Anomalie[],
-  // label = texte affiché ; query = terme envoyé à la recherche
-  // Médicaments (même mécanisme que les liens drogue des protocoles).
-  orientations_therapeutiques: [
-    { label: "Aspirine 250 mg IVD", query: "Aspirine" },
-    { label: "Ticagrelor 180 mg PO", query: "Ticagrelor" },
-    { label: "Héparine non fractionnée", query: "Héparine" },
-    { label: "Morphine titrée si EVA > 3", query: "Morphine" },
-  ],
-  limites_lecture:
-    "Calibration 25 mm/s, 10 mm/mV présumée. Tableau évocateur de SCA ST+ antérieur — coronarographie en urgence à discuter selon contexte clinique.",
+// Forme renvoyée par /api/analyze-ecg (champs tolérants : l'IA peut
+// omettre / mettre null ce qu'elle ne mesure pas — on rend défensivement).
+type Analysis = {
+  rythme?: { type?: string; regulier?: boolean; frequence_estimee_bpm?: number | null };
+  axe?: string | null;
+  intervalles?: { PR_ms?: number | null; QRS_ms?: number | null; QT_ms?: number | null };
+  verdict?: { kicker?: string; titre?: string; sous_titre?: string; severite?: Severite };
+  anomalies_visibles?: Anomalie[];
+  orientations_therapeutiques?: Orientation[];
+  limites_lecture?: string;
 };
-
-const ECG_PATH =
-  "M 0,150 L 30,150 L 35,148 L 40,152 L 45,150 L 60,150 L 65,140 L 68,180 L 71,100 L 74,170 L 77,150 L 95,150 L 100,130 L 130,130 L 135,148 L 140,152 L 150,150 L 165,150 L 170,140 L 173,180 L 176,100 L 179,170 L 182,150 L 200,150 L 205,125 L 235,125 L 240,148 L 245,152 L 255,150 L 270,150 L 275,140 L 278,180 L 281,100 L 284,170 L 287,150 L 305,150 L 310,128 L 340,128 L 345,150 L 400,150";
 
 type IconName =
   | "activity"
@@ -148,7 +132,7 @@ const Ic = ({ n, cls }: { n: IconName; cls?: string }) => (
   </svg>
 );
 
-type Screen = "capture" | "preview" | "loading" | "results";
+type Screen = "capture" | "preview" | "loading" | "results" | "error";
 
 const SEV_CLASS: Record<Severite, string> = {
   info: "ecgr-sev-info",
@@ -159,6 +143,11 @@ const SEV_IC: Record<Severite, IconName> = {
   info: "info",
   attention: "alert-triangle",
   critique: "alert-octagon",
+};
+const VERDICT_MOD: Record<Severite, string> = {
+  info: "ecgr-verdict--info",
+  attention: "ecgr-verdict--attention",
+  critique: "",
 };
 
 const Disclaimer = ({ title, children }: { title: string; children: ReactNode }) => (
@@ -173,21 +162,134 @@ const Disclaimer = ({ title, children }: { title: string; children: ReactNode })
   </div>
 );
 
+// Compresse l'image (max 1568 px de côté, JPEG q.82) avant l'upload :
+// garde le payload loin de la limite Vercel (~4,5 Mo) et reste largement
+// suffisant pour la lecture vision. Renvoie une data URL.
+function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Lecture du fichier impossible"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Image illisible"));
+      img.onload = () => {
+        const MAX = 1568;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          const r = Math.min(MAX / width, MAX / height);
+          width = Math.round(width * r);
+          height = Math.round(height * r);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas indisponible"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const num = (v: number | null | undefined, suffix = "") => (v == null ? "—" : `${v}${suffix}`);
+
 type EcgReaderProps = { onDrugSearch?: (name: string) => void };
 
 const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
   const [screen, setScreen] = useState<Screen>("capture");
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [result, setResult] = useState<Analysis | null>(null);
+  const [errMsg, setErrMsg] = useState<string>("");
+  const cameraInput = useRef<HTMLInputElement>(null);
+  const galleryInput = useRef<HTMLInputElement>(null);
 
+  // Évite un setState après démontage si l'utilisateur ferme pendant
+  // l'analyse (l'appel réseau peut durer quelques secondes).
+  const alive = useRef(true);
   useEffect(() => {
-    if (screen !== "loading") return;
-    const t = setTimeout(() => setScreen("results"), 2500);
-    return () => clearTimeout(t);
-  }, [screen]);
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
 
-  const a = MOCK;
+  const onPick = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // permet de re-sélectionner le même fichier
+    if (!file) return;
+    try {
+      const dataUrl = await compressImage(file);
+      if (!alive.current) return;
+      setPhoto(dataUrl);
+      setScreen("preview");
+    } catch {
+      if (!alive.current) return;
+      setErrMsg("Impossible de lire cette image. Réessayer avec une autre photo.");
+      setScreen("error");
+    }
+  };
+
+  const analyze = async () => {
+    if (!photo) return;
+    setScreen("loading");
+    try {
+      const resp = await fetch("/api/analyze-ecg", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: photo }),
+      });
+      const data: unknown = await resp.json().catch(() => null);
+      if (!alive.current) return;
+      if (!resp.ok) {
+        const d = data as { error?: string; message?: string } | null;
+        if (resp.status === 422) {
+          setErrMsg(d?.message || "L'image ne semble pas être un ECG lisible. Reprendre la photo.");
+        } else {
+          setErrMsg(d?.error || "L'analyse a échoué. Vérifier la connexion réseau puis réessayer.");
+        }
+        setScreen("error");
+        return;
+      }
+      setResult(data as Analysis);
+      setScreen("results");
+    } catch {
+      if (!alive.current) return;
+      setErrMsg("Analyse impossible — connexion indisponible. Cette fonction nécessite Internet.");
+      setScreen("error");
+    }
+  };
+
+  const reset = () => {
+    setPhoto(null);
+    setResult(null);
+    setErrMsg("");
+    setScreen("capture");
+  };
+
+  const a = result;
+  const verdict = a?.verdict;
+  const verdictSev: Severite = verdict?.severite || "attention";
+  const anomalies = a?.anomalies_visibles ?? [];
+  const orientations = a?.orientations_therapeutiques ?? [];
 
   return (
     <div className="ecg-reader">
+      <input
+        ref={cameraInput}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={onPick}
+      />
+      <input ref={galleryInput} type="file" accept="image/*" hidden onChange={onPick} />
+
       {screen === "capture" && (
         <div className="ecgr-pad">
           <header className="ecgr-head">
@@ -198,7 +300,7 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             <span className="ecgr-head-tag">Aide à la lecture</span>
           </header>
 
-          <button className="ecgr-cta" onClick={() => setScreen("preview")} type="button">
+          <button className="ecgr-cta" onClick={() => cameraInput.current?.click()} type="button">
             <span className="ecgr-cta-ic">
               <Ic n="camera" />
             </span>
@@ -208,7 +310,11 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             </span>
           </button>
 
-          <button className="ecgr-row-btn" onClick={() => setScreen("preview")} type="button">
+          <button
+            className="ecgr-row-btn"
+            onClick={() => galleryInput.current?.click()}
+            type="button"
+          >
             <span className="ecgr-row-ic">
               <Ic n="image" />
             </span>
@@ -245,15 +351,10 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
         </div>
       )}
 
-      {screen === "preview" && (
+      {screen === "preview" && photo && (
         <div>
           <header className="ecgr-bar">
-            <button
-              className="ecgr-bar-close"
-              onClick={() => setScreen("capture")}
-              type="button"
-              aria-label="Fermer"
-            >
+            <button className="ecgr-bar-close" onClick={reset} type="button" aria-label="Fermer">
               <Ic n="x" />
             </button>
             <h1 className="ecgr-bar-h1">Photo capturée</h1>
@@ -261,18 +362,13 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
 
           <div className="ecgr-pad ecgr-stack">
             <div className="ecgr-photo">
-              <div className="ecg-grid ecgr-photo-in">
-                <svg viewBox="0 0 400 300" preserveAspectRatio="none" className="ecgr-svg">
-                  <path d={ECG_PATH} fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-                </svg>
-                <div className="ecgr-photo-tag">V2-V4 · 25 mm/s · 10 mm/mV</div>
-              </div>
+              <img src={photo} alt="ECG capturé" className="ecgr-img" />
             </div>
 
-            <button className="ecgr-analyze" onClick={() => setScreen("loading")} type="button">
+            <button className="ecgr-analyze" onClick={analyze} type="button">
               <Ic n="sparkles" /> Analyser cet ECG
             </button>
-            <button className="ecgr-secondary" onClick={() => setScreen("capture")} type="button">
+            <button className="ecgr-secondary" onClick={reset} type="button">
               Reprendre la photo
             </button>
           </div>
@@ -286,13 +382,11 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             <h1 className="ecgr-bar-h1">Analyse en cours</h1>
           </header>
           <div className="ecgr-pad ecgr-stack">
-            <div className="ecgr-photo" style={{ opacity: 0.5 }}>
-              <div className="ecg-grid ecgr-photo-in">
-                <svg viewBox="0 0 400 300" preserveAspectRatio="none" className="ecgr-svg">
-                  <path d={ECG_PATH} fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-                </svg>
+            {photo && (
+              <div className="ecgr-photo" style={{ opacity: 0.5 }}>
+                <img src={photo} alt="" className="ecgr-img" />
               </div>
-            </div>
+            )}
             <div className="ecgr-loadbox">
               <span className="ecgr-spin">
                 <Ic n="loader" />
@@ -308,15 +402,40 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
         </div>
       )}
 
-      {screen === "results" && (
+      {screen === "error" && (
         <div>
           <header className="ecgr-bar">
-            <button
-              className="ecgr-bar-close"
-              onClick={() => setScreen("capture")}
-              type="button"
-              aria-label="Fermer"
-            >
+            <button className="ecgr-bar-close" onClick={reset} type="button" aria-label="Fermer">
+              <Ic n="x" />
+            </button>
+            <h1 className="ecgr-bar-h1">Analyse impossible</h1>
+          </header>
+          <div className="ecgr-pad ecgr-stack">
+            <div className="ecgr-verdict ecgr-verdict--attention">
+              <span className="ecgr-verdict-ic">
+                <Ic n="alert-triangle" />
+              </span>
+              <div>
+                <div className="ecgr-verdict-k">Échec</div>
+                <div className="ecgr-verdict-t">{errMsg}</div>
+              </div>
+            </div>
+            {photo && (
+              <button className="ecgr-analyze" onClick={analyze} type="button">
+                <Ic n="refresh-cw" /> Réessayer l'analyse
+              </button>
+            )}
+            <button className="ecgr-secondary" onClick={reset} type="button">
+              Nouvelle photo
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === "results" && a && (
+        <div>
+          <header className="ecgr-bar">
+            <button className="ecgr-bar-close" onClick={reset} type="button" aria-label="Fermer">
               <Ic n="x" />
             </button>
             <h1 className="ecgr-bar-h1">Analyse ECG</h1>
@@ -332,31 +451,24 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
           </div>
 
           <div className="ecgr-pad ecgr-stack">
-            <div className="ecgr-photo fade-up fade-up-1">
-              <div className="ecg-grid ecgr-strip">
-                <svg viewBox="0 0 400 150" preserveAspectRatio="none" className="ecgr-svg">
-                  <path
-                    d="M 0,75 L 30,75 L 35,73 L 40,77 L 45,75 L 60,75 L 65,65 L 68,105 L 71,25 L 74,95 L 77,75 L 95,75 L 100,55 L 130,55 L 135,73 L 140,77 L 150,75 L 200,75 L 205,50 L 235,50 L 240,73 L 245,77 L 255,75 L 305,75 L 310,53 L 340,53 L 345,75 L 400,75"
-                    fill="none"
-                    stroke="#1a1a1a"
-                    strokeWidth="1.5"
-                  />
-                </svg>
+            {photo && (
+              <div className="ecgr-photo fade-up fade-up-1">
+                <img src={photo} alt="ECG analysé" className="ecgr-img" />
               </div>
-            </div>
+            )}
 
-            <div className="ecgr-verdict fade-up fade-up-2">
-              <span className="ecgr-verdict-ic">
-                <Ic n="alert-octagon" />
-              </span>
-              <div>
-                <div className="ecgr-verdict-k">Tableau évocateur</div>
-                <div className="ecgr-verdict-t">SCA ST+ antérieur</div>
-                <div className="ecgr-verdict-s">
-                  À confirmer cliniquement — orientation USIC / coronarographie
+            {verdict && (
+              <div className={`ecgr-verdict fade-up fade-up-2 ${VERDICT_MOD[verdictSev]}`}>
+                <span className="ecgr-verdict-ic">
+                  <Ic n={SEV_IC[verdictSev]} />
+                </span>
+                <div>
+                  <div className="ecgr-verdict-k">{verdict.kicker || "Lecture"}</div>
+                  <div className="ecgr-verdict-t">{verdict.titre || "—"}</div>
+                  {verdict.sous_titre && <div className="ecgr-verdict-s">{verdict.sous_titre}</div>}
                 </div>
               </div>
-            </div>
+            )}
 
             <section className="ecgr-card fade-up fade-up-3">
               <div className="ecgr-card-h">
@@ -365,15 +477,23 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
               <div className="ecgr-grid3">
                 <div>
                   <div className="ecgr-k">Type</div>
-                  <div className="ecgr-v">{a.rythme.type}</div>
+                  <div className="ecgr-v">{a.rythme?.type || "—"}</div>
                 </div>
                 <div>
                   <div className="ecgr-k">Rég.</div>
-                  <div className="ecgr-v">{a.rythme.regulier ? "Régulier" : "Irrégulier"}</div>
+                  <div className="ecgr-v">
+                    {a.rythme?.regulier == null
+                      ? "—"
+                      : a.rythme.regulier
+                        ? "Régulier"
+                        : "Irrégulier"}
+                  </div>
                 </div>
                 <div>
                   <div className="ecgr-k">FC</div>
-                  <div className="ecgr-v ecgr-mono">{a.rythme.frequence_estimee_bpm} bpm</div>
+                  <div className="ecgr-v ecgr-mono">
+                    {num(a.rythme?.frequence_estimee_bpm, " bpm")}
+                  </div>
                 </div>
               </div>
             </section>
@@ -385,78 +505,89 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
               <div className="ecgr-grid3">
                 <div>
                   <div className="ecgr-k">PR</div>
-                  <div className="ecgr-v ecgr-mono">{a.intervalles.PR_ms} ms</div>
+                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.PR_ms, " ms")}</div>
                 </div>
                 <div>
                   <div className="ecgr-k">QRS</div>
-                  <div className="ecgr-v ecgr-mono">{a.intervalles.QRS_ms} ms</div>
+                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.QRS_ms, " ms")}</div>
                 </div>
                 <div>
                   <div className="ecgr-k">QT</div>
-                  <div className="ecgr-v ecgr-mono">{a.intervalles.QT_ms} ms</div>
+                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.QT_ms, " ms")}</div>
                 </div>
               </div>
               <div className="ecgr-card-foot">
-                Axe : <span className="ecgr-axe">{a.axe}</span>
+                Axe : <span className="ecgr-axe">{a.axe || "—"}</span>
               </div>
             </section>
 
-            <section className="fade-up fade-up-4">
-              <div className="ecgr-sec-h">Anomalies visibles · {a.anomalies_visibles.length}</div>
-              <div className="ecgr-stack-sm">
-                {a.anomalies_visibles.map((an) => (
-                  <div key={an.libelle} className={`ecgr-anom ${SEV_CLASS[an.severite]}`}>
-                    <span className="ecgr-anom-ic">
-                      <Ic n={SEV_IC[an.severite]} />
-                    </span>
-                    <div>
-                      <div className="ecgr-anom-t">{an.libelle}</div>
-                      <div className="ecgr-anom-d">{an.derivations.join(" · ")}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            {anomalies.length > 0 && (
+              <section className="fade-up fade-up-4">
+                <div className="ecgr-sec-h">Anomalies visibles · {anomalies.length}</div>
+                <div className="ecgr-stack-sm">
+                  {anomalies.map((an, i) => {
+                    const sev: Severite = an.severite || "info";
+                    return (
+                      <div key={`${an.libelle}-${i}`} className={`ecgr-anom ${SEV_CLASS[sev]}`}>
+                        <span className="ecgr-anom-ic">
+                          <Ic n={SEV_IC[sev]} />
+                        </span>
+                        <div>
+                          <div className="ecgr-anom-t">{an.libelle}</div>
+                          {an.derivations && an.derivations.length > 0 && (
+                            <div className="ecgr-anom-d">{an.derivations.join(" · ")}</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
-            <section className="ecgr-card fade-up fade-up-5">
-              <div className="ecgr-card-h">
-                <Ic n="pill" /> Pistes thérapeutiques — fiches MediURG
-              </div>
-              <div>
-                {a.orientations_therapeutiques.map((o) => (
-                  <button
-                    key={o.label}
-                    className="ecgr-piste"
-                    type="button"
-                    disabled={!onDrugSearch}
-                    onClick={onDrugSearch ? () => onDrugSearch(o.query) : undefined}
-                    title={onDrugSearch ? `Ouvrir la fiche ${o.query}` : undefined}
-                  >
-                    <span className="ecgr-piste-chev">
-                      <Ic n="chevron-right" />
-                    </span>
-                    <span className="ecgr-piste-t">{o.label}</span>
-                    <span className="ecgr-piste-ext">
-                      <Ic n="external-link" />
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <div className="ecgr-card-foot">
-                Suggestions générées à partir du tableau ECG — posologies et contre-indications à
-                vérifier sur la fiche.
-              </div>
-            </section>
+            {orientations.length > 0 && (
+              <section className="ecgr-card fade-up fade-up-5">
+                <div className="ecgr-card-h">
+                  <Ic n="pill" /> Pistes thérapeutiques — fiches MediURG
+                </div>
+                <div>
+                  {orientations.map((o) => (
+                    <button
+                      key={o.label}
+                      className="ecgr-piste"
+                      type="button"
+                      disabled={!onDrugSearch}
+                      onClick={onDrugSearch ? () => onDrugSearch(o.query) : undefined}
+                      title={onDrugSearch ? `Ouvrir la fiche ${o.query}` : undefined}
+                    >
+                      <span className="ecgr-piste-chev">
+                        <Ic n="chevron-right" />
+                      </span>
+                      <span className="ecgr-piste-t">{o.label}</span>
+                      <span className="ecgr-piste-ext">
+                        <Ic n="external-link" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="ecgr-card-foot">
+                  Suggestions générées à partir du tableau ECG — posologies et contre-indications à
+                  vérifier sur la fiche.
+                </div>
+              </section>
+            )}
 
-            <div className="ecgr-limits fade-up fade-up-5">
-              <div className="ecgr-limits-h">
-                <Ic n="info" /> Limites de la lecture
+            {a.limites_lecture && (
+              <div className="ecgr-limits fade-up fade-up-5">
+                <div className="ecgr-limits-h">
+                  <Ic n="info" /> Limites de la lecture
+                </div>
+                {a.limites_lecture}
               </div>
-              {a.limites_lecture}
-            </div>
+            )}
 
             <div className="ecgr-grid2">
-              <button className="ecgr-secondary ecgr-ico-btn" type="button" disabled>
+              <button className="ecgr-secondary ecgr-ico-btn" type="button" onClick={reset}>
                 <Ic n="refresh-cw" /> Nouvelle analyse
               </button>
               <button className="ecgr-secondary ecgr-ico-btn" type="button" disabled>

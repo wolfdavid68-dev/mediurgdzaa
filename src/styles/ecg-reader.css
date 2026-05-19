@@ -376,6 +376,15 @@
   color: #71717a;
   font-family: var(--mono);
 }
+/* Photo ECG réelle (capturée / importée) */
+.ecgr-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 62vh;
+  object-fit: contain;
+  background: #fff;
+}
 
 /* Boutons d'action */
 .ecgr-analyze {
@@ -474,6 +483,25 @@
 .ecgr-verdict-s {
   font-size: 0.75rem;
   margin-top: 0.25rem;
+  color: var(--text-dim);
+}
+/* Variantes de gravité du verdict (défaut = critique → danger).
+   L'IA peut conclure à un tracé sans urgence : on adapte la couleur
+   pour ne pas alarmer à tort (attention = warn, info = accent neutre). */
+.ecgr-verdict--attention {
+  border-color: color-mix(in srgb, var(--warn) 50%, transparent);
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+}
+.ecgr-verdict--attention .ecgr-verdict-ic,
+.ecgr-verdict--attention .ecgr-verdict-k {
+  color: var(--warn);
+}
+.ecgr-verdict--info {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+}
+.ecgr-verdict--info .ecgr-verdict-ic,
+.ecgr-verdict--info .ecgr-verdict-k {
   color: var(--text-dim);
 }
 
