@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { calcDose, ciSeverity } from "../lib/calc";
+import { isPreview } from "../lib/featureFlags";
+import { DRUGS_PREVIEW } from "../data/drugs.preview";
 import { findProtocolsForDrug } from "../lib/crossref";
 import DrugNote from "./DrugNote";
 import PrepBlock from "./PrepBlock";
@@ -63,7 +65,10 @@ const DrugCard = ({
   };
 
   const renderPosoTab = () => {
-    const prep = drug.prep || null;
+    // Overlay preview : en ?auth=preview, un `prep` redéfini dans
+    // drugs.preview.js remplace celui de drugs.js (public inchangé).
+    const prep =
+      (isPreview() && (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep) || drug.prep || null;
 
     return (
       <>
