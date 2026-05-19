@@ -38,6 +38,14 @@ export const PREP_KITS = [
         note: "Préféré si état de choc ou bronchospasme",
       },
       {
+        drugId: 1,
+        nom: "Propofol (Diprivan)",
+        role: "Hypnotique d'induction (patient stable)",
+        dose: "1,5–2,5 mg/kg IVD",
+        prep: "Ampoule 200 mg/20 mL (10 mg/mL) — administrer pure en IV bolus lent",
+        note: "CI : choc hémodynamique (hypotension) — préférer étomidate/kétamine si instable",
+      },
+      {
         drugId: 9,
         nom: "Célocurine (Suxaméthonium)",
         role: "Curare dépolarisant",
