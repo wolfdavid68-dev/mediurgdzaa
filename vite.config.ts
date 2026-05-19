@@ -190,6 +190,18 @@ export default defineConfig({
       },
     },
   },
+  // ── Flake « Test Files failed / process won't exit » (Node ≥ 25) ──
+  // Node 25 active Web Storage par DÉFAUT : `localStorage` devient un
+  // objet natif même en environnement node (projet "libs"). Le code
+  // garde-fou (`typeof localStorage !== 'undefined'`) passe alors et
+  // touche le store natif Node → handle persistant → vitest affiche
+  // « something prevents the main process from exiting » → sous
+  // pre-push/CI les workers sont tués → fichiers reportés en échec
+  // (flaky non déterministe). Fix RACINE : `NODE_OPTIONS=
+  // --no-experimental-webstorage` dans les scripts test* du package.json
+  // → `localStorage` undefined en node (comportement pré-Node-25 pour
+  // lequel le projet "libs" est conçu). happy-dom (projet "dom") fournit
+  // son propre localStorage, non affecté. NE PAS retirer ce flag.
   // @ts-expect-error — clé `test` ajoutée par vitest, pas dans le type de Vite
   test: {
     // Projects : sépare les tests purs (logique métier, reducers) du test DOM.

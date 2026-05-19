@@ -27,9 +27,9 @@
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css}\" \"*.{js,json,html}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css}\" \"*.{js,json,html}\"",
     "verify": "npm run typecheck && npm run lint && npm run knip && npm test",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test": "cross-env NODE_OPTIONS=--no-experimental-webstorage vitest run",
+    "test:watch": "cross-env NODE_OPTIONS=--no-experimental-webstorage vitest",
+    "test:coverage": "cross-env NODE_OPTIONS=--no-experimental-webstorage vitest run --coverage",
     "generate-pwa-assets": "pwa-assets-generator",
     "prepare": "husky"
   },
