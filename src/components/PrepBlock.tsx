@@ -6,6 +6,14 @@ import {
   calcPrepDoseKg,
   calcPedTable,
 } from "../lib/calc";
+import { isPreview } from "../lib/featureFlags";
+import { DRUGS_PREVIEW } from "../data/drugs.preview";
+
+// `prep` public (drugs.js) ou override preview (drugs.preview.js) si
+// ?auth=preview. Même mécanisme que resolvePse dans PseBlock — le
+// public ne voit jamais drugs.preview.js tant qu'on est hors preview.
+const resolvePrep = (drug: any) =>
+  (isPreview() && (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep) || drug.prep || null;
 
 const PrepIcon = () => (
   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
@@ -27,7 +35,7 @@ type PrepBlockProps = { drug: any; weight: string; produitFinal: string };
 // produitFinal vient du parent car son input vit au-dessus du bloc poso (input swap).
 const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   const [doseLibre, setDoseLibre] = useState("");
-  const prep = drug.prep;
+  const prep = resolvePrep(drug);
   if (!prep) return null;
 
   const kg = parseFloat(weight);
