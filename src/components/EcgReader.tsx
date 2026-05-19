@@ -13,6 +13,13 @@ import {
 // secrètes côté serveur, Gemini 2.5 Flash + repli Mistral Pixtral) →
 // rendu data-driven. Contenu NON-DIAGNOSTIQUE : disclaimers + validation
 // médicale obligatoire conservés. CSS scopé .ecg-reader (pas de Tailwind).
+//
+// Ergonomie (usage en stress réel, cf. exigence ACR) :
+//  - écran capture condensé en 1 ligne fine (pas 2 pavés avant le tableau)
+//  - loading : chrono + étapes + Annuler (AbortController)
+//  - résultats : verdict EN PREMIER, anomalies, puis photo compacte
+//  - Rythme + Intervalles fusionnés en une carte dense
+//  - photo zoomable (lightbox tap-to-zoom) + « Ré-analyser cette photo »
 
 type Severite = "info" | "attention" | "critique";
 type Anomalie = { libelle: string; derivations?: string[]; severite?: Severite };
@@ -46,7 +53,7 @@ type IconName =
   | "pill"
   | "external-link"
   | "refresh-cw"
-  | "share-2";
+  | "zoom-in";
 
 const PATHS: Record<IconName, ReactElement> = {
   activity: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
@@ -116,12 +123,10 @@ const PATHS: Record<IconName, ReactElement> = {
   "refresh-cw": (
     <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 21v-5h5" />
   ),
-  "share-2": (
+  "zoom-in": (
     <>
-      <circle cx="18" cy="5" r="3" />
-      <circle cx="6" cy="12" r="3" />
-      <circle cx="18" cy="19" r="3" />
-      <path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98" />
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3M11 8v6M8 11h6" />
     </>
   ),
 };
@@ -206,8 +211,12 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
   const [photo, setPhoto] = useState<string | null>(null);
   const [result, setResult] = useState<Analysis | null>(null);
   const [errMsg, setErrMsg] = useState<string>("");
+  const [elapsed, setElapsed] = useState(0);
+  const [zoom, setZoom] = useState(false); // lightbox ouvert
+  const [zoomed, setZoomed] = useState(false); // niveau de zoom dans la lightbox
   const cameraInput = useRef<HTMLInputElement>(null);
   const galleryInput = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Évite un setState après démontage si l'utilisateur ferme pendant
   // l'analyse (l'appel réseau peut durer quelques secondes).
@@ -216,8 +225,17 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
     alive.current = true;
     return () => {
       alive.current = false;
+      abortRef.current?.abort();
     };
   }, []);
+
+  // Chrono de l'analyse : feedback « ça tourne, pas figé » en stress.
+  useEffect(() => {
+    if (screen !== "loading") return;
+    setElapsed(0);
+    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(t);
+  }, [screen]);
 
   const onPick = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -237,15 +255,18 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
 
   const analyze = async () => {
     if (!photo) return;
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
     setScreen("loading");
     try {
       const resp = await fetch("/api/analyze-ecg", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: photo }),
+        signal: ctrl.signal,
       });
       const data: unknown = await resp.json().catch(() => null);
-      if (!alive.current) return;
+      if (!alive.current || ctrl.signal.aborted) return;
       if (!resp.ok) {
         const d = data as { error?: string; message?: string } | null;
         if (resp.status === 422) {
@@ -258,18 +279,32 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
       }
       setResult(data as Analysis);
       setScreen("results");
-    } catch {
+    } catch (err) {
+      // Annulation volontaire : on est déjà revenu sur « preview ».
+      if ((err as Error)?.name === "AbortError" || ctrl.signal.aborted) return;
       if (!alive.current) return;
       setErrMsg("Analyse impossible — connexion indisponible. Cette fonction nécessite Internet.");
       setScreen("error");
     }
   };
 
+  const cancelAnalyze = () => {
+    abortRef.current?.abort();
+    setScreen("preview");
+  };
+
   const reset = () => {
+    abortRef.current?.abort();
     setPhoto(null);
     setResult(null);
     setErrMsg("");
+    setZoom(false);
     setScreen("capture");
+  };
+
+  const closeZoom = () => {
+    setZoom(false);
+    setZoomed(false);
   };
 
   const a = result;
@@ -290,6 +325,44 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
       />
       <input ref={galleryInput} type="file" accept="image/*" hidden onChange={onPick} />
 
+      {/* Lightbox zoom — vérification fine du tracé. Tap image = bascule
+          ajusté ⇄ 2×, tap fond / ✕ = ferme. */}
+      {zoom && photo && (
+        <div
+          className="ecgr-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Tracé ECG agrandi"
+          tabIndex={-1}
+          onClick={closeZoom}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") closeZoom();
+          }}
+        >
+          <button className="ecgr-lb-close" type="button" aria-label="Fermer" onClick={closeZoom}>
+            <Ic n="x" />
+          </button>
+          <div className="ecgr-lb-scroll">
+            <button
+              type="button"
+              className="ecgr-lb-imgbtn"
+              aria-label={zoomed ? "Réduire le tracé" : "Zoomer le tracé"}
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomed((z) => !z);
+              }}
+            >
+              <img
+                src={photo}
+                alt="Tracé ECG agrandi"
+                className={`ecgr-lb-img ${zoomed ? "is-2x" : ""}`}
+              />
+            </button>
+          </div>
+          <div className="ecgr-lb-hint">Toucher l'image pour {zoomed ? "réduire" : "zoomer"}</div>
+        </div>
+      )}
+
       {screen === "capture" && (
         <div className="ecgr-pad">
           <header className="ecgr-head">
@@ -306,7 +379,7 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             </span>
             <span>
               <span className="ecgr-cta-title">Prendre une photo de l'ECG</span>
-              <span className="ecgr-cta-sub">Cadrage 12 dérivations, papier à plat</span>
+              <span className="ecgr-cta-sub">12 dérivations · papier à plat · sans reflet</span>
             </span>
           </button>
 
@@ -327,27 +400,13 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             </span>
           </button>
 
-          <div className="ecgr-tips">
-            <div className="ecgr-tips-h">Conseils de prise de vue</div>
-            <ul className="ecgr-tips-list">
-              <li>
-                <span className="ecgr-bullet">·</span> Lumière homogène, pas de reflets
-              </li>
-              <li>
-                <span className="ecgr-bullet">·</span> ECG entier visible avec calibration (1mV)
-              </li>
-              <li>
-                <span className="ecgr-bullet">·</span> Masquer les données patient identifiantes
-              </li>
-            </ul>
-          </div>
-
-          <div className="ecgr-warn">
-            <Disclaimer title="À titre indicatif et éducatif">
-              Contenu non-diagnostique. Toujours faire valider par un médecin avant toute décision
-              thérapeutique.
-            </Disclaimer>
-          </div>
+          {/* Ligne fine unique : tip + disclaimer fusionnés (au lieu de 2
+              pavés qui repoussaient le tableau diagnostic plus bas). */}
+          <p className="ecgr-note">
+            <Ic n="alert-triangle" cls="ecgr-note-ic" />
+            ECG entier visible avec calibration 1 mV. Aide <strong>non-diagnostique</strong> —
+            validation par un médecin obligatoire avant toute décision.
+          </p>
         </div>
       )}
 
@@ -361,9 +420,17 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
           </header>
 
           <div className="ecgr-pad ecgr-stack">
-            <div className="ecgr-photo">
+            <button
+              className="ecgr-photo ecgr-photo-btn"
+              type="button"
+              onClick={() => setZoom(true)}
+              aria-label="Agrandir le tracé"
+            >
               <img src={photo} alt="ECG capturé" className="ecgr-img" />
-            </div>
+              <span className="ecgr-zoom-badge">
+                <Ic n="zoom-in" />
+              </span>
+            </button>
 
             <button className="ecgr-analyze" onClick={analyze} type="button">
               <Ic n="sparkles" /> Analyser cet ECG
@@ -378,12 +445,20 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
       {screen === "loading" && (
         <div>
           <header className="ecgr-bar">
-            <span style={{ width: 20 }} />
+            <button
+              className="ecgr-bar-close"
+              onClick={cancelAnalyze}
+              type="button"
+              aria-label="Annuler l'analyse"
+            >
+              <Ic n="x" />
+            </button>
             <h1 className="ecgr-bar-h1">Analyse en cours</h1>
+            <span className="ecgr-bar-tag ecgr-mono">{elapsed}s</span>
           </header>
           <div className="ecgr-pad ecgr-stack">
             {photo && (
-              <div className="ecgr-photo" style={{ opacity: 0.5 }}>
+              <div className="ecgr-photo" style={{ opacity: 0.45 }}>
                 <img src={photo} alt="" className="ecgr-img" />
               </div>
             )}
@@ -394,10 +469,14 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
               <div>
                 <div className="ecgr-load-t">Lecture du tracé…</div>
                 <div className="ecgr-load-s">
-                  <span className="ecgr-dot">●</span> Analyse rythme · intervalles · anomalies
+                  <span className="ecgr-dot">●</span> Rythme · intervalles · anomalies
+                  {elapsed >= 8 && " · presque terminé"}
                 </div>
               </div>
             </div>
+            <button className="ecgr-secondary" onClick={cancelAnalyze} type="button">
+              Annuler
+            </button>
           </div>
         </div>
       )}
@@ -442,23 +521,10 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             <span className="ecgr-bar-tag">Non-diagnostique</span>
           </header>
 
-          <div className="ecgr-banner">
-            <Disclaimer title="À titre indicatif et éducatif">
-              Cette analyse ne remplace pas l'avis d'un médecin.{" "}
-              <strong>Toujours faire valider</strong> par un praticien avant toute décision
-              thérapeutique.
-            </Disclaimer>
-          </div>
-
           <div className="ecgr-pad ecgr-stack">
-            {photo && (
-              <div className="ecgr-photo fade-up fade-up-1">
-                <img src={photo} alt="ECG analysé" className="ecgr-img" />
-              </div>
-            )}
-
+            {/* 1. Verdict EN PREMIER — l'info actionnable en stress. */}
             {verdict && (
-              <div className={`ecgr-verdict fade-up fade-up-2 ${VERDICT_MOD[verdictSev]}`}>
+              <div className={`ecgr-verdict fade-up fade-up-1 ${VERDICT_MOD[verdictSev]}`}>
                 <span className="ecgr-verdict-ic">
                   <Ic n={SEV_IC[verdictSev]} />
                 </span>
@@ -470,59 +536,9 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
               </div>
             )}
 
-            <section className="ecgr-card fade-up fade-up-3">
-              <div className="ecgr-card-h">
-                <Ic n="heart-pulse" /> Rythme
-              </div>
-              <div className="ecgr-grid3">
-                <div>
-                  <div className="ecgr-k">Type</div>
-                  <div className="ecgr-v">{a.rythme?.type || "—"}</div>
-                </div>
-                <div>
-                  <div className="ecgr-k">Rég.</div>
-                  <div className="ecgr-v">
-                    {a.rythme?.regulier == null
-                      ? "—"
-                      : a.rythme.regulier
-                        ? "Régulier"
-                        : "Irrégulier"}
-                  </div>
-                </div>
-                <div>
-                  <div className="ecgr-k">FC</div>
-                  <div className="ecgr-v ecgr-mono">
-                    {num(a.rythme?.frequence_estimee_bpm, " bpm")}
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="ecgr-card fade-up fade-up-3">
-              <div className="ecgr-card-h">
-                <Ic n="ruler" /> Intervalles
-              </div>
-              <div className="ecgr-grid3">
-                <div>
-                  <div className="ecgr-k">PR</div>
-                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.PR_ms, " ms")}</div>
-                </div>
-                <div>
-                  <div className="ecgr-k">QRS</div>
-                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.QRS_ms, " ms")}</div>
-                </div>
-                <div>
-                  <div className="ecgr-k">QT</div>
-                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.QT_ms, " ms")}</div>
-                </div>
-              </div>
-              <div className="ecgr-card-foot">
-                Axe : <span className="ecgr-axe">{a.axe || "—"}</span>
-              </div>
-            </section>
-
+            {/* 2. Anomalies juste après le verdict. */}
             {anomalies.length > 0 && (
-              <section className="fade-up fade-up-4">
+              <section className="fade-up fade-up-2">
                 <div className="ecgr-sec-h">Anomalies visibles · {anomalies.length}</div>
                 <div className="ecgr-stack-sm">
                   {anomalies.map((an, i) => {
@@ -545,8 +561,62 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
               </section>
             )}
 
+            {/* 3. Photo compacte, tap pour agrandir. */}
+            {photo && (
+              <button
+                className="ecgr-thumb fade-up fade-up-3"
+                type="button"
+                onClick={() => setZoom(true)}
+              >
+                <img src={photo} alt="ECG analysé" className="ecgr-thumb-img" />
+                <span className="ecgr-thumb-cap">
+                  <Ic n="zoom-in" /> Toucher pour agrandir le tracé
+                </span>
+              </button>
+            )}
+
+            {/* 4. Rythme + Intervalles fusionnés en une seule carte dense. */}
+            <section className="ecgr-card fade-up fade-up-3">
+              <div className="ecgr-card-h">
+                <Ic n="heart-pulse" /> Rythme &amp; intervalles
+              </div>
+              <div className="ecgr-grid3">
+                <div>
+                  <div className="ecgr-k">Type</div>
+                  <div className="ecgr-v">{a.rythme?.type || "—"}</div>
+                </div>
+                <div>
+                  <div className="ecgr-k">FC</div>
+                  <div className="ecgr-v ecgr-mono">
+                    {num(a.rythme?.frequence_estimee_bpm, " bpm")}
+                  </div>
+                </div>
+                <div>
+                  <div className="ecgr-k">Rég.</div>
+                  <div className="ecgr-v">
+                    {a.rythme?.regulier == null ? "—" : a.rythme.regulier ? "Régulier" : "Irrég."}
+                  </div>
+                </div>
+                <div>
+                  <div className="ecgr-k">PR</div>
+                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.PR_ms, " ms")}</div>
+                </div>
+                <div>
+                  <div className="ecgr-k">QRS</div>
+                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.QRS_ms, " ms")}</div>
+                </div>
+                <div>
+                  <div className="ecgr-k">QT</div>
+                  <div className="ecgr-v ecgr-mono">{num(a.intervalles?.QT_ms, " ms")}</div>
+                </div>
+              </div>
+              <div className="ecgr-card-foot">
+                Axe : <span className="ecgr-axe">{a.axe || "—"}</span>
+              </div>
+            </section>
+
             {orientations.length > 0 && (
-              <section className="ecgr-card fade-up fade-up-5">
+              <section className="ecgr-card fade-up fade-up-4">
                 <div className="ecgr-card-h">
                   <Ic n="pill" /> Pistes thérapeutiques — fiches MediURG
                 </div>
@@ -587,20 +657,21 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             )}
 
             <div className="ecgr-grid2">
-              <button className="ecgr-secondary ecgr-ico-btn" type="button" onClick={reset}>
-                <Ic n="refresh-cw" /> Nouvelle analyse
+              <button className="ecgr-secondary ecgr-ico-btn" type="button" onClick={analyze}>
+                <Ic n="refresh-cw" /> Ré-analyser
               </button>
-              <button className="ecgr-secondary ecgr-ico-btn" type="button" disabled>
-                <Ic n="share-2" /> Partager
+              <button className="ecgr-secondary ecgr-ico-btn" type="button" onClick={reset}>
+                <Ic n="camera" /> Nouvelle photo
               </button>
             </div>
 
+            {/* Disclaimer unique fort (suffit médico-légalement ; on a
+                retiré les blocs redondants pour alléger). */}
             <div className="ecgr-warn">
-              <Disclaimer title="Rappel important">
-                Contenu fourni à <strong>titre indicatif et éducatif uniquement</strong>. Cette
-                analyse automatisée peut contenir des erreurs et ne constitue pas un diagnostic
-                médical. <strong>Faire systématiquement valider par un médecin</strong> avant toute
-                prise de décision clinique ou thérapeutique.
+              <Disclaimer title="À titre indicatif et éducatif">
+                Analyse automatisée pouvant contenir des erreurs, <strong>non-diagnostique</strong>.{" "}
+                <strong>Faire systématiquement valider par un médecin</strong> avant toute décision
+                clinique ou thérapeutique.
               </Disclaimer>
             </div>
 
