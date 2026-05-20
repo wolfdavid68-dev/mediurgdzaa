@@ -123,22 +123,6 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
               <span className="dot dot-info" />
               <span className="tab-label">Matériel</span>
             </button>
-            <button
-              className={`tab-btn tab-neutral ${activeTab === "sequence" ? "tab-active" : ""}`}
-              onClick={() => setActiveTab("sequence")}
-            >
-              <span className="dot dot-neutral" />
-              <span className="tab-label">Séquence</span>
-            </button>
-            {kit.notes && kit.notes.length > 0 && (
-              <button
-                className={`tab-btn tab-danger ${activeTab === "notes" ? "tab-active" : ""}`}
-                onClick={() => setActiveTab("notes")}
-              >
-                <span className="dot dot-danger" />
-                <span className="tab-label">Notes</span>
-              </button>
-            )}
             {showSchema && (
               <button
                 className={`tab-btn tab-poso ${activeTab === "schema" ? "tab-active" : ""}`}
@@ -155,6 +139,22 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
               >
                 <span className="dot dot-poso" style={{ background: kit.couleur }} />
                 <span className="tab-label">Schéma</span>
+              </button>
+            )}
+            <button
+              className={`tab-btn tab-neutral ${activeTab === "sequence" ? "tab-active" : ""}`}
+              onClick={() => setActiveTab("sequence")}
+            >
+              <span className="dot dot-neutral" />
+              <span className="tab-label">Séquence</span>
+            </button>
+            {kit.notes && kit.notes.length > 0 && (
+              <button
+                className={`tab-btn tab-danger ${activeTab === "notes" ? "tab-active" : ""}`}
+                onClick={() => setActiveTab("notes")}
+              >
+                <span className="dot dot-danger" />
+                <span className="tab-label">Notes</span>
               </button>
             )}
           </div>
