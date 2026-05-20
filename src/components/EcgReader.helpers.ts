@@ -1,8 +1,8 @@
 import type { IconName } from "./EcgReader.icons";
 
 export type Severite = "info" | "attention" | "critique";
-export type Anomalie = { libelle: string; derivations?: string[]; severite?: Severite };
-export type Orientation = { label: string; query: string };
+type Anomalie = { libelle: string; derivations?: string[]; severite?: Severite };
+type Orientation = { label: string; query: string };
 
 // Forme renvoyée par /api/analyze-ecg (champs tolérants : l'IA peut
 // omettre / mettre null ce qu'elle ne mesure pas — on rend défensivement).
