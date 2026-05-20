@@ -36,13 +36,13 @@ const NotesBackupModal = ({ open, onClose }: Props) => {
     <dialog
       ref={dialogRef}
       className="notes-backup-dialog"
-      aria-label="Sauvegarder mes notes personnelles"
+      aria-labelledby="notes-backup-title"
       onClose={onClose}
       onClick={onBackdropClick}
     >
       <div className="notes-backup-modal">
         <header className="notes-backup-modal-header">
-          <h3>💾 Mes notes personnelles</h3>
+          <h2 id="notes-backup-title">💾 Mes notes personnelles</h2>
           <button
             type="button"
             className="notes-backup-modal-close"

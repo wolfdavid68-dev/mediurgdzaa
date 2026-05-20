@@ -83,6 +83,37 @@
     opacity: 0.45;
   }
 }
+
+/* ── Banner offline ────────────────────────────────────────
+   Affiché sous le header quand !isOnline. Le badge "Offline" du header
+   reste, mais ce banner explique ce qui est indisponible. Pas sticky :
+   se laisse scroller avec le contenu — le badge clignotant du header
+   suffit comme rappel permanent. */
+.offline-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px clamp(14px, 3vw, 24px);
+  background: rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+  color: #b45309;
+  font-size: 13px;
+  line-height: 1.4;
+}
+[data-theme="dark"] .offline-banner {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fcd34d;
+  border-bottom-color: rgba(245, 158, 11, 0.4);
+}
+.offline-banner-ic {
+  flex-shrink: 0;
+  font-size: 15px;
+  line-height: 1;
+  margin-top: 1px;
+}
+.offline-banner-txt {
+  flex: 1;
+}
 @media (max-width: 480px) {
   .net-status {
     height: 24px;

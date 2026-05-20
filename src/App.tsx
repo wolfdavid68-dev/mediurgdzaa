@@ -6,6 +6,7 @@ import { fuzzyIncludes } from "./lib/fuzzy";
 import AppHeader from "./components/AppHeader";
 import BottomNav from "./components/BottomNav";
 import MedicamentsPage from "./pages/MedicamentsPage";
+import OfflineBanner from "./components/OfflineBanner";
 import UpdatePrompt from "./components/UpdatePrompt";
 import { APP_VERSION } from "./data/changelog";
 import {
@@ -385,6 +386,8 @@ const App = () => {
           </>
         )}
       </AppHeader>
+
+      <OfflineBanner isOnline={isOnline} />
 
       <main className="main-content">
         {page === "medicaments" && (

@@ -134,7 +134,7 @@
   border-bottom: 1px solid var(--border);
   background: var(--bg-elevated);
 }
-.notes-backup-modal-header h3 {
+.notes-backup-modal-header h2 {
   margin: 0;
   font-size: 15px;
   font-weight: 600;

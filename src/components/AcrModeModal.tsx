@@ -69,13 +69,13 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }: AcrModeModalProps) => {
     <dialog
       ref={dialogRef}
       className="acr-mode-dialog"
-      aria-label="Mode urgence ACR"
+      aria-labelledby="acr-mode-title"
       onClose={onClose}
       onClick={onBackdropClick}
     >
       <div className="acr-mode-modal">
         <header className="acr-mode-header">
-          <div className="acr-mode-title">
+          <h2 id="acr-mode-title" className="acr-mode-title">
             <span className="acr-mode-flash" aria-hidden="true">
               🚨
             </span>
@@ -83,7 +83,7 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }: AcrModeModalProps) => {
             {pediatric !== null && (
               <span className="acr-mode-subtitle">· {pediatric ? "Enfant" : "Adulte"}</span>
             )}
-          </div>
+          </h2>
           <button
             type="button"
             className="acr-mode-close"
