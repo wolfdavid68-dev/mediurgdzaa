@@ -201,16 +201,16 @@ describe("suggestActions — pédiatrique", () => {
 // localStorage stub explicite (happy-dom ne le fournit pas toujours en JS test)
 // ════════════════════════════════════════════════════════════════
 describe("readCoach", () => {
-  let store;
+  let store: Record<string, string>;
 
   beforeEach(() => {
     store = {};
     vi.stubGlobal("localStorage", {
-      getItem: (k) => (k in store ? store[k] : null),
-      setItem: (k, v) => {
+      getItem: (k: string) => (k in store ? store[k] : null),
+      setItem: (k: string, v: string) => {
         store[k] = String(v);
       },
-      removeItem: (k) => {
+      removeItem: (k: string) => {
         delete store[k];
       },
       clear: () => {

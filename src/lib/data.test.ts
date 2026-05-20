@@ -34,7 +34,7 @@ describe("DRUGS — intégrité", () => {
     const broken = DRUGS.map((d) => ({
       id: d.id,
       nom: d.nom,
-      missing: required.filter((k) => d[k] === undefined || d[k] === null),
+      missing: required.filter((k) => (d as any)[k] === undefined || (d as any)[k] === null),
     })).filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });
@@ -103,7 +103,7 @@ describe("PSE — cohérence avec DRUGS", () => {
   test("chaque entrée PSE a conc, unite, min, max, steps", () => {
     const required = ["conc", "unite", "min", "max", "steps"];
     const broken = Object.entries(PSE)
-      .map(([id, p]) => ({ id, missing: required.filter((k) => p[k] === undefined) }))
+      .map(([id, p]) => ({ id, missing: required.filter((k) => (p as any)[k] === undefined) }))
       .filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });
@@ -145,7 +145,7 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
   });
 
   test("toutes les références 'with' pointent sur un drug connu", () => {
-    const broken = [];
+    const broken: string[] = [];
     INCOMPATIBILITIES.forEach((entry) => {
       (entry.items || []).forEach((item) => {
         if (!drugSet.has(item.with)) {
@@ -157,7 +157,7 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
   });
 
   test("toutes les références 'compatibleWith' pointent sur un drug connu", () => {
-    const broken = [];
+    const broken: string[] = [];
     INCOMPATIBILITIES.forEach((entry) => {
       (entry.compatibleWith || []).forEach((name) => {
         if (!drugSet.has(name)) {
@@ -169,7 +169,7 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
   });
 
   test("aucune référence à soi-même", () => {
-    const selfRefs = [];
+    const selfRefs: string[] = [];
     INCOMPATIBILITIES.forEach((entry) => {
       (entry.items || []).forEach((item) => {
         if (item.with === entry.drug) selfRefs.push(`${entry.drug} → with self`);
@@ -183,7 +183,7 @@ describe("INCOMPATIBILITIES — cohérence symétrique", () => {
 
   test("type d'incompatibilité reconnu (pH | incompatible)", () => {
     const validTypes = ["pH", "incompatible"];
-    const bad = [];
+    const bad: string[] = [];
     INCOMPATIBILITIES.forEach((entry) => {
       (entry.items || []).forEach((item) => {
         if (!validTypes.includes(item.type)) {
@@ -230,7 +230,7 @@ describe("PROTOCOLS — intégrité", () => {
       "rythme_non_choquable",
       "reprise",
     ];
-    const bad = [];
+    const bad: string[] = [];
     PROTOCOLS.forEach((p) => {
       p.sections.forEach((s) => {
         if (!validTypes.includes(s.type)) {
@@ -256,7 +256,7 @@ describe("PROTOCOLS — intégrité", () => {
 // via la même recherche normalisée qu'App.js
 // ════════════════════════════════════════════════════════════════
 describe("DRUG_PATTERNS — couverture vers DRUGS", () => {
-  const searchHits = (pattern) => {
+  const searchHits = (pattern: string) => {
     const q = normalize(pattern);
     return DRUGS.filter((d) => {
       const fields = [d.nom, d.commercial, d.dci, d.classe].filter(Boolean).map(normalize);
@@ -299,9 +299,9 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
   test("dose_kg × 70 kg / conc_produit donne un volume entre 0,05 et 500 mL", () => {
     // 500 mL = borne haute pour antibios en perfusion lente diluée
     // (vanco, etc.). Au-dessus, c'est probablement une erreur d'unité 1000×.
-    const bad = [];
+    const bad: string[] = [];
     DRUGS.forEach((d) => {
-      const p = d.prep;
+      const p = (d as any).prep;
       if (!p?.dose_kg || !p?.conc_produit) return;
       const vol = (p.dose_kg * REF_KG) / p.conc_produit;
       if (vol < SANE_VOL_MIN || vol > 500) {
@@ -316,11 +316,11 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
   test("phases × 70 kg / conc_produit donne un volume entre 0,05 et 500 mL", () => {
     // Hidonac autorise des volumes plus grands car les phases sont diluées
     // dans 500–1000 mL de G5%. On assouplit la borne haute.
-    const bad = [];
+    const bad: string[] = [];
     DRUGS.forEach((d) => {
-      const p = d.prep;
+      const p = (d as any).prep;
       if (!p?.phases?.length || !p.conc_produit) return;
-      p.phases.forEach((phase, i) => {
+      p.phases.forEach((phase: any, i: number) => {
         const vol = (phase.dose_kg * REF_KG) / p.conc_produit;
         if (vol < SANE_VOL_MIN || vol > 500) {
           bad.push(`${d.id} ${d.nom} phase ${i} → ${vol.toFixed(2)} mL`);
@@ -334,14 +334,17 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
     // Les preps qui calculent autrement (sufenta_table = table Vi/Vf,
     // dose_threshold = seuil ampoules type Anexate) n'ont pas besoin de
     // conc_produit au niveau racine.
-    const bad = DRUGS.filter((d) => d.prep)
-      .filter((d) => !d.prep.sufenta_table && d.prep.dose_threshold === undefined)
+    const bad = DRUGS.filter((d) => (d as any).prep)
+      .filter((d) => !(d as any).prep.sufenta_table && (d as any).prep.dose_threshold === undefined)
       .filter((d) => {
-        const hasConc = d.prep.conc_produit !== undefined;
-        const hasUnite = d.prep.unite !== undefined;
+        const hasConc = (d as any).prep.conc_produit !== undefined;
+        const hasUnite = (d as any).prep.unite !== undefined;
         return hasConc !== hasUnite;
       })
-      .map((d) => `${d.id} ${d.nom} (conc=${d.prep.conc_produit}, unite=${d.prep.unite})`);
+      .map(
+        (d) =>
+          `${d.id} ${d.nom} (conc=${(d as any).prep.conc_produit}, unite=${(d as any).prep.unite})`
+      );
     expect(bad).toEqual([]);
   });
 });
@@ -354,7 +357,7 @@ describe("Plausibilité — débits PSE (pse.js)", () => {
   const SANE_RATE_MAX = 100;
 
   test("dose mid-range × 70 kg → débit entre 0,05 et 100 mL/h", () => {
-    const bad = [];
+    const bad: string[] = [];
     Object.entries(PSE).forEach(([id, p]) => {
       // Les unités « mL/kg/min » (Octaplex et autres push rapides de
       // produits sanguins) ont volontairement des débits élevés (jusqu'au
@@ -375,7 +378,7 @@ describe("Plausibilité — débits PSE (pse.js)", () => {
   });
 
   test("steps[] sont toutes dans [min, max]", () => {
-    const bad = [];
+    const bad: string[] = [];
     Object.entries(PSE).forEach(([id, p]) => {
       p.steps.forEach((s) => {
         if (s < p.min || s > p.max) {
@@ -387,14 +390,15 @@ describe("Plausibilité — débits PSE (pse.js)", () => {
   });
 
   test("mode 'extra' (héparine UI/24h) : débit cohérent aussi", () => {
-    const bad = [];
+    const bad: string[] = [];
     Object.entries(PSE).forEach(([id, p]) => {
-      if (!p.extra) return;
-      const ex = { unite: p.extra.unite, conc: p.conc };
-      const mid = (p.extra.min + p.extra.max) / 2;
+      const pAny = p as any;
+      if (!pAny.extra) return;
+      const ex = { unite: pAny.extra.unite, conc: pAny.conc };
+      const mid = (pAny.extra.min + pAny.extra.max) / 2;
       const rate = calcDebit(ex, mid, null);
       if (rate === null || rate < SANE_RATE_MIN || rate > SANE_RATE_MAX) {
-        bad.push(`${id} extra → ${rate} mL/h (dose=${mid} ${p.extra.unite})`);
+        bad.push(`${id} extra → ${rate} mL/h (dose=${mid} ${pAny.extra.unite})`);
       }
     });
     expect(bad).toEqual([]);
@@ -410,10 +414,10 @@ describe("Plausibilité — toutes les chaînes poso /kg sont parsables", () => 
   const HAS_DOSE_PATTERN = /\d+(?:[,.]\d+)?\s*(?:mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)\/kg/i;
 
   test("chaque poso adulte/péd contenant '/kg' est parsable par calcDose", () => {
-    const unparsable = [];
+    const unparsable: string[] = [];
     DRUGS.forEach((d) => {
-      ["a", "p"].forEach((group) => {
-        (d.poso?.[group] || []).forEach((line, i) => {
+      (["a", "p"] as const).forEach((group) => {
+        ((d.poso as any)?.[group] || []).forEach((line: string, i: number) => {
           if (!HAS_DOSE_PATTERN.test(line)) return; // ligne sans dose/kg, OK
           const res = calcDose(line, REF_KG);
           if (res === null) {

@@ -1,9 +1,11 @@
 import { tokenizeProtocolText } from "./protocolText";
 import { DRUG_PATTERNS } from "../components/ProtocolCard";
 
+type Token = { type: "text" | "drug" | "dose"; value: string };
+
 // Helpers pour rendre les assertions plus lisibles
-const types = (toks) => toks.map((t) => t.type);
-const values = (toks) => toks.map((t) => t.value);
+const types = (toks: Token[]) => toks.map((t) => t.type);
+const values = (toks: Token[]) => toks.map((t) => t.value);
 
 describe("tokenizeProtocolText — texte sans match", () => {
   test("texte vide → tableau vide", () => {
@@ -27,21 +29,21 @@ describe("tokenizeProtocolText — détection des doses", () => {
   test("dose mg/kg simple", () => {
     const toks = tokenizeProtocolText("Posologie : 1 mg/kg IV bolus", DRUG_PATTERNS);
     const dose = toks.find((t) => t.type === "dose");
-    expect(dose.value).toBe("1 mg/kg");
+    expect(dose!.value).toBe("1 mg/kg");
   });
 
   test("fourchette de dose", () => {
     const toks = tokenizeProtocolText("Induction : 1-2,5 mg/kg IV", DRUG_PATTERNS);
     const dose = toks.find((t) => t.type === "dose");
-    expect(dose.value).toBe("1-2,5 mg/kg");
+    expect(dose!.value).toBe("1-2,5 mg/kg");
   });
 
   test("dose µg/kg/min", () => {
     const toks = tokenizeProtocolText("0,1 µg/kg/min IVSE", DRUG_PATTERNS);
     const dose = toks.find((t) => t.type === "dose");
     // Le suffixe /min est capté via la 3e capture (?:\/(?:kg|h|min|j|24h))?
-    expect(dose.value).toContain("0,1");
-    expect(dose.value).toContain("µg/kg");
+    expect(dose!.value).toContain("0,1");
+    expect(dose!.value).toContain("µg/kg");
   });
 
   test("dose en mL", () => {
@@ -79,7 +81,7 @@ describe("tokenizeProtocolText — détection des médicaments", () => {
     const drugs = toks.filter((t) => t.type === "drug").map((d) => d.value);
     expect(drugs).toEqual(["Méthylprednisolone", "Solumédrol"]);
     const dose = toks.find((t) => t.type === "dose");
-    expect(dose.value).toBe("1 mg/kg");
+    expect(dose!.value).toBe("1 mg/kg");
   });
 
   test("pattern multi-mot : 'acide tranexamique' reste un seul token", () => {
@@ -151,7 +153,7 @@ describe("tokenizeProtocolText — pièges connus", () => {
   test("traitement des points d'intervalle '0,01 mg/kg'", () => {
     const toks = tokenizeProtocolText("Adrénaline 0,01 mg/kg IV bolus", DRUG_PATTERNS);
     const dose = toks.find((t) => t.type === "dose");
-    expect(dose.value).toBe("0,01 mg/kg");
+    expect(dose!.value).toBe("0,01 mg/kg");
   });
 
   test("intervalle avec tiret cadratin (–)", () => {

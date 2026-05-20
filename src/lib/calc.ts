@@ -7,7 +7,7 @@ import { normalize } from "./normalize";
 const KG_MIN = 0;
 const KG_MAX = 300;
 
-export function isValidWeight(w: string | number) {
+export function isValidWeight(w: string | number | null | undefined) {
   const kg = parseFloat(String(w));
   return Number.isFinite(kg) && kg > KG_MIN && kg <= KG_MAX;
 }
@@ -41,7 +41,7 @@ export function validateDoseValue(numericValue: number, unit: string) {
 }
 
 // ── Dose poids-dépendante (parse un texte de poso) ────────────
-export function calcDose(text: string, w: string | number) {
+export function calcDose(text: string, w: string | number | null | undefined) {
   const kg = parseFloat(String(w));
   if (!kg || kg <= 0 || kg > 300) return null;
 
@@ -117,7 +117,12 @@ export function ciSeverity(text: string) {
 }
 
 // ── Débit PSE (mL/h) ──────────────────────────────────────────
-export function calcDebit(pse: any, dose: string | number, kg: string | number) {
+// `kg` peut être null/"" pour les unités non poids-dépendantes (mg/h, UI/24h).
+export function calcDebit(
+  pse: any,
+  dose: string | number | null | undefined,
+  kg: string | number | null | undefined
+) {
   const d = parseFloat(String(dose));
   if (!d || d <= 0) return null;
   if (pse.factor) return +(d * pse.factor).toFixed(2);
@@ -148,8 +153,8 @@ export function calcDebit(pse: any, dose: string | number, kg: string | number) 
 // millième=3 Iso) pour coller à la précision de réglage clinique.
 export function calcDoseFromRate(
   pse: any,
-  mlh: string | number,
-  kg: string | number,
+  mlh: string | number | null | undefined,
+  kg: string | number | null | undefined,
   precision = 3
 ) {
   const r = parseFloat(String(mlh));
@@ -173,7 +178,7 @@ export function calcDoseFromRate(
 // ── Préparation : seuil dose (Anexate) ────────────────────────
 // Renvoie le nombre d'ampoules / volumes selon que le produit final
 // franchit ou non `prep.dose_threshold` mg.
-export function calcPrepThreshold(prep: any, produitFinalMg: string | number) {
+export function calcPrepThreshold(prep: any, produitFinalMg: string | number | null | undefined) {
   const pf = parseFloat(String(produitFinalMg));
   if (!pf || pf <= 0) return null;
   if (prep?.dose_threshold === undefined) return null;
@@ -188,7 +193,7 @@ export function calcPrepThreshold(prep: any, produitFinalMg: string | number) {
 
 // ── Préparation : table Sufentanil (Vi/Vf par poids) ──────────
 // Règle : 1 mL/h = 0,1 µg/kg/h ; Vf = round(500 × Vi / kg)
-export function calcPrepSufentaTable(weightKg: string | number) {
+export function calcPrepSufentaTable(weightKg: string | number | null | undefined) {
   if (!isValidWeight(weightKg)) return null;
   const kg = parseFloat(String(weightKg));
   let vi;
@@ -201,7 +206,7 @@ export function calcPrepSufentaTable(weightKg: string | number) {
 }
 
 // ── Préparation : phases successives (Hidonac) ────────────────
-export function calcPrepPhases(prep: any, weightKg: string | number) {
+export function calcPrepPhases(prep: any, weightKg: string | number | null | undefined) {
   if (!isValidWeight(weightKg) || !prep?.phases?.length) return null;
   const kg = parseFloat(String(weightKg));
   return prep.phases.map((phase: any) => {
@@ -221,7 +226,7 @@ export function calcPrepPhases(prep: any, weightKg: string | number) {
 // Renvoie la bande applicable + volumes calculés selon le mode :
 // - mode "inject" : volume à injecter = vol_per_kg × kg (avec arrondi optionnel)
 // - mode "dilute" : volume médicament = vol_per_kg × kg, complété au volume_final
-export function calcPedTable(prep: any, weightKg: string | number) {
+export function calcPedTable(prep: any, weightKg: string | number | null | undefined) {
   if (!isValidWeight(weightKg) || !prep?.pedTable?.bandes?.length) return null;
   const kg = parseFloat(String(weightKg));
   const bande = prep.pedTable.bandes.find(
@@ -269,7 +274,7 @@ export function calcPedTable(prep: any, weightKg: string | number) {
 // ── Préparation : dose_kg standard ────────────────────────────
 // Renvoie les volumes à prélever / compléter pour une dilution
 // dose_kg (+ option dose_max_kg pour les fourchettes).
-export function calcPrepDoseKg(prep: any, weightKg: string | number) {
+export function calcPrepDoseKg(prep: any, weightKg: string | number | null | undefined) {
   if (!isValidWeight(weightKg) || !prep?.dose_kg) return null;
   const kg = parseFloat(String(weightKg));
   const dose = prep.dose_kg * kg;

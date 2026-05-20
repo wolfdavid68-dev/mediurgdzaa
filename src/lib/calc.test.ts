@@ -28,7 +28,7 @@ describe("isValidWeight", () => {
     [undefined, false],
     ["abc", false],
   ])("isValidWeight(%p) = %p", (input, expected) => {
-    expect(isValidWeight(input)).toBe(expected);
+    expect(isValidWeight(input as string | number)).toBe(expected);
   });
 });
 
@@ -408,7 +408,7 @@ describe("calcPrepSufentaTable", () => {
   });
 
   test("borne basse de tranche : 10 kg → Vi=1 (et non 0,5)", () => {
-    expect(calcPrepSufentaTable(10).vi).toBe(1);
+    expect(calcPrepSufentaTable(10)!.vi).toBe(1);
   });
 
   test("poids invalide → null", () => {
