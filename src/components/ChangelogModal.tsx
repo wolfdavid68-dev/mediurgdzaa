@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { CHANGELOG } from "../data/changelog";
 import NotesBackup from "./NotesBackup";
 import LegalModal from "./LegalModal";
+import CharterModal from "./CharterModal";
 
 const TYPE_LABEL = {
   feat: "Nouveau",
@@ -40,6 +41,7 @@ type ChangelogModalProps = { open: boolean; onClose: () => void };
 const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [showLegal, setShowLegal] = useState(false);
+  const [showCharter, setShowCharter] = useState(false);
 
   useEffect(() => {
     const d = dialogRef.current;
@@ -108,12 +110,23 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
       </div>
 
       <footer className="changelog-footer">
+        <button type="button" className="auth-legal-link" onClick={() => setShowCharter(true)}>
+          Charte d&apos;utilisation
+        </button>
+        <span aria-hidden="true" style={{ color: "var(--text-mute)" }}>
+          ·
+        </span>
         <button type="button" className="auth-legal-link" onClick={() => setShowLegal(true)}>
           Mentions légales &amp; confidentialité
         </button>
       </footer>
 
       <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
+      <CharterModal
+        open={showCharter}
+        onAccept={() => setShowCharter(false)}
+        onClose={() => setShowCharter(false)}
+      />
     </dialog>
   );
 };

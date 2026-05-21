@@ -1359,6 +1359,7 @@
   background: oklch(0.21 0.006 280);
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 @media (max-width: 600px) {

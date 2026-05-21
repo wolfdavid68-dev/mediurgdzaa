@@ -68,7 +68,7 @@ export const useRegisterForm = () => {
       return;
     }
     if (!acceptCharte) {
-      fail("Tu dois accepter la charte d'usage du SI hospitalier");
+      fail("Tu dois accepter la charte d'utilisation");
       return;
     }
     setLoading(true);

@@ -26,8 +26,14 @@ import { useLongPress } from "./lib/useLongPress";
 const AcrModeModal = lazy(() => import("./components/AcrModeModal"));
 const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
 const NotesBackupModal = lazy(() => import("./components/NotesBackupModal"));
+const CharterModal = lazy(() => import("./components/CharterModal"));
 const ProtocolesPage = lazy(() => import("./pages/ProtocolesPage"));
 const EchellesPage = lazy(() => import("./pages/EchellesPage"));
+
+// Cf. CharterModal.tsx — version stockée en localStorage pour pouvoir
+// forcer une re-acceptation si la charte change matériellement.
+const CHARTER_VERSION = "1.0";
+const CHARTER_LS_KEY = "mediurg-charter-accepted";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -92,6 +98,25 @@ const App = () => {
   // null | "default" | "firefox-no-exit" — null = caché ; sinon affiche le toast
   // avec le bon message (variante Firefox PWA = ne peut pas quitter via back).
   const [exitToast, setExitToast] = useState<ExitToastVariant | null>(null);
+
+  // Charte d'utilisation : ouverte automatiquement au premier lancement
+  // (et après chaque bump de CHARTER_VERSION). Acceptation persistée en
+  // localStorage avec date pour audit éventuel. Mode `requireAccept` →
+  // pas de × ni ESC tant que l'utilisateur n'a pas cliqué « J'accepte ».
+  const [showCharter, setShowCharter] = useState(() => {
+    try {
+      const raw = localStorage.getItem(CHARTER_LS_KEY) ?? "";
+      return !raw.startsWith(CHARTER_VERSION);
+    } catch {
+      return true;
+    }
+  });
+  const acceptCharter = () => {
+    try {
+      localStorage.setItem(CHARTER_LS_KEY, `${CHARTER_VERSION}|${new Date().toISOString()}`);
+    } catch {}
+    setShowCharter(false);
+  };
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -465,6 +490,16 @@ const App = () => {
             ? "Sur Firefox Android, utilisez le bouton app récente pour fermer MediURG."
             : "Appuyez à nouveau sur retour pour quitter"}
         </div>
+      )}
+      {showCharter && (
+        <Suspense fallback={null}>
+          <CharterModal
+            open={showCharter}
+            requireAccept
+            onAccept={acceptCharter}
+            onClose={acceptCharter}
+          />
+        </Suspense>
       )}
       <UpdatePrompt />
     </div>

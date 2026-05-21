@@ -4,6 +4,7 @@ import { useRegisterForm } from "./hooks/useRegisterForm";
 import { FONCTIONS, SERVICES } from "./authConstants";
 import { EMAIL_DOMAIN } from "../../lib/auth";
 import LegalModal from "../LegalModal";
+import CharterModal from "../CharterModal";
 
 // Création de compte en 2 étapes + confirmation.
 // Cf. design_handoff_sau_mulhouse pour la fidélité visuelle.
@@ -44,6 +45,7 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
   } = useRegisterForm();
   const [shake, setShake] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
+  const [showCharter, setShowCharter] = useState(false);
 
   useEffect(() => {
     if (errorNonce === 0) return;
@@ -232,7 +234,18 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
                     onChange={(e) => setAcceptCharte(e.target.checked)}
                   />
                   <span>
-                    J'accepte la charte d'usage du SI hospitalier et la{" "}
+                    J&apos;accepte la{" "}
+                    <button
+                      type="button"
+                      className="auth-legal-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowCharter(true);
+                      }}
+                    >
+                      charte d&apos;utilisation
+                    </button>{" "}
+                    et la{" "}
                     <button
                       type="button"
                       className="auth-legal-link"
@@ -303,6 +316,14 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
       </div>
 
       <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
+      <CharterModal
+        open={showCharter}
+        onAccept={() => {
+          setAcceptCharte(true);
+          setShowCharter(false);
+        }}
+        onClose={() => setShowCharter(false)}
+      />
     </div>
   );
 };

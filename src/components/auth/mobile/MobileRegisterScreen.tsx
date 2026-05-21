@@ -3,6 +3,7 @@ import { useRegisterForm } from "../hooks/useRegisterForm";
 import { FONCTIONS, SERVICES } from "../authConstants";
 import { EMAIL_DOMAIN } from "../../../lib/auth";
 import LegalModal from "../../LegalModal";
+import CharterModal from "../../CharterModal";
 import { ArrowL, Arrow, Check, Spinner, Warn } from "./icons";
 
 // Création de compte — design mobile dédié (header back + barre de
@@ -45,6 +46,7 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
     goBack,
   } = useRegisterForm();
   const [showLegal, setShowLegal] = useState(false);
+  const [showCharter, setShowCharter] = useState(false);
   const [shake, setShake] = useState(false);
 
   useEffect(() => {
@@ -242,7 +244,18 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
                   onChange={(e) => setAcceptCharte(e.target.checked)}
                 />
                 <span>
-                  J'accepte la charte d'usage du SI hospitalier et la{" "}
+                  J&apos;accepte la{" "}
+                  <button
+                    type="button"
+                    className="m-legal-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowCharter(true);
+                    }}
+                  >
+                    charte d&apos;utilisation
+                  </button>{" "}
+                  et la{" "}
                   <button
                     type="button"
                     className="m-legal-link"
@@ -317,6 +330,14 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
       </div>
 
       <LegalModal open={showLegal} onClose={() => setShowLegal(false)} />
+      <CharterModal
+        open={showCharter}
+        onAccept={() => {
+          setAcceptCharte(true);
+          setShowCharter(false);
+        }}
+        onClose={() => setShowCharter(false)}
+      />
     </div>
   );
 };
