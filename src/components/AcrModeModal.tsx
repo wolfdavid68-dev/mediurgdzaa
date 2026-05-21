@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import AcrTimer from "./AcrTimer";
+import TestVersionBanner from "./TestVersionBanner";
 import { useWakeLock } from "../lib/useWakeLock";
 
 // Modale plein écran déclenchée par le bouton URGENCE.
@@ -74,6 +75,7 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }: AcrModeModalProps) => {
       onClick={onBackdropClick}
     >
       <div className="acr-mode-modal">
+        <TestVersionBanner />
         <header className="acr-mode-header">
           <h2 id="acr-mode-title" className="acr-mode-title">
             <span className="acr-mode-flash" aria-hidden="true">

@@ -7,6 +7,7 @@ import AppHeader from "./components/AppHeader";
 import BottomNav from "./components/BottomNav";
 import MedicamentsPage from "./pages/MedicamentsPage";
 import OfflineBanner from "./components/OfflineBanner";
+import TestVersionBanner from "./components/TestVersionBanner";
 import UpdatePrompt from "./components/UpdatePrompt";
 import { APP_VERSION } from "./data/changelog";
 import {
@@ -298,6 +299,7 @@ const App = () => {
   return (
     <div className="app" data-testid="app">
       <title>{docTitle}</title>
+      <TestVersionBanner />
       <AppHeader
         isOnline={isOnline}
         theme={theme}

@@ -2,7 +2,7 @@
 
 .app-header {
   position: sticky;
-  top: 0;
+  top: var(--test-banner-h, 0px);
   z-index: 100;
   background: var(--header-bg);
   backdrop-filter: blur(16px);
@@ -84,6 +84,60 @@
   }
 }
 
+/* ── Banner « Version test » ───────────────────────────────
+   Affiché tout en haut, sticky, tant que la base médicamenteuse n'a pas
+   été validée par un référent. La variable --test-banner-h est lue par
+   .app-header pour positionner son sticky top juste en-dessous.
+   Rendu aussi à l'intérieur du <dialog> ACR (qui sort du flux normal). */
+:root {
+  --test-banner-h: 28px;
+}
+.test-banner {
+  position: sticky;
+  top: 0;
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--test-banner-h);
+  padding: 0 clamp(10px, 3vw, 20px);
+  background: rgba(234, 179, 8, 0.18);
+  border-bottom: 1px solid rgba(202, 138, 4, 0.5);
+  color: #92400e;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+[data-theme="dark"] .test-banner {
+  background: rgba(234, 179, 8, 0.22);
+  color: #fde68a;
+  border-bottom-color: rgba(234, 179, 8, 0.45);
+}
+.test-banner-ic {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+.test-banner-txt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.test-banner-txt strong {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 480px) {
+  .test-banner {
+    font-size: 11px;
+    gap: 6px;
+  }
+  .test-banner-ic {
+    font-size: 13px;
+  }
+}
 /* ── Banner offline ────────────────────────────────────────
    Affiché sous le header quand !isOnline. Le badge "Offline" du header
    reste, mais ce banner explique ce qui est indisponible. Pas sticky :
