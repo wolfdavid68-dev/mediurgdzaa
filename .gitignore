@@ -11,3 +11,4 @@ npm-debug.log*
 # Claude Code config (peut contenir des clés API / MCP secrets)
 .claude/
 .mcp.json
+.env*.local

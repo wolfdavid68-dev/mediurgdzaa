@@ -7,7 +7,9 @@ export const FONCTIONS = [
   "Interne",
   "Infirmier",
   "Aide-soignant",
-  "Cadre",
+  "Étudiant infirmier",
+  "Étudiant aide-soignant",
+  "Cadre de santé",
 ] as const;
 
 export const SERVICES = ["SAU", "SMUR", "UHCD", "Réanimation", "Régulation 15"] as const;
