@@ -67,7 +67,7 @@ export const DRUGS_ANTIDOTES = [
     svc: ["SAUV", "SMUR"],
     couleur: "#F87171",
     icon: "🔓",
-    desc: "Agent de décurarisation sélectif. Encapsule le rocuronium et la vécuronium. Permet la décurarisation profonde en 2-3 min. Disponible en REA.",
+    desc: "Agent de décurarisation sélectif. Encapsule le rocuronium et la vécuronium. Disponible en REA.",
     indic: [
       "Décurarisation urgente du rocuronium/vécuronium (CICO)",
       "Récupération neuromusculaire incomplète",
@@ -76,11 +76,7 @@ export const DRUGS_ANTIDOTES = [
     ei: ["Anaphylaxie (rare)", "Bradycardie", "Recurarisation si dose insuffisante"],
     cond: ["Flacon 200 mg/2 mL", "Flacon 500 mg/5 mL"],
     poso: {
-      a: [
-        "IVD — urgence CICO : 16 mg/kg",
-        "Décurarisation profonde : 4 mg/kg IV",
-        "Voies : VVP ou VVC",
-      ],
+      a: ["IVD — urgence CICO : 16 mg/kg", "Voies : VVP ou VVC"],
       p: ["4-16 mg/kg IV selon profondeur du bloc"],
     },
   },
@@ -283,7 +279,7 @@ export const DRUGS_ANTIDOTES = [
     svc: ["SAUV", "SMUR", "SAU"],
     couleur: "#0EA5E9",
     icon: "🧪",
-    desc: "Antidote de référence du surdosage au paracétamol. Précurseur du glutathion hépatique. Efficacité maximale dans les 8–10 premières heures. Administré en 3 phases successives. Contacter le centre antipoison.",
+    desc: "Antidote de référence du surdosage au paracétamol. Précurseur du glutathion hépatique. Efficacité maximale dans les 8–10 premières heures. Administré en plusieurs phases successives. Contacter le centre antipoison.",
     indic: [
       "Intoxication au paracétamol (surdosage volontaire ou accidentel)",
       "Hépatoprotection en cas de surdosage paracétamol",
@@ -304,6 +300,7 @@ export const DRUGS_ANTIDOTES = [
         "Phase 1 : 150 mg/kg IV en 60 min",
         "Phase 2 : 50 mg/kg IV en 4h",
         "Phase 3 : 100 mg/kg IV en 16h",
+        "Phase 4 : 300 mg/kg IV en 24h",
         "Voie : VVP ou VVC — G5% préféré",
       ],
       p: [
@@ -320,17 +317,19 @@ export const DRUGS_ANTIDOTES = [
       conc_produit: 200,
       unite: "mg",
       dose_calc: true,
-      duree: "3 phases successives",
+      duree: "Phases successives",
       stabilite: "Utiliser immédiatement après dilution",
       phases: [
         { label: "Phase 1", dose_kg: 150, duree: "60 min", solvant_vol: 500 },
         { label: "Phase 2", dose_kg: 50, duree: "4h", solvant_vol: 500 },
         { label: "Phase 3", dose_kg: 100, duree: "16h", solvant_vol: 1000 },
+        { label: "Phase 4", dose_kg: 300, duree: "24h", solvant_vol: 1000 },
       ],
       etapes: [
         "Phase 1 — 150 mg/kg dans 500 mL G5% → perfuser en 60 min",
         "Phase 2 — 50 mg/kg dans 500 mL G5% → perfuser en 4h",
         "Phase 3 — 100 mg/kg dans 1000 mL G5% → perfuser en 16h",
+        "Phase 4 — 300 mg/kg dans 1000 mL G5% → perfuser en 24h",
       ],
       notes: [
         "Réaction anaphylactoïde : arrêter la perfusion, antihistaminique IV, reprendre à débit réduit après résolution",
