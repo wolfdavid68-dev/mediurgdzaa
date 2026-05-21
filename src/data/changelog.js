@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v99";
+export const APP_VERSION = "v100";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v100",
+    date: "2026-05-21",
+    titre: "Charte d'utilisation + bandeau « Version test »",
+    changes: [
+      {
+        type: "feat",
+        text: "Charte d'utilisation obligatoire au 1er lancement de l'app et à la création de compte. La modale formalise les responsabilités d'usage : MediURG est un mémo numérique d'aide, jamais un substitut à la prescription ; la prescription officielle prévaut en cas de divergence ; les valeurs affichées doivent être vérifiées avec la prescription de référence. L'utilisateur doit cliquer « J'accepte la charte » pour entrer dans l'app (× et ESC désactivés en mode 1re lecture). Acceptation persistée en localStorage avec horodatage pour audit. Charte reconsultable à tout moment via le lien dans la modale Notes de version.",
+      },
+      {
+        type: "feat",
+        text: "Bandeau permanent « 🧪 Version test — Les valeurs affichées sont en cours de validation » affiché en haut de l'app et en haut du mode URGENCE ACR. Reste visible pendant tout le scroll. À retirer (1 ligne dans App.tsx + AcrModeModal.tsx) une fois la base médicamenteuse validée par un référent pharmaceutique.",
+      },
+    ],
+  },
   {
     version: "v99",
     date: "2026-05-19",
