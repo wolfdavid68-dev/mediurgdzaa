@@ -38,14 +38,6 @@
   font-family: var(--mono);
 }
 
-/* Grille ECG (papier millimétré — sur la photo blanche, réaliste) */
-.ecg-grid {
-  background-image:
-    linear-gradient(rgba(255, 71, 87, 0.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 71, 87, 0.18) 1px, transparent 1px);
-  background-size: 8px 8px;
-}
-
 /* Animations */
 @keyframes ecgr-fadeUp {
   from {
@@ -288,11 +280,6 @@
 .ecgr-stack .ecgr-warn {
   margin-top: 1.25rem;
 }
-.ecgr-banner {
-  background: color-mix(in srgb, var(--warn) 16%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
-  padding: 0.75rem 1.25rem;
-}
 
 /* Barre supérieure (preview / loading / results) */
 .ecgr-bar {
@@ -342,27 +329,6 @@
   overflow: hidden;
   background: #fff;
   border: 1px solid var(--border);
-}
-.ecgr-photo-in {
-  padding: 1rem;
-  position: relative;
-  aspect-ratio: 4 / 3;
-}
-.ecgr-strip {
-  padding: 0.5rem;
-  aspect-ratio: 16 / 6;
-}
-.ecgr-svg {
-  width: 100%;
-  height: 100%;
-}
-.ecgr-photo-tag {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  font-size: 9px;
-  color: #71717a;
-  font-family: var(--mono);
 }
 /* Photo ECG réelle (capturée / importée) */
 .ecgr-img {

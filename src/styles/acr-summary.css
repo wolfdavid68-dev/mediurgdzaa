@@ -376,9 +376,6 @@
   .acr-cycle-value {
     font-size: 19px;
   }
-  .acr-counter {
-    font-size: 12px;
-  }
 }
 
 /* Variante intégrée à la bottom-nav : petit v19 centré sous les onglets */
@@ -580,9 +577,6 @@
 }
 
 @media (max-width: 480px) {
-  .changelog-modal {
-    max-height: 90vh;
-  }
   .changelog-header {
     padding: 12px 16px;
   }

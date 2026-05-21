@@ -271,6 +271,17 @@ export function calcPedTable(prep: any, weightKg: string | number | null | undef
   return null;
 }
 
+// ── Préparation : dose libre (input mg → mL à prélever) ──────
+// Utilisé par le panneau « Calcul dose libre » de PrepBlock : on saisit
+// une dose en mg et on lit le volume à prélever, indépendamment du poids.
+// Renvoie null si dose invalide ou conc_produit absente.
+export function calcDoseLibre(prep: any, doseMg: string | number | null | undefined) {
+  const d = parseFloat(String(doseMg));
+  if (!d || d <= 0) return null;
+  if (!prep?.conc_produit) return null;
+  return +(d / prep.conc_produit).toFixed(2);
+}
+
 // ── Préparation : dose_kg standard ────────────────────────────
 // Renvoie les volumes à prélever / compléter pour une dilution
 // dose_kg (+ option dose_max_kg pour les fourchettes).

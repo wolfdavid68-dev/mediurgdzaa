@@ -112,12 +112,6 @@
   color: #fff;
 }
 
-.proto-filter-count {
-  font-size: 11px;
-  color: var(--text-mute);
-  margin-left: auto;
-}
-
 /* ── PROTOCOLES ──────────────────────────────────────────── */
 .protocol-list {
   display: flex;

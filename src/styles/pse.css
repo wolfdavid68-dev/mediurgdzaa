@@ -193,11 +193,3 @@
   color: #60a5fa;
   font-weight: 700;
 }
-
-.pse-no-weight {
-  font-size: 11px;
-  color: var(--text-mute);
-  font-style: italic;
-  text-align: center;
-  padding: 4px 0;
-}

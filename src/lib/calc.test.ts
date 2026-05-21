@@ -8,6 +8,7 @@ import {
   calcPrepSufentaTable,
   calcPrepPhases,
   calcPrepDoseKg,
+  calcDoseLibre,
   validateDoseValue,
 } from "./calc";
 
@@ -499,5 +500,34 @@ describe("calcPrepDoseKg", () => {
     const prep = { dose_kg: 1.5, conc_produit: 10, unite: "mg" };
     expect(calcPrepDoseKg(prep, 0)).toBeNull();
     expect(calcPrepDoseKg(prep, 400)).toBeNull();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// calcDoseLibre — saisie mg → mL à prélever (poids non requis)
+// ════════════════════════════════════════════════════════════════
+describe("calcDoseLibre", () => {
+  test("100 mg / 10 mg/mL → 10 mL", () => {
+    expect(calcDoseLibre({ conc_produit: 10 }, 100)).toBe(10);
+  });
+
+  test("arrondi à 2 décimales : 5 mg / 3 mg/mL → 1,67 mL", () => {
+    expect(calcDoseLibre({ conc_produit: 3 }, 5)).toBe(1.67);
+  });
+
+  test("accepte une string (input HTML)", () => {
+    expect(calcDoseLibre({ conc_produit: 10 }, "50")).toBe(5);
+  });
+
+  test("dose vide ou ≤ 0 → null", () => {
+    expect(calcDoseLibre({ conc_produit: 10 }, "")).toBeNull();
+    expect(calcDoseLibre({ conc_produit: 10 }, 0)).toBeNull();
+    expect(calcDoseLibre({ conc_produit: 10 }, -5)).toBeNull();
+  });
+
+  test("conc_produit absente ou nulle → null", () => {
+    expect(calcDoseLibre({}, 100)).toBeNull();
+    expect(calcDoseLibre({ conc_produit: 0 }, 100)).toBeNull();
+    expect(calcDoseLibre(null, 100)).toBeNull();
   });
 });

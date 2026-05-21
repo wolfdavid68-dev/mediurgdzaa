@@ -380,12 +380,6 @@
   gap: 6px;
 }
 
-.proto-section {
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
 .proto-tabs {
   display: flex;
   gap: 7px;
@@ -434,11 +428,6 @@
   border-top: 1px solid var(--border);
   padding-top: 8px;
   animation: panel-expand-in 0.18s ease;
-}
-
-/* Section headers (supprimés — remplacés par tabs) */
-.proto-section-header {
-  display: none;
 }
 
 .proto-items {
@@ -555,26 +544,9 @@
   margin-top: 1px;
 }
 
-.proto-section-gravite .proto-item {
-  color: #fdba74;
-}
-.proto-section-exclusion .proto-item {
-  color: #fca5a5;
-}
-
-[data-theme="light"] .proto-section-gravite .proto-item {
-  color: #9a3412;
-}
-[data-theme="light"] .proto-section-exclusion .proto-item {
-  color: #991b1b;
-}
-
 /* Grande police protocoles */
 [data-fontsize="large"] .protocol-name {
   font-size: 18px;
-}
-[data-fontsize="large"] .proto-section-title {
-  font-size: 13px;
 }
 [data-fontsize="large"] .proto-item {
   font-size: 15px;

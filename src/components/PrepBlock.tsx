@@ -5,6 +5,7 @@ import {
   calcPrepPhases,
   calcPrepDoseKg,
   calcPedTable,
+  calcDoseLibre,
 } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
 import { DRUGS_PREVIEW } from "../data/drugs.preview";
@@ -392,17 +393,20 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
               </button>
             )}
           </div>
-          {doseLibre && parseFloat(doseLibre) > 0 && (
-            <div className="prep-calc-row">
-              <span className="prep-calc-step">Prélever</span>
-              <span
-                className="prep-calc-val prep-calc-highlight"
-                style={{ color: "#60a5fa", fontWeight: 800 }}
-              >
-                {+(parseFloat(doseLibre) / prep.conc_produit).toFixed(2)} mL
-              </span>
-            </div>
-          )}
+          {(() => {
+            const ml = calcDoseLibre(prep, doseLibre);
+            return ml !== null ? (
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Prélever</span>
+                <span
+                  className="prep-calc-val prep-calc-highlight"
+                  style={{ color: "#60a5fa", fontWeight: 800 }}
+                >
+                  {ml} mL
+                </span>
+              </div>
+            ) : null;
+          })()}
         </div>
       )}
 
