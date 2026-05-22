@@ -62,6 +62,15 @@ export default defineConfig({
       // Workbox génère le precache-manifest avec les hashes Vite → invalide
       // automatiquement à chaque build.
       workbox: {
+        // clientsClaim : dès que le SW s'active, il prend le contrôle de la
+        // page courante (pas seulement des navigations futures). Sans ça, la
+        // TOUTE PREMIÈRE session reste non-contrôlée → si l'user coupe le
+        // réseau ou recharge avant d'avoir rouvert l'app, rien n'est servi
+        // depuis le cache → page d'erreur « Vous êtes hors connexion ».
+        // On NE touche PAS à skipWaiting (toujours géré par le toast « Mettre
+        // à jour ») : clientsClaim n'impacte que la prise de contrôle, pas le
+        // moment d'activation d'une nouvelle version. Combo sûr avec 'prompt'.
+        clientsClaim: true,
         // woff2 inclus : la police Geist (@fontsource) doit être précachée
         // pour rester dispo hors-ligne (sinon fallback système en offline).
         globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,ico,webmanifest,woff2}"],

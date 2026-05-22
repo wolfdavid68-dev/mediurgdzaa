@@ -140,6 +140,17 @@
     transform: translateX(-50%) translateY(8px);
   }
 }
+/* Variante info « ✓ Disponible hors-ligne » : pas de bouton, juste la
+   confirmation que le précache est terminé. Padding symétrique (pas de
+   bouton fermer à droite) + accent vert plein. Auto-disparaît après 5 s. */
+.update-prompt--ready {
+  padding: 10px 18px;
+  border-color: rgba(74, 222, 128, 0.65);
+}
+.update-prompt--ready .update-prompt-text {
+  color: #4ade80;
+  font-weight: 700;
+}
 .update-prompt-text {
   color: #e8e8f0;
 }

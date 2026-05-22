@@ -10,6 +10,7 @@ import { useRegisterSW } from "virtual:pwa-register/react";
 const UpdatePrompt = () => {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
+    offlineReady: [offlineReady, setOfflineReady],
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(reg) {
@@ -31,31 +32,53 @@ const UpdatePrompt = () => {
     if (needRefresh) setClosed(false);
   }, [needRefresh]);
 
-  if (!needRefresh || closed) return null;
+  // offlineReady fire une fois que le SW a fini de précacher TOUTE l'app :
+  // c'est le seul moment où couper le réseau est garanti sûr. On l'affiche
+  // explicitement (« ✓ Disponible hors-ligne ») pour qu'un soignant sache
+  // qu'il peut partir en SMUR sans risque de tomber sur la page d'erreur du
+  // navigateur. Auto-disparition après 5 s (info, pas une action).
+  useEffect(() => {
+    if (!offlineReady) return;
+    const id = setTimeout(() => setOfflineReady(false), 5000);
+    return () => clearTimeout(id);
+  }, [offlineReady, setOfflineReady]);
 
-  return (
-    <div className="update-prompt" role="status" aria-live="polite">
-      <span className="update-prompt-text">Nouvelle version disponible</span>
-      <button
-        type="button"
-        className="update-prompt-action"
-        onClick={() => updateServiceWorker(true)}
-      >
-        Mettre à jour
-      </button>
-      <button
-        type="button"
-        className="update-prompt-close"
-        onClick={() => {
-          setNeedRefresh(false);
-          setClosed(true);
-        }}
-        aria-label="Fermer"
-      >
-        ×
-      </button>
-    </div>
-  );
+  // Le toast de mise à jour (actionnable) est prioritaire sur l'info offline.
+  if (needRefresh && !closed) {
+    return (
+      <div className="update-prompt" role="status" aria-live="polite">
+        <span className="update-prompt-text">Nouvelle version disponible</span>
+        <button
+          type="button"
+          className="update-prompt-action"
+          onClick={() => updateServiceWorker(true)}
+        >
+          Mettre à jour
+        </button>
+        <button
+          type="button"
+          className="update-prompt-close"
+          onClick={() => {
+            setNeedRefresh(false);
+            setClosed(true);
+          }}
+          aria-label="Fermer"
+        >
+          ×
+        </button>
+      </div>
+    );
+  }
+
+  if (offlineReady) {
+    return (
+      <div className="update-prompt update-prompt--ready" role="status" aria-live="polite">
+        <span className="update-prompt-text">✓ Disponible hors-ligne</span>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default UpdatePrompt;

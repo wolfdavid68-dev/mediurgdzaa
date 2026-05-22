@@ -4,6 +4,7 @@
 import { useState } from "react";
 
 let mockNeedRefresh = false;
+let mockOfflineReady = false;
 let mockUpdateSW = vi.fn();
 let mockOnRegistered: ((reg: any) => void) | undefined;
 let mockOnRegisterError: ((err: unknown) => void) | undefined;
@@ -14,20 +15,23 @@ vi.mock("virtual:pwa-register/react", () => ({
     onRegisterError?: (err: unknown) => void;
   }) => {
     const [needRefresh, setNeedRefresh] = useState(mockNeedRefresh);
+    const [offlineReady, setOfflineReady] = useState(mockOfflineReady);
     mockOnRegistered = opts?.onRegistered;
     mockOnRegisterError = opts?.onRegisterError;
     return {
       needRefresh: [needRefresh, setNeedRefresh],
+      offlineReady: [offlineReady, setOfflineReady],
       updateServiceWorker: mockUpdateSW,
     };
   },
 }));
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import UpdatePrompt from "./UpdatePrompt";
 
 beforeEach(() => {
   mockNeedRefresh = false;
+  mockOfflineReady = false;
   mockUpdateSW = vi.fn();
   mockOnRegistered = undefined;
   mockOnRegisterError = undefined;
@@ -93,6 +97,34 @@ describe("UpdatePrompt", () => {
     vi.advanceTimersByTime(60 * 60 * 1000);
     // Aucune assertion d'appel — juste vérifier que ça ne crashe pas
     vi.useRealTimers();
+  });
+
+  test("offlineReady=true : affiche « ✓ Disponible hors-ligne » (sans bouton)", () => {
+    mockOfflineReady = true;
+    render(<UpdatePrompt />);
+    expect(screen.getByText("✓ Disponible hors-ligne")).toBeInTheDocument();
+    // Toast purement informatif : aucun bouton d'action.
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  test("offlineReady disparaît après 5 s", () => {
+    vi.useFakeTimers();
+    mockOfflineReady = true;
+    render(<UpdatePrompt />);
+    expect(screen.getByText("✓ Disponible hors-ligne")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.queryByText("✓ Disponible hors-ligne")).toBeNull();
+    vi.useRealTimers();
+  });
+
+  test("needRefresh prioritaire sur offlineReady", () => {
+    mockNeedRefresh = true;
+    mockOfflineReady = true;
+    render(<UpdatePrompt />);
+    expect(screen.getByText("Nouvelle version disponible")).toBeInTheDocument();
+    expect(screen.queryByText("✓ Disponible hors-ligne")).toBeNull();
   });
 
   test("onRegisterError : log warning sans crasher", () => {
