@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Check-list interactive d'un kit (ex : ISR / intubation). Trois types
 // d'items : `check` (case à cocher), `choice` (options exclusives en chips),
@@ -20,6 +20,25 @@ type ChecklistItem =
 type ChecklistSection = { titre: string; items: ChecklistItem[] };
 
 type Values = Record<string, boolean | string>;
+
+// Sections « complètes » = toutes leurs cases à cocher sont cochées. Les
+// sections sans case à cocher (ex : critères prédictifs) ne sont jamais
+// « complètes » → ne se replient pas automatiquement.
+const computeSectionDone = (checklist: ChecklistSection[], vals: Values): boolean[] =>
+  checklist.map((section, si) => {
+    let total = 0;
+    let done = 0;
+    section.items.forEach((item, ii) => {
+      if (item.type === "check") {
+        total++;
+        if (vals[`${si}-${ii}`] === true) done++;
+      }
+    });
+    return total > 0 && done === total;
+  });
+
+const collapsedFromDone = (done: boolean[]): Set<number> =>
+  new Set(done.flatMap((d, i) => (d ? [i] : [])));
 
 const loadValues = (kitId: string): Values => {
   try {
@@ -50,6 +69,15 @@ type Props = {
 const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
   const [values, setValues] = useState<Values>(() => loadValues(kitId));
 
+  // Sections repliées. À l'ouverture, les sections déjà complètes (valeurs
+  // persistées) démarrent repliées pour réduire le scroll. Ensuite, une
+  // section se replie automatiquement quand elle passe à « complète » ;
+  // l'utilisateur peut toujours la déplier/replier manuellement.
+  const [collapsed, setCollapsed] = useState<Set<number>>(() =>
+    collapsedFromDone(computeSectionDone(checklist, values))
+  );
+  const prevDone = useRef<boolean[]>(computeSectionDone(checklist, values));
+
   useEffect(() => {
     try {
       localStorage.setItem(storageKey(kitId), JSON.stringify({ ts: Date.now(), values }));
@@ -57,6 +85,32 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
       /* quota / navigation privée : on ignore, la session reste utilisable */
     }
   }, [values, kitId]);
+
+  // Auto-repli sur la transition incomplète → complète (uniquement à ce
+  // moment-là, pour ne pas re-replier une section que l'utilisateur a
+  // rouverte pour la relire).
+  useEffect(() => {
+    const done = computeSectionDone(checklist, values);
+    setCollapsed((prev) => {
+      let next = prev;
+      done.forEach((d, si) => {
+        if (d && !prevDone.current[si] && !next.has(si)) {
+          if (next === prev) next = new Set(prev);
+          next.add(si);
+        }
+      });
+      return next;
+    });
+    prevDone.current = done;
+  }, [values, checklist]);
+
+  const toggleCollapse = (si: number) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(si)) next.delete(si);
+      else next.add(si);
+      return next;
+    });
 
   // Valeur lisible d'un item pour l'export (mail / impression).
   const itemValue = (item: ChecklistItem, key: string): string => {
@@ -167,6 +221,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
     if (!hasAnyValue) return;
     if (window.confirm("Réinitialiser toute la check-list (coches + saisies) ?")) {
       setValues({});
+      setCollapsed(new Set());
     }
   };
 
@@ -252,12 +307,30 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
       {checklist.map((section, si) => {
         const sec = sectionChecks[si];
         const secDone = sec.total > 0 && sec.done === sec.total;
+        const isCollapsed = collapsed.has(si);
         return (
           <div key={si} className="kit-checklist-section">
-            <div
+            <button
+              type="button"
               className={`checklist-section kit-checklist-sechead ${secDone ? "kit-checklist-sec-done" : ""}`}
+              onClick={() => toggleCollapse(si)}
+              aria-expanded={!isCollapsed}
             >
-              <span>{section.titre}</span>
+              <span className="kit-checklist-sectitle">
+                <svg
+                  className={`kit-checklist-chevron ${isCollapsed ? "" : "kit-checklist-chevron-open"}`}
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  aria-hidden="true"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+                {section.titre}
+              </span>
               {sec.total > 0 && (
                 <span className="kit-checklist-secbadge">
                   {secDone && (
@@ -276,90 +349,94 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
                   {sec.done}/{sec.total}
                 </span>
               )}
-            </div>
-            <ul className="checklist">
-              {section.items.map((item, ii) => {
-                const key = `${si}-${ii}`;
-                if (item.type === "check") {
-                  const checked = values[key] === true;
-                  return (
-                    <li key={ii} className="checklist-item">
-                      <label className={`checklist-label ${checked ? "checklist-checked" : ""}`}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => setValues((p) => ({ ...p, [key]: !p[key] }))}
-                        />
-                        <span
-                          className="checklist-box"
-                          style={checked ? { background: couleur, borderColor: couleur } : {}}
-                          aria-hidden="true"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            width="13"
-                            height="13"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
+            </button>
+            {!isCollapsed && (
+              <ul className="checklist">
+                {section.items.map((item, ii) => {
+                  const key = `${si}-${ii}`;
+                  if (item.type === "check") {
+                    const checked = values[key] === true;
+                    return (
+                      <li key={ii} className="checklist-item">
+                        <label className={`checklist-label ${checked ? "checklist-checked" : ""}`}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => setValues((p) => ({ ...p, [key]: !p[key] }))}
+                          />
+                          <span
+                            className="checklist-box"
+                            style={checked ? { background: couleur, borderColor: couleur } : {}}
+                            aria-hidden="true"
                           >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </span>
-                        <span className="checklist-text">{item.label}</span>
-                      </label>
-                    </li>
-                  );
-                }
-                if (item.type === "choice") {
-                  const selected = (values[key] as string) || "";
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="13"
+                              height="13"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </span>
+                          <span className="checklist-text">{item.label}</span>
+                        </label>
+                      </li>
+                    );
+                  }
+                  if (item.type === "choice") {
+                    const selected = (values[key] as string) || "";
+                    return (
+                      <li key={ii} className="kit-checklist-field">
+                        <span className="kit-checklist-flabel">{item.label}</span>
+                        <div
+                          className="kit-checklist-chips"
+                          role="radiogroup"
+                          aria-label={item.label}
+                        >
+                          {item.options.map((opt) => {
+                            const active = selected === opt;
+                            return (
+                              <button
+                                key={opt}
+                                type="button"
+                                role="radio"
+                                aria-checked={active}
+                                className={`kit-checklist-chip ${active ? "kit-checklist-chip-active" : ""}`}
+                                style={active ? { background: couleur, borderColor: couleur } : {}}
+                                onClick={() =>
+                                  setValues((p) => ({ ...p, [key]: active ? "" : opt }))
+                                }
+                              >
+                                {opt}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </li>
+                    );
+                  }
+                  // text
                   return (
                     <li key={ii} className="kit-checklist-field">
                       <span className="kit-checklist-flabel">{item.label}</span>
-                      <div
-                        className="kit-checklist-chips"
-                        role="radiogroup"
-                        aria-label={item.label}
-                      >
-                        {item.options.map((opt) => {
-                          const active = selected === opt;
-                          return (
-                            <button
-                              key={opt}
-                              type="button"
-                              role="radio"
-                              aria-checked={active}
-                              className={`kit-checklist-chip ${active ? "kit-checklist-chip-active" : ""}`}
-                              style={active ? { background: couleur, borderColor: couleur } : {}}
-                              onClick={() => setValues((p) => ({ ...p, [key]: active ? "" : opt }))}
-                            >
-                              {opt}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <span className="kit-checklist-input-wrap">
+                        <input
+                          className="kit-checklist-input"
+                          type="text"
+                          inputMode={item.unit ? "decimal" : "text"}
+                          placeholder={item.placeholder || ""}
+                          value={(values[key] as string) || ""}
+                          onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))}
+                        />
+                        {item.unit && <span className="kit-checklist-unit">{item.unit}</span>}
+                      </span>
                     </li>
                   );
-                }
-                // text
-                return (
-                  <li key={ii} className="kit-checklist-field">
-                    <span className="kit-checklist-flabel">{item.label}</span>
-                    <span className="kit-checklist-input-wrap">
-                      <input
-                        className="kit-checklist-input"
-                        type="text"
-                        inputMode={item.unit ? "decimal" : "text"}
-                        placeholder={item.placeholder || ""}
-                        value={(values[key] as string) || ""}
-                        onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))}
-                      />
-                      {item.unit && <span className="kit-checklist-unit">{item.unit}</span>}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+                })}
+              </ul>
+            )}
           </div>
         );
       })}

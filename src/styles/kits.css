@@ -97,12 +97,31 @@
   border-radius: 999px;
   transition: width 0.25s ease;
 }
-/* En-tête de section : titre + badge de progression local */
+/* En-tête de section : bouton repliable (titre + chevron + badge) */
 .kit-checklist-sechead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  /* hérite des styles .checklist-section (uppercase, couleur, marges) */
+}
+.kit-checklist-sectitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.kit-checklist-chevron {
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+  transform: rotate(0deg);
+}
+.kit-checklist-chevron-open {
+  transform: rotate(90deg);
 }
 .kit-checklist-secbadge {
   display: inline-flex;
