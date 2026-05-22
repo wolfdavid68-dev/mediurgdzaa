@@ -12,7 +12,7 @@ export const DRUGS_DIURETIQUES = [
     dci: "Furosémide",
     classe: "Diurétique de l'anse",
     cat: "Diurétiques",
-    svc: ["SAUV", "SMUR", "SAU"],
+    svc: ["SMUR", "SAU"],
     couleur: "#64D2FF",
     icon: "💧",
     desc: "Diurétique de l'anse. Produit qui précipite avec de nombreux autres thérapeutiques — se référer au tableau des incompatibilités. Rincer la tubulure avant et après l'injection. Stabilité à la lumière 12h.",

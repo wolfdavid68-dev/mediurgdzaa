@@ -33,7 +33,7 @@ import { usePersistentStorage } from "./lib/usePersistentStorage";
 import { useLongPress } from "./lib/useLongPress";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
-const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
+const SERVICES = ["Tout", "SMUR", "SAU"];
 
 const App = () => {
   const [page, setPage] = useState("medicaments");
