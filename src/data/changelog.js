@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v101";
+export const APP_VERSION = "v102";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v102",
+    date: "2026-05-22",
+    titre: "Correctif écran noir au rechargement hors-ligne",
+    changes: [
+      {
+        type: "fix",
+        text: "L'app affichait un écran noir quand on rechargeait (refresh) la page en mode avion / sans réseau — alors que la navigation normale hors-ligne fonctionnait. Cause : un chemin de base relatif (hérité de l'ancien build) empêchait le service worker de re-servir la coquille (index.html + scripts) au rechargement → React ne montait pas. Passage en chemin absolu : le rechargement hors-ligne ré-affiche désormais l'app normalement.",
+      },
+    ],
+  },
   {
     version: "v101",
     date: "2026-05-22",

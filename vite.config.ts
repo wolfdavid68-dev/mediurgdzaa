@@ -167,7 +167,13 @@ export default defineConfig({
         template: "treemap",
       }),
   ],
-  base: "./",
+  // base "/" (et NON "./") : déploiement à la racine du domaine (Vercel).
+  // Un base relatif casse le navigateFallback de Workbox au rechargement
+  // hors-ligne — la coquille (index.html) n'est pas re-servie → React ne
+  // monte pas → écran noir. En ligne ça passe (le réseau sert), d'où un bug
+  // visible uniquement offline au refresh. Avec "/", precache + fallback
+  // utilisent des URLs absolues cohérentes → reload offline OK.
+  base: "/",
   build: {
     outDir: "build",
     emptyOutDir: true,
