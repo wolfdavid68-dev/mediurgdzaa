@@ -1,9 +1,10 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { fetchProfile, getCurrentSession, onAuthStateChange, type Profile } from "../../lib/auth";
 import { cacheProfile, getCachedProfile, getLastCachedProfile } from "../../lib/profileCache";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
+import { DRUGS } from "../../data/drugs";
 import ForgotPasswordScreen from "./ForgotPasswordScreen";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
@@ -14,12 +15,10 @@ import MobileRegisterScreen from "./mobile/MobileRegisterScreen";
 import MobileForgotPasswordScreen from "./mobile/MobileForgotPasswordScreen";
 import MobileResetPasswordScreen from "./mobile/MobileResetPasswordScreen";
 import { MobileBannedScreen, MobilePendingScreen } from "./mobile/MobileStatusScreens";
-
-// AdminDashboard est lazy-loadé : seuls les admins voient cet écran, et
-// même pour eux il sort du bundle initial (~10 kB). Idem pour la variante
-// mobile (tab bar + bottom sheet), chargée seulement sur petit écran.
-const AdminDashboard = lazy(() => import("./AdminDashboard"));
-const MobileAdminDashboard = lazy(() => import("./mobile/MobileAdminDashboard"));
+// Dashboards admin en import STATIQUE (comme tout le reste) : pas de chunk
+// lazy qui pourrait échouer à fetch hors-ligne. Cf. App.tsx.
+import AdminDashboard from "./AdminDashboard";
+import MobileAdminDashboard from "./mobile/MobileAdminDashboard";
 
 // AuthGate — wrapper qui décide quoi rendre selon l'état d'auth.
 //
@@ -156,11 +155,8 @@ const AuthGate = ({ children }: Props) => {
   const profileStatus = profile?.status;
   useEffect(() => {
     if (!enabled || !profileId || profileStatus !== "active") return;
-    // Import dynamique pour ne pas charger DRUGS si l'auth est désactivée.
-    import("../../data/drugs").then((m) => {
-      const ids = (m.DRUGS as Array<{ id: number }>).map((d) => d.id);
-      migrateAnonymousData(profileId, ids);
-    });
+    const ids = (DRUGS as Array<{ id: number }>).map((d) => d.id);
+    migrateAnonymousData(profileId, ids);
   }, [enabled, profileId, profileStatus]);
 
   // Accès admin par geste caché : appui long sur le logo (App.tsx) émet
@@ -259,17 +255,7 @@ const AuthGate = ({ children }: Props) => {
       onLogout: () => setProfile(null),
       onExitAdmin: () => setShowAdmin(false),
     };
-    return (
-      <Suspense
-        fallback={
-          <div className="auth-stage">
-            <span className="auth-spinner" />
-          </div>
-        }
-      >
-        {isMobile ? <MobileAdminDashboard {...adminProps} /> : <AdminDashboard {...adminProps} />}
-      </Suspense>
-    );
+    return isMobile ? <MobileAdminDashboard {...adminProps} /> : <AdminDashboard {...adminProps} />;
   }
 
   // App normale. L'accès admin se fait par appui long sur le logo

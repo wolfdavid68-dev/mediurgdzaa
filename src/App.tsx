@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useDeferredValue, lazy, Suspense } from "react";
+import { useMemo, useState, useEffect, useDeferredValue } from "react";
 import { DRUGS } from "./data/drugs";
 import { ALIASES } from "./data/aliases";
 import { normalize } from "./lib/normalize";
@@ -9,22 +9,19 @@ import MedicamentsPage from "./pages/MedicamentsPage";
 import OfflineBanner from "./components/OfflineBanner";
 import TestVersionBanner from "./components/TestVersionBanner";
 import UpdatePrompt from "./components/UpdatePrompt";
-// Pages/modale CŒUR offline : importées en statique (PAS en lazy). Un chunk
-// lazy peut échouer à charger hors-ligne si le hash demandé ne matche pas le
-// précache du service worker (décalage inévitable à chaque mise à jour en mode
-// 'prompt') → « Failed to fetch dynamically imported module » → crash. Comme
-// l'app est offline-first et que ces écrans DOIVENT marcher hors-ligne, on les
-// met dans le bundle principal : chargés avec index.html, toujours cohérents,
-// aucun fetch séparé possible. Le surcoût de poids initial est précaché de
-// toute façon. Cf. RootErrorFallback / commit error-boundary racine.
+// Tout en import STATIQUE (PAS de lazy). Un chunk lazy peut échouer à charger
+// hors-ligne si le hash demandé ne matche pas le précache du service worker
+// (décalage inévitable à chaque mise à jour en mode 'prompt') → « Failed to
+// fetch dynamically imported module » → crash. L'app est offline-first :
+// chaque écran DOIT marcher hors-ligne, donc tout vit dans le bundle principal,
+// chargé avec index.html, toujours cohérent, aucun fetch séparé possible. Le
+// surcoût de poids initial est précaché de toute façon. Cf. RootErrorFallback.
 import AcrModeModal from "./components/AcrModeModal";
 import ProtocolesPage from "./pages/ProtocolesPage";
 import EchellesPage from "./pages/EchellesPage";
-// CharterModal en statique aussi : la charte doit pouvoir s'afficher au tout
-// premier lancement même hors-ligne (et juste après une mise à jour, quand un
-// chunk lazy au hash décalé échouerait à fetch). Acceptation obligatoire avant
-// d'entrer dans l'app → on ne peut pas se permettre qu'elle plante.
-import CharterModal from "./components/CharterModal";
+import ChangelogModal from "./components/ChangelogModal";
+import NotesBackupModal from "./components/NotesBackupModal";
+import CharterModal, { CHARTER_VERSION, CHARTER_LS_KEY } from "./components/CharterModal";
 import { APP_VERSION } from "./data/changelog";
 import {
   pushNav,
@@ -34,19 +31,6 @@ import {
 } from "./lib/useBackNavigation";
 import { usePersistentStorage } from "./lib/usePersistentStorage";
 import { useLongPress } from "./lib/useLongPress";
-
-// Code-splitting : modales NON critiques hors-ligne, importées à la demande.
-// (Changelog, sauvegarde de notes.) Si l'une échoue à charger hors-ligne,
-// l'ErrorBoundary racine affiche un écran de récupération — pas de crash. Les
-// écrans CŒUR (Protocoles, Échelles, URGENCE ACR, Charte) sont importés en
-// statique en tête de fichier — voir le commentaire là-bas.
-const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
-const NotesBackupModal = lazy(() => import("./components/NotesBackupModal"));
-
-// Cf. CharterModal.tsx — version stockée en localStorage pour pouvoir
-// forcer une re-acceptation si la charte change matériellement.
-const CHARTER_VERSION = "1.0";
-const CHARTER_LS_KEY = "mediurg-charter-accepted";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SAUV", "SMUR", "SAU", "REA"];
@@ -443,23 +427,17 @@ const App = () => {
         )}
 
         {page === "protocoles" && (
-          <Suspense fallback={null}>
-            <ProtocolesPage
-              protoCategory={protoCategory}
-              changeProtoCategory={changeProtoCategory}
-              onDrugSearch={(name: string) => {
-                navigateTo("medicaments");
-                setSearch(name);
-              }}
-            />
-          </Suspense>
+          <ProtocolesPage
+            protoCategory={protoCategory}
+            changeProtoCategory={changeProtoCategory}
+            onDrugSearch={(name: string) => {
+              navigateTo("medicaments");
+              setSearch(name);
+            }}
+          />
         )}
 
-        {page === "echelles" && (
-          <Suspense fallback={null}>
-            <EchellesPage />
-          </Suspense>
-        )}
+        {page === "echelles" && <EchellesPage />}
       </main>
 
       <BottomNav
@@ -470,32 +448,23 @@ const App = () => {
         onOpenAcr={openAcr}
       />
 
-      {/* Modales lazy-loadées : l'import ne déclenche que quand showXxx passe
-          à true pour la 1ère fois — pas inclus dans le bundle initial. */}
+      {/* Modales montées à la demande (showXxx) mais importées en statique →
+          aucun fetch réseau, fonctionnent hors-ligne sans risque de chunk
+          manquant. */}
       {showAcr && (
-        <Suspense fallback={null}>
-          <AcrModeModal
-            open={showAcr}
-            onClose={closeOverlay}
-            onOpenDrug={(name: string) => {
-              replaceNav({ page: "medicaments", modal: null });
-              setShowAcr(false);
-              setPage("medicaments");
-              setSearch(name);
-            }}
-          />
-        </Suspense>
+        <AcrModeModal
+          open={showAcr}
+          onClose={closeOverlay}
+          onOpenDrug={(name: string) => {
+            replaceNav({ page: "medicaments", modal: null });
+            setShowAcr(false);
+            setPage("medicaments");
+            setSearch(name);
+          }}
+        />
       )}
-      {showChangelog && (
-        <Suspense fallback={null}>
-          <ChangelogModal open={showChangelog} onClose={closeOverlay} />
-        </Suspense>
-      )}
-      {showNotesBackup && (
-        <Suspense fallback={null}>
-          <NotesBackupModal open={showNotesBackup} onClose={closeOverlay} />
-        </Suspense>
-      )}
+      {showChangelog && <ChangelogModal open={showChangelog} onClose={closeOverlay} />}
+      {showNotesBackup && <NotesBackupModal open={showNotesBackup} onClose={closeOverlay} />}
 
       {exitToast && (
         <div className="exit-toast" role="status" aria-live="polite">

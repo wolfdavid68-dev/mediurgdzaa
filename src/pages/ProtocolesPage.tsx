@@ -1,4 +1,4 @@
-import { useMemo, lazy, Suspense, useState } from "react";
+import { useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { isPreview } from "../lib/featureFlags";
 import ProtocolCard from "../components/ProtocolCard";
@@ -6,17 +6,14 @@ import CardErrorFallback from "../components/CardErrorFallback";
 import { PROTOCOLS } from "../data/protocols";
 import { PREP_KITS } from "../data/prepKits";
 
-// Contenu CŒUR offline (incompatibilités, kits, tableau ECG) importé en
-// STATIQUE : un chunk lazy peut échouer hors-ligne si son hash ne matche pas le
-// précache du SW → crash. Ces sous-onglets doivent marcher hors-ligne, donc ils
-// vivent dans le bundle principal (chargé avec index.html). Cf. App.tsx.
+// Tout en import STATIQUE (PAS de lazy). Un chunk lazy peut échouer hors-ligne
+// si son hash ne matche pas le précache du SW → crash. Ces sous-onglets doivent
+// marcher hors-ligne, donc ils vivent dans le bundle principal (chargé avec
+// index.html). Cf. App.tsx.
 import IncompatibilityList from "../components/IncompatibilityList";
 import PrepKitCard from "../components/PrepKitCard";
 import EcgDiagnostic from "../components/EcgDiagnostic";
-// EcgReader reste lazy : preview-only (?auth=preview) ET nécessite le réseau
-// (analyse IA). Le public ne le charge jamais ; en preview, un échec offline
-// est rattrapé par l'ErrorBoundary racine.
-const EcgReader = lazy(() => import("../components/EcgReader"));
+import EcgReader from "../components/EcgReader";
 
 // Page Protocoles avec ses 3 sous-onglets (PISU, Incompatibilités, Kits).
 // Imports data en interne → quand App.jsx la lazy-load, PROTOCOLS et
@@ -77,14 +74,10 @@ const ProtocolesPage = ({
         </button>
       </div>
 
-      {protoCategory === "incompatibilites" && (
-        <Suspense fallback={null}>
-          <IncompatibilityList />
-        </Suspense>
-      )}
+      {protoCategory === "incompatibilites" && <IncompatibilityList />}
 
       {protoCategory === "ecg" && (
-        <Suspense fallback={null}>
+        <>
           {/* Lecteur ECG (photo → analyse) : PREVIEW uniquement
               (?auth=preview). Public : seul le tableau diagnostique. */}
           {isPreview() && (
@@ -93,17 +86,15 @@ const ProtocolesPage = ({
             </div>
           )}
           <EcgDiagnostic />
-        </Suspense>
+        </>
       )}
 
       {protoCategory === "kits" && (
-        <Suspense fallback={null}>
-          <div className="protocol-list">
-            {PREP_KITS.map((k) => (
-              <PrepKitCard key={k.id} kit={k} />
-            ))}
-          </div>
-        </Suspense>
+        <div className="protocol-list">
+          {PREP_KITS.map((k) => (
+            <PrepKitCard key={k.id} kit={k} />
+          ))}
+        </div>
       )}
 
       {protoCategory === "PISU" && (
