@@ -150,8 +150,12 @@ export const PREP_KITS = [
       {
         titre: "Thérapeutiques",
         items: [
-          { type: "text", label: "Hypnotique (dose)", unit: "mg" },
-          { type: "text", label: "Curare (dose)", unit: "mg" },
+          // `from` : peuple le menu déroulant avec les drogues du kit dont le
+          // rôle contient ce mot-clé (Hypnotique / Curare). Cf. KitChecklist.
+          { type: "select", label: "Hypnotique", from: "Hypnotique" },
+          { type: "text", label: "Dose hypnotique", unit: "mg" },
+          { type: "select", label: "Curare", from: "Curare" },
+          { type: "text", label: "Dose curare", unit: "mg" },
           { type: "check", label: "Sédation au PSE préparée" },
           { type: "check", label: "Support vasopresseur préparé" },
         ],

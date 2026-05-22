@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v104";
+export const APP_VERSION = "v105";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v105",
+    date: "2026-05-22",
+    titre: "Check-list ISR : menus déroulants hypnotique / curare",
+    changes: [
+      {
+        type: "feat",
+        text: "Dans la section Thérapeutiques de la check-list intubation, les champs Hypnotique et Curare sont désormais des menus déroulants peuplés automatiquement avec les médicaments du kit ISR selon leur classe (hypnotiques : Étomidate, Kétamine, Propofol ; curares : Célocurine, Rocuronium). Une zone de dose accompagne chaque choix. Le déroulant se met à jour tout seul si la composition du kit change.",
+      },
+    ],
+  },
   {
     version: "v104",
     date: "2026-05-22",

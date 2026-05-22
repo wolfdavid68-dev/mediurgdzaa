@@ -15,9 +15,12 @@ const storageKey = (kitId: string) => `mediurg-kit-checklist-${kitId}`;
 type ChecklistItem =
   | { type: "check"; label: string }
   | { type: "choice"; label: string; options: string[] }
+  | { type: "select"; label: string; from?: string; options?: string[] }
   | { type: "text"; label: string; placeholder?: string; unit?: string };
 
 type ChecklistSection = { titre: string; items: ChecklistItem[] };
+
+type Drogue = { nom: string; role?: string };
 
 type Values = Record<string, boolean | string>;
 
@@ -72,9 +75,22 @@ type Props = {
   titre: string;
   checklist: ChecklistSection[];
   couleur: string;
+  drogues?: Drogue[];
 };
 
-const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
+const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
+  // Options d'un menu déroulant : soit explicites (`options`), soit dérivées
+  // des drogues du kit dont le rôle contient le mot-clé `from` (ex : tous les
+  // « Hypnotique … » / « Curare … » du kit). Sufentanil (« Morphinique ») est
+  // donc exclu du déroulant hypnotique/curare.
+  const selectOptions = (item: ChecklistItem): string[] => {
+    if (item.type !== "select") return [];
+    if (item.options?.length) return item.options;
+    if (item.from) {
+      return drogues.filter((d) => d.role?.includes(item.from as string)).map((d) => d.nom);
+    }
+    return [];
+  };
   const [values, setValues] = useState<Values>(() => loadValues(kitId));
 
   // Sections repliées. À l'ouverture, les sections déjà complètes (valeurs
@@ -144,7 +160,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
   const itemValue = (item: ChecklistItem, key: string): string => {
     const v = values[key];
     if (item.type === "check") return v === true ? "OUI" : "—";
-    if (item.type === "choice") return v ? String(v) : "—";
+    if (item.type === "choice" || item.type === "select") return v ? String(v) : "—";
     const txt = (v as string) || "";
     if (!txt) return "—";
     return item.unit ? `${txt} ${item.unit}` : txt;
@@ -432,6 +448,28 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
                             );
                           })}
                         </div>
+                      </li>
+                    );
+                  }
+                  if (item.type === "select") {
+                    const selected = (values[key] as string) || "";
+                    const opts = selectOptions(item);
+                    return (
+                      <li key={ii} className="kit-checklist-field">
+                        <span className="kit-checklist-flabel">{item.label}</span>
+                        <select
+                          className="kit-checklist-select"
+                          value={selected}
+                          aria-label={item.label}
+                          onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))}
+                        >
+                          <option value="">— choisir —</option>
+                          {opts.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
                       </li>
                     );
                   }

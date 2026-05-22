@@ -329,6 +329,7 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
                 kitId={kit.id}
                 titre={`Check-list — ${kit.nom}`}
                 checklist={kit.checklist}
+                drogues={kit.drogues}
                 couleur={kit.couleur}
               />
             )}
