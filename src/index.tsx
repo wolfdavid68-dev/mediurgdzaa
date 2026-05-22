@@ -1,5 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "react-error-boundary";
+import RootErrorFallback from "./components/RootErrorFallback";
 
 // Styles découpés par domaine (anciennement style.css monolithique).
 // Ordre = ordre original du fichier monolithique → cascade préservée.
@@ -54,14 +56,32 @@ const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("#root introuvable dans index.html");
 const root = createRoot(rootElement);
 
+// Capture des erreurs qui ne remontent PAS par React (rejets de promesse non
+// gérés, erreurs dans des handlers async). Elles ne démontent pas l'arbre mais
+// on les loggue pour diagnostic — utile pour pister un crash hors-ligne.
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("[mediurg] unhandledrejection", e.reason);
+});
+window.addEventListener("error", (e) => {
+  console.error("[mediurg] window error", e.message, e.error);
+});
+
 root.render(
   <StrictMode>
-    {/* AuthGate : transparent quand AUTH_ENABLED=false (mode actuel par
-        défaut), sinon affiche login/register/pending/banned/admin selon
-        l'état de session Supabase. Cf. src/lib/featureFlags.ts. */}
-    <AuthGate>
-      <App />
-    </AuthGate>
+    {/* ErrorBoundary racine : filet ultime. Une erreur de rendu non rattrapée
+        démonterait sinon tout React → écran noir. Ici on affiche un écran de
+        récupération lisible (cf. RootErrorFallback) au lieu du néant. */}
+    <ErrorBoundary
+      FallbackComponent={RootErrorFallback}
+      onError={(error, info) => console.error("[mediurg] root crash", error, info)}
+    >
+      {/* AuthGate : transparent quand AUTH_ENABLED=false (mode actuel par
+          défaut), sinon affiche login/register/pending/banned/admin selon
+          l'état de session Supabase. Cf. src/lib/featureFlags.ts. */}
+      <AuthGate>
+        <App />
+      </AuthGate>
+    </ErrorBoundary>
   </StrictMode>
 );
 
