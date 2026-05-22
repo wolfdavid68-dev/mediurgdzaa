@@ -169,6 +169,46 @@
   flex-wrap: wrap;
   gap: 6px;
 }
+/* Aide visuelle des scores (Mallampati / Cormack) : 4 vignettes */
+.kit-scale {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.kit-scale-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+}
+.kit-scale-cell-active {
+  background: var(--card-hover);
+  border-width: 2px;
+}
+.kit-scale-svg {
+  width: 100%;
+  max-width: 52px;
+}
+.kit-scale-roman {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+}
+.kit-scale-caption {
+  font-size: 9.5px;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--text-mute);
+}
+.kit-scale-cell-active .kit-scale-caption {
+  color: inherit;
+}
 .kit-checklist-chip {
   font-size: clamp(12px, 1.3vw, 13px);
   font-weight: 600;

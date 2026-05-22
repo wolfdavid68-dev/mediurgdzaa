@@ -101,8 +101,18 @@ export const PREP_KITS = [
       {
         titre: "Critères prédictifs de complications",
         items: [
-          { type: "choice", label: "Score de Mallampati", options: ["I", "II", "III", "IV"] },
-          { type: "choice", label: "Score de Cormack", options: ["I", "II", "III", "IV"] },
+          {
+            type: "choice",
+            label: "Score de Mallampati",
+            options: ["I", "II", "III", "IV"],
+            scale: "mallampati",
+          },
+          {
+            type: "choice",
+            label: "Score de Cormack",
+            options: ["I", "II", "III", "IV"],
+            scale: "cormack",
+          },
           { type: "choice", label: "Risque d'inhalation", options: ["Repas < 6h", "Repas > 6h"] },
           { type: "text", label: "Allergie connue", placeholder: "Préciser si oui" },
         ],

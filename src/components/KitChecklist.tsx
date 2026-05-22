@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import KitScaleIllustration from "./KitScaleIllustration";
 
 // Check-list interactive d'un kit (ex : ISR / intubation). Trois types
 // d'items : `check` (case à cocher), `choice` (options exclusives en chips),
@@ -14,7 +15,7 @@ const storageKey = (kitId: string) => `mediurg-kit-checklist-${kitId}`;
 
 type ChecklistItem =
   | { type: "check"; label: string }
-  | { type: "choice"; label: string; options: string[] }
+  | { type: "choice"; label: string; options: string[]; scale?: "mallampati" | "cormack" }
   | { type: "select"; label: string; from?: string; options?: string[] }
   | { type: "text"; label: string; placeholder?: string; unit?: string };
 
@@ -448,6 +449,13 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                             );
                           })}
                         </div>
+                        {item.scale && (
+                          <KitScaleIllustration
+                            scale={item.scale}
+                            selected={selected}
+                            couleur={couleur}
+                          />
+                        )}
                       </li>
                     );
                   }
