@@ -87,6 +87,10 @@ export default defineConfig({
         // (~60 % de poids police en moins dans le precache).
         globIgnores: [
           "**/stats.html",
+          // Icônes de raccourcis : déjà ajoutées au précache via le manifest
+          // PWA (shortcuts[].icons). Les exclure du glob évite la double
+          // inscription (même URL listée 2× dans precacheAndRoute).
+          "**/shortcuts/*.svg",
           "**/geist-cyrillic-*.woff2",
           "**/geist-latin-ext-*.woff2",
           "**/geist-mono-cyrillic-*.woff2",
