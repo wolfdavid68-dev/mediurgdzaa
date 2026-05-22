@@ -20,6 +20,11 @@ import UpdatePrompt from "./components/UpdatePrompt";
 import AcrModeModal from "./components/AcrModeModal";
 import ProtocolesPage from "./pages/ProtocolesPage";
 import EchellesPage from "./pages/EchellesPage";
+// CharterModal en statique aussi : la charte doit pouvoir s'afficher au tout
+// premier lancement même hors-ligne (et juste après une mise à jour, quand un
+// chunk lazy au hash décalé échouerait à fetch). Acceptation obligatoire avant
+// d'entrer dans l'app → on ne peut pas se permettre qu'elle plante.
+import CharterModal from "./components/CharterModal";
 import { APP_VERSION } from "./data/changelog";
 import {
   pushNav,
@@ -31,13 +36,12 @@ import { usePersistentStorage } from "./lib/usePersistentStorage";
 import { useLongPress } from "./lib/useLongPress";
 
 // Code-splitting : modales NON critiques hors-ligne, importées à la demande.
-// (Changelog, sauvegarde de notes, charte.) Si l'une échoue à charger
-// hors-ligne, l'ErrorBoundary racine affiche un écran de récupération — pas de
-// crash. Les écrans CŒUR (Protocoles, Échelles, URGENCE ACR) sont importés en
+// (Changelog, sauvegarde de notes.) Si l'une échoue à charger hors-ligne,
+// l'ErrorBoundary racine affiche un écran de récupération — pas de crash. Les
+// écrans CŒUR (Protocoles, Échelles, URGENCE ACR, Charte) sont importés en
 // statique en tête de fichier — voir le commentaire là-bas.
 const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
 const NotesBackupModal = lazy(() => import("./components/NotesBackupModal"));
-const CharterModal = lazy(() => import("./components/CharterModal"));
 
 // Cf. CharterModal.tsx — version stockée en localStorage pour pouvoir
 // forcer une re-acceptation si la charte change matériellement.
@@ -501,14 +505,12 @@ const App = () => {
         </div>
       )}
       {showCharter && (
-        <Suspense fallback={null}>
-          <CharterModal
-            open={showCharter}
-            requireAccept
-            onAccept={acceptCharter}
-            onClose={acceptCharter}
-          />
-        </Suspense>
+        <CharterModal
+          open={showCharter}
+          requireAccept
+          onAccept={acceptCharter}
+          onClose={acceptCharter}
+        />
       )}
       <UpdatePrompt />
     </div>
