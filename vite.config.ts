@@ -73,7 +73,12 @@ export default defineConfig({
         clientsClaim: true,
         // woff2 inclus : la police Geist (@fontsource) doit être précachée
         // pour rester dispo hors-ligne (sinon fallback système en offline).
-        globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,ico,webmanifest,woff2}"],
+        // PAS de `webmanifest` ici : vite-plugin-pwa ajoute déjà
+        // manifest.webmanifest au précache avec sa propre révision. Si on le
+        // re-matche via le glob, il se retrouve listé 2× avec 2 révisions
+        // différentes → Workbox lève « add-to-cache-list-conflicting-entries »
+        // à l'installation → précache KO → écran figé au reload hors-ligne.
+        globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,ico,woff2}"],
         // stats.html (visualizer) jamais précaché. Subsets de police non
         // utilisés exclus du precache : MediURG est FR only → seul le
         // subset « latin » sert (les accents FR é è à ç ù sont en

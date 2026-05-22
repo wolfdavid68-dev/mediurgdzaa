@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v103";
+export const APP_VERSION = "v104";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v104",
+    date: "2026-05-22",
+    titre: "Correctif définitif écran figé au rechargement hors-ligne",
+    changes: [
+      {
+        type: "fix",
+        text: "manifest.webmanifest était précaché deux fois avec des révisions différentes (une fois par le plugin PWA, une fois via le motif glob). Workbox rejette une même URL avec deux révisions → l'installation du précache échouait → hors-ligne, la coquille de l'app n'était pas servie → écran figé/noir au rechargement (alors qu'en ligne tout marchait). Retrait de webmanifest du glob : le précache s'installe désormais correctement et le rechargement hors-ligne ré-affiche l'app.",
+      },
+    ],
+  },
   {
     version: "v103",
     date: "2026-05-22",
