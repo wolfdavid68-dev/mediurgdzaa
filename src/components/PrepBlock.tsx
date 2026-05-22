@@ -10,11 +10,18 @@ import {
 import { isPreview } from "../lib/featureFlags";
 import { DRUGS_PREVIEW } from "../data/drugs.preview";
 
-// `prep` public (drugs.js) ou override preview (drugs.preview.js) si
-// ?auth=preview. Même mécanisme que resolvePse dans PseBlock — le
-// public ne voit jamais drugs.preview.js tant qu'on est hors preview.
-const resolvePrep = (drug: any) =>
-  (isPreview() && (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep) || drug.prep || null;
+// `prep` public (drugs.js) éventuellement enrichi par l'override preview
+// (drugs.preview.js) si ?auth=preview. On FUSIONNE l'override par-dessus le
+// public (au lieu de le remplacer) : l'override preview ne porte que la
+// nouvelle dilution fixe (fixed_dilution + étapes), donc les champs qu'il ne
+// redéfinit pas — notamment `pedTable`, la table de dilution PÉDIATRIQUE —
+// doivent survivre. Sans fusion, la table pédiatrique d'Adrénaline (et autres
+// drogues à pedTable présentes dans l'override) disparaît en preview.
+const resolvePrep = (drug: any) => {
+  const override = isPreview() ? (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep : null;
+  if (override) return { ...drug.prep, ...override };
+  return drug.prep || null;
+};
 
 const PrepIcon = () => (
   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
