@@ -87,12 +87,33 @@ const DrugCard = ({
       (isPreview() && (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep) || drug.prep || null;
 
     // Filtrage des colonnes posologie selon le poids saisi :
-    //  < 30 kg → pédiatrique seule · > 70 kg → adulte seule · 30–70 kg → les
-    //  deux · pas de poids → les deux. Bornes incluses (30 et 70 = les deux).
+    //  < 30 kg → pédiatrique · > 70 kg → adulte · 30–70 kg (inclus) ou pas de
+    //  poids → les deux. Repli : si la colonne pertinente n'est pas renseignée
+    //  pour ce médicament, on affiche l'autre (mieux que « Non renseigné »).
     const kgNum = parseFloat(weight);
     const validKg = kgNum > 0 && kgNum <= 300;
-    const showAdult = !validKg || kgNum >= 30;
-    const showPed = !validKg || kgNum <= 70;
+    const hasAdult = !!(drug.poso?.a && drug.poso.a.length);
+    const hasPed = !!(drug.poso?.p && drug.poso.p.length);
+    let showAdult = true;
+    let showPed = true;
+    let posoHint = "";
+    if (validKg && kgNum < 30) {
+      if (hasPed) {
+        showAdult = false;
+        posoHint = "Poids < 30 kg — posologie pédiatrique";
+      } else {
+        showPed = false;
+        posoHint = "Pas de posologie pédiatrique — posologie adulte affichée";
+      }
+    } else if (validKg && kgNum > 70) {
+      if (hasAdult) {
+        showPed = false;
+        posoHint = "Poids > 70 kg — posologie adulte";
+      } else {
+        showAdult = false;
+        posoHint = "Pas de posologie adulte — posologie pédiatrique affichée";
+      }
+    }
     const single = showAdult !== showPed;
 
     const renderPosoLines = (lines: string[] | undefined) =>
@@ -193,11 +214,7 @@ const DrugCard = ({
           </div>
         )}
 
-        {validKg && single && (
-          <div className="poso-filter-hint">
-            {showPed ? "Poids < 30 kg — posologie pédiatrique" : "Poids > 70 kg — posologie adulte"}
-          </div>
-        )}
+        {posoHint && <div className="poso-filter-hint">{posoHint}</div>}
         <div className={`poso-grid ${single ? "poso-grid-single" : ""}`}>
           {showAdult && (
             <div className="poso-box">
