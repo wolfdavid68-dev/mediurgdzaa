@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useId } from "react";
 import { calcDose, ciSeverity } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
 import { DRUGS_PREVIEW } from "../data/drugs.preview";
@@ -20,7 +20,7 @@ type DrugCardProps = {
   isFavorite?: boolean;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
-  onOpenChange?: (id: number, open: boolean) => void;
+  onOpenChange?: (key: string, open: boolean) => void;
   onProtocolOpen?: () => void;
 };
 
@@ -37,6 +37,12 @@ const DrugCard = ({
   const [hasNote, setHasNote] = useState(false);
   const [weight, setWeight] = useState("");
   const [produitFinal, setProduitFinal] = useState("");
+  // Clé d'instance unique : une même drogue peut être rendue 2 fois
+  // simultanément (section Récents + liste filtrée). Utiliser drug.id
+  // comme clé d'état « ouvert » ferait que le montage de la 2e carte
+  // (fermée) efface l'état posé par la 1re. useId garantit une clé par
+  // instance de carte.
+  const instanceId = useId();
 
   // Protocoles qui mentionnent cette drogue. Cache global dans crossref.ts
   // — l'appel est instantané après le premier rendu de la session.
@@ -57,9 +63,9 @@ const DrugCard = ({
   // recherche tant qu'au moins une fiche est ouverte). Cleanup au démontage
   // = considéré fermé (ex: la fiche disparaît quand la recherche change).
   useEffect(() => {
-    onOpenChange?.(drug.id, open);
-    return () => onOpenChange?.(drug.id, false);
-  }, [open, drug.id, onOpenChange]);
+    onOpenChange?.(instanceId, open);
+    return () => onOpenChange?.(instanceId, false);
+  }, [open, instanceId, onOpenChange]);
 
   const toggleTab = (key: string) => setActiveTab(activeTab === key ? null : key);
 

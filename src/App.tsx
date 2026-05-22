@@ -91,13 +91,13 @@ const App = () => {
   // (il ne reste que le bandeau logo + boutons thème/police) pour maximiser
   // la place de lecture de la fiche. La callback est stable (useCallback []) →
   // pas de churn de l'effet onOpenChange dans DrugCard.
-  const [openDrugs, setOpenDrugs] = useState<Set<number>>(new Set());
-  const handleDrugOpenChange = useCallback((id: number, open: boolean) => {
+  const [openDrugs, setOpenDrugs] = useState<Set<string>>(new Set());
+  const handleDrugOpenChange = useCallback((key: string, open: boolean) => {
     setOpenDrugs((prev) => {
-      if (open === prev.has(id)) return prev;
+      if (open === prev.has(key)) return prev;
       const next = new Set(prev);
-      if (open) next.add(id);
-      else next.delete(id);
+      if (open) next.add(key);
+      else next.delete(key);
       return next;
     });
   }, []);
