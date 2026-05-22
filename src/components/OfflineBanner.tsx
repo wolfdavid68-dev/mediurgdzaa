@@ -1,8 +1,8 @@
 // Banner discret affiché sous le header quand le device est hors-ligne.
-// Le badge "Offline" dans AppHeader reste (vu d'un coup d'œil), mais ce
-// banner explique ce qui est réellement indisponible (analyse ECG IA + auth)
-// — utile en stress quand on s'apprête à utiliser une feature qui requiert
-// le réseau alors qu'on est en SMUR avec une mauvaise 4G.
+// Formulation rassurante : on met en avant que le cœur de l'app fonctionne
+// hors-ligne (médicaments, protocoles, calculs, check-lists) ; seule
+// l'analyse ECG par photo (IA) requiert le réseau. Utile en SMUR avec une
+// mauvaise 4G avant de lancer une feature réseau.
 
 const OfflineBanner = ({ isOnline }: { isOnline: boolean }) => {
   if (isOnline) return null;
@@ -12,8 +12,8 @@ const OfflineBanner = ({ isOnline }: { isOnline: boolean }) => {
         ⚠
       </span>
       <span className="offline-banner-txt">
-        Hors ligne — médicaments, protocoles et calculs restent dispo. L'analyse ECG par photo et la
-        connexion admin ne fonctionnent pas.
+        Mode hors-ligne — médicaments, protocoles, calculs et check-lists fonctionnent normalement.
+        Seule l'analyse ECG par photo nécessite une connexion.
       </span>
     </div>
   );
