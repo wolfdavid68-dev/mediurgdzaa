@@ -21,21 +21,29 @@ type ChecklistSection = { titre: string; items: ChecklistItem[] };
 
 type Values = Record<string, boolean | string>;
 
-// Sections « complètes » = toutes leurs cases à cocher sont cochées. Les
-// sections sans case à cocher (ex : critères prédictifs) ne sont jamais
-// « complètes » → ne se replient pas automatiquement.
-const computeSectionDone = (checklist: ChecklistSection[], vals: Values): boolean[] =>
+// Un item est « complété » selon son type : case cochée, choix sélectionné,
+// ou champ texte non vide. Une section est complète quand TOUS ses items le
+// sont (y compris les champs à saisir).
+const itemDone = (item: ChecklistItem, vals: Values, key: string): boolean => {
+  const v = vals[key];
+  if (item.type === "check") return v === true;
+  return typeof v === "string" && v.trim() !== "";
+};
+
+const computeSectionProgress = (
+  checklist: ChecklistSection[],
+  vals: Values
+): { total: number; done: number }[] =>
   checklist.map((section, si) => {
-    let total = 0;
     let done = 0;
     section.items.forEach((item, ii) => {
-      if (item.type === "check") {
-        total++;
-        if (vals[`${si}-${ii}`] === true) done++;
-      }
+      if (itemDone(item, vals, `${si}-${ii}`)) done++;
     });
-    return total > 0 && done === total;
+    return { total: section.items.length, done };
   });
+
+const computeSectionDone = (checklist: ChecklistSection[], vals: Values): boolean[] =>
+  computeSectionProgress(checklist, vals).map((s) => s.total > 0 && s.done === s.total);
 
 const collapsedFromDone = (done: boolean[]): Set<number> =>
   new Set(done.flatMap((d, i) => (d ? [i] : [])));
@@ -201,19 +209,9 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
     w.document.close();
   };
 
-  // Compte des cases à cocher (les saisies/choix ne comptent pas, comme la
-  // check-list matériel). Par section pour l'indicateur de progression local.
-  const sectionChecks = checklist.map((section, si) => {
-    let total = 0;
-    let done = 0;
-    section.items.forEach((item, ii) => {
-      if (item.type === "check") {
-        total++;
-        if (values[`${si}-${ii}`] === true) done++;
-      }
-    });
-    return { total, done };
-  });
+  // Progression = tous les items complétés (coches + choix + champs saisis),
+  // par section pour l'indicateur local + l'auto-repli.
+  const sectionChecks = computeSectionProgress(checklist, values);
   const checkTotal = sectionChecks.reduce((s, c) => s + c.total, 0);
   const checkDone = sectionChecks.reduce((s, c) => s + c.done, 0);
   const pct = checkTotal ? Math.round((checkDone / checkTotal) * 100) : 0;
@@ -246,7 +244,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
               <polyline points="20 6 9 17 4 12" />
             </svg>
           )}
-          {checkDone}/{checkTotal} coché{checkDone > 1 ? "s" : ""}
+          {checkDone}/{checkTotal} complété{checkDone > 1 ? "s" : ""}
         </span>
         <div className="kit-checklist-actions">
           <button
