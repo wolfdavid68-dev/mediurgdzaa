@@ -86,6 +86,107 @@ export const PREP_KITS = [
       "En cas d'échec : ventilation au masque + appel renfort + vidéo-laryngoscope",
       "Algorithme intubation difficile DAS à portée",
     ],
+    checklist: [
+      {
+        titre: "Évaluation initiale",
+        items: [
+          { type: "check", label: "Critères d'intubation réunis" },
+          {
+            type: "check",
+            label:
+              "Absence de contre-indication à la Célocurine (allergie, hyperkaliémie, brûlure, insuffisance rénale)",
+          },
+        ],
+      },
+      {
+        titre: "Critères prédictifs de complications",
+        items: [
+          { type: "choice", label: "Score de Mallampati", options: ["I", "II", "III", "IV"] },
+          { type: "choice", label: "Score de Cormack", options: ["I", "II", "III", "IV"] },
+          { type: "choice", label: "Risque d'inhalation", options: ["Repas < 6h", "Repas > 6h"] },
+          { type: "text", label: "Allergie connue", placeholder: "Préciser si oui" },
+        ],
+      },
+      {
+        titre: "Préparation patient & matériel",
+        items: [
+          { type: "check", label: "Position du patient adaptée" },
+          { type: "check", label: "Patient pré-oxygéné" },
+          {
+            type: "choice",
+            label: "Méthode de pré-oxygénation",
+            options: ["Optiflow", "MHC", "VNI"],
+          },
+          { type: "check", label: "Patient monitoré (ECG, SpO₂, EtCO₂, FR)" },
+          { type: "check", label: "2 VVP de bon calibre et fonctionnelles" },
+          { type: "check", label: "Aspiration opérationnelle + sonde branchée" },
+          { type: "check", label: "BAVU complet et raccordé à l'O₂" },
+          {
+            type: "check",
+            label: "Sonde d'intubation : bonne taille, lubrifiée, mandrin, ballonnet testé",
+          },
+          { type: "check", label: "Respirateur complet, chargé, réglages effectués" },
+          { type: "text", label: "FiO₂", unit: "%" },
+          { type: "text", label: "VT", unit: "mL" },
+          { type: "text", label: "FR", unit: "/min" },
+          { type: "text", label: "PEP", unit: "cmH₂O" },
+        ],
+      },
+      {
+        titre: "Technique d'intubation",
+        items: [
+          {
+            type: "choice",
+            label: "1ʳᵉ intention",
+            options: ["Vidéolaryngoscope", "Mandrin semi-rigide", "Laryngoscopie directe"],
+          },
+          {
+            type: "check",
+            label:
+              "Matériel d'intubation difficile à proximité (kit crico, Cook/Eichmann, supraglottique, fibroscope)",
+          },
+        ],
+      },
+      {
+        titre: "Thérapeutiques",
+        items: [
+          { type: "text", label: "Hypnotique (dose)", unit: "mg" },
+          { type: "text", label: "Curare (dose)", unit: "mg" },
+          { type: "check", label: "Sédation au PSE préparée" },
+          { type: "check", label: "Support vasopresseur préparé" },
+        ],
+      },
+      {
+        titre: "Contrôle ultime & décision",
+        items: [
+          { type: "check", label: "Déroulé + alternatives expliqués à toute l'équipe" },
+          { type: "check", label: "2ᵉ opérateur expérimenté à proximité immédiate" },
+          { type: "text", label: "FC", unit: "bpm" },
+          { type: "text", label: "PA / PAM", unit: "mmHg" },
+          { type: "text", label: "SpO₂", unit: "%" },
+          { type: "text", label: "FR", unit: "/min" },
+        ],
+      },
+      {
+        titre: "Post-intubation",
+        items: [
+          { type: "check", label: "Sonde fixée + repère commissure noté" },
+          { type: "text", label: "Capnographie (EtCO₂)", unit: "mmHg" },
+          { type: "check", label: "Pression du ballonnet contrôlée" },
+          { type: "check", label: "Réglages du respirateur adéquats" },
+          { type: "check", label: "Radiographie pulmonaire effectuée" },
+          { type: "choice", label: "Dispositif invasif en place", options: ["KTC", "KTA", "Aucun"] },
+        ],
+      },
+      {
+        titre: "Soins IDE",
+        items: [
+          { type: "check", label: "Yeux fermés + gel ophtalmique appliqué" },
+          { type: "check", label: "Sonde gastrique en place" },
+          { type: "check", label: "Sonde urinaire en place" },
+        ],
+      },
+    ],
   },
   {
     id: "acr",

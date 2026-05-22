@@ -69,6 +69,68 @@
   margin-top: 1px;
 }
 
+/* ── Onglet « Check-list » (kit ISR — intubation) ─────────── */
+.kit-checklist-section + .kit-checklist-section {
+  margin-top: 4px;
+}
+/* Champ choix / saisie (non cochable) dans la check-list */
+.kit-checklist-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 6px;
+}
+.kit-checklist-flabel {
+  font-size: clamp(12px, 1.3vw, 14px);
+  color: var(--text);
+  line-height: 1.4;
+}
+.kit-checklist-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.kit-checklist-chip {
+  font-size: clamp(12px, 1.3vw, 13px);
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 7px 12px;
+  min-height: 36px;
+  cursor: pointer;
+}
+.kit-checklist-chip-active {
+  color: #fff;
+}
+.kit-checklist-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kit-checklist-input {
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(13px, 1.4vw, 15px);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-height: 40px;
+}
+.kit-checklist-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.kit-checklist-unit {
+  flex-shrink: 0;
+  font-size: clamp(11px, 1.2vw, 13px);
+  font-family: var(--mono);
+  color: var(--text-mute);
+}
+
 /* ── Onglet « Schéma » (kit KTC — preview) ───────────────── */
 .kit-schema {
   display: flex;

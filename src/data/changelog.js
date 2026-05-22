@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v100";
+export const APP_VERSION = "v101";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v101",
+    date: "2026-05-22",
+    titre: "Check-list intubation (ISR) + filtre service SMUR/SAU",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouvel onglet « Check-list » dans le kit ISR (Protocoles → Kits) : la check-list intubation complète du service, interactive. Cases à cocher (évaluation, préparation patient/matériel, contrôle ultime, post-intubation, soins IDE), choix exclusifs (Mallampati I-IV, Cormack I-IV, risque d'inhalation, méthode de pré-oxygénation, technique d'intubation, dispositif invasif) et champs de saisie (doses hypnotique/curare, FiO₂/VT/FR/PEP, constantes FC/PA/SpO₂, capnographie). Compteur de progression, bouton Réinitialiser, état persisté localement avec auto-expiration 3 h (ne traîne pas d'un patient à l'autre).",
+      },
+      {
+        type: "feat",
+        text: "Filtre Service simplifié à SMUR et SAU. SAU regroupe tous les médicaments ; SMUR n'affiche que les médicaments réellement présents dans la trousse SMUR du service (31 fiches). Retrait des filtres SAUV et REA.",
+      },
+      {
+        type: "feat",
+        text: "Quand une fiche médicament est déployée, la barre de recherche et les filtres se masquent pour laisser toute la place à la lecture (réapparaissent à la fermeture de la fiche).",
+      },
+    ],
+  },
   {
     version: "v100",
     date: "2026-05-21",

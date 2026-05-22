@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { DRUGS } from "../data/drugs";
+import KitChecklist from "./KitChecklist";
 
 const checkKey = (kitId: string) => `mediurg-kit-check-${kitId}`;
 
@@ -50,6 +51,9 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
   // Onglet « Schéma » : affiché dès que le kit fournit une image de
   // schéma (kit.schema). Public depuis v99 (validé).
   const showSchema = !!kit.schema;
+  // Onglet « Check-list » : affiché si le kit fournit une check-list
+  // interactive (kit.checklist) — ex : check-list intubation du kit ISR.
+  const showChecklist = Array.isArray(kit.checklist) && kit.checklist.length > 0;
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>(() =>
     loadChecked(kit.id)
   );
@@ -123,6 +127,26 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
               <span className="dot dot-info" />
               <span className="tab-label">Matériel</span>
             </button>
+            {showChecklist && (
+              <button
+                className={`tab-btn tab-ci ${activeTab === "checklist" ? "tab-active" : ""}`}
+                onClick={() => setActiveTab("checklist")}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="11"
+                  height="11"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className="tab-ci-icon"
+                >
+                  <polyline points="9 11 12 14 22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+                <span className="tab-label">Check-list</span>
+              </button>
+            )}
             {showSchema && (
               <button
                 className={`tab-btn tab-poso ${activeTab === "schema" ? "tab-active" : ""}`}
@@ -298,6 +322,10 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
                   })}
                 </ul>
               </div>
+            )}
+
+            {activeTab === "checklist" && showChecklist && (
+              <KitChecklist kitId={kit.id} checklist={kit.checklist} couleur={kit.couleur} />
             )}
 
             {activeTab === "sequence" && (
