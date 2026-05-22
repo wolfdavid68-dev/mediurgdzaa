@@ -86,6 +86,37 @@ const DrugCard = ({
     const prep =
       (isPreview() && (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep) || drug.prep || null;
 
+    // Filtrage des colonnes posologie selon le poids saisi :
+    //  < 30 kg → pédiatrique seule · > 70 kg → adulte seule · 30–70 kg → les
+    //  deux · pas de poids → les deux. Bornes incluses (30 et 70 = les deux).
+    const kgNum = parseFloat(weight);
+    const validKg = kgNum > 0 && kgNum <= 300;
+    const showAdult = !validKg || kgNum >= 30;
+    const showPed = !validKg || kgNum <= 70;
+    const single = showAdult !== showPed;
+
+    const renderPosoLines = (lines: string[] | undefined) =>
+      lines && lines.length ? (
+        lines.map((p: string, i: number) => {
+          const res = calcDose(p, weight);
+          return (
+            <div key={i} className="poso-item">
+              {p}
+              {res && (
+                <span
+                  className={`calc-result ${res.validation === "danger" ? "calc-danger" : res.capped ? "calc-over" : "calc-ok"}`}
+                >
+                  {res.value}
+                  {res.validation === "danger" ? " 🚨 vérifier" : res.capped ? " ⚠ max" : ""}
+                </span>
+              )}
+            </div>
+          );
+        })
+      ) : (
+        <span className="na">Non renseigné</span>
+      );
+
     return (
       <>
         {prep?.dose_threshold !== undefined ? (
@@ -162,53 +193,24 @@ const DrugCard = ({
           </div>
         )}
 
-        <div className="poso-grid">
-          <div className="poso-box">
-            <div className="poso-title">Adulte</div>
-            {drug.poso.a && drug.poso.a.length ? (
-              drug.poso.a.map((p: string, i: number) => {
-                const res = calcDose(p, weight);
-                return (
-                  <div key={i} className="poso-item">
-                    {p}
-                    {res && (
-                      <span
-                        className={`calc-result ${res.validation === "danger" ? "calc-danger" : res.capped ? "calc-over" : "calc-ok"}`}
-                      >
-                        {res.value}
-                        {res.validation === "danger" ? " 🚨 vérifier" : res.capped ? " ⚠ max" : ""}
-                      </span>
-                    )}
-                  </div>
-                );
-              })
-            ) : (
-              <span className="na">Non renseigné</span>
-            )}
+        {validKg && single && (
+          <div className="poso-filter-hint">
+            {showPed ? "Poids < 30 kg — posologie pédiatrique" : "Poids > 70 kg — posologie adulte"}
           </div>
-          <div className="poso-box">
-            <div className="poso-title">Pédiatrique</div>
-            {drug.poso.p && drug.poso.p.length ? (
-              drug.poso.p.map((p: string, i: number) => {
-                const res = calcDose(p, weight);
-                return (
-                  <div key={i} className="poso-item">
-                    {p}
-                    {res && (
-                      <span
-                        className={`calc-result ${res.validation === "danger" ? "calc-danger" : res.capped ? "calc-over" : "calc-ok"}`}
-                      >
-                        {res.value}
-                        {res.validation === "danger" ? " 🚨 vérifier" : res.capped ? " ⚠ max" : ""}
-                      </span>
-                    )}
-                  </div>
-                );
-              })
-            ) : (
-              <span className="na">Non renseigné</span>
-            )}
-          </div>
+        )}
+        <div className={`poso-grid ${single ? "poso-grid-single" : ""}`}>
+          {showAdult && (
+            <div className="poso-box">
+              <div className="poso-title">Adulte</div>
+              {renderPosoLines(drug.poso.a)}
+            </div>
+          )}
+          {showPed && (
+            <div className="poso-box">
+              <div className="poso-title">Pédiatrique</div>
+              {renderPosoLines(drug.poso.p)}
+            </div>
+          )}
         </div>
 
         <PrepBlock drug={drug} weight={weight} produitFinal={produitFinal} />

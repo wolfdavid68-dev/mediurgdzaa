@@ -806,6 +806,23 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 10px;
 }
+.poso-grid-single {
+  grid-template-columns: 1fr;
+}
+/* Bandeau quand une seule colonne posologie est affichée (filtre poids) */
+.poso-filter-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  font-size: clamp(11px, 1.2vw, 13px);
+  font-weight: 600;
+  color: var(--info);
+  background: color-mix(in srgb, var(--info) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--info) 35%, transparent);
+  border-radius: 8px;
+}
 
 .poso-box {
   background: var(--bg-elevated);
