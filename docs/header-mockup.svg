@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="560" viewBox="0 0 780 560" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <rect width="780" height="560" fill="#06060c"/>
+
+  <!-- ===================== AVANT ===================== -->
+  <text x="32" y="40" fill="#8a8aa0" font-size="14" font-weight="700" letter-spacing="2">AVANT (actuel)</text>
+
+  <!-- header bar -->
+  <rect x="24" y="56" width="732" height="92" rx="14" fill="#12121c" stroke="#2a2a3a"/>
+  <!-- logo -->
+  <circle cx="70" cy="102" r="22" fill="#ffffff"/>
+  <circle cx="70" cy="102" r="22" fill="none" stroke="#2a2a3a"/>
+  <text x="70" y="107" fill="#06060c" font-size="13" font-weight="800" text-anchor="middle">GHR</text>
+  <text x="104" y="96" fill="#e8e8f0" font-size="19" font-weight="800">MediURG</text>
+  <text x="104" y="118" fill="#8a8aa0" font-size="11">Pharmacologie d'urgence · SAUV · SMUR · SAU</text>
+
+  <!-- right cluster: ONLINE + 3 boutons, serrés -->
+  <rect x="470" y="86" width="92" height="32" rx="16" fill="#10241a" stroke="#1f6b3f"/>
+  <circle cx="486" cy="102" r="5" fill="#4ade80"/>
+  <text x="498" y="106" fill="#4ade80" font-size="12" font-weight="700">ONLINE</text>
+
+  <rect x="572" y="84" width="40" height="36" rx="9" fill="#161620" stroke="#2a2a3a"/>
+  <text x="592" y="107" fill="#e8e8f0" font-size="15" text-anchor="middle">💾</text>
+
+  <rect x="620" y="84" width="44" height="36" rx="9" fill="#161620" stroke="#2a2a3a"/>
+  <text x="642" y="107" fill="#e8e8f0" font-size="14" font-weight="700" text-anchor="middle">A+</text>
+
+  <rect x="672" y="84" width="40" height="36" rx="9" fill="#161620" stroke="#2a2a3a"/>
+  <text x="692" y="107" fill="#e8e8f0" font-size="15" text-anchor="middle">☀</text>
+
+  <text x="32" y="178" fill="#ff6b76" font-size="12.5">4 contrôles serrés à droite · cibles ~36 px · « ONLINE » affiché en permanence</text>
+
+  <!-- ===================== APRÈS ===================== -->
+  <text x="32" y="250" fill="#8a8aa0" font-size="14" font-weight="700" letter-spacing="2">APRÈS (proposé)</text>
+
+  <!-- header bar -->
+  <rect x="24" y="266" width="732" height="92" rx="14" fill="#12121c" stroke="#2a2a3a"/>
+  <circle cx="70" cy="312" r="22" fill="#ffffff"/>
+  <circle cx="70" cy="312" r="22" fill="none" stroke="#2a2a3a"/>
+  <text x="70" y="317" fill="#06060c" font-size="13" font-weight="800" text-anchor="middle">GHR</text>
+  <text x="104" y="306" fill="#e8e8f0" font-size="19" font-weight="800">MediURG</text>
+  <text x="104" y="328" fill="#8a8aa0" font-size="11">Pharmacologie d'urgence · SAUV · SMUR · SAU</text>
+
+  <!-- single kebab button, grand (48px) -->
+  <rect x="690" y="288" width="48" height="48" rx="12" fill="#161620" stroke="#3a3a4d"/>
+  <circle cx="714" cy="302" r="3" fill="#e8e8f0"/>
+  <circle cx="714" cy="312" r="3" fill="#e8e8f0"/>
+  <circle cx="714" cy="322" r="3" fill="#e8e8f0"/>
+
+  <!-- menu déroulant ouvert -->
+  <rect x="520" y="346" width="222" height="150" rx="14" fill="#161620" stroke="#3a3a4d"/>
+  <!-- item 1 -->
+  <rect x="532" y="358" width="198" height="40" rx="9" fill="#1c1c28"/>
+  <text x="548" y="383" fill="#e8e8f0" font-size="15">☀</text>
+  <text x="574" y="383" fill="#e8e8f0" font-size="14">Thème sombre</text>
+  <!-- item 2 -->
+  <text x="548" y="427" fill="#e8e8f0" font-size="14" font-weight="700">A+</text>
+  <text x="574" y="427" fill="#e8e8f0" font-size="14">Agrandir la police</text>
+  <!-- item 3 -->
+  <text x="548" y="471" fill="#e8e8f0" font-size="15">💾</text>
+  <text x="574" y="471" fill="#e8e8f0" font-size="14">Sauvegarder mes notes</text>
+
+  <text x="32" y="384" fill="#4ade80" font-size="12.5">1 seul bouton ⋮ (48 px) · réglages regroupés dans un menu</text>
+  <text x="32" y="406" fill="#4ade80" font-size="12.5">« ONLINE » retiré (le bandeau orange apparaît seulement hors-ligne)</text>
+  <text x="32" y="428" fill="#4ade80" font-size="12.5">+ d'espace pour le titre · cibles tactiles plus grandes (gants)</text>
+
+  <text x="32" y="524" fill="#5a5a70" font-size="11" font-style="italic">Maquette indicative — couleurs réelles de l'app (thème sombre).</text>
+</svg>
