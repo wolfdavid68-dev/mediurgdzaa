@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v102";
+export const APP_VERSION = "v103";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v103",
+    date: "2026-05-22",
+    titre: "Fiabilisation des mises à jour (en-têtes Vercel)",
+    changes: [
+      {
+        type: "fix",
+        text: "Ajout d'un vercel.json qui force le service worker à ne jamais être mis en cache (no-cache) et index.html à se revalider. L'ancien .htaccess prévoyait ça mais n'a aucun effet sur Vercel (config Apache). Sans ces en-têtes, un ancien service worker pouvait rester coincé et continuer à servir une vieille version hors-ligne (symptôme : à jour en ligne, mais retour à une ancienne version en mode avion). Les assets hashés (/static) restent en cache long (immutable).",
+      },
+    ],
+  },
   {
     version: "v102",
     date: "2026-05-22",
