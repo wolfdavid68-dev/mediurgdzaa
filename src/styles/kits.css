@@ -70,6 +70,19 @@
 }
 
 /* ── Onglet « Check-list » (kit ISR — intubation) ─────────── */
+.kit-checklist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.kit-checklist-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.kit-checklist-act svg {
+  flex-shrink: 0;
+}
 .kit-checklist-section + .kit-checklist-section {
   margin-top: 4px;
 }

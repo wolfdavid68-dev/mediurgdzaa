@@ -13,7 +13,7 @@ export const CHANGELOG = [
     changes: [
       {
         type: "feat",
-        text: "Nouvel onglet « Check-list » dans le kit ISR (Protocoles → Kits) : la check-list intubation complète du service, interactive. Cases à cocher (évaluation, préparation patient/matériel, contrôle ultime, post-intubation, soins IDE), choix exclusifs (Mallampati I-IV, Cormack I-IV, risque d'inhalation, méthode de pré-oxygénation, technique d'intubation, dispositif invasif) et champs de saisie (doses hypnotique/curare, FiO₂/VT/FR/PEP, constantes FC/PA/SpO₂, capnographie). Compteur de progression, bouton Réinitialiser, état persisté localement avec auto-expiration 3 h (ne traîne pas d'un patient à l'autre).",
+        text: "Nouvel onglet « Check-list » dans le kit ISR (Protocoles → Kits) : la check-list intubation complète du service, interactive. Cases à cocher (évaluation, préparation patient/matériel, contrôle ultime, post-intubation, soins IDE), choix exclusifs (Mallampati I-IV, Cormack I-IV, risque d'inhalation, méthode de pré-oxygénation, technique d'intubation, dispositif invasif) et champs de saisie (doses hypnotique/curare, FiO₂/VT/FR/PEP, constantes FC/PA/SpO₂, capnographie). Compteur de progression, bouton Réinitialiser, état persisté localement avec auto-expiration 3 h (ne traîne pas d'un patient à l'autre). Boutons Imprimer (vue propre prête à imprimer / PDF) et Mail (ouvre le client mail avec la check-list remplie en texte).",
       },
       {
         type: "feat",

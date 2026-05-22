@@ -325,7 +325,12 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
             )}
 
             {activeTab === "checklist" && showChecklist && (
-              <KitChecklist kitId={kit.id} checklist={kit.checklist} couleur={kit.couleur} />
+              <KitChecklist
+                kitId={kit.id}
+                titre={`Check-list — ${kit.nom}`}
+                checklist={kit.checklist}
+                couleur={kit.couleur}
+              />
             )}
 
             {activeTab === "sequence" && (

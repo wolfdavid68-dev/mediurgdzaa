@@ -42,11 +42,12 @@ const loadValues = (kitId: string): Values => {
 
 type Props = {
   kitId: string;
+  titre: string;
   checklist: ChecklistSection[];
   couleur: string;
 };
 
-const KitChecklist = ({ kitId, checklist, couleur }: Props) => {
+const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
   const [values, setValues] = useState<Values>(() => loadValues(kitId));
 
   useEffect(() => {
@@ -56,6 +57,91 @@ const KitChecklist = ({ kitId, checklist, couleur }: Props) => {
       /* quota / navigation privée : on ignore, la session reste utilisable */
     }
   }, [values, kitId]);
+
+  // Valeur lisible d'un item pour l'export (mail / impression).
+  const itemValue = (item: ChecklistItem, key: string): string => {
+    const v = values[key];
+    if (item.type === "check") return v === true ? "OUI" : "—";
+    if (item.type === "choice") return v ? String(v) : "—";
+    const txt = (v as string) || "";
+    if (!txt) return "—";
+    return item.unit ? `${txt} ${item.unit}` : txt;
+  };
+
+  // Représentation texte (mail) : sections + items avec leur état.
+  const buildText = (): string => {
+    const lines: string[] = [];
+    const now = new Date().toLocaleString("fr-FR");
+    lines.push(`${titre}`);
+    lines.push(`Édité le ${now}`);
+    checklist.forEach((section, si) => {
+      lines.push("");
+      lines.push(`== ${section.titre.toUpperCase()} ==`);
+      section.items.forEach((item, ii) => {
+        const key = `${si}-${ii}`;
+        if (item.type === "check") {
+          lines.push(`[${values[key] === true ? "X" : " "}] ${item.label}`);
+        } else {
+          lines.push(`${item.label} : ${itemValue(item, key)}`);
+        }
+      });
+    });
+    lines.push("");
+    lines.push("— Édité depuis MediURG. Outil d'aide : ne remplace pas la prescription.");
+    return lines.join("\n");
+  };
+
+  const onEmail = () => {
+    const subject = encodeURIComponent(titre);
+    const body = encodeURIComponent(buildText());
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  const onPrint = () => {
+    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const now = new Date().toLocaleString("fr-FR");
+    let body = `<h1>${esc(titre)}</h1><p class="date">Édité le ${esc(now)}</p>`;
+    checklist.forEach((section, si) => {
+      body += `<h2>${esc(section.titre)}</h2><ul>`;
+      section.items.forEach((item, ii) => {
+        const key = `${si}-${ii}`;
+        if (item.type === "check") {
+          const checked = values[key] === true;
+          body += `<li class="chk"><span class="box">${checked ? "&#10003;" : ""}</span>${esc(item.label)}</li>`;
+        } else {
+          body += `<li class="fld"><strong>${esc(item.label)} :</strong> ${esc(itemValue(item, key))}</li>`;
+        }
+      });
+      body += `</ul>`;
+    });
+    body += `<p class="foot">Édité depuis MediURG — outil d'aide, ne remplace pas la prescription. La prescription officielle prévaut.</p>`;
+
+    const doc =
+      `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${esc(titre)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #111; margin: 24px; line-height: 1.4; }
+  h1 { font-size: 18px; margin: 0 0 2px; }
+  .date { font-size: 12px; color: #555; margin: 0 0 14px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #333; border-bottom: 1px solid #999; padding-bottom: 3px; margin: 16px 0 6px; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { font-size: 13px; padding: 3px 0; break-inside: avoid; }
+  li.chk { display: flex; align-items: flex-start; gap: 8px; }
+  .box { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 15px; height: 15px; border: 1.5px solid #333; border-radius: 3px; font-size: 12px; line-height: 1; margin-top: 1px; }
+  li.fld strong { color: #333; }
+  .foot { margin-top: 20px; font-size: 10px; color: #777; font-style: italic; border-top: 1px solid #ccc; padding-top: 8px; }
+  @media print { body { margin: 12mm; } }
+</style></head><body>${body}<script>window.onload=function(){window.print();}</scr` +
+      `ipt></body></html>`;
+
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.open();
+    w.document.write(doc);
+    w.document.close();
+  };
 
   // Progression = uniquement les cases à cocher (les saisies/choix ne comptent
   // pas, comme la check-list matériel qui ne compte que les coches).
@@ -78,14 +164,57 @@ const KitChecklist = ({ kitId, checklist, couleur }: Props) => {
         <span className="materiel-progress">
           {checkDone}/{checkTotal} coché{checkDone > 1 ? "s" : ""}
         </span>
-        <button
-          type="button"
-          className="materiel-reset-btn"
-          onClick={() => setValues({})}
-          disabled={!hasAnyValue}
-        >
-          Réinitialiser
-        </button>
+        <div className="kit-checklist-actions">
+          <button
+            type="button"
+            className="materiel-reset-btn kit-checklist-act"
+            onClick={onPrint}
+            title="Imprimer la check-list"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect x="6" y="14" width="12" height="8" />
+            </svg>
+            Imprimer
+          </button>
+          <button
+            type="button"
+            className="materiel-reset-btn kit-checklist-act"
+            onClick={onEmail}
+            title="Envoyer la check-list par mail"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-10 6L2 7" />
+            </svg>
+            Mail
+          </button>
+          <button
+            type="button"
+            className="materiel-reset-btn"
+            onClick={() => setValues({})}
+            disabled={!hasAnyValue}
+          >
+            Réinitialiser
+          </button>
+        </div>
       </div>
 
       {checklist.map((section, si) => (
