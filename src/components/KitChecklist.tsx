@@ -88,20 +88,24 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
 
   // Auto-repli sur la transition incomplète → complète (uniquement à ce
   // moment-là, pour ne pas re-replier une section que l'utilisateur a
-  // rouverte pour la relire).
+  // rouverte pour la relire). On capture l'état précédent dans une variable
+  // locale AVANT de réassigner la ref : l'updater de setCollapsed s'exécute
+  // en phase de rendu (différée), donc lire prevDone.current dedans
+  // renverrait déjà la nouvelle valeur (race) → aucun repli.
   useEffect(() => {
     const done = computeSectionDone(checklist, values);
-    setCollapsed((prev) => {
-      let next = prev;
+    const prev = prevDone.current;
+    prevDone.current = done;
+    setCollapsed((prevCollapsed) => {
+      let next = prevCollapsed;
       done.forEach((d, si) => {
-        if (d && !prevDone.current[si] && !next.has(si)) {
-          if (next === prev) next = new Set(prev);
+        if (d && !prev[si] && !next.has(si)) {
+          if (next === prevCollapsed) next = new Set(prevCollapsed);
           next.add(si);
         }
       });
       return next;
     });
-    prevDone.current = done;
   }, [values, checklist]);
 
   const toggleCollapse = (si: number) =>
