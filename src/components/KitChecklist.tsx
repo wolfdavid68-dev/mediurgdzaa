@@ -85,6 +85,11 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
     collapsedFromDone(computeSectionDone(checklist, values))
   );
   const prevDone = useRef<boolean[]>(computeSectionDone(checklist, values));
+  // Section dont un champ texte est en cours de saisie (focus). On NE replie
+  // pas cette section tant qu'elle a le focus : sinon, dès la 1ʳᵉ lettre du
+  // dernier champ, la section deviendrait complète et se replierait en plein
+  // milieu de la frappe (l'input disparaîtrait). Le repli se fait au blur.
+  const focusedSection = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -107,7 +112,8 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
     setCollapsed((prevCollapsed) => {
       let next = prevCollapsed;
       done.forEach((d, si) => {
-        if (d && !prev[si] && !next.has(si)) {
+        // Skip la section en cours de saisie → repli reporté au blur.
+        if (d && !prev[si] && !next.has(si) && focusedSection.current !== si) {
           if (next === prevCollapsed) next = new Set(prevCollapsed);
           next.add(si);
         }
@@ -115,6 +121,16 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
       return next;
     });
   }, [values, checklist]);
+
+  // Quand un champ texte perd le focus : si sa section est complète, on la
+  // replie (le repli avait été reporté pendant la saisie).
+  const handleFieldBlur = (si: number) => {
+    if (focusedSection.current === si) focusedSection.current = null;
+    const done = computeSectionDone(checklist, values);
+    if (done[si]) {
+      setCollapsed((prev) => (prev.has(si) ? prev : new Set(prev).add(si)));
+    }
+  };
 
   const toggleCollapse = (si: number) =>
     setCollapsed((prev) => {
@@ -430,6 +446,10 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
                           inputMode={item.unit ? "decimal" : "text"}
                           placeholder={item.placeholder || ""}
                           value={(values[key] as string) || ""}
+                          onFocus={() => {
+                            focusedSection.current = si;
+                          }}
+                          onBlur={() => handleFieldBlur(si)}
                           onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))}
                         />
                         {item.unit && <span className="kit-checklist-unit">{item.unit}</span>}
