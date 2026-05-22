@@ -143,25 +143,50 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
     w.document.close();
   };
 
-  // Progression = uniquement les cases à cocher (les saisies/choix ne comptent
-  // pas, comme la check-list matériel qui ne compte que les coches).
-  let checkTotal = 0;
-  let checkDone = 0;
-  checklist.forEach((section, si) =>
+  // Compte des cases à cocher (les saisies/choix ne comptent pas, comme la
+  // check-list matériel). Par section pour l'indicateur de progression local.
+  const sectionChecks = checklist.map((section, si) => {
+    let total = 0;
+    let done = 0;
     section.items.forEach((item, ii) => {
       if (item.type === "check") {
-        checkTotal++;
-        if (values[`${si}-${ii}`] === true) checkDone++;
+        total++;
+        if (values[`${si}-${ii}`] === true) done++;
       }
-    })
-  );
+    });
+    return { total, done };
+  });
+  const checkTotal = sectionChecks.reduce((s, c) => s + c.total, 0);
+  const checkDone = sectionChecks.reduce((s, c) => s + c.done, 0);
+  const pct = checkTotal ? Math.round((checkDone / checkTotal) * 100) : 0;
+  const allDone = checkTotal > 0 && checkDone === checkTotal;
 
   const hasAnyValue = Object.values(values).some((v) => v === true || (typeof v === "string" && v));
+
+  const handleReset = () => {
+    if (!hasAnyValue) return;
+    if (window.confirm("Réinitialiser toute la check-list (coches + saisies) ?")) {
+      setValues({});
+    }
+  };
 
   return (
     <div className="materiel-checklist kit-checklist">
       <div className="materiel-checklist-head">
-        <span className="materiel-progress">
+        <span className={`materiel-progress ${allDone ? "kit-checklist-alldone" : ""}`}>
+          {allDone && (
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              aria-hidden="true"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
           {checkDone}/{checkTotal} coché{checkDone > 1 ? "s" : ""}
         </span>
         <div className="kit-checklist-actions">
@@ -209,7 +234,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
           <button
             type="button"
             className="materiel-reset-btn"
-            onClick={() => setValues({})}
+            onClick={handleReset}
             disabled={!hasAnyValue}
           >
             Réinitialiser
@@ -217,90 +242,127 @@ const KitChecklist = ({ kitId, titre, checklist, couleur }: Props) => {
         </div>
       </div>
 
-      {checklist.map((section, si) => (
-        <div key={si} className="kit-checklist-section">
-          <div className="checklist-section">{section.titre}</div>
-          <ul className="checklist">
-            {section.items.map((item, ii) => {
-              const key = `${si}-${ii}`;
-              if (item.type === "check") {
-                const checked = values[key] === true;
-                return (
-                  <li key={ii} className="checklist-item">
-                    <label className={`checklist-label ${checked ? "checklist-checked" : ""}`}>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => setValues((p) => ({ ...p, [key]: !p[key] }))}
-                      />
-                      <span
-                        className="checklist-box"
-                        style={checked ? { background: couleur, borderColor: couleur } : {}}
-                        aria-hidden="true"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          width="13"
-                          height="13"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
+      <div className="kit-checklist-progressbar" aria-hidden="true">
+        <div
+          className="kit-checklist-progressfill"
+          style={{ width: `${pct}%`, background: allDone ? "var(--success)" : couleur }}
+        />
+      </div>
+
+      {checklist.map((section, si) => {
+        const sec = sectionChecks[si];
+        const secDone = sec.total > 0 && sec.done === sec.total;
+        return (
+          <div key={si} className="kit-checklist-section">
+            <div
+              className={`checklist-section kit-checklist-sechead ${secDone ? "kit-checklist-sec-done" : ""}`}
+            >
+              <span>{section.titre}</span>
+              {sec.total > 0 && (
+                <span className="kit-checklist-secbadge">
+                  {secDone && (
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="12"
+                      height="12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      aria-hidden="true"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                  {sec.done}/{sec.total}
+                </span>
+              )}
+            </div>
+            <ul className="checklist">
+              {section.items.map((item, ii) => {
+                const key = `${si}-${ii}`;
+                if (item.type === "check") {
+                  const checked = values[key] === true;
+                  return (
+                    <li key={ii} className="checklist-item">
+                      <label className={`checklist-label ${checked ? "checklist-checked" : ""}`}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => setValues((p) => ({ ...p, [key]: !p[key] }))}
+                        />
+                        <span
+                          className="checklist-box"
+                          style={checked ? { background: couleur, borderColor: couleur } : {}}
+                          aria-hidden="true"
                         >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </span>
-                      <span className="checklist-text">{item.label}</span>
-                    </label>
-                  </li>
-                );
-              }
-              if (item.type === "choice") {
-                const selected = (values[key] as string) || "";
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="13"
+                            height="13"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </span>
+                        <span className="checklist-text">{item.label}</span>
+                      </label>
+                    </li>
+                  );
+                }
+                if (item.type === "choice") {
+                  const selected = (values[key] as string) || "";
+                  return (
+                    <li key={ii} className="kit-checklist-field">
+                      <span className="kit-checklist-flabel">{item.label}</span>
+                      <div
+                        className="kit-checklist-chips"
+                        role="radiogroup"
+                        aria-label={item.label}
+                      >
+                        {item.options.map((opt) => {
+                          const active = selected === opt;
+                          return (
+                            <button
+                              key={opt}
+                              type="button"
+                              role="radio"
+                              aria-checked={active}
+                              className={`kit-checklist-chip ${active ? "kit-checklist-chip-active" : ""}`}
+                              style={active ? { background: couleur, borderColor: couleur } : {}}
+                              onClick={() => setValues((p) => ({ ...p, [key]: active ? "" : opt }))}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </li>
+                  );
+                }
+                // text
                 return (
                   <li key={ii} className="kit-checklist-field">
                     <span className="kit-checklist-flabel">{item.label}</span>
-                    <div className="kit-checklist-chips" role="radiogroup" aria-label={item.label}>
-                      {item.options.map((opt) => {
-                        const active = selected === opt;
-                        return (
-                          <button
-                            key={opt}
-                            type="button"
-                            role="radio"
-                            aria-checked={active}
-                            className={`kit-checklist-chip ${active ? "kit-checklist-chip-active" : ""}`}
-                            style={active ? { background: couleur, borderColor: couleur } : {}}
-                            onClick={() => setValues((p) => ({ ...p, [key]: active ? "" : opt }))}
-                          >
-                            {opt}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <span className="kit-checklist-input-wrap">
+                      <input
+                        className="kit-checklist-input"
+                        type="text"
+                        inputMode={item.unit ? "decimal" : "text"}
+                        placeholder={item.placeholder || ""}
+                        value={(values[key] as string) || ""}
+                        onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))}
+                      />
+                      {item.unit && <span className="kit-checklist-unit">{item.unit}</span>}
+                    </span>
                   </li>
                 );
-              }
-              // text
-              return (
-                <li key={ii} className="kit-checklist-field">
-                  <span className="kit-checklist-flabel">{item.label}</span>
-                  <span className="kit-checklist-input-wrap">
-                    <input
-                      className="kit-checklist-input"
-                      type="text"
-                      inputMode={item.unit ? "decimal" : "text"}
-                      placeholder={item.placeholder || ""}
-                      value={(values[key] as string) || ""}
-                      onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))}
-                    />
-                    {item.unit && <span className="kit-checklist-unit">{item.unit}</span>}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+              })}
+            </ul>
+          </div>
+        );
+      })}
     </div>
   );
 };

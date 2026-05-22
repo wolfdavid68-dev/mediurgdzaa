@@ -75,6 +75,53 @@
   flex-wrap: wrap;
   gap: 6px;
 }
+/* Compteur global : passe en vert quand tout est coché */
+.materiel-progress.kit-checklist-alldone {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--success);
+  font-weight: 700;
+}
+/* Barre de progression visuelle sous l'en-tête */
+.kit-checklist-progressbar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.kit-checklist-progressfill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+/* En-tête de section : titre + badge de progression local */
+.kit-checklist-sechead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.kit-checklist-secbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mute);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.kit-checklist-sec-done {
+  color: var(--success);
+}
+.kit-checklist-sec-done .kit-checklist-secbadge {
+  color: var(--success);
+}
 .kit-checklist-act {
   display: inline-flex;
   align-items: center;
