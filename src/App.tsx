@@ -22,6 +22,7 @@ import EchellesPage from "./pages/EchellesPage";
 import ChangelogModal from "./components/ChangelogModal";
 import NotesBackupModal from "./components/NotesBackupModal";
 import CharterModal, { CHARTER_VERSION, CHARTER_LS_KEY } from "./components/CharterModal";
+import AnnounceModal, { ANNOUNCE_VERSION, ANNOUNCE_LS_KEY } from "./components/AnnounceModal";
 import { APP_VERSION } from "./data/changelog";
 import {
   pushNav,
@@ -129,6 +130,22 @@ const App = () => {
       localStorage.setItem(CHARTER_LS_KEY, `${CHARTER_VERSION}|${new Date().toISOString()}`);
     } catch {}
     setShowCharter(false);
+  };
+
+  // Annonce ponctuelle (nouvel outil ECG) — vue une seule fois. Affichée
+  // seulement une fois la charte acceptée pour ne pas empiler deux modales.
+  const [showAnnounce, setShowAnnounce] = useState(() => {
+    try {
+      return localStorage.getItem(ANNOUNCE_LS_KEY) !== ANNOUNCE_VERSION;
+    } catch {
+      return false;
+    }
+  });
+  const dismissAnnounce = () => {
+    try {
+      localStorage.setItem(ANNOUNCE_LS_KEY, ANNOUNCE_VERSION);
+    } catch {}
+    setShowAnnounce(false);
   };
 
   useEffect(() => {
@@ -497,6 +514,9 @@ const App = () => {
           onAccept={acceptCharter}
           onClose={acceptCharter}
         />
+      )}
+      {!showCharter && showAnnounce && (
+        <AnnounceModal open={showAnnounce} onClose={dismissAnnounce} />
       )}
       <UpdatePrompt />
     </div>

@@ -1,3 +1,83 @@
+/* ── Annonce ponctuelle à l'ouverture (nouvel outil ECG) ───── */
+.announce-dialog {
+  border: none;
+  background: transparent;
+  padding: 0;
+  max-width: 380px;
+  width: calc(100vw - 32px);
+}
+.announce-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+.announce-card {
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 22px 20px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.announce-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+.announce-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+}
+.announce-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 18%, transparent);
+  padding: 2px 7px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+.announce-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0;
+}
+.announce-where {
+  font-size: 13px;
+  color: var(--text-mute);
+  margin: 0;
+}
+.announce-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 46px;
+}
+.announce-btn:active {
+  transform: scale(0.98);
+}
+
 /* ── Backup notes utilisateur (export/import JSON) ───────────
    Affiché dans la modale changelog, en bas. Permet à l'user de
    sauvegarder/restaurer ses notes personnelles par médicament

@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { isPreview } from "../lib/featureFlags";
 import ProtocolCard from "../components/ProtocolCard";
 import CardErrorFallback from "../components/CardErrorFallback";
 import { PROTOCOLS } from "../data/protocols";
@@ -78,13 +77,12 @@ const ProtocolesPage = ({
 
       {protoCategory === "ecg" && (
         <>
-          {/* Lecteur ECG (photo → analyse) : PREVIEW uniquement
-              (?auth=preview). Public : seul le tableau diagnostique. */}
-          {isPreview() && (
-            <div style={{ marginBottom: 16 }}>
-              <EcgReader onDrugSearch={onDrugSearch} />
-            </div>
-          )}
+          {/* Lecteur ECG (photo → analyse IA) : visible pour tous. Outil
+              d'aide à la décision en test, ne remplace pas l'interprétation
+              médicale. Nécessite le réseau (analyse) — cf. OfflineBanner. */}
+          <div style={{ marginBottom: 16 }}>
+            <EcgReader onDrugSearch={onDrugSearch} />
+          </div>
           <EcgDiagnostic />
         </>
       )}

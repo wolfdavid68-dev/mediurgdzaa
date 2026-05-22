@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v105";
+export const APP_VERSION = "v106";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v106",
+    date: "2026-05-22",
+    titre: "Lecteur ECG ouvert à tous + annonce",
+    changes: [
+      {
+        type: "feat",
+        text: "Le lecteur ECG (aide à l'interprétation par photo) est désormais visible pour tous dans Protocoles → ECG (il était jusqu'ici réservé au mode preview). Outil d'aide à la décision EN TEST : il ne remplace en rien l'interprétation médicale. Nécessite le réseau pour l'analyse.",
+      },
+      {
+        type: "feat",
+        text: "Annonce affichée une fois à l'ouverture pour présenter ce nouvel outil ECG et rappeler qu'il ne se substitue pas à l'interprétation médicale.",
+      },
+    ],
+  },
   {
     version: "v105",
     date: "2026-05-22",
