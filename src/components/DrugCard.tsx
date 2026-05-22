@@ -20,6 +20,7 @@ type DrugCardProps = {
   isFavorite?: boolean;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
+  onOpenChange?: (id: number, open: boolean) => void;
   onProtocolOpen?: () => void;
 };
 
@@ -28,6 +29,7 @@ const DrugCard = ({
   isFavorite,
   onToggleFavorite,
   onOpen,
+  onOpenChange,
   onProtocolOpen,
 }: DrugCardProps) => {
   const [open, setOpen] = useState(false);
@@ -50,6 +52,14 @@ const DrugCard = ({
       if (onOpen) onOpen(drug.id);
     }
   }, [open, drug.id]); // eslint-disable-line
+
+  // Notifie le parent de l'état déployé/replié (App masque la barre de
+  // recherche tant qu'au moins une fiche est ouverte). Cleanup au démontage
+  // = considéré fermé (ex: la fiche disparaît quand la recherche change).
+  useEffect(() => {
+    onOpenChange?.(drug.id, open);
+    return () => onOpenChange?.(drug.id, false);
+  }, [open, drug.id, onOpenChange]);
 
   const toggleTab = (key: string) => setActiveTab(activeTab === key ? null : key);
 

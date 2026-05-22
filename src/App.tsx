@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useDeferredValue } from "react";
+import { useMemo, useState, useEffect, useDeferredValue, useCallback } from "react";
 import { DRUGS } from "./data/drugs";
 import { ALIASES } from "./data/aliases";
 import { normalize } from "./lib/normalize";
@@ -86,6 +86,22 @@ const App = () => {
     }
   });
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  // IDs des fiches médicament actuellement déployées. Tant qu'au moins une
+  // est ouverte, on masque la barre de recherche + filtres dans le header
+  // (il ne reste que le bandeau logo + boutons thème/police) pour maximiser
+  // la place de lecture de la fiche. La callback est stable (useCallback []) →
+  // pas de churn de l'effet onOpenChange dans DrugCard.
+  const [openDrugs, setOpenDrugs] = useState<Set<number>>(new Set());
+  const handleDrugOpenChange = useCallback((id: number, open: boolean) => {
+    setOpenDrugs((prev) => {
+      if (open === prev.has(id)) return prev;
+      const next = new Set(prev);
+      if (open) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }, []);
+  const anyDrugOpen = openDrugs.size > 0;
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
@@ -331,7 +347,7 @@ const App = () => {
         onToggleFont={toggleFont}
         onToggleTheme={toggleTheme}
       >
-        {page === "medicaments" && (
+        {page === "medicaments" && !anyDrugOpen && (
           <>
             <div className="search-bar">
               <svg
@@ -422,6 +438,7 @@ const App = () => {
             showFavoritesOnly={showFavoritesOnly}
             onToggleFavorite={toggleFavorite}
             onOpen={addToHistory}
+            onOpenChange={handleDrugOpenChange}
             onProtocolOpen={() => navigateTo("protocoles")}
           />
         )}

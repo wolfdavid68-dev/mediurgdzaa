@@ -12,6 +12,7 @@ type DrugListProps = {
   favorites?: Set<number>;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
+  onOpenChange?: (id: number, open: boolean) => void;
   onProtocolOpen?: () => void;
 };
 
@@ -20,6 +21,7 @@ const DrugList = ({
   favorites,
   onToggleFavorite,
   onOpen,
+  onOpenChange,
   onProtocolOpen,
 }: DrugListProps) => {
   return (
@@ -31,6 +33,7 @@ const DrugList = ({
             isFavorite={favorites?.has(drug.id) || false}
             onToggleFavorite={onToggleFavorite}
             onOpen={onOpen}
+            onOpenChange={onOpenChange}
             onProtocolOpen={onProtocolOpen}
           />
         </ErrorBoundary>

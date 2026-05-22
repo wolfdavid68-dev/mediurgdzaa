@@ -15,6 +15,7 @@ type MedicamentsPageProps = {
   showFavoritesOnly: boolean;
   onToggleFavorite: (id: number) => void;
   onOpen: (id: number) => void;
+  onOpenChange: (id: number, open: boolean) => void;
   onProtocolOpen: () => void;
 };
 
@@ -25,6 +26,7 @@ const MedicamentsPage = ({
   showFavoritesOnly,
   onToggleFavorite,
   onOpen,
+  onOpenChange,
   onProtocolOpen,
 }: MedicamentsPageProps) => {
   if (filtered.length === 0) {
@@ -64,6 +66,7 @@ const MedicamentsPage = ({
             favorites={favorites}
             onToggleFavorite={onToggleFavorite}
             onOpen={onOpen}
+            onOpenChange={onOpenChange}
             onProtocolOpen={onProtocolOpen}
           />
         </div>
@@ -73,6 +76,7 @@ const MedicamentsPage = ({
         favorites={favorites}
         onToggleFavorite={onToggleFavorite}
         onOpen={onOpen}
+        onOpenChange={onOpenChange}
         onProtocolOpen={onProtocolOpen}
       />
     </>
