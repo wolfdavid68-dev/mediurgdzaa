@@ -9,6 +9,17 @@ import MedicamentsPage from "./pages/MedicamentsPage";
 import OfflineBanner from "./components/OfflineBanner";
 import TestVersionBanner from "./components/TestVersionBanner";
 import UpdatePrompt from "./components/UpdatePrompt";
+// Pages/modale CŒUR offline : importées en statique (PAS en lazy). Un chunk
+// lazy peut échouer à charger hors-ligne si le hash demandé ne matche pas le
+// précache du service worker (décalage inévitable à chaque mise à jour en mode
+// 'prompt') → « Failed to fetch dynamically imported module » → crash. Comme
+// l'app est offline-first et que ces écrans DOIVENT marcher hors-ligne, on les
+// met dans le bundle principal : chargés avec index.html, toujours cohérents,
+// aucun fetch séparé possible. Le surcoût de poids initial est précaché de
+// toute façon. Cf. RootErrorFallback / commit error-boundary racine.
+import AcrModeModal from "./components/AcrModeModal";
+import ProtocolesPage from "./pages/ProtocolesPage";
+import EchellesPage from "./pages/EchellesPage";
 import { APP_VERSION } from "./data/changelog";
 import {
   pushNav,
@@ -19,16 +30,14 @@ import {
 import { usePersistentStorage } from "./lib/usePersistentStorage";
 import { useLongPress } from "./lib/useLongPress";
 
-// Code-splitting : les modales (ACR, changelog) sont importées à la demande,
-// et la page Protocoles entière (avec ses data PROTOCOLS + PREP_KITS et ses
-// sous-onglets IncompatibilityList + PrepKitCard) est lazy aussi. Tout ce
-// poids sort du bundle initial → premier paint plus rapide.
-const AcrModeModal = lazy(() => import("./components/AcrModeModal"));
+// Code-splitting : modales NON critiques hors-ligne, importées à la demande.
+// (Changelog, sauvegarde de notes, charte.) Si l'une échoue à charger
+// hors-ligne, l'ErrorBoundary racine affiche un écran de récupération — pas de
+// crash. Les écrans CŒUR (Protocoles, Échelles, URGENCE ACR) sont importés en
+// statique en tête de fichier — voir le commentaire là-bas.
 const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
 const NotesBackupModal = lazy(() => import("./components/NotesBackupModal"));
 const CharterModal = lazy(() => import("./components/CharterModal"));
-const ProtocolesPage = lazy(() => import("./pages/ProtocolesPage"));
-const EchellesPage = lazy(() => import("./pages/EchellesPage"));
 
 // Cf. CharterModal.tsx — version stockée en localStorage pour pouvoir
 // forcer une re-acceptation si la charte change matériellement.

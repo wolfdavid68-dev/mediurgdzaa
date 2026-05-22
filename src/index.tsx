@@ -66,6 +66,26 @@ window.addEventListener("error", (e) => {
   console.error("[mediurg] window error", e.message, e.error);
 });
 
+// Vite émet `vite:preloadError` quand un chunk lazy échoue à charger — typique
+// après un déploiement (le hash demandé n'existe plus / pas encore en cache).
+// Si on est EN LIGNE : un reload récupère l'index.html + le SW à jour et tout
+// se resynchronise. HORS-LIGNE : on laisse l'ErrorBoundary racine afficher
+// l'écran de récupération (un reload ne servirait à rien sans réseau). Garde
+//-fou anti-boucle : un seul reload auto par session d'onglet.
+window.addEventListener("vite:preloadError", (e) => {
+  const onLine = typeof navigator === "undefined" || navigator.onLine;
+  const already = sessionStorage.getItem("mediurg-preload-reloaded") === "1";
+  if (onLine && !already) {
+    e.preventDefault();
+    try {
+      sessionStorage.setItem("mediurg-preload-reloaded", "1");
+    } catch {
+      /* sessionStorage indispo : on recharge quand même */
+    }
+    window.location.reload();
+  }
+});
+
 root.render(
   <StrictMode>
     {/* ErrorBoundary racine : filet ultime. Une erreur de rendu non rattrapée

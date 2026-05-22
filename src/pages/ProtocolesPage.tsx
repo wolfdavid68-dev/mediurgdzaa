@@ -6,10 +6,16 @@ import CardErrorFallback from "../components/CardErrorFallback";
 import { PROTOCOLS } from "../data/protocols";
 import { PREP_KITS } from "../data/prepKits";
 
-// Sous-onglets lourds : lazy par-dessus, leur data se charge avec eux.
-const IncompatibilityList = lazy(() => import("../components/IncompatibilityList"));
-const PrepKitCard = lazy(() => import("../components/PrepKitCard"));
-const EcgDiagnostic = lazy(() => import("../components/EcgDiagnostic"));
+// Contenu CŒUR offline (incompatibilités, kits, tableau ECG) importé en
+// STATIQUE : un chunk lazy peut échouer hors-ligne si son hash ne matche pas le
+// précache du SW → crash. Ces sous-onglets doivent marcher hors-ligne, donc ils
+// vivent dans le bundle principal (chargé avec index.html). Cf. App.tsx.
+import IncompatibilityList from "../components/IncompatibilityList";
+import PrepKitCard from "../components/PrepKitCard";
+import EcgDiagnostic from "../components/EcgDiagnostic";
+// EcgReader reste lazy : preview-only (?auth=preview) ET nécessite le réseau
+// (analyse IA). Le public ne le charge jamais ; en preview, un échec offline
+// est rattrapé par l'ErrorBoundary racine.
 const EcgReader = lazy(() => import("../components/EcgReader"));
 
 // Page Protocoles avec ses 3 sous-onglets (PISU, Incompatibilités, Kits).
