@@ -494,7 +494,6 @@ const App = () => {
             favorites={favorites}
             showFavoritesOnly={showFavoritesOnly}
             patientWeight={patientWeight}
-            onPatientWeightChange={setPatientWeight}
             onToggleFavorite={toggleFavorite}
             onOpen={addToHistory}
             onOpenChange={handleDrugOpenChange}

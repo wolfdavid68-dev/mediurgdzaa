@@ -14,7 +14,6 @@ type MedicamentsPageProps = {
   favorites: Set<number>;
   showFavoritesOnly: boolean;
   patientWeight: string;
-  onPatientWeightChange: (kg: string) => void;
   onToggleFavorite: (id: number) => void;
   onOpen: (id: number) => void;
   onOpenChange: (key: string, open: boolean) => void;
@@ -27,7 +26,6 @@ const MedicamentsPage = ({
   favorites,
   showFavoritesOnly,
   patientWeight,
-  onPatientWeightChange,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -73,7 +71,6 @@ const MedicamentsPage = ({
             onOpenChange={onOpenChange}
             onProtocolOpen={onProtocolOpen}
             patientWeight={patientWeight}
-            onPatientWeightChange={onPatientWeightChange}
           />
         </div>
       )}

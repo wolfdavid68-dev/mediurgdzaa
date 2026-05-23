@@ -19,7 +19,6 @@ type DrugCardProps = {
   drug: any;
   isFavorite?: boolean;
   patientWeight?: string;
-  onPatientWeightChange?: (kg: string) => void;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
   onOpenChange?: (key: string, open: boolean) => void;
@@ -30,7 +29,6 @@ const DrugCard = ({
   drug,
   isFavorite,
   patientWeight = "",
-  onPatientWeightChange,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -39,16 +37,9 @@ const DrugCard = ({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState(false);
-  // Poids : controlled si App fournit onPatientWeightChange (mode prod,
-  // poids partagé entre toutes les fiches), sinon état local (mode test
-  // unitaire isolé). Évite de casser les tests qui rendent DrugCard seul.
-  const [internalWeight, setInternalWeight] = useState("");
-  const isControlled = onPatientWeightChange !== undefined;
-  const weight = isControlled ? patientWeight : internalWeight;
-  const setWeight = (kg: string) => {
-    if (isControlled) onPatientWeightChange(kg);
-    else setInternalWeight(kg);
-  };
+  // Poids partagé : vient du bandeau global (App.tsx → PatientWeightBanner) via
+  // le prop. Plus d'input local dans la fiche (évite le doublon avec le bandeau).
+  const weight = patientWeight;
   const [produitFinal, setProduitFinal] = useState("");
   // Clé d'instance unique : une même drogue peut être rendue 2 fois
   // simultanément (section Récents + liste filtrée). Utiliser drug.id
@@ -153,7 +144,7 @@ const DrugCard = ({
 
     return (
       <>
-        {prep?.dose_threshold !== undefined ? (
+        {prep?.dose_threshold !== undefined && (
           <div className="poso-calc">
             <svg
               viewBox="0 0 24 24"
@@ -184,42 +175,6 @@ const DrugCard = ({
                 className="poso-calc-clear"
                 onClick={() => setProduitFinal("")}
                 aria-label="Effacer la dose"
-              >
-                ×
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="poso-calc">
-            <svg
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <span className="poso-calc-label">Poids patient</span>
-            <input
-              className="poso-calc-input"
-              type="number"
-              min="1"
-              max="300"
-              placeholder="kg"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-            />
-            <span className="poso-calc-unit">kg</span>
-            {weight && (
-              <button
-                type="button"
-                className="poso-calc-clear"
-                onClick={() => setWeight("")}
-                aria-label="Effacer le poids"
               >
                 ×
               </button>

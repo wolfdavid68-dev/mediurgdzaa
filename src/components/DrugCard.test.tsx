@@ -55,8 +55,8 @@ describe("DrugCard", () => {
       expect(screen.getByText(/Description longue du médicament/)).toBeInTheDocument();
       expect(screen.getByText("DCI")).toBeInTheDocument();
       expect(screen.getByText("Médicament de test")).toBeInTheDocument();
-      // Onglet poso = actif par défaut → calculateur de poids visible
-      expect(screen.getByPlaceholderText("kg")).toBeInTheDocument();
+      // Onglet poso = actif par défaut → texte des posologies visible
+      expect(screen.getByText(/1-2 mg\/kg IV lente/)).toBeInTheDocument();
     });
 
     test("re-clic sur le header referme la carte", () => {
@@ -125,13 +125,11 @@ describe("DrugCard", () => {
       expect(container?.querySelector(".calc-result")).toBeNull();
     });
 
-    test("poids = 70 kg : calc affiche 70-140 mg (1-2 mg/kg × 70)", () => {
-      render(<DrugCard drug={mockDrug} />);
+    test("poids = 70 kg (via prop patientWeight) : calc affiche 70-140 mg", () => {
+      render(<DrugCard drug={mockDrug} patientWeight="70" />);
       fireEvent.click(screen.getByText("TEST_DRUG_XYZ").closest("button")!);
-      const weightInput = screen.getByPlaceholderText("kg") as HTMLInputElement;
-      fireEvent.change(weightInput, { target: { value: "70" } });
-      // Le résultat apparaît dans un .calc-result. La regex de calcDose
-      // produit un format type "70-140 mg" pour la fourchette.
+      // Le poids vient du bandeau global (App.tsx) via prop, l'input inline a
+      // été retiré pour éviter le doublon. Le résultat apparaît dans .calc-result.
       const adultePosoItem = screen.getByText(/1-2 mg\/kg IV lente/).closest(".poso-item")!;
       const result = adultePosoItem.querySelector(".calc-result");
       expect(result).toBeTruthy();
@@ -139,28 +137,14 @@ describe("DrugCard", () => {
     });
 
     test("poids = 150 kg : 1-2 mg/kg × 150 = 150-300, capé à max 200 mg → badge ⚠ max", () => {
-      render(<DrugCard drug={mockDrug} />);
+      render(<DrugCard drug={mockDrug} patientWeight="150" />);
       fireEvent.click(screen.getByText("TEST_DRUG_XYZ").closest("button")!);
-      const weightInput = screen.getByPlaceholderText("kg") as HTMLInputElement;
-      fireEvent.change(weightInput, { target: { value: "150" } });
+      // 150 > 70 → seule la colonne Adulte s'affiche (filtre poso par poids)
       const adultePosoItem = screen.getByText(/1-2 mg\/kg IV lente/).closest(".poso-item")!;
       const result = adultePosoItem.querySelector(".calc-result");
       expect(result).toBeTruthy();
-      // Le calcul doit signaler le cap (« ⚠ max ») et la classe calc-over
       expect(result!.textContent).toMatch(/⚠ max/);
       expect(result!.className).toContain("calc-over");
-    });
-
-    test("clic sur la croix efface le poids", () => {
-      render(<DrugCard drug={mockDrug} />);
-      fireEvent.click(screen.getByText("TEST_DRUG_XYZ").closest("button")!);
-      const weightInput = screen.getByPlaceholderText("kg") as HTMLInputElement;
-      fireEvent.change(weightInput, { target: { value: "70" } });
-      expect(weightInput.value).toBe("70");
-
-      const clearBtn = screen.getByRole("button", { name: "Effacer le poids" });
-      fireEvent.click(clearBtn);
-      expect(weightInput.value).toBe("");
     });
   });
 
