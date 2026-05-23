@@ -168,14 +168,13 @@ describe("DrugCard", () => {
       expect(screen.queryByText(/Description longue/)).not.toBeInTheDocument();
     });
 
-    test("Enter ou Space sur l'étoile fonctionne aussi (a11y clavier)", () => {
-      const onToggle = vi.fn();
-      render(<DrugCard drug={mockDrug} isFavorite={false} onToggleFavorite={onToggle} />);
+    test("l'étoile est un vrai <button> (Enter/Space géré nativement par le browser)", () => {
+      render(<DrugCard drug={mockDrug} isFavorite={false} onToggleFavorite={() => {}} />);
       const star = screen.getByLabelText("Ajouter aux favoris");
-      fireEvent.keyDown(star, { key: "Enter" });
-      expect(onToggle).toHaveBeenCalledWith(99999);
-      fireEvent.keyDown(star, { key: " " });
-      expect(onToggle).toHaveBeenCalledTimes(2);
+      // Vrai bouton natif → pas besoin de handler keyDown explicite. Le browser
+      // déclenche un click au Enter/Space. On vérifie juste que c'est bien un
+      // <button> (couvre la régression « nested-interactive » détectée par axe).
+      expect(star.tagName).toBe("BUTTON");
     });
 
     test("pas d'étoile si onToggleFavorite n'est pas fourni", () => {

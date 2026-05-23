@@ -92,7 +92,7 @@ export type Drug = {
 };
 
 // ── Protocole (PISU / SAUV) ───────────────────────────────────
-export type ProtocolSectionType =
+type ProtocolSectionType =
   | "inclusion"
   | "exclusion"
   | "gravite"

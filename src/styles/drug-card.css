@@ -26,8 +26,20 @@
    ci-dessus, mais on n'a pas encore de règles @container utilisées —
    l'infra est en place quand on voudra une vue tablette horizontale.) */
 
+/* .drug-row : conteneur flex qui aligne le bouton header (zone de toggle
+   expand/replier) et le bouton favori. Ces deux boutons sont des éléments
+   interactifs frères — l'étoile n'est PAS imbriquée dans le header pour
+   respecter la règle a11y « nested-interactive » (un <button> ne peut pas
+   contenir d'autre élément focusable). */
+.drug-row {
+  display: flex;
+  align-items: center;
+  padding-right: clamp(8px, 1.2vw, 12px);
+}
+
 .drug-header {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: clamp(12px, 1.8vw, 16px) clamp(14px, 2vw, 18px);
   display: flex;
   align-items: center;
@@ -90,7 +102,9 @@
   font-weight: 500;
 }
 
-/* Étoile favoris sur la card médicament */
+/* Étoile favoris sur la card médicament. Vrai <button> sibling de .drug-header
+   (cf. .drug-row) — pas imbriqué, pour ne pas tomber sur la règle a11y
+   nested-interactive. */
 .drug-favorite {
   display: inline-flex;
   align-items: center;
@@ -100,9 +114,11 @@
   border-radius: 50%;
   font-size: 18px;
   color: #94a3b8;
+  background: transparent;
+  border: none;
   cursor: pointer;
   user-select: none;
-  margin-right: 4px;
+  margin-left: 4px;
   transition: all 0.15s;
   flex-shrink: 0;
 }

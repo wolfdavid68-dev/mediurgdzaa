@@ -247,70 +247,61 @@ const DrugCard = ({
 
   return (
     <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
-      <button
-        className="drug-header"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        aria-label={`${drug.nom} — ${open ? "replier" : "déployer"} la fiche`}
-      >
-        <div className="drug-color-bar" style={{ background: drug.couleur }} />
-        <div className="drug-main">
-          <div className="drug-title-row">
-            <span className="drug-icon">{drug.icon}</span>
-            <span className="drug-name">{drug.nom}</span>
-            <span className="drug-commercial">{drug.commercial}</span>
-            {hasNote && (
-              <span className="note-indicator" title="Note personnelle ajoutée">
-                ✎
+      <div className="drug-row">
+        <button
+          className="drug-header"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-label={`${drug.nom} — ${open ? "replier" : "déployer"} la fiche`}
+        >
+          <div className="drug-color-bar" style={{ background: drug.couleur }} />
+          <div className="drug-main">
+            <div className="drug-title-row">
+              <span className="drug-icon">{drug.icon}</span>
+              <span className="drug-name">{drug.nom}</span>
+              <span className="drug-commercial">{drug.commercial}</span>
+              {hasNote && (
+                <span className="note-indicator" title="Note personnelle ajoutée">
+                  ✎
+                </span>
+              )}
+            </div>
+            <div className="drug-subtitle">
+              <span className="badge badge-cat" data-cat={drug.cat}>
+                {drug.cat}
               </span>
-            )}
+              {drug.svc.map((s: string) => (
+                <span key={s} className="badge badge-svc">
+                  {s}
+                </span>
+              ))}
+              <span className="drug-classe">{drug.classe}</span>
+            </div>
           </div>
-          <div className="drug-subtitle">
-            <span className="badge badge-cat" data-cat={drug.cat}>
-              {drug.cat}
-            </span>
-            {drug.svc.map((s: string) => (
-              <span key={s} className="badge badge-svc">
-                {s}
-              </span>
-            ))}
-            <span className="drug-classe">{drug.classe}</span>
-          </div>
-        </div>
+          <svg
+            className={`chevron ${open ? "chevron-open" : ""}`}
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
         {onToggleFavorite && (
-          <span
-            role="button"
-            tabIndex={0}
+          <button
+            type="button"
             className={`drug-favorite ${isFavorite ? "drug-favorite-active" : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(drug.id);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                onToggleFavorite(drug.id);
-              }
-            }}
+            onClick={() => onToggleFavorite(drug.id)}
             aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
             title={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
           >
             {isFavorite ? "★" : "☆"}
-          </span>
+          </button>
         )}
-        <svg
-          className={`chevron ${open ? "chevron-open" : ""}`}
-          viewBox="0 0 24 24"
-          width="18"
-          height="18"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
+      </div>
 
       {open && (
         <div className="drug-body">
