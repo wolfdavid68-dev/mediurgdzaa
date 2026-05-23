@@ -1,9 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import ProtocolCard from "./ProtocolCard";
+import type { Protocol } from "../types/data";
 
 // Mock minimal de protocole — on couvre la structure typique : sections de
 // types variés (inclusion, actions, surveillance) avec items texte simples.
-const mockProtocol = {
+const mockProtocol: Protocol = {
   id: 9999,
   code: "TEST-001",
   titre: "Protocole de test",

@@ -90,3 +90,89 @@ export type Drug = {
   poso: DrugPosology;
   prep?: DrugPrep | null;
 };
+
+// ── Protocole (PISU / SAUV) ───────────────────────────────────
+export type ProtocolSectionType =
+  | "inclusion"
+  | "exclusion"
+  | "gravite"
+  | "actions"
+  | "surveillance"
+  | "recueil"
+  | "rythme_choquable"
+  | "rythme_non_choquable"
+  | "reprise";
+
+type ProtocolItem = { text: string; sub?: string[] };
+
+type ProtocolSection = {
+  titre: string;
+  type: ProtocolSectionType;
+  items: ProtocolItem[];
+};
+
+export type Protocol = {
+  id: number;
+  code: string;
+  version?: string;
+  valide?: string;
+  titre: string;
+  auteurs?: string[];
+  ref?: string;
+  service?: string;
+  couleur: string;
+  icon: string;
+  sections: ProtocolSection[];
+};
+
+// ── Kit de préparation (ISR, ACR, KTC, PA, drain, anaphylaxie…) ─
+type PrepKitDrogue = {
+  drugId?: number;
+  nom: string;
+  role: string;
+  dose: string;
+  prep?: string;
+  note?: string;
+};
+
+type PrepKitSchemaLegende = { titre: string; items: string[] };
+
+type PrepKitSchema = {
+  img: string;
+  alt: string;
+  source?: string;
+  intro?: string;
+  legende: PrepKitSchemaLegende[];
+};
+
+// ── Check-list interactive (KitChecklist + kit ISR) ───────────
+// Trois types d'items : case à cocher, choix exclusifs en chips, saisie
+// libre (avec unité optionnelle), et menu déroulant peuplé à partir des
+// drogues du kit filtrées par mot-clé sur le rôle.
+export type ChecklistItem =
+  | { type: "check"; label: string }
+  | {
+      type: "choice";
+      label: string;
+      options: string[];
+      scale?: "mallampati" | "cormack";
+    }
+  | { type: "select"; label: string; from?: string; options?: string[] }
+  | { type: "text"; label: string; placeholder?: string; unit?: string };
+
+export type ChecklistSection = { titre: string; items: ChecklistItem[] };
+
+export type PrepKit = {
+  id: string;
+  nom: string;
+  cat: string;
+  couleur: string;
+  icon: string;
+  desc: string;
+  materiel: string[];
+  drogues: PrepKitDrogue[];
+  sequence: string[];
+  notes?: string[];
+  schema?: PrepKitSchema;
+  checklist?: ChecklistSection[];
+};

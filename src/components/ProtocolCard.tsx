@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { tokenizeProtocolText } from "../lib/protocolText";
+import type { Protocol } from "../types/data";
 
 const SECTION_META = {
   inclusion: { label: "Inclusion", color: "#16a34a", short: "Inclusion" },
@@ -86,7 +87,7 @@ const renderText = (text: string, onDrugSearch: (name: string) => void) => {
 };
 
 type ProtocolCardProps = {
-  protocol: any;
+  protocol: Protocol;
   onDrugSearch: (name: string) => void;
 };
 
@@ -178,7 +179,7 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
           <div className="protocol-body-top">
             {p.ref ? (
               <div className="protocol-authors">
-                {p.auteurs.join(" · ")}
+                {(p.auteurs ?? []).join(" · ")}
                 <span className="protocol-ref"> — {p.ref}</span>
               </div>
             ) : (

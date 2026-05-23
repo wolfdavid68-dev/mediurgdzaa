@@ -22,8 +22,10 @@ import ProtocolesPage from "./pages/ProtocolesPage";
 import EchellesPage from "./pages/EchellesPage";
 import ChangelogModal from "./components/ChangelogModal";
 import NotesBackupModal from "./components/NotesBackupModal";
-import CharterModal, { CHARTER_VERSION, CHARTER_LS_KEY } from "./components/CharterModal";
-import AnnounceModal, { ANNOUNCE_VERSION, ANNOUNCE_LS_KEY } from "./components/AnnounceModal";
+import CharterModal from "./components/CharterModal";
+import AnnounceModal from "./components/AnnounceModal";
+import { useCharterFlow } from "./lib/useCharterFlow";
+import { useAnnounceFlow } from "./lib/useAnnounceFlow";
 import { APP_VERSION } from "./data/changelog";
 import {
   pushNav,
@@ -123,40 +125,8 @@ const App = () => {
   // avec le bon message (variante Firefox PWA = ne peut pas quitter via back).
   const [exitToast, setExitToast] = useState<ExitToastVariant | null>(null);
 
-  // Charte d'utilisation : ouverte automatiquement au premier lancement
-  // (et après chaque bump de CHARTER_VERSION). Acceptation persistée en
-  // localStorage avec date pour audit éventuel. Mode `requireAccept` →
-  // pas de × ni ESC tant que l'utilisateur n'a pas cliqué « J'accepte ».
-  const [showCharter, setShowCharter] = useState(() => {
-    try {
-      const raw = localStorage.getItem(CHARTER_LS_KEY) ?? "";
-      return !raw.startsWith(CHARTER_VERSION);
-    } catch {
-      return true;
-    }
-  });
-  const acceptCharter = () => {
-    try {
-      localStorage.setItem(CHARTER_LS_KEY, `${CHARTER_VERSION}|${new Date().toISOString()}`);
-    } catch {}
-    setShowCharter(false);
-  };
-
-  // Annonce ponctuelle (nouvel outil ECG) — vue une seule fois. Affichée
-  // seulement une fois la charte acceptée pour ne pas empiler deux modales.
-  const [showAnnounce, setShowAnnounce] = useState(() => {
-    try {
-      return localStorage.getItem(ANNOUNCE_LS_KEY) !== ANNOUNCE_VERSION;
-    } catch {
-      return false;
-    }
-  });
-  const dismissAnnounce = () => {
-    try {
-      localStorage.setItem(ANNOUNCE_LS_KEY, ANNOUNCE_VERSION);
-    } catch {}
-    setShowAnnounce(false);
-  };
+  const [showCharter, acceptCharter] = useCharterFlow();
+  const [showAnnounce, dismissAnnounce] = useAnnounceFlow();
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import KitScaleIllustration from "./KitScaleIllustration";
+import type { ChecklistItem, ChecklistSection } from "../types/data";
 
 // Check-list interactive d'un kit (ex : ISR / intubation). Trois types
 // d'items : `check` (case à cocher), `choice` (options exclusives en chips),
@@ -12,14 +13,6 @@ import KitScaleIllustration from "./KitScaleIllustration";
 
 const CHECK_MAX_AGE_MS = 3 * 60 * 60 * 1000; // 3 h
 const storageKey = (kitId: string) => `mediurg-kit-checklist-${kitId}`;
-
-type ChecklistItem =
-  | { type: "check"; label: string }
-  | { type: "choice"; label: string; options: string[]; scale?: "mallampati" | "cormack" }
-  | { type: "select"; label: string; from?: string; options?: string[] }
-  | { type: "text"; label: string; placeholder?: string; unit?: string };
-
-type ChecklistSection = { titre: string; items: ChecklistItem[] };
 
 type Drogue = { nom: string; role?: string };
 

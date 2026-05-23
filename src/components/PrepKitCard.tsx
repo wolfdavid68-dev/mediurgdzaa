@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { DRUGS } from "../data/drugs";
 import KitChecklist from "./KitChecklist";
+import type { Drug, PrepKit } from "../types/data";
 
 const checkKey = (kitId: string) => `mediurg-kit-check-${kitId}`;
 
@@ -28,7 +29,7 @@ const loadChecked = (kitId: string): Record<number, boolean> => {
   }
 };
 
-const buildPrepFromDrug = (drug: any) => {
+const buildPrepFromDrug = (drug: Drug | undefined) => {
   if (!drug) return null;
   const cond = drug.cond?.[0] || null;
   const etapes = drug.prep?.etapes || [];
@@ -43,7 +44,7 @@ const isSectionLabel = (m: string) => {
 // Kits dont le matériel s'affiche en check-list cochable (gestes invasifs)
 const CHECKLIST_KIT_IDS = ["drain-thoracique", "pa", "ktc"];
 
-const PrepKitCard = ({ kit }: { kit: any }) => {
+const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("drogues");
   const [schemaZoom, setSchemaZoom] = useState(false);
@@ -186,8 +187,8 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
           <div className="tab-content">
             {activeTab === "drogues" && (
               <div className="prepkit-drugs">
-                {kit.drogues.map((d: any, i: number) => {
-                  const drug = d.drugId ? DRUGS.find((x: any) => x.id === d.drugId) : null;
+                {kit.drogues.map((d, i: number) => {
+                  const drug = d.drugId ? DRUGS.find((x) => x.id === d.drugId) : undefined;
                   const fromDrug = buildPrepFromDrug(drug);
                   const condText = fromDrug?.cond || null;
                   // Si le kit fournit sa propre prep, elle prime sur les etapes du drug
@@ -324,7 +325,7 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
               </div>
             )}
 
-            {activeTab === "checklist" && showChecklist && (
+            {activeTab === "checklist" && kit.checklist && kit.checklist.length > 0 && (
               <KitChecklist
                 kitId={kit.id}
                 titre={`Check-list — ${kit.nom}`}
@@ -366,7 +367,7 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
               </ul>
             )}
 
-            {activeTab === "schema" && showSchema && (
+            {activeTab === "schema" && kit.schema && (
               <div className="kit-schema">
                 {kit.schema.intro && <p className="kit-schema-intro">{kit.schema.intro}</p>}
                 <button
@@ -393,11 +394,11 @@ const PrepKitCard = ({ kit }: { kit: any }) => {
                 </button>
 
                 <div className="kit-schema-legend">
-                  {kit.schema.legende.map((sec: { titre: string; items: string[] }, i: number) => (
+                  {kit.schema.legende.map((sec, i) => (
                     <div key={i} className="kit-schema-legblock">
                       <div className="kit-schema-legtitle">{sec.titre}</div>
                       <ul className="kit-schema-leglist">
-                        {sec.items.map((it: string, j: number) => (
+                        {sec.items.map((it, j) => (
                           <li key={j}>{it}</li>
                         ))}
                       </ul>
