@@ -275,7 +275,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: { label: "dom", color: "green" },
-          include: ["src/components/**/*.test.{js,ts,tsx}"],
+          include: ["src/components/**/*.test.{js,ts,tsx}", "src/pages/**/*.test.{js,ts,tsx}"],
           // Le reducer pur tourne dans le projet "libs" pour la vitesse.
           exclude: ["src/components/AcrTimer.reducer.test.ts"],
           environment: "happy-dom",
