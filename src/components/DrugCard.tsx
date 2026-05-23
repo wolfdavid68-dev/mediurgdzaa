@@ -18,6 +18,8 @@ const TABS = [
 type DrugCardProps = {
   drug: any;
   isFavorite?: boolean;
+  patientWeight?: string;
+  onPatientWeightChange?: (kg: string) => void;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
   onOpenChange?: (key: string, open: boolean) => void;
@@ -27,6 +29,8 @@ type DrugCardProps = {
 const DrugCard = ({
   drug,
   isFavorite,
+  patientWeight = "",
+  onPatientWeightChange,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -35,7 +39,16 @@ const DrugCard = ({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState(false);
-  const [weight, setWeight] = useState("");
+  // Poids : controlled si App fournit onPatientWeightChange (mode prod,
+  // poids partagé entre toutes les fiches), sinon état local (mode test
+  // unitaire isolé). Évite de casser les tests qui rendent DrugCard seul.
+  const [internalWeight, setInternalWeight] = useState("");
+  const isControlled = onPatientWeightChange !== undefined;
+  const weight = isControlled ? patientWeight : internalWeight;
+  const setWeight = (kg: string) => {
+    if (isControlled) onPatientWeightChange(kg);
+    else setInternalWeight(kg);
+  };
   const [produitFinal, setProduitFinal] = useState("");
   // Clé d'instance unique : une même drogue peut être rendue 2 fois
   // simultanément (section Récents + liste filtrée). Utiliser drug.id

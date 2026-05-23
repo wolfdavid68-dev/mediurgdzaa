@@ -354,6 +354,66 @@
   stroke: var(--accent);
 }
 
+/* Bandeau « poids patient » partagé entre toutes les fiches médicament.
+   Affiché en permanence sur la page Médicaments (même quand une fiche est
+   déployée) → reste accessible pour ajuster le poids pendant la lecture. */
+.patient-weight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--info) 10%, var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--info) 35%, var(--border));
+  border-radius: 10px;
+  color: var(--text);
+}
+.patient-weight > svg {
+  flex-shrink: 0;
+  color: var(--info);
+}
+.patient-weight-label {
+  font-size: clamp(12px, 1.3vw, 14px);
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.patient-weight-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 120px;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+}
+.patient-weight-input:focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 1px;
+}
+.patient-weight-unit {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-mute);
+}
+.patient-weight-clear {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+}
+.patient-weight-clear:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
 /* Search bar */
 .search-bar {
   position: relative;

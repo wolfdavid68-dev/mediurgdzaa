@@ -10,6 +10,8 @@ import CardErrorFallback from "./CardErrorFallback";
 type DrugListProps = {
   drugs: any[];
   favorites?: Set<number>;
+  patientWeight?: string;
+  onPatientWeightChange?: (kg: string) => void;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
   onOpenChange?: (key: string, open: boolean) => void;
@@ -19,6 +21,8 @@ type DrugListProps = {
 const DrugList = ({
   drugs,
   favorites,
+  patientWeight,
+  onPatientWeightChange,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -31,6 +35,8 @@ const DrugList = ({
           <DrugCard
             drug={drug}
             isFavorite={favorites?.has(drug.id) || false}
+            patientWeight={patientWeight}
+            onPatientWeightChange={onPatientWeightChange}
             onToggleFavorite={onToggleFavorite}
             onOpen={onOpen}
             onOpenChange={onOpenChange}

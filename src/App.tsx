@@ -7,6 +7,7 @@ import AppHeader from "./components/AppHeader";
 import BottomNav from "./components/BottomNav";
 import MedicamentsPage from "./pages/MedicamentsPage";
 import OfflineBanner from "./components/OfflineBanner";
+import PatientWeightBanner from "./components/PatientWeightBanner";
 import TestVersionBanner from "./components/TestVersionBanner";
 import UpdatePrompt from "./components/UpdatePrompt";
 // Tout en import STATIQUE (PAS de lazy). Un chunk lazy peut échouer à charger
@@ -32,6 +33,28 @@ import {
 } from "./lib/useBackNavigation";
 import { usePersistentStorage } from "./lib/usePersistentStorage";
 import { useLongPress } from "./lib/useLongPress";
+import { useWakeLock } from "./lib/useWakeLock";
+
+// Poids patient partagé entre toutes les fiches médicament. Persisté en
+// localStorage avec auto-expiration 3 h (au-delà, repart vierge pour ne pas
+// traîner d'un patient à l'autre entre 2 gardes).
+const WEIGHT_LS_KEY = "mediurg-patient-weight";
+const WEIGHT_MAX_AGE_MS = 3 * 60 * 60 * 1000;
+const loadPatientWeight = (): string => {
+  try {
+    const raw = localStorage.getItem(WEIGHT_LS_KEY);
+    if (!raw) return "";
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.ts !== "number") return "";
+    if (Date.now() - parsed.ts > WEIGHT_MAX_AGE_MS) {
+      localStorage.removeItem(WEIGHT_LS_KEY);
+      return "";
+    }
+    return typeof parsed.kg === "string" ? parsed.kg : "";
+  } catch {
+    return "";
+  }
+};
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SMUR", "SAU"];
@@ -103,6 +126,20 @@ const App = () => {
     });
   }, []);
   const anyDrugOpen = openDrugs.size > 0;
+
+  // Poids patient partagé. Tant qu'au moins une fiche est déployée, on tient
+  // un wake lock écran (procédure en cours → ne pas verrouiller mains gantées).
+  const [patientWeight, setPatientWeight] = useState<string>(() => loadPatientWeight());
+  useEffect(() => {
+    try {
+      if (patientWeight) {
+        localStorage.setItem(WEIGHT_LS_KEY, JSON.stringify({ ts: Date.now(), kg: patientWeight }));
+      } else {
+        localStorage.removeItem(WEIGHT_LS_KEY);
+      }
+    } catch {}
+  }, [patientWeight]);
+  useWakeLock(anyDrugOpen);
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
@@ -364,6 +401,9 @@ const App = () => {
         onToggleFont={toggleFont}
         onToggleTheme={toggleTheme}
       >
+        {page === "medicaments" && (
+          <PatientWeightBanner weight={patientWeight} onChange={setPatientWeight} />
+        )}
         {page === "medicaments" && !anyDrugOpen && (
           <>
             <div className="search-bar">
@@ -453,6 +493,8 @@ const App = () => {
             recentDrugs={recentDrugs}
             favorites={favorites}
             showFavoritesOnly={showFavoritesOnly}
+            patientWeight={patientWeight}
+            onPatientWeightChange={setPatientWeight}
             onToggleFavorite={toggleFavorite}
             onOpen={addToHistory}
             onOpenChange={handleDrugOpenChange}
