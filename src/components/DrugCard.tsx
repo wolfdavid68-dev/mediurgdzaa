@@ -3,6 +3,7 @@ import { calcDose, ciSeverity } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
 import { DRUGS_PREVIEW } from "../data/drugs.preview";
 import { findProtocolsForDrug } from "../lib/crossref";
+import type { Drug } from "../types/data";
 import DrugNote from "./DrugNote";
 import PrepBlock from "./PrepBlock";
 import PseBlock from "./PseBlock";
@@ -16,7 +17,7 @@ const TABS = [
 ];
 
 type DrugCardProps = {
-  drug: any;
+  drug: Drug;
   isFavorite?: boolean;
   patientWeight?: string;
   onToggleFavorite?: (id: number) => void;

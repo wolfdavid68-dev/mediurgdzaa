@@ -80,9 +80,9 @@ describe("DRUGS — intégrité", () => {
   });
 
   test("poso a au moins une posologie adulte ou pédiatrique", () => {
-    const broken = DRUGS.filter((d) => !(d.poso?.a?.length > 0) && !(d.poso?.p?.length > 0)).map(
-      (d) => `${d.id} ${d.nom}`
-    );
+    const broken = DRUGS.filter(
+      (d) => (d.poso?.a?.length ?? 0) === 0 && (d.poso?.p?.length ?? 0) === 0
+    ).map((d) => `${d.id} ${d.nom}`);
     expect(broken).toEqual([]);
   });
 });

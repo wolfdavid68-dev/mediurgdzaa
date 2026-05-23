@@ -1,6 +1,7 @@
 import { ErrorBoundary } from "react-error-boundary";
 import DrugCard from "./DrugCard";
 import CardErrorFallback from "./CardErrorFallback";
+import type { Drug } from "../types/data";
 
 // Chaque DrugCard est isolée dans son propre ErrorBoundary : si une carte crashe
 // (data malformée, regex inattendue dans calcDose, etc.), seule cette carte
@@ -8,7 +9,7 @@ import CardErrorFallback from "./CardErrorFallback";
 // la différence entre « 1 médicament temporairement indisponible » et « l'app
 // est dead, je dois la fermer pour la rouvrir ».
 type DrugListProps = {
-  drugs: any[];
+  drugs: Drug[];
   favorites?: Set<number>;
   patientWeight?: string;
   onToggleFavorite?: (id: number) => void;
@@ -28,7 +29,7 @@ const DrugList = ({
 }: DrugListProps) => {
   return (
     <div className="drug-list-grid">
-      {drugs.map((drug: any) => (
+      {drugs.map((drug) => (
         <ErrorBoundary key={drug.id} FallbackComponent={CardErrorFallback}>
           <DrugCard
             drug={drug}

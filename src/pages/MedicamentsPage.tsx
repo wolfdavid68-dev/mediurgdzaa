@@ -1,12 +1,11 @@
 import DrugList from "../components/DrugList";
+import type { Drug } from "../types/data";
 
 // Page Médicaments — contenu seul (la search bar + filtres restent dans App.tsx,
 // dans le header sticky, car couplés au state global `search` qui est aussi
 // piloté depuis l'extérieur — `onDrugSearch` de ProtocolesPage / EcgReader /
 // AcrModeModal appelle `setSearch(name)`. Découpler nécessiterait un context
 // ou ref forwarded ; pas d'intérêt pour l'instant.
-
-type Drug = { id: number; nom: string; [k: string]: unknown };
 
 type MedicamentsPageProps = {
   filtered: Drug[];
