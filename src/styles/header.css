@@ -178,66 +178,81 @@
 }
 
 /* Font size toggle button */
-.font-toggle {
-  height: 36px;
-  padding: 0 10px;
+/* Menu kebab (regroupe thème / police / sauvegarde notes derrière un seul
+   bouton 48 px à droite du header). Ouvre un menu déroulant ancré. */
+.header-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+.header-menu-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--card);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.header-menu-btn:hover,
+.header-menu-btn[aria-expanded="true"] {
+  background: var(--card-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.header-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 110;
+  min-width: 230px;
+  padding: 6px;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.header-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: none;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.header-menu-item:hover {
+  background: var(--card-hover);
+}
+.header-menu-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
   color: var(--text-dim);
+}
+.header-menu-ic-text {
+  font-weight: 800;
   font-size: 13px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
   letter-spacing: 0.02em;
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.font-toggle:hover {
-  background: var(--card-hover);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-.font-toggle-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-.font-toggle-active:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-
-/* Theme toggle button */
-.theme-toggle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.theme-toggle:hover {
-  background: var(--card-hover);
-  border-color: var(--border-strong);
-  color: var(--text);
 }
 
 /* Logo */

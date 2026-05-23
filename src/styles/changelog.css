@@ -200,36 +200,3 @@
 .notes-backup-modal-body .notes-backup {
   margin-top: 0;
 }
-
-/* ── Bouton 💾 dans le header (à côté de A+ et 🌓) ──────────── */
-.notes-backup-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 16px;
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    transform 0.1s;
-}
-.notes-backup-toggle:hover {
-  background: var(--card-hover);
-  border-color: var(--border-strong);
-}
-.notes-backup-toggle:active {
-  transform: scale(0.94);
-}
-@media (max-width: 480px) {
-  .notes-backup-toggle {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-}
