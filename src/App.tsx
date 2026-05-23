@@ -392,6 +392,7 @@ const App = () => {
                 <input
                   type="text"
                   placeholder="Rechercher un médicament, DCI, classe…"
+                  aria-label="Rechercher un médicament"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   autoComplete="off"

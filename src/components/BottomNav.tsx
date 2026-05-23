@@ -13,6 +13,7 @@ const BottomNav = ({ page, version, onNavigate, onOpenChangelog, onOpenAcr }: Bo
         <button
           className={`bottom-tab ${page === "medicaments" ? "bottom-tab-active" : ""}`}
           onClick={() => onNavigate("medicaments")}
+          aria-current={page === "medicaments" ? "page" : undefined}
         >
           <svg
             viewBox="0 0 24 24"
@@ -29,6 +30,7 @@ const BottomNav = ({ page, version, onNavigate, onOpenChangelog, onOpenAcr }: Bo
         <button
           className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
           onClick={() => onNavigate("protocoles")}
+          aria-current={page === "protocoles" ? "page" : undefined}
         >
           <svg
             viewBox="0 0 24 24"
@@ -48,6 +50,7 @@ const BottomNav = ({ page, version, onNavigate, onOpenChangelog, onOpenAcr }: Bo
         <button
           className={`bottom-tab ${page === "echelles" ? "bottom-tab-active" : ""}`}
           onClick={() => onNavigate("echelles")}
+          aria-current={page === "echelles" ? "page" : undefined}
         >
           <svg
             viewBox="0 0 24 24"

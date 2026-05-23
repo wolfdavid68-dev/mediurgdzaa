@@ -247,7 +247,12 @@ const DrugCard = ({
 
   return (
     <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
-      <button className="drug-header" onClick={() => setOpen(!open)}>
+      <button
+        className="drug-header"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-label={`${drug.nom} — ${open ? "replier" : "déployer"} la fiche`}
+      >
         <div className="drug-color-bar" style={{ background: drug.couleur }} />
         <div className="drug-main">
           <div className="drug-title-row">
@@ -348,6 +353,7 @@ const DrugCard = ({
                 <button
                   key={tab.key}
                   className={`tab-btn tab-${tab.type} ${isActive ? "tab-active" : ""}`}
+                  aria-pressed={isActive}
                   style={
                     tab.type === "poso" && isActive
                       ? {
