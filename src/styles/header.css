@@ -16,10 +16,10 @@
 .header-inner {
   max-width: var(--content-max);
   margin: 0 auto;
-  padding: clamp(12px, 2.5vw, 18px) clamp(14px, 3vw, 24px);
+  padding: clamp(8px, 1.6vw, 16px) clamp(14px, 3vw, 24px);
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 1.8vw, 14px);
+  gap: clamp(6px, 1.2vw, 12px);
 }
 
 /* Logo row */
@@ -300,6 +300,14 @@
   font-family: var(--mono);
   margin-top: 2px;
 }
+/* Mobile : on masque le sous-titre (« Pharmacologie d'urgence · SAUV · SMUR
+   · SAU ») pour économiser une ligne (il wrappait sur écran étroit). Le
+   titre MediURG + le logo + le contexte de l'app suffisent. */
+@media (max-width: 600px) {
+  .logo-text p {
+    display: none;
+  }
+}
 
 /* Bottom navigation bar */
 .bottom-nav {
@@ -363,13 +371,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 4px 0 6px;
-  padding: 4px 8px;
+  margin: 0;
+  padding: 3px 8px;
   background: color-mix(in srgb, var(--info) 10%, var(--bg-elevated));
   border: 1px solid color-mix(in srgb, var(--info) 35%, var(--border));
   border-radius: 8px;
   color: var(--text);
-  min-height: 36px;
+  min-height: 34px;
 }
 .patient-weight > svg {
   flex-shrink: 0;
@@ -662,6 +670,9 @@
   color: var(--text-mute);
   font-family: var(--mono);
   letter-spacing: 0.3px;
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* ── Main content ───────────────────────────────────────── */

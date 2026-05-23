@@ -474,11 +474,8 @@ const App = () => {
                     </button>
                   ))}
                 </div>
+                <span className="result-count">{filtered.length} méd.</span>
               </div>
-            </div>
-
-            <div className="result-count">
-              {filtered.length} médicament{filtered.length > 1 ? "s" : ""}
             </div>
           </>
         )}
