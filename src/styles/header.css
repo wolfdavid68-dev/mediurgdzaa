@@ -362,6 +362,23 @@
   stroke: var(--accent);
 }
 
+/* Rangée commune search + poids : un seul flex row, gagne une rangée sur
+   mobile. La search-bar prend toute la place dispo (flex:1), le bandeau
+   poids garde sa largeur naturelle. Quand une fiche est déployée, la search
+   se cache → le bandeau poids occupe la rangée seul. */
+.search-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.search-row .search-bar {
+  flex: 1;
+  min-width: 0;
+}
+.search-row .patient-weight {
+  flex: 0 0 auto;
+}
+
 /* Bandeau « poids patient » partagé entre toutes les fiches médicament.
    Affiché en permanence sur la page Médicaments (même quand une fiche est
    déployée) → reste accessible pour ajuster le poids pendant la lecture.

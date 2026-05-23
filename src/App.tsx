@@ -402,82 +402,87 @@ const App = () => {
         onToggleTheme={toggleTheme}
       >
         {page === "medicaments" && (
-          <PatientWeightBanner weight={patientWeight} onChange={setPatientWeight} />
+          <div className="search-row">
+            {!anyDrugOpen && (
+              <div className="search-bar">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Rechercher un médicament, DCI, classe…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  autoComplete="off"
+                  spellCheck="false"
+                />
+                {search && (
+                  <button
+                    className="search-clear"
+                    onClick={() => setSearch("")}
+                    aria-label="Effacer"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            )}
+            <PatientWeightBanner weight={patientWeight} onChange={setPatientWeight} />
+          </div>
         )}
         {page === "medicaments" && !anyDrugOpen && (
-          <>
-            <div className="search-bar">
-              <svg
-                viewBox="0 0 24 24"
-                width="18"
-                height="18"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Rechercher un médicament, DCI, classe…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                autoComplete="off"
-                spellCheck="false"
-              />
-              {search && (
-                <button className="search-clear" onClick={() => setSearch("")} aria-label="Effacer">
-                  ×
+          <div className="filters">
+            <div className="filter-group">
+              <span className="filter-label">CAT</span>
+              <div className="filter-chips">
+                <button
+                  className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
+                  onClick={() => setShowFavoritesOnly((v) => !v)}
+                  title={
+                    showFavoritesOnly
+                      ? "Désactiver le filtre favoris"
+                      : "Afficher seulement les favoris"
+                  }
+                >
+                  ★ Favoris{" "}
+                  {favorites.size > 0 && <span className="chip-count">{favorites.size}</span>}
                 </button>
-              )}
-            </div>
-
-            <div className="filters">
-              <div className="filter-group">
-                <span className="filter-label">CAT</span>
-                <div className="filter-chips">
+                {CATEGORIES.map((c) => (
                   <button
-                    className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
-                    onClick={() => setShowFavoritesOnly((v) => !v)}
-                    title={
-                      showFavoritesOnly
-                        ? "Désactiver le filtre favoris"
-                        : "Afficher seulement les favoris"
-                    }
+                    key={c}
+                    data-cat={c}
+                    className={`chip ${cat === c ? "chip-active" : ""}`}
+                    onClick={() => setCat(c)}
                   >
-                    ★ Favoris{" "}
-                    {favorites.size > 0 && <span className="chip-count">{favorites.size}</span>}
+                    {c}
                   </button>
-                  {CATEGORIES.map((c) => (
-                    <button
-                      key={c}
-                      data-cat={c}
-                      className={`chip ${cat === c ? "chip-active" : ""}`}
-                      onClick={() => setCat(c)}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="filter-group">
-                <span className="filter-label">SVC</span>
-                <div className="filter-chips">
-                  {SERVICES.map((s) => (
-                    <button
-                      key={s}
-                      className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
-                      onClick={() => setSvc(s)}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-                <span className="result-count">{filtered.length} méd.</span>
+                ))}
               </div>
             </div>
-          </>
+            <div className="filter-group">
+              <span className="filter-label">SVC</span>
+              <div className="filter-chips">
+                {SERVICES.map((s) => (
+                  <button
+                    key={s}
+                    className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
+                    onClick={() => setSvc(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <span className="result-count">{filtered.length} méd.</span>
+            </div>
+          </div>
         )}
       </AppHeader>
 
