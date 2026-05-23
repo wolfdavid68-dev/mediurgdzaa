@@ -81,6 +81,7 @@ const MedicamentsPage = ({
         onOpen={onOpen}
         onOpenChange={onOpenChange}
         onProtocolOpen={onProtocolOpen}
+        patientWeight={patientWeight}
       />
     </>
   );
