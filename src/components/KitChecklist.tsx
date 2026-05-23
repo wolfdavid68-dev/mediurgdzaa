@@ -491,6 +491,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                           type="text"
                           inputMode={item.unit ? "decimal" : "text"}
                           placeholder={item.placeholder || ""}
+                          aria-label={item.label}
                           value={(values[key] as string) || ""}
                           onFocus={() => {
                             focusedSection.current = si;

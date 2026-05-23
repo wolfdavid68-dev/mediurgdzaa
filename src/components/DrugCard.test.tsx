@@ -198,4 +198,78 @@ describe("DrugCard", () => {
       expect(onOpen).not.toHaveBeenCalled();
     });
   });
+
+  // ════════════════════════════════════════════════════════════════
+  // Filtre poso par poids — < 30 kg pédiatrique, > 70 kg adulte,
+  // 30-70 kg les deux. Bornes incluses (30 et 70 → les deux).
+  // Repli : si la colonne pertinente n'est pas renseignée, on affiche l'autre.
+  // CRITIQUE cliniquement : afficher la mauvaise colonne = mauvaise dose.
+  // ════════════════════════════════════════════════════════════════
+  describe("Filtre poso par poids", () => {
+    const openWith = (weight: string, drug = mockDrug) => {
+      render(<DrugCard drug={drug} patientWeight={weight} />);
+      fireEvent.click(screen.getByText(drug.nom).closest("button")!);
+    };
+    const drugAdulteOnly = { ...mockDrug, nom: "ADULT_ONLY", poso: { a: mockDrug.poso.a, p: [] } };
+    const drugPedOnly = { ...mockDrug, nom: "PED_ONLY", poso: { a: [], p: mockDrug.poso.p } };
+
+    test("pas de poids → les deux colonnes (Adulte + Pédiatrique)", () => {
+      openWith("");
+      expect(screen.getByText("Adulte")).toBeInTheDocument();
+      expect(screen.getByText("Pédiatrique")).toBeInTheDocument();
+    });
+
+    test("poids = 50 kg (30-70) → les deux colonnes", () => {
+      openWith("50");
+      expect(screen.getByText("Adulte")).toBeInTheDocument();
+      expect(screen.getByText("Pédiatrique")).toBeInTheDocument();
+    });
+
+    test("poids = 30 kg (borne incluse) → les deux colonnes", () => {
+      openWith("30");
+      expect(screen.getByText("Adulte")).toBeInTheDocument();
+      expect(screen.getByText("Pédiatrique")).toBeInTheDocument();
+    });
+
+    test("poids = 70 kg (borne incluse) → les deux colonnes", () => {
+      openWith("70");
+      expect(screen.getByText("Adulte")).toBeInTheDocument();
+      expect(screen.getByText("Pédiatrique")).toBeInTheDocument();
+    });
+
+    test("poids = 20 kg (<30) → Pédiatrique seule, bandeau d'explication", () => {
+      openWith("20");
+      expect(screen.queryByText("Adulte")).not.toBeInTheDocument();
+      expect(screen.getByText("Pédiatrique")).toBeInTheDocument();
+      expect(screen.getByText(/Poids < 30 kg.*pédiatrique/i)).toBeInTheDocument();
+    });
+
+    test("poids = 100 kg (>70) → Adulte seule, bandeau d'explication", () => {
+      openWith("100");
+      expect(screen.getByText("Adulte")).toBeInTheDocument();
+      expect(screen.queryByText("Pédiatrique")).not.toBeInTheDocument();
+      expect(screen.getByText(/Poids > 70 kg.*adulte/i)).toBeInTheDocument();
+    });
+
+    test("repli : poids 20 kg + pas de poso pédiatrique → affiche Adulte + bandeau", () => {
+      openWith("20", drugAdulteOnly);
+      expect(screen.getByText("Adulte")).toBeInTheDocument();
+      expect(screen.queryByText("Pédiatrique")).not.toBeInTheDocument();
+      expect(screen.getByText(/Pas de posologie pédiatrique/i)).toBeInTheDocument();
+    });
+
+    test("repli : poids 100 kg + pas de poso adulte → affiche Pédiatrique + bandeau", () => {
+      openWith("100", drugPedOnly);
+      expect(screen.queryByText("Adulte")).not.toBeInTheDocument();
+      expect(screen.getByText("Pédiatrique")).toBeInTheDocument();
+      expect(screen.getByText(/Pas de posologie adulte/i)).toBeInTheDocument();
+    });
+
+    test("poids invalide (vide / > 300) → les deux colonnes, pas de bandeau", () => {
+      openWith("999"); // > 300 → traité comme invalide
+      expect(screen.getByText("Adulte")).toBeInTheDocument();
+      expect(screen.getByText("Pédiatrique")).toBeInTheDocument();
+      expect(screen.queryByText(/Poids < 30|Poids > 70|Pas de posologie/i)).not.toBeInTheDocument();
+    });
+  });
 });
