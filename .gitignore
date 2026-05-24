@@ -12,3 +12,6 @@ npm-debug.log*
 .claude/
 .mcp.json
 .env*.local
+
+# Codex local config (peut contenir des cles API / MCP secrets)
+.codex/
