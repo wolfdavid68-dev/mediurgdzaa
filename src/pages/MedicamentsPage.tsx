@@ -16,7 +16,7 @@ type MedicamentsPageProps = {
   onToggleFavorite: (id: number) => void;
   onOpen: (id: number) => void;
   onOpenChange: (key: string, open: boolean) => void;
-  onProtocolOpen: () => void;
+  onProtocolOpen?: () => void;
 };
 
 const MedicamentsPage = ({

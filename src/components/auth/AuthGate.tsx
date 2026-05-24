@@ -4,6 +4,7 @@ import { cacheProfile, getCachedProfile, getLastCachedProfile } from "../../lib/
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
+import { AuthProfileProvider } from "../../lib/authProfile";
 import { DRUGS } from "../../data/drugs";
 import ForgotPasswordScreen from "./ForgotPasswordScreen";
 import LoginScreen from "./LoginScreen";
@@ -260,7 +261,7 @@ const AuthGate = ({ children }: Props) => {
 
   // App normale. L'accès admin se fait par appui long sur le logo
   // (cf. useEffect "mediurg:open-admin") — plus de bouton flottant.
-  return <>{children}</>;
+  return <AuthProfileProvider value={profile}>{children}</AuthProfileProvider>;
 };
 
 export default AuthGate;

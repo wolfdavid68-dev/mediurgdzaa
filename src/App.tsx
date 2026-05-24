@@ -37,11 +37,35 @@ import { usePersistentStorage } from "./lib/usePersistentStorage";
 import { useLongPress } from "./lib/useLongPress";
 import { useWakeLock } from "./lib/useWakeLock";
 import { usePatientWeight } from "./lib/usePatientWeight";
+import { getPreviewAccessMode } from "./lib/access";
+import { isPreview } from "./lib/featureFlags";
+import { useAuthProfile } from "./lib/authProfile";
+import { TUTORAT_URL } from "./lib/tutorat";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SMUR", "SAU"];
+const ALL_PAGES = ["medicaments", "protocoles", "echelles"];
+const MEDICAMENTS_ONLY_PAGES = ["medicaments"];
+
+const TutoratOnlyView = () => (
+  <main className="main-content main-content-tutorat-only">
+    <section className="tutorat-only" aria-labelledby="tutorat-only-title">
+      <img src="/logo-sau.png" alt="Urgences Mulhouse" draggable={false} />
+      <p className="tutorat-only-kicker">Accès preview dédié</p>
+      <h1 id="tutorat-only-title">Tutorat SAU Mulhouse</h1>
+      <p>Ton profil ouvre directement le compagnon de tutorat ESI/AS.</p>
+      <a className="tutorat-only-btn" href={TUTORAT_URL}>
+        Ouvrir le tutorat ↗
+      </a>
+    </section>
+  </main>
+);
 
 const App = () => {
+  const authProfile = useAuthProfile();
+  const accessMode = getPreviewAccessMode(authProfile, isPreview());
+  const hasFullAppAccess = accessMode === "full";
+  const allowedPages = hasFullAppAccess ? ALL_PAGES : MEDICAMENTS_ONLY_PAGES;
   const [page, setPage] = useState("medicaments");
   const [search, setSearch] = useState("");
   // useDeferredValue : l'input reste réactif à 60 fps (priorité urgente)
@@ -129,6 +153,15 @@ const App = () => {
   const [showAnnounce, dismissAnnounce] = useAnnounceFlow();
 
   useEffect(() => {
+    if (accessMode === "full") return;
+    if (page !== "medicaments") {
+      replaceNav({ page: "medicaments", modal: null });
+      setPage("medicaments");
+    }
+    setShowAcr(false);
+  }, [accessMode, page]);
+
+  useEffect(() => {
     const onOnline = () => setIsOnline(true);
     const onOffline = () => setIsOnline(false);
     window.addEventListener("online", onOnline);
@@ -149,19 +182,22 @@ const App = () => {
     const pageParam = params.get("page");
     const tab = params.get("tab");
     let dirty = false;
-    if (mode === "acr") {
+    if (hasFullAppAccess && mode === "acr") {
       setShowAcr(true);
       dirty = true;
     }
-    if (pageParam === "protocoles") {
+    if (hasFullAppAccess && pageParam === "protocoles") {
       setPage("protocoles");
       dirty = true;
     }
-    if (pageParam === "echelles") {
+    if (hasFullAppAccess && pageParam === "echelles") {
       setPage("echelles");
       dirty = true;
     }
-    if (tab === "incompatibilites" || tab === "kits" || tab === "PISU" || tab === "ecg") {
+    if (
+      hasFullAppAccess &&
+      (tab === "incompatibilites" || tab === "kits" || tab === "PISU" || tab === "ecg")
+    ) {
       setProtoCategory(tab);
       dirty = true;
     }
@@ -170,7 +206,7 @@ const App = () => {
         window.history.replaceState(window.history.state, "", window.location.pathname);
       } catch {}
     }
-  }, []);
+  }, [hasFullAppAccess]);
 
   const toggleFavorite = (id: number) => {
     setFavorites((prev: Set<number>) => {
@@ -240,6 +276,7 @@ const App = () => {
   // Le rapid-double-back dans le popstate handler (<1s) court-circuite cette
   // navigation pour permettre un exit rapide quand l'user mash le bouton.
   const navigateTo = (newPage: string) => {
+    if (!allowedPages.includes(newPage)) newPage = "medicaments";
     if (newPage === page && !showAcr && !showChangelog && !showNotesBackup) return;
     pushNav({ page: newPage, modal: null });
     withTransition(() => {
@@ -251,6 +288,7 @@ const App = () => {
   };
 
   const changeProtoCategory = (newCat: string) => {
+    if (!hasFullAppAccess) return;
     if (newCat === protoCategory) return;
     replaceNav({ protoCategory: newCat });
     withTransition(() => setProtoCategory(newCat));
@@ -261,6 +299,7 @@ const App = () => {
     setShowChangelog(true);
   };
   const openAcr = () => {
+    if (!hasFullAppAccess) return;
     pushNav({ modal: "acr" });
     setShowAcr(true);
   };
@@ -316,6 +355,7 @@ const App = () => {
   // (rare mais possible en SAU avec un poste partagé) distingue Médicaments,
   // Protocoles, et la recherche en cours.
   const docTitle = (() => {
+    if (accessMode === "tutorat") return "MediURG — Tutorat";
     if (showAcr) return "MediURG — URGENCE ACR";
     if (showChangelog) return "MediURG — Notes de version";
     if (showNotesBackup) return "MediURG — Sauvegarde des notes";
@@ -335,177 +375,189 @@ const App = () => {
     <div className="app" data-testid="app">
       <title>{docTitle}</title>
       <TestVersionBanner />
-      <AppHeader
-        isOnline={isOnline}
-        theme={theme}
-        bigFont={bigFont}
-        adminLongPress={adminLongPress}
-        onOpenNotesBackup={openNotesBackup}
-        onToggleFont={toggleFont}
-        onToggleTheme={toggleTheme}
-      >
-        {page === "medicaments" && (
-          <div className="search-row">
-            {!anyDrugOpen && (
-              <div className="search-bar">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Rechercher un médicament, DCI, classe…"
-                  aria-label="Rechercher un médicament"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  autoComplete="off"
-                  spellCheck="false"
-                />
-                {search && (
-                  <button
-                    className="search-clear"
-                    onClick={() => setSearch("")}
-                    aria-label="Effacer"
-                  >
-                    ×
-                  </button>
+      {accessMode === "tutorat" ? (
+        <>
+          <TutoratOnlyView />
+          <UpdatePrompt />
+        </>
+      ) : (
+        <>
+          <AppHeader
+            isOnline={isOnline}
+            theme={theme}
+            bigFont={bigFont}
+            adminLongPress={adminLongPress}
+            onOpenNotesBackup={openNotesBackup}
+            onToggleFont={toggleFont}
+            onToggleTheme={toggleTheme}
+            showTutorat={hasFullAppAccess && isPreview()}
+          >
+            {page === "medicaments" && (
+              <div className="search-row">
+                {!anyDrugOpen && (
+                  <div className="search-bar">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Rechercher un médicament, DCI, classe…"
+                      aria-label="Rechercher un médicament"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      autoComplete="off"
+                      spellCheck="false"
+                    />
+                    {search && (
+                      <button
+                        className="search-clear"
+                        onClick={() => setSearch("")}
+                        aria-label="Effacer"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                 )}
+                <PatientWeightBanner weight={patientWeight} onChange={setPatientWeight} />
               </div>
             )}
-            <PatientWeightBanner weight={patientWeight} onChange={setPatientWeight} />
-          </div>
-        )}
-        {page === "medicaments" && !anyDrugOpen && (
-          <div className="filters">
-            <div className="filter-group">
-              <span className="filter-label">CAT</span>
-              <div className="filter-chips">
-                <button
-                  className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
-                  onClick={() => setShowFavoritesOnly((v) => !v)}
-                  title={
-                    showFavoritesOnly
-                      ? "Désactiver le filtre favoris"
-                      : "Afficher seulement les favoris"
-                  }
-                >
-                  ★ Favoris{" "}
-                  {favorites.size > 0 && <span className="chip-count">{favorites.size}</span>}
-                </button>
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c}
-                    data-cat={c}
-                    className={`chip ${cat === c ? "chip-active" : ""}`}
-                    onClick={() => setCat(c)}
-                  >
-                    {c}
-                  </button>
-                ))}
+            {page === "medicaments" && !anyDrugOpen && (
+              <div className="filters">
+                <div className="filter-group">
+                  <span className="filter-label">CAT</span>
+                  <div className="filter-chips">
+                    <button
+                      className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
+                      onClick={() => setShowFavoritesOnly((v) => !v)}
+                      title={
+                        showFavoritesOnly
+                          ? "Désactiver le filtre favoris"
+                          : "Afficher seulement les favoris"
+                      }
+                    >
+                      ★ Favoris{" "}
+                      {favorites.size > 0 && <span className="chip-count">{favorites.size}</span>}
+                    </button>
+                    {CATEGORIES.map((c) => (
+                      <button
+                        key={c}
+                        data-cat={c}
+                        className={`chip ${cat === c ? "chip-active" : ""}`}
+                        onClick={() => setCat(c)}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="filter-group">
+                  <span className="filter-label">SVC</span>
+                  <div className="filter-chips">
+                    {SERVICES.map((s) => (
+                      <button
+                        key={s}
+                        className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
+                        onClick={() => setSvc(s)}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="result-count">{filtered.length} méd.</span>
+                </div>
               </div>
-            </div>
-            <div className="filter-group">
-              <span className="filter-label">SVC</span>
-              <div className="filter-chips">
-                {SERVICES.map((s) => (
-                  <button
-                    key={s}
-                    className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
-                    onClick={() => setSvc(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-              <span className="result-count">{filtered.length} méd.</span>
-            </div>
-          </div>
-        )}
-      </AppHeader>
+            )}
+          </AppHeader>
 
-      <OfflineBanner isOnline={isOnline} />
+          <OfflineBanner isOnline={isOnline} />
 
-      <main className="main-content">
-        {page === "medicaments" && (
-          <MedicamentsPage
-            filtered={filtered}
-            recentDrugs={recentDrugs}
-            favorites={favorites}
-            showFavoritesOnly={showFavoritesOnly}
-            patientWeight={patientWeight}
-            onToggleFavorite={toggleFavorite}
-            onOpen={addToHistory}
-            onOpenChange={handleDrugOpenChange}
-            onProtocolOpen={() => navigateTo("protocoles")}
+          <main className="main-content">
+            {page === "medicaments" && (
+              <MedicamentsPage
+                filtered={filtered}
+                recentDrugs={recentDrugs}
+                favorites={favorites}
+                showFavoritesOnly={showFavoritesOnly}
+                patientWeight={patientWeight}
+                onToggleFavorite={toggleFavorite}
+                onOpen={addToHistory}
+                onOpenChange={handleDrugOpenChange}
+                onProtocolOpen={hasFullAppAccess ? () => navigateTo("protocoles") : undefined}
+              />
+            )}
+
+            {hasFullAppAccess && page === "protocoles" && (
+              <ProtocolesPage
+                protoCategory={protoCategory}
+                changeProtoCategory={changeProtoCategory}
+                onDrugSearch={(name: string) => {
+                  navigateTo("medicaments");
+                  setSearch(name);
+                }}
+              />
+            )}
+
+            {hasFullAppAccess && page === "echelles" && <EchellesPage />}
+          </main>
+
+          <BottomNav
+            page={page}
+            version={APP_VERSION}
+            allowedPages={allowedPages}
+            showUrgence={hasFullAppAccess}
+            onNavigate={navigateTo}
+            onOpenChangelog={openChangelog}
+            onOpenAcr={openAcr}
           />
-        )}
 
-        {page === "protocoles" && (
-          <ProtocolesPage
-            protoCategory={protoCategory}
-            changeProtoCategory={changeProtoCategory}
-            onDrugSearch={(name: string) => {
-              navigateTo("medicaments");
-              setSearch(name);
-            }}
-          />
-        )}
-
-        {page === "echelles" && <EchellesPage />}
-      </main>
-
-      <BottomNav
-        page={page}
-        version={APP_VERSION}
-        onNavigate={navigateTo}
-        onOpenChangelog={openChangelog}
-        onOpenAcr={openAcr}
-      />
-
-      {/* Modales montées à la demande (showXxx) mais importées en statique →
+          {/* Modales montées à la demande (showXxx) mais importées en statique →
           aucun fetch réseau, fonctionnent hors-ligne sans risque de chunk
           manquant. */}
-      {showAcr && (
-        <AcrModeModal
-          open={showAcr}
-          onClose={closeOverlay}
-          onOpenDrug={(name: string) => {
-            replaceNav({ page: "medicaments", modal: null });
-            setShowAcr(false);
-            setPage("medicaments");
-            setSearch(name);
-          }}
-        />
-      )}
-      {showChangelog && <ChangelogModal open={showChangelog} onClose={closeOverlay} />}
-      {showNotesBackup && <NotesBackupModal open={showNotesBackup} onClose={closeOverlay} />}
+          {showAcr && (
+            <AcrModeModal
+              open={showAcr}
+              onClose={closeOverlay}
+              onOpenDrug={(name: string) => {
+                replaceNav({ page: "medicaments", modal: null });
+                setShowAcr(false);
+                setPage("medicaments");
+                setSearch(name);
+              }}
+            />
+          )}
+          {showChangelog && <ChangelogModal open={showChangelog} onClose={closeOverlay} />}
+          {showNotesBackup && <NotesBackupModal open={showNotesBackup} onClose={closeOverlay} />}
 
-      {exitToast && (
-        <div className="exit-toast" role="status" aria-live="polite">
-          {exitToast === "firefox-no-exit"
-            ? "Sur Firefox Android, utilisez le bouton app récente pour fermer MediURG."
-            : "Appuyez à nouveau sur retour pour quitter"}
-        </div>
+          {exitToast && (
+            <div className="exit-toast" role="status" aria-live="polite">
+              {exitToast === "firefox-no-exit"
+                ? "Sur Firefox Android, utilisez le bouton app récente pour fermer MediURG."
+                : "Appuyez à nouveau sur retour pour quitter"}
+            </div>
+          )}
+          {showCharter && (
+            <CharterModal
+              open={showCharter}
+              requireAccept
+              onAccept={acceptCharter}
+              onClose={acceptCharter}
+            />
+          )}
+          {!showCharter && showAnnounce && (
+            <AnnounceModal open={showAnnounce} onClose={dismissAnnounce} />
+          )}
+          <UpdatePrompt />
+        </>
       )}
-      {showCharter && (
-        <CharterModal
-          open={showCharter}
-          requireAccept
-          onAccept={acceptCharter}
-          onClose={acceptCharter}
-        />
-      )}
-      {!showCharter && showAnnounce && (
-        <AnnounceModal open={showAnnounce} onClose={dismissAnnounce} />
-      )}
-      <UpdatePrompt />
     </div>
   );
 };

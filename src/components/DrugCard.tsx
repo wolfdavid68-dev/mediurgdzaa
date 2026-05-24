@@ -313,7 +313,7 @@ const DrugCard = ({
           </div>
           <p className="drug-desc">{drug.desc}</p>
 
-          {relatedProtocols.length > 0 && (
+          {onProtocolOpen && relatedProtocols.length > 0 && (
             <div className="drug-related">
               <span className="drug-related-label">Utilisée dans</span>
               <div className="drug-related-list">

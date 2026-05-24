@@ -6,9 +6,10 @@ export const FONCTIONS = [
   "Médecin urgentiste",
   "Interne",
   "Infirmier",
+  "Pharmacienne",
   "Aide-soignant",
   "Étudiant infirmier",
-  "Étudiant aide-soignant",
+  "Étudiant AS",
   "Cadre de santé",
 ] as const;
 

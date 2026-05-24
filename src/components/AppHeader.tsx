@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { useLongPress } from "../lib/useLongPress";
 import { isPreview } from "../lib/featureFlags";
-
-// URL du compagnon Tutorat ESI/AS (projet séparé : repo
-// wolfdavid68-dev/tutorat-sau-mulhouse, déploiement Vercel autonome).
-// Override possible en dev via .env.local : VITE_TUTORAT_URL=http://localhost:5174.
-const TUTORAT_URL = import.meta.env.VITE_TUTORAT_URL || "https://tutorat-sau-mulhouse.vercel.app";
+import { TUTORAT_URL } from "../lib/tutorat";
 
 // Pastille « Tutorat ↗ » : visible uniquement en mode preview unifié
 // (?author=preview, sticky pour la session). Navigation dans le même
@@ -47,6 +43,7 @@ type AppHeaderProps = {
   onOpenNotesBackup: () => void;
   onToggleFont: () => void;
   onToggleTheme: () => void;
+  showTutorat?: boolean;
   children?: ReactNode;
 };
 
@@ -78,6 +75,7 @@ const AppHeader = ({
   onOpenNotesBackup,
   onToggleFont,
   onToggleTheme,
+  showTutorat = isPreview(),
   children,
 }: AppHeaderProps) => {
   // Menu kebab : regroupe thème / police / sauvegarde notes derrière un seul
@@ -124,7 +122,7 @@ const AppHeader = ({
               <p>Pharmacologie d'urgence · SAUV · SMUR · SAU</p>
             </div>
           </div>
-          {isPreview() && <TutoratLink />}
+          {showTutorat && <TutoratLink />}
           <span
             className={`net-status ${isOnline ? "net-status-online" : "net-status-offline"}`}
             aria-live="polite"
