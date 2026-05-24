@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Ic, Disclaimer } from "./EcgReader.icons";
 import {
-  compressImage,
+  anonymizeEcgImage,
+  ECG_ANONYMIZATION_NOTICE,
   num,
   SEV_CLASS,
   SEV_IC,
@@ -13,8 +14,8 @@ import {
 
 // Lecteur ECG — module d'aide à la lecture (PREVIEW uniquement, cf.
 // ProtocolesPage / isPreview). Flux RÉEL : photo/galerie → compression
-// client → POST /api/analyze-ecg (proxy serverless Vercel, clés API
-// secrètes côté serveur, Gemini 2.5 Flash + repli Mistral Pixtral) →
+// client + anonymisation locale → POST /api/analyze-ecg (proxy serverless
+// Vercel, clés API secrètes côté serveur, Gemini 2.5 Flash + repli Mistral Pixtral) →
 // rendu data-driven. Contenu NON-DIAGNOSTIQUE : disclaimers + validation
 // médicale obligatoire conservés. CSS scopé .ecg-reader (pas de Tailwind).
 //
@@ -63,7 +64,7 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
     e.target.value = ""; // permet de re-sélectionner le même fichier
     if (!file) return;
     try {
-      const dataUrl = await compressImage(file);
+      const dataUrl = await anonymizeEcgImage(file);
       if (!alive.current) return;
       setPhoto(dataUrl);
       setScreen("preview");
@@ -258,6 +259,10 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
             <button className="ecgr-analyze" onClick={analyze} type="button">
               <Ic n="sparkles" /> Analyser cet ECG
             </button>
+            <div className="ecgr-privacy">
+              <Ic n="alert-triangle" />
+              <span>{ECG_ANONYMIZATION_NOTICE}</span>
+            </div>
             <button className="ecgr-secondary" onClick={reset} type="button">
               Reprendre la photo
             </button>
@@ -494,7 +499,7 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
               <Disclaimer title="À titre indicatif et éducatif">
                 Analyse automatisée pouvant contenir des erreurs, <strong>non-diagnostique</strong>.{" "}
                 <strong>Faire systématiquement valider par un médecin</strong> avant toute décision
-                clinique ou thérapeutique.
+                clinique ou thérapeutique. {ECG_ANONYMIZATION_NOTICE}
               </Disclaimer>
             </div>
 
