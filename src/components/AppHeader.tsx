@@ -2,10 +2,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { useLongPress } from "../lib/useLongPress";
 import { isPreview } from "../lib/featureFlags";
 
-// URL du compagnon Tutorat ESI/AS (projet séparé). Configurable via env
-// Vercel : VITE_TUTORAT_URL. Fallback : domaine prod par défaut, à ajuster
-// quand le déploiement Vercel du Tutorat est en place.
-const TUTORAT_URL = import.meta.env.VITE_TUTORAT_URL || "https://tutorat.vercel.app";
+// URL du compagnon Tutorat ESI/AS (projet séparé : repo
+// wolfdavid68-dev/tutorat-sau-mulhouse, déploiement Vercel autonome).
+// Override possible en dev via .env.local : VITE_TUTORAT_URL=http://localhost:5174.
+const TUTORAT_URL = import.meta.env.VITE_TUTORAT_URL || "https://tutorat-sau-mulhouse.vercel.app";
 
 // Pastille « Tutorat ↗ » : visible uniquement en mode preview unifié
 // (?author=preview, sticky pour la session). Ouvre l'app Tutorat dans un
