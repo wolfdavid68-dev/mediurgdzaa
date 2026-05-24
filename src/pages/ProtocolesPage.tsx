@@ -14,9 +14,9 @@ import PrepKitCard from "../components/PrepKitCard";
 import EcgDiagnostic from "../components/EcgDiagnostic";
 import EcgReader from "../components/EcgReader";
 
-// Page Protocoles avec ses 3 sous-onglets (PISU, Incompatibilités, Kits).
-// Imports data en interne → quand App.jsx la lazy-load, PROTOCOLS et
-// PREP_KITS sortent du bundle initial (gain ~100 kB).
+// Page Protocoles avec ses sous-onglets (PISU, Incompatibilités, ECG, Kits).
+// Imports statiques : la page reste disponible hors-ligne même après une
+// mise à jour du service worker, sans risque de chunk lazy introuvable.
 type ProtocolesPageProps = {
   protoCategory: string;
   changeProtoCategory: (cat: string) => void;

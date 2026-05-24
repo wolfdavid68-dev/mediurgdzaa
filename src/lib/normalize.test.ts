@@ -36,7 +36,7 @@ describe("normalize — comparaison insensible casse + diacritiques", () => {
   });
 
   test("recherche : 'adre' contient le préfixe d'une drogue normalisée", () => {
-    // C'est exactement le cas d'usage d'App.js et data.test.js
+    // C'est exactement le cas d'usage d'App.tsx et data.test.js
     expect(normalize("Adrénaline").includes(normalize("adre"))).toBe(true);
     expect(normalize("Solumédrol").includes(normalize("solu"))).toBe(true);
   });

@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-Ce fichier guide Claude Code (claude.ai/code) lorsqu'il travaille dans ce dépôt.
+Ce fichier guide Codex (Codex.ai/code) lorsqu'il travaille dans ce dépôt.
 
 ## Projet
 
@@ -27,7 +27,7 @@ TypeScript en mode **strict pragmatique** : `tsconfig.json` avec `strict: true, 
 
 Les tests sont dans `src/lib/**/*.test.{js,ts}`, `src/components/**/*.test.{ts,tsx}` et `src/pages/**/*.test.tsx`. Vitest utilise des projets dans `vite.config.ts` : les tests de logique pure tournent sous node, les tests React/composants sous happy-dom. Les globals (`describe`, `test`, `expect`) sont auto-injectés via `test.globals`.
 
-`deployer.bat` (Windows uniquement) commit, pousse vers `origin main`, puis lance `vercel --prod`. Ne pas l'invoquer depuis Claude Code : c'est un assistant interactif pour l'utilisateur.
+`deployer.bat` (Windows uniquement) commit, pousse vers `origin main`, puis lance `vercel --prod`. Ne pas l'invoquer depuis Codex : c'est un assistant interactif pour l'utilisateur.
 
 ## Architecture
 

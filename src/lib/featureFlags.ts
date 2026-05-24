@@ -20,7 +20,7 @@ const URL_PARAM_OVERRIDE: Record<string, string[]> = {
 
 // Override de session « collant » : dès que `?auth=preview` est vu une
 // fois, on le mémorise en sessionStorage. Sinon l'override serait perdu
-// au premier popstate/pushState de l'app (App.jsx réécrit l'URL et fait
+// au premier popstate/pushState de l'app (App.tsx réécrit l'URL et fait
 // sauter le query param) → isAuthEnabled() repasserait à false → AuthGate
 // bypasserait l'auth et réafficherait l'app (ex. après logout on revenait
 // sur l'app au lieu du login). Sticky pour toute la session d'onglet ;

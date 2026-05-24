@@ -1,6 +1,6 @@
 // Tests d'intégrité des données — détectent les références cassées
 // silencieuses entre drugs.js / pse.js / incompatibilities.js / protocols.js
-// et la liste DRUG_PATTERNS de ProtocolCard.js.
+// et la liste DRUG_PATTERNS de ProtocolCard.tsx.
 
 import { DRUGS } from "../data/drugs";
 import { PSE } from "../data/pse";
@@ -242,7 +242,7 @@ describe("PROTOCOLS — intégrité", () => {
   });
 
   test("convention Adulte/Enfant : titre 'Enfant' ⇒ code contient 'ENF'", () => {
-    // Cf. CLAUDE.md : le filtrage Adulte/Enfant dans App.js dépend de
+    // Cf. CLAUDE.md : le filtrage Adulte/Enfant dans ProtocolesPage.tsx dépend de
     // code.includes("ENF") + titre.includes("Adulte"/"Enfant").
     const bad = PROTOCOLS.filter((p) => p.titre.includes("Enfant") !== p.code.includes("ENF")).map(
       (p) => `${p.code} — ${p.titre}`
@@ -253,7 +253,7 @@ describe("PROTOCOLS — intégrité", () => {
 
 // ════════════════════════════════════════════════════════════════
 // DRUG_PATTERNS — chaque pattern doit retrouver au moins un drug
-// via la même recherche normalisée qu'App.js
+// via la même recherche normalisée qu'App.tsx
 // ════════════════════════════════════════════════════════════════
 describe("DRUG_PATTERNS — couverture vers DRUGS", () => {
   const searchHits = (pattern: string) => {
@@ -275,7 +275,7 @@ describe("DRUG_PATTERNS — couverture vers DRUGS", () => {
   });
 
   test("aucun pattern ne se termine par un caractère non-word (% ou espace)", () => {
-    // Cf. ProtocolCard.js : le \b de fin du DRUG_REGEX ne matche pas
+    // Cf. ProtocolCard.tsx : le \b de fin du DRUG_REGEX ne matche pas
     // après un caractère non-word — le pattern serait inopérant.
     const bad = DRUG_PATTERNS.filter((p) => /[^\w]$/.test(p) && !/[a-zA-Zé]$/.test(p.slice(-1)));
     expect(bad).toEqual([]);

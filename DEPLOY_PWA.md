@@ -214,21 +214,23 @@ const CACHE_NAME = 'mediurg-v2'; // ← v1 → v2
 ## 📝 Fichiers importants
 
 ```
+index.html              ← HTML principal + splash de démarrage
+vite.config.ts          ← Config Vite, manifest PWA et Workbox
+build/                  ← Sortie de production générée par npm run build
+
 public/
-├── index.html           ← HTML principal avec PWA setup
-├── manifest.json        ← Configuration app (icônes, nom, etc.)
-├── service-worker.js    ← Logique cache hors ligne
-├── .htaccess            ← Config serveur Apache
-└── (icônes PNG à ajouter)
+├── pwa-*.png           ← Icônes PWA générées
+├── maskable-icon-512x512.png
+└── shortcuts/*.svg     ← Icônes des raccourcis Android
 
 src/
-├── App.js               ← Composant React principal
-├── index.js             ← Point d'entrée React
-├── components/
-│   ├── DrugList.js
-│   └── DrugCard.js
-└── data/
-    └── drugs.js         ← +73 médicaments
+├── App.tsx             ← État global + navigation
+├── index.tsx           ← Point d'entrée React + imports CSS
+├── components/         ← Cartes, modales, auth, ACR, ECG
+├── pages/              ← Médicaments, Protocoles, Échelles
+├── data/               ← Données cliniques JS
+├── lib/                ← Calculs purs, auth, navigation, helpers
+└── styles/             ← CSS découpé par domaine
 ```
 
 ---

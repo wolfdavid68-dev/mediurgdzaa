@@ -17,7 +17,7 @@ const SECTION_META = {
 // Médicaments détectables dans les textes de protocoles.
 // Ne pas terminer un pattern par un caractère non-word (%, espace) :
 // le \b de fin du regex échouerait — utiliser un nom court (« NaCl »
-// plutôt que « NaCl 0,9 % »), la recherche normalisée d'App.js fait le reste.
+// plutôt que « NaCl 0,9 % »), la recherche normalisée d'App.tsx fait le reste.
 export const DRUG_PATTERNS = [
   "adrénaline",
   "noradrénaline",
@@ -52,7 +52,7 @@ export const DRUG_PATTERNS = [
 ];
 
 // Rendu JSX d'un texte protocole : doses en gras, médicaments cliquables.
-// Le tokenizer pur vit dans src/lib/protocolText.js et est testé en isolation.
+// Le tokenizer pur vit dans src/lib/protocolText.ts et est testé en isolation.
 const renderText = (text: string, onDrugSearch: (name: string) => void) => {
   const tokens = tokenizeProtocolText(text, DRUG_PATTERNS);
   if (tokens.length <= 1) return text;

@@ -1,5 +1,5 @@
 // Tokenizer pur des textes de protocoles : repère médicaments + doses.
-// Le rendu JSX vit dans ProtocolCard.js — ici aucune dépendance React.
+// Le rendu JSX vit dans ProtocolCard.tsx — ici aucune dépendance React.
 
 const DOSE_PATTERN =
   /\b(\d+(?:[,.]\d+)?(?:\s*[-–]\s*\d+(?:[,.]\d+)?)?)\s*(mg\/kg|µg\/kg|mL\/kg|mg\/h|mL\/h|L\/min|gouttes\/kg|mg|µg|mcg|mL|g\/L|g)\b(?:\/(?:kg|h|min|j|24h))?/g;
