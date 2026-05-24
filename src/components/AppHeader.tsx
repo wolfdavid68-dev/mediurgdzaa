@@ -8,14 +8,13 @@ import { isPreview } from "../lib/featureFlags";
 const TUTORAT_URL = import.meta.env.VITE_TUTORAT_URL || "https://tutorat-sau-mulhouse.vercel.app";
 
 // Pastille « Tutorat ↗ » : visible uniquement en mode preview unifié
-// (?author=preview, sticky pour la session). Ouvre l'app Tutorat dans un
-// nouvel onglet pour préserver la session MediURG. Pas de token JWT pour
-// l'instant : le Tutorat tombera en mode démo côté useAuth.
+// (?author=preview, sticky pour la session). Navigation dans le même
+// onglet (symétrique au retour Tutorat → MediURG qui utilise aussi
+// window.location.href). Pas de token JWT pour l'instant : le Tutorat
+// tombera en mode démo côté useAuth.
 const TutoratLink = () => (
   <a
     href={TUTORAT_URL}
-    target="_blank"
-    rel="noopener noreferrer"
     className="tutorat-pill"
     title="Ouvrir le Compagnon ESI/AS — Tutorat SAU Mulhouse"
   >
