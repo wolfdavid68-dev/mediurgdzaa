@@ -1,5 +1,44 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { useLongPress } from "../lib/useLongPress";
+import { isPreview } from "../lib/featureFlags";
+
+// URL du compagnon Tutorat ESI/AS (projet séparé). Configurable via env
+// Vercel : VITE_TUTORAT_URL. Fallback : domaine prod par défaut, à ajuster
+// quand le déploiement Vercel du Tutorat est en place.
+const TUTORAT_URL = import.meta.env.VITE_TUTORAT_URL || "https://tutorat.vercel.app";
+
+// Pastille « Tutorat ↗ » : visible uniquement en mode preview unifié
+// (?author=preview, sticky pour la session). Ouvre l'app Tutorat dans un
+// nouvel onglet pour préserver la session MediURG. Pas de token JWT pour
+// l'instant : le Tutorat tombera en mode démo côté useAuth.
+const TutoratLink = () => (
+  <a
+    href={TUTORAT_URL}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="tutorat-pill"
+    title="Ouvrir le Compagnon ESI/AS — Tutorat SAU Mulhouse"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+    <span>Tutorat</span>
+    <span aria-hidden="true" className="tutorat-pill-arrow">
+      ↗
+    </span>
+  </a>
+);
 
 type AppHeaderProps = {
   isOnline: boolean;
@@ -86,6 +125,7 @@ const AppHeader = ({
               <p>Pharmacologie d'urgence · SAUV · SMUR · SAU</p>
             </div>
           </div>
+          {isPreview() && <TutoratLink />}
           <span
             className={`net-status ${isOnline ? "net-status-online" : "net-status-offline"}`}
             aria-live="polite"
