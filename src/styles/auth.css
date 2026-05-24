@@ -38,7 +38,12 @@
     Roboto,
     "Helvetica Neue",
     Arial,
-    sans-serif;
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji",
+    "Twemoji Mozilla";
 }
 
 .auth-bg-decor {
@@ -720,7 +725,9 @@
 
 /* ── Mono ──────────────────────────────────────────────────── */
 .auth-stage .mono {
-  font-family: "Geist Mono Variable", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  font-family:
+    "Geist Mono Variable", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace,
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla";
   letter-spacing: -0.01em;
 }
 
@@ -753,7 +760,12 @@
     Roboto,
     "Helvetica Neue",
     Arial,
-    sans-serif;
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji",
+    "Twemoji Mozilla";
 }
 .admin-topbar {
   display: flex;
@@ -873,7 +885,9 @@
 .admin-nav-badge {
   font-size: 11px;
   color: var(--auth-text-3);
-  font-family: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
+  font-family:
+    "Geist Mono Variable", "Geist Mono", ui-monospace, monospace, "Apple Color Emoji",
+    "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla";
 }
 .admin-kpi {
   display: grid;
@@ -1276,7 +1290,12 @@
     Roboto,
     "Helvetica Neue",
     Arial,
-    sans-serif;
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji",
+    "Twemoji Mozilla";
 }
 .legal-header {
   display: flex;

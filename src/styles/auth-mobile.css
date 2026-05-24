@@ -20,7 +20,12 @@
     -apple-system,
     "SF Pro",
     system-ui,
-    sans-serif;
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji",
+    "Twemoji Mozilla";
   font-feature-settings: "ss01", "calt", "liga";
   -webkit-font-smoothing: antialiased;
   display: flex;
