@@ -1,7 +1,7 @@
 /**
  * Overlay PSE « preview » — protocoles PSE en attente de validation.
  *
- * Visible UNIQUEMENT en mode preview unifié (URL `?auth=preview`, cf.
+ * Visible UNIQUEMENT en mode preview unifié (URL `?author=preview`, cf.
  * src/lib/featureFlags.ts → isPsePreview). La même preview active aussi
  * le login. Jamais exposé au public tant que le flag reste false.
  *
@@ -21,7 +21,7 @@
  *  5 mg/mL · Isoprénaline 20 µg/mL · Sufentanil 5 µg/mL. Pas
  *  d'alternative. conc en µg/mL pour µg/kg/min, en µg/mL pour µg/kg/h.
  *
- * Workflow : tester via …/?auth=preview (collant pour l'onglet) ; une
+ * Workflow : tester via …/?author=preview (collant pour l'onglet) ; une
  * fois validé, déplacer l'entrée vers pse.js et retirer d'ici.
  */
 export const PSE_PREVIEW = {

@@ -19,6 +19,10 @@ export const CHANGELOG = [
         type: "fix",
         text: "Durcissement du script Supabase : la table des profils n'est plus exposée aux accès anonymes ; la résolution matricule → email passe uniquement par une fonction ciblée utilisée par le login.",
       },
+      {
+        type: "chore",
+        text: "Les fonctionnalités internes restent réservées à l'URL de preview dédiée : Tutorat, PSE preview et surcharges de préparation ne s'activent qu'avec ?author=preview.",
+      },
     ],
   },
   {
@@ -147,7 +151,7 @@ export const CHANGELOG = [
     changes: [
       {
         type: "chore",
-        text: "Nouveau mécanisme pour tester de nouveaux protocoles PSE (ou des corrections) directement sur la prod live sans les exposer au public. Les entrées en attente vivent dans src/data/pse.preview.js et ne sont fusionnées par-dessus PSE que si l'URL contient ?pse=preview (override collant pour la session d'onglet, même principe que ?auth=preview). Pour le public, aucun changement. Promotion d'un protocole validé : déplacer son entrée de pse.preview.js vers pse.js, commit/push.",
+        text: "Nouveau mécanisme pour tester de nouveaux protocoles PSE (ou des corrections) directement sur la prod live sans les exposer au public. Les entrées en attente vivent dans src/data/pse.preview.js et ne sont fusionnées par-dessus PSE que si l'URL contient le paramètre de preview interne. Pour le public, aucun changement. Promotion d'un protocole validé : déplacer son entrée de pse.preview.js vers pse.js, commit/push.",
       },
     ],
   },

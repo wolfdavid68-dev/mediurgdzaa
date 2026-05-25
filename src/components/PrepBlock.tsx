@@ -11,7 +11,7 @@ import { isPreview } from "../lib/featureFlags";
 import { DRUGS_PREVIEW } from "../data/drugs.preview";
 
 // `prep` public (drugs.js) éventuellement enrichi par l'override preview
-// (drugs.preview.js) si ?auth=preview. On FUSIONNE l'override par-dessus le
+// (drugs.preview.js) si ?author=preview. On FUSIONNE l'override par-dessus le
 // public (au lieu de le remplacer) : l'override preview ne porte que la
 // nouvelle dilution fixe (fixed_dilution + étapes), donc les champs qu'il ne
 // redéfinit pas — notamment `pedTable`, la table de dilution PÉDIATRIQUE —

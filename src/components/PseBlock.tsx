@@ -4,7 +4,7 @@ import { PSE_PREVIEW } from "../data/pse.preview";
 import { isPsePreview } from "../lib/featureFlags";
 import { calcDebit, calcDoseFromRate } from "../lib/calc";
 
-// PSE public, ou PSE + overlay preview si ?pse=preview (cf. featureFlags).
+// PSE public, ou PSE + overlay preview si ?author=preview (cf. featureFlags).
 // L'overlay remplace/ajoute par drug id ; le public ne voit jamais
 // pse.preview.js tant que le flag PSE_PREVIEW reste false.
 const resolvePse = (): Record<number, any> =>

@@ -9,23 +9,20 @@
 // ajouter `?<flag-name>=preview` à l'URL → la feature est forcée à true
 // pour cette session (lue à chaque appel, pas mémorisée).
 
-// Preview UNIFIÉE : un seul point d'entrée active TOUTES les features en
-// preview (login + protocoles PSE). Plusieurs alias de param acceptés
-// (`auth`, `author`, `preview`) car la faute de frappe « author » au lieu
-// de « auth » est facile et silencieuse (rien ne s'affiche → on croit
-// que le déploiement a échoué). Le 1ᵉʳ alias est la clé sticky canonique.
+// Preview UNIFIÉE : un seul point d'entrée active les features internes
+// encore non publiques (Tutorat, overlays PSE/drugs, etc.). Depuis
+// l'ouverture officielle du login, l'auth n'est plus pilotée par ce mode :
+// `?author=preview` reste l'URL de preview dédiée.
 const URL_PARAM_OVERRIDE: Record<string, string[]> = {
-  AUTH_ENABLED: ["auth", "author", "preview"],
+  AUTH_ENABLED: ["author"],
 };
 
-// Override de session « collant » : dès que `?auth=preview` est vu une
+// Override de session « collant » : dès que `?author=preview` est vu une
 // fois, on le mémorise en sessionStorage. Sinon l'override serait perdu
 // au premier popstate/pushState de l'app (App.tsx réécrit l'URL et fait
-// sauter le query param) → isAuthEnabled() repasserait à false → AuthGate
-// bypasserait l'auth et réafficherait l'app (ex. après logout on revenait
-// sur l'app au lieu du login). Sticky pour toute la session d'onglet ;
-// fermer l'onglet « sort » du mode preview. N'affecte jamais la prod
-// (AUTH_ENABLED reste la source de vérité hors preview).
+// sauter le query param) → les features preview disparaîtraient au cours
+// de la navigation. Sticky pour toute la session d'onglet ; fermer l'onglet
+// « sort » du mode preview. N'affecte jamais la prod publique.
 const STICKY_PREFIX = "mediurg-preview-";
 
 const isPreviewing = (flagName: string): boolean => {
@@ -59,13 +56,13 @@ const isPreviewing = (flagName: string): boolean => {
 // Quand false : l'app fonctionne comme avant, sans login. AuthGate rend
 // directement <App /> et aucun appel Supabase n'est effectué.
 //
-// Pour tester localement : http://localhost:5173/?auth=preview
+// Login ouvert officiellement : laisser true en prod.
 // ────────────────────────────────────────────────────────────
 const AUTH_ENABLED = true;
 
 // Détecte un retour de lien de récupération (mot de passe oublié) :
 // Supabase ajoute `#type=recovery&access_token=...` au hash. Si l'auth
-// est désactivée (flag false ET pas de ?auth=preview), l'user resterait
+// est désactivée (flag false), l'user resterait
 // bloqué sur l'app sans jamais voir le ResetPasswordScreen. On force
 // l'activation dans ce cas.
 const isRecoveryReturn = (): boolean => {
@@ -83,9 +80,9 @@ export const isAuthEnabled = (): boolean =>
 // vivent dans src/data/pse.preview.js (overlay fusionné par-dessus PSE
 // uniquement quand ce mode est actif).
 //
-// Activé par la MÊME preview unifiée que le login : `?auth=preview`
-// (sticky pour la session d'onglet). Public (flag false, pas de
-// ?auth=preview) : PSE strictement inchangé.
+// Activé par la preview unifiée : `?author=preview` (sticky pour la
+// session d'onglet). Public (flag false, pas de ?author=preview) :
+// PSE strictement inchangé.
 //
 // Promotion en prod d'un protocole validé : déplacer son entrée de
 // pse.preview.js vers pse.js, puis commit/push (le flag reste false).
@@ -95,7 +92,7 @@ const PSE_PREVIEW = false;
 export const isPsePreview = (): boolean => PSE_PREVIEW || isPreviewing("AUTH_ENABLED");
 
 // Preview unifiée générique : true dès qu'on est en mode preview
-// (?auth/author/preview=preview, collant). Pour les features preview
+// (?author=preview, collant). Pour les features preview
 // qui ne sont pas pilotées par un flag de prod dédié (ex. lecteur ECG
 // expérimental). Public hors preview → toujours false.
 export const isPreview = (): boolean => isPreviewing("AUTH_ENABLED");

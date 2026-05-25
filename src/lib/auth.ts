@@ -290,10 +290,8 @@ export const requestPasswordReset = async (matricule: string): Promise<AuthResul
   // Matricule inconnu → on fait semblant de réussir (anti-énumération).
   if (!email) return { ok: true, data: undefined };
 
-  // On préserve `search` (notamment `?auth=preview` en local quand le flag
-  // AUTH_ENABLED est false) — sinon l'utilisateur revient de son mail sur
-  // une URL où l'auth est désactivée et l'event PASSWORD_RECOVERY n'est
-  // jamais traité.
+  // On préserve `search` pour garder les éventuels paramètres en cours
+  // (notamment preview interne) au retour du mail.
   const { origin, pathname, search } = window.location;
   const redirectTo = `${origin}${pathname}${search}`;
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });

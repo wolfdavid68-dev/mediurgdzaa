@@ -30,7 +30,7 @@ et exécuter. Cela crée :
 
 ## 3. Promouvoir le 1er admin
 
-Après avoir créé ton compte via l'app (en mode preview avec `?auth=preview`),
+Après avoir créé ton compte via l'app,
 tu auras un profile en `status='pending'`. Pour t'auto-promouvoir :
 
 ```sql
@@ -60,7 +60,7 @@ Ajouter les deux mêmes variables, scope « Production », « Preview », « Dev
 
 ## 5. Activer la feature
 
-Quand tout fonctionne en preview (`?auth=preview` sur localhost) :
+Quand tout fonctionne sur localhost :
 
 1. Modifier [`src/lib/featureFlags.ts`](../src/lib/featureFlags.ts) :
    `const AUTH_ENABLED = true;`
@@ -83,7 +83,7 @@ Penser à :
 ## Tests
 
 Une fois Supabase configuré, tester en local avec
-`http://localhost:5173/?auth=preview` :
+`http://localhost:5173/` :
 
 - [ ] Signup avec un matricule de test (ex: `M999999`, email
   `test@ghrmsa.fr`) → demande créée en `pending`
@@ -109,7 +109,7 @@ Pour désactiver l'auth en cas de problème en prod :
 ```
 src/
 ├── lib/
-│   ├── featureFlags.ts       ← AUTH_ENABLED + override ?auth=preview
+│   ├── featureFlags.ts       ← AUTH_ENABLED + preview interne ?author=preview
 │   ├── supabase.ts           ← Singleton client
 │   ├── auth.ts               ← signup / login / logout / fetchProfile (+ kind) / actions admin
 │   ├── profileCache.ts       ← Cache profil localStorage (fallback offline)

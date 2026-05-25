@@ -86,7 +86,7 @@ const DrugCard = ({
   };
 
   const renderPosoTab = () => {
-    // Overlay preview : en ?auth=preview, un `prep` redéfini dans
+    // Overlay preview : en ?author=preview, un `prep` redéfini dans
     // drugs.preview.js remplace celui de drugs.js (public inchangé).
     const prep =
       (isPreview() && (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep) || drug.prep || null;

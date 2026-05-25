@@ -1,15 +1,15 @@
 /**
  * Overlay « preview » des fiches médicaments (champ `prep`).
  *
- * Visible UNIQUEMENT en preview unifiée (URL `?auth=preview` /
- * `?author=preview` / `?preview=preview`, cf. featureFlags → isPreview).
+ * Visible UNIQUEMENT en preview unifiée (URL `?author=preview`,
+ * cf. featureFlags → isPreview).
  * Jamais exposé au public tant qu'on est hors preview.
  *
  * Indexé par drug id. La valeur `prep` REMPLACE celle de drugs.js.
  * PrepBlock applique l'override (cf. PrepBlock.tsx → resolvePrep),
  * même contrat que pse.preview.js. Public (drugs.js) inchangé.
  *
- * Workflow : tester via …/?auth=preview ; une fois validé sur le
+ * Workflow : tester via …/?author=preview ; une fois validé sur le
  * terrain, reporter le `prep` dans drugs.js et retirer l'entrée d'ici.
  *
  * ── Nouvelle préparation des médicaments en PSE (MEMO service +
