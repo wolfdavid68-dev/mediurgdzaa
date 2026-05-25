@@ -141,19 +141,6 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
                   </div>
                 </label>
               </div>
-              <label className="m-field">
-                <span className="m-field-lbl">Email</span>
-                <div className="m-input-wrap">
-                  <input
-                    className="m-input"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
-                    placeholder={emailPlaceholder}
-                  />
-                </div>
-              </label>
               <div className="m-row-2">
                 <label className="m-field">
                   <span className="m-field-lbl">Fonction</span>
@@ -184,6 +171,19 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
                   </div>
                 </label>
               </div>
+              <label className="m-field">
+                <span className="m-field-lbl">Email</span>
+                <div className="m-input-wrap">
+                  <input
+                    className="m-input"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    placeholder={emailPlaceholder}
+                  />
+                </div>
+              </label>
               {error && (
                 <div className="m-err" role="alert">
                   <Warn />

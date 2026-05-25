@@ -134,18 +134,6 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
                   </label>
                 </div>
 
-                <label className="auth-field">
-                  <span className="auth-field-label">Email</span>
-                  <input
-                    type="email"
-                    className="auth-input"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={emailPlaceholder}
-                    autoComplete="email"
-                  />
-                </label>
-
                 <div className="auth-field-row">
                   <label className="auth-field">
                     <span className="auth-field-label">Fonction</span>
@@ -176,6 +164,18 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
                     </select>
                   </label>
                 </div>
+
+                <label className="auth-field">
+                  <span className="auth-field-label">Email</span>
+                  <input
+                    type="email"
+                    className="auth-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={emailPlaceholder}
+                    autoComplete="email"
+                  />
+                </label>
 
                 {error && (
                   <div className="auth-error" role="alert">

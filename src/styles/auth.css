@@ -45,6 +45,11 @@
     "Noto Color Emoji",
     "Twemoji Mozilla";
 }
+.auth-stage *,
+.auth-stage *::before,
+.auth-stage *::after {
+  box-sizing: border-box;
+}
 
 .auth-bg-decor {
   position: fixed;
@@ -313,6 +318,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 .auth-card-narrow {
   max-width: 460px;
@@ -394,11 +400,15 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 .auth-field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+.auth-field-row > * {
+  min-width: 0;
 }
 @media (max-width: 480px) {
   .auth-field-row {
@@ -413,6 +423,8 @@
   font-weight: 500;
 }
 .auth-input {
+  width: 100%;
+  min-width: 0;
   background: var(--auth-surface);
   border: 1px solid var(--auth-line);
   color: var(--auth-text);
@@ -434,6 +446,7 @@
 .auth-matricule-field {
   display: grid;
   grid-template-columns: auto 1fr;
+  min-width: 0;
   background: var(--auth-surface);
   border: 1px solid var(--auth-line);
   border-radius: 12px;
@@ -455,6 +468,8 @@
   border-right: 1px solid var(--auth-line);
 }
 .auth-matricule-input {
+  width: 100%;
+  min-width: 0;
   background: transparent;
   border: none;
   outline: none;
