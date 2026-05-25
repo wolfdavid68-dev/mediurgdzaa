@@ -554,8 +554,10 @@ select.m-input {
 /* ----- Admin ----- */
 .m-admin {
   padding-bottom: 0;
+  overflow: hidden;
 }
 .m-admin-head {
+  flex: none;
   padding: max(62px, env(safe-area-inset-top)) 20px 14px;
   position: sticky;
   top: 0;
@@ -639,6 +641,10 @@ select.m-input {
 
 .m-admin-list {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 4px 16px 110px;
   display: flex;
   flex-direction: column;
