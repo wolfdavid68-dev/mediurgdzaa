@@ -760,10 +760,14 @@
   --auth-ok: oklch(0.74 0.13 150);
   --auth-warn: oklch(0.78 0.14 80);
   min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--auth-bg);
   color: var(--auth-text);
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   font-family:
     "Geist Variable",
     "Geist",
@@ -846,10 +850,12 @@
   display: grid;
   grid-template-columns: 248px 1fr;
   min-height: 0;
+  overflow: hidden;
 }
 @media (max-width: 880px) {
   .admin-body {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
   /* La sidebar reste visible mais bascule en barre horizontale (cf. règle
      mobile < 600px plus bas qui finalise le layout). Sur tablette, on
@@ -933,10 +939,13 @@
 .admin-main {
   padding: 24px 28px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  min-height: 0;
 }
 .admin-main-head {
   display: flex;
