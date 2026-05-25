@@ -29,6 +29,15 @@
 drop view   if exists public.matricule_lookup;
 drop policy if exists "matricule_lookup_anon" on public.profiles;
 
+-- 1bis. Durcir l'accès Data API à `profiles` : aucune lecture anonyme de
+-- la table complète, même si une ancienne policy anon subsiste ou si les
+-- grants par défaut du projet exposaient public.*. Les utilisateurs
+-- connectés gardent l'accès nécessaire, toujours filtré par RLS.
+alter table public.profiles enable row level security;
+revoke all on table public.profiles from anon;
+revoke all on table public.profiles from public;
+grant select, update, delete on table public.profiles to authenticated;
+
 -- 2. Fonction de résolution : matricule → email (ou null si inconnu).
 --    security definer + search_path = '' : pattern Supabase recommandé
 --    (lecture de profiles sans être bloquée par la RLS, sans hijacking

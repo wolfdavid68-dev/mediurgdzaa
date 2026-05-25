@@ -104,6 +104,14 @@ $$;
 -- ── RLS sur profiles ────────────────────────────────────────
 alter table public.profiles enable row level security;
 
+-- Data API : ne jamais exposer `profiles` aux anonymes. La clé anon est
+-- publique dans le bundle JS ; le login passe uniquement par la fonction
+-- ciblée `matricule_to_email(text)`. Les users connectés gardent l'accès
+-- requis, filtré ensuite par les policies RLS ci-dessous.
+revoke all on table public.profiles from anon;
+revoke all on table public.profiles from public;
+grant select, update, delete on table public.profiles to authenticated;
+
 -- Drop les anciennes policies pour ré-exécution propre
 drop policy if exists "self_read" on public.profiles;
 drop policy if exists "admin_read_all" on public.profiles;

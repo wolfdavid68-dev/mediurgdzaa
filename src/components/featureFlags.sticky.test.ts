@@ -1,4 +1,4 @@
-import { isAuthEnabled, isPsePreview } from "../lib/featureFlags";
+import { isAuthEnabled, isPreview, isPsePreview } from "../lib/featureFlags";
 
 // Régression : l'override ?auth=preview doit rester actif même quand l'app
 // réécrit l'URL et fait sauter le query param (sinon AuthGate bypassait
@@ -17,41 +17,47 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 
-describe("isAuthEnabled — preview collant", () => {
-  test("sans ?auth=preview et AUTH_ENABLED=false → false", () => {
-    expect(isAuthEnabled()).toBe(false);
+describe("isAuthEnabled — activation officielle", () => {
+  test("sans ?auth=preview → true depuis l'ouverture officielle du login", () => {
+    expect(isAuthEnabled()).toBe(true);
+  });
+});
+
+describe("isPreview — preview collant", () => {
+  test("sans ?auth=preview → false", () => {
+    expect(isPreview()).toBe(false);
   });
 
   test("?auth=preview dans l'URL → true (et mémorisé)", () => {
     window.history.replaceState(null, "", "/?auth=preview");
-    expect(isAuthEnabled()).toBe(true);
+    expect(isPreview()).toBe(true);
     expect(store.get("mediurg-preview-auth")).toBe("1");
   });
 
   test("param perdu APRÈS coup → reste true (sticky session)", () => {
     window.history.replaceState(null, "", "/?auth=preview");
-    expect(isAuthEnabled()).toBe(true);
+    expect(isPreview()).toBe(true);
     // L'app réécrit l'URL sans le param (popstate/pushState)…
     window.history.replaceState(null, "", "/");
-    expect(isAuthEnabled()).toBe(true); // ← avant le fix : false
+    expect(isPreview()).toBe(true); // ← avant le fix : false
   });
 
   test("nouvelle session (sessionStorage vide) + pas de param → false", () => {
     store.clear();
     window.history.replaceState(null, "", "/");
-    expect(isAuthEnabled()).toBe(false);
+    expect(isPreview()).toBe(false);
   });
 
   test("alias ?author=preview (faute de frappe courante) → true", () => {
     window.history.replaceState(null, "", "/?author=preview");
-    expect(isAuthEnabled()).toBe(true);
+    expect(isPreview()).toBe(true);
     // clé sticky canonique = 1ᵉʳ alias, indépendante de l'alias tapé
     expect(store.get("mediurg-preview-auth")).toBe("1");
   });
 
   test("alias ?preview=preview → true", () => {
     window.history.replaceState(null, "", "/?preview=preview");
-    expect(isAuthEnabled()).toBe(true);
+    expect(isPreview()).toBe(true);
   });
 });
 

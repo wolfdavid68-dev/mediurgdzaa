@@ -61,7 +61,7 @@ const isPreviewing = (flagName: string): boolean => {
 //
 // Pour tester localement : http://localhost:5173/?auth=preview
 // ────────────────────────────────────────────────────────────
-const AUTH_ENABLED = false;
+const AUTH_ENABLED = true;
 
 // Détecte un retour de lien de récupération (mot de passe oublié) :
 // Supabase ajoute `#type=recovery&access_token=...` au hash. Si l'auth

@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v106";
+export const APP_VERSION = "v107";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v107",
+    date: "2026-05-25",
+    titre: "Ouverture officielle du login",
+    changes: [
+      {
+        type: "feat",
+        text: "Activation officielle de l'authentification : connexion par matricule professionnel, création de compte avec validation administrateur, récupération de mot de passe et console de gestion des accès.",
+      },
+      {
+        type: "fix",
+        text: "Durcissement du script Supabase : la table des profils n'est plus exposée aux accès anonymes ; la résolution matricule → email passe uniquement par une fonction ciblée utilisée par le login.",
+      },
+    ],
+  },
   {
     version: "v106",
     date: "2026-05-22",
