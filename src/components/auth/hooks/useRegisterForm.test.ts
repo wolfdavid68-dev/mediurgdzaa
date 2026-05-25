@@ -20,7 +20,7 @@ const fillStep1Valid = (r: { current: ReturnType<typeof useRegisterForm> }) => {
 describe("useRegisterForm", () => {
   beforeEach(() => signupMock.mockReset());
 
-  test("étape 1 invalide (email hors domaine) → reste étape 1", () => {
+  test("etape 1 invalide (email hors domaine) -> reste etape 1", () => {
     const { result } = renderHook(() => useRegisterForm());
     act(() => {
       result.current.setMatriculeDigits("402100");
@@ -34,14 +34,27 @@ describe("useRegisterForm", () => {
     expect(result.current.errorNonce).toBe(1);
   });
 
-  test("étape 1 valide → passe étape 2", () => {
+  test("etape 1 etudiant IDE/AS avec email externe -> passe etape 2", () => {
+    const { result } = renderHook(() => useRegisterForm());
+    act(() => {
+      result.current.setMatriculeDigits("402100");
+      result.current.setPrenom("Camille");
+      result.current.setNom("Bernard");
+      result.current.setFonction("Etudiant infirmier");
+      result.current.setEmail("camille.stage@gmail.com");
+    });
+    act(() => result.current.submitStep1());
+    expect(result.current.step).toBe(2);
+  });
+
+  test("etape 1 valide -> passe etape 2", () => {
     const { result } = renderHook(() => useRegisterForm());
     fillStep1Valid(result);
     act(() => result.current.submitStep1());
     expect(result.current.step).toBe(2);
   });
 
-  test("étape 2 : mot de passe trop court → erreur, signup non appelé", async () => {
+  test("etape 2 : mot de passe trop court -> erreur, signup non appele", async () => {
     const { result } = renderHook(() => useRegisterForm());
     fillStep1Valid(result);
     act(() => result.current.submitStep1());
@@ -53,11 +66,11 @@ describe("useRegisterForm", () => {
     await act(async () => {
       await result.current.submitStep2();
     });
-    expect(result.current.error).toMatch(/8 caractères/);
+    expect(result.current.error).toMatch(/8 caract/);
     expect(signupMock).not.toHaveBeenCalled();
   });
 
-  test("étape 2 : charte non acceptée → erreur", async () => {
+  test("etape 2 : charte non acceptee -> erreur", async () => {
     const { result } = renderHook(() => useRegisterForm());
     fillStep1Valid(result);
     act(() => result.current.submitStep1());
@@ -73,7 +86,7 @@ describe("useRegisterForm", () => {
     expect(signupMock).not.toHaveBeenCalled();
   });
 
-  test("étape 2 valide → signup appelé puis étape 3", async () => {
+  test("etape 2 valide -> signup appele puis etape 3", async () => {
     signupMock.mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useRegisterForm());
     fillStep1Valid(result);
@@ -92,7 +105,7 @@ describe("useRegisterForm", () => {
     expect(result.current.step).toBe(3);
   });
 
-  test("goBack : étape 2 → étape 1 ; étape 1 → onExit", () => {
+  test("goBack : etape 2 -> etape 1 ; etape 1 -> onExit", () => {
     const { result } = renderHook(() => useRegisterForm());
     fillStep1Valid(result);
     act(() => result.current.submitStep1());

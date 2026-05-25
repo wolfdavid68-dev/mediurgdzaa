@@ -2,8 +2,10 @@ import {
   EMAIL_DOMAIN,
   isNetworkError,
   isValidEmail,
+  isValidEmailForFunction,
   isValidMatricule,
   isValidPassword,
+  isStudentFunction,
   MATRICULE_REGEX,
   passwordStrength,
 } from "./auth";
@@ -69,6 +71,25 @@ describe("isValidEmail", () => {
 
   test("EMAIL_DOMAIN exporté", () => {
     expect(EMAIL_DOMAIN).toBe("@ghrmsa.fr");
+  });
+});
+
+describe("isValidEmailForFunction", () => {
+  test("personnel hors étudiants → domaine @ghrmsa.fr requis", () => {
+    expect(isValidEmailForFunction("david.wolf@ghrmsa.fr", "Infirmier")).toBe(true);
+    expect(isValidEmailForFunction("david.wolf@gmail.com", "Infirmier")).toBe(false);
+  });
+
+  test("étudiants IDE/AS → autre domaine autorisé", () => {
+    expect(isStudentFunction("Étudiant infirmier")).toBe(true);
+    expect(isStudentFunction("Etudiant IDE")).toBe(true);
+    expect(isStudentFunction("Étudiant AS")).toBe(true);
+    expect(isValidEmailForFunction("lea.stage@gmail.com", "Étudiant infirmier")).toBe(true);
+    expect(isValidEmailForFunction("ines.stage@yahoo.fr", "Étudiant AS")).toBe(true);
+  });
+
+  test("format email invalide → refusé même pour étudiant", () => {
+    expect(isValidEmailForFunction("pas-un-email", "Étudiant AS")).toBe(false);
   });
 });
 

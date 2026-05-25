@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRegisterForm } from "../hooks/useRegisterForm";
 import { FONCTIONS, SERVICES } from "../authConstants";
-import { EMAIL_DOMAIN } from "../../../lib/auth";
+import { EMAIL_DOMAIN, isStudentFunction } from "../../../lib/auth";
 import LegalModal from "../../LegalModal";
 import CharterModal from "../../CharterModal";
 import { ArrowL, Arrow, Check, Spinner, Warn } from "./icons";
@@ -48,6 +48,9 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
   const [showLegal, setShowLegal] = useState(false);
   const [showCharter, setShowCharter] = useState(false);
   const [shake, setShake] = useState(false);
+  const emailPlaceholder = isStudentFunction(fonction)
+    ? "prenom.nom@exemple.fr"
+    : `prenom.nom${EMAIL_DOMAIN}`;
 
   useEffect(() => {
     if (errorNonce === 0) return;
@@ -139,7 +142,7 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
                 </label>
               </div>
               <label className="m-field">
-                <span className="m-field-lbl">Email professionnel</span>
+                <span className="m-field-lbl">Email</span>
                 <div className="m-input-wrap">
                   <input
                     className="m-input"
@@ -147,7 +150,7 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
-                    placeholder={`prenom.nom${EMAIL_DOMAIN}`}
+                    placeholder={emailPlaceholder}
                   />
                 </div>
               </label>

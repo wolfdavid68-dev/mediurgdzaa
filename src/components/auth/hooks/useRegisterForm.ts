@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import {
   signup,
   isValidMatricule,
-  isValidEmail,
+  isValidEmailForFunction,
   isValidPassword,
   passwordStrength,
 } from "../../../lib/auth";
@@ -41,7 +41,9 @@ export const useRegisterForm = () => {
       return "Matricule invalide (format : M + 6 chiffres)";
     if (!prenom.trim()) return "Prénom requis";
     if (!nom.trim()) return "Nom requis";
-    if (!isValidEmail(email)) return "Email invalide (doit se terminer par @ghrmsa.fr)";
+    if (!isValidEmailForFunction(email, fonction)) {
+      return "Email invalide (domaine libre pour les étudiants IDE/AS, @ghrmsa.fr requis sinon)";
+    }
     return null;
   };
 

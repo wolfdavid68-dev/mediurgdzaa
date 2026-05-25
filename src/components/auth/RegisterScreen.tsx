@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import MatriculeInput from "./MatriculeInput";
 import { useRegisterForm } from "./hooks/useRegisterForm";
 import { FONCTIONS, SERVICES } from "./authConstants";
-import { EMAIL_DOMAIN } from "../../lib/auth";
+import { EMAIL_DOMAIN, isStudentFunction } from "../../lib/auth";
 import LegalModal from "../LegalModal";
 import CharterModal from "../CharterModal";
 
@@ -46,6 +46,9 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
   const [shake, setShake] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const [showCharter, setShowCharter] = useState(false);
+  const emailPlaceholder = isStudentFunction(fonction)
+    ? "prenom.nom@exemple.fr"
+    : `prenom.nom${EMAIL_DOMAIN}`;
 
   useEffect(() => {
     if (errorNonce === 0) return;
@@ -132,13 +135,13 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
                 </div>
 
                 <label className="auth-field">
-                  <span className="auth-field-label">Email professionnel</span>
+                  <span className="auth-field-label">Email</span>
                   <input
                     type="email"
                     className="auth-input"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={`prenom.nom${EMAIL_DOMAIN}`}
+                    placeholder={emailPlaceholder}
                     autoComplete="email"
                   />
                 </label>

@@ -45,6 +45,22 @@ export type SignupPayload = {
 // ─── Validation ──────────────────────────────────────────────
 export const isValidMatricule = (m: string): boolean => MATRICULE_REGEX.test(m);
 
+const normalizeProfileLabel = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+export const isStudentFunction = (fonction: string): boolean => {
+  const normalized = normalizeProfileLabel(fonction);
+  if (["esi", "etudiant ide", "etudiant infirmier", "etudiant as"].includes(normalized)) {
+    return true;
+  }
+  return /\betudiant\b/.test(normalized) && /\b(as|esi|ide|infirmier)\b/.test(normalized);
+};
+
 // Whitelist optionnelle : emails admins externes au domaine @ghrmsa.fr.
 // Renseigner VITE_ADMIN_EMAILS dans .env.local (séparés par virgules) pour
 // permettre à un admin GHR ayant un email perso de s'inscrire pendant le
@@ -63,6 +79,11 @@ export const isValidEmail = (e: string): boolean => {
   const lower = e.toLowerCase();
   if (lower.endsWith(EMAIL_DOMAIN)) return true;
   return adminEmailsWhitelist().includes(lower);
+};
+
+export const isValidEmailForFunction = (email: string, fonction: string): boolean => {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  return isStudentFunction(fonction) || isValidEmail(email);
 };
 
 export const isValidPassword = (p: string): boolean => p.length >= 8;
@@ -115,8 +136,11 @@ export const signup = async (payload: SignupPayload): Promise<AuthResult<{ id: s
   if (!isValidMatricule(payload.matricule)) {
     return { ok: false, error: "Matricule invalide (format attendu : M + 6 chiffres)" };
   }
-  if (!isValidEmail(payload.email)) {
-    return { ok: false, error: `Email invalide (doit se terminer par ${EMAIL_DOMAIN})` };
+  if (!isValidEmailForFunction(payload.email, payload.fonction)) {
+    return {
+      ok: false,
+      error: `Email invalide (doit se terminer par ${EMAIL_DOMAIN}, sauf comptes étudiants)`,
+    };
   }
   if (!isValidPassword(payload.password)) {
     return { ok: false, error: "Mot de passe trop court (min 8 caractères)" };
