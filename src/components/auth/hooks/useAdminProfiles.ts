@@ -6,6 +6,7 @@ import {
   banProfile,
   unbanProfile,
   logout,
+  isStudentFunction,
   type Profile,
   type ProfileStatus,
 } from "../../../lib/auth";
@@ -19,6 +20,16 @@ export type AdminTab = ProfileStatus; // "pending" | "active" | "banned"
 export type AdminToast = { kind: "ok" | "warn"; msg: string } | null;
 
 type ActionResult = { ok: true } | { ok: false; error: string };
+
+const sortProfilesForAdmin = (profiles: Profile[]): Profile[] =>
+  [...profiles].sort((a, b) => {
+    const aStudent = isStudentFunction(a.fonction);
+    const bStudent = isStudentFunction(b.fonction);
+    if (aStudent !== bStudent) return aStudent ? 1 : -1;
+    return `${a.nom} ${a.prenom}`.localeCompare(`${b.nom} ${b.prenom}`, "fr", {
+      sensitivity: "base",
+    });
+  });
 
 export const useAdminProfiles = (onLogout: () => void) => {
   const [tab, setTab] = useState<AdminTab>("pending");
@@ -39,7 +50,7 @@ export const useAdminProfiles = (onLogout: () => void) => {
       setError(result.error);
       return;
     }
-    setProfiles(result.data);
+    setProfiles(sortProfilesForAdmin(result.data));
     if (forStatus === "pending") setPendingCount(result.data.length);
   };
 

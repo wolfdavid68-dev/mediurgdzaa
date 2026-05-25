@@ -16,6 +16,7 @@ export const FONCTIONS = [
 export const SERVICES = ["SAU", "SMUR", "UHCD", "Réanimation", "Régulation 15"] as const;
 
 export const BAN_REASONS = [
+  "Fin de stage",
   "Partage d'identifiants",
   "Départ du service",
   "Comportement inapproprié",
