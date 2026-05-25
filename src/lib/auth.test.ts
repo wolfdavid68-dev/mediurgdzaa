@@ -1,11 +1,16 @@
 import {
   EMAIL_DOMAIN,
+  hasAdminAccess,
+  isAsFunction,
+  isCadreFunction,
+  isIdeFunction,
+  isMedicalFunction,
   isNetworkError,
+  isStudentFunction,
   isValidEmail,
   isValidEmailForFunction,
   isValidMatricule,
   isValidPassword,
-  isStudentFunction,
   MATRICULE_REGEX,
   passwordStrength,
 } from "./auth";
@@ -90,6 +95,25 @@ describe("isValidEmailForFunction", () => {
 
   test("format email invalide → refusé même pour étudiant", () => {
     expect(isValidEmailForFunction("pas-un-email", "Étudiant AS")).toBe(false);
+  });
+});
+
+describe("fonction profile helpers", () => {
+  test("classifie le metier depuis fonction, pas depuis role", () => {
+    expect(isMedicalFunction("Médecin urgentiste")).toBe(true);
+    expect(isMedicalFunction("Interne")).toBe(true);
+    expect(isIdeFunction("Infirmier")).toBe(true);
+    expect(isIdeFunction("IDE")).toBe(true);
+    expect(isAsFunction("Aide-soignant")).toBe(true);
+    expect(isStudentFunction("Étudiant infirmier")).toBe(true);
+    expect(isStudentFunction("Étudiant AS")).toBe(true);
+    expect(isCadreFunction("Cadre de santé")).toBe(true);
+  });
+
+  test("l'acces admin reste possible par role admin ou fonction cadre", () => {
+    expect(hasAdminAccess({ role: "admin", fonction: "Infirmier" })).toBe(true);
+    expect(hasAdminAccess({ role: "user", fonction: "Cadre de santé" })).toBe(true);
+    expect(hasAdminAccess({ role: "user", fonction: "Infirmier" })).toBe(false);
   });
 });
 

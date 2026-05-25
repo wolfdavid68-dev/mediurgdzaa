@@ -1,5 +1,11 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { fetchProfile, getCurrentSession, onAuthStateChange, type Profile } from "../../lib/auth";
+import {
+  fetchProfile,
+  getCurrentSession,
+  hasAdminAccess,
+  onAuthStateChange,
+  type Profile,
+} from "../../lib/auth";
 import { cacheProfile, getCachedProfile, getLastCachedProfile } from "../../lib/profileCache";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
@@ -31,7 +37,7 @@ import MobileAdminDashboard from "./mobile/MobileAdminDashboard";
 //   - Pas de session → LoginScreen / RegisterScreen
 //   - Session + profile.status='pending' → PendingApprovalScreen
 //   - Session + profile.status='banned' → BannedScreen
-//   - Session + profile.status='active' + role='admin' → toggle App ↔ AdminDashboard
+//   - Session + profile.status='active' + admin access → toggle App ↔ AdminDashboard
 //   - Session + profile.status='active' + role='user' → App (les enfants)
 
 type AuthScreen = "login" | "register" | "forgot";
@@ -162,7 +168,7 @@ const AuthGate = ({ children }: Props) => {
 
   // Accès admin par geste caché : appui long sur le logo (App.tsx) émet
   // `mediurg:open-admin`. On ouvre la console — le rendu ne l'affiche que
-  // si profile.role === "admin" (no-op pour un non-admin). Remplace
+  // si le profil a un accès admin (no-op pour un non-admin). Remplace
   // l'ancienne roue crantée flottante.
   useEffect(() => {
     const open = () => setShowAdmin(true);
@@ -250,7 +256,7 @@ const AuthGate = ({ children }: Props) => {
   }
 
   // Active : si admin et showAdmin → console, sinon → app normale
-  if (profile.role === "admin" && showAdmin) {
+  if (hasAdminAccess(profile) && showAdmin) {
     const adminProps = {
       currentUserName: `${profile.prenom} ${profile.nom}`,
       onLogout: () => setProfile(null),
