@@ -13,10 +13,12 @@ en français, utilisable hors ligne après installation.
 La base technique a été durcie :
 
 - accès Supabase `public.profiles` restreint aux utilisateurs authentifiés via RLS ;
+- traçabilité des actions d'administration via `public.admin_audit_events` : approbation, refus,
+  suspension, rétablissement ;
 - absence de lecture anonyme sur `profiles` vérifiée en production le 26 mai 2026 ;
 - headers de sécurité ajoutés côté Vercel ;
 - API ECG protégée par proxy serveur, validation MIME/taille, `Cache-Control: no-store` et
-  limitation simple de débit ;
+  limitation simple de débit, avec session Supabase active requise ;
 - secrets non suivis par Git ;
 - audit npm ajouté en CI ;
 - runbook sécurité créé.
@@ -32,6 +34,7 @@ requise avant qualification institutionnelle.
 - Protocoles, incompatibilités, kits de préparation, échelles cliniques.
 - Favoris, historique et notes personnelles stockés localement.
 - Authentification optionnelle via Supabase.
+- Console d'administration avec validation/suspension des comptes et journal d'audit.
 - Module ECG d'aide à la lecture, non diagnostique, avec anonymisation côté client puis appel
   serveur optionnel.
 
@@ -54,7 +57,7 @@ requise avant qualification institutionnelle.
 
 ### Backend
 
-- Supabase pour authentification et table `profiles`.
+- Supabase pour authentification, table `profiles` et journal `admin_audit_events`.
 - API Vercel `/api/analyze-ecg` pour proxy ECG vers fournisseurs IA.
 - Aucune clé IA exposée dans le bundle client.
 
@@ -73,6 +76,7 @@ Stockage navigateur via `localStorage`, `sessionStorage`, cache PWA et session S
 | Poids patient                 | Navigateur                | Calcul ponctuel               | donnée clinique isolée   | Expiration courte environ 3 h                           |
 | Checklists kit                | Navigateur                | Préparation opérationnelle    | potentiellement clinique | Expiration courte environ 3 h                           |
 | Profil agent                  | Supabase + cache local    | Authentification/autorisation | donnée personnelle agent | Matricule, email, nom, fonction, service                |
+| Journal actions admin         | Supabase                  | Traçabilité des accès         | donnée personnelle agent | Admin, cible, action, date, motif éventuel              |
 | Session Supabase              | Navigateur                | Maintien de session           | secret utilisateur       | Jeton local Supabase                                    |
 | Image ECG                     | Client puis API Vercel/IA | Aide non diagnostique         | potentiellement patient  | Anonymisation locale à vérifier par l'utilisateur       |
 
@@ -82,6 +86,8 @@ MediURG ne doit pas stocker de donnée patient nominative.
 
 Mesures déjà présentes :
 
+- avertissement visible dans chaque champ de note personnelle : ne pas saisir identité patient,
+  IPP, date de naissance ou donnée nominative ;
 - rappel UI dans l'export/import des notes : ne pas saisir nom, IPP, date de naissance ou donnée
   patient nominative ;
 - poids patient avec expiration courte ;
@@ -126,6 +132,7 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 ### API ECG
 
 - Méthode `POST` uniquement.
+- Session Supabase active requise avant analyse.
 - `Cache-Control: no-store`.
 - MIME acceptés : JPEG, PNG, WebP.
 - Taille maximale : 2 Mo après compression.
@@ -148,6 +155,16 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 - `anon` n'a pas le privilège `SELECT`.
 - `authenticated` conserve `SELECT`, `UPDATE`, `DELETE`.
 - Privilèges inutiles retirés : `INSERT`, `TRUNCATE`, `TRIGGER`, `REFERENCES`.
+
+État cible pour `public.admin_audit_events` après application du SQL d'audit :
+
+- RLS active.
+- Aucun accès `anon` ou `public`.
+- Droits `authenticated` limités à `SELECT` et `INSERT`, filtrés par RLS.
+- Policies attendues : `admin_audit_read`, `admin_audit_insert`.
+- Insertion autorisée uniquement pour un admin actif avec `actor_id = auth.uid()`.
+- Les refus de compte conservent un snapshot du compte cible dans le journal avant disparition de
+  la ligne `profiles`.
 
 ## Décision offline-first
 
@@ -175,6 +192,7 @@ cas de départ d'un agent ou de perte d'appareil.
 | Accès offline après retrait d'habilitation  | moyen          | réconciliation à la reconnexion      | valider compromis urgentiste            |
 | Perte/vol d'appareil appairé                | moyen          | logout possible, stockage navigateur | définir procédure institutionnelle      |
 | Dépendance Vercel/Supabase/IA               | moyen          | secrets protégés, RLS, headers       | valider sous-traitants                  |
+| Action admin non expliquée                  | faible         | journal d'audit admin                | valider durée de conservation           |
 | Erreur de contenu clinique                  | élevé          | versioning, PWA update prompt        | définir procédure de correction urgente |
 
 ## Points à valider
@@ -183,10 +201,12 @@ cas de départ d'un agent ou de perte d'appareil.
 - DPO/RSSI : autorisation d'usage de Vercel et Supabase.
 - DPO/RSSI : autorisation ou suspension du module ECG IA.
 - Politique de conservation des comptes agents.
+- Politique de conservation du journal `admin_audit_events`.
 - Procédure de retrait d'accès et perte d'appareil.
 - Mention légale finale : directeur de publication, DPO confirmé, contact institutionnel.
 - Confirmation qu'aucune donnée patient nominative ne doit être saisie dans les notes.
 - Fréquence d'audit Supabase/RLS.
+- Modalités d'accès au journal d'audit admin par DPO/RSSI/DSI.
 
 ## Checklist avant validation institutionnelle
 
@@ -199,6 +219,7 @@ cas de départ d'un agent ou de perte d'appareil.
 - [ ] Un test hors ligne complet est effectué sur appareil réel.
 - [ ] Une procédure de correction urgente du contenu clinique est documentée.
 - [ ] Une procédure de retrait d'accès agent est documentée.
+- [ ] Une durée de conservation du journal d'audit admin est validée.
 - [ ] Les mentions légales sont complétées et validées.
 
 ## Commandes de vérification
