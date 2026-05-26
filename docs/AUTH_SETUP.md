@@ -3,6 +3,8 @@
 Ce guide explique comment configurer le backend Supabase pour activer la
 feature d'authentification (`AUTH_ENABLED = true` dans
 [`src/lib/featureFlags.ts`](../src/lib/featureFlags.ts)).
+Pour l'audit périodique et la checklist sécurité avant déploiement, voir aussi
+[`SECURITY_RUNBOOK.md`](./SECURITY_RUNBOOK.md).
 
 Tant que l'auth n'est pas activée, l'app continue de fonctionner sans
 login (mode actuel par défaut). **Ne pas flip le flag tant que les étapes
@@ -45,15 +47,19 @@ approuver les autres demandes (aucune intervention SQL future nécessaire).
 ## 4. Variables d'environnement
 
 Récupérer les valeurs dans Supabase → Project Settings → API.
+La doc Supabase actuelle recommande les clés publiques `sb_publishable_*` côté navigateur ;
+la clé `anon` legacy reste acceptée par l'app pour compatibilité.
 
 **Local (`.env.local`, gitignored)** :
 
 ```
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJ...   # clé "anon public"
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+# fallback legacy accepté si le projet n'a pas encore de publishable key :
+# VITE_SUPABASE_ANON_KEY=eyJ...
 ```
 
-⚠️ **Ne JAMAIS** mettre la `service_role` côté client — elle bypass RLS.
+⚠️ **Ne JAMAIS** mettre la `service_role` ou une clé secrète côté client — elle bypass RLS.
 
 **Vercel (Project Settings → Environment Variables)** :
 Ajouter les deux mêmes variables, scope « Production », « Preview », « Development ».
@@ -86,7 +92,7 @@ Une fois Supabase configuré, tester en local avec
 `http://localhost:5173/` :
 
 - [ ] Signup avec un matricule de test (ex: `M999999`, email
-  `test@ghrmsa.fr`) → demande créée en `pending`
+      `test@ghrmsa.fr`) → demande créée en `pending`
 - [ ] Connexion impossible tant que `pending` → écran « En attente »
 - [ ] Promotion via SQL → connexion OK
 - [ ] Console admin accessible par **appui long (~600 ms) sur le logo**
@@ -130,6 +136,11 @@ src/
                                 MobileLogin/Register/Admin/Forgot/Reset…
 ```
 
+MediURG n'utilise pas de router : la protection de routes est centralisée par
+`AuthGate` autour de `<App />` dans `src/index.tsx`. Tant qu'aucun profil actif
+n'est résolu, aucune page clinique n'est rendue ; quand le profil est actif,
+`App.tsx` applique ensuite les droits métier (`full`, `medicaments`, `tutorat`).
+
 ## Comportement hors-ligne (offline-first)
 
 MediURG est un outil d'urgence : le contenu clinique doit rester
@@ -138,14 +149,14 @@ accessible **sans réseau**. L'auth ne doit jamais le verrouiller.
 **Modèle « appairage en ligne une fois → usage offline illimité »**
 (comme un contenu téléchargé) :
 
-| Situation | Comportement |
-|---|---|
-| 1ʳᵉ connexion (appareil jamais appairé) | Réseau requis (seul moment incompressible) |
-| App rouverte hors-réseau, appareil déjà appairé | ✅ session localStorage + **profil caché** → entre |
-| `fetchProfile` échoue avec `kind:"network"` | → profil caché (offline dur, wifi sans route, timeout) |
-| `fetchProfile` échoue `notfound`/`config`/en ligne | → écran login (légitime, ré-auth/config possible) |
-| Session expirée + offline (refresh impossible) | → `getLastCachedProfile()` (appareil appairé → on garde l'accès) |
-| Déconnexion explicite | `logout()` purge le cache → mur login au prochain lancement |
+| Situation                                          | Comportement                                                     |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| 1ʳᵉ connexion (appareil jamais appairé)            | Réseau requis (seul moment incompressible)                       |
+| App rouverte hors-réseau, appareil déjà appairé    | ✅ session localStorage + **profil caché** → entre               |
+| `fetchProfile` échoue avec `kind:"network"`        | → profil caché (offline dur, wifi sans route, timeout)           |
+| `fetchProfile` échoue `notfound`/`config`/en ligne | → écran login (légitime, ré-auth/config possible)                |
+| Session expirée + offline (refresh impossible)     | → `getLastCachedProfile()` (appareil appairé → on garde l'accès) |
+| Déconnexion explicite                              | `logout()` purge le cache → mur login au prochain lancement      |
 
 **Contrainte refresh-token à cadrer côté Supabase.** Le JWT expire
 (~1 h) ; son refresh exige le réseau. Le **refresh token** a sa propre
@@ -157,7 +168,7 @@ refresh-token TTL Supabase reste recommandé en complément.
 
 **Risque accepté — falsification du cache.** Le profil en localStorage
 (`mediurg-profile-cache-v1`) est éditable côté client : un utilisateur
-averti peut forcer `role:"admin"` ou `status:"active"` pour *voir* la
+averti peut forcer `role:"admin"` ou `status:"active"` pour _voir_ la
 console admin / l'app hors-ligne. Impact limité et assumé :
 
 - toute **action serveur** (approuver, bannir…) passe par Supabase +

@@ -149,7 +149,8 @@ const NotesBackup = () => {
         <strong>Mes notes personnelles</strong>
         <span className="notes-backup-hint">
           Sauvegarde un fichier .json pour migrer entre téléphones ou avant un changement
-          d&apos;appareil.
+          d&apos;appareil. Ne pas saisir de nom, IPP, date de naissance ou autre donnée patient
+          nominative dans les notes.
         </span>
       </div>
       <div className="notes-backup-actions">

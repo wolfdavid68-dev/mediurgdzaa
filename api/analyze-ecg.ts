@@ -26,6 +26,10 @@ const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions";
 const MISTRAL_MODEL = "pixtral-12b-2409";
+const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 8;
 
 // Schéma exact attendu par EcgReader.tsx (résultats data-driven).
 const SYSTEM_PROMPT = `Tu es un outil d'AIDE À LA LECTURE d'ECG 12 dérivations pour des soignants d'urgence francophones. Tu n'es PAS un dispositif de diagnostic : tu décris ce qui est visible sur le tracé et tu restes prudent.
@@ -59,7 +63,12 @@ Règles :
 - N'invente jamais de valeurs précises si elles ne sont pas mesurables : mets null pour le champ concerné.
 - Reste factuel, en français, sans jamais affirmer un diagnostic de certitude.`;
 
-type VercelReq = { method?: string; body?: unknown };
+type VercelReq = {
+  method?: string;
+  body?: unknown;
+  headers?: Record<string, string | string[] | undefined>;
+  socket?: { remoteAddress?: string };
+};
 type VercelRes = {
   status: (code: number) => VercelRes;
   json: (body: unknown) => void;
@@ -72,10 +81,51 @@ type Attempt =
   | { ok: true; text: string }
   | { ok: false; retryable: boolean; status: number; error: string };
 
+type RateBucket = { start: number; count: number };
+const rateBuckets = new Map<string, RateBucket>();
+
+function getHeader(req: VercelReq, name: string): string | undefined {
+  const headers = req.headers;
+  if (!headers) return undefined;
+  const lower = name.toLowerCase();
+  for (const [k, v] of Object.entries(headers)) {
+    if (k.toLowerCase() !== lower) continue;
+    return Array.isArray(v) ? v[0] : v;
+  }
+  return undefined;
+}
+
+function getClientIp(req: VercelReq): string {
+  const forwarded = getHeader(req, "x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
+  return getHeader(req, "x-real-ip") || req.socket?.remoteAddress || "unknown";
+}
+
+function checkRateLimit(ip: string): { allowed: true } | { allowed: false; retryAfterSec: number } {
+  const now = Date.now();
+  const current = rateBuckets.get(ip);
+  if (!current || now - current.start > RATE_LIMIT_WINDOW_MS) {
+    rateBuckets.set(ip, { start: now, count: 1 });
+    return { allowed: true };
+  }
+  current.count += 1;
+  if (current.count <= RATE_LIMIT_MAX_REQUESTS) return { allowed: true };
+  return {
+    allowed: false,
+    retryAfterSec: Math.max(1, Math.ceil((RATE_LIMIT_WINDOW_MS - (now - current.start)) / 1000)),
+  };
+}
+
+function estimateBase64Bytes(b64: string): number {
+  const padding = b64.endsWith("==") ? 2 : b64.endsWith("=") ? 1 : 0;
+  return Math.floor((b64.length * 3) / 4) - padding;
+}
+
 // "data:image/jpeg;base64,XXXX" → { mime, b64 }
 function splitDataUrl(image: string): { mime: string; b64: string } | null {
-  const m = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(image);
+  const m = /^data:(image\/[a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/]+={0,2})$/.exec(image);
   if (!m) return null;
+  if (!ALLOWED_IMAGE_MIMES.has(m[1])) return null;
   return { mime: m[1], b64: m[2] };
 }
 
@@ -157,7 +207,10 @@ async function tryMistral(image: string): Promise<Attempt> {
 }
 
 export default async function handler(req: VercelReq, res: VercelRes) {
+  res.setHeader("Cache-Control", "no-store");
+
   if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
     res.status(405).json({ error: "Méthode non autorisée" });
     return;
   }
@@ -179,8 +232,26 @@ export default async function handler(req: VercelReq, res: VercelRes) {
   }
 
   const image = body?.image;
-  if (typeof image !== "string" || !image.startsWith("data:image/")) {
+  if (typeof image !== "string") {
     res.status(400).json({ error: "Image manquante ou format invalide" });
+    return;
+  }
+  const parts = splitDataUrl(image);
+  if (!parts) {
+    res.status(415).json({ error: "Format image non supporte (JPEG, PNG ou WebP uniquement)." });
+    return;
+  }
+  if (estimateBase64Bytes(parts.b64) > MAX_IMAGE_BYTES) {
+    res.status(413).json({ error: "Image trop volumineuse (2 Mo maximum apres compression)." });
+    return;
+  }
+
+  const rate = checkRateLimit(getClientIp(req));
+  if (!rate.allowed) {
+    res.setHeader("Retry-After", String(rate.retryAfterSec));
+    res
+      .status(429)
+      .json({ error: "Trop de demandes d'analyse. Reessayer dans quelques instants." });
     return;
   }
 
@@ -224,7 +295,6 @@ export default async function handler(req: VercelReq, res: VercelRes) {
     return;
   }
 
-  res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Ecg-Provider", usedFallback ? "mistral" : "gemini");
   res.status(200).json(parsed);
 }
