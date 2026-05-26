@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { getCurrentSession } from "../lib/auth";
 import { Ic, Disclaimer } from "./EcgReader.icons";
 import {
   anonymizeEcgImage,
@@ -77,13 +78,22 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
 
   const analyze = async () => {
     if (!photo) return;
+    const session = await getCurrentSession();
+    if (!session?.access_token) {
+      setErrMsg("Session expirée. Se reconnecter avant de relancer l'analyse ECG.");
+      setScreen("error");
+      return;
+    }
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     setScreen("loading");
     try {
       const resp = await fetch("/api/analyze-ecg", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ image: photo }),
         signal: ctrl.signal,
       });

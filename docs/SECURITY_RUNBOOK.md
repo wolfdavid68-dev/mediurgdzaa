@@ -11,6 +11,8 @@ un support de validation institutionnelle, voir aussi
 - Lancer `npm run typecheck`, `npm run lint`, `npm run knip`, `npm test`, puis `npm run build`.
 - Vérifier que `vercel.json` contient toujours les headers globaux : CSP, `nosniff`,
   `Referrer-Policy`, `Permissions-Policy`, HSTS et `frame-ancestors 'none'`.
+- Si le script bootstrap inline de `index.html` change, recalculer le hash `sha256-...` dans la
+  CSP (`script-src`) au même commit.
 - Vérifier qu'aucune variable secrète n'est préfixée `VITE_`.
 - Vérifier qu'aucune clé API réelle n'est suivie par Git : `.env.local`, `.env`, `.mcp.json`,
   `.claude/` et `.codex/` doivent rester ignorés.
@@ -149,6 +151,7 @@ le cache local ne doit jamais autoriser une mutation.
 ## API ECG
 
 - Les clés Gemini/Mistral restent côté Vercel, jamais en `VITE_`.
+- L'endpoint `/api/analyze-ecg` doit refuser toute requête sans session Supabase active.
 - Les images envoyées doivent être anonymisées côté client, puis contrôlées côté serveur.
 - L'API doit refuser les formats non image, les images trop lourdes et les rafales de requêtes.
 - Les réponses de l'API ECG doivent rester en `Cache-Control: no-store`.

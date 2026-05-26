@@ -17,6 +17,7 @@
 //
 // ⚠️ Contenu non-diagnostique : le prompt impose des disclaimers ; la
 // validation médicale obligatoire reste affichée côté UI (EcgReader.tsx).
+import { createClient } from "@supabase/supabase-js";
 
 // Le chemin Gemini → repli Mistral peut enchaîner deux appels réseau :
 // on relève le plafond (défaut Hobby = 10 s) pour éviter un timeout.
@@ -82,6 +83,8 @@ type Attempt =
   | { ok: false; retryable: boolean; status: number; error: string };
 
 type RateBucket = { start: number; count: number };
+type AuthCheck = { ok: true; userId: string } | { ok: false; status: number; error: string };
+
 const rateBuckets = new Map<string, RateBucket>();
 
 function getHeader(req: VercelReq, name: string): string | undefined {
@@ -114,6 +117,67 @@ function checkRateLimit(ip: string): { allowed: true } | { allowed: false; retry
     allowed: false,
     retryAfterSec: Math.max(1, Math.ceil((RATE_LIMIT_WINDOW_MS - (now - current.start)) / 1000)),
   };
+}
+
+function getSupabaseServerEnv(): { url: string; key: string } | null {
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY;
+  return url && key ? { url, key } : null;
+}
+
+function getBearerToken(req: VercelReq): string | null {
+  const auth = getHeader(req, "authorization");
+  const match = /^Bearer\s+(.+)$/i.exec(auth ?? "");
+  return match?.[1]?.trim() || null;
+}
+
+async function requireActiveSession(req: VercelReq): Promise<AuthCheck> {
+  const env = getSupabaseServerEnv();
+  if (!env) {
+    return {
+      ok: false,
+      status: 500,
+      error: "Authentification serveur non configurée pour l'analyse ECG.",
+    };
+  }
+
+  const token = getBearerToken(req);
+  if (!token) {
+    return { ok: false, status: 401, error: "Session requise pour analyser un ECG." };
+  }
+
+  const supabase = createClient(env.url, env.key, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+
+  const { data: userData, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !userData.user) {
+    return { ok: false, status: 401, error: "Session invalide ou expirée." };
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("status")
+    .eq("id", userData.user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    return {
+      ok: false,
+      status: 503,
+      error: "Vérification du profil indisponible. Réessayer dans quelques instants.",
+    };
+  }
+  if (!profile || profile.status !== "active") {
+    return { ok: false, status: 403, error: "Compte non autorisé pour l'analyse ECG." };
+  }
+
+  return { ok: true, userId: userData.user.id };
 }
 
 function estimateBase64Bytes(b64: string): number {
@@ -208,6 +272,8 @@ async function tryMistral(image: string): Promise<Attempt> {
 
 export default async function handler(req: VercelReq, res: VercelRes) {
   res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
 
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -220,6 +286,21 @@ export default async function handler(req: VercelReq, res: VercelRes) {
       error:
         "Service d'analyse non configuré (aucune clé API). Contacter l'administrateur MediURG.",
     });
+    return;
+  }
+
+  const rate = checkRateLimit(getClientIp(req));
+  if (!rate.allowed) {
+    res.setHeader("Retry-After", String(rate.retryAfterSec));
+    res
+      .status(429)
+      .json({ error: "Trop de demandes d'analyse. Reessayer dans quelques instants." });
+    return;
+  }
+
+  const auth = await requireActiveSession(req);
+  if (!auth.ok) {
+    res.status(auth.status).json({ error: auth.error });
     return;
   }
 
@@ -243,15 +324,6 @@ export default async function handler(req: VercelReq, res: VercelRes) {
   }
   if (estimateBase64Bytes(parts.b64) > MAX_IMAGE_BYTES) {
     res.status(413).json({ error: "Image trop volumineuse (2 Mo maximum apres compression)." });
-    return;
-  }
-
-  const rate = checkRateLimit(getClientIp(req));
-  if (!rate.allowed) {
-    res.setHeader("Retry-After", String(rate.retryAfterSec));
-    res
-      .status(429)
-      .json({ error: "Trop de demandes d'analyse. Reessayer dans quelques instants." });
     return;
   }
 
