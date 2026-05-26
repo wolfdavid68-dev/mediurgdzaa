@@ -47,6 +47,29 @@ create table if not exists public.profiles (
 create index if not exists profiles_status_idx on public.profiles (status);
 create index if not exists profiles_matricule_idx on public.profiles (matricule);
 
+-- Journal d'audit admin : trace les validations, refus, suspensions et
+-- rétablissements. On garde un snapshot du compte cible (matricule/email/nom)
+-- car un refus supprime ensuite la ligne `profiles`.
+create table if not exists public.admin_audit_events (
+  id                bigserial   primary key,
+  created_at        timestamptz not null default now(),
+  actor_id          uuid        not null references auth.users on delete restrict,
+  target_profile_id uuid        not null,
+  target_matricule  text        not null,
+  target_email      text        not null,
+  target_prenom     text        not null,
+  target_nom        text        not null,
+  action            text        not null check (action in ('approve', 'reject', 'ban', 'unban')),
+  reason            text
+);
+
+create index if not exists admin_audit_events_created_idx
+  on public.admin_audit_events (created_at desc);
+create index if not exists admin_audit_events_actor_idx
+  on public.admin_audit_events (actor_id);
+create index if not exists admin_audit_events_target_idx
+  on public.admin_audit_events (target_profile_id);
+
 -- ── Trigger : auto-création du profile au signup ────────────
 -- Le trigger lit `raw_user_meta_data` (envoyé par signUp({ data: {...} })
 -- côté client) et insère la ligne profile correspondante. Sans ça, un
@@ -103,6 +126,7 @@ $$;
 
 -- ── RLS sur profiles ────────────────────────────────────────
 alter table public.profiles enable row level security;
+alter table public.admin_audit_events enable row level security;
 
 -- Data API : ne jamais exposer `profiles` aux anonymes. La clé anon est
 -- publique dans le bundle JS ; le login passe uniquement par la fonction
@@ -112,12 +136,19 @@ revoke all on table public.profiles from anon;
 revoke all on table public.profiles from public;
 grant select, update, delete on table public.profiles to authenticated;
 
+revoke all on table public.admin_audit_events from anon;
+revoke all on table public.admin_audit_events from public;
+grant select, insert on table public.admin_audit_events to authenticated;
+grant usage, select on sequence public.admin_audit_events_id_seq to authenticated;
+
 -- Drop les anciennes policies pour ré-exécution propre
 drop policy if exists "self_read" on public.profiles;
 drop policy if exists "admin_read_all" on public.profiles;
 drop policy if exists "admin_update_all" on public.profiles;
 drop policy if exists "admin_delete" on public.profiles;
 drop policy if exists "no_direct_insert" on public.profiles;
+drop policy if exists "admin_audit_read" on public.admin_audit_events;
+drop policy if exists "admin_audit_insert" on public.admin_audit_events;
 
 -- Lecture : un user voit son propre profile
 create policy "self_read"
@@ -148,6 +179,19 @@ create policy "admin_delete"
 
 -- Pas d'insert direct depuis le client : l'insertion se fait uniquement
 -- via le trigger handle_new_user() qui s'exécute en security definer.
+
+-- Audit admin : seuls les admins actifs peuvent lire/écrire le journal.
+-- L'acteur doit être l'utilisateur connecté pour empêcher une usurpation
+-- côté client.
+create policy "admin_audit_read"
+  on public.admin_audit_events for select
+  to authenticated
+  using (public.is_admin());
+
+create policy "admin_audit_insert"
+  on public.admin_audit_events for insert
+  to authenticated
+  with check (public.is_admin() and actor_id = (select auth.uid()));
 
 -- ── Résolution matricule → email pour le login ──────────────
 -- Le client login envoie un matricule, Supabase Auth attend un email :

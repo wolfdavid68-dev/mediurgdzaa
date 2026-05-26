@@ -9,12 +9,13 @@ import { BAN_REASONS } from "./authConstants";
 // Logique partagée avec MobileAdminDashboard via useAdminProfiles.
 
 type Props = {
+  currentUserId: string;
   currentUserName: string;
   onLogout: () => void;
   onExitAdmin: () => void; // retour à la vue user normale
 };
 
-const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
+const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin }: Props) => {
   const {
     tab,
     setTab,
@@ -30,7 +31,7 @@ const AdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
     ban,
     unban: onUnban,
     handleLogout,
-  } = useAdminProfiles(onLogout);
+  } = useAdminProfiles(onLogout, currentUserId);
   const [banReason, setBanReason] = useState<string>(BAN_REASONS[0]);
 
   const onBan = (p: Profile) => ban(p, banReason);

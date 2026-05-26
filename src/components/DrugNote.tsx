@@ -56,11 +56,15 @@ const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
         </div>
         {noteSaved && <span className="note-saved">✓ Enregistré</span>}
       </div>
+      <div className="poso-note-warning" role="note">
+        Notes locales uniquement : ne saisir aucune identité patient, IPP, date de naissance ou
+        donnée nominative.
+      </div>
       <textarea
         className="poso-note-textarea"
         value={note}
         onChange={handleNoteChange}
-        placeholder="Ajoutez une remarque, protocole local, rappel personnel…"
+        placeholder="Remarque locale sans donnée patient nominative…"
         rows={3}
       />
     </div>

@@ -926,6 +926,23 @@
   animation: fadeIn 0.2s ease;
 }
 
+.poso-note-warning {
+  margin-bottom: 8px;
+  padding: 7px 9px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 6px;
+  background: rgba(251, 191, 36, 0.09);
+  color: #fbbf24;
+  font-size: clamp(11px, 1.15vw, 12px);
+  line-height: 1.4;
+}
+
+[data-theme="light"] .poso-note-warning {
+  color: #92400e;
+  background: rgba(251, 191, 36, 0.13);
+  border-color: rgba(180, 83, 9, 0.28);
+}
+
 .poso-note-textarea {
   width: 100%;
   min-height: 70px;

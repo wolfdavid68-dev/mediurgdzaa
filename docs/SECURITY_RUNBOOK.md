@@ -28,6 +28,8 @@ un support de validation institutionnelle, voir aussi
 Vérifié en production le 26 mai 2026 via le SQL Editor Supabase.
 
 - `public.profiles` : RLS active (`rowsecurity = true`).
+- `public.admin_audit_events` : RLS active (`rowsecurity = true`) si le journal admin a été
+  déployé.
 - Policies finales sur `public.profiles` : `self_read`, `admin_read_all`, `admin_update_all`,
   `admin_delete`.
 - Aucune policy `anon` ou `public` sur `public.profiles`.
@@ -63,6 +65,7 @@ order by tablename;
 ```
 
 Attendu pour MediURG : `public.profiles` avec `rowsecurity = true`.
+Si l'audit admin est déployé : `public.admin_audit_events` avec `rowsecurity = true`.
 
 ```sql
 select grantee, privilege_type
@@ -74,6 +77,8 @@ order by grantee, privilege_type;
 
 Attendu : aucun accès direct `anon` à `profiles`. Le rôle `authenticated` peut avoir les droits
 nécessaires, filtrés ensuite par RLS.
+Pour `admin_audit_events` : aucun accès `anon` ; `authenticated` limité à `SELECT`/`INSERT`, filtré
+par RLS admin.
 
 ```sql
 select policyname, cmd, roles, qual, with_check
@@ -85,6 +90,8 @@ order by policyname;
 
 Attendu : lecture de son propre profil, lecture admin, update admin, delete admin. Pas de policy
 de lecture anonyme.
+Pour `admin_audit_events` : lecture admin et insertion admin uniquement, avec `actor_id =
+auth.uid()`.
 
 ### 3. Fonctions privilégiées
 

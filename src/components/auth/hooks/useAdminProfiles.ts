@@ -31,7 +31,7 @@ const sortProfilesForAdmin = (profiles: Profile[]): Profile[] =>
     });
   });
 
-export const useAdminProfiles = (onLogout: () => void) => {
+export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) => {
   const [tab, setTab] = useState<AdminTab>("pending");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
@@ -91,13 +91,23 @@ export const useAdminProfiles = (onLogout: () => void) => {
   };
 
   const approve = (p: Profile) =>
-    runAction(p, () => approveProfile(p.id), "ok", `${p.prenom} ${p.nom} approuvé(e)`);
+    runAction(p, () => approveProfile(p, currentAdminId), "ok", `${p.prenom} ${p.nom} approuvé(e)`);
   const reject = (p: Profile) =>
-    runAction(p, () => rejectProfile(p.id), "warn", `Demande de ${p.prenom} ${p.nom} refusée`);
+    runAction(
+      p,
+      () => rejectProfile(p, currentAdminId),
+      "warn",
+      `Demande de ${p.prenom} ${p.nom} refusée`
+    );
   const ban = (p: Profile, reason: string) =>
-    runAction(p, () => banProfile(p.id, reason), "warn", `${p.prenom} ${p.nom} suspendu(e)`);
+    runAction(
+      p,
+      () => banProfile(p, reason, currentAdminId),
+      "warn",
+      `${p.prenom} ${p.nom} suspendu(e)`
+    );
   const unban = (p: Profile) =>
-    runAction(p, () => unbanProfile(p.id), "ok", `${p.prenom} ${p.nom} rétabli(e)`);
+    runAction(p, () => unbanProfile(p, currentAdminId), "ok", `${p.prenom} ${p.nom} rétabli(e)`);
 
   const handleLogout = async () => {
     // onLogout DOIT s'exécuter même si logout() échoue (sinon « clic sur

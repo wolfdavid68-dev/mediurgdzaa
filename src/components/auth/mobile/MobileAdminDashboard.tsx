@@ -30,12 +30,13 @@ const initials = (p: Profile) => `${p.prenom[0] ?? ""}${p.nom[0] ?? ""}`.toUpper
 const frDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("fr-FR") : "—");
 
 type Props = {
+  currentUserId: string;
   currentUserName: string;
   onLogout: () => void;
   onExitAdmin: () => void;
 };
 
-const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props) => {
+const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin }: Props) => {
   const {
     tab,
     setTab,
@@ -52,7 +53,7 @@ const MobileAdminDashboard = ({ currentUserName, onLogout, onExitAdmin }: Props)
     ban: onBan,
     unban: onUnban,
     handleLogout,
-  } = useAdminProfiles(onLogout);
+  } = useAdminProfiles(onLogout, currentUserId);
   const [query, setQuery] = useState("");
 
   const q = query.trim().toLowerCase();

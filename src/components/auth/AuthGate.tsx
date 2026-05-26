@@ -258,6 +258,7 @@ const AuthGate = ({ children }: Props) => {
   // Active : si admin et showAdmin → console, sinon → app normale
   if (hasAdminAccess(profile) && showAdmin) {
     const adminProps = {
+      currentUserId: profile.id,
       currentUserName: `${profile.prenom} ${profile.nom}`,
       onLogout: () => setProfile(null),
       onExitAdmin: () => setShowAdmin(false),

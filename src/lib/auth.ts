@@ -32,6 +32,9 @@ export type Profile = {
   ban_reason: string | null;
 };
 
+type AdminAuditAction = "approve" | "reject" | "ban" | "unban";
+type AdminAuditTarget = Pick<Profile, "id" | "matricule" | "email" | "prenom" | "nom">;
+
 export type SignupPayload = {
   matricule: string;
   email: string;
@@ -365,7 +368,32 @@ export const fetchProfilesByStatus = async (
   return { ok: true, data: (data ?? []) as Profile[] };
 };
 
-export const approveProfile = async (profileId: string): Promise<AuthResult> => {
+const logAdminAction = async (
+  actorId: string,
+  target: AdminAuditTarget,
+  action: AdminAuditAction,
+  reason?: string
+): Promise<void> => {
+  const supabase = getSupabase();
+  if (!supabase) return;
+  try {
+    await supabase.from("admin_audit_events").insert({
+      actor_id: actorId,
+      target_profile_id: target.id,
+      target_matricule: target.matricule,
+      target_email: target.email,
+      target_prenom: target.prenom,
+      target_nom: target.nom,
+      action,
+      reason: reason || null,
+    });
+  } catch {
+    // Best-effort : l'audit ne doit pas bloquer une action urgente si la table
+    // n'a pas encore été déployée ou si le réseau tombe après la mutation.
+  }
+};
+
+export const approveProfile = async (profile: Profile, actorId: string): Promise<AuthResult> => {
   const supabase = getSupabase();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   const { error } = await supabase
@@ -373,23 +401,30 @@ export const approveProfile = async (profileId: string): Promise<AuthResult> => 
     .update({
       status: "active",
       approved_at: new Date().toISOString(),
+      approved_by: actorId,
     })
-    .eq("id", profileId);
+    .eq("id", profile.id);
   if (error) return { ok: false, error: humanizeError(error.message) };
+  await logAdminAction(actorId, profile, "approve");
   return { ok: true, data: undefined };
 };
 
-export const rejectProfile = async (profileId: string): Promise<AuthResult> => {
+export const rejectProfile = async (profile: Profile, actorId: string): Promise<AuthResult> => {
   const supabase = getSupabase();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   // Reject = on supprime le profile (l'auth.user reste mais sans profile,
   // il ne peut plus se login car matricule_to_email ne le trouve plus).
-  const { error } = await supabase.from("profiles").delete().eq("id", profileId);
+  const { error } = await supabase.from("profiles").delete().eq("id", profile.id);
   if (error) return { ok: false, error: humanizeError(error.message) };
+  await logAdminAction(actorId, profile, "reject");
   return { ok: true, data: undefined };
 };
 
-export const banProfile = async (profileId: string, reason: string): Promise<AuthResult> => {
+export const banProfile = async (
+  profile: Profile,
+  reason: string,
+  actorId: string
+): Promise<AuthResult> => {
   const supabase = getSupabase();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   const { error } = await supabase
@@ -399,12 +434,13 @@ export const banProfile = async (profileId: string, reason: string): Promise<Aut
       banned_at: new Date().toISOString(),
       ban_reason: reason,
     })
-    .eq("id", profileId);
+    .eq("id", profile.id);
   if (error) return { ok: false, error: humanizeError(error.message) };
+  await logAdminAction(actorId, profile, "ban", reason);
   return { ok: true, data: undefined };
 };
 
-export const unbanProfile = async (profileId: string): Promise<AuthResult> => {
+export const unbanProfile = async (profile: Profile, actorId: string): Promise<AuthResult> => {
   const supabase = getSupabase();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   const { error } = await supabase
@@ -414,8 +450,9 @@ export const unbanProfile = async (profileId: string): Promise<AuthResult> => {
       banned_at: null,
       ban_reason: null,
     })
-    .eq("id", profileId);
+    .eq("id", profile.id);
   if (error) return { ok: false, error: humanizeError(error.message) };
+  await logAdminAction(actorId, profile, "unban");
   return { ok: true, data: undefined };
 };
 

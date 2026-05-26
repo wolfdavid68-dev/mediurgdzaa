@@ -23,7 +23,12 @@ describe("MobileAdminDashboard — dedup fetch au montage", () => {
 
   test("un seul fetch (pending) au montage, pas de double appel", async () => {
     render(
-      <MobileAdminDashboard currentUserName="Admin Test" onLogout={vi.fn()} onExitAdmin={vi.fn()} />
+      <MobileAdminDashboard
+        currentUserId="admin-1"
+        currentUserName="Admin Test"
+        onLogout={vi.fn()}
+        onExitAdmin={vi.fn()}
+      />
     );
     await waitFor(() => expect(fetchProfilesByStatus).toHaveBeenCalled());
     // Laisse les promesses/effets se stabiliser pour détecter un 2e appel.
@@ -39,6 +44,7 @@ describe("MobileAdminDashboard — dedup fetch au montage", () => {
     const onLogout = vi.fn();
     render(
       <MobileAdminDashboard
+        currentUserId="admin-1"
         currentUserName="Admin Test"
         onLogout={onLogout}
         onExitAdmin={vi.fn()}
