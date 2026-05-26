@@ -1,7 +1,9 @@
 # Runbook sécurité MediURG
 
 Ce document complète [`AUTH_SETUP.md`](./AUTH_SETUP.md). Il sert de checklist courte avant
-déploiement et de procédure d'audit périodique pour la PWA, Supabase et les données locales.
+déploiement et de procédure d'audit périodique pour la PWA, Supabase et les données locales. Pour
+un support de validation institutionnelle, voir aussi
+[`DOSSIER_SECURITE_DPO_RSSI.md`](./DOSSIER_SECURITE_DPO_RSSI.md).
 
 ## Avant chaque mise en production
 
