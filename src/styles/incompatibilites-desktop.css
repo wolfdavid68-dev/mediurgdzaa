@@ -1,0 +1,67 @@
+/* ============================================================
+   Incompatibilités — layout desktop
+   Prevent the drug picker from overflowing over the selected-drug
+   card on wide screens. Desktop gets a stable left panel + scrollable
+   picker grid, while mobile keeps the original horizontal picker.
+   ============================================================ */
+
+@media (min-width: 760px) {
+  .incompat-focus-view {
+    grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .incompat-focus-side {
+    align-self: start;
+    position: sticky;
+    top: calc(var(--test-banner-h, 0px) + 96px);
+  }
+
+  .incompat-drug-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 7px;
+    max-height: min(42vh, 360px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    align-content: start;
+    scrollbar-width: thin;
+  }
+
+  .incompat-drug-picker button {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .incompat-drug-picker button span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .incompat-focus-card {
+    margin-top: 0;
+  }
+}
+
+@media (min-width: 1040px) {
+  .incompat-focus-view {
+    grid-template-columns: minmax(380px, 460px) minmax(0, 1fr);
+  }
+
+  .incompat-relations-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .incompat-focus-view {
+    grid-template-columns: minmax(430px, 500px) minmax(0, 1fr);
+  }
+
+  .incompat-drug-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
