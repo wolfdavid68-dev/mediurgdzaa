@@ -526,14 +526,15 @@
 }
 .ktc-line-head strong {
   display: block;
-  color: var(--text);
+  color: #fff;
   font-size: 0.88rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 .ktc-line-label {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: var(--text-mute);
+  color: rgba(255, 255, 255, 0.78);
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -558,16 +559,15 @@
 .ktc-line-mount {
   width: fit-content;
   padding: 3px 7px;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  border: 1px solid currentColor;
   border-radius: 6px;
   font-size: 0.72rem;
   font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 .ktc-line-note {
   margin: 0;
-  color: var(--text-dim);
+  color: rgba(255, 255, 255, 0.84);
   font-size: 0.76rem;
   line-height: 1.35;
 }
@@ -577,7 +577,7 @@
   gap: 6px;
 }
 .ktc-line-empty {
-  color: var(--text-mute);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 0.78rem;
 }
 .ktc-line-chip {

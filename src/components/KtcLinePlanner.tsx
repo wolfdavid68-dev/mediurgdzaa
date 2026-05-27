@@ -364,10 +364,9 @@ const KtcLinePlanner = () => {
               <div
                 className="ktc-line-mount"
                 style={{
-                  background:
-                    line.id === "proximale" ? "rgba(148, 163, 184, 0.14)" : `${line.couleur}1f`,
+                  background: line.id === "proximale" ? "rgba(248, 250, 252, 0.22)" : line.couleur,
                   borderColor: line.couleur,
-                  color: line.id === "proximale" ? "var(--text)" : line.couleur,
+                  color: "#fff",
                 }}
               >
                 {line.montage}
