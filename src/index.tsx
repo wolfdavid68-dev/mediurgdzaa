@@ -15,6 +15,7 @@ import "./styles/protocols.css";
 import "./styles/drug-related.css";
 import "./styles/echelles.css";
 import "./styles/kits.css";
+import "./styles/kit-icon-fallback.css";
 import "./styles/incompatibilites.css";
 import "./styles/incompatibilites-desktop.css";
 import "./styles/ci-severity.css";
