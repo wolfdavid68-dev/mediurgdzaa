@@ -20,6 +20,7 @@ import "./styles/ci-severity.css";
 import "./styles/font-large.css";
 import "./styles/changelog.css";
 import "./styles/urgence-button.css";
+import "./styles/bottom-nav-safe-area.css";
 // Sous-fichiers de l'ancien acr.css (2071 lignes) — découpés par sous-composant
 // d'AcrTimer.parts.tsx. L'ordre suit la cascade originale.
 import "./styles/acr-base.css";
