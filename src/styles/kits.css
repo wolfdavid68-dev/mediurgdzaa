@@ -530,11 +530,20 @@
   font-size: 0.88rem;
 }
 .ktc-line-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   color: var(--text-mute);
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+.ktc-line-label-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
 }
 .ktc-line-status {
   flex: 0 0 auto;
@@ -652,20 +661,6 @@
   color: var(--text-dim);
   text-align: right;
 }
-.ktc-lines-footer {
-  padding: 10px;
-  color: var(--text-dim);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 0.78rem;
-  line-height: 1.45;
-}
-.ktc-lines-footer strong,
-.ktc-lines-footer span {
-  color: var(--text);
-}
-
 @media (max-width: 760px) {
   .ktc-lines-grid {
     grid-template-columns: 1fr;

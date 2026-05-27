@@ -35,6 +35,8 @@ const LINE_META: Array<{
   montage: string;
   role: string;
   note: string;
+  couleur: string;
+  fond: string;
 }> = [
   {
     id: "proximale",
@@ -42,6 +44,8 @@ const LINE_META: Array<{
     montage: "OCTOPUS 4 voies",
     role: "Amines / PSE continus",
     note: "Priorité aux amines et PSE hémodynamiques compatibles.",
+    couleur: "#f8fafc",
+    fond: "rgba(248, 250, 252, 0.16)",
   },
   {
     id: "mediane2",
@@ -49,6 +53,8 @@ const LINE_META: Array<{
     montage: "OCTOPUS 2 voies",
     role: "Sédation / analgésie",
     note: "Deuxième rampe pour les perfusions continues compatibles.",
+    couleur: "#0891b2",
+    fond: "rgba(8, 145, 178, 0.18)",
   },
   {
     id: "distale",
@@ -56,6 +62,8 @@ const LINE_META: Array<{
     montage: "Ligne dédiée",
     role: "Voie dédiée / secours",
     note: "À préserver si une perfusion doit rester isolée ou si une voie libre est nécessaire.",
+    couleur: "#ef4444",
+    fond: "rgba(239, 68, 68, 0.16)",
   },
   {
     id: "mediane1",
@@ -63,6 +71,8 @@ const LINE_META: Array<{
     montage: "Remplissage / transfusion · IVD / miniflac",
     role: "Remplissage / transfusion / antibiotiques",
     note: "Transfusion, remplissage, antibiotiques et traitements courts sur cette section, avec rinçage avant/après.",
+    couleur: "#374151",
+    fond: "rgba(55, 65, 81, 0.22)",
   },
 ];
 
@@ -335,16 +345,33 @@ const KtcLinePlanner = () => {
               : "Compatible";
 
           return (
-            <section key={line.id} className={`ktc-line ${statusClass}`}>
+            <section
+              key={line.id}
+              className={`ktc-line ${statusClass}`}
+              style={{ background: line.fond, borderColor: line.couleur }}
+            >
               <div className="ktc-line-head">
                 <div>
-                  <span className="ktc-line-label">{line.label}</span>
+                  <span className="ktc-line-label">
+                    <span className="ktc-line-label-dot" style={{ background: line.couleur }} />
+                    {line.label}
+                  </span>
                   <strong>{line.role}</strong>
                 </div>
                 <span className="ktc-line-status">{statusText}</span>
               </div>
 
-              <div className="ktc-line-mount">{line.montage}</div>
+              <div
+                className="ktc-line-mount"
+                style={{
+                  background:
+                    line.id === "proximale" ? "rgba(148, 163, 184, 0.14)" : `${line.couleur}1f`,
+                  borderColor: line.couleur,
+                  color: line.id === "proximale" ? "var(--text)" : line.couleur,
+                }}
+              >
+                {line.montage}
+              </div>
               <p className="ktc-line-note">{line.note}</p>
 
               <div className="ktc-line-drugs">
@@ -396,12 +423,6 @@ const KtcLinePlanner = () => {
           ))}
         </div>
       )}
-
-      <div className="ktc-lines-footer">
-        <strong>Où je le placerais :</strong> dans le kit KTC, onglet <span>Lignes</span>, juste à
-        côté de <span>Schéma</span>. En pratique l'utilisateur voit le montage officiel, puis
-        vérifie immédiatement où brancher les médicaments.
-      </div>
     </div>
   );
 };
