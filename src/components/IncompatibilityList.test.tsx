@@ -42,9 +42,9 @@ describe("IncompatibilityList", () => {
 
   test("affiche les noms de drogues en en-tête de ligne", () => {
     render(<IncompatibilityList />);
-    expect(screen.getByText("DrugA")).toBeInTheDocument();
-    expect(screen.getByText("DrugB")).toBeInTheDocument();
-    expect(screen.getByText("DrugC")).toBeInTheDocument();
+    expect(screen.getAllByText("DrugA").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("DrugB").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("DrugC").length).toBeGreaterThan(0);
   });
 
   test("aucun détail affiché tant qu'on ne clique pas sur une cellule", () => {
