@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
+import { normalize } from "../lib/normalize";
 
 type RelationType = "compatible" | "incompatible" | "pH" | "unknown";
 
@@ -28,6 +29,20 @@ const CUSTOM_LINE_ITEMS: IncompatDrug[] = [
   },
 ];
 const SELECTABLE_ITEMS = [...CUSTOM_LINE_ITEMS, ...DRUGS_INCOMPAT];
+
+const DRUG_DISPLAY_OVERRIDES: Record<string, string> = {
+  "Norépinéphrine (Noradrénaline®)": "Noradrénaline",
+};
+
+const DRUG_SEARCH_ALIASES: Record<string, string[]> = {
+  "Norépinéphrine (Noradrénaline®)": [
+    "noradrénaline",
+    "noradrenaline",
+    "norépinéphrine",
+    "norepinephrine",
+  ],
+  "Furosémide (Lasilix®)": ["furosémide", "furosemide", "lasilix", "l'asile", "l asile", "lasile"],
+};
 
 const LINE_META: Array<{
   id: LineId;
@@ -87,10 +102,28 @@ const ANTIBIOTIC_PATTERNS =
   /(amoxicilline|aztreonam|aztréonam|cef|céf|cefta|céfta|cefox|céfox|cloxacilline|meropenem|meronem|penicilline|piperacilline|tazobactam|sulbactam|ampicilline|temocilline|témocilline|vancomycine)/i;
 
 const normalizeSearch = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
+  normalize(value)
+    .replace(/®/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const getDrugDisplayName = (drug: string) => DRUG_DISPLAY_OVERRIDES[drug] || drug;
+
+const getDrugSearchText = (entry: IncompatDrug) =>
+  normalizeSearch(
+    [
+      entry.drug,
+      entry.short,
+      getDrugDisplayName(entry.drug),
+      ...(DRUG_SEARCH_ALIASES[entry.drug] || []),
+    ].join(" ")
+  );
+
+const matchesDrugSearch = (entry: IncompatDrug, query: string) => {
+  const q = normalizeSearch(query);
+  if (!q) return true;
+  return getDrugSearchText(entry).includes(q);
+};
 
 const getDrug = (name: string) => SELECTABLE_ITEMS.find((entry) => entry.drug === name);
 
@@ -259,11 +292,7 @@ const KtcLinePlanner = () => {
     setSelectedDrugs((current) => current.filter((name) => name !== drug));
   };
 
-  const searchTerm = normalizeSearch(drugSearch.trim());
-  const filteredDrugs = SELECTABLE_ITEMS.filter((entry) => {
-    const haystack = normalizeSearch(`${entry.drug} ${entry.short}`);
-    return haystack.includes(searchTerm);
-  })
+  const filteredDrugs = SELECTABLE_ITEMS.filter((entry) => matchesDrugSearch(entry, drugSearch))
     .filter((entry) => !selectedDrugs.includes(entry.drug))
     .slice(0, 14);
   const proposal = buildProposal(selectedDrugs);
@@ -297,13 +326,13 @@ const KtcLinePlanner = () => {
           id="ktc-drug-search"
           value={drugSearch}
           onChange={(event) => setDrugSearch(event.target.value)}
-          placeholder="Noradrénaline, Hypnovel, Lasilix..."
+          placeholder="Noradrénaline, furosemide, Lasilix..."
         />
         <div className="ktc-picker-results">
           {filteredDrugs.map((entry) => (
             <button key={entry.drug} type="button" onClick={() => addDrug(entry.drug)}>
               <span style={{ background: entry.color }} />
-              {entry.drug}
+              {getDrugDisplayName(entry.drug)}
             </button>
           ))}
         </div>
@@ -318,7 +347,7 @@ const KtcLinePlanner = () => {
             return (
               <button key={drug} type="button" onClick={() => removeDrug(drug)}>
                 <span style={{ background: entry?.color || "#64748b" }} />
-                {entry?.short || drug}
+                {getDrugDisplayName(entry?.drug || drug)}
                 <strong>×</strong>
               </button>
             );
@@ -385,7 +414,7 @@ const KtcLinePlanner = () => {
                           className="ktc-line-dot"
                           style={{ background: entry?.color || "#64748b" }}
                         />
-                        {entry?.short || drug}
+                        {getDrugDisplayName(entry?.drug || drug)}
                         {entry?.exclusif && <em>voie dédiée</em>}
                       </span>
                     );
@@ -399,8 +428,8 @@ const KtcLinePlanner = () => {
                     <div key={`${relation.a}-${relation.b}`} className={`ktc-rel-${relation.type}`}>
                       <strong>{relationLabel[relation.type]}</strong>
                       <span>
-                        {getDrug(relation.a)?.short || relation.a} +{" "}
-                        {getDrug(relation.b)?.short || relation.b}
+                        {getDrugDisplayName(getDrug(relation.a)?.drug || relation.a)} +{" "}
+                        {getDrugDisplayName(getDrug(relation.b)?.drug || relation.b)}
                       </span>
                     </div>
                   ))}
@@ -416,7 +445,7 @@ const KtcLinePlanner = () => {
           <strong>À isoler / revalider</strong>
           {proposal.unplaced.map((item) => (
             <div key={item.drug}>
-              <span>{getDrug(item.drug)?.short || item.drug}</span>
+              <span>{getDrugDisplayName(getDrug(item.drug)?.drug || item.drug)}</span>
               <p>{item.reason}</p>
             </div>
           ))}
