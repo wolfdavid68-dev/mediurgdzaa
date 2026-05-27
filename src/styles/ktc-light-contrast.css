@@ -1,0 +1,105 @@
+/* ============================================================
+   KTC line planner — light theme readability
+   The line cards use colored inline backgrounds shared with dark mode.
+   In light mode, keep the clinical grouping but force readable text,
+   cards and badges.
+   ============================================================ */
+
+[data-theme="light"] .ktc-lines-intro,
+[data-theme="light"] .ktc-lines-kicker,
+[data-theme="light"] .ktc-picker label {
+  color: var(--text-dim);
+}
+
+[data-theme="light"] .ktc-picker {
+  background: #ffffff;
+  border-color: #cfd5e4;
+}
+
+[data-theme="light"] .ktc-picker input {
+  background: #f8fafc;
+  border-color: #b8c0d2;
+  color: #111827;
+}
+
+[data-theme="light"] .ktc-picker-results button,
+[data-theme="light"] .ktc-selected button {
+  background: #ffffff;
+  border-color: #cfd5e4;
+  color: #111827;
+}
+
+[data-theme="light"] .ktc-selected > span {
+  color: #475569;
+}
+
+[data-theme="light"] .ktc-line {
+  background: #ffffff !important;
+  border-color: #cfd5e4 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .ktc-line-ok {
+  border-left-color: #16a34a !important;
+}
+
+[data-theme="light"] .ktc-line-watch {
+  border-left-color: #f59e0b !important;
+}
+
+[data-theme="light"] .ktc-line-danger {
+  border-left-color: #dc2626 !important;
+}
+
+[data-theme="light"] .ktc-line-head strong {
+  color: #111827;
+  text-shadow: none;
+}
+
+[data-theme="light"] .ktc-line-label {
+  color: #334155;
+}
+
+[data-theme="light"] .ktc-line-label-dot {
+  border-color: #94a3b8;
+}
+
+[data-theme="light"] .ktc-line-status {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #111827;
+}
+
+[data-theme="light"] .ktc-line-mount {
+  background: #334155 !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+  text-shadow: none;
+}
+
+[data-theme="light"] .ktc-line-note,
+[data-theme="light"] .ktc-line-empty {
+  color: #475569;
+}
+
+[data-theme="light"] .ktc-line-chip {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #111827;
+}
+
+[data-theme="light"] .ktc-rel-compatible {
+  color: #14532d;
+  background: rgba(22, 163, 74, 0.12);
+}
+
+[data-theme="light"] .ktc-rel-pH,
+[data-theme="light"] .ktc-rel-unknown {
+  color: #7c2d12;
+  background: rgba(245, 158, 11, 0.18);
+}
+
+[data-theme="light"] .ktc-rel-incompatible {
+  color: #7f1d1d;
+  background: rgba(220, 38, 38, 0.14);
+}
