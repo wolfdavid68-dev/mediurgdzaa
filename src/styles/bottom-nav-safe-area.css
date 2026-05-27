@@ -1,0 +1,21 @@
+/* ============================================================
+   Bottom navigation safe area
+   Keep the last medication/protocol content reachable above the
+   fixed bottom navigation, including the version badge and mobile
+   safe-area inset.
+   ============================================================ */
+
+:root {
+  --bottom-nav-clearance: 112px;
+}
+
+.main-content {
+  padding-bottom: calc(var(--bottom-nav-clearance) + var(--safe-bottom));
+  scroll-padding-bottom: calc(var(--bottom-nav-clearance) + var(--safe-bottom));
+}
+
+@media (max-width: 480px) {
+  :root {
+    --bottom-nav-clearance: 120px;
+  }
+}
