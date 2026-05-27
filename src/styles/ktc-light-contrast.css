@@ -1,8 +1,8 @@
 /* ============================================================
    KTC line planner — light theme readability
-   The line cards use colored inline backgrounds shared with dark mode.
-   In light mode, keep the clinical grouping but force readable text,
-   cards and badges.
+   Keep the same clinical color blocks in light and dark mode, but
+   switch text/badges to light-mode contrast where the dark-mode text
+   was white-on-pale.
    ============================================================ */
 
 [data-theme="light"] .ktc-lines-intro,
@@ -12,45 +12,28 @@
 }
 
 [data-theme="light"] .ktc-picker {
-  background: #ffffff;
-  border-color: #cfd5e4;
+  background: color-mix(in srgb, var(--card) 86%, var(--bg));
+  border-color: var(--border);
 }
 
 [data-theme="light"] .ktc-picker input {
-  background: #f8fafc;
-  border-color: #b8c0d2;
-  color: #111827;
+  background: var(--bg);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 
 [data-theme="light"] .ktc-picker-results button,
 [data-theme="light"] .ktc-selected button {
-  background: #ffffff;
-  border-color: #cfd5e4;
-  color: #111827;
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text);
 }
 
 [data-theme="light"] .ktc-selected > span {
-  color: #475569;
+  color: var(--text-mute);
 }
 
-[data-theme="light"] .ktc-line {
-  background: #ffffff !important;
-  border-color: #cfd5e4 !important;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
-}
-
-[data-theme="light"] .ktc-line-ok {
-  border-left-color: #16a34a !important;
-}
-
-[data-theme="light"] .ktc-line-watch {
-  border-left-color: #f59e0b !important;
-}
-
-[data-theme="light"] .ktc-line-danger {
-  border-left-color: #dc2626 !important;
-}
-
+/* Garde les fonds inline originaux des lignes ; seuls les textes changent. */
 [data-theme="light"] .ktc-line-head strong {
   color: #111827;
   text-shadow: none;
@@ -65,16 +48,19 @@
 }
 
 [data-theme="light"] .ktc-line-status {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(148, 163, 184, 0.8);
   color: #111827;
 }
 
 [data-theme="light"] .ktc-line-mount {
-  background: #334155 !important;
-  border-color: #334155 !important;
-  color: #ffffff !important;
   text-shadow: none;
+}
+
+/* La ligne proximale utilise un montage très clair : texte foncé uniquement ici. */
+[data-theme="light"] .ktc-lines-grid .ktc-line:nth-child(1) .ktc-line-mount {
+  color: #111827 !important;
+  border-color: #94a3b8 !important;
 }
 
 [data-theme="light"] .ktc-line-note,
@@ -83,8 +69,8 @@
 }
 
 [data-theme="light"] .ktc-line-chip {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(148, 163, 184, 0.7);
   color: #111827;
 }
 
