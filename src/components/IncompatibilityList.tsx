@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
+import { normalize } from "../lib/normalize";
 
 const TYPE_META = {
   incompatible: { label: "Incompatible", short: "✕", color: "#dc2626" },
   pH: { label: "Compatible — vigilance pH", short: "pH", color: "#16a34a" },
   compatible: { label: "Compatible validé", short: "✓", color: "#16a34a" },
   unknown: { label: "Non renseigné", short: "?", color: "#64748b" },
+};
+
+const DRUG_DISPLAY_OVERRIDES: Record<string, string> = {
+  "Norépinéphrine (Noradrénaline®)": "Noradrénaline",
+};
+
+const DRUG_SEARCH_ALIASES: Record<string, string[]> = {
+  "Norépinéphrine (Noradrénaline®)": [
+    "noradrénaline",
+    "noradrenaline",
+    "norépinéphrine",
+    "norepinephrine",
+  ],
+  "Furosémide (Lasilix®)": ["furosémide", "furosemide", "lasilix", "l'asile", "l asile", "lasile"],
 };
 
 type CellInfo = { type: string; note: string };
@@ -24,6 +39,30 @@ type IncompatDrug = {
 };
 
 const DRUGS_INCOMPAT = INCOMPATIBILITIES as IncompatDrug[];
+
+const normalizeSearch = (value: string) =>
+  normalize(value)
+    .replace(/®/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const getDrugDisplayName = (drug: string) => DRUG_DISPLAY_OVERRIDES[drug] || drug;
+
+const getDrugSearchText = (entry: IncompatDrug) =>
+  normalizeSearch(
+    [
+      entry.drug,
+      entry.short,
+      getDrugDisplayName(entry.drug),
+      ...(DRUG_SEARCH_ALIASES[entry.drug] || []),
+    ].join(" ")
+  );
+
+const matchesDrugSearch = (entry: IncompatDrug, query: string) => {
+  const q = normalizeSearch(query);
+  if (!q) return true;
+  return getDrugSearchText(entry).includes(q);
+};
 
 const buildMatrix = () => {
   const incomp: Matrix = {};
@@ -71,9 +110,7 @@ const IncompatibilityList = () => {
   const [compareB, setCompareB] = useState(secondDrug);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
-  const filteredDrugs = DRUGS_INCOMPAT.filter((entry) =>
-    `${entry.drug} ${entry.short}`.toLowerCase().includes(drugSearch.trim().toLowerCase())
-  );
+  const filteredDrugs = DRUGS_INCOMPAT.filter((entry) => matchesDrugSearch(entry, drugSearch));
 
   const focusEntry = getDrugEntry(focusDrug);
   const focusedRelations = DRUGS_INCOMPAT.filter((entry) => entry.drug !== focusDrug).reduce(
@@ -158,7 +195,7 @@ const IncompatibilityList = () => {
                     <span className="incompat-chip-mark" style={{ background: meta.color }}>
                       {meta.short}
                     </span>
-                    <span>{otherEntry?.short || relation.drugB}</span>
+                    <span>{getDrugDisplayName(otherEntry?.drug || relation.drugB)}</span>
                   </button>
                 );
               })}
@@ -217,7 +254,7 @@ const IncompatibilityList = () => {
                       <span className="incompat-chip-mark" style={{ background: meta.color }}>
                         {meta.short}
                       </span>
-                      <span>{otherEntry?.short || relation.drugB}</span>
+                      <span>{getDrugDisplayName(otherEntry?.drug || relation.drugB)}</span>
                     </button>
                   );
                 })}
@@ -292,20 +329,21 @@ const IncompatibilityList = () => {
               className="incompat-search-input"
               value={drugSearch}
               onChange={(event) => setDrugSearch(event.target.value)}
-              placeholder="Adrénaline, Lasilix, Propofol..."
+              placeholder="Noradrénaline, furosémide, Lasilix..."
             />
 
             <div className="incompat-drug-picker" aria-label="Médicament sélectionné">
-              {filteredDrugs.map((entry: any) => (
+              {filteredDrugs.map((entry: IncompatDrug) => (
                 <button
                   key={entry.drug}
                   type="button"
                   className={entry.drug === focusDrug ? "incompat-drug-active" : ""}
                   style={{ borderColor: entry.drug === focusDrug ? entry.color : undefined }}
                   onClick={() => handleSelectDrug(entry.drug)}
+                  title={entry.drug}
                 >
                   <span className="incompat-drug-dot" style={{ background: entry.color }} />
-                  <span>{entry.short}</span>
+                  <span>{getDrugDisplayName(entry.drug)}</span>
                 </button>
               ))}
             </div>
@@ -314,7 +352,7 @@ const IncompatibilityList = () => {
               <div className="incompat-focus-head">
                 <div>
                   <span className="incompat-focus-kicker">Fiche médicament</span>
-                  <h3>{focusDrug}</h3>
+                  <h3>{getDrugDisplayName(focusDrug)}</h3>
                 </div>
                 {focusEntry?.exclusif && <span className="incompat-excl-badge">voie dédiée</span>}
               </div>
@@ -375,7 +413,7 @@ const IncompatibilityList = () => {
               <select value={compareA} onChange={(event) => setCompareA(event.target.value)}>
                 {DRUGS_INCOMPAT.map((entry) => (
                   <option key={entry.drug} value={entry.drug}>
-                    {entry.drug}
+                    {getDrugDisplayName(entry.drug)}
                   </option>
                 ))}
               </select>
@@ -385,7 +423,7 @@ const IncompatibilityList = () => {
               <select value={compareB} onChange={(event) => setCompareB(event.target.value)}>
                 {DRUGS_INCOMPAT.map((entry) => (
                   <option key={entry.drug} value={entry.drug}>
-                    {entry.drug}
+                    {getDrugDisplayName(entry.drug)}
                   </option>
                 ))}
               </select>
@@ -409,7 +447,7 @@ const IncompatibilityList = () => {
                   <div>
                     <strong>{meta.label}</strong>
                     <span>
-                      {compareResult.drugA} + {compareResult.drugB}
+                      {getDrugDisplayName(compareResult.drugA)} + {getDrugDisplayName(compareResult.drugB)}
                     </span>
                     {compareResult.note && <p>{compareResult.note}</p>}
                   </div>
@@ -466,7 +504,7 @@ const IncompatibilityList = () => {
                     <span className="incompat-row-name" style={{ color: rowDrug.color }}>
                       {rowDrug.short}
                     </span>
-                    <span className="incompat-row-full">{rowDrug.drug}</span>
+                    <span className="incompat-row-full">{getDrugDisplayName(rowDrug.drug)}</span>
                     {rowDrug.exclusif && <span className="incompat-excl-badge">excl.</span>}
                   </td>
                   {DRUGS_INCOMPAT.map((colDrug, colIndex) => {
@@ -542,9 +580,9 @@ const IncompatibilityList = () => {
                 <span className="incompat-detail-badge" style={{ background: meta.color }}>
                   {meta.short}
                 </span>
-                <strong>{selected.drugA}</strong>
+                <strong>{getDrugDisplayName(selected.drugA)}</strong>
                 <span className="incompat-detail-plus">+</span>
-                <strong>{selected.drugB}</strong>
+                <strong>{getDrugDisplayName(selected.drugB)}</strong>
               </div>
               <div className="incompat-detail-type" style={{ color: meta.color }}>
                 {meta.label}
@@ -562,7 +600,7 @@ const IncompatibilityList = () => {
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  Solvant {selected.drugA} : {entryA.solvant}
+                  Solvant {getDrugDisplayName(selected.drugA)} : {entryA.solvant}
                 </div>
               )}
             </div>
