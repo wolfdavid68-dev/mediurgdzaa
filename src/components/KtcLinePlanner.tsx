@@ -51,17 +51,17 @@ const LINE_META: Array<{
     id: "mediane2",
     label: "Médiane 2",
     montage: "OCTOPUS 2 voies",
-    role: "Sédation / analgésie",
-    note: "Deuxième rampe pour les perfusions continues compatibles.",
+    role: "Voie dédiée / secours",
+    note: "À préserver si une perfusion doit rester isolée ou si une voie libre est nécessaire.",
     couleur: "#0891b2",
     fond: "rgba(8, 145, 178, 0.18)",
   },
   {
     id: "distale",
     label: "Distale",
-    montage: "Ligne dédiée",
-    role: "Voie dédiée / secours",
-    note: "À préserver si une perfusion doit rester isolée ou si une voie libre est nécessaire.",
+    montage: "OCTOPUS 4 voies",
+    role: "Sédation / analgésie",
+    note: "Hypnotiques, morphiniques, curares et sédation continue compatibles.",
     couleur: "#ef4444",
     fond: "rgba(239, 68, 68, 0.16)",
   },
@@ -79,7 +79,7 @@ const LINE_META: Array<{
 const LINE_LIMITS: Record<LineId, number> = {
   proximale: 4,
   mediane2: 2,
-  distale: 1,
+  distale: 4,
   mediane1: 8,
 };
 
@@ -173,11 +173,11 @@ const getDrugProfile = (drug: string) => {
 const scoreLine = (drug: string, lineId: LineId) => {
   const profile = getDrugProfile(drug);
   const scores: Record<string, Record<LineId, number>> = {
-    dedie: { proximale: -20, mediane2: 5, distale: 32, mediane1: 28 },
+    dedie: { proximale: -20, mediane2: 30, distale: 18, mediane1: 24 },
     transfusion: { proximale: -30, mediane2: -20, distale: 8, mediane1: 45 },
     antibiotique: { proximale: -12, mediane2: -4, distale: 4, mediane1: 42 },
     hemodynamique: { proximale: 34, mediane2: 12, distale: -6, mediane1: 0 },
-    sedation: { proximale: 8, mediane2: 32, distale: 0, mediane1: 6 },
+    sedation: { proximale: 8, mediane2: 6, distale: 34, mediane1: 6 },
     court: { proximale: -8, mediane2: 0, distale: 12, mediane1: 30 },
     standard: { proximale: 4, mediane2: 10, distale: 6, mediane1: 12 },
   };
