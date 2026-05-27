@@ -376,3 +376,314 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* Assistant de répartition des lignes KTC */
+.ktc-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ktc-lines-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ktc-lines-kicker {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-mute);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ktc-lines-head h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.ktc-lines-reset {
+  min-height: 36px;
+  padding: 0 12px;
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.ktc-lines-reset:disabled {
+  opacity: 0.45;
+}
+.ktc-lines-intro {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.ktc-picker {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.ktc-picker label {
+  color: var(--text-mute);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.ktc-picker input {
+  min-height: 40px;
+  padding: 8px 10px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.ktc-picker-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 112px;
+  overflow: auto;
+}
+.ktc-picker-results button,
+.ktc-selected button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 9px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.ktc-picker-results span,
+.ktc-selected span,
+.ktc-line-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+}
+.ktc-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 38px;
+  align-items: center;
+}
+.ktc-selected > span {
+  width: auto;
+  height: auto;
+  flex: 1;
+  color: var(--text-mute);
+  font-size: 0.82rem;
+}
+.ktc-selected strong {
+  color: var(--text-mute);
+  font-size: 0.9rem;
+}
+.ktc-lines-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.ktc-line {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 8px;
+}
+.ktc-line-ok {
+  border-left-color: #16a34a;
+}
+.ktc-line-watch {
+  border-left-color: #f59e0b;
+}
+.ktc-line-danger {
+  border-left-color: #dc2626;
+}
+.ktc-line-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ktc-line-head strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+.ktc-line-label {
+  display: block;
+  color: var(--text-mute);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.ktc-line-status {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+.ktc-line-mount {
+  width: fit-content;
+  padding: 3px 7px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.ktc-line-note {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+.ktc-line-drugs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ktc-line-empty {
+  color: var(--text-mute);
+  font-size: 0.78rem;
+}
+.ktc-line-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 8px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.ktc-line-chip em {
+  color: #dc2626;
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 800;
+}
+.ktc-line-relations {
+  display: grid;
+  gap: 5px;
+}
+.ktc-line-relations div,
+.ktc-unplaced div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-size: 0.74rem;
+}
+.ktc-line-relations strong {
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+.ktc-line-relations span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.ktc-rel-compatible {
+  color: #166534;
+  background: rgba(22, 163, 74, 0.12);
+}
+.ktc-rel-pH,
+.ktc-rel-unknown {
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.14);
+}
+.ktc-rel-incompatible {
+  color: #991b1b;
+  background: rgba(220, 38, 38, 0.14);
+}
+.ktc-unplaced {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.28);
+  border-radius: 8px;
+}
+.ktc-unplaced > strong {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+.ktc-unplaced div {
+  background: var(--bg);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+.ktc-unplaced span {
+  color: var(--text);
+  font-weight: 800;
+}
+.ktc-unplaced p {
+  margin: 0;
+  color: var(--text-dim);
+  text-align: right;
+}
+.ktc-lines-footer {
+  padding: 10px;
+  color: var(--text-dim);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.ktc-lines-footer strong,
+.ktc-lines-footer span {
+  color: var(--text);
+}
+
+@media (max-width: 760px) {
+  .ktc-lines-grid {
+    grid-template-columns: 1fr;
+  }
+  .ktc-lines-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ktc-lines-reset {
+    width: fit-content;
+  }
+  .ktc-line-relations div,
+  .ktc-unplaced div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .ktc-line-relations span,
+  .ktc-unplaced p {
+    text-align: left;
+  }
+}

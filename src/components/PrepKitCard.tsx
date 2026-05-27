@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { DRUGS } from "../data/drugs";
 import KitChecklist from "./KitChecklist";
+import KtcLinePlanner from "./KtcLinePlanner";
 import type { Drug, PrepKit } from "../types/data";
 
 const checkKey = (kitId: string) => `mediurg-kit-check-${kitId}`;
@@ -52,6 +53,7 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
   // Onglet « Schéma » : affiché dès que le kit fournit une image de
   // schéma (kit.schema). Public depuis v99 (validé).
   const showSchema = !!kit.schema;
+  const showKtcLines = kit.id === "ktc";
   // Onglet « Check-list » : affiché si le kit fournit une check-list
   // interactive (kit.checklist) — ex : check-list intubation du kit ISR.
   const showChecklist = Array.isArray(kit.checklist) && kit.checklist.length > 0;
@@ -60,6 +62,7 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
   );
 
   const isChecklist = CHECKLIST_KIT_IDS.includes(kit.id);
+  const isRearmementKit = CHECKLIST_KIT_IDS.includes(kit.id);
 
   useEffect(() => {
     if (!isChecklist) return;
@@ -121,13 +124,15 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
               <span className="dot dot-poso" style={{ background: kit.couleur }} />
               <span className="tab-label">Médicaments</span>
             </button>
-            <button
-              className={`tab-btn tab-info ${activeTab === "materiel" ? "tab-active" : ""}`}
-              onClick={() => setActiveTab("materiel")}
-            >
-              <span className="dot dot-info" />
-              <span className="tab-label">Matériel</span>
-            </button>
+            {!showKtcLines && (
+              <button
+                className={`tab-btn tab-info ${activeTab === "materiel" ? "tab-active" : ""}`}
+                onClick={() => setActiveTab("materiel")}
+              >
+                <span className="dot dot-info" />
+                <span className="tab-label">{isRearmementKit ? "Réarmement" : "Matériel"}</span>
+              </button>
+            )}
             {showChecklist && (
               <button
                 className={`tab-btn tab-ci ${activeTab === "checklist" ? "tab-active" : ""}`}
@@ -164,6 +169,24 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
               >
                 <span className="dot dot-poso" style={{ background: kit.couleur }} />
                 <span className="tab-label">Schéma</span>
+              </button>
+            )}
+            {showKtcLines && (
+              <button
+                className={`tab-btn tab-info ${activeTab === "lignes" ? "tab-active" : ""}`}
+                onClick={() => setActiveTab("lignes")}
+              >
+                <span className="dot dot-info" />
+                <span className="tab-label">Lignes</span>
+              </button>
+            )}
+            {showKtcLines && (
+              <button
+                className={`tab-btn tab-info ${activeTab === "materiel" ? "tab-active" : ""}`}
+                onClick={() => setActiveTab("materiel")}
+              >
+                <span className="dot dot-info" />
+                <span className="tab-label">Réarmement</span>
               </button>
             )}
             <button
@@ -409,6 +432,8 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
                 {kit.schema.source && <p className="kit-schema-source">{kit.schema.source}</p>}
               </div>
             )}
+
+            {activeTab === "lignes" && showKtcLines && <KtcLinePlanner />}
           </div>
         </div>
       )}

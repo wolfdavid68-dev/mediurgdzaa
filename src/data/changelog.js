@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v107";
+export const APP_VERSION = "v108";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v108",
+    date: "2026-05-27",
+    titre: "Incompatibilités v2 visuelle + assistant Lignes KTC",
+    changes: [
+      {
+        type: "feat",
+        text: "Tableau d'incompatibilités v2 visuelle : l'onglet Incompatibilités propose une lecture plus rapide avec fiche médicament, comparaison directe entre deux produits et matrice colorée. Rouge = association incompatible, vert = compatibilité documentée ou vigilance pH, blanc = absence de donnée renseignée.",
+      },
+      {
+        type: "feat",
+        text: "Nouvel outil « Lignes » dans le kit KTC : saisir les médicaments utilisés chez le patient, puis MediURG propose une répartition sur les lumières du cathéter en croisant le schéma KTC et le tableau d'incompatibilités. Les amines partent en priorité sur la voie proximale, la sédation sur médiane 2, les antibiotiques et la transfusion générale sur médiane 1 / remplissage-transfusion / IVD-miniflac, et les éléments impossibles à placer sont signalés « à isoler / revalider ».",
+      },
+      {
+        type: "chore",
+        text: "Dans les kits KTC, PA et drain thoracique, l'onglet Matériel devient « Réarmement » pour mieux refléter l'usage terrain : ces kits sont préparés à l'avance et la liste sert surtout à refaire le kit après utilisation.",
+      },
+    ],
+  },
   {
     version: "v107",
     date: "2026-05-25",
