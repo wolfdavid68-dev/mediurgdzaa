@@ -16,6 +16,7 @@ import "./styles/drug-related.css";
 import "./styles/echelles.css";
 import "./styles/kits.css";
 import "./styles/incompatibilites.css";
+import "./styles/incompatibilites-desktop.css";
 import "./styles/ci-severity.css";
 import "./styles/font-large.css";
 import "./styles/changelog.css";
