@@ -447,7 +447,8 @@ const IncompatibilityList = () => {
                   <div>
                     <strong>{meta.label}</strong>
                     <span>
-                      {getDrugDisplayName(compareResult.drugA)} + {getDrugDisplayName(compareResult.drugB)}
+                      {getDrugDisplayName(compareResult.drugA)} +{" "}
+                      {getDrugDisplayName(compareResult.drugB)}
                     </span>
                     {compareResult.note && <p>{compareResult.note}</p>}
                   </div>
