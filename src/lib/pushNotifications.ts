@@ -11,8 +11,31 @@ export type PushNotificationStatus =
 
 type PushResult = { ok: true; status: PushNotificationStatus } | { ok: false; error: string };
 
-const vapidPublicKey = (): string =>
-  ((import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY as string | undefined) ?? "").trim();
+let cachedVapidPublicKey: string | null = null;
+
+const fetchVapidPublicKey = async (): Promise<string> => {
+  if (cachedVapidPublicKey !== null) return cachedVapidPublicKey;
+
+  const buildKey = ((import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY as string | undefined) ?? "").trim();
+  if (buildKey) {
+    cachedVapidPublicKey = buildKey;
+    return buildKey;
+  }
+
+  try {
+    const response = await fetch("/api/push-public-key", { cache: "no-store" });
+    if (!response.ok) {
+      cachedVapidPublicKey = "";
+      return "";
+    }
+    const data = (await response.json()) as { publicKey?: unknown };
+    cachedVapidPublicKey = typeof data.publicKey === "string" ? data.publicKey.trim() : "";
+    return cachedVapidPublicKey;
+  } catch {
+    cachedVapidPublicKey = "";
+    return "";
+  }
+};
 
 const isPushSupported = (): boolean =>
   typeof window !== "undefined" &&
@@ -39,7 +62,7 @@ const getCurrentSubscription = async (): Promise<PushSubscription | null> => {
 
 export const getAdminPushStatus = async (): Promise<PushNotificationStatus> => {
   if (!isPushSupported()) return "unsupported";
-  if (!vapidPublicKey()) return "missing-key";
+  if (!(await fetchVapidPublicKey())) return "missing-key";
   if (Notification.permission === "denied") return "denied";
   if (Notification.permission === "default") return "default";
   const subscription = await getCurrentSubscription();
@@ -50,7 +73,7 @@ export const enableAdminPushNotifications = async (): Promise<PushResult> => {
   if (!isPushSupported())
     return { ok: false, error: "Notifications non supportées sur cet appareil" };
 
-  const publicKey = vapidPublicKey();
+  const publicKey = await fetchVapidPublicKey();
   if (!publicKey) return { ok: false, error: "Clé publique Web Push manquante" };
 
   const permission =
