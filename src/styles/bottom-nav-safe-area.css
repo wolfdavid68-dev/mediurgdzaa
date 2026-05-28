@@ -30,4 +30,9 @@
   :root {
     --bottom-nav-clearance: 32px;
   }
+
+  .main-content {
+    padding-left: calc(188px + var(--safe-left));
+    padding-right: clamp(16px, 2vw, 32px);
+  }
 }
