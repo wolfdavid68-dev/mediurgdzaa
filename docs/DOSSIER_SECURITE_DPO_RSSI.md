@@ -15,6 +15,8 @@ La base technique a été durcie :
 - accès Supabase `public.profiles` restreint aux utilisateurs authentifiés via RLS ;
 - traçabilité des actions d'administration via `public.admin_audit_events` : approbation, refus,
   suspension, rétablissement ;
+- notifications PWA admin pour les nouvelles demandes d'accès, avec payload générique non
+  nominatif ;
 - absence de lecture anonyme sur `profiles` vérifiée en production le 26 mai 2026 ;
 - headers de sécurité ajoutés côté Vercel ;
 - API ECG protégée par proxy serveur, validation MIME/taille, `Cache-Control: no-store` et
@@ -35,6 +37,7 @@ requise avant qualification institutionnelle.
 - Favoris, historique et notes personnelles stockés localement.
 - Authentification optionnelle via Supabase.
 - Console d'administration avec validation/suspension des comptes et journal d'audit.
+- Notifications PWA optionnelles pour alerter les admins d'une nouvelle demande d'accès.
 - Module ECG d'aide à la lecture, non diagnostique, avec anonymisation côté client puis appel
   serveur optionnel.
 
@@ -57,8 +60,11 @@ requise avant qualification institutionnelle.
 
 ### Backend
 
-- Supabase pour authentification, table `profiles` et journal `admin_audit_events`.
+- Supabase pour authentification, table `profiles`, journal `admin_audit_events` et abonnements
+  `push_subscriptions`.
 - API Vercel `/api/analyze-ecg` pour proxy ECG vers fournisseurs IA.
+- API Vercel `/api/notify-access-request` pour envoyer une notification Web Push générique aux
+  admins abonnés.
 - Aucune clé IA exposée dans le bundle client.
 
 ### Stockage local
@@ -77,6 +83,7 @@ Stockage navigateur via `localStorage`, `sessionStorage`, cache PWA et session S
 | Checklists kit                | Navigateur                | Préparation opérationnelle    | potentiellement clinique | Expiration courte environ 3 h                           |
 | Profil agent                  | Supabase + cache local    | Authentification/autorisation | donnée personnelle agent | Matricule, email, nom, fonction, service                |
 | Journal actions admin         | Supabase                  | Traçabilité des accès         | donnée personnelle agent | Admin, cible, action, date, motif éventuel              |
+| Abonnement Web Push admin     | Supabase                  | Notification demande d'accès  | secret technique         | Endpoint push, clés p256dh/auth, user-agent             |
 | Session Supabase              | Navigateur                | Maintien de session           | secret utilisateur       | Jeton local Supabase                                    |
 | Image ECG                     | Client puis API Vercel/IA | Aide non diagnostique         | potentiellement patient  | Anonymisation locale à vérifier par l'utilisateur       |
 
@@ -109,8 +116,16 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 ### Supabase
 
 - Authentification et base `profiles`.
+- Stockage du journal `admin_audit_events`.
+- Stockage des abonnements Web Push admins `push_subscriptions`.
 - Recommandation : projet localisé en UE, idéalement Frankfurt `eu-central-1`.
 - À valider : DPA, région effective, sauvegardes, rétention, journalisation.
+
+### Services Web Push navigateur
+
+- Acheminement des notifications PWA selon le navigateur / système de l'appareil admin.
+- Le payload MediURG reste générique : pas de nom, matricule, service, email, IPP ou donnée patient.
+- À valider : acceptabilité institutionnelle des notifications Web Push sur téléphones admins.
 
 ### Fournisseurs IA ECG
 
@@ -166,6 +181,16 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 - Les refus de compte conservent un snapshot du compte cible dans le journal avant disparition de
   la ligne `profiles`.
 
+État cible pour `public.push_subscriptions` après application du SQL notifications :
+
+- RLS active.
+- Aucun accès `anon` ou `public`.
+- Droits `authenticated` limités à `SELECT`, `INSERT`, `UPDATE`, `DELETE`, filtrés par RLS.
+- Chaque admin ne peut lire/supprimer que ses propres abonnements.
+- Insertion/mise à jour autorisées uniquement pour un admin actif avec `user_id = auth.uid()`.
+- La route serveur de notification lit les abonnements des admins actifs via `service_role`, côté
+  serveur uniquement.
+
 ## Décision offline-first
 
 MediURG est conçu pour rester disponible sans réseau.
@@ -193,6 +218,7 @@ cas de départ d'un agent ou de perte d'appareil.
 | Perte/vol d'appareil appairé                | moyen          | logout possible, stockage navigateur | définir procédure institutionnelle      |
 | Dépendance Vercel/Supabase/IA               | moyen          | secrets protégés, RLS, headers       | valider sous-traitants                  |
 | Action admin non expliquée                  | faible         | journal d'audit admin                | valider durée de conservation           |
+| Notification exposant une identité          | faible         | payload push générique               | valider règle de contenu notification   |
 | Erreur de contenu clinique                  | élevé          | versioning, PWA update prompt        | définir procédure de correction urgente |
 
 ## Points à valider
@@ -202,11 +228,14 @@ cas de départ d'un agent ou de perte d'appareil.
 - DPO/RSSI : autorisation ou suspension du module ECG IA.
 - Politique de conservation des comptes agents.
 - Politique de conservation du journal `admin_audit_events`.
+- Politique de conservation/purge des abonnements `push_subscriptions`.
+- Acceptabilité des notifications Web Push admin sur appareils personnels/professionnels.
 - Procédure de retrait d'accès et perte d'appareil.
 - Mention légale finale : directeur de publication, DPO confirmé, contact institutionnel.
 - Confirmation qu'aucune donnée patient nominative ne doit être saisie dans les notes.
 - Fréquence d'audit Supabase/RLS.
 - Modalités d'accès au journal d'audit admin par DPO/RSSI/DSI.
+- Modalités de désactivation des notifications admin et purge des endpoints push.
 
 ## Checklist avant validation institutionnelle
 
@@ -220,6 +249,7 @@ cas de départ d'un agent ou de perte d'appareil.
 - [ ] Une procédure de correction urgente du contenu clinique est documentée.
 - [ ] Une procédure de retrait d'accès agent est documentée.
 - [ ] Une durée de conservation du journal d'audit admin est validée.
+- [ ] Les notifications PWA admin sont validées ou désactivées.
 - [ ] Les mentions légales sont complétées et validées.
 
 ## Commandes de vérification

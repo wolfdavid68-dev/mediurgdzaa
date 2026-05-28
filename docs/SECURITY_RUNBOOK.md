@@ -14,10 +14,17 @@ un support de validation institutionnelle, voir aussi
 - Si le script bootstrap inline de `index.html` change, recalculer le hash `sha256-...` dans la
   CSP (`script-src`) au même commit.
 - Vérifier qu'aucune variable secrète n'est préfixée `VITE_`.
+- Vérifier les variables Web Push :
+  - `VITE_WEB_PUSH_PUBLIC_KEY` seule côté client ;
+  - `WEB_PUSH_PRIVATE_KEY`, `WEB_PUSH_SUBJECT` et `SUPABASE_SERVICE_ROLE_KEY` uniquement côté
+    Vercel/serverless ;
+  - aucune clé VAPID privée ou `service_role` dans le bundle.
 - Vérifier qu'aucune clé API réelle n'est suivie par Git : `.env.local`, `.env`, `.mcp.json`,
   `.claude/` et `.codex/` doivent rester ignorés.
 - Pour tout changement de service worker/PWA, faire un test de mise à jour : version déjà
   installée, nouvelle version en attente, clic sur « Mettre à jour », puis usage hors ligne.
+- Pour tout changement Web Push, vérifier que la notification de demande d'accès reste générique :
+  pas de nom, matricule, email, service, IPP ou donnée patient dans le payload.
 
 ## Audit Supabase prod
 
@@ -26,10 +33,13 @@ un support de validation institutionnelle, voir aussi
 ### Dernière vérification MediURG
 
 Vérifié en production le 26 mai 2026 via le SQL Editor Supabase.
+Revue locale du code `main` le 28 mai 2026 après ajout des notifications PWA admin.
 
 - `public.profiles` : RLS active (`rowsecurity = true`).
 - `public.admin_audit_events` : RLS active (`rowsecurity = true`) si le journal admin a été
   déployé.
+- `public.push_subscriptions` : RLS active (`rowsecurity = true`) si les notifications admin ont
+  été déployées.
 - Policies finales sur `public.profiles` : `self_read`, `admin_read_all`, `admin_update_all`,
   `admin_delete`.
 - Aucune policy `anon` ou `public` sur `public.profiles`.
@@ -66,6 +76,7 @@ order by tablename;
 
 Attendu pour MediURG : `public.profiles` avec `rowsecurity = true`.
 Si l'audit admin est déployé : `public.admin_audit_events` avec `rowsecurity = true`.
+Si les notifications admin sont déployées : `public.push_subscriptions` avec `rowsecurity = true`.
 
 ```sql
 select grantee, privilege_type
@@ -79,6 +90,9 @@ Attendu : aucun accès direct `anon` à `profiles`. Le rôle `authenticated` peu
 nécessaires, filtrés ensuite par RLS.
 Pour `admin_audit_events` : aucun accès `anon` ; `authenticated` limité à `SELECT`/`INSERT`, filtré
 par RLS admin.
+Pour `push_subscriptions` : aucun accès `anon` ; `authenticated` limité à
+`SELECT`/`INSERT`/`UPDATE`/`DELETE`, filtré par RLS pour que chaque admin ne voie que ses propres
+endpoints.
 
 ```sql
 select policyname, cmd, roles, qual, with_check
@@ -92,6 +106,8 @@ Attendu : lecture de son propre profil, lecture admin, update admin, delete admi
 de lecture anonyme.
 Pour `admin_audit_events` : lecture admin et insertion admin uniquement, avec `actor_id =
 auth.uid()`.
+Pour `push_subscriptions` : lecture/suppression limitées à `user_id = auth.uid()` ; insertion et
+mise à jour limitées aux admins actifs avec `user_id = auth.uid()`.
 
 ### 3. Fonctions privilégiées
 
@@ -127,7 +143,11 @@ matricule avant authentification. Pas de grant inutile sur `PUBLIC`.
 - Vérifier que le profil arrive en `pending`.
 - Vérifier qu'un compte `pending` ne peut pas entrer.
 - Promouvoir un admin, puis approuver/rejeter/bannir depuis la console.
+- Depuis un téléphone admin, activer puis désactiver les notifications PWA.
+- Créer une demande d'accès test et vérifier qu'une notification générique arrive aux admins
+  abonnés.
 - Vérifier que `anon` ne peut pas lister `profiles`.
+- Vérifier que l'utilisateur connecté ne peut pas lister les abonnements push d'un autre admin.
 - Tester le mode hors ligne après une connexion réussie.
 - Tester la déconnexion explicite : elle doit purger le profil caché local.
 
@@ -145,6 +165,22 @@ MediURG stocke volontairement certaines données sur l'appareil pour l'usage off
 | Poids patient      | `mediurg-patient-weight`               | expiration env. 3 h       | donnée de soin isolée    | expiration courte obligatoire                   |
 | Profil auth caché  | `mediurg-profile-cache-v1`             | jusqu'au logout/reset     | donnée personnelle agent | sert uniquement au fallback offline             |
 | Session Supabase   | `sb-*-auth-token`                      | selon config Supabase     | secret utilisateur       | logout purge localement                         |
+
+## Notifications Web Push admin
+
+- Les abonnements push sont stockés dans `public.push_subscriptions` : endpoint, clés `p256dh` /
+  `auth`, `user_agent`, `user_id`.
+- Ces endpoints et clés sont des secrets techniques : pas de lecture anonyme, chaque admin ne voit
+  que ses propres abonnements côté client.
+- L'envoi serveur utilise la `service_role` uniquement dans `/api/notify-access-request`, jamais
+  côté client.
+- La route `/api/notify-access-request` exige la session Supabase du demandeur et vérifie via RLS
+  que son propre profil est encore `pending`.
+- Le payload envoyé au service Web Push est volontairement générique : « une nouvelle demande
+  d'accès est en attente », sans identité agent, matricule, email, service ou donnée patient.
+- Les endpoints expirés (`404` / `410`) sont purgés côté serveur.
+- Les notifications nécessitent l'accord explicite du navigateur/appareil admin et peuvent être
+  désactivées depuis la console admin.
 
 ## Décision offline/auth
 
