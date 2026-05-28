@@ -40,7 +40,6 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
 
   const onBan = (p: Profile) => ban(p, banReason);
   const pushEnabled = pushStatus === "enabled";
-  const pushDisabled = pushStatus === "unsupported" || pushStatus === "missing-key";
   const pushTitle =
     pushStatus === "unsupported"
       ? "Notifications non supportées sur cet appareil"
@@ -126,7 +125,7 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
             type="button"
             className={`admin-push ${pushEnabled ? "admin-push-on" : ""}`}
             onClick={pushEnabled ? disablePush : enablePush}
-            disabled={pushBusy || pushDisabled}
+            disabled={pushBusy}
             title={pushTitle}
           >
             {pushBusy ? "…" : pushEnabled ? "Notifications actives" : "Activer notifications"}

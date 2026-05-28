@@ -60,7 +60,6 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
   } = useAdminProfiles(onLogout, currentUserId);
   const [query, setQuery] = useState("");
   const pushEnabled = pushStatus === "enabled";
-  const pushDisabled = pushStatus === "unsupported" || pushStatus === "missing-key";
 
   const q = query.trim().toLowerCase();
   const filtered = q
@@ -114,7 +113,7 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
             type="button"
             className={`m-push-btn ${pushEnabled ? "on" : ""}`}
             onClick={pushEnabled ? disablePush : enablePush}
-            disabled={pushBusy || pushDisabled}
+            disabled={pushBusy}
           >
             {pushBusy ? "…" : pushEnabled ? "Notifications actives" : "Activer notifications"}
           </button>

@@ -137,6 +137,22 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
   };
 
   const enablePush = async () => {
+    if (pushStatus === "unsupported") {
+      setToast({ kind: "warn", msg: "Notifications non supportées sur cet appareil" });
+      return;
+    }
+    if (pushStatus === "missing-key") {
+      setToast({ kind: "warn", msg: "Clé Web Push manquante : redéploiement Vercel requis" });
+      return;
+    }
+    if (pushStatus === "denied") {
+      setToast({
+        kind: "warn",
+        msg: "Notifications bloquées : autorise-les dans les réglages du navigateur",
+      });
+      return;
+    }
+
     setPushBusy(true);
     const result = await enableAdminPushNotifications();
     setPushBusy(false);
