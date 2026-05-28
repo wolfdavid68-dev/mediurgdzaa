@@ -98,7 +98,8 @@ function getSupabaseServiceEnv(): { url: string; serviceKey: string } | null {
 function getVapidEnv(): { publicKey: string; privateKey: string; subject: string } | null {
   const publicKey = process.env.WEB_PUSH_PUBLIC_KEY || process.env.VITE_WEB_PUSH_PUBLIC_KEY;
   const privateKey = process.env.WEB_PUSH_PRIVATE_KEY;
-  const subject = process.env.WEB_PUSH_SUBJECT || "mailto:admin@mediurg.local";
+  const rawSubject = process.env.WEB_PUSH_SUBJECT?.trim() || "mailto:admin@mediurg.local";
+  const subject = rawSubject.includes(":") ? rawSubject : `mailto:${rawSubject}`;
   return publicKey && privateKey ? { publicKey, privateKey, subject } : null;
 }
 
@@ -297,7 +298,9 @@ export default async function handler(req: VercelReq, res: VercelRes) {
 
     notifiedProfileIds.set(profileId, Date.now());
     res.status(202).json({ ok: true, sent: subscriptions.length });
-  } catch {
+  } catch (error) {
+    const code = error instanceof Error ? error.message : "unknown";
+    console.error("notify-access-request failed", code);
     res.status(502).json({ error: "Notification admin indisponible" });
   }
 }

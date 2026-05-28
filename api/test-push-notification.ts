@@ -65,7 +65,8 @@ function getSupabaseServiceEnv(): { url: string; serviceKey: string } | null {
 function getVapidEnv(): { publicKey: string; privateKey: string; subject: string } | null {
   const publicKey = process.env.WEB_PUSH_PUBLIC_KEY || process.env.VITE_WEB_PUSH_PUBLIC_KEY;
   const privateKey = process.env.WEB_PUSH_PRIVATE_KEY;
-  const subject = process.env.WEB_PUSH_SUBJECT || "mailto:admin@mediurg.local";
+  const rawSubject = process.env.WEB_PUSH_SUBJECT?.trim() || "mailto:admin@mediurg.local";
+  const subject = rawSubject.includes(":") ? rawSubject : `mailto:${rawSubject}`;
   return publicKey && privateKey ? { publicKey, privateKey, subject } : null;
 }
 
@@ -211,7 +212,9 @@ export default async function handler(req: VercelReq, res: VercelRes) {
     }
 
     res.status(202).json({ ok: true, ...result });
-  } catch {
-    res.status(502).json({ error: "Notification test indisponible" });
+  } catch (error) {
+    const code = error instanceof Error ? error.message : "unknown";
+    console.error("test-push-notification failed", code);
+    res.status(502).json({ error: "Notification test indisponible", code });
   }
 }
