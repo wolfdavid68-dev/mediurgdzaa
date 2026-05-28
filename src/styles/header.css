@@ -404,16 +404,24 @@
    se cache → le bandeau poids occupe la rangée seul. */
 @media (min-width: 1100px) {
   .bottom-nav {
-    top: 50%;
+    top: var(--test-banner-h, 0px);
     bottom: auto;
-    left: calc(16px + var(--safe-left));
-    width: 156px;
-    padding: 6px;
-    transform: translateY(-50%);
+    left: 0;
+    width: calc(176px + var(--safe-left));
+    height: calc(100dvh - var(--test-banner-h, 0px));
+    padding: 0 10px 0 calc(10px + var(--safe-left));
+    transform: none;
+    justify-content: center;
+    z-index: 90;
+    border: none;
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .bottom-nav-row {
     flex-direction: column;
+    gap: 8px;
   }
 
   .bottom-tab {
@@ -422,6 +430,10 @@
     min-height: 48px;
     padding: 9px 11px;
     text-align: left;
+  }
+
+  .bottom-tab-active {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 }
 

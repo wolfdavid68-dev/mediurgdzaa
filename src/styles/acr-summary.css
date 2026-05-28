@@ -414,10 +414,11 @@
 
 @media (min-width: 1100px) {
   .version-badge-nav {
-    position: static;
-    align-self: stretch;
-    margin-top: 4px;
-    padding: 6px 8px 3px;
+    position: absolute;
+    right: 10px;
+    bottom: calc(12px + var(--safe-bottom));
+    left: calc(10px + var(--safe-left));
+    padding: 8px 8px 0;
     transform: none;
     border-top: 1px solid var(--border);
     text-align: center;
