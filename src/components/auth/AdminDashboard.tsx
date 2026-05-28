@@ -26,15 +26,29 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
     setSelected,
     busyId,
     toast,
+    pushStatus,
+    pushBusy,
     approve: onApprove,
     reject: onReject,
     ban,
     unban: onUnban,
     handleLogout,
+    enablePush,
+    disablePush,
   } = useAdminProfiles(onLogout, currentUserId);
   const [banReason, setBanReason] = useState<string>(BAN_REASONS[0]);
 
   const onBan = (p: Profile) => ban(p, banReason);
+  const pushEnabled = pushStatus === "enabled";
+  const pushDisabled = pushStatus === "unsupported" || pushStatus === "missing-key";
+  const pushTitle =
+    pushStatus === "unsupported"
+      ? "Notifications non supportées sur cet appareil"
+      : pushStatus === "missing-key"
+        ? "Configuration Web Push manquante"
+        : pushEnabled
+          ? "Désactiver les notifications sur cet appareil"
+          : "Activer les notifications sur cet appareil";
 
   // A11y du drawer de suspension : focus déplacé dedans à l'ouverture,
   // piège de focus (Tab cyclique), Échap ferme, focus restauré. L'arrière-
@@ -107,6 +121,15 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
             title="Vue utilisateur"
           >
             ← App
+          </button>
+          <button
+            type="button"
+            className={`admin-push ${pushEnabled ? "admin-push-on" : ""}`}
+            onClick={pushEnabled ? disablePush : enablePush}
+            disabled={pushBusy || pushDisabled}
+            title={pushTitle}
+          >
+            {pushBusy ? "…" : pushEnabled ? "Notifications actives" : "Activer notifications"}
           </button>
           <button type="button" className="admin-logout" onClick={handleLogout}>
             Déconnexion

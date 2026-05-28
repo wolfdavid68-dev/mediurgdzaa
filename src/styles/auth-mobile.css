@@ -612,7 +612,28 @@ select.m-input {
 .m-admin-sub {
   color: oklch(0.6 0.008 70);
   font-size: 13px;
-  margin: 4px 0 14px;
+  margin: 4px 0 12px;
+}
+
+.m-push-btn {
+  width: 100%;
+  min-height: 38px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid oklch(0.28 0.008 280);
+  background: oklch(0.21 0.006 280);
+  color: oklch(0.78 0.008 70);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+.m-push-btn.on {
+  border-color: oklch(0.6 0.2 25 / 0.35);
+  background: oklch(0.6 0.2 25 / 0.14);
+  color: oklch(0.97 0.004 90);
+}
+.m-push-btn:disabled {
+  opacity: 0.55;
 }
 
 .m-search-wrap {

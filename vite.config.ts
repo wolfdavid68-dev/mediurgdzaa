@@ -105,6 +105,9 @@ export default defineConfig({
         // ECG, PDF protocole) sans risquer un asset hors cache → 404 offline.
         // Aujourd'hui le plus gros est vendor-react ≈ 191 kB, large marge.
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Ajoute les handlers Web Push natifs au SW généré par Workbox.
+        // Le fichier reste très petit et séparé du bundle React.
+        importScripts: ["/push-handler.js"],
       },
       // (Pas d'`includeAssets` : les .png/.webmanifest sont déjà capturés
       // par workbox.globPatterns plus haut. Listing redondant créait des

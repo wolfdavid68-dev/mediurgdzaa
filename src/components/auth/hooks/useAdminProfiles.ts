@@ -10,6 +10,12 @@ import {
   type Profile,
   type ProfileStatus,
 } from "../../../lib/auth";
+import {
+  disableAdminPushNotifications,
+  enableAdminPushNotifications,
+  getAdminPushStatus,
+  type PushNotificationStatus,
+} from "../../../lib/pushNotifications";
 
 // Logique de la console d'admin, partagée par AdminDashboard (desktop,
 // sidebar + drawer) et MobileAdminDashboard (tab bar + bottom sheet).
@@ -40,6 +46,8 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
   const [selected, setSelected] = useState<Profile | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [toast, setToast] = useState<AdminToast>(null);
+  const [pushStatus, setPushStatus] = useState<PushNotificationStatus>("unsupported");
+  const [pushBusy, setPushBusy] = useState(false);
 
   const reload = async (forStatus: ProfileStatus) => {
     setLoading(true);
@@ -64,6 +72,12 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
   useEffect(() => {
     reload(tab);
   }, [tab]);
+
+  useEffect(() => {
+    getAdminPushStatus()
+      .then(setPushStatus)
+      .catch(() => setPushStatus("unsupported"));
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -122,6 +136,36 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     onLogout();
   };
 
+  const enablePush = async () => {
+    setPushBusy(true);
+    const result = await enableAdminPushNotifications();
+    setPushBusy(false);
+    if (!result.ok) {
+      setToast({ kind: "warn", msg: result.error });
+      return;
+    }
+    setPushStatus(result.status);
+    setToast({
+      kind: result.status === "enabled" ? "ok" : "warn",
+      msg:
+        result.status === "enabled"
+          ? "Notifications activées sur cet appareil"
+          : "Autorisation de notification en attente",
+    });
+  };
+
+  const disablePush = async () => {
+    setPushBusy(true);
+    const result = await disableAdminPushNotifications();
+    setPushBusy(false);
+    if (!result.ok) {
+      setToast({ kind: "warn", msg: result.error });
+      return;
+    }
+    setPushStatus(result.status);
+    setToast({ kind: "ok", msg: "Notifications désactivées sur cet appareil" });
+  };
+
   return {
     tab,
     setTab,
@@ -133,11 +177,15 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     setSelected,
     busyId,
     toast,
+    pushStatus,
+    pushBusy,
     reload,
     approve,
     reject,
     ban,
     unban,
     handleLogout,
+    enablePush,
+    disablePush,
   };
 };

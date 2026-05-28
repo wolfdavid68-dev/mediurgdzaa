@@ -1,5 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["pwa-assets.config.ts", "api/**/*.ts"],
-  "ignore": ["design_handoff_sau_mulhouse/**", "scripts/audit-dead-css.cjs"]
+  "ignore": [
+    "design_handoff_sau_mulhouse/**",
+    "scripts/audit-dead-css.cjs",
+    "public/push-handler.js"
+  ]
 }

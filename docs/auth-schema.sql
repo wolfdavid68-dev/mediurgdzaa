@@ -70,6 +70,24 @@ create index if not exists admin_audit_events_actor_idx
 create index if not exists admin_audit_events_target_idx
   on public.admin_audit_events (target_profile_id);
 
+-- Abonnements Web Push PWA des admins. Un abonnement = un appareil/navigateur.
+-- Les endpoints et clés de chiffrement sont des secrets techniques : un user
+-- ne voit que ses propres abonnements ; l'envoi serveur utilise la service_role
+-- côté Vercel pour joindre uniquement les admins actifs.
+create table if not exists public.push_subscriptions (
+  id          uuid        primary key default gen_random_uuid(),
+  user_id     uuid        not null references public.profiles(id) on delete cascade,
+  endpoint    text        not null unique,
+  p256dh      text        not null,
+  auth        text        not null,
+  user_agent  text,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists push_subscriptions_user_idx
+  on public.push_subscriptions (user_id);
+
 -- ── Trigger : auto-création du profile au signup ────────────
 -- Le trigger lit `raw_user_meta_data` (envoyé par signUp({ data: {...} })
 -- côté client) et insère la ligne profile correspondante. Sans ça, un
@@ -127,6 +145,7 @@ $$;
 -- ── RLS sur profiles ────────────────────────────────────────
 alter table public.profiles enable row level security;
 alter table public.admin_audit_events enable row level security;
+alter table public.push_subscriptions enable row level security;
 
 -- Data API : ne jamais exposer `profiles` aux anonymes. La clé anon est
 -- publique dans le bundle JS ; le login passe uniquement par la fonction
@@ -141,6 +160,10 @@ revoke all on table public.admin_audit_events from public;
 grant select, insert on table public.admin_audit_events to authenticated;
 grant usage, select on sequence public.admin_audit_events_id_seq to authenticated;
 
+revoke all on table public.push_subscriptions from anon;
+revoke all on table public.push_subscriptions from public;
+grant select, insert, update, delete on table public.push_subscriptions to authenticated;
+
 -- Drop les anciennes policies pour ré-exécution propre
 drop policy if exists "self_read" on public.profiles;
 drop policy if exists "admin_read_all" on public.profiles;
@@ -149,6 +172,10 @@ drop policy if exists "admin_delete" on public.profiles;
 drop policy if exists "no_direct_insert" on public.profiles;
 drop policy if exists "admin_audit_read" on public.admin_audit_events;
 drop policy if exists "admin_audit_insert" on public.admin_audit_events;
+drop policy if exists "push_self_read" on public.push_subscriptions;
+drop policy if exists "push_self_insert_admin_only" on public.push_subscriptions;
+drop policy if exists "push_self_update_admin_only" on public.push_subscriptions;
+drop policy if exists "push_self_delete" on public.push_subscriptions;
 
 -- Lecture : un user voit son propre profile
 create policy "self_read"
@@ -192,6 +219,29 @@ create policy "admin_audit_insert"
   on public.admin_audit_events for insert
   to authenticated
   with check (public.is_admin() and actor_id = (select auth.uid()));
+
+-- Web Push : seuls les admins actifs peuvent enregistrer / maintenir leur
+-- propre appareil. Personne ne liste les endpoints des autres côté client.
+create policy "push_self_read"
+  on public.push_subscriptions for select
+  to authenticated
+  using ((select auth.uid()) = user_id);
+
+create policy "push_self_insert_admin_only"
+  on public.push_subscriptions for insert
+  to authenticated
+  with check (public.is_admin() and user_id = (select auth.uid()));
+
+create policy "push_self_update_admin_only"
+  on public.push_subscriptions for update
+  to authenticated
+  using ((select auth.uid()) = user_id)
+  with check (public.is_admin() and user_id = (select auth.uid()));
+
+create policy "push_self_delete"
+  on public.push_subscriptions for delete
+  to authenticated
+  using ((select auth.uid()) = user_id);
 
 -- ── Résolution matricule → email pour le login ──────────────
 -- Le client login envoie un matricule, Supabase Auth attend un email :

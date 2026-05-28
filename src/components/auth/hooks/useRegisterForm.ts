@@ -6,6 +6,7 @@ import {
   isValidPassword,
   passwordStrength,
 } from "../../../lib/auth";
+import { notifyAccessRequestCreated } from "../../../lib/accessRequestNotification";
 import { FONCTIONS, SERVICES } from "../authConstants";
 
 // Logique du formulaire d'inscription (2 étapes + confirmation), partagée
@@ -88,6 +89,7 @@ export const useRegisterForm = () => {
       fail(result.error);
       return;
     }
+    void notifyAccessRequestCreated(result.data?.id);
     setStep(3);
   };
 

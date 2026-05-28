@@ -831,7 +831,8 @@
   letter-spacing: 0.08em;
 }
 .admin-exit,
-.admin-logout {
+.admin-logout,
+.admin-push {
   background: transparent;
   border: 1px solid var(--auth-line);
   color: var(--auth-text-2);
@@ -841,9 +842,19 @@
   cursor: pointer;
 }
 .admin-exit:hover,
-.admin-logout:hover {
+.admin-logout:hover,
+.admin-push:hover:not(:disabled) {
   background: var(--auth-surface-2);
   color: var(--auth-text);
+}
+.admin-push-on {
+  background: var(--auth-accent-soft);
+  border-color: oklch(0.6 0.2 25 / 0.35);
+  color: var(--auth-text);
+}
+.admin-push:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .admin-body {

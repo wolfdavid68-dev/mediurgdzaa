@@ -29,6 +29,7 @@ et exécuter. Cela crée :
 - Fonction `public.is_admin()` : utilisée dans les RLS pour les contrôles admin
 - Policies RLS : un user voit son profile, un admin voit tout
 - Contrainte unique sur `matricule` (un matricule = un compte)
+- Table `push_subscriptions` : abonnements Web Push des admins, protégés par RLS
 
 ## 3. Promouvoir le 1er admin
 
@@ -64,6 +65,38 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 **Vercel (Project Settings → Environment Variables)** :
 Ajouter les deux mêmes variables, scope « Production », « Preview », « Development ».
 
+### Notifications téléphone PWA des demandes d'accès
+
+Pour recevoir un pop-up natif sur téléphone quand une inscription passe en
+`status='pending'`, sans service externe de messagerie :
+
+1. Générer une paire VAPID une seule fois :
+
+```bash
+node -e "import('web-push').then(w=>console.log(w.default.generateVAPIDKeys()))"
+```
+
+2. Ajouter ces variables dans Vercel :
+
+```
+VITE_WEB_PUSH_PUBLIC_KEY=<publicKey VAPID>
+WEB_PUSH_PRIVATE_KEY=<privateKey VAPID>
+WEB_PUSH_SUBJECT=mailto:<email-contact-admin>
+SUPABASE_SERVICE_ROLE_KEY=<clé service_role Supabase>
+APP_PUBLIC_URL=https://<domaine-mediurg>
+```
+
+La clé publique `VITE_WEB_PUSH_PUBLIC_KEY` est normale côté navigateur : elle
+sert à créer l'abonnement push. La clé privée VAPID et la `service_role`
+restent côté serveur Vercel uniquement. La route `/api/notify-access-request`
+valide via la session Supabase du demandeur que son propre profil existe bien
+en `status='pending'`, puis lit côté serveur les abonnements des admins actifs.
+La notification envoyée est générique : pas de nom, matricule, service, email
+ni donnée patient dans le push.
+
+3. Dans la console admin MediURG, cliquer sur **Activer notifications** sur
+   chaque téléphone admin qui doit recevoir les pop-ups.
+
 ## 5. Activer la feature
 
 Quand tout fonctionne sur localhost :
@@ -97,6 +130,8 @@ Une fois Supabase configuré, tester en local avec
 - [ ] Promotion via SQL → connexion OK
 - [ ] Console admin accessible par **appui long (~600 ms) sur le logo**
       (role=admin uniquement ; aucun bouton visible — accès discret)
+- [ ] Console admin → **Activer notifications** sur le téléphone admin
+- [ ] Nouvelle demande créée depuis un autre compte → pop-up générique reçu
 - [ ] Approve / reject / ban / unban depuis la console
 - [ ] Logout → retour à l'écran login
 
