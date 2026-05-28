@@ -171,15 +171,16 @@
 /* ── Layout 2 colonnes — tablette paysage / desktop ───────── */
 @media (min-width: 900px) {
   .main-content {
-    max-width: 1400px;
+    width: 100%;
+    max-width: none;
     margin: 0 auto;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: clamp(16px, 2vw, 32px);
+    padding-right: clamp(16px, 2vw, 32px);
   }
 
   .drug-list-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
     gap: 12px;
     align-items: start;
   }
@@ -193,14 +194,15 @@
   }
 
   .header-inner {
-    max-width: 1400px;
+    width: 100%;
+    max-width: none;
     margin: 0 auto;
   }
 }
 
 @media (min-width: 1280px) {
   .drug-list-grid {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
   }
   .drug-list-grid > .drug-card-open {
     grid-column: 1 / -1;
@@ -1212,13 +1214,6 @@
   .filter-chips {
     flex-wrap: wrap;
     overflow-x: visible;
-  }
-}
-
-/* Large écran — 1200px et plus */
-@media (min-width: 1200px) {
-  :root {
-    --content-max: 1040px;
   }
 }
 

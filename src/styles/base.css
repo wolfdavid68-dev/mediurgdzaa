@@ -72,7 +72,7 @@ html {
   --nav-bg: rgba(10, 10, 18, 0.96);
 
   /* Fluid container width */
-  --content-max: 960px;
+  --content-max: 100%;
 
   /* Safe area insets for iOS notch */
   --safe-top: env(safe-area-inset-top, 0px);

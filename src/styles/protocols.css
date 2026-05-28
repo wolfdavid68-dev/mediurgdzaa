@@ -119,6 +119,20 @@
   gap: 10px;
 }
 
+@media (min-width: 900px) {
+  .protocol-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+    align-items: start;
+    gap: 12px;
+  }
+
+  .protocol-list > .protocol-card-open,
+  .protocol-list > .drug-card-open {
+    grid-column: 1 / -1;
+  }
+}
+
 .protocol-card {
   background: var(--card);
   border: 1px solid var(--border);
