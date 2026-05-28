@@ -14,6 +14,7 @@ import {
   disableAdminPushNotifications,
   enableAdminPushNotifications,
   getAdminPushStatus,
+  sendAdminPushTestNotification,
   type PushNotificationStatus,
 } from "../../../lib/pushNotifications";
 
@@ -48,6 +49,7 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
   const [toast, setToast] = useState<AdminToast>(null);
   const [pushStatus, setPushStatus] = useState<PushNotificationStatus>("unsupported");
   const [pushBusy, setPushBusy] = useState(false);
+  const [pushTestBusy, setPushTestBusy] = useState(false);
 
   const reload = async (forStatus: ProfileStatus) => {
     setLoading(true);
@@ -182,6 +184,25 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     setToast({ kind: "ok", msg: "Notifications désactivées sur cet appareil" });
   };
 
+  const testPush = async () => {
+    if (pushStatus !== "enabled") {
+      setToast({ kind: "warn", msg: "Active d'abord les notifications sur cet appareil" });
+      return;
+    }
+
+    setPushTestBusy(true);
+    const result = await sendAdminPushTestNotification();
+    setPushTestBusy(false);
+    if (!result.ok) {
+      setToast({ kind: "warn", msg: result.error });
+      return;
+    }
+    setToast({
+      kind: "ok",
+      msg: result.sent > 0 ? "Notification test envoyée" : "Aucun appareil joint",
+    });
+  };
+
   return {
     tab,
     setTab,
@@ -195,6 +216,7 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     toast,
     pushStatus,
     pushBusy,
+    pushTestBusy,
     reload,
     approve,
     reject,
@@ -203,5 +225,6 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     handleLogout,
     enablePush,
     disablePush,
+    testPush,
   };
 };

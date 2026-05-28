@@ -28,6 +28,7 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
     toast,
     pushStatus,
     pushBusy,
+    pushTestBusy,
     approve: onApprove,
     reject: onReject,
     ban,
@@ -35,6 +36,7 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
     handleLogout,
     enablePush,
     disablePush,
+    testPush,
   } = useAdminProfiles(onLogout, currentUserId);
   const [banReason, setBanReason] = useState<string>(BAN_REASONS[0]);
 
@@ -130,6 +132,17 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
           >
             {pushBusy ? "…" : pushEnabled ? "Notifications actives" : "Activer notifications"}
           </button>
+          {pushEnabled && (
+            <button
+              type="button"
+              className="admin-push"
+              onClick={testPush}
+              disabled={pushTestBusy}
+              title="Envoyer une notification test sur cet appareil"
+            >
+              {pushTestBusy ? "…" : "Tester"}
+            </button>
+          )}
           <button type="button" className="admin-logout" onClick={handleLogout}>
             Déconnexion
           </button>

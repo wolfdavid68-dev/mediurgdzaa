@@ -9,6 +9,7 @@ export type PushNotificationStatus =
   | "disabled";
 
 type PushResult = { ok: true; status: PushNotificationStatus } | { ok: false; error: string };
+type PushTestResult = { ok: true; sent: number } | { ok: false; error: string };
 
 let cachedVapidPublicKey = "";
 
@@ -135,4 +136,39 @@ export const disableAdminPushNotifications = async (): Promise<PushResult> => {
   }
 
   return { ok: true, status: await getAdminPushStatus() };
+};
+
+export const sendAdminPushTestNotification = async (): Promise<PushTestResult> => {
+  if (!isPushSupported())
+    return { ok: false, error: "Notifications non supportées sur cet appareil" };
+  if (Notification.permission !== "granted") {
+    return { ok: false, error: "Notifications non autorisées sur cet appareil" };
+  }
+
+  const subscription = await getCurrentSubscription();
+  if (!subscription) return { ok: false, error: "Aucun abonnement push sur cet appareil" };
+
+  const session = await getCurrentSession();
+  if (!session?.access_token) return { ok: false, error: "Session admin introuvable" };
+
+  try {
+    const response = await fetch("/api/test-push-notification", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    const body = (await response.json().catch(() => null)) as {
+      error?: string;
+      sent?: number;
+    } | null;
+
+    if (!response.ok) {
+      return { ok: false, error: body?.error || "Notification test non transmise" };
+    }
+    return { ok: true, sent: body?.sent ?? 0 };
+  } catch {
+    return { ok: false, error: "Notification test indisponible" };
+  }
 };

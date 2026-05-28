@@ -632,6 +632,12 @@ select.m-input {
   background: oklch(0.6 0.2 25 / 0.14);
   color: oklch(0.97 0.004 90);
 }
+.m-push-btn-test {
+  min-height: 34px;
+  margin-top: -6px;
+  background: transparent;
+  color: oklch(0.78 0.012 280);
+}
 .m-push-btn:disabled {
   opacity: 0.55;
 }

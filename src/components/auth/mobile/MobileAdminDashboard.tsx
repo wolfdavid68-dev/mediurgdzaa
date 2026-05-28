@@ -50,6 +50,7 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
     toast,
     pushStatus,
     pushBusy,
+    pushTestBusy,
     approve: onApprove,
     reject: onReject,
     ban: onBan,
@@ -57,6 +58,7 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
     handleLogout,
     enablePush,
     disablePush,
+    testPush,
   } = useAdminProfiles(onLogout, currentUserId);
   const [query, setQuery] = useState("");
   const pushEnabled = pushStatus === "enabled";
@@ -117,6 +119,16 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
           >
             {pushBusy ? "…" : pushEnabled ? "Notifications actives" : "Activer notifications"}
           </button>
+          {pushEnabled && (
+            <button
+              type="button"
+              className="m-push-btn m-push-btn-test"
+              onClick={testPush}
+              disabled={pushTestBusy}
+            >
+              {pushTestBusy ? "…" : "Tester la notification"}
+            </button>
+          )}
           <div className="m-search-wrap">
             <SearchIcon />
             <input
