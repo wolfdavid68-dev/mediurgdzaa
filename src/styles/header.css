@@ -402,6 +402,29 @@
    mobile. La search-bar prend toute la place dispo (flex:1), le bandeau
    poids garde sa largeur naturelle. Quand une fiche est déployée, la search
    se cache → le bandeau poids occupe la rangée seul. */
+@media (min-width: 1100px) {
+  .bottom-nav {
+    top: 50%;
+    bottom: auto;
+    left: calc(16px + var(--safe-left));
+    width: 156px;
+    padding: 6px;
+    transform: translateY(-50%);
+  }
+
+  .bottom-nav-row {
+    flex-direction: column;
+  }
+
+  .bottom-tab {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 48px;
+    padding: 9px 11px;
+    text-align: left;
+  }
+}
+
 .search-row {
   display: flex;
   align-items: stretch;

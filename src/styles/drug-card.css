@@ -212,6 +212,13 @@
 }
 
 /* Section Récents */
+@media (min-width: 1100px) {
+  .main-content {
+    padding-left: calc(188px + var(--safe-left));
+    padding-right: clamp(16px, 2vw, 32px);
+  }
+}
+
 .recent-section {
   width: min(100%, var(--clinical-content-max));
   margin-left: auto;
