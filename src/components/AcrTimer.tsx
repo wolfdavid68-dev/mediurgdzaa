@@ -29,6 +29,7 @@ import {
   AcrZoomOverlay,
 } from "./AcrTimer.parts";
 import { useWakeLock } from "../lib/useWakeLock";
+import { safeSetItem } from "../lib/safeStorage";
 import AcrSummary from "./AcrSummary";
 import AcrPrepOverlay from "./AcrPrepOverlay";
 
@@ -78,9 +79,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
   const visualOn = coachMode !== "silent"; // zoom DSA + flashs
   const voiceOn = coachMode === "full"; // annonces TTS françaises
   useEffect(() => {
-    try {
-      localStorage.setItem(COACH_LS_KEY, coachMode);
-    } catch {}
+    safeSetItem(COACH_LS_KEY, coachMode);
   }, [coachMode]);
   const [showHistory, setShowHistory] = useState(false);
   const [metroOn, setMetroOn] = useState(false);

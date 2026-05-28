@@ -1,5 +1,4 @@
 import type { Session, User } from "@supabase/supabase-js";
-import { getSupabase } from "./supabase";
 import { clearCachedProfile } from "./profileCache";
 
 // API d'authentification haut-niveau pour MediURG. Toute la logique est
@@ -10,6 +9,11 @@ import { clearCachedProfile } from "./profileCache";
 
 export const MATRICULE_REGEX = /^M\d{6}$/;
 export const EMAIL_DOMAIN = "@ghrmsa.fr";
+
+const getSupabaseClient = async () => {
+  const { getSupabase } = await import("./supabase");
+  return getSupabase();
+};
 
 // ─── Types métier ────────────────────────────────────────────
 export type ProfileStatus = "pending" | "active" | "banned";
@@ -162,7 +166,7 @@ export const isNetworkError = (e: unknown): boolean => {
 // Crée un compte auth Supabase + une ligne profile (status=pending).
 // L'admin doit ensuite approuver depuis la console.
 export const signup = async (payload: SignupPayload): Promise<AuthResult<{ id: string }>> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
 
   if (!isValidMatricule(payload.matricule)) {
@@ -205,7 +209,7 @@ export const login = async (
   matricule: string,
   password: string
 ): Promise<AuthResult<{ session: Session; profile: Profile }>> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   if (!isValidMatricule(matricule)) {
     return { ok: false, error: "Matricule invalide (format : M + 6 chiffres)" };
@@ -256,7 +260,7 @@ export const logout = async (): Promise<void> => {
   // Purge le profil caché : une déconnexion explicite ne doit pas laisser
   // un fallback offline réactivable au prochain lancement.
   clearCachedProfile();
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return;
   // scope:"local" → vide la session locale (localStorage) SANS appel
   // réseau. Le scope "global" par défaut révoque le refresh-token côté
@@ -280,7 +284,7 @@ export const logout = async (): Promise<void> => {
 // On retourne toujours { ok: true } même si le matricule est inconnu :
 // éviter la fuite d'info (énumération de matricules valides).
 export const requestPasswordReset = async (matricule: string): Promise<AuthResult> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   if (!isValidMatricule(matricule)) {
     return { ok: false, error: "Matricule invalide (format : M + 6 chiffres)" };
@@ -306,7 +310,7 @@ export const requestPasswordReset = async (matricule: string): Promise<AuthResul
 // Appelé depuis le ResetPasswordScreen après que Supabase a établi
 // la session de récupération via le lien email.
 export const updatePassword = async (newPassword: string): Promise<AuthResult> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   if (!isValidPassword(newPassword)) {
     return { ok: false, error: "Mot de passe trop court (min 8 caractères)" };
@@ -318,7 +322,7 @@ export const updatePassword = async (newPassword: string): Promise<AuthResult> =
 
 // ─── Récupération de la session courante ─────────────────────
 export const getCurrentSession = async (): Promise<Session | null> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return null;
   const { data } = await supabase.auth.getSession();
   return data.session ?? null;
@@ -326,7 +330,7 @@ export const getCurrentSession = async (): Promise<Session | null> => {
 
 // ─── Fetch profile par id ────────────────────────────────────
 export const fetchProfile = async (userId: string): Promise<AuthResult<Profile>> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré", kind: "config" };
   try {
     const { data, error } = await supabase
@@ -357,7 +361,7 @@ export const fetchProfile = async (userId: string): Promise<AuthResult<Profile>>
 export const fetchProfilesByStatus = async (
   status: ProfileStatus
 ): Promise<AuthResult<Profile[]>> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   const { data, error } = await supabase
     .from("profiles")
@@ -374,7 +378,7 @@ const logAdminAction = async (
   action: AdminAuditAction,
   reason?: string
 ): Promise<void> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return;
   try {
     await supabase.from("admin_audit_events").insert({
@@ -394,7 +398,7 @@ const logAdminAction = async (
 };
 
 export const approveProfile = async (profile: Profile, actorId: string): Promise<AuthResult> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   const { error } = await supabase
     .from("profiles")
@@ -410,7 +414,7 @@ export const approveProfile = async (profile: Profile, actorId: string): Promise
 };
 
 export const rejectProfile = async (profile: Profile, actorId: string): Promise<AuthResult> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   // Reject = on supprime le profile (l'auth.user reste mais sans profile,
   // il ne peut plus se login car matricule_to_email ne le trouve plus).
@@ -425,7 +429,7 @@ export const banProfile = async (
   reason: string,
   actorId: string
 ): Promise<AuthResult> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   const { error } = await supabase
     .from("profiles")
@@ -441,7 +445,7 @@ export const banProfile = async (
 };
 
 export const unbanProfile = async (profile: Profile, actorId: string): Promise<AuthResult> => {
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
   const { error } = await supabase
     .from("profiles")
@@ -466,16 +470,23 @@ export const onAuthStateChange = (
   callback: (user: User | null) => void,
   onRecovery?: () => void
 ) => {
-  const supabase = getSupabase();
-  if (!supabase) return () => {};
-  const { data } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "PASSWORD_RECOVERY") {
-      onRecovery?.();
-      return;
-    }
-    callback(session?.user ?? null);
+  let active = true;
+  let unsubscribe: (() => void) | undefined;
+  getSupabaseClient().then((supabase) => {
+    if (!active || !supabase) return;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        onRecovery?.();
+        return;
+      }
+      callback(session?.user ?? null);
+    });
+    unsubscribe = () => data.subscription.unsubscribe();
   });
-  return () => data.subscription.unsubscribe();
+  return () => {
+    active = false;
+    unsubscribe?.();
+  };
 };
 
 // ─── Utils ───────────────────────────────────────────────────

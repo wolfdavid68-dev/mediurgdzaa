@@ -23,6 +23,8 @@ La base technique a été durcie :
   limitation simple de débit, avec session Supabase active requise ;
 - secrets non suivis par Git ;
 - audit npm ajouté en CI ;
+- scan automatisé des assets buildés pour repérer l'embarquement accidentel de secrets serveur ;
+- budgets gzip par chunk et captures mobiles hors-ligne de test avec profil factice ;
 - runbook sécurité créé.
 
 Conclusion opérationnelle : base technique saine pour poursuivre, mais validation DPO/RSSI/DSI
@@ -143,6 +145,10 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 - Assets statiques versionnés et cache contrôlé.
 - Service worker Workbox avec stratégie de mise à jour explicite.
 - Pas de `dangerouslySetInnerHTML` identifié dans le scan local.
+- Vérification `verify:pwa-offline` : précache Workbox, seuils de taille, budgets gzip, scan
+  d'indices de secrets serveur dans les assets livrés.
+- Vérification `verify:pwa-offline:browser` : rechargement hors-ligne réel de Protocoles, Kits,
+  URGENCE ACR, Médicaments et Login, avec captures mobiles factices.
 
 ### API ECG
 
@@ -159,6 +165,8 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 - `npm audit --audit-level=moderate` ajouté en CI.
 - Vulnérabilité `ws` corrigée via lockfile.
 - Vérifications utilisées : typecheck, lint, knip, tests, build.
+- Rapport de cohérence des données cliniques générable via `npm run report:data`, sans donnée
+  patient.
 
 ### Supabase
 

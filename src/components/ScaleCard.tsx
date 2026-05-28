@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ClinicalScale, ScaleItem } from "../types/data";
 
 // Affiche une échelle clinique interactive (Glasgow, RASS, Cushman...).
 // L'état des sélections est local — pas de persistence entre ouvertures :
@@ -15,7 +16,7 @@ import { useState } from "react";
 // alors choisir d'abord un variant (ex: tranche d'âge pour la PA dans Cushman),
 // puis l'option dans le barème de ce variant.
 
-type ScaleCardProps = { scale: any };
+type ScaleCardProps = { scale: ClinicalScale };
 
 const ScaleCard = ({ scale }: ScaleCardProps) => {
   const [open, setOpen] = useState(false);
@@ -32,7 +33,7 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
     : pickedScore;
 
   const allAnswered = isSum
-    ? scale.items.every((_: any, i: number) => typeof sumSelections[i] === "number")
+    ? scale.items.every((_, i) => typeof sumSelections[i] === "number")
     : pickedScore !== null;
 
   // total est garanti non-null quand allAnswered=true (allAnswered le vérifie).
@@ -48,11 +49,11 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
 
   // Pour un item avec variants : on n'autorise le clic sur les options que
   // si un variant a été choisi. Sinon les options ne s'affichent pas.
-  const getActiveOptions = (item: any, i: number) => {
+  const getActiveOptions = (item: ScaleItem, i: number) => {
     if (!item.variants) return item.options;
     const variantId = variantSelections[i];
     if (!variantId) return null;
-    const v = item.variants.find((x: any) => x.id === variantId);
+    const v = item.variants.find((x) => x.id === variantId);
     return v ? v.options : null;
   };
 
@@ -71,7 +72,7 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
           <h3 className="scale-title">{scale.nom}</h3>
           {!open && <p className="scale-description">{scale.description}</p>}
         </div>
-        {allAnswered && (
+        {allAnswered && interp && (
           <span className="scale-header-score" style={{ background: interp.color }}>
             {isSum ? totalSafe : totalSafe > 0 ? `+${totalSafe}` : totalSafe}
           </span>
@@ -95,7 +96,7 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
 
           {isSum ? (
             <div className="scale-items">
-              {scale.items.map((item: any, i: number) => {
+              {scale.items.map((item, i) => {
                 const activeOptions = getActiveOptions(item, i);
                 return (
                   <div key={i} className="scale-item">
@@ -103,7 +104,7 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
 
                     {item.variants && (
                       <div className="scale-variants">
-                        {item.variants.map((v: any) => {
+                        {item.variants.map((v) => {
                           const selected = variantSelections[i] === v.id;
                           return (
                             <button
@@ -127,7 +128,7 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
 
                     {activeOptions ? (
                       <div className="scale-item-options">
-                        {activeOptions.map((opt: any) => {
+                        {activeOptions.map((opt) => {
                           const selected = sumSelections[i] === opt.score;
                           return (
                             <button
@@ -151,7 +152,7 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
             </div>
           ) : (
             <div className="scale-pick-list">
-              {scale.options.map((opt: any) => {
+              {scale.options.map((opt) => {
                 const selected = pickedScore === opt.score;
                 return (
                   <button

@@ -1,4 +1,5 @@
 import { useState, useEffect, type ChangeEvent } from "react";
+import { safeGetItem, safeRemoveItem, safeSetItem } from "../lib/safeStorage";
 
 // Note personnelle par drug, persistée dans localStorage (mediurg-note-{id}).
 // onChange(hasContent) permet au parent d'afficher l'indicateur ✎ dans l'en-tête.
@@ -7,33 +8,23 @@ type DrugNoteProps = { drugId: number; onChange?: (hasContent: boolean) => void 
 const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
+  const storageKey = `mediurg-note-${drugId}`;
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`mediurg-note-${drugId}`);
-      if (saved) {
-        setNote(saved);
-        if (onChange) onChange(true);
-      }
-    } catch {
-      // localStorage indisponible (mode privé, restrictions)
+    const saved = safeGetItem(storageKey);
+    if (saved) {
+      setNote(saved);
+      if (onChange) onChange(true);
     }
-  }, [drugId, onChange]);
+  }, [onChange, storageKey]);
 
   const handleNoteChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setNote(value);
-    try {
-      if (value.trim()) {
-        localStorage.setItem(`mediurg-note-${drugId}`, value);
-      } else {
-        localStorage.removeItem(`mediurg-note-${drugId}`);
-      }
-      setNoteSaved(true);
-      setTimeout(() => setNoteSaved(false), 1500);
-    } catch {
-      // ignore
-    }
+    if (value.trim()) safeSetItem(storageKey, value);
+    else safeRemoveItem(storageKey);
+    setNoteSaved(true);
+    setTimeout(() => setNoteSaved(false), 1500);
     if (onChange) onChange(!!value.trim());
   };
 

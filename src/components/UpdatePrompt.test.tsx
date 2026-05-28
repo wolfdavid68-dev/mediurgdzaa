@@ -6,12 +6,14 @@ import { useState } from "react";
 let mockNeedRefresh = false;
 let mockOfflineReady = false;
 let mockUpdateSW = vi.fn();
-let mockOnRegistered: ((reg: any) => void) | undefined;
+type MockServiceWorkerRegistration = Pick<ServiceWorkerRegistration, "update">;
+
+let mockOnRegistered: ((reg: MockServiceWorkerRegistration | null) => void) | undefined;
 let mockOnRegisterError: ((err: unknown) => void) | undefined;
 
 vi.mock("virtual:pwa-register/react", () => ({
   useRegisterSW: (opts: {
-    onRegistered?: (reg: any) => void;
+    onRegistered?: (reg: MockServiceWorkerRegistration | null) => void;
     onRegisterError?: (err: unknown) => void;
   }) => {
     const [needRefresh, setNeedRefresh] = useState(mockNeedRefresh);
@@ -132,7 +134,10 @@ describe("UpdatePrompt", () => {
     render(<UpdatePrompt />);
     expect(mockOnRegisterError).toBeDefined();
     mockOnRegisterError!(new Error("boom"));
-    expect(warn).toHaveBeenCalledWith("SW registration error", expect.any(Error));
+    expect(warn).toHaveBeenCalledTimes(1);
+    const [message, error] = warn.mock.calls[0];
+    expect(message).toBe("SW registration error");
+    expect(error).toBeInstanceOf(Error);
     warn.mockRestore();
   });
 });

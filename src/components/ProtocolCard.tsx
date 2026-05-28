@@ -91,6 +91,9 @@ type ProtocolCardProps = {
   onDrugSearch: (name: string) => void;
 };
 
+type ProtocolSection = Protocol["sections"][number];
+type ProtocolItem = ProtocolSection["items"][number];
+
 const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<number | null>(null);
@@ -99,7 +102,7 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
 
   useEffect(() => {
     if (open) {
-      const idx = p.sections.findIndex((s: any) => s.type === "actions");
+      const idx = p.sections.findIndex((s) => s.type === "actions");
       setActiveTab(idx >= 0 ? idx : 0);
     }
   }, [open, p.sections]);
@@ -216,7 +219,7 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
           </div>
 
           <div className="proto-tabs">
-            {p.sections.map((s: any, i: number) => {
+            {p.sections.map((s: ProtocolSection, i: number) => {
               const m = SECTION_META[s.type as keyof typeof SECTION_META] || {
                 short: s.titre,
                 color: "#888",
@@ -243,7 +246,7 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
           {sec && (
             <div className="proto-tab-content">
               <ol className={`proto-items ${isActions ? "proto-items-numbered" : ""}`}>
-                {sec.items.map((item: any, j: number) => (
+                {sec.items.map((item: ProtocolItem, j: number) => (
                   <li key={j} className={`proto-item proto-item-${sec.type}`}>
                     {isActions ? (
                       <span className="proto-item-num" style={{ background: meta?.color }}>

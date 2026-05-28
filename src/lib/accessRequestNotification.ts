@@ -11,14 +11,16 @@ export const notifyAccessRequestCreated = async (
 
   try {
     const session = await getCurrentSession();
-    if (!session?.access_token) return { ok: true };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
 
     const response = await fetch("/api/notify-access-request", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({ profileId }),
     });
 

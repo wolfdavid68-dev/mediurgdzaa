@@ -12,6 +12,8 @@
 // puis les clés anonymes sont laissées pour fallback si plusieurs users du
 // même device se logueront ensuite). Cf. migrateAnonymousData().
 
+import { safeGetItem, safeRemoveItem, safeSetItem } from "./safeStorage";
+
 const ANON_PREFIX = "mediurg-";
 
 // Clés à migrer du mode anonyme vers le mode authentifié au 1er login.
@@ -25,25 +27,15 @@ const userPrefix = (userId: string | null): string =>
 // Lecture sécurisée — retourne null si localStorage indisponible (mode privé,
 // quotas, etc.) ou si la clé n'existe pas.
 export const readUserItem = (userId: string | null, key: string): string | null => {
-  try {
-    return localStorage.getItem(userPrefix(userId) + key);
-  } catch {
-    return null;
-  }
+  return safeGetItem(userPrefix(userId) + key);
 };
 
 export const writeUserItem = (userId: string | null, key: string, value: string): void => {
-  try {
-    localStorage.setItem(userPrefix(userId) + key, value);
-  } catch {
-    // Quota dépassé, mode privé, etc. — l'app continue sans persistance.
-  }
+  safeSetItem(userPrefix(userId) + key, value);
 };
 
 export const removeUserItem = (userId: string | null, key: string): void => {
-  try {
-    localStorage.removeItem(userPrefix(userId) + key);
-  } catch {}
+  safeRemoveItem(userPrefix(userId) + key);
 };
 
 // Notes par médicament — convention spécifique : `mediurg-note-{drugId}` en
@@ -68,12 +60,7 @@ export const migrateAnonymousData = (
   drugIds: number[]
 ): { migrated: number; skipped: number } => {
   if (!userId) return { migrated: 0, skipped: 0 };
-  // Skip si déjà fait
-  try {
-    if (localStorage.getItem(MIGRATION_DONE_KEY_PREFIX + userId) === "1") {
-      return { migrated: 0, skipped: 0 };
-    }
-  } catch {
+  if (safeGetItem(MIGRATION_DONE_KEY_PREFIX + userId) === "1") {
     return { migrated: 0, skipped: 0 };
   }
 
@@ -82,44 +69,34 @@ export const migrateAnonymousData = (
 
   // Migre les clés simples
   for (const key of MIGRATABLE_KEYS) {
-    try {
-      const anonValue = localStorage.getItem(ANON_PREFIX + key);
-      if (anonValue === null) continue;
-      const userKey = userPrefix(userId) + key;
-      // Si l'user a déjà une valeur, on ne l'écrase pas (priorité aux
-      // données déjà associées à son compte).
-      if (localStorage.getItem(userKey) !== null) {
-        skipped++;
-        continue;
-      }
-      localStorage.setItem(userKey, anonValue);
-      migrated++;
-    } catch {
+    const anonValue = safeGetItem(ANON_PREFIX + key);
+    if (anonValue === null) continue;
+    const userKey = userPrefix(userId) + key;
+    // Si l'user a déjà une valeur, on ne l'écrase pas (priorité aux
+    // données déjà associées à son compte).
+    if (safeGetItem(userKey) !== null) {
       skipped++;
+      continue;
     }
+    if (safeSetItem(userKey, anonValue)) migrated++;
+    else skipped++;
   }
 
   // Migre les notes par drug
   for (const drugId of drugIds) {
-    try {
-      const anonValue = localStorage.getItem(`${ANON_PREFIX}note-${drugId}`);
-      if (!anonValue) continue;
-      const userKey = `${userPrefix(userId)}note-${drugId}`;
-      if (localStorage.getItem(userKey) !== null) {
-        skipped++;
-        continue;
-      }
-      localStorage.setItem(userKey, anonValue);
-      migrated++;
-    } catch {
+    const anonValue = safeGetItem(`${ANON_PREFIX}note-${drugId}`);
+    if (!anonValue) continue;
+    const userKey = `${userPrefix(userId)}note-${drugId}`;
+    if (safeGetItem(userKey) !== null) {
       skipped++;
+      continue;
     }
+    if (safeSetItem(userKey, anonValue)) migrated++;
+    else skipped++;
   }
 
   // Marque la migration comme faite pour cet user
-  try {
-    localStorage.setItem(MIGRATION_DONE_KEY_PREFIX + userId, "1");
-  } catch {}
+  safeSetItem(MIGRATION_DONE_KEY_PREFIX + userId, "1");
 
   return { migrated, skipped };
 };

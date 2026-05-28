@@ -119,6 +119,6 @@ describe("ProtocolCard", () => {
       })
     );
     // Cleanup pour ne pas fuiter dans les autres tests
-    delete (navigator as any).share;
+    Reflect.deleteProperty(navigator, "share");
   });
 });

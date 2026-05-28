@@ -6,13 +6,35 @@ import { DRUGS } from "../data/drugs";
 import { PSE } from "../data/pse";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
 import { PROTOCOLS } from "../data/protocols";
+import { PREP_KITS } from "../data/prepKits";
 import { DRUG_PATTERNS } from "../components/ProtocolCard";
 import { normalize } from "./normalize";
-import { calcDose, calcDebit } from "./calc";
+import { calcDose, calcDebit, type PrepFormula, type PseFormula } from "./calc";
+import type { Drug, PrepKit } from "../types/data";
 import idsSnapshot from "../data/drug-ids.snapshot.json";
 
 // Poids de référence pour les tests de plausibilité clinique
 const REF_KG = 70;
+
+type LooseRecord = Record<string, unknown>;
+type DrugForIntegrity = Drug & { prep?: PrepFormula | null };
+type PseEntryForIntegrity = PseFormula & {
+  min: number;
+  max: number;
+  steps: number[];
+  extra?: {
+    unite: string;
+    min: number;
+    max: number;
+  };
+};
+
+const hasMissingKeys = (value: LooseRecord, keys: string[]) =>
+  keys.filter((key) => value[key] === undefined || value[key] === null);
+
+const drugsForIntegrity = DRUGS as DrugForIntegrity[];
+const pseForIntegrity = PSE as Record<string, PseEntryForIntegrity>;
+const prepKitsForIntegrity = PREP_KITS as PrepKit[];
 
 // ════════════════════════════════════════════════════════════════
 // DRUGS — intégrité des IDs
@@ -34,7 +56,7 @@ describe("DRUGS — intégrité", () => {
     const broken = DRUGS.map((d) => ({
       id: d.id,
       nom: d.nom,
-      missing: required.filter((k) => (d as any)[k] === undefined || (d as any)[k] === null),
+      missing: hasMissingKeys(d as LooseRecord, required),
     })).filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });
@@ -102,8 +124,8 @@ describe("PSE — cohérence avec DRUGS", () => {
 
   test("chaque entrée PSE a conc, unite, min, max, steps", () => {
     const required = ["conc", "unite", "min", "max", "steps"];
-    const broken = Object.entries(PSE)
-      .map(([id, p]) => ({ id, missing: required.filter((k) => (p as any)[k] === undefined) }))
+    const broken = Object.entries(pseForIntegrity)
+      .map(([id, p]) => ({ id, missing: hasMissingKeys(p as unknown as LooseRecord, required) }))
       .filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });
@@ -129,6 +151,42 @@ describe("PSE — cohérence avec DRUGS", () => {
       .filter(([, p]) => p.min >= p.max || !p.steps?.length)
       .map(([id]) => id);
     expect(bad).toEqual([]);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// PREP_KITS — cohérence avec DRUGS et check-lists interactives
+// ════════════════════════════════════════════════════════════════
+describe("PREP_KITS — cohérence", () => {
+  const drugIds = new Set(DRUGS.map((d) => d.id));
+
+  test("chaque drugId de kit pointe vers un drug.id existant", () => {
+    const broken: string[] = [];
+    prepKitsForIntegrity.forEach((kit) => {
+      kit.drogues.forEach((drogue) => {
+        if (drogue.drugId !== undefined && !drugIds.has(drogue.drugId)) {
+          broken.push(`${kit.id} → ${drogue.nom} drugId=${drogue.drugId}`);
+        }
+      });
+    });
+    expect(broken).toEqual([]);
+  });
+
+  test("les menus select[from] des check-lists trouvent une drogue du kit", () => {
+    const broken: string[] = [];
+    prepKitsForIntegrity.forEach((kit) => {
+      kit.checklist?.forEach((section) => {
+        section.items.forEach((item) => {
+          if (item.type !== "select" || !item.from) return;
+          const needle = normalize(item.from);
+          const hasMatch = kit.drogues.some((drogue) => normalize(drogue.role).includes(needle));
+          if (!hasMatch) {
+            broken.push(`${kit.id} → ${section.titre} / ${item.label} from="${item.from}"`);
+          }
+        });
+      });
+    });
+    expect(broken).toEqual([]);
   });
 });
 
@@ -300,8 +358,8 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
     // 500 mL = borne haute pour antibios en perfusion lente diluée
     // (vanco, etc.). Au-dessus, c'est probablement une erreur d'unité 1000×.
     const bad: string[] = [];
-    DRUGS.forEach((d) => {
-      const p = (d as any).prep;
+    drugsForIntegrity.forEach((d) => {
+      const p = d.prep;
       if (!p?.dose_kg || !p?.conc_produit) return;
       const vol = (p.dose_kg * REF_KG) / p.conc_produit;
       if (vol < SANE_VOL_MIN || vol > 500) {
@@ -317,11 +375,12 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
     // Hidonac autorise des volumes plus grands car les phases sont diluées
     // dans 500–1000 mL de G5%. On assouplit la borne haute.
     const bad: string[] = [];
-    DRUGS.forEach((d) => {
-      const p = (d as any).prep;
+    drugsForIntegrity.forEach((d) => {
+      const p = d.prep;
       if (!p?.phases?.length || !p.conc_produit) return;
-      p.phases.forEach((phase: any, i: number) => {
-        const vol = (phase.dose_kg * REF_KG) / p.conc_produit;
+      const concProduit = p.conc_produit;
+      p.phases.forEach((phase, i) => {
+        const vol = (phase.dose_kg * REF_KG) / concProduit;
         if (vol < SANE_VOL_MIN || vol > 500) {
           bad.push(`${d.id} ${d.nom} phase ${i} → ${vol.toFixed(2)} mL`);
         }
@@ -334,17 +393,15 @@ describe("Plausibilité — préparations IV (drugs.js)", () => {
     // Les preps qui calculent autrement (sufenta_table = table Vi/Vf,
     // dose_threshold = seuil ampoules type Anexate) n'ont pas besoin de
     // conc_produit au niveau racine.
-    const bad = DRUGS.filter((d) => (d as any).prep)
-      .filter((d) => !(d as any).prep.sufenta_table && (d as any).prep.dose_threshold === undefined)
+    const bad = drugsForIntegrity
+      .filter((d) => d.prep)
+      .filter((d) => !d.prep?.sufenta_table && d.prep?.dose_threshold === undefined)
       .filter((d) => {
-        const hasConc = (d as any).prep.conc_produit !== undefined;
-        const hasUnite = (d as any).prep.unite !== undefined;
+        const hasConc = d.prep?.conc_produit !== undefined;
+        const hasUnite = d.prep?.unite !== undefined;
         return hasConc !== hasUnite;
       })
-      .map(
-        (d) =>
-          `${d.id} ${d.nom} (conc=${(d as any).prep.conc_produit}, unite=${(d as any).prep.unite})`
-      );
+      .map((d) => `${d.id} ${d.nom} (conc=${d.prep?.conc_produit}, unite=${d.prep?.unite})`);
     expect(bad).toEqual([]);
   });
 });
@@ -391,14 +448,13 @@ describe("Plausibilité — débits PSE (pse.js)", () => {
 
   test("mode 'extra' (héparine UI/24h) : débit cohérent aussi", () => {
     const bad: string[] = [];
-    Object.entries(PSE).forEach(([id, p]) => {
-      const pAny = p as any;
-      if (!pAny.extra) return;
-      const ex = { unite: pAny.extra.unite, conc: pAny.conc };
-      const mid = (pAny.extra.min + pAny.extra.max) / 2;
+    Object.entries(pseForIntegrity).forEach(([id, p]) => {
+      if (!p.extra) return;
+      const ex = { unite: p.extra.unite, conc: p.conc };
+      const mid = (p.extra.min + p.extra.max) / 2;
       const rate = calcDebit(ex, mid, null);
       if (rate === null || rate < SANE_RATE_MIN || rate > SANE_RATE_MAX) {
-        bad.push(`${id} extra → ${rate} mL/h (dose=${mid} ${pAny.extra.unite})`);
+        bad.push(`${id} extra → ${rate} mL/h (dose=${mid} ${p.extra.unite})`);
       }
     });
     expect(bad).toEqual([]);
@@ -417,7 +473,7 @@ describe("Plausibilité — toutes les chaînes poso /kg sont parsables", () => 
     const unparsable: string[] = [];
     DRUGS.forEach((d) => {
       (["a", "p"] as const).forEach((group) => {
-        ((d.poso as any)?.[group] || []).forEach((line: string, i: number) => {
+        (d.poso?.[group] || []).forEach((line: string, i: number) => {
           if (!HAS_DOSE_PATTERN.test(line)) return; // ligne sans dose/kg, OK
           const res = calcDose(line, REF_KG);
           if (res === null) {

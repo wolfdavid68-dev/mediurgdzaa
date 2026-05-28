@@ -9,6 +9,7 @@ import {
 } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
 import { DRUGS_PREVIEW } from "../data/drugs.preview";
+import type { Drug } from "../types/data";
 
 // `prep` public (drugs.js) éventuellement enrichi par l'override preview
 // (drugs.preview.js) si ?author=preview. On FUSIONNE l'override par-dessus le
@@ -17,8 +18,11 @@ import { DRUGS_PREVIEW } from "../data/drugs.preview";
 // redéfinit pas — notamment `pedTable`, la table de dilution PÉDIATRIQUE —
 // doivent survivre. Sans fusion, la table pédiatrique d'Adrénaline (et autres
 // drogues à pedTable présentes dans l'override) disparaît en preview.
-const resolvePrep = (drug: any) => {
-  const override = isPreview() ? (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep : null;
+type DrugPrep = NonNullable<Drug["prep"]>;
+type PreviewPrepByDrugId = Partial<Record<number, { prep?: Partial<DrugPrep> }>>;
+
+const resolvePrep = (drug: Drug): DrugPrep | null => {
+  const override = isPreview() ? (DRUGS_PREVIEW as PreviewPrepByDrugId)[drug.id]?.prep : null;
   if (override) return { ...drug.prep, ...override };
   return drug.prep || null;
 };
@@ -37,7 +41,7 @@ const InfoIcon = () => (
   </svg>
 );
 
-type PrepBlockProps = { drug: any; weight: string; produitFinal: string };
+type PrepBlockProps = { drug: Drug; weight: string; produitFinal: string };
 
 // Bloc Préparation : étapes + calculateur (4 variantes selon la shape de prep).
 // produitFinal vient du parent car son input vit au-dessus du bloc poso (input swap).
@@ -143,7 +147,7 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
           <div className="prep-calc-header">
             <PrepIcon /> Pour {kg} kg
           </div>
-          {phases.map((phase: any, i: number) => (
+          {phases.map((phase, i: number) => (
             <div
               key={i}
               style={{

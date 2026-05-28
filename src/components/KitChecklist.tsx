@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import KitScaleIllustration from "./KitScaleIllustration";
+import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
 import type { ChecklistItem, ChecklistSection } from "../types/data";
 
 // Check-list interactive d'un kit (ex : ISR / intubation). Trois types
@@ -17,6 +18,7 @@ const storageKey = (kitId: string) => `mediurg-kit-checklist-${kitId}`;
 type Drogue = { nom: string; role?: string };
 
 type Values = Record<string, boolean | string>;
+type StoredValues = { ts: number; values: Values };
 
 // Un item est « complété » selon son type : case cochée, choix sélectionné,
 // ou champ texte non vide. Une section est complète quand TOUS ses items le
@@ -46,22 +48,16 @@ const collapsedFromDone = (done: boolean[]): Set<number> =>
   new Set(done.flatMap((d, i) => (d ? [i] : [])));
 
 const loadValues = (kitId: string): Values => {
-  try {
-    const raw = localStorage.getItem(storageKey(kitId));
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed.ts !== "number" || !parsed.values) {
-      localStorage.removeItem(storageKey(kitId));
-      return {};
-    }
-    if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
-      localStorage.removeItem(storageKey(kitId));
-      return {};
-    }
-    return parsed.values;
-  } catch {
+  const parsed = safeGetJson<StoredValues | null>(storageKey(kitId), null);
+  if (!parsed || typeof parsed.ts !== "number" || !parsed.values) {
+    safeRemoveItem(storageKey(kitId));
     return {};
   }
+  if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
+    safeRemoveItem(storageKey(kitId));
+    return {};
+  }
+  return parsed.values;
 };
 
 type Props = {
@@ -73,6 +69,7 @@ type Props = {
 };
 
 const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
+  const sectionIdPrefix = useId();
   // Options d'un menu déroulant : soit explicites (`options`), soit dérivées
   // des drogues du kit dont le rôle contient le mot-clé `from` (ex : tous les
   // « Hypnotique … » / « Curare … » du kit). Sufentanil (« Morphinique ») est
@@ -102,11 +99,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   const focusedSection = useRef<number | null>(null);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(storageKey(kitId), JSON.stringify({ ts: Date.now(), values }));
-    } catch {
-      /* quota / navigation privée : on ignore, la session reste utilisable */
-    }
+    safeSetJson(storageKey(kitId), { ts: Date.now(), values });
   }, [values, kitId]);
 
   // Auto-repli sur la transition incomplète → complète (uniquement à ce
@@ -325,7 +318,14 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
         </div>
       </div>
 
-      <div className="kit-checklist-progressbar" aria-hidden="true">
+      <div
+        className="kit-checklist-progressbar"
+        role="progressbar"
+        aria-label={`Progression ${titre}`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      >
         <div
           className="kit-checklist-progressfill"
           style={{ width: `${pct}%`, background: allDone ? "var(--success)" : couleur }}
@@ -336,6 +336,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
         const sec = sectionChecks[si];
         const secDone = sec.total > 0 && sec.done === sec.total;
         const isCollapsed = collapsed.has(si);
+        const contentId = `${sectionIdPrefix}-section-${si}`;
         return (
           <div key={si} className="kit-checklist-section">
             <button
@@ -343,6 +344,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
               className={`checklist-section kit-checklist-sechead ${secDone ? "kit-checklist-sec-done" : ""}`}
               onClick={() => toggleCollapse(si)}
               aria-expanded={!isCollapsed}
+              aria-controls={contentId}
             >
               <span className="kit-checklist-sectitle">
                 <svg
@@ -379,7 +381,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
               )}
             </button>
             {!isCollapsed && (
-              <ul className="checklist">
+              <ul id={contentId} className="checklist">
                 {section.items.map((item, ii) => {
                   const key = `${si}-${ii}`;
                   if (item.type === "check") {

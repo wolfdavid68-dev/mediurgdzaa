@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import ModalDialog from "./ModalDialog";
 
 // Annonce ponctuelle affichée à l'ouverture de l'app pour présenter le
 // nouvel outil d'aide à l'interprétation ECG. Vue une seule fois par
@@ -11,34 +11,12 @@ export const ANNOUNCE_LS_KEY = "mediurg-announce";
 type Props = { open: boolean; onClose: () => void };
 
 const AnnounceModal = ({ open, onClose }: Props) => {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    if (open && !d.open) {
-      try {
-        d.showModal();
-      } catch {}
-    } else if (!open && d.open) {
-      try {
-        d.close();
-      } catch {}
-    }
-  }, [open]);
-
-  const onBackdropClick = (e: MouseEvent) => {
-    if (e.target === dialogRef.current) onClose();
-  };
-
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <dialog
-      ref={dialogRef}
+    <ModalDialog
+      open={open}
+      onClose={onClose}
       className="announce-dialog"
       aria-labelledby="announce-title"
-      onClose={onClose}
-      onClick={onBackdropClick}
     >
       <div className="announce-card">
         <div className="announce-icon" aria-hidden="true">
@@ -68,7 +46,7 @@ const AnnounceModal = ({ open, onClose }: Props) => {
           J&apos;ai compris
         </button>
       </div>
-    </dialog>
+    </ModalDialog>
   );
 };
 

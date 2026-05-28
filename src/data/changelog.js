@@ -1,11 +1,49 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v108";
+export const APP_VERSION = "v110";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v110",
+    date: "2026-05-28",
+    titre: "Garde-fous cyber + vérifications offline visuelles",
+    changes: [
+      {
+        type: "chore",
+        text: "Ajout de budgets gzip par chunk et d'un scan de build pour repérer les indices de secrets serveur embarqués par erreur. Les clés publiques prévues pour le navigateur restent autorisées, les secrets type service role / clé privée restent interdits côté client.",
+      },
+      {
+        type: "chore",
+        text: "Le test navigateur hors-ligne génère désormais des captures mobiles pour URGENCE ACR, Kits, Incompatibilités et Login, avec données factices uniquement.",
+      },
+      {
+        type: "docs",
+        text: "Ajout d'un rapport de cohérence des données cliniques et d'un mémo cybersécurité pour garder les contraintes offline, données et secrets explicites.",
+      },
+    ],
+  },
+  {
+    version: "v109",
+    date: "2026-05-28",
+    titre: "Optimisations offline-first et nettoyage technique",
+    changes: [
+      {
+        type: "chore",
+        text: "Optimisation du chargement : recherche médicaments indexée, incompatibilités mises en tables de lecture rapides, découpage des bundles par domaine et séparation plus nette du client Supabase. Les écrans cliniques restent disponibles hors-ligne après mise à jour.",
+      },
+      {
+        type: "fix",
+        text: "Renforcement du mode hors-ligne : le service worker est enregistré dès le démarrage de l'app, le test navigateur Playwright vérifie maintenant aussi les kits et le raccourci URGENCE ACR sans réseau.",
+      },
+      {
+        type: "refactor",
+        text: "Nettoyage interne : stockage local sécurisé centralisé, modales basées sur un composant dialog partagé, et nouveaux tests de cohérence sur les kits de préparation.",
+      },
+    ],
+  },
   {
     version: "v108",
     date: "2026-05-27",

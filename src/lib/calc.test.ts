@@ -432,7 +432,7 @@ describe("calcPrepPhases", () => {
   };
 
   test("70 kg : doses 10500 / 3500 / 7000 mg, volumes 52,5 / 17,5 / 35 mL", () => {
-    const r = calcPrepPhases(prep, 70);
+    const r = calcPrepPhases(prep, 70)!;
     expect(r).toHaveLength(3);
     expect(r[0]).toEqual({
       label: "Phase 1",
@@ -446,7 +446,7 @@ describe("calcPrepPhases", () => {
   });
 
   test("sans conc_produit → vol = null", () => {
-    const r = calcPrepPhases({ phases: prep.phases }, 70);
+    const r = calcPrepPhases({ phases: prep.phases }, 70)!;
     expect(r[0].vol).toBeNull();
   });
 

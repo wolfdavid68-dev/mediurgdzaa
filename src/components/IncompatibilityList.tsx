@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
-import { normalize } from "../lib/normalize";
+import {
+  createIncompatibilityIndex,
+  getIncompatDisplayName,
+  getIncompatRelation,
+  matchesIncompatSearch,
+  type IncompatEntry,
+} from "../lib/incompatibilityIndex";
 
 const TYPE_META = {
   incompatible: { label: "Incompatible", short: "✕", color: "#dc2626" },
@@ -23,80 +29,22 @@ const DRUG_SEARCH_ALIASES: Record<string, string[]> = {
   "Furosémide (Lasilix®)": ["furosémide", "furosemide", "lasilix", "l'asile", "l asile", "lasile"],
 };
 
-type CellInfo = { type: string; note: string };
-type Matrix = Record<string, Record<string, CellInfo>>;
-type CompatMatrix = Record<string, Record<string, true>>;
 type Selected = { drugA: string; drugB: string; type: string; note: string };
 type ViewMode = "fiche" | "comparaison" | "matrice";
-type IncompatDrug = {
-  drug: string;
-  short: string;
-  color: string;
-  items: Array<{ with: string; type: string; note: string }>;
-  compatibleWith?: string[];
-  solvant?: string;
-  exclusif?: boolean;
-};
 
-const DRUGS_INCOMPAT = INCOMPATIBILITIES as IncompatDrug[];
+const DRUGS_INCOMPAT = INCOMPATIBILITIES as IncompatEntry[];
+const INCOMPAT_INDEX = createIncompatibilityIndex(DRUGS_INCOMPAT, {
+  displayOverrides: DRUG_DISPLAY_OVERRIDES,
+  searchAliases: DRUG_SEARCH_ALIASES,
+});
+const { incomp: INCOMP, compat: COMPAT } = INCOMPAT_INDEX;
 
-const normalizeSearch = (value: string) =>
-  normalize(value)
-    .replace(/®/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-
-const getDrugDisplayName = (drug: string) => DRUG_DISPLAY_OVERRIDES[drug] || drug;
-
-const getDrugSearchText = (entry: IncompatDrug) =>
-  normalizeSearch(
-    [
-      entry.drug,
-      entry.short,
-      getDrugDisplayName(entry.drug),
-      ...(DRUG_SEARCH_ALIASES[entry.drug] || []),
-    ].join(" ")
-  );
-
-const matchesDrugSearch = (entry: IncompatDrug, query: string) => {
-  const q = normalizeSearch(query);
-  if (!q) return true;
-  return getDrugSearchText(entry).includes(q);
-};
-
-const buildMatrix = () => {
-  const incomp: Matrix = {};
-  const compat: CompatMatrix = {};
-  DRUGS_INCOMPAT.forEach((entry) => {
-    entry.items.forEach((item) => {
-      const target = DRUGS_INCOMPAT.find((d) => d.drug === item.with);
-      if (!target) return;
-      if (!incomp[entry.drug]) incomp[entry.drug] = {};
-      incomp[entry.drug][target.drug] = { type: item.type, note: item.note };
-      if (!incomp[target.drug]) incomp[target.drug] = {};
-      incomp[target.drug][entry.drug] = { type: item.type, note: item.note };
-    });
-    (entry.compatibleWith || []).forEach((name: string) => {
-      const target = DRUGS_INCOMPAT.find((d) => d.drug === name);
-      if (!target) return;
-      if (!compat[entry.drug]) compat[entry.drug] = {};
-      compat[entry.drug][target.drug] = true;
-      if (!compat[target.drug]) compat[target.drug] = {};
-      compat[target.drug][entry.drug] = true;
-    });
-  });
-  return { incomp, compat };
-};
-
-const { incomp: INCOMP, compat: COMPAT } = buildMatrix();
-
-const getDrugEntry = (drug: string) => DRUGS_INCOMPAT.find((d) => d.drug === drug);
+const getDrugDisplayName = (drug: string) => getIncompatDisplayName(drug, DRUG_DISPLAY_OVERRIDES);
+const getDrugEntry = (drug: string) => INCOMPAT_INDEX.byName.get(drug);
 
 const getRelation = (drugA: string, drugB: string): Selected => {
-  const cell = INCOMP[drugA]?.[drugB];
-  if (cell) return { drugA, drugB, type: cell.type, note: cell.note || "" };
-  if (COMPAT[drugA]?.[drugB]) return { drugA, drugB, type: "compatible", note: "" };
-  return { drugA, drugB, type: "unknown", note: "" };
+  const relation = getIncompatRelation(INCOMPAT_INDEX, drugA, drugB);
+  return { drugA, drugB, type: relation.type, note: relation.note };
 };
 
 const IncompatibilityList = () => {
@@ -110,27 +58,37 @@ const IncompatibilityList = () => {
   const [compareB, setCompareB] = useState(secondDrug);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
-  const filteredDrugs = DRUGS_INCOMPAT.filter((entry) => matchesDrugSearch(entry, drugSearch));
+  const filteredDrugs = useMemo(
+    () =>
+      DRUGS_INCOMPAT.filter((entry) => matchesIncompatSearch(INCOMPAT_INDEX, entry, drugSearch)),
+    [drugSearch]
+  );
 
   const focusEntry = getDrugEntry(focusDrug);
-  const focusedRelations = DRUGS_INCOMPAT.filter((entry) => entry.drug !== focusDrug).reduce(
-    (groups, entry) => {
-      const relation = getRelation(focusDrug, entry.drug);
-      if (relation.type === "incompatible") groups.incompatible.push(relation);
-      else if (relation.type === "pH") groups.pH.push(relation);
-      else if (relation.type === "compatible") groups.compatible.push(relation);
-      else groups.unknown.push(relation);
-      return groups;
-    },
-    {
-      incompatible: [] as Selected[],
-      pH: [] as Selected[],
-      compatible: [] as Selected[],
-      unknown: [] as Selected[],
-    }
+  const focusedRelations = useMemo(
+    () =>
+      DRUGS_INCOMPAT.filter((entry) => entry.drug !== focusDrug).reduce(
+        (groups, entry) => {
+          const relation = getRelation(focusDrug, entry.drug);
+          if (relation.type === "incompatible") groups.incompatible.push(relation);
+          else if (relation.type === "pH") groups.pH.push(relation);
+          else if (relation.type === "compatible") groups.compatible.push(relation);
+          else groups.unknown.push(relation);
+          return groups;
+        },
+        {
+          incompatible: [] as Selected[],
+          pH: [] as Selected[],
+          compatible: [] as Selected[],
+          unknown: [] as Selected[],
+        }
+      ),
+    [focusDrug]
   );
-  const compareResult =
-    compareA && compareB && compareA !== compareB ? getRelation(compareA, compareB) : null;
+  const compareResult = useMemo(
+    () => (compareA && compareB && compareA !== compareB ? getRelation(compareA, compareB) : null),
+    [compareA, compareB]
+  );
 
   const handleCell = (drugA: string, drugB: string) => {
     if (drugA === drugB) return;
@@ -333,7 +291,7 @@ const IncompatibilityList = () => {
             />
 
             <div className="incompat-drug-picker" aria-label="Médicament sélectionné">
-              {filteredDrugs.map((entry: IncompatDrug) => (
+              {filteredDrugs.map((entry) => (
                 <button
                   key={entry.drug}
                   type="button"

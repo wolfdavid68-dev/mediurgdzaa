@@ -251,7 +251,7 @@ describe("useAcrAnalysisCue", () => {
   });
 
   afterEach(() => {
-    delete (navigator as any).vibrate;
+    Reflect.deleteProperty(navigator, "vibrate");
   });
 
   type CueProps = {

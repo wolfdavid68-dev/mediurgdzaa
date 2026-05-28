@@ -88,8 +88,8 @@ const DrugCard = ({
   const renderPosoTab = () => {
     // Overlay preview : en ?author=preview, un `prep` redéfini dans
     // drugs.preview.js remplace celui de drugs.js (public inchangé).
-    const prep =
-      (isPreview() && (DRUGS_PREVIEW as Record<number, any>)[drug.id]?.prep) || drug.prep || null;
+    const previewPrepByDrugId = DRUGS_PREVIEW as Record<number, { prep?: Drug["prep"] }>;
+    const prep = (isPreview() && previewPrepByDrugId[drug.id]?.prep) || drug.prep || null;
 
     // Filtrage des colonnes posologie selon le poids saisi :
     //  < 30 kg → pédiatrique · > 70 kg → adulte · 30–70 kg (inclus) ou pas de

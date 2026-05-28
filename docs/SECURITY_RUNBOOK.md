@@ -9,11 +9,19 @@ un support de validation institutionnelle, voir aussi
 
 - Lancer `npm audit --audit-level=moderate`.
 - Lancer `npm run typecheck`, `npm run lint`, `npm run knip`, `npm test`, puis `npm run build`.
+- Lancer `npm run verify:pwa-offline` après le build : précache Workbox, budgets gzip par chunk,
+  scan d'indices de secrets serveur dans les assets buildés.
+- Lancer `npm run verify:pwa-offline:browser` pour valider les routes cliniques hors-ligne dans
+  Chromium et régénérer les captures mobiles factices dans `build/offline-screenshots/`.
+- Lancer `npm run report:data` si les données cliniques ont changé, puis relire
+  `RAPPORT_DONNEES_CLINIQUES.md`.
 - Vérifier que `vercel.json` contient toujours les headers globaux : CSP, `nosniff`,
   `Referrer-Policy`, `Permissions-Policy`, HSTS et `frame-ancestors 'none'`.
 - Si le script bootstrap inline de `index.html` change, recalculer le hash `sha256-...` dans la
   CSP (`script-src`) au même commit.
 - Vérifier qu'aucune variable secrète n'est préfixée `VITE_`.
+- Vérifier que les rapports et captures générés ne contiennent aucune donnée patient, note
+  utilisateur réelle, matricule réel ou email réel.
 - Vérifier les variables Web Push :
   - `VITE_WEB_PUSH_PUBLIC_KEY` seule côté client ;
   - `WEB_PUSH_PRIVATE_KEY`, `WEB_PUSH_SUBJECT` et `SUPABASE_SERVICE_ROLE_KEY` uniquement côté
@@ -165,6 +173,25 @@ MediURG stocke volontairement certaines données sur l'appareil pour l'usage off
 | Poids patient      | `mediurg-patient-weight`               | expiration env. 3 h       | donnée de soin isolée    | expiration courte obligatoire                   |
 | Profil auth caché  | `mediurg-profile-cache-v1`             | jusqu'au logout/reset     | donnée personnelle agent | sert uniquement au fallback offline             |
 | Session Supabase   | `sb-*-auth-token`                      | selon config Supabase     | secret utilisateur       | logout purge localement                         |
+
+Les captures offline générées par les tests utilisent uniquement un profil factice local. Ne pas
+modifier ces scripts pour injecter un compte réel, une note utilisateur, un IPP ou une donnée
+patient.
+
+## Build client et secrets
+
+Tout ce qui est livré dans `build/` est public et inspectable côté navigateur.
+
+Interdit dans le build client :
+
+- `SUPABASE_SERVICE_ROLE_KEY` ou tout équivalent `service_role` ;
+- clé privée Web Push / VAPID ;
+- `DATABASE_URL`, `JWT_SECRET`, clé privée PEM/OpenSSH ;
+- clé API privée de fournisseur IA.
+
+Accepté côté client : clés publiques explicitement prévues pour navigateur, par exemple clé
+publishable/anon Supabase et clé publique Web Push. Ces clés publiques ne remplacent jamais les
+policies RLS côté Supabase.
 
 ## Notifications Web Push admin
 

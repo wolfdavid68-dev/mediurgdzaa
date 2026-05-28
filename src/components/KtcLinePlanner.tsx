@@ -1,25 +1,22 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
-import { normalize } from "../lib/normalize";
+import {
+  createIncompatibilityIndex,
+  getIncompatDisplayName,
+  getIncompatRelation,
+  matchesIncompatSearch,
+  type IncompatEntry,
+  type IncompatRelationType,
+} from "../lib/incompatibilityIndex";
 
-type RelationType = "compatible" | "incompatible" | "pH" | "unknown";
-
-type IncompatDrug = {
-  drug: string;
-  short: string;
-  color: string;
-  items: Array<{ with: string; type: "incompatible" | "pH"; note: string }>;
-  compatibleWith?: string[];
-  solvant?: string;
-  exclusif?: boolean;
-};
+type RelationType = IncompatRelationType;
 
 type LineId = "proximale" | "mediane2" | "distale" | "mediane1";
 
 type LineState = Record<LineId, string[]>;
 
-const DRUGS_INCOMPAT = INCOMPATIBILITIES as IncompatDrug[];
-const CUSTOM_LINE_ITEMS: IncompatDrug[] = [
+const DRUGS_INCOMPAT = INCOMPATIBILITIES as IncompatEntry[];
+const CUSTOM_LINE_ITEMS: IncompatEntry[] = [
   {
     drug: "Transfusion générale",
     short: "Transfu",
@@ -101,48 +98,15 @@ const LINE_LIMITS: Record<LineId, number> = {
 const ANTIBIOTIC_PATTERNS =
   /(amoxicilline|aztreonam|aztréonam|cef|céf|cefta|céfta|cefox|céfox|cloxacilline|meropenem|meronem|penicilline|piperacilline|tazobactam|sulbactam|ampicilline|temocilline|témocilline|vancomycine)/i;
 
-const normalizeSearch = (value: string) =>
-  normalize(value)
-    .replace(/®/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+const SELECTABLE_INDEX = createIncompatibilityIndex(SELECTABLE_ITEMS, {
+  displayOverrides: DRUG_DISPLAY_OVERRIDES,
+  searchAliases: DRUG_SEARCH_ALIASES,
+});
 
-const getDrugDisplayName = (drug: string) => DRUG_DISPLAY_OVERRIDES[drug] || drug;
-
-const getDrugSearchText = (entry: IncompatDrug) =>
-  normalizeSearch(
-    [
-      entry.drug,
-      entry.short,
-      getDrugDisplayName(entry.drug),
-      ...(DRUG_SEARCH_ALIASES[entry.drug] || []),
-    ].join(" ")
-  );
-
-const matchesDrugSearch = (entry: IncompatDrug, query: string) => {
-  const q = normalizeSearch(query);
-  if (!q) return true;
-  return getDrugSearchText(entry).includes(q);
-};
-
-const getDrug = (name: string) => SELECTABLE_ITEMS.find((entry) => entry.drug === name);
-
-const getRelation = (drugA: string, drugB: string): RelationType => {
-  const entryA = getDrug(drugA);
-  const entryB = getDrug(drugB);
-  if (!entryA || !entryB) return "unknown";
-
-  const aToB = entryA.items.find((item) => item.with === drugB);
-  const bToA = entryB.items.find((item) => item.with === drugA);
-  const incompat = aToB || bToA;
-  if (incompat) return incompat.type;
-
-  if (entryA.compatibleWith?.includes(drugB) || entryB.compatibleWith?.includes(drugA)) {
-    return "compatible";
-  }
-
-  return "unknown";
-};
+const getDrugDisplayName = (drug: string) => getIncompatDisplayName(drug, DRUG_DISPLAY_OVERRIDES);
+const getDrug = (name: string) => SELECTABLE_INDEX.byName.get(name);
+const getRelation = (drugA: string, drugB: string): RelationType =>
+  getIncompatRelation(SELECTABLE_INDEX, drugA, drugB).type;
 
 const getLineRelations = (drugs: string[]) => {
   const relations: Array<{ a: string; b: string; type: RelationType }> = [];
@@ -156,11 +120,17 @@ const getLineRelations = (drugs: string[]) => {
   return relations;
 };
 
-const getConflictWeight = (drug: string) =>
-  DRUGS_INCOMPAT.reduce((score, entry) => {
-    if (entry.drug === drug) return score;
-    return score + (getRelation(drug, entry.drug) === "incompatible" ? 1 : 0);
-  }, 0);
+const CONFLICT_WEIGHT_BY_DRUG = new Map(
+  SELECTABLE_ITEMS.map((drug) => [
+    drug.drug,
+    DRUGS_INCOMPAT.reduce((score, entry) => {
+      if (entry.drug === drug.drug) return score;
+      return score + (getRelation(drug.drug, entry.drug) === "incompatible" ? 1 : 0);
+    }, 0),
+  ])
+);
+
+const getConflictWeight = (drug: string) => CONFLICT_WEIGHT_BY_DRUG.get(drug) || 0;
 
 const getDrugProfile = (drug: string) => {
   if (drug === "Transfusion générale") return "transfusion";
@@ -292,10 +262,15 @@ const KtcLinePlanner = () => {
     setSelectedDrugs((current) => current.filter((name) => name !== drug));
   };
 
-  const filteredDrugs = SELECTABLE_ITEMS.filter((entry) => matchesDrugSearch(entry, drugSearch))
-    .filter((entry) => !selectedDrugs.includes(entry.drug))
-    .slice(0, 14);
-  const proposal = buildProposal(selectedDrugs);
+  const selectedDrugSet = useMemo(() => new Set(selectedDrugs), [selectedDrugs]);
+  const filteredDrugs = useMemo(
+    () =>
+      SELECTABLE_ITEMS.filter((entry) => matchesIncompatSearch(SELECTABLE_INDEX, entry, drugSearch))
+        .filter((entry) => !selectedDrugSet.has(entry.drug))
+        .slice(0, 14),
+    [drugSearch, selectedDrugSet]
+  );
+  const proposal = useMemo(() => buildProposal(selectedDrugs), [selectedDrugs]);
 
   return (
     <div className="ktc-lines">

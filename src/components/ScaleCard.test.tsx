@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import ScaleCard from "./ScaleCard";
+import type { ClinicalScale } from "../types/data";
 
 // Helper : lit la valeur du total via son className unique. Évite l'ambiguïté
 // quand le score apparaît aussi dans une option (ex: "1" présent dans la liste
@@ -14,7 +15,7 @@ const getBadgeText = () => document.querySelector(".scale-badge")?.textContent?.
 // - "sum" avec variants (Cushman-like)
 // - "single-pick" (RASS-like)
 
-const sumScale = {
+const sumScale: ClinicalScale = {
   id: "test-sum",
   nom: "Échelle de test (sum)",
   icon: "🧠",
@@ -44,7 +45,7 @@ const sumScale = {
   },
 };
 
-const variantScale = {
+const variantScale: ClinicalScale = {
   id: "test-variant",
   nom: "Échelle avec variants",
   icon: "🩺",
@@ -76,7 +77,7 @@ const variantScale = {
   interpret: (_total: number) => ({ severity: "OK", color: "#000" }),
 };
 
-const pickScale = {
+const pickScale: ClinicalScale = {
   id: "test-pick",
   nom: "Échelle single-pick",
   icon: "💉",

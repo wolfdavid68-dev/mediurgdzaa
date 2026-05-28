@@ -12,17 +12,14 @@
 //     editingTally, prepDrug, htChecked/htExpanded/htDetail
 //   Ces états ne forment pas une machine d'état avec le reste.
 
-import { suggestActions } from "./AcrTimer.helpers";
+import { suggestActions, type SuggestedAction } from "./AcrTimer.helpers";
 
 // Types internes au reducer. Ré-exporter si un sous-composant en a besoin.
 type Phase = "rcp" | "analyse" | "actions" | "post-rosc";
 type Rhythm = "choquable" | "non_choquable" | "rosc" | null;
 
-type ActionItem = {
-  type: string;
-  label: string;
+type ActionItem = SuggestedAction & {
   done: boolean;
-  hint?: string;
   prevLastAdreAt?: number | null;
   eventId?: string | null;
 };
@@ -163,7 +160,7 @@ export const sessionReducer = (state: SessionState, action: SessionAction): Sess
       return {
         ...state,
         currentRhythm: action.rhythm,
-        pendingActions: sugg.map((a: any) => ({ ...a, done: false })),
+        pendingActions: sugg.map((a) => ({ ...a, done: false })),
         phase: "actions",
         // Le MCE reprend pile maintenant → le chrono 2 min de RCP du nouveau
         // cycle démarre ici (et non au moment de l'analyse précédente).

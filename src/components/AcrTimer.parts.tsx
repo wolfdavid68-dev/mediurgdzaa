@@ -8,6 +8,7 @@
 
 import { ACLS_PREP_STEPS, PREP_CONTENT, POST_ROSC_TARGETS } from "./AcrTimer.constants";
 import { fmt, stepState } from "./AcrTimer.helpers";
+import type { SuggestedAction } from "./AcrTimer.helpers";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Compteurs de rappel temporel : Analyse DSA (cycle 2 min) et Adrénaline (cycle 4 min).
@@ -53,7 +54,7 @@ export const AcrCycleCounters = ({
 // ─────────────────────────────────────────────────────────────────────────────
 // Panneau guidé qui change selon la phase. 5 sous-vues : empty / rcp / analyse /
 // actions / post-rosc.
-type Action = { type: string; label: string; done: boolean; hint?: string; [k: string]: any };
+type Action = SuggestedAction & { done: boolean };
 
 type StepPanelProps = {
   running: boolean;

@@ -1,4 +1,5 @@
 import type { Profile } from "./auth";
+import { safeGetJson, safeRemoveItem, safeSetJson } from "./safeStorage";
 
 // Cache du profil auth en localStorage pour l'usage HORS-LIGNE.
 //
@@ -18,26 +19,14 @@ const KEY = "mediurg-profile-cache-v1";
 
 type CachedEntry = { id: string; profile: Profile; at: number };
 
-// Accès au global `localStorage` (convention du projet, cf. userStorage.ts),
-// chaque opération protégée par try/catch (mode privé, quota, indispo).
 export const cacheProfile = (profile: Profile): void => {
-  try {
-    const entry: CachedEntry = { id: profile.id, profile, at: Date.now() };
-    localStorage.setItem(KEY, JSON.stringify(entry));
-  } catch {
-    // Best-effort : quota dépassé / storage indisponible → on ignore.
-  }
+  const entry: CachedEntry = { id: profile.id, profile, at: Date.now() };
+  safeSetJson(KEY, entry);
 };
 
 export const getCachedProfile = (userId: string): Profile | null => {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    const entry = JSON.parse(raw) as CachedEntry;
-    return entry && entry.id === userId ? entry.profile : null;
-  } catch {
-    return null;
-  }
+  const entry = safeGetJson<CachedEntry | null>(KEY, null);
+  return entry && entry.id === userId ? entry.profile : null;
 };
 
 // Dernier profil caché SANS connaître le user id — pour le cas « session
@@ -46,20 +35,10 @@ export const getCachedProfile = (userId: string): Profile | null => {
 // (un cache existe) → on autorise l'usage offline. Si aucun cache →
 // null → mur de login (appareil jamais appairé), conforme au modèle.
 export const getLastCachedProfile = (): Profile | null => {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    const entry = JSON.parse(raw) as CachedEntry;
-    return entry?.profile ?? null;
-  } catch {
-    return null;
-  }
+  const entry = safeGetJson<CachedEntry | null>(KEY, null);
+  return entry?.profile ?? null;
 };
 
 export const clearCachedProfile = (): void => {
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* no-op */
-  }
+  safeRemoveItem(KEY);
 };

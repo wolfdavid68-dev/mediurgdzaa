@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import ModalDialog from "./ModalDialog";
 import NotesBackup from "./NotesBackup";
 
 // Modale dédiée pour la sauvegarde / restauration des notes utilisateur.
@@ -11,34 +11,12 @@ import NotesBackup from "./NotesBackup";
 type Props = { open: boolean; onClose: () => void };
 
 const NotesBackupModal = ({ open, onClose }: Props) => {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    if (open && !d.open) {
-      try {
-        d.showModal();
-      } catch {}
-    } else if (!open && d.open) {
-      try {
-        d.close();
-      } catch {}
-    }
-  }, [open]);
-
-  const onBackdropClick = (e: MouseEvent) => {
-    if (e.target === dialogRef.current) onClose();
-  };
-
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <dialog
-      ref={dialogRef}
+    <ModalDialog
+      open={open}
+      onClose={onClose}
       className="notes-backup-dialog"
       aria-labelledby="notes-backup-title"
-      onClose={onClose}
-      onClick={onBackdropClick}
     >
       <div className="notes-backup-modal">
         <header className="notes-backup-modal-header">
@@ -56,7 +34,7 @@ const NotesBackupModal = ({ open, onClose }: Props) => {
           <NotesBackup />
         </div>
       </div>
-    </dialog>
+    </ModalDialog>
   );
 };
 

@@ -1,3 +1,5 @@
+import { safeGetSessionItem, safeSetSessionItem } from "./safeStorage";
+
 // Feature flags — interrupteurs pour activer / désactiver des features
 // pas encore prêtes pour la prod sans avoir à supprimer le code.
 //
@@ -35,14 +37,10 @@ const isPreviewing = (flagName: string): boolean => {
     const search = new URLSearchParams(window.location.search);
     const inUrl = params.some((p) => search.get(p) === "preview");
     if (inUrl) {
-      try {
-        window.sessionStorage.setItem(stickyKey, "1");
-      } catch {
-        /* sessionStorage indispo : on reste sur la lecture URL */
-      }
+      safeSetSessionItem(stickyKey, "1");
       return true;
     }
-    return window.sessionStorage.getItem(stickyKey) === "1";
+    return safeGetSessionItem(stickyKey) === "1";
   } catch {
     return false;
   }

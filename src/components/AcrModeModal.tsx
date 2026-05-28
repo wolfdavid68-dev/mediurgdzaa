@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import AcrTimer from "./AcrTimer";
+import ModalDialog from "./ModalDialog";
 import TestVersionBanner from "./TestVersionBanner";
+import { safeGetItem, safeSetItem } from "../lib/safeStorage";
 import { useWakeLock } from "../lib/useWakeLock";
 
 // Modale plein écran déclenchée par le bouton URGENCE.
@@ -11,10 +13,8 @@ import { useWakeLock } from "../lib/useWakeLock";
 // useEffect ESC ni d'override sur document.body.style.overflow.
 const PROTOCOL_LS_KEY = "mediurg-acr-protocol";
 const readProtocol = () => {
-  try {
-    const v = localStorage.getItem(PROTOCOL_LS_KEY);
-    if (v === "erc" || v === "acls") return v;
-  } catch {}
+  const v = safeGetItem(PROTOCOL_LS_KEY);
+  if (v === "erc" || v === "acls") return v;
   return "erc";
 };
 type AcrModeModalProps = {
@@ -24,13 +24,10 @@ type AcrModeModalProps = {
 };
 
 const AcrModeModal = ({ open, onClose, onOpenDrug }: AcrModeModalProps) => {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [pediatric, setPediatric] = useState<boolean | null>(null); // null tant que pas choisi
   const [protocol, setProtocol] = useState(readProtocol);
   useEffect(() => {
-    try {
-      localStorage.setItem(PROTOCOL_LS_KEY, protocol);
-    } catch {}
+    safeSetItem(PROTOCOL_LS_KEY, protocol);
   }, [protocol]);
 
   // Wake Lock : tant que la modale URGENCE est ouverte, l'écran reste allumé.
@@ -39,40 +36,17 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }: AcrModeModalProps) => {
   // dose adrénaline pédiatrique.
   useWakeLock(open);
 
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    if (open && !d.open) {
-      try {
-        d.showModal();
-      } catch {}
-    } else if (!open && d.open) {
-      try {
-        d.close();
-      } catch {}
-    }
-  }, [open]);
-
   // Reset du choix à la fermeture pour repartir propre la prochaine fois
   useEffect(() => {
     if (!open) setPediatric(null);
   }, [open]);
 
-  // Clic backdrop = ferme. Le clic intérieur ne déclenche pas (event sur l'enfant).
-  const onBackdropClick = (e: MouseEvent) => {
-    if (e.target === dialogRef.current) onClose();
-  };
-
   return (
-    // <dialog> a son propre support clavier (ESC) ; l'onClick gère juste le
-    // clic backdrop pour souris/tactile. Le warning a11y est ici un faux positif.
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <dialog
-      ref={dialogRef}
+    <ModalDialog
+      open={open}
+      onClose={onClose}
       className="acr-mode-dialog"
       aria-labelledby="acr-mode-title"
-      onClose={onClose}
-      onClick={onBackdropClick}
     >
       <div className="acr-mode-modal">
         <TestVersionBanner />
@@ -189,7 +163,7 @@ const AcrModeModal = ({ open, onClose, onOpenDrug }: AcrModeModalProps) => {
           )}
         </div>
       </div>
-    </dialog>
+    </ModalDialog>
   );
 };
 

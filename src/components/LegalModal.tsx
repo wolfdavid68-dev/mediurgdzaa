@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import ModalDialog from "./ModalDialog";
 
 // Modale Mention légale + Politique de confidentialité (RGPD).
 // Accessible depuis le footer de l'écran login ET depuis l'app principale
@@ -12,34 +12,12 @@ import { useEffect, useRef, type MouseEvent } from "react";
 type Props = { open: boolean; onClose: () => void };
 
 const LegalModal = ({ open, onClose }: Props) => {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    if (open && !d.open) {
-      try {
-        d.showModal();
-      } catch {}
-    } else if (!open && d.open) {
-      try {
-        d.close();
-      } catch {}
-    }
-  }, [open]);
-
-  const onBackdropClick = (e: MouseEvent) => {
-    if (e.target === dialogRef.current) onClose();
-  };
-
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <dialog
-      ref={dialogRef}
+    <ModalDialog
+      open={open}
+      onClose={onClose}
       className="legal-dialog"
       aria-labelledby="legal-title"
-      onClose={onClose}
-      onClick={onBackdropClick}
     >
       <div className="legal-modal">
         <header className="legal-header">
@@ -269,7 +247,7 @@ const LegalModal = ({ open, onClose }: Props) => {
           </button>
         </footer>
       </div>
-    </dialog>
+    </ModalDialog>
   );
 };
 

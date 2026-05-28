@@ -1,5 +1,4 @@
 import { getCurrentSession } from "./auth";
-import { getSupabase } from "./supabase";
 
 export type PushNotificationStatus =
   | "unsupported"
@@ -12,6 +11,11 @@ export type PushNotificationStatus =
 type PushResult = { ok: true; status: PushNotificationStatus } | { ok: false; error: string };
 
 let cachedVapidPublicKey = "";
+
+const getSupabaseClient = async () => {
+  const { getSupabase } = await import("./supabase");
+  return getSupabase();
+};
 
 const fetchVapidPublicKey = async (force = false): Promise<string> => {
   if (!force && cachedVapidPublicKey) return cachedVapidPublicKey;
@@ -99,7 +103,7 @@ export const enableAdminPushNotifications = async (): Promise<PushResult> => {
     return { ok: false, error: "Abonnement push incomplet" };
   }
 
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: "Backend non configuré" };
 
   const { error } = await supabase.from("push_subscriptions").upsert(
@@ -125,7 +129,7 @@ export const disableAdminPushNotifications = async (): Promise<PushResult> => {
   const endpoint = subscription.endpoint;
   await subscription.unsubscribe();
 
-  const supabase = getSupabase();
+  const supabase = await getSupabaseClient();
   if (supabase) {
     await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
   }

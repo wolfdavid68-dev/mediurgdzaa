@@ -21,6 +21,9 @@
     "analyze": "cross-env ANALYZE=true vite build && echo Open build/stats.html",
     "preview": "vite preview",
     "check-versions": "node scripts/check-versions.cjs",
+    "verify:pwa-offline": "node scripts/verify-pwa-offline.cjs",
+    "verify:pwa-offline:browser": "node scripts/verify-pwa-offline-browser.cjs",
+    "report:data": "node scripts/report-clinical-data.mjs",
     "lint": "eslint src",
     "lint:fast": "oxlint src",
     "knip": "knip",
@@ -45,6 +48,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.60.0",
     "@rolldown/plugin-babel": "^0.2.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

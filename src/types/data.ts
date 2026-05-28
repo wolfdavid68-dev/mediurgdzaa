@@ -176,3 +176,64 @@ export type PrepKit = {
   schema?: PrepKitSchema;
   checklist?: ChecklistSection[];
 };
+
+// ── Échelles cliniques ────────────────────────────────────────
+type ScaleOption = {
+  score: number;
+  label: string;
+  description?: string;
+};
+
+type ScaleVariant = {
+  id: string;
+  label: string;
+  options: ScaleOption[];
+};
+
+export type ScaleItem = {
+  label: string;
+  options?: ScaleOption[];
+  variants?: ScaleVariant[];
+};
+
+type ScaleInterpretation = {
+  severity: string;
+  color: string;
+};
+
+type SumScale = {
+  id: string;
+  nom: string;
+  icon: string;
+  description: string;
+  type: "sum";
+  items: ScaleItem[];
+  interpret: (total: number) => ScaleInterpretation;
+};
+
+type SinglePickScale = {
+  id: string;
+  nom: string;
+  icon: string;
+  description: string;
+  type: "single-pick";
+  options: ScaleOption[];
+  interpret: (total: number) => ScaleInterpretation;
+};
+
+export type ClinicalScale = SumScale | SinglePickScale;
+
+// ── Changelog ─────────────────────────────────────────────────
+type ChangelogChangeType = "feat" | "fix" | "chore" | "refactor" | "docs";
+
+type ChangelogChange = {
+  type: ChangelogChangeType;
+  text: string;
+};
+
+export type ChangelogEntry = {
+  version: string;
+  date: string;
+  titre?: string;
+  changes: ChangelogChange[];
+};

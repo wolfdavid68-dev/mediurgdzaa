@@ -197,22 +197,75 @@ export default defineConfig({
           if (name && /\.css$/.test(name)) return "static/css/[name].[hash][extname]";
           return "static/media/[name].[hash][extname]";
         },
-        // Split chunks pour que les data files (drugs/pse/aliases — ~150 kB,
-        // contenu clinique modifié à chaque release) soient cacheables
-        // indépendamment du code app (React + composants). Quand on bump
-        // une poso sans toucher au code, le navigateur ne ré-télécharge
-        // que `data-medic.[hash].js` au lieu du bundle principal entier.
-        manualChunks(id) {
-          if (id.includes("node_modules/react") || id.includes("node_modules/scheduler")) {
-            return "vendor-react";
-          }
-          if (
-            id.includes("/src/data/drugs") ||
-            id.includes("/src/data/pse") ||
-            id.includes("/src/data/aliases")
-          ) {
-            return "data-medic";
-          }
+        codeSplitting: {
+          groups: [
+            {
+              name: "vendor-react",
+              test: /node_modules[\\/](react|react-dom|scheduler)/,
+              priority: 100,
+            },
+            {
+              name: "vendor-supabase",
+              test: /(@supabase|node_modules[\\/]@supabase|[\\/]src[\\/]lib[\\/]supabase)/,
+              priority: 95,
+            },
+            { name: "data-medic", test: /[\\/]src[\\/]data[\\/](drugs|pse|aliases)/, priority: 90 },
+            {
+              name: "auth-admin",
+              test: /[\\/]src[\\/]components[\\/]auth[\\/](AdminDashboard|mobile[\\/]MobileAdminDashboard|hooks[\\/]useAdminProfiles)/,
+              priority: 85,
+            },
+            {
+              name: "auth-mobile",
+              test: /([\\/]src[\\/]components[\\/]auth[\\/]mobile[\\/]|[\\/]src[\\/]styles[\\/]auth-mobile)/,
+              priority: 80,
+            },
+            {
+              name: "auth",
+              test: /([\\/]src[\\/]components[\\/]auth[\\/]|[\\/]src[\\/]components[\\/]AuthGate|[\\/]src[\\/]lib[\\/](auth|access|profileCache)|[\\/]src[\\/]styles[\\/]auth)/,
+              priority: 75,
+            },
+            {
+              name: "acr",
+              test: /([\\/]src[\\/]components[\\/]Acr|[\\/]src[\\/]styles[\\/]acr-)/,
+              priority: 70,
+            },
+            {
+              name: "protocoles-incompat",
+              test: /([\\/]src[\\/]components[\\/](IncompatibilityList|KtcLinePlanner)|[\\/]src[\\/]data[\\/]incompatibilities|[\\/]src[\\/]lib[\\/]incompatibilityIndex|[\\/]src[\\/]styles[\\/]incompatibilites)/,
+              priority: 65,
+            },
+            {
+              name: "protocoles-kits",
+              test: /([\\/]src[\\/]components[\\/](PrepKitCard|KitChecklist|KitScaleIllustration)|[\\/]src[\\/]data[\\/]prepKits|[\\/]src[\\/]styles[\\/]kits)/,
+              priority: 64,
+            },
+            {
+              name: "protocoles-ecg",
+              test: /([\\/]src[\\/]components[\\/]Ecg|[\\/]src[\\/]styles[\\/]ecg)/,
+              priority: 63,
+            },
+            {
+              name: "protocoles-pisu",
+              test: /([\\/]src[\\/]components[\\/]ProtocolCard|[\\/]src[\\/]data[\\/]protocols|[\\/]src[\\/]lib[\\/]protocolText)/,
+              priority: 62,
+            },
+            {
+              name: "protocoles",
+              test: /([\\/]src[\\/]pages[\\/]ProtocolesPage|[\\/]src[\\/]styles[\\/]protocols)/,
+              priority: 61,
+            },
+            {
+              name: "medicaments",
+              test: /([\\/]src[\\/]pages[\\/]MedicamentsPage|[\\/]src[\\/]components[\\/](Drug|PrepBlock|PseBlock)|[\\/]src[\\/]lib[\\/](calc|drugSearch)|[\\/]src[\\/]styles[\\/](drug|pse))/,
+              priority: 60,
+            },
+            {
+              name: "echelles",
+              test: /([\\/]src[\\/]pages[\\/]EchellesPage|[\\/]src[\\/]components[\\/]ScaleCard|[\\/]src[\\/]data[\\/]scales|[\\/]src[\\/]styles[\\/]echelles)/,
+              priority: 55,
+            },
+          ],
         },
       },
     },

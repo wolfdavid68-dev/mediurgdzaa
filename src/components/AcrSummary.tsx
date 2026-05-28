@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect, useCallback, type MouseEvent } from "react";
+import { useState, useRef, useCallback } from "react";
 import { toPng } from "html-to-image";
 import { fmt, fmtWall } from "./AcrTimer.helpers";
+import ModalDialog from "./ModalDialog";
 
 // Icône par type d'event horodaté. Étendu en v83 pour couvrir aussi les
 // transitions d'état (ROSC, re-arrêt) et les marqueurs chrono (start, pause,
@@ -76,19 +77,7 @@ const AcrSummary = ({
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<null | "shared" | "downloaded" | "error">(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
-
-  // <dialog> natif : focus trap, ESC, scroll lock automatiques par le navigateur.
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    if (!d.open) {
-      try {
-        d.showModal();
-      } catch {}
-    }
-  }, []);
 
   const lines: string[] = [];
   lines.push(`BILAN ACR — ${pediatric ? "Enfant" : "Adulte"}`);
@@ -221,18 +210,12 @@ const AcrSummary = ({
     }
   }, [exporting, generatePng]);
 
-  const onBackdropClick = (e: MouseEvent) => {
-    if (e.target === dialogRef.current) onClose();
-  };
-
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <dialog
-      ref={dialogRef}
+    <ModalDialog
+      open={true}
+      onClose={onClose}
       className="acr-summary-dialog"
       aria-labelledby="acr-summary-title"
-      onClose={onClose}
-      onClick={onBackdropClick}
     >
       <div className="acr-summary-modal" ref={captureRef}>
         <header className="acr-summary-header">
@@ -355,7 +338,7 @@ const AcrSummary = ({
           </button>
         </footer>
       </div>
-    </dialog>
+    </ModalDialog>
   );
 };
 

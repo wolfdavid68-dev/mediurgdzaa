@@ -2,6 +2,7 @@
 // Testable isolément (cf. AcrTimer.helpers.test.js).
 
 import { COACH_LS_KEY } from "./AcrTimer.constants";
+import { safeGetItem } from "../lib/safeStorage";
 
 // Formate un nombre de secondes en MM:SS (≥ 0).
 export const fmt = (s: number) => {
@@ -86,10 +87,8 @@ export const speak = (text: string) => {
 
 // Lecture du mode coach persisté en localStorage (default = "full")
 export const readCoach = () => {
-  try {
-    const v = localStorage.getItem(COACH_LS_KEY);
-    if (v === "full" || v === "visual" || v === "silent") return v;
-  } catch {}
+  const v = safeGetItem(COACH_LS_KEY);
+  if (v === "full" || v === "visual" || v === "silent") return v;
   return "full";
 };
 
@@ -104,7 +103,7 @@ export const stepState = (step: { from: number; to: number }, t: number) => {
 // Le médecin reste décideur — on n'affiche que les rappels protocolaires.
 // ERC : Adré + Amio après 3e CEE.
 // ACLS : Adré dès le 2e CEE (q3-5 min), Amio 300 après 3e CEE, 150 après 5e.
-type SuggestedAction = { type: string; label: string; hint?: string };
+export type SuggestedAction = { type: string; label: string; hint?: string };
 export const suggestActions = ({
   rhythm,
   totalShocks,

@@ -1,31 +1,36 @@
-import { useEffect, useState, type ReactNode } from "react";
-import {
-  fetchProfile,
-  getCurrentSession,
-  hasAdminAccess,
-  onAuthStateChange,
-  type Profile,
-} from "../../lib/auth";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import type { User } from "@supabase/supabase-js";
+import type { Profile } from "../../lib/auth";
 import { cacheProfile, getCachedProfile, getLastCachedProfile } from "../../lib/profileCache";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
 import { AuthProfileProvider } from "../../lib/authProfile";
 import { DRUGS } from "../../data/drugs";
-import ForgotPasswordScreen from "./ForgotPasswordScreen";
-import LoginScreen from "./LoginScreen";
-import RegisterScreen from "./RegisterScreen";
-import ResetPasswordScreen from "./ResetPasswordScreen";
-import { BannedScreen, PendingApprovalScreen } from "./StatusScreens";
-import MobileLoginScreen from "./mobile/MobileLoginScreen";
-import MobileRegisterScreen from "./mobile/MobileRegisterScreen";
-import MobileForgotPasswordScreen from "./mobile/MobileForgotPasswordScreen";
-import MobileResetPasswordScreen from "./mobile/MobileResetPasswordScreen";
-import { MobileBannedScreen, MobilePendingScreen } from "./mobile/MobileStatusScreens";
-// Dashboards admin en import STATIQUE (comme tout le reste) : pas de chunk
-// lazy qui pourrait échouer à fetch hors-ligne. Cf. App.tsx.
-import AdminDashboard from "./AdminDashboard";
-import MobileAdminDashboard from "./mobile/MobileAdminDashboard";
+const ForgotPasswordScreen = lazy(() => import("./ForgotPasswordScreen"));
+const LoginScreen = lazy(() => import("./LoginScreen"));
+const RegisterScreen = lazy(() => import("./RegisterScreen"));
+const ResetPasswordScreen = lazy(() => import("./ResetPasswordScreen"));
+const PendingApprovalScreen = lazy(() =>
+  import("./StatusScreens").then((module) => ({ default: module.PendingApprovalScreen }))
+);
+const BannedScreen = lazy(() =>
+  import("./StatusScreens").then((module) => ({ default: module.BannedScreen }))
+);
+const MobileLoginScreen = lazy(() => import("./mobile/MobileLoginScreen"));
+const MobileRegisterScreen = lazy(() => import("./mobile/MobileRegisterScreen"));
+const MobileForgotPasswordScreen = lazy(() => import("./mobile/MobileForgotPasswordScreen"));
+const MobileResetPasswordScreen = lazy(() => import("./mobile/MobileResetPasswordScreen"));
+const MobilePendingScreen = lazy(() =>
+  import("./mobile/MobileStatusScreens").then((module) => ({ default: module.MobilePendingScreen }))
+);
+const MobileBannedScreen = lazy(() =>
+  import("./mobile/MobileStatusScreens").then((module) => ({ default: module.MobileBannedScreen }))
+);
+// Écrans auth/admin en chunks dédiés. Ils restent disponibles hors-ligne parce
+// que Workbox précache tous les chunks générés au build.
+const AdminDashboard = lazy(() => import("./AdminDashboard"));
+const MobileAdminDashboard = lazy(() => import("./mobile/MobileAdminDashboard"));
 
 // AuthGate — wrapper qui décide quoi rendre selon l'état d'auth.
 //
@@ -45,6 +50,51 @@ type AuthScreen = "login" | "register" | "forgot";
 type Props = {
   children: ReactNode;
 };
+
+const authLoading = (
+  <div className="auth-stage">
+    <div className="auth-loading">
+      <span className="auth-spinner" aria-hidden="true" />
+      <span>Chargement de l'authentification…</span>
+    </div>
+  </div>
+);
+
+const withAuthSuspense = (node: ReactNode) => <Suspense fallback={authLoading}>{node}</Suspense>;
+
+const getAuthApi = () => import("../../lib/authGateRuntime");
+
+const getCurrentSession = async () => {
+  const { getCurrentSession } = await getAuthApi();
+  return getCurrentSession();
+};
+
+const onAuthStateChange = (
+  callback: (user: User | null) => void,
+  onRecovery?: () => void
+): (() => void) => {
+  let active = true;
+  let unsubscribe: (() => void) | undefined;
+  getAuthApi().then(({ onAuthStateChange }) => {
+    if (!active) return;
+    unsubscribe = onAuthStateChange(callback, onRecovery);
+  });
+  return () => {
+    active = false;
+    unsubscribe?.();
+  };
+};
+
+const normalizeFunctionLabel = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const hasAdminAccess = (profile: Pick<Profile, "role" | "fonction">): boolean =>
+  profile.role === "admin" || /\bcadre\b/.test(normalizeFunctionLabel(profile.fonction));
 
 // Détecte une erreur de retour Supabase dans le hash, e.g. lien recovery
 // expiré : `#error=access_denied&error_code=otp_expired&error_description=...`.
@@ -75,6 +125,7 @@ const consumeAuthHashError = (): string | null => {
 // renvoie status:banned → écran suspendu) ; seul un compte SUPPRIMÉ
 // côté serveur garderait l'accès via cache jusqu'à purge (cf. AUTH_SETUP).
 export const resolveProfile = async (userId: string): Promise<Profile | null> => {
+  const { fetchProfile } = await getAuthApi();
   const result = await fetchProfile(userId);
   if (result.ok) {
     cacheProfile(result.data);
@@ -198,10 +249,12 @@ const AuthGate = ({ children }: Props) => {
       setProfile(null);
       setScreen("login");
     };
-    return isMobile ? (
-      <MobileResetPasswordScreen onDone={onDone} />
-    ) : (
-      <ResetPasswordScreen onDone={onDone} />
+    return withAuthSuspense(
+      isMobile ? (
+        <MobileResetPasswordScreen onDone={onDone} />
+      ) : (
+        <ResetPasswordScreen onDone={onDone} />
+      )
     );
   }
 
@@ -210,10 +263,12 @@ const AuthGate = ({ children }: Props) => {
   // maquette mobile spécifiée → on garde l'écran responsive desktop.
   if (!profile) {
     if (screen === "register") {
-      return isMobile ? (
-        <MobileRegisterScreen onGoToLogin={() => setScreen("login")} />
-      ) : (
-        <RegisterScreen onGoToLogin={() => setScreen("login")} />
+      return withAuthSuspense(
+        isMobile ? (
+          <MobileRegisterScreen onGoToLogin={() => setScreen("login")} />
+        ) : (
+          <RegisterScreen onGoToLogin={() => setScreen("login")} />
+        )
       );
     }
     if (screen === "forgot") {
@@ -221,10 +276,12 @@ const AuthGate = ({ children }: Props) => {
         setHashError(null);
         setScreen("login");
       };
-      return isMobile ? (
-        <MobileForgotPasswordScreen onBackToLogin={onBackToLogin} initialError={hashError} />
-      ) : (
-        <ForgotPasswordScreen onBackToLogin={onBackToLogin} initialError={hashError} />
+      return withAuthSuspense(
+        isMobile ? (
+          <MobileForgotPasswordScreen onBackToLogin={onBackToLogin} initialError={hashError} />
+        ) : (
+          <ForgotPasswordScreen onBackToLogin={onBackToLogin} initialError={hashError} />
+        )
       );
     }
     const loginProps = {
@@ -234,24 +291,30 @@ const AuthGate = ({ children }: Props) => {
       onGoToRegister: () => setScreen("register"),
       onGoToForgot: () => setScreen("forgot"),
     };
-    return isMobile ? <MobileLoginScreen {...loginProps} /> : <LoginScreen {...loginProps} />;
+    return withAuthSuspense(
+      isMobile ? <MobileLoginScreen {...loginProps} /> : <LoginScreen {...loginProps} />
+    );
   }
 
   // Session + profile pending
   if (profile.status === "pending") {
-    return isMobile ? (
-      <MobilePendingScreen onLogout={() => setProfile(null)} />
-    ) : (
-      <PendingApprovalScreen onLogout={() => setProfile(null)} />
+    return withAuthSuspense(
+      isMobile ? (
+        <MobilePendingScreen onLogout={() => setProfile(null)} />
+      ) : (
+        <PendingApprovalScreen onLogout={() => setProfile(null)} />
+      )
     );
   }
 
   // Session + profile banned
   if (profile.status === "banned") {
-    return isMobile ? (
-      <MobileBannedScreen onLogout={() => setProfile(null)} reason={profile.ban_reason} />
-    ) : (
-      <BannedScreen onLogout={() => setProfile(null)} reason={profile.ban_reason} />
+    return withAuthSuspense(
+      isMobile ? (
+        <MobileBannedScreen onLogout={() => setProfile(null)} reason={profile.ban_reason} />
+      ) : (
+        <BannedScreen onLogout={() => setProfile(null)} reason={profile.ban_reason} />
+      )
     );
   }
 
@@ -263,7 +326,9 @@ const AuthGate = ({ children }: Props) => {
       onLogout: () => setProfile(null),
       onExitAdmin: () => setShowAdmin(false),
     };
-    return isMobile ? <MobileAdminDashboard {...adminProps} /> : <AdminDashboard {...adminProps} />;
+    return withAuthSuspense(
+      isMobile ? <MobileAdminDashboard {...adminProps} /> : <AdminDashboard {...adminProps} />
+    );
   }
 
   // App normale. L'accès admin se fait par appui long sur le logo

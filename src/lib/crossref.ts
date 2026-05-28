@@ -22,7 +22,10 @@ export type ProtocolRef = {
 
 const cache = new Map<string, ProtocolRef[]>();
 
-const flattenSubText = (sub: any): string => {
+type ProtocolSubText = string | { text?: string };
+type ProtocolItemText = string | { text?: string; sub?: ProtocolSubText[] };
+
+const flattenSubText = (sub: ProtocolSubText): string => {
   if (typeof sub === "string") return sub;
   if (sub && typeof sub === "object" && typeof sub.text === "string") return sub.text;
   return "";
@@ -42,13 +45,14 @@ export const findProtocolsForDrug = (drugNom: string | null | undefined): Protoc
   for (const p of PROTOCOLS) {
     let found = false;
     for (const sec of p.sections || []) {
-      for (const item of sec.items || []) {
+      for (const item of (sec.items || []) as ProtocolItemText[]) {
         const itemText = typeof item === "string" ? item : item.text || "";
         if (normalize(itemText).includes(target)) {
           found = true;
           break;
         }
-        for (const sub of item.sub || []) {
+        const subs = typeof item === "string" ? [] : item.sub || [];
+        for (const sub of subs) {
           if (normalize(flattenSubText(sub)).includes(target)) {
             found = true;
             break;

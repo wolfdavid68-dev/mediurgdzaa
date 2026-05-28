@@ -1,10 +1,12 @@
 // Fonction serverless Vercel - notification Web Push PWA d'une demande d'acces.
 //
 // Flux cyber :
-// - le demandeur appelle cette route avec sa session Supabase ;
-// - la route verifie via RLS que son propre profil est bien en pending ;
+// - le demandeur appelle cette route avec l'id de profil cree a l'inscription ;
+// - si une session Supabase existe, la route verifie d'abord via RLS ;
+// - sinon, ou si la session vient d'expirer, la route valide cote serveur que
+//   le profil existe toujours en pending ;
 // - la cle service_role sert uniquement cote serveur a lire les abonnements
-//   push des admins actifs et a purger les endpoints expires ;
+//   push des admins actifs, verifier le statut pending et purger les endpoints expires ;
 // - le payload push reste generique : aucune donnee nominative.
 import { createClient } from "@supabase/supabase-js";
 import webpush, { type PushSubscription } from "web-push";
@@ -125,7 +127,10 @@ function cleanupNotificationCache(now = Date.now()): void {
   }
 }
 
-async function verifyPendingProfile(req: VercelReq, profileId: string): Promise<boolean> {
+async function verifyPendingProfileWithSession(
+  req: VercelReq,
+  profileId: string
+): Promise<boolean> {
   const env = getSupabasePublicEnv();
   if (!env) throw new Error("supabase-public-env-missing");
 
@@ -149,6 +154,32 @@ async function verifyPendingProfile(req: VercelReq, profileId: string): Promise<
 
   if (error) throw error;
   return Boolean(data);
+}
+
+async function verifyPendingProfileWithServiceRole(profileId: string): Promise<boolean> {
+  const env = getSupabaseServiceEnv();
+  if (!env) throw new Error("supabase-service-env-missing");
+
+  const supabase = createClient(env.url, env.serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", profileId)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (error) throw error;
+  return Boolean(data);
+}
+
+async function verifyPendingProfile(req: VercelReq, profileId: string): Promise<boolean> {
+  if (getBearerToken(req) && (await verifyPendingProfileWithSession(req, profileId))) {
+    return true;
+  }
+  return verifyPendingProfileWithServiceRole(profileId);
 }
 
 async function fetchAdminSubscriptions(): Promise<StoredPushSubscription[]> {

@@ -3,31 +3,28 @@ import { DRUGS } from "../data/drugs";
 import KitChecklist from "./KitChecklist";
 import KtcLinePlanner from "./KtcLinePlanner";
 import type { Drug, PrepKit } from "../types/data";
+import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
 
 const checkKey = (kitId: string) => `mediurg-kit-check-${kitId}`;
+const DRUG_BY_ID = new Map(DRUGS.map((drug) => [drug.id, drug]));
 
 // Au-delà de ce délai depuis la dernière coche, la check-list repart vierge
 // (évite de garder les coches d'une procédure/patient précédent entre 2 gardes).
 const CHECK_MAX_AGE_MS = 3 * 60 * 60 * 1000; // 3 h
+type StoredKitChecks = { ts?: number; items?: Record<number, boolean> };
 
 const loadChecked = (kitId: string): Record<number, boolean> => {
-  try {
-    const raw = localStorage.getItem(checkKey(kitId));
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    // Ancien format (objet plat) ou expiré → on repart vierge
-    if (!parsed || typeof parsed.ts !== "number" || !parsed.items) {
-      localStorage.removeItem(checkKey(kitId));
-      return {};
-    }
-    if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
-      localStorage.removeItem(checkKey(kitId));
-      return {};
-    }
-    return parsed.items;
-  } catch {
+  const parsed = safeGetJson<StoredKitChecks | null>(checkKey(kitId), null);
+  // Ancien format (objet plat) ou expiré → on repart vierge
+  if (!parsed || typeof parsed.ts !== "number" || !parsed.items) {
+    safeRemoveItem(checkKey(kitId));
     return {};
   }
+  if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
+    safeRemoveItem(checkKey(kitId));
+    return {};
+  }
+  return parsed.items;
 };
 
 const buildPrepFromDrug = (drug: Drug | undefined) => {
@@ -66,14 +63,7 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
 
   useEffect(() => {
     if (!isChecklist) return;
-    try {
-      localStorage.setItem(
-        checkKey(kit.id),
-        JSON.stringify({ ts: Date.now(), items: checkedItems })
-      );
-    } catch {
-      /* quota / mode privé : on ignore, la session reste fonctionnelle */
-    }
+    safeSetJson(checkKey(kit.id), { ts: Date.now(), items: checkedItems });
   }, [checkedItems, isChecklist, kit.id]);
   const checkableCount = kit.materiel.filter((m: string) => !isSectionLabel(m)).length;
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
@@ -211,7 +201,7 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
             {activeTab === "drogues" && (
               <div className="prepkit-drugs">
                 {kit.drogues.map((d, i: number) => {
-                  const drug = d.drugId ? DRUGS.find((x) => x.id === d.drugId) : undefined;
+                  const drug = d.drugId ? DRUG_BY_ID.get(d.drugId) : undefined;
                   const fromDrug = buildPrepFromDrug(drug);
                   const condText = fromDrug?.cond || null;
                   // Si le kit fournit sa propre prep, elle prime sur les etapes du drug

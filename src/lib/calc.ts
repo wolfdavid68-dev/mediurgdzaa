@@ -30,6 +30,47 @@ const DOSE_DANGER_THRESHOLDS = {
   mEq: 500,
 };
 
+export type PseFormula = {
+  unite: string;
+  conc: number;
+  factor?: number;
+  maxMlH?: number;
+};
+
+type PrepPhaseInput = {
+  label: string;
+  duree: string;
+  dose_kg: number;
+  solvant_vol?: number;
+};
+
+type PedTableBandInput = {
+  kg_min?: number | null;
+  kg_max?: number | null;
+  mode: "inject" | "dilute";
+  preparation: string;
+  vol_per_kg: number;
+  volume_final?: number;
+  solvant?: string;
+  admin?: string;
+  step?: number;
+  round_mode?: "up" | "down" | "round";
+};
+
+export type PrepFormula = {
+  dose_threshold?: number;
+  amp_high?: number;
+  amp_low?: number;
+  vol_high?: number;
+  vol_low?: number;
+  phases?: PrepPhaseInput[];
+  pedTable?: { bandes: PedTableBandInput[] };
+  conc_produit?: number;
+  dose_kg?: number;
+  dose_max_kg?: number;
+  unite?: string;
+};
+
 // "ok" : dose plausible · "danger" : valeur aberrante (donnée à vérifier)
 export function validateDoseValue(numericValue: number, unit: string) {
   if (!Number.isFinite(numericValue)) return "danger";
@@ -119,7 +160,7 @@ export function ciSeverity(text: string) {
 // ── Débit PSE (mL/h) ──────────────────────────────────────────
 // `kg` peut être null/"" pour les unités non poids-dépendantes (mg/h, UI/24h).
 export function calcDebit(
-  pse: any,
+  pse: PseFormula,
   dose: string | number | null | undefined,
   kg: string | number | null | undefined
 ) {
@@ -152,7 +193,7 @@ export function calcDebit(
 // de l'entrée PSE (centième=2 Nora/Adré/Sufenta, dixième=1 Dobu,
 // millième=3 Iso) pour coller à la précision de réglage clinique.
 export function calcDoseFromRate(
-  pse: any,
+  pse: PseFormula,
   mlh: string | number | null | undefined,
   kg: string | number | null | undefined,
   precision = 3
@@ -178,7 +219,10 @@ export function calcDoseFromRate(
 // ── Préparation : seuil dose (Anexate) ────────────────────────
 // Renvoie le nombre d'ampoules / volumes selon que le produit final
 // franchit ou non `prep.dose_threshold` mg.
-export function calcPrepThreshold(prep: any, produitFinalMg: string | number | null | undefined) {
+export function calcPrepThreshold(
+  prep: PrepFormula | null | undefined,
+  produitFinalMg: string | number | null | undefined
+) {
   const pf = parseFloat(String(produitFinalMg));
   if (!pf || pf <= 0) return null;
   if (prep?.dose_threshold === undefined) return null;
@@ -206,10 +250,13 @@ export function calcPrepSufentaTable(weightKg: string | number | null | undefine
 }
 
 // ── Préparation : phases successives (Hidonac) ────────────────
-export function calcPrepPhases(prep: any, weightKg: string | number | null | undefined) {
+export function calcPrepPhases(
+  prep: PrepFormula | null | undefined,
+  weightKg: string | number | null | undefined
+) {
   if (!isValidWeight(weightKg) || !prep?.phases?.length) return null;
   const kg = parseFloat(String(weightKg));
-  return prep.phases.map((phase: any) => {
+  return prep.phases.map((phase) => {
     const dose = +(phase.dose_kg * kg).toFixed(0);
     const vol = prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
     return {
@@ -226,15 +273,18 @@ export function calcPrepPhases(prep: any, weightKg: string | number | null | und
 // Renvoie la bande applicable + volumes calculés selon le mode :
 // - mode "inject" : volume à injecter = vol_per_kg × kg (avec arrondi optionnel)
 // - mode "dilute" : volume médicament = vol_per_kg × kg, complété au volume_final
-export function calcPedTable(prep: any, weightKg: string | number | null | undefined) {
+export function calcPedTable(
+  prep: PrepFormula | null | undefined,
+  weightKg: string | number | null | undefined
+) {
   if (!isValidWeight(weightKg) || !prep?.pedTable?.bandes?.length) return null;
   const kg = parseFloat(String(weightKg));
   const bande = prep.pedTable.bandes.find(
-    (b: any) => (b.kg_min == null || kg >= b.kg_min) && (b.kg_max == null || kg <= b.kg_max)
+    (b) => (b.kg_min == null || kg >= b.kg_min) && (b.kg_max == null || kg <= b.kg_max)
   );
   if (!bande) return null;
 
-  const roundStep = (val: number, step: number, mode: string) => {
+  const roundStep = (val: number, step: number, mode?: string) => {
     const factor = 1 / step;
     if (mode === "down") return Math.floor(val * factor) / factor;
     if (mode === "up") return Math.ceil(val * factor) / factor;
@@ -253,6 +303,7 @@ export function calcPedTable(prep: any, weightKg: string | number | null | undef
   }
 
   if (bande.mode === "dilute") {
+    if (typeof bande.volume_final !== "number") return null;
     const raw = kg * bande.vol_per_kg;
     const volMed = roundStep(raw, bande.step || 0.1, bande.round_mode);
     const volSolv = +(bande.volume_final - volMed).toFixed(1);
@@ -275,7 +326,10 @@ export function calcPedTable(prep: any, weightKg: string | number | null | undef
 // Utilisé par le panneau « Calcul dose libre » de PrepBlock : on saisit
 // une dose en mg et on lit le volume à prélever, indépendamment du poids.
 // Renvoie null si dose invalide ou conc_produit absente.
-export function calcDoseLibre(prep: any, doseMg: string | number | null | undefined) {
+export function calcDoseLibre(
+  prep: PrepFormula | null | undefined,
+  doseMg: string | number | null | undefined
+) {
   const d = parseFloat(String(doseMg));
   if (!d || d <= 0) return null;
   if (!prep?.conc_produit) return null;
@@ -285,7 +339,10 @@ export function calcDoseLibre(prep: any, doseMg: string | number | null | undefi
 // ── Préparation : dose_kg standard ────────────────────────────
 // Renvoie les volumes à prélever / compléter pour une dilution
 // dose_kg (+ option dose_max_kg pour les fourchettes).
-export function calcPrepDoseKg(prep: any, weightKg: string | number | null | undefined) {
+export function calcPrepDoseKg(
+  prep: PrepFormula | null | undefined,
+  weightKg: string | number | null | undefined
+) {
   if (!isValidWeight(weightKg) || !prep?.dose_kg) return null;
   const kg = parseFloat(String(weightKg));
   const dose = prep.dose_kg * kg;

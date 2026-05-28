@@ -1,15 +1,11 @@
 import { useMemo, useState, useEffect, useDeferredValue, useCallback } from "react";
 import { DRUGS } from "./data/drugs";
-import { ALIASES } from "./data/aliases";
-import { normalize } from "./lib/normalize";
-import { fuzzyIncludes } from "./lib/fuzzy";
 import AppHeader from "./components/AppHeader";
 import BottomNav from "./components/BottomNav";
 import MedicamentsPage from "./pages/MedicamentsPage";
 import OfflineBanner from "./components/OfflineBanner";
 import PatientWeightBanner from "./components/PatientWeightBanner";
 import TestVersionBanner from "./components/TestVersionBanner";
-import UpdatePrompt from "./components/UpdatePrompt";
 // Tout en import STATIQUE (PAS de lazy). Un chunk lazy peut échouer à charger
 // hors-ligne si le hash demandé ne matche pas le précache du service worker
 // (décalage inévitable à chaque mise à jour en mode 'prompt') → « Failed to
@@ -41,6 +37,8 @@ import { getPreviewAccessMode } from "./lib/access";
 import { isPreview } from "./lib/featureFlags";
 import { useAuthProfile } from "./lib/authProfile";
 import { TUTORAT_URL } from "./lib/tutorat";
+import { filterDrugs as searchDrugs, getRecentDrugs as readRecentDrugs } from "./lib/drugSearch";
+import { safeGetItem, safeGetJson, safeSetItem, safeSetJson } from "./lib/safeStorage";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SMUR", "SAU"];
@@ -80,18 +78,10 @@ const App = () => {
   // l'historique navigateur (pushNav { protoCategory: ... }).
   const [protoCategory, setProtoCategory] = useState("PISU");
   const [theme, setTheme] = useState(() => {
-    try {
-      return localStorage.getItem("mediurg-theme") || "dark";
-    } catch {
-      return "dark";
-    }
+    return safeGetItem("mediurg-theme") || "dark";
   });
   const [bigFont, setBigFont] = useState(() => {
-    try {
-      return localStorage.getItem("mediurg-bigfont") === "1";
-    } catch {
-      return false;
-    }
+    return safeGetItem("mediurg-bigfont") === "1";
   });
   // Accès caché à la console admin : appui long (~600 ms) sur le logo
   // émet un event intercepté par AuthGate (qui ne l'honore que pour un
@@ -100,20 +90,10 @@ const App = () => {
   const adminLongPress = useLongPress(() => window.dispatchEvent(new Event("mediurg:open-admin")));
 
   const [favorites, setFavorites] = useState<Set<number>>(() => {
-    try {
-      const raw = localStorage.getItem("mediurg-favorites");
-      return raw ? new Set<number>(JSON.parse(raw)) : new Set<number>();
-    } catch {
-      return new Set<number>();
-    }
+    return new Set<number>(safeGetJson<number[]>("mediurg-favorites", []));
   });
   const [history, setHistory] = useState(() => {
-    try {
-      const raw = localStorage.getItem("mediurg-history");
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
+    return safeGetJson<number[]>("mediurg-history", []);
   });
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   // IDs des fiches médicament actuellement déployées. Tant qu'au moins une
@@ -213,9 +193,7 @@ const App = () => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
-      try {
-        localStorage.setItem("mediurg-favorites", JSON.stringify([...next]));
-      } catch {}
+      safeSetJson("mediurg-favorites", [...next]);
       return next;
     });
   };
@@ -223,25 +201,19 @@ const App = () => {
   const addToHistory = (id: number) => {
     setHistory((prev: number[]) => {
       const next = [id, ...prev.filter((x: number) => x !== id)].slice(0, 5);
-      try {
-        localStorage.setItem("mediurg-history", JSON.stringify(next));
-      } catch {}
+      safeSetJson("mediurg-history", next);
       return next;
     });
   };
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    try {
-      localStorage.setItem("mediurg-theme", theme);
-    } catch {}
+    safeSetItem("mediurg-theme", theme);
   }, [theme]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-fontsize", bigFont ? "large" : "normal");
-    try {
-      localStorage.setItem("mediurg-bigfont", bigFont ? "1" : "0");
-    } catch {}
+    safeSetItem("mediurg-bigfont", bigFont ? "1" : "0");
   }, [bigFont]);
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
@@ -318,35 +290,18 @@ const App = () => {
   };
 
   const filtered = useMemo(() => {
-    const q = normalize(deferredSearch.trim());
-
-    // Trouve toutes les cibles d'alias dont la clé contient (ou est contenue dans) la requête
-    const aliasTargets = q
-      ? Object.entries(ALIASES)
-          .filter(([alias]) => {
-            const a = normalize(alias);
-            return a.includes(q) || q.includes(a);
-          })
-          .map(([, target]) => normalize(target))
-      : [];
-
-    return DRUGS.filter((d) => {
-      const fields = [d.nom, d.commercial, d.dci, d.classe].map(normalize);
-      // fuzzyIncludes : substring d'abord (rapide), Levenshtein en fallback
-      // pour les requêtes ≥ 4 chars. Tolère « amidaron » → amiodarone.
-      const matchDirect = !q || fields.some((f) => fuzzyIncludes(f, q));
-      const matchAlias = aliasTargets.some((t) => fields.some((f) => fuzzyIncludes(f, t)));
-      const matchQ = matchDirect || matchAlias;
-      const matchC = cat === "Tout" || d.cat === cat;
-      const matchS = svc === "Tout" || d.svc.includes(svc);
-      const matchF = !showFavoritesOnly || favorites.has(d.id);
-      return matchQ && matchC && matchS && matchF;
-    }).sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+    return searchDrugs({
+      search: deferredSearch,
+      cat,
+      svc,
+      showFavoritesOnly,
+      favorites,
+    });
   }, [deferredSearch, cat, svc, showFavoritesOnly, favorites]);
 
   const recentDrugs = useMemo(() => {
     if (deferredSearch.trim() || cat !== "Tout" || svc !== "Tout" || showFavoritesOnly) return [];
-    return history.map((id: number) => DRUGS.find((d: any) => d.id === id)).filter(Boolean);
+    return readRecentDrugs(history);
   }, [history, deferredSearch, cat, svc, showFavoritesOnly]);
 
   // React 19 : <title> rendu dans le tree est hissé automatiquement dans <head>.
@@ -376,10 +331,7 @@ const App = () => {
       <title>{docTitle}</title>
       <TestVersionBanner />
       {accessMode === "tutorat" ? (
-        <>
-          <TutoratOnlyView />
-          <UpdatePrompt />
-        </>
+        <TutoratOnlyView />
       ) : (
         <>
           <AppHeader
@@ -555,7 +507,6 @@ const App = () => {
           {!showCharter && showAnnounce && (
             <AnnounceModal open={showAnnounce} onClose={dismissAnnounce} />
           )}
-          <UpdatePrompt />
         </>
       )}
     </div>

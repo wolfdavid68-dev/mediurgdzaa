@@ -54,6 +54,8 @@ import "./styles/auth.css";
 import "./styles/auth-mobile.css";
 import App from "./App";
 import AuthGate from "./components/auth/AuthGate";
+import UpdatePrompt from "./components/UpdatePrompt";
+import { safeGetSessionItem, safeSetSessionItem } from "./lib/safeStorage";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("#root introuvable dans index.html");
@@ -77,14 +79,10 @@ window.addEventListener("error", (e) => {
 //-fou anti-boucle : un seul reload auto par session d'onglet.
 window.addEventListener("vite:preloadError", (e) => {
   const onLine = typeof navigator === "undefined" || navigator.onLine;
-  const already = sessionStorage.getItem("mediurg-preload-reloaded") === "1";
+  const already = safeGetSessionItem("mediurg-preload-reloaded") === "1";
   if (onLine && !already) {
     e.preventDefault();
-    try {
-      sessionStorage.setItem("mediurg-preload-reloaded", "1");
-    } catch {
-      /* sessionStorage indispo : on recharge quand même */
-    }
+    safeSetSessionItem("mediurg-preload-reloaded", "1");
     window.location.reload();
   }
 });
@@ -101,9 +99,12 @@ root.render(
       {/* AuthGate : transparent quand AUTH_ENABLED=false (mode actuel par
           défaut), sinon affiche login/register/pending/banned/admin selon
           l'état de session Supabase. Cf. src/lib/featureFlags.ts. */}
-      <AuthGate>
-        <App />
-      </AuthGate>
+      <>
+        <AuthGate>
+          <App />
+        </AuthGate>
+        <UpdatePrompt />
+      </>
     </ErrorBoundary>
   </StrictMode>
 );

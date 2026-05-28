@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useState } from "react";
 import { CHANGELOG } from "../data/changelog";
+import type { ChangelogEntry } from "../types/data";
 import NotesBackup from "./NotesBackup";
 import LegalModal from "./LegalModal";
 import CharterModal from "./CharterModal";
+import ModalDialog from "./ModalDialog";
 
 const TYPE_LABEL = {
   feat: "Nouveau",
@@ -39,40 +41,15 @@ const formatDateFr = (iso: string) => {
 type ChangelogModalProps = { open: boolean; onClose: () => void };
 
 const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [showLegal, setShowLegal] = useState(false);
   const [showCharter, setShowCharter] = useState(false);
 
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    if (open && !d.open) {
-      try {
-        d.showModal();
-      } catch {}
-    } else if (!open && d.open) {
-      try {
-        d.close();
-      } catch {}
-    }
-  }, [open]);
-
-  // Ferme si clic sur le backdrop (zone hors du <dialog> direct)
-  const onBackdropClick = (e: MouseEvent) => {
-    if (e.target === dialogRef.current) onClose();
-  };
-
   return (
-    // <dialog> supporte nativement ESC pour fermer — l'onClick ici n'est qu'un
-    // raccourci souris/tactile pour cliquer le backdrop. Le plugin jsx-a11y
-    // s'en méfie sur les éléments génériques, mais sur <dialog> c'est OK.
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <dialog
-      ref={dialogRef}
+    <ModalDialog
+      open={open}
+      onClose={onClose}
       className="changelog-dialog"
       aria-labelledby="changelog-title"
-      onClose={onClose}
-      onClick={onBackdropClick}
     >
       <header className="changelog-header">
         <h2 id="changelog-title">Notes de version</h2>
@@ -88,7 +65,7 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
 
       <div className="changelog-body">
         <NotesBackup />
-        {CHANGELOG.map((entry: any) => (
+        {(CHANGELOG as ChangelogEntry[]).map((entry) => (
           <section key={entry.version} className="changelog-entry">
             <div className="changelog-entry-head">
               <span className="changelog-version">{entry.version}</span>
@@ -96,7 +73,7 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
             </div>
             {entry.titre && <h3 className="changelog-titre">{entry.titre}</h3>}
             <ul className="changelog-list">
-              {entry.changes.map((c: any, i: number) => (
+              {entry.changes.map((c, i) => (
                 <li key={i} className={`changelog-item changelog-item-${c.type}`}>
                   <span className={`changelog-tag changelog-tag-${c.type}`}>
                     {TYPE_LABEL[c.type as keyof typeof TYPE_LABEL] || c.type}
@@ -127,7 +104,7 @@ const ChangelogModal = ({ open, onClose }: ChangelogModalProps) => {
         onAccept={() => setShowCharter(false)}
         onClose={() => setShowCharter(false)}
       />
-    </dialog>
+    </ModalDialog>
   );
 };
 

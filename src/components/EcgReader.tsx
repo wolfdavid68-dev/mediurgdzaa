@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { getCurrentSession } from "../lib/auth";
 import { Ic, Disclaimer } from "./EcgReader.icons";
 import {
   anonymizeEcgImage,
@@ -78,6 +77,7 @@ const EcgReader = ({ onDrugSearch }: EcgReaderProps) => {
 
   const analyze = async () => {
     if (!photo) return;
+    const { getCurrentSession } = await import("../lib/authSessionRuntime");
     const session = await getCurrentSession();
     if (!session?.access_token) {
       setErrMsg("Session expirée. Se reconnecter avant de relancer l'analyse ECG.");

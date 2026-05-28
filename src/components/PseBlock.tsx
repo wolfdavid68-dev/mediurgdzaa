@@ -2,17 +2,39 @@ import { useState } from "react";
 import { PSE } from "../data/pse";
 import { PSE_PREVIEW } from "../data/pse.preview";
 import { isPsePreview } from "../lib/featureFlags";
-import { calcDebit, calcDoseFromRate } from "../lib/calc";
+import { calcDebit, calcDoseFromRate, type PseFormula } from "../lib/calc";
+import type { Drug } from "../types/data";
+
+type PseExtra = {
+  unite: string;
+  min: number;
+  max: number;
+  steps: number[];
+};
+
+type PseEntry = PseFormula & {
+  min: number;
+  max: number;
+  steps: number[];
+  tag?: string;
+  note?: string;
+  inputMode?: "mlh";
+  mlhSteps?: number[];
+  dosePrecision?: number;
+  extra?: PseExtra;
+};
 
 // PSE public, ou PSE + overlay preview si ?author=preview (cf. featureFlags).
 // L'overlay remplace/ajoute par drug id ; le public ne voit jamais
 // pse.preview.js tant que le flag PSE_PREVIEW reste false.
-const resolvePse = (): Record<number, any> =>
-  isPsePreview() ? { ...PSE, ...PSE_PREVIEW } : (PSE as Record<number, any>);
+const resolvePse = (): Record<number, PseEntry> =>
+  isPsePreview()
+    ? ({ ...PSE, ...PSE_PREVIEW } as unknown as Record<number, PseEntry>)
+    : (PSE as unknown as Record<number, PseEntry>);
 
 // Bloc PSE (pousse-seringue électrique) : input dose cible + calcul mL/h
 // + table des paliers. Gère le mode "extra" (héparine UI/24h en plus).
-type PseBlockProps = { drug: any; weight: string };
+type PseBlockProps = { drug: Drug; weight: string };
 
 const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const [pseTarget, setPseTarget] = useState("");
@@ -36,7 +58,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const outRange = debit && (parseFloat(pseTarget) < pse.min || parseFloat(pseTarget) > pse.max);
 
   // Précision d'affichage de la dose (nb de décimales) par médicament.
-  const dosePrec: number = Number.isInteger(pse.dosePrecision) ? pse.dosePrecision : 3;
+  const dosePrec: number = Number.isInteger(pse.dosePrecision) ? Number(pse.dosePrecision) : 3;
   // Virgule décimale FR (convention clinique du projet) : « 6,0 » pas « 6.0 ».
   const fmtDose = (v: number | null): string | null =>
     v == null ? null : v.toFixed(dosePrec).replace(".", ",");
@@ -105,7 +127,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder={pse.min}
+                placeholder={String(pse.min)}
                 value={pseTarget}
                 onChange={(e) => setPseTarget(e.target.value)}
               />
@@ -190,7 +212,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
                   type="number"
                   min="0"
                   step="500"
-                  placeholder={pse.extra.min}
+                  placeholder={String(pse.extra.min)}
                   value={pseTarget2}
                   onChange={(e) => setPseTarget2(e.target.value)}
                 />

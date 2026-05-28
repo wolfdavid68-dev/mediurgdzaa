@@ -1,6 +1,7 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { DRUGS } from "../data/drugs";
 import { APP_VERSION } from "../data/changelog";
+import { safeGetItem, safeSetItem } from "../lib/safeStorage";
 
 // Backup utilisateur des notes personnelles par médicament. Les notes vivent
 // dans localStorage (`mediurg-note-{drugId}`) et survivent normalement aux
@@ -39,13 +40,9 @@ type ExportPayload = {
 const collectNotes = (): NoteEntry[] => {
   const out: NoteEntry[] = [];
   for (const drug of DRUGS as Array<{ id: number; nom: string }>) {
-    try {
-      const note = localStorage.getItem(`${NOTE_KEY_PREFIX}${drug.id}`);
-      if (note && note.trim()) {
-        out.push({ drugId: drug.id, drugName: drug.nom, note });
-      }
-    } catch {
-      // localStorage indisponible (mode privé, etc.) → on saute
+    const note = safeGetItem(`${NOTE_KEY_PREFIX}${drug.id}`);
+    if (note && note.trim()) {
+      out.push({ drugId: drug.id, drugName: drug.nom, note });
     }
   }
   return out;
@@ -122,10 +119,9 @@ const NotesBackup = () => {
           skipped++;
           continue;
         }
-        try {
-          localStorage.setItem(`${NOTE_KEY_PREFIX}${target.id}`, entry.note);
+        if (safeSetItem(`${NOTE_KEY_PREFIX}${target.id}`, entry.note)) {
           imported++;
-        } catch {
+        } else {
           skipped++;
         }
       }
