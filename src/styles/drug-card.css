@@ -180,7 +180,9 @@
 
   .drug-list-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+    width: min(100%, var(--clinical-content-max));
+    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
     gap: 12px;
     align-items: start;
   }
@@ -190,7 +192,7 @@
   }
 
   .recent-section .drug-list-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
   }
 
   .header-inner {
@@ -202,7 +204,7 @@
 
 @media (min-width: 1280px) {
   .drug-list-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
   }
   .drug-list-grid > .drug-card-open {
     grid-column: 1 / -1;
@@ -211,6 +213,9 @@
 
 /* Section Récents */
 .recent-section {
+  width: min(100%, var(--clinical-content-max));
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 18px;
   padding-bottom: 14px;
   border-bottom: 1px dashed var(--border);

@@ -19,3 +19,9 @@
     --bottom-nav-clearance: 120px;
   }
 }
+
+@media (min-width: 900px) {
+  :root {
+    --bottom-nav-clearance: 96px;
+  }
+}

@@ -362,6 +362,42 @@
   stroke: var(--accent);
 }
 
+@media (min-width: 900px) {
+  .bottom-nav {
+    left: 50%;
+    right: auto;
+    bottom: calc(16px + var(--safe-bottom));
+    width: min(560px, calc(100vw - 48px));
+    padding: 4px;
+    transform: translateX(-50%);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+  }
+
+  .bottom-nav-row {
+    gap: 4px;
+  }
+
+  .bottom-tab {
+    flex-direction: row;
+    gap: 7px;
+    min-height: 46px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .bottom-tab:hover {
+    background: color-mix(in srgb, var(--card-hover) 72%, transparent);
+  }
+
+  .bottom-tab svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
 /* Rangée commune search + poids : un seul flex row, gagne une rangée sur
    mobile. La search-bar prend toute la place dispo (flex:1), le bandeau
    poids garde sa largeur naturelle. Quand une fiche est déployée, la search

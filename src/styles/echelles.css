@@ -3,6 +3,7 @@
    ============================================================ */
 
 .echelles-page {
+  width: 100%;
   padding: 12px 14px 24px;
   display: flex;
   flex-direction: column;
@@ -26,9 +27,14 @@
 }
 
 @media (min-width: 1100px) {
+  .echelles-page {
+    width: min(100%, var(--clinical-content-max));
+    margin: 0 auto;
+  }
+
   .echelles-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
     align-items: start;
   }
 

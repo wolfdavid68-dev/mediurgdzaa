@@ -72,6 +72,13 @@
   }
 }
 
+@media (min-width: 1100px) {
+  .urgence-fab {
+    right: calc(24px + var(--safe-right));
+    bottom: calc(24px + var(--safe-bottom));
+  }
+}
+
 /* Toast "Appuyez 2× pour quitter" */
 .exit-toast {
   position: fixed;
