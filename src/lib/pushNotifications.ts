@@ -11,10 +11,10 @@ export type PushNotificationStatus =
 
 type PushResult = { ok: true; status: PushNotificationStatus } | { ok: false; error: string };
 
-let cachedVapidPublicKey: string | null = null;
+let cachedVapidPublicKey = "";
 
-const fetchVapidPublicKey = async (): Promise<string> => {
-  if (cachedVapidPublicKey !== null) return cachedVapidPublicKey;
+const fetchVapidPublicKey = async (force = false): Promise<string> => {
+  if (!force && cachedVapidPublicKey) return cachedVapidPublicKey;
 
   const buildKey = ((import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY as string | undefined) ?? "").trim();
   if (buildKey) {
@@ -23,16 +23,15 @@ const fetchVapidPublicKey = async (): Promise<string> => {
   }
 
   try {
-    const response = await fetch("/api/push-public-key", { cache: "no-store" });
+    const response = await fetch(`/api/push-public-key?ts=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) {
-      cachedVapidPublicKey = "";
       return "";
     }
     const data = (await response.json()) as { publicKey?: unknown };
-    cachedVapidPublicKey = typeof data.publicKey === "string" ? data.publicKey.trim() : "";
-    return cachedVapidPublicKey;
+    const runtimeKey = typeof data.publicKey === "string" ? data.publicKey.trim() : "";
+    if (runtimeKey) cachedVapidPublicKey = runtimeKey;
+    return runtimeKey;
   } catch {
-    cachedVapidPublicKey = "";
     return "";
   }
 };
@@ -73,7 +72,7 @@ export const enableAdminPushNotifications = async (): Promise<PushResult> => {
   if (!isPushSupported())
     return { ok: false, error: "Notifications non supportées sur cet appareil" };
 
-  const publicKey = await fetchVapidPublicKey();
+  const publicKey = await fetchVapidPublicKey(true);
   if (!publicKey) return { ok: false, error: "Clé publique Web Push manquante" };
 
   const permission =

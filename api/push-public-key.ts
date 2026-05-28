@@ -18,6 +18,15 @@ export default function handler(req: VercelReq, res: VercelRes) {
     return;
   }
 
-  const publicKey = process.env.WEB_PUSH_PUBLIC_KEY || process.env.VITE_WEB_PUSH_PUBLIC_KEY || "";
-  res.status(publicKey ? 200 : 503).json({ publicKey });
+  const publicKey = (
+    process.env.WEB_PUSH_PUBLIC_KEY ||
+    process.env.VITE_WEB_PUSH_PUBLIC_KEY ||
+    process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY ||
+    ""
+  ).trim();
+
+  res.status(publicKey ? 200 : 503).json({
+    configured: Boolean(publicKey),
+    publicKey,
+  });
 }
