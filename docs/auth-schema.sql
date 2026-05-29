@@ -318,177 +318,133 @@ returns void
 language plpgsql
 security definer
 set search_path = ''
-as $$
-declare
-  v_actor uuid := (select auth.uid());
-  v_target_id uuid;
-  v_target_matricule text;
-  v_target_email text;
-  v_target_prenom text;
-  v_target_nom text;
+as $admin_rpc$
 begin
-  if v_actor is null or not public.is_admin_mfa() then
+  if (select auth.uid()) is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select id, matricule, email, prenom, nom
-  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
-  from public.profiles
-  where id = p_target_profile_id
-  for update;
-
-  if not found then
-    raise exception 'profile_not_found' using errcode = 'P0002';
-  end if;
-
-  update public.profiles
-  set status = 'active',
-      approved_at = now(),
-      approved_by = v_actor
-  where id = p_target_profile_id;
-
+  with updated as (
+    update public.profiles
+    set status = 'active',
+        approved_at = now(),
+        approved_by = (select auth.uid())
+    where id = p_target_profile_id
+    returning id, matricule, email, prenom, nom
+  )
   insert into public.admin_audit_events (
     actor_id, target_profile_id, target_matricule, target_email,
     target_prenom, target_nom, action, reason
   )
-  values (
-    v_actor, v_target_id, v_target_matricule, v_target_email,
-    v_target_prenom, v_target_nom, 'approve', null
-  );
+  select
+    (select auth.uid()), id, matricule, email,
+    prenom, nom, 'approve', null
+  from updated;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
 end;
-$$;
+$admin_rpc$;
 
 create or replace function public.admin_reject_profile(p_target_profile_id uuid)
 returns void
 language plpgsql
 security definer
 set search_path = ''
-as $$
-declare
-  v_actor uuid := (select auth.uid());
-  v_target_id uuid;
-  v_target_matricule text;
-  v_target_email text;
-  v_target_prenom text;
-  v_target_nom text;
+as $admin_rpc$
 begin
-  if v_actor is null or not public.is_admin_mfa() then
+  if (select auth.uid()) is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select id, matricule, email, prenom, nom
-  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
-  from public.profiles
-  where id = p_target_profile_id
-  for update;
-
-  if not found then
-    raise exception 'profile_not_found' using errcode = 'P0002';
-  end if;
-
+  with deleted as (
+    delete from public.profiles
+    where id = p_target_profile_id
+    returning id, matricule, email, prenom, nom
+  )
   insert into public.admin_audit_events (
     actor_id, target_profile_id, target_matricule, target_email,
     target_prenom, target_nom, action, reason
   )
-  values (
-    v_actor, v_target_id, v_target_matricule, v_target_email,
-    v_target_prenom, v_target_nom, 'reject', null
-  );
+  select
+    (select auth.uid()), id, matricule, email,
+    prenom, nom, 'reject', null
+  from deleted;
 
-  delete from public.profiles where id = p_target_profile_id;
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
 end;
-$$;
+$admin_rpc$;
 
 create or replace function public.admin_ban_profile(p_target_profile_id uuid, p_reason text)
 returns void
 language plpgsql
 security definer
 set search_path = ''
-as $$
-declare
-  v_actor uuid := (select auth.uid());
-  v_target_id uuid;
-  v_target_matricule text;
-  v_target_email text;
-  v_target_prenom text;
-  v_target_nom text;
-  v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+as $admin_rpc$
 begin
-  if v_actor is null or not public.is_admin_mfa() then
+  if (select auth.uid()) is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select id, matricule, email, prenom, nom
-  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
-  from public.profiles
-  where id = p_target_profile_id
-  for update;
-
-  if not found then
-    raise exception 'profile_not_found' using errcode = 'P0002';
-  end if;
-
-  update public.profiles
-  set status = 'banned',
-      banned_at = now(),
-      ban_reason = v_reason
-  where id = p_target_profile_id;
-
+  with updated as (
+    update public.profiles
+    set status = 'banned',
+        banned_at = now(),
+        ban_reason = nullif(btrim(coalesce(p_reason, '')), '')
+    where id = p_target_profile_id
+    returning id, matricule, email, prenom, nom
+  )
   insert into public.admin_audit_events (
     actor_id, target_profile_id, target_matricule, target_email,
     target_prenom, target_nom, action, reason
   )
-  values (
-    v_actor, v_target_id, v_target_matricule, v_target_email,
-    v_target_prenom, v_target_nom, 'ban', v_reason
-  );
+  select
+    (select auth.uid()), id, matricule, email,
+    prenom, nom, 'ban', nullif(btrim(coalesce(p_reason, '')), '')
+  from updated;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
 end;
-$$;
+$admin_rpc$;
 
 create or replace function public.admin_unban_profile(p_target_profile_id uuid)
 returns void
 language plpgsql
 security definer
 set search_path = ''
-as $$
-declare
-  v_actor uuid := (select auth.uid());
-  v_target_id uuid;
-  v_target_matricule text;
-  v_target_email text;
-  v_target_prenom text;
-  v_target_nom text;
+as $admin_rpc$
 begin
-  if v_actor is null or not public.is_admin_mfa() then
+  if (select auth.uid()) is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select id, matricule, email, prenom, nom
-  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
-  from public.profiles
-  where id = p_target_profile_id
-  for update;
-
-  if not found then
-    raise exception 'profile_not_found' using errcode = 'P0002';
-  end if;
-
-  update public.profiles
-  set status = 'active',
-      banned_at = null,
-      ban_reason = null
-  where id = p_target_profile_id;
-
+  with updated as (
+    update public.profiles
+    set status = 'active',
+        banned_at = null,
+        ban_reason = null
+    where id = p_target_profile_id
+    returning id, matricule, email, prenom, nom
+  )
   insert into public.admin_audit_events (
     actor_id, target_profile_id, target_matricule, target_email,
     target_prenom, target_nom, action, reason
   )
-  values (
-    v_actor, v_target_id, v_target_matricule, v_target_email,
-    v_target_prenom, v_target_nom, 'unban', null
-  );
+  select
+    (select auth.uid()), id, matricule, email,
+    prenom, nom, 'unban', null
+  from updated;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
 end;
-$$;
+$admin_rpc$;
 
 revoke all on function public.admin_approve_profile(uuid) from public;
 revoke all on function public.admin_reject_profile(uuid) from public;
