@@ -241,3 +241,26 @@ le cache local ne doit jamais autoriser une mutation.
 - Les réponses de l'API ECG doivent rester en `Cache-Control: no-store`.
 - Ne jamais considérer l'analyse ECG comme diagnostique : l'UI doit garder la validation médicale
   obligatoire visible.
+
+## MFA admin et journal
+
+- Le MFA TOTP est exigé uniquement à l'ouverture de la console admin, pas pour la consultation
+  clinique standard.
+- Le flux admin utilise Supabase Auth MFA : enrôlement TOTP, challenge, vérification, puis session
+  `aal2`.
+- Les policies SQL admin doivent utiliser `public.is_admin_mfa()` pour la lecture globale des
+  profils, les approbations/refus/suspensions, le journal `admin_audit_events` et l'inscription des
+  appareils Web Push admin.
+- Test fonctionnel minimal : ouvrir la console avec un admin sans MFA, configurer le QR code,
+  valider un code à 6 chiffres, vérifier l'accès au journal puis exporter le CSV.
+
+```sql
+select policyname, qual, with_check
+from pg_policies
+where schemaname = 'public'
+  and tablename in ('profiles', 'admin_audit_events', 'push_subscriptions')
+order by tablename, policyname;
+```
+
+Attendu : les policies admin sensibles référencent `is_admin_mfa()` ; la lecture du profil propre
+reste possible sans MFA pour permettre le chargement de session.

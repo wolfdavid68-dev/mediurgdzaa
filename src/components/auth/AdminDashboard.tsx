@@ -20,7 +20,9 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
     tab,
     setTab,
     profiles,
+    auditEvents,
     loading,
+    auditLoading,
     error,
     selected,
     setSelected,
@@ -37,6 +39,7 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
     enablePush,
     disablePush,
     testPush,
+    exportAuditCsv,
   } = useAdminProfiles(onLogout, currentUserId);
   const [banReason, setBanReason] = useState<string>(BAN_REASONS[0]);
 
@@ -101,7 +104,15 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
     pending: "Demandes",
     active: "Personnels actifs",
     banned: "Comptes suspendus",
+    audit: "Journal",
   };
+  const auditActionLabel = {
+    approve: "Approbation",
+    reject: "Refus",
+    ban: "Suspension",
+    unban: "Rétablissement",
+  };
+  const isAuditTab = tab === "audit";
 
   return (
     <div className="admin-stage">
@@ -153,7 +164,7 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
         <aside className="admin-sidebar" inert={drawerOpen ? true : undefined}>
           <div className="admin-sidebar-section-label">Gestion des accès</div>
           <nav className="admin-nav">
-            {(["pending", "active", "banned"] as const).map((t) => (
+            {(["pending", "active", "banned", "audit"] as const).map((t) => (
               <button
                 key={t}
                 type="button"
@@ -161,7 +172,9 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
                 onClick={() => setTab(t)}
               >
                 <span>{tabLabel[t]}</span>
-                <span className="admin-nav-badge">{tab === t ? profiles.length : ""}</span>
+                <span className="admin-nav-badge">
+                  {tab === t ? (t === "audit" ? auditEvents.length : profiles.length) : ""}
+                </span>
               </button>
             ))}
           </nav>
@@ -184,8 +197,24 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
         <main className="admin-main" inert={drawerOpen ? true : undefined}>
           <div className="admin-main-head">
             <h1 className="admin-main-title">{tabLabel[tab]}</h1>
+            {isAuditTab && (
+              <button
+                type="button"
+                className="admin-btn-soft"
+                onClick={exportAuditCsv}
+                disabled={auditEvents.length === 0}
+              >
+                Export CSV
+              </button>
+            )}
             <div className="admin-main-pill">
-              {loading ? "…" : `${profiles.length} résultat(s)`}
+              {isAuditTab
+                ? auditLoading
+                  ? "..."
+                  : `${auditEvents.length} événement(s)`
+                : loading
+                  ? "..."
+                  : `${profiles.length} résultat(s)`}
             </div>
           </div>
 
@@ -195,7 +224,7 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
             </div>
           )}
 
-          {!loading && profiles.length === 0 && !error && (
+          {!isAuditTab && !loading && profiles.length === 0 && !error && (
             <div className="admin-empty">
               Aucun{" "}
               {tab === "pending"
@@ -207,102 +236,138 @@ const AdminDashboard = ({ currentUserId, currentUserName, onLogout, onExitAdmin 
             </div>
           )}
 
-          <ul className="admin-list">
-            {profiles.map((p) => (
-              <li
-                key={p.id}
-                className={`admin-row ${selected?.id === p.id ? "admin-row-selected" : ""}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => setSelected(p)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setSelected(p);
-                  }
-                }}
-              >
-                <div className="admin-row-person">
-                  <div className="admin-row-avatar">
-                    {p.prenom[0]}
-                    {p.nom[0]}
-                  </div>
-                  <div>
-                    <div className="admin-row-name">
-                      {p.prenom} {p.nom}
+          {isAuditTab && !auditLoading && auditEvents.length === 0 && !error && (
+            <div className="admin-empty">Aucun événement d'administration.</div>
+          )}
+
+          {isAuditTab && (
+            <ul className="admin-list admin-audit-list">
+              {auditEvents.map((event) => (
+                <li key={event.id} className="admin-row admin-audit-row">
+                  <div className="admin-row-person">
+                    <div className="admin-row-avatar">{event.action.slice(0, 1).toUpperCase()}</div>
+                    <div>
+                      <div className="admin-row-name">{auditActionLabel[event.action]}</div>
+                      <div className="admin-row-email">
+                        {new Date(event.created_at).toLocaleString("fr-FR")}
+                      </div>
                     </div>
-                    <div className="admin-row-email">{p.email}</div>
                   </div>
-                </div>
-                <div className="admin-row-matricule mono">{p.matricule}</div>
-                <div className="admin-row-fonction">{p.fonction}</div>
-                <div className="admin-row-service">
-                  <span className="admin-pill">{p.service}</span>
-                </div>
-                <div className="admin-row-meta">
-                  {tab === "pending" && new Date(p.created_at).toLocaleDateString("fr-FR")}
-                  {tab === "active" &&
-                    p.approved_at &&
-                    `Approuvé le ${new Date(p.approved_at).toLocaleDateString("fr-FR")}`}
-                  {tab === "banned" && p.ban_reason}
-                </div>
-                <div className="admin-row-actions">
-                  {tab === "pending" && (
-                    <>
+                  <div className="admin-row-matricule mono">{event.target_matricule}</div>
+                  <div className="admin-row-fonction">
+                    {event.target_prenom} {event.target_nom}
+                  </div>
+                  <div className="admin-row-service">
+                    <span className="admin-pill">
+                      {event.actor
+                        ? `${event.actor.prenom} ${event.actor.nom}`
+                        : event.actor_id.slice(0, 8)}
+                    </span>
+                  </div>
+                  <div className="admin-row-meta">{event.reason ?? "Motif non renseigné"}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {!isAuditTab && (
+            <ul className="admin-list">
+              {profiles.map((p) => (
+                <li
+                  key={p.id}
+                  className={`admin-row ${selected?.id === p.id ? "admin-row-selected" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelected(p)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelected(p);
+                    }
+                  }}
+                >
+                  <div className="admin-row-person">
+                    <div className="admin-row-avatar">
+                      {p.prenom[0]}
+                      {p.nom[0]}
+                    </div>
+                    <div>
+                      <div className="admin-row-name">
+                        {p.prenom} {p.nom}
+                      </div>
+                      <div className="admin-row-email">{p.email}</div>
+                    </div>
+                  </div>
+                  <div className="admin-row-matricule mono">{p.matricule}</div>
+                  <div className="admin-row-fonction">{p.fonction}</div>
+                  <div className="admin-row-service">
+                    <span className="admin-pill">{p.service}</span>
+                  </div>
+                  <div className="admin-row-meta">
+                    {tab === "pending" && new Date(p.created_at).toLocaleDateString("fr-FR")}
+                    {tab === "active" &&
+                      p.approved_at &&
+                      `Approuvé le ${new Date(p.approved_at).toLocaleDateString("fr-FR")}`}
+                    {tab === "banned" && p.ban_reason}
+                  </div>
+                  <div className="admin-row-actions">
+                    {tab === "pending" && (
+                      <>
+                        <button
+                          type="button"
+                          className="admin-btn-ghost"
+                          disabled={busyId === p.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onReject(p);
+                          }}
+                        >
+                          Refuser
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn-primary"
+                          disabled={busyId === p.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onApprove(p);
+                          }}
+                        >
+                          Approuver
+                        </button>
+                      </>
+                    )}
+                    {tab === "active" && (
                       <button
                         type="button"
-                        className="admin-btn-ghost"
+                        className="admin-btn-danger-soft"
                         disabled={busyId === p.id}
                         onClick={(e) => {
                           e.stopPropagation();
-                          onReject(p);
+                          setSelected(p);
                         }}
                       >
-                        Refuser
+                        Suspendre…
                       </button>
+                    )}
+                    {tab === "banned" && (
                       <button
                         type="button"
-                        className="admin-btn-primary"
+                        className="admin-btn-soft"
                         disabled={busyId === p.id}
                         onClick={(e) => {
                           e.stopPropagation();
-                          onApprove(p);
+                          onUnban(p);
                         }}
                       >
-                        Approuver
+                        Rétablir
                       </button>
-                    </>
-                  )}
-                  {tab === "active" && (
-                    <button
-                      type="button"
-                      className="admin-btn-danger-soft"
-                      disabled={busyId === p.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelected(p);
-                      }}
-                    >
-                      Suspendre…
-                    </button>
-                  )}
-                  {tab === "banned" && (
-                    <button
-                      type="button"
-                      className="admin-btn-soft"
-                      disabled={busyId === p.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUnban(p);
-                      }}
-                    >
-                      Rétablir
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </main>
 
         {/* Drawer suspension */}

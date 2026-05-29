@@ -51,6 +51,48 @@
   box-sizing: border-box;
 }
 
+.admin-mfa-card {
+  gap: 18px;
+}
+
+.auth-loading-inline {
+  min-height: auto;
+  padding: 12px 0;
+}
+
+.admin-mfa-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-mfa-qr {
+  width: min(220px, 100%);
+  aspect-ratio: 1;
+  justify-self: center;
+  border-radius: 8px;
+  border: 1px solid var(--auth-line);
+  background: white;
+  padding: 10px;
+}
+
+.admin-mfa-secret {
+  overflow-wrap: anywhere;
+  border: 1px solid var(--auth-line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--auth-surface-2);
+  color: var(--auth-text-3);
+  font-size: 12px;
+}
+
+.admin-audit-row {
+  cursor: default;
+}
+
+.admin-audit-row:hover {
+  background: var(--auth-surface);
+}
+
 .auth-bg-decor {
   position: fixed;
   inset: 0;

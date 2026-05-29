@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import {
   fetchProfilesByStatus,
+  fetchAdminAuditEvents,
   approveProfile,
   rejectProfile,
   banProfile,
   unbanProfile,
   logout,
   isStudentFunction,
+  type AdminAuditEventWithActor,
   type Profile,
   type ProfileStatus,
 } from "../../../lib/auth";
@@ -23,7 +25,7 @@ import {
 // Fetch par statut, actions Supabase, toast et compteur de demandes
 // centralisés ; chaque variante n'apporte que son markup.
 
-export type AdminTab = ProfileStatus; // "pending" | "active" | "banned"
+export type AdminTab = ProfileStatus | "audit";
 export type AdminToast = { kind: "ok" | "warn"; msg: string } | null;
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -41,8 +43,10 @@ const sortProfilesForAdmin = (profiles: Profile[]): Profile[] =>
 export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) => {
   const [tab, setTab] = useState<AdminTab>("pending");
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [auditEvents, setAuditEvents] = useState<AdminAuditEventWithActor[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [auditLoading, setAuditLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Profile | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -64,6 +68,18 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     if (forStatus === "pending") setPendingCount(result.data.length);
   };
 
+  const reloadAudit = async () => {
+    setAuditLoading(true);
+    setError(null);
+    const result = await fetchAdminAuditEvents();
+    setAuditLoading(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setAuditEvents(result.data);
+  };
+
   const refreshPendingCount = async () => {
     const result = await fetchProfilesByStatus("pending");
     if (result.ok) setPendingCount(result.data.length);
@@ -72,6 +88,10 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
   // reload(tab) tourne aussi au montage (tab initial = "pending") et met
   // déjà pendingCount à jour pour ce statut → pas de fetch dédié au montage.
   useEffect(() => {
+    if (tab === "audit") {
+      reloadAudit();
+      return;
+    }
     reload(tab);
   }, [tab]);
 
@@ -124,6 +144,32 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     );
   const unban = (p: Profile) =>
     runAction(p, () => unbanProfile(p, currentAdminId), "ok", `${p.prenom} ${p.nom} rétabli(e)`);
+
+  const exportAuditCsv = () => {
+    if (auditEvents.length === 0) return;
+    const rows = [
+      ["date", "action", "admin", "admin_matricule", "cible", "cible_matricule", "motif"],
+      ...auditEvents.map((event) => [
+        event.created_at,
+        event.action,
+        event.actor ? `${event.actor.prenom} ${event.actor.nom}` : event.actor_id,
+        event.actor?.matricule ?? "",
+        `${event.target_prenom} ${event.target_nom}`,
+        event.target_matricule,
+        event.reason ?? "",
+      ]),
+    ];
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(";"))
+      .join("\n");
+    const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `mediurg-journal-admin-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleLogout = async () => {
     // onLogout DOIT s'exécuter même si logout() échoue (sinon « clic sur
@@ -207,8 +253,10 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     tab,
     setTab,
     profiles,
+    auditEvents,
     pendingCount,
     loading,
+    auditLoading,
     error,
     selected,
     setSelected,
@@ -218,6 +266,8 @@ export const useAdminProfiles = (onLogout: () => void, currentAdminId: string) =
     pushBusy,
     pushTestBusy,
     reload,
+    reloadAudit,
+    exportAuditCsv,
     approve,
     reject,
     ban,

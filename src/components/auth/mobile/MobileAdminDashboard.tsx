@@ -10,6 +10,7 @@ import {
   Dots,
   ExitIcon,
   InboxIcon,
+  JournalIcon,
   SearchIcon,
   UsersIcon,
   Warn,
@@ -24,6 +25,7 @@ const TAB_TITLE: Record<AdminTab, string> = {
   pending: "Demandes",
   active: "Personnels",
   banned: "Suspendus",
+  audit: "Journal",
 };
 
 const initials = (p: Profile) => `${p.prenom[0] ?? ""}${p.nom[0] ?? ""}`.toUpperCase();
@@ -41,8 +43,10 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
     tab,
     setTab,
     profiles,
+    auditEvents,
     pendingCount,
     loading,
+    auditLoading,
     error,
     selected,
     setSelected,
@@ -70,13 +74,25 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
       )
     : profiles;
 
-  const subtitle = loading
-    ? "Chargement…"
-    : tab === "pending"
-      ? `${profiles.length} à valider`
-      : tab === "active"
-        ? `${profiles.length} actifs`
-        : `${profiles.length} comptes`;
+  const subtitle =
+    tab === "audit"
+      ? auditLoading
+        ? "Chargement..."
+        : `${auditEvents.length} événements`
+      : loading
+        ? "Chargement..."
+        : tab === "pending"
+          ? `${profiles.length} à valider`
+          : tab === "active"
+            ? `${profiles.length} actifs`
+            : `${profiles.length} comptes`;
+
+  const auditActionLabel = {
+    approve: "Approbation",
+    reject: "Refus",
+    ban: "Suspension",
+    unban: "Rétablissement",
+  };
 
   return (
     <div className="m-app">
@@ -147,53 +163,88 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
               <span>{error}</span>
             </div>
           )}
-          {!loading && filtered.length === 0 && !error && (
+          {tab !== "audit" && !loading && filtered.length === 0 && !error && (
             <div className="m-empty">Aucun résultat.</div>
           )}
-          {filtered.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={`m-card ${tab === "banned" ? "m-card-banned" : ""}`}
-              onClick={() => setSelected(p)}
-            >
-              <span className={`m-av ${tab === "banned" ? "m-av-muted" : ""}`}>{initials(p)}</span>
-              <span className="m-card-body">
-                <span className="m-card-line1">
-                  <span className="m-card-name">
-                    {p.prenom} {p.nom}
+          {tab === "audit" && !auditLoading && auditEvents.length === 0 && !error && (
+            <div className="m-empty">Aucun événement d'administration.</div>
+          )}
+          {tab === "audit" &&
+            auditEvents.map((event) => (
+              <div key={event.id} className="m-card m-audit-card">
+                <span className="m-av">{event.action.slice(0, 1).toUpperCase()}</span>
+                <span className="m-card-body">
+                  <span className="m-card-line1">
+                    <span className="m-card-name">{auditActionLabel[event.action]}</span>
+                    <span className="m-card-mat m-mono">{event.target_matricule}</span>
                   </span>
-                  <span className="m-card-mat m-mono">{p.matricule}</span>
+                  <span className="m-card-line2">
+                    <span>
+                      {event.target_prenom} {event.target_nom}
+                    </span>
+                    <span className="m-card-dot">·</span>
+                    <span>
+                      {event.actor
+                        ? `${event.actor.prenom} ${event.actor.nom}`
+                        : event.actor_id.slice(0, 8)}
+                    </span>
+                  </span>
+                  <span className="m-card-line3">
+                    <span className="m-card-time">
+                      {new Date(event.created_at).toLocaleString("fr-FR")}
+                    </span>
+                    {event.reason && <span>{event.reason}</span>}
+                  </span>
                 </span>
-                <span className="m-card-line2">
-                  <span>{p.fonction}</span>
-                  <span className="m-card-dot">·</span>
-                  <span>{p.service}</span>
+              </div>
+            ))}
+          {tab !== "audit" &&
+            filtered.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`m-card ${tab === "banned" ? "m-card-banned" : ""}`}
+                onClick={() => setSelected(p)}
+              >
+                <span className={`m-av ${tab === "banned" ? "m-av-muted" : ""}`}>
+                  {initials(p)}
                 </span>
-                <span className="m-card-line3">
-                  {tab === "pending" && (
-                    <>
-                      <span className="m-card-time">{frDate(p.created_at)}</span>
-                      <span className="m-card-email m-mono">{p.email}</span>
-                    </>
-                  )}
-                  {tab === "active" && (
-                    <>
-                      <span className="m-card-time">
-                        <span className="m-dot m-dot-ok" /> {frDate(p.approved_at)}
-                      </span>
-                      <span className="m-card-email m-mono">{p.email}</span>
-                    </>
-                  )}
-                  {tab === "banned" && (
-                    <span className="m-card-time">{p.ban_reason ?? "Motif non précisé"}</span>
-                  )}
+                <span className="m-card-body">
+                  <span className="m-card-line1">
+                    <span className="m-card-name">
+                      {p.prenom} {p.nom}
+                    </span>
+                    <span className="m-card-mat m-mono">{p.matricule}</span>
+                  </span>
+                  <span className="m-card-line2">
+                    <span>{p.fonction}</span>
+                    <span className="m-card-dot">·</span>
+                    <span>{p.service}</span>
+                  </span>
+                  <span className="m-card-line3">
+                    {tab === "pending" && (
+                      <>
+                        <span className="m-card-time">{frDate(p.created_at)}</span>
+                        <span className="m-card-email m-mono">{p.email}</span>
+                      </>
+                    )}
+                    {tab === "active" && (
+                      <>
+                        <span className="m-card-time">
+                          <span className="m-dot m-dot-ok" /> {frDate(p.approved_at)}
+                        </span>
+                        <span className="m-card-email m-mono">{p.email}</span>
+                      </>
+                    )}
+                    {tab === "banned" && (
+                      <span className="m-card-time">{p.ban_reason ?? "Motif non précisé"}</span>
+                    )}
+                  </span>
                 </span>
-              </span>
-              {tab === "pending" && <span className="m-card-cta">À valider</span>}
-              <Dots />
-            </button>
-          ))}
+                {tab === "pending" && <span className="m-card-cta">À valider</span>}
+                <Dots />
+              </button>
+            ))}
         </main>
 
         <nav className="m-tabbar" inert={selected ? true : undefined}>
@@ -227,6 +278,16 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
               <BanIcon />
             </span>
             <span className="m-tab-lbl">Suspendus</span>
+          </button>
+          <button
+            type="button"
+            className={`m-tab ${tab === "audit" ? "on" : ""}`}
+            onClick={() => setTab("audit")}
+          >
+            <span className="m-tab-icn">
+              <JournalIcon />
+            </span>
+            <span className="m-tab-lbl">Journal</span>
           </button>
         </nav>
 

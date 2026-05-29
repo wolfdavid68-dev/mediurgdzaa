@@ -39,6 +39,34 @@ export type Profile = {
 type AdminAuditAction = "approve" | "reject" | "ban" | "unban";
 type AdminAuditTarget = Pick<Profile, "id" | "matricule" | "email" | "prenom" | "nom">;
 
+type AdminAuditEvent = {
+  id: number;
+  created_at: string;
+  actor_id: string;
+  target_profile_id: string;
+  target_matricule: string;
+  target_email: string;
+  target_prenom: string;
+  target_nom: string;
+  action: AdminAuditAction;
+  reason: string | null;
+};
+
+export type AdminAuditEventWithActor = AdminAuditEvent & {
+  actor: Pick<Profile, "id" | "matricule" | "email" | "prenom" | "nom"> | null;
+};
+
+export type AdminMfaStatus =
+  | { state: "verified" }
+  | { state: "enroll" }
+  | { state: "challenge"; factorId: string; label: string };
+
+export type AdminMfaEnrollment = {
+  factorId: string;
+  qrCode: string;
+  secret: string | null;
+};
+
 export type SignupPayload = {
   matricule: string;
   email: string;
@@ -370,6 +398,126 @@ export const fetchProfilesByStatus = async (
     .order("created_at", { ascending: false });
   if (error) return { ok: false, error: humanizeError(error.message) };
   return { ok: true, data: (data ?? []) as Profile[] };
+};
+
+export const fetchAdminAuditEvents = async (
+  limit = 100
+): Promise<AuthResult<AdminAuditEventWithActor[]>> => {
+  const supabase = await getSupabaseClient();
+  if (!supabase) return { ok: false, error: "Backend non configuré" };
+
+  const { data, error } = await supabase
+    .from("admin_audit_events")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) return { ok: false, error: humanizeError(error.message) };
+
+  const events = (data ?? []) as AdminAuditEvent[];
+  const actorIds = [...new Set(events.map((event) => event.actor_id).filter(Boolean))];
+  const actorById = new Map<
+    string,
+    Pick<Profile, "id" | "matricule" | "email" | "prenom" | "nom">
+  >();
+
+  if (actorIds.length > 0) {
+    const { data: actors } = await supabase
+      .from("profiles")
+      .select("id, matricule, email, prenom, nom")
+      .in("id", actorIds);
+    for (const actor of (actors ?? []) as Pick<
+      Profile,
+      "id" | "matricule" | "email" | "prenom" | "nom"
+    >[]) {
+      actorById.set(actor.id, actor);
+    }
+  }
+
+  return {
+    ok: true,
+    data: events.map((event) => ({ ...event, actor: actorById.get(event.actor_id) ?? null })),
+  };
+};
+
+type MfaFactor = {
+  id: string;
+  friendly_name?: string | null;
+  factor_type?: string;
+  status?: string;
+  phone?: string | null;
+};
+
+type MfaListData = {
+  all?: MfaFactor[];
+  totp?: MfaFactor[];
+  phone?: MfaFactor[];
+};
+
+const firstVerifiedFactor = (data: MfaListData): MfaFactor | null => {
+  const factors = [...(data.totp ?? []), ...(data.phone ?? []), ...(data.all ?? [])];
+  return factors.find((factor) => factor.status === "verified") ?? null;
+};
+
+const mfaFactorLabel = (factor: MfaFactor): string => {
+  if (factor.friendly_name) return factor.friendly_name;
+  if (factor.factor_type === "phone" && factor.phone) return `Téléphone ${factor.phone}`;
+  return factor.factor_type === "phone" ? "Code téléphone" : "Application d'authentification";
+};
+
+export const getAdminMfaStatus = async (): Promise<AuthResult<AdminMfaStatus>> => {
+  const supabase = await getSupabaseClient();
+  if (!supabase) return { ok: false, error: "Backend non configuré" };
+
+  const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal.error) return { ok: false, error: humanizeError(aal.error.message) };
+  if (aal.data.currentLevel === "aal2") return { ok: true, data: { state: "verified" } };
+
+  const factors = await supabase.auth.mfa.listFactors();
+  if (factors.error) return { ok: false, error: humanizeError(factors.error.message) };
+
+  const factor = firstVerifiedFactor(factors.data as MfaListData);
+  if (!factor) return { ok: true, data: { state: "enroll" } };
+  return {
+    ok: true,
+    data: { state: "challenge", factorId: factor.id, label: mfaFactorLabel(factor) },
+  };
+};
+
+export const startAdminMfaEnrollment = async (): Promise<AuthResult<AdminMfaEnrollment>> => {
+  const supabase = await getSupabaseClient();
+  if (!supabase) return { ok: false, error: "Backend non configuré" };
+
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+  if (error) return { ok: false, error: humanizeError(error.message) };
+  return {
+    ok: true,
+    data: {
+      factorId: data.id,
+      qrCode: data.totp.qr_code,
+      secret: data.totp.secret ?? null,
+    },
+  };
+};
+
+export const verifyAdminMfaCode = async (factorId: string, code: string): Promise<AuthResult> => {
+  const supabase = await getSupabaseClient();
+  if (!supabase) return { ok: false, error: "Backend non configuré" };
+  if (!/^\d{6}$/.test(code.trim())) {
+    return { ok: false, error: "Code MFA invalide : 6 chiffres attendus" };
+  }
+
+  const challenge = await supabase.auth.mfa.challenge({ factorId });
+  if (challenge.error) return { ok: false, error: humanizeError(challenge.error.message) };
+
+  const verify = await supabase.auth.mfa.verify({
+    factorId,
+    challengeId: challenge.data.id,
+    code: code.trim(),
+  });
+  if (verify.error) return { ok: false, error: humanizeError(verify.error.message) };
+
+  await supabase.auth.refreshSession();
+  return { ok: true, data: undefined };
 };
 
 const logAdminAction = async (

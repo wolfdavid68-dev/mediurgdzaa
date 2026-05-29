@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import type { Profile } from "../lib/auth";
 
 // Garantie offline-first de bout en bout : avec auth ACTIVÉE, un soignant
@@ -26,6 +26,7 @@ const h = vi.hoisted(() => ({
   isAuthEnabled: vi.fn(() => true),
   getCurrentSession: vi.fn(),
   fetchProfile: vi.fn(),
+  getAdminMfaStatus: vi.fn(),
   onAuthStateChange: vi.fn(() => () => {}),
   getCachedProfile: vi.fn(),
   getLastCachedProfile: vi.fn(),
@@ -61,6 +62,7 @@ vi.mock("../lib/auth", async (importOriginal) => {
     ...actual,
     getCurrentSession: h.getCurrentSession,
     fetchProfile: h.fetchProfile,
+    getAdminMfaStatus: h.getAdminMfaStatus,
     onAuthStateChange: h.onAuthStateChange,
   };
 });
@@ -81,6 +83,7 @@ describe("AuthGate — garantie offline (auth activée)", () => {
     vi.clearAllMocks();
     h.isAuthEnabled.mockReturnValue(true);
     h.onAuthStateChange.mockReturnValue(() => {});
+    h.getAdminMfaStatus.mockResolvedValue({ ok: true, data: { state: "verified" } });
     h.migrateAnonymousData.mockReset();
     setOnline(true);
   });
@@ -176,7 +179,7 @@ describe("AuthGate — garantie offline (auth activée)", () => {
     );
 
     await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
-    window.dispatchEvent(new Event("mediurg:open-admin"));
+    act(() => window.dispatchEvent(new Event("mediurg:open-admin")));
     expect(screen.queryByText("ADMIN_CONSOLE")).not.toBeInTheDocument();
   });
 
@@ -194,7 +197,7 @@ describe("AuthGate — garantie offline (auth activée)", () => {
     );
 
     await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
-    window.dispatchEvent(new Event("mediurg:open-admin"));
+    act(() => window.dispatchEvent(new Event("mediurg:open-admin")));
     await waitFor(() => expect(screen.getByText("ADMIN_CONSOLE")).toBeInTheDocument());
   });
 });

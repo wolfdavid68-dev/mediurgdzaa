@@ -293,3 +293,14 @@ npm run release:check
 - [`SECURITY_RUNBOOK.md`](./SECURITY_RUNBOOK.md)
 - [`DEPLOY_PWA.md`](../DEPLOY_PWA.md)
 - [`QUICK_START_PWA.md`](../QUICK_START_PWA.md)
+
+## Mise à jour sécurité admin
+
+- Le MFA TOTP est désormais imposé uniquement aux administrateurs lors de l'ouverture de la console
+  d'administration.
+- Les opérations admin sensibles doivent être protégées côté Supabase par `public.is_admin_mfa()`,
+  qui vérifie à la fois le rôle admin actif et le niveau de session `aal2`.
+- Le journal `admin_audit_events` est consultable depuis la console admin et exportable en CSV pour
+  revue DPO/RSSI/DSI.
+- Point opérationnel à valider : procédure de récupération en cas de perte du second facteur par un
+  administrateur.

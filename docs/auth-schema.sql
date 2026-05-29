@@ -142,6 +142,18 @@ begin
 end;
 $$;
 
+-- Helper : admin actif avec MFA valide sur la session courante.
+-- Les actions d'administration exigent le claim JWT `aal = aal2`.
+create or replace function public.is_admin_mfa()
+returns boolean
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select public.is_admin() and coalesce((select auth.jwt()) ->> 'aal', 'aal1') = 'aal2';
+$$;
+
 -- ── RLS sur profiles ────────────────────────────────────────
 alter table public.profiles enable row level security;
 alter table public.admin_audit_events enable row level security;
@@ -187,14 +199,14 @@ create policy "self_read"
 create policy "admin_read_all"
   on public.profiles for select
   to authenticated
-  using (public.is_admin());
+  using (public.is_admin_mfa());
 
 -- Update : les admins peuvent modifier tous les profiles (approve/ban)
 create policy "admin_update_all"
   on public.profiles for update
   to authenticated
-  using (public.is_admin())
-  with check (public.is_admin());
+  using (public.is_admin_mfa())
+  with check (public.is_admin_mfa());
 
 -- Delete : les admins peuvent supprimer un profile (= reject d'une demande)
 -- Note : la suppression du profile cascade vers auth.users via la FK,
@@ -202,7 +214,7 @@ create policy "admin_update_all"
 create policy "admin_delete"
   on public.profiles for delete
   to authenticated
-  using (public.is_admin());
+  using (public.is_admin_mfa());
 
 -- Pas d'insert direct depuis le client : l'insertion se fait uniquement
 -- via le trigger handle_new_user() qui s'exécute en security definer.
@@ -213,12 +225,12 @@ create policy "admin_delete"
 create policy "admin_audit_read"
   on public.admin_audit_events for select
   to authenticated
-  using (public.is_admin());
+  using (public.is_admin_mfa());
 
 create policy "admin_audit_insert"
   on public.admin_audit_events for insert
   to authenticated
-  with check (public.is_admin() and actor_id = (select auth.uid()));
+  with check (public.is_admin_mfa() and actor_id = (select auth.uid()));
 
 -- Web Push : seuls les admins actifs peuvent enregistrer / maintenir leur
 -- propre appareil. Personne ne liste les endpoints des autres côté client.
@@ -230,13 +242,13 @@ create policy "push_self_read"
 create policy "push_self_insert_admin_only"
   on public.push_subscriptions for insert
   to authenticated
-  with check (public.is_admin() and user_id = (select auth.uid()));
+  with check (public.is_admin_mfa() and user_id = (select auth.uid()));
 
 create policy "push_self_update_admin_only"
   on public.push_subscriptions for update
   to authenticated
   using ((select auth.uid()) = user_id)
-  with check (public.is_admin() and user_id = (select auth.uid()));
+  with check (public.is_admin_mfa() and user_id = (select auth.uid()));
 
 create policy "push_self_delete"
   on public.push_subscriptions for delete

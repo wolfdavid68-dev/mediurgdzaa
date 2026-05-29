@@ -84,6 +84,13 @@ export const BanIcon = ({ size = 20, ...p }: IconProps) => (
     <path d="m4.9 4.9 14.2 14.2" />
   </svg>
 );
+export const JournalIcon = ({ size = 20, ...p }: IconProps) => (
+  <svg {...base(size)} {...p}>
+    <path d="M7 3h10a2 2 0 0 1 2 2v16l-7-3-7 3V5a2 2 0 0 1 2-2Z" />
+    <path d="M9 8h6" />
+    <path d="M9 12h6" />
+  </svg>
+);
 export const Dots = ({ size = 18, ...p }: IconProps) => (
   <svg {...base(size)} {...p}>
     <circle cx="5" cy="12" r="1.5" />

@@ -30,6 +30,7 @@ const MobileBannedScreen = lazy(() =>
 // Écrans auth/admin en chunks dédiés. Ils restent disponibles hors-ligne parce
 // que Workbox précache tous les chunks générés au build.
 const AdminDashboard = lazy(() => import("./AdminDashboard"));
+const AdminMfaGate = lazy(() => import("./AdminMfaGate"));
 const MobileAdminDashboard = lazy(() => import("./mobile/MobileAdminDashboard"));
 
 // AuthGate — wrapper qui décide quoi rendre selon l'état d'auth.
@@ -327,7 +328,12 @@ const AuthGate = ({ children }: Props) => {
       onExitAdmin: () => setShowAdmin(false),
     };
     return withAuthSuspense(
-      isMobile ? <MobileAdminDashboard {...adminProps} /> : <AdminDashboard {...adminProps} />
+      <AdminMfaGate
+        currentUserName={adminProps.currentUserName}
+        onExitAdmin={adminProps.onExitAdmin}
+      >
+        {isMobile ? <MobileAdminDashboard {...adminProps} /> : <AdminDashboard {...adminProps} />}
+      </AdminMfaGate>
     );
   }
 
