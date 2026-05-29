@@ -6,7 +6,7 @@
    ============================================================ */
 
 :root {
-  --bottom-nav-clearance: 112px;
+  --bottom-nav-clearance: 86px;
 }
 
 .main-content {
@@ -16,7 +16,7 @@
 
 @media (max-width: 480px) {
   :root {
-    --bottom-nav-clearance: 120px;
+    --bottom-nav-clearance: 86px;
   }
 }
 
