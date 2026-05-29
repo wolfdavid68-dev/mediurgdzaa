@@ -21,9 +21,19 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+function getSafeNotificationUrl(rawUrl) {
+  const fallback = new URL("/", self.location.origin).href;
+  try {
+    const target = new URL(rawUrl || "/", self.location.origin);
+    return target.origin === self.location.origin ? target.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const targetUrl = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  const targetUrl = getSafeNotificationUrl(event.notification.data?.url);
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {

@@ -16,8 +16,10 @@ La base technique a été durcie :
 - MFA TOTP obligatoire pour les administrateurs avant ouverture de la console ;
 - traçabilité des actions d'administration via `public.admin_audit_events` : approbation, refus,
   suspension, rétablissement, avec consultation et export CSV depuis la console ;
+- actions admin exécutées via RPC Supabase atomiques : mutation du profil et écriture du journal
+  dans la même transaction ;
 - notifications PWA admin pour les nouvelles demandes d'accès, avec payload générique non
-  nominatif ;
+  nominatif et déduplication durable côté Supabase ;
 - absence de lecture anonyme sur `profiles` vérifiée en production le 26 mai 2026 ;
 - headers de sécurité ajoutés côté Vercel ;
 - API ECG protégée par proxy serveur, validation MIME/taille, `Cache-Control: no-store` et
@@ -48,6 +50,11 @@ Pour un administrateur :
 
 Côté Supabase, les policies admin sensibles doivent référencer `public.is_admin_mfa()` : elles
 vérifient à la fois le rôle admin actif et le niveau de session `aal2`.
+
+Depuis la passe post-scan Codex Security du 29 mai 2026, les actions admin ne sont plus des
+mutations directes client suivies d'un audit best-effort. Elles passent par les RPC
+`admin_approve_profile`, `admin_reject_profile`, `admin_ban_profile` et `admin_unban_profile`, qui
+écrivent l'audit dans la même transaction.
 
 ## Périmètre fonctionnel
 
@@ -83,6 +90,8 @@ vérifient à la fois le rôle admin actif et le niveau de session `aal2`.
 
 - Supabase pour authentification, table `profiles`, journal `admin_audit_events` et abonnements
   `push_subscriptions`.
+- Table `access_request_notifications` pour limiter les relances de notification admin sans
+  dépendre de la mémoire Vercel.
 - API Vercel `/api/analyze-ecg` pour proxy ECG vers fournisseurs IA.
 - API Vercel `/api/notify-access-request` pour envoyer une notification Web Push générique aux
   admins abonnés.
@@ -195,18 +204,26 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 - Policies finales : `self_read`, `admin_read_all`, `admin_update_all`, `admin_delete`.
 - Aucune policy `anon` ou `public`.
 - `anon` n'a pas le privilège `SELECT`.
-- `authenticated` conserve `SELECT`, `UPDATE`, `DELETE`.
+- `authenticated` conserve `SELECT`.
+- `UPDATE` et `DELETE` directs sont retirés de `authenticated` : les actions admin passent par RPC.
 - Privilèges inutiles retirés : `INSERT`, `TRUNCATE`, `TRIGGER`, `REFERENCES`.
 
 État cible pour `public.admin_audit_events` après application du SQL d'audit :
 
 - RLS active.
 - Aucun accès `anon` ou `public`.
-- Droits `authenticated` limités à `SELECT` et `INSERT`, filtrés par RLS.
+- Droits `authenticated` limités à `SELECT`.
 - Policies attendues : `admin_audit_read`, `admin_audit_insert`.
-- Insertion autorisée uniquement pour un admin actif avec `actor_id = auth.uid()`.
+- Insertion réalisée par les RPC admin atomiques ; les droits directs client `INSERT` sont retirés.
 - Les refus de compte conservent un snapshot du compte cible dans le journal avant disparition de
   la ligne `profiles`.
+
+État cible pour `public.access_request_notifications` après application du SQL notifications :
+
+- RLS active.
+- Aucun accès `anon`, `public` ou `authenticated`.
+- Accès réservé au serveur via `service_role`.
+- Une ligne par profil en attente, utilisée pour dédupliquer les notifications pendant 6 h.
 
 État cible pour `public.push_subscriptions` après application du SQL notifications :
 
@@ -244,8 +261,8 @@ cas de départ d'un agent ou de perte d'appareil.
 | Accès offline après retrait d'habilitation  | moyen          | réconciliation à la reconnexion      | valider compromis urgentiste            |
 | Perte/vol d'appareil appairé                | moyen          | logout possible, stockage navigateur | définir procédure institutionnelle      |
 | Dépendance Vercel/Supabase/IA               | moyen          | secrets protégés, RLS, headers       | valider sous-traitants                  |
-| Action admin non expliquée                  | faible         | journal d'audit admin                | valider durée de conservation           |
-| Notification exposant une identité          | faible         | payload push générique               | valider règle de contenu notification   |
+| Action admin non expliquée                  | faible         | journal d'audit admin atomique       | valider durée de conservation           |
+| Notification exposant une identité/spam     | faible         | payload générique + déduplication DB | valider règle de contenu notification   |
 | Erreur de contenu clinique                  | élevé          | versioning, PWA update prompt        | définir procédure de correction urgente |
 
 ## Matrice risques / mesures / preuves

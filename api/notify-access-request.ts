@@ -7,6 +7,7 @@
 //   le profil existe toujours en pending ;
 // - la cle service_role sert uniquement cote serveur a lire les abonnements
 //   push des admins actifs, verifier le statut pending et purger les endpoints expires ;
+// - la deduplication 6 h est stockee dans Supabase, pas dans la memoire Vercel ;
 // - le payload push reste generique : aucune donnee nominative.
 import { createClient } from "@supabase/supabase-js";
 import webpush, { type PushSubscription } from "web-push";
@@ -35,8 +36,8 @@ type StoredPushSubscription = {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 12;
+const NOTIFICATION_DEDUPE_MS = 6 * 60 * 60 * 1000;
 const rateBuckets = new Map<string, RateBucket>();
-const notifiedProfileIds = new Map<string, number>();
 
 function getHeader(req: VercelReq, name: string): string | undefined {
   const lower = name.toLowerCase();
@@ -121,13 +122,6 @@ function parseBody(body: unknown): { profileId?: unknown } | null {
   return null;
 }
 
-function cleanupNotificationCache(now = Date.now()): void {
-  const ttl = 6 * 60 * 60 * 1000;
-  for (const [id, ts] of notifiedProfileIds) {
-    if (now - ts > ttl) notifiedProfileIds.delete(id);
-  }
-}
-
 async function verifyPendingProfileWithSession(
   req: VercelReq,
   profileId: string
@@ -181,6 +175,37 @@ async function verifyPendingProfile(req: VercelReq, profileId: string): Promise<
     return true;
   }
   return verifyPendingProfileWithServiceRole(profileId);
+}
+
+async function reserveProfileNotification(profileId: string): Promise<"send" | "duplicate"> {
+  const env = getSupabaseServiceEnv();
+  if (!env) throw new Error("supabase-service-env-missing");
+
+  const supabase = createClient(env.url, env.serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const cutoffIso = new Date(now.getTime() - NOTIFICATION_DEDUPE_MS).toISOString();
+
+  const { error: insertError } = await supabase
+    .from("access_request_notifications")
+    .insert({ profile_id: profileId, notified_at: nowIso });
+
+  if (!insertError) return "send";
+  if (insertError.code !== "23505") throw insertError;
+
+  const { data, error: updateError } = await supabase
+    .from("access_request_notifications")
+    .update({ notified_at: nowIso })
+    .eq("profile_id", profileId)
+    .lte("notified_at", cutoffIso)
+    .select("profile_id")
+    .maybeSingle();
+
+  if (updateError) throw updateError;
+  return data ? "send" : "duplicate";
 }
 
 async function fetchAdminSubscriptions(): Promise<StoredPushSubscription[]> {
@@ -278,16 +303,16 @@ export default async function handler(req: VercelReq, res: VercelRes) {
     return;
   }
 
-  cleanupNotificationCache();
-  if (notifiedProfileIds.has(profileId)) {
-    res.status(202).json({ ok: true, duplicate: true });
-    return;
-  }
-
   try {
     const profileIsPending = await verifyPendingProfile(req, profileId);
     if (!profileIsPending) {
       res.status(404).json({ error: "Demande introuvable" });
+      return;
+    }
+
+    const reservation = await reserveProfileNotification(profileId);
+    if (reservation === "duplicate") {
+      res.status(202).json({ ok: true, duplicate: true });
       return;
     }
 
@@ -296,7 +321,6 @@ export default async function handler(req: VercelReq, res: VercelRes) {
       await publishWebPush(subscriptions, getBaseUrl(req));
     }
 
-    notifiedProfileIds.set(profileId, Date.now());
     res.status(202).json({ ok: true, sent: subscriptions.length });
   } catch (error) {
     const code = error instanceof Error ? error.message : "unknown";

@@ -88,6 +88,17 @@ create table if not exists public.push_subscriptions (
 create index if not exists push_subscriptions_user_idx
   on public.push_subscriptions (user_id);
 
+-- Deduplication durable des notifications de demande d'acces. La route
+-- Vercel reserve une notification ici avant d'envoyer le Web Push, pour ne
+-- pas dependre d'un cache memoire serverless.
+create table if not exists public.access_request_notifications (
+  profile_id  uuid primary key references public.profiles(id) on delete cascade,
+  notified_at timestamptz not null default now()
+);
+
+create index if not exists access_request_notifications_notified_idx
+  on public.access_request_notifications (notified_at);
+
 -- ── Trigger : auto-création du profile au signup ────────────
 -- Le trigger lit `raw_user_meta_data` (envoyé par signUp({ data: {...} })
 -- côté client) et insère la ligne profile correspondante. Sans ça, un
@@ -158,6 +169,7 @@ $$;
 alter table public.profiles enable row level security;
 alter table public.admin_audit_events enable row level security;
 alter table public.push_subscriptions enable row level security;
+alter table public.access_request_notifications enable row level security;
 
 -- Data API : ne jamais exposer `profiles` aux anonymes. La clé anon est
 -- publique dans le bundle JS ; le login passe uniquement par la fonction
@@ -165,16 +177,23 @@ alter table public.push_subscriptions enable row level security;
 -- requis, filtré ensuite par les policies RLS ci-dessous.
 revoke all on table public.profiles from anon;
 revoke all on table public.profiles from public;
-grant select, update, delete on table public.profiles to authenticated;
+revoke update, delete on table public.profiles from authenticated;
+grant select on table public.profiles to authenticated;
 
 revoke all on table public.admin_audit_events from anon;
 revoke all on table public.admin_audit_events from public;
-grant select, insert on table public.admin_audit_events to authenticated;
-grant usage, select on sequence public.admin_audit_events_id_seq to authenticated;
+revoke insert on table public.admin_audit_events from authenticated;
+grant select on table public.admin_audit_events to authenticated;
+revoke all on sequence public.admin_audit_events_id_seq from anon, public, authenticated;
 
 revoke all on table public.push_subscriptions from anon;
 revoke all on table public.push_subscriptions from public;
 grant select, insert, update, delete on table public.push_subscriptions to authenticated;
+
+revoke all on table public.access_request_notifications from anon;
+revoke all on table public.access_request_notifications from authenticated;
+revoke all on table public.access_request_notifications from public;
+grant select, insert, update, delete on table public.access_request_notifications to service_role;
 
 -- Drop les anciennes policies pour ré-exécution propre
 drop policy if exists "self_read" on public.profiles;
@@ -289,6 +308,176 @@ $$;
 -- le grant PUBLIC implicite pour ne l'ouvrir qu'aux rôles voulus.
 revoke all     on function public.matricule_to_email(text) from public;
 grant  execute on function public.matricule_to_email(text) to anon, authenticated;
+
+-- Actions admin atomiques avec audit obligatoire.
+-- Le client n'a pas de droit direct UPDATE/DELETE sur profiles ni INSERT sur
+-- admin_audit_events. Il appelle ces RPC ; chaque fonction verifie le MFA admin
+-- puis modifie le profil et ecrit l'audit dans la meme transaction.
+create or replace function public.admin_approve_profile(p_target_profile_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_actor uuid := (select auth.uid());
+  v_target public.profiles%rowtype;
+begin
+  if v_actor is null or not public.is_admin_mfa() then
+    raise exception 'admin_mfa_required' using errcode = '42501';
+  end if;
+
+  select * into v_target
+  from public.profiles
+  where id = p_target_profile_id
+  for update;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
+
+  update public.profiles
+  set status = 'active',
+      approved_at = now(),
+      approved_by = v_actor
+  where id = p_target_profile_id;
+
+  insert into public.admin_audit_events (
+    actor_id, target_profile_id, target_matricule, target_email,
+    target_prenom, target_nom, action, reason
+  )
+  values (
+    v_actor, v_target.id, v_target.matricule, v_target.email,
+    v_target.prenom, v_target.nom, 'approve', null
+  );
+end;
+$$;
+
+create or replace function public.admin_reject_profile(p_target_profile_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_actor uuid := (select auth.uid());
+  v_target public.profiles%rowtype;
+begin
+  if v_actor is null or not public.is_admin_mfa() then
+    raise exception 'admin_mfa_required' using errcode = '42501';
+  end if;
+
+  select * into v_target
+  from public.profiles
+  where id = p_target_profile_id
+  for update;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
+
+  insert into public.admin_audit_events (
+    actor_id, target_profile_id, target_matricule, target_email,
+    target_prenom, target_nom, action, reason
+  )
+  values (
+    v_actor, v_target.id, v_target.matricule, v_target.email,
+    v_target.prenom, v_target.nom, 'reject', null
+  );
+
+  delete from public.profiles where id = p_target_profile_id;
+end;
+$$;
+
+create or replace function public.admin_ban_profile(p_target_profile_id uuid, p_reason text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_actor uuid := (select auth.uid());
+  v_target public.profiles%rowtype;
+  v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
+begin
+  if v_actor is null or not public.is_admin_mfa() then
+    raise exception 'admin_mfa_required' using errcode = '42501';
+  end if;
+
+  select * into v_target
+  from public.profiles
+  where id = p_target_profile_id
+  for update;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
+
+  update public.profiles
+  set status = 'banned',
+      banned_at = now(),
+      ban_reason = v_reason
+  where id = p_target_profile_id;
+
+  insert into public.admin_audit_events (
+    actor_id, target_profile_id, target_matricule, target_email,
+    target_prenom, target_nom, action, reason
+  )
+  values (
+    v_actor, v_target.id, v_target.matricule, v_target.email,
+    v_target.prenom, v_target.nom, 'ban', v_reason
+  );
+end;
+$$;
+
+create or replace function public.admin_unban_profile(p_target_profile_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_actor uuid := (select auth.uid());
+  v_target public.profiles%rowtype;
+begin
+  if v_actor is null or not public.is_admin_mfa() then
+    raise exception 'admin_mfa_required' using errcode = '42501';
+  end if;
+
+  select * into v_target
+  from public.profiles
+  where id = p_target_profile_id
+  for update;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
+
+  update public.profiles
+  set status = 'active',
+      banned_at = null,
+      ban_reason = null
+  where id = p_target_profile_id;
+
+  insert into public.admin_audit_events (
+    actor_id, target_profile_id, target_matricule, target_email,
+    target_prenom, target_nom, action, reason
+  )
+  values (
+    v_actor, v_target.id, v_target.matricule, v_target.email,
+    v_target.prenom, v_target.nom, 'unban', null
+  );
+end;
+$$;
+
+revoke all on function public.admin_approve_profile(uuid) from public;
+revoke all on function public.admin_reject_profile(uuid) from public;
+revoke all on function public.admin_ban_profile(uuid, text) from public;
+revoke all on function public.admin_unban_profile(uuid) from public;
+grant execute on function public.admin_approve_profile(uuid) to authenticated;
+grant execute on function public.admin_reject_profile(uuid) to authenticated;
+grant execute on function public.admin_ban_profile(uuid, text) to authenticated;
+grant execute on function public.admin_unban_profile(uuid) to authenticated;
 
 -- ── Realtime (optionnel) ────────────────────────────────────
 -- Active les events realtime sur profiles : utile pour le dashboard

@@ -48,7 +48,7 @@ publication, voir [`PROCEDURE_RELEASE.md`](./PROCEDURE_RELEASE.md).
 - Pour tout changement Web Push, vérifier que la notification de demande d'accès reste générique :
   pas de nom, matricule, email, service, IPP ou donnée patient dans le payload.
 - Pour tout changement auth/admin, tester le MFA admin : enrôlement TOTP, challenge, ouverture de
-  la console, lecture du journal et export CSV.
+  la console, action admin via RPC, lecture du journal et export CSV.
 
 ## Audit Supabase prod
 
@@ -57,19 +57,23 @@ publication, voir [`PROCEDURE_RELEASE.md`](./PROCEDURE_RELEASE.md).
 ### Dernière vérification MediURG
 
 Vérifié en production le 26 mai 2026 via le SQL Editor Supabase.
-Revue locale du code `main` le 29 mai 2026 après ajout du MFA admin et du journal consultable.
+Revue locale du code `main` le 29 mai 2026 après ajout du MFA admin, du journal consultable et des
+RPC admin atomiques.
 
 - `public.profiles` : RLS active (`rowsecurity = true`).
 - `public.admin_audit_events` : RLS active (`rowsecurity = true`) si le journal admin a été
   déployé.
 - `public.push_subscriptions` : RLS active (`rowsecurity = true`) si les notifications admin ont
   été déployées.
+- `public.access_request_notifications` : RLS active (`rowsecurity = true`) si la déduplication
+  durable des notifications admin a été déployée.
 - Policies finales sur `public.profiles` : `self_read`, `admin_read_all`, `admin_update_all`,
   `admin_delete`. Les policies admin sensibles doivent utiliser `public.is_admin_mfa()`.
 - Aucune policy `anon` ou `public` sur `public.profiles`.
 - Privilège direct `anon` sur `public.profiles` : `SELECT = false`.
-- Privilèges `authenticated` conservés sur `public.profiles` : `SELECT = true`,
-  `UPDATE = true`, `DELETE = true`.
+- Privilèges `authenticated` conservés sur `public.profiles` : `SELECT = true`.
+- Privilèges directs `authenticated` retirés de `public.profiles` : `UPDATE`, `DELETE`
+  (actions admin via RPC atomiques).
 - Privilèges inutiles retirés de `authenticated` sur `public.profiles` : `INSERT`, `TRUNCATE`,
   `TRIGGER`, `REFERENCES`.
 
@@ -110,10 +114,10 @@ where table_schema = 'public'
 order by grantee, privilege_type;
 ```
 
-Attendu : aucun accès direct `anon` à `profiles`. Le rôle `authenticated` peut avoir les droits
-nécessaires, filtrés ensuite par RLS.
-Pour `admin_audit_events` : aucun accès `anon` ; `authenticated` limité à `SELECT`/`INSERT`, filtré
-par RLS admin.
+Attendu : aucun accès direct `anon` à `profiles`. Le rôle `authenticated` garde `SELECT` sur
+`profiles`; les actions admin sensibles passent par les RPC `admin_*_profile`.
+Pour `admin_audit_events` : aucun accès `anon` ; `authenticated` limité à `SELECT`. L'écriture est
+faite par les RPC admin atomiques.
 Pour `push_subscriptions` : aucun accès `anon` ; `authenticated` limité à
 `SELECT`/`INSERT`/`UPDATE`/`DELETE`, filtré par RLS pour que chaque admin ne voie que ses propres
 endpoints.
@@ -145,7 +149,16 @@ select
 from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
-  and p.proname in ('matricule_to_email', 'is_admin', 'is_admin_mfa', 'handle_new_user')
+  and p.proname in (
+    'matricule_to_email',
+    'is_admin',
+    'is_admin_mfa',
+    'handle_new_user',
+    'admin_approve_profile',
+    'admin_reject_profile',
+    'admin_ban_profile',
+    'admin_unban_profile'
+  )
 order by p.proname;
 ```
 
@@ -155,12 +168,22 @@ Attendu : `security_definer = true` et `search_path=` présent dans `proconfig`.
 select routine_name, grantee, privilege_type
 from information_schema.routine_privileges
 where routine_schema = 'public'
-  and routine_name in ('matricule_to_email', 'is_admin', 'is_admin_mfa', 'handle_new_user')
+  and routine_name in (
+    'matricule_to_email',
+    'is_admin',
+    'is_admin_mfa',
+    'handle_new_user',
+    'admin_approve_profile',
+    'admin_reject_profile',
+    'admin_ban_profile',
+    'admin_unban_profile'
+  )
 order by routine_name, grantee;
 ```
 
 Attendu : `matricule_to_email` exécutable par `anon` et `authenticated`, car le login résout le
-matricule avant authentification. Pas de grant inutile sur `PUBLIC`.
+matricule avant authentification. Les RPC admin sont exécutables par `authenticated`, mais protégées
+à l'intérieur par `public.is_admin_mfa()`. Pas de grant inutile sur `PUBLIC`.
 
 ### 4. Tests fonctionnels auth
 
@@ -221,10 +244,15 @@ policies RLS côté Supabase.
   que ses propres abonnements côté client.
 - L'envoi serveur utilise la `service_role` uniquement dans `/api/notify-access-request`, jamais
   côté client.
-- La route `/api/notify-access-request` exige la session Supabase du demandeur et vérifie via RLS
-  que son propre profil est encore `pending`.
+- La route `/api/notify-access-request` vérifie que le profil demandé est encore `pending` ; avec
+  une session Supabase valide, la vérification passe d'abord par RLS du demandeur, puis par un
+  contrôle serveur `service_role` si nécessaire.
+- La déduplication des notifications est persistée dans `public.access_request_notifications`
+  pendant 6 h pour éviter de dépendre de la mémoire serverless Vercel.
 - Le payload envoyé au service Web Push est volontairement générique : « une nouvelle demande
   d'accès est en attente », sans identité agent, matricule, email, service ou donnée patient.
+- Le service worker refuse les URLs de notification hors origine MediURG avant `openWindow` ou
+  `navigate`.
 - Les endpoints expirés (`404` / `410`) sont purgés côté serveur.
 - Les notifications nécessitent l'accord explicite du navigateur/appareil admin et peuvent être
   désactivées depuis la console admin.
@@ -255,11 +283,14 @@ le cache local ne doit jamais autoriser une mutation.
 - Le flux admin utilise Supabase Auth MFA : enrôlement TOTP, challenge, vérification, puis session
   `aal2`.
 - Les policies SQL admin doivent utiliser `public.is_admin_mfa()` pour la lecture globale des
-  profils, les approbations/refus/suspensions, le journal `admin_audit_events` et l'inscription des
-  appareils Web Push admin.
+  profils, les RPC d'approbation/refus/suspension, le journal `admin_audit_events` et l'inscription
+  des appareils Web Push admin.
 - Si le schéma Supabase existe déjà, appliquer le patch ciblé
   [`auth-admin-mfa-patch.sql`](./auth-admin-mfa-patch.sql) plutôt que de relancer tout
   `auth-schema.sql`.
+- Après le patch MFA, appliquer
+  [`auth-admin-atomic-audit-patch.sql`](./auth-admin-atomic-audit-patch.sql) pour retirer les
+  mutations directes client, créer les RPC atomiques et activer `access_request_notifications`.
 - Test fonctionnel minimal : ouvrir la console avec un admin sans MFA, configurer le QR code,
   valider un code à 6 chiffres, vérifier l'accès au journal puis exporter le CSV.
 
@@ -273,3 +304,15 @@ order by tablename, policyname;
 
 Attendu : les policies admin sensibles référencent `is_admin_mfa()` ; la lecture du profil propre
 reste possible sans MFA pour permettre le chargement de session.
+
+```sql
+select grantee, privilege_type
+from information_schema.role_table_grants
+where table_schema = 'public'
+  and table_name in ('profiles', 'admin_audit_events', 'access_request_notifications')
+order by table_name, grantee, privilege_type;
+```
+
+Attendu : `authenticated` a `SELECT` sur `profiles` et `admin_audit_events`, pas `UPDATE`/`DELETE`
+sur `profiles` ni `INSERT` sur `admin_audit_events`. `access_request_notifications` est réservé au
+serveur via `service_role`.

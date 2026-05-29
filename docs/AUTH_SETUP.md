@@ -32,10 +32,20 @@ et exécuter. Cela crée :
 - Table `push_subscriptions` : abonnements Web Push des admins, protégés par RLS
 - Fonction `public.is_admin_mfa()` : admin actif + session MFA `aal2`
 - Table `admin_audit_events` : journal des approbations, refus, suspensions et rétablissements
+- RPC `admin_approve_profile`, `admin_reject_profile`, `admin_ban_profile`,
+  `admin_unban_profile` : actions admin atomiques avec écriture du journal dans
+  la même transaction
+- Table `access_request_notifications` : déduplication durable des notifications
+  de demande d'accès
 
 Si le schéma existe déjà et que seule la protection MFA admin doit être ajoutée, utiliser le patch
 ciblé [`docs/auth-admin-mfa-patch.sql`](./auth-admin-mfa-patch.sql) au lieu de relancer tout le
 fichier `auth-schema.sql`.
+
+Si le MFA et le journal existent déjà, appliquer ensuite
+[`docs/auth-admin-atomic-audit-patch.sql`](./auth-admin-atomic-audit-patch.sql)
+pour basculer les actions admin vers les RPC atomiques et activer la
+déduplication durable des notifications.
 
 ## 3. Promouvoir le 1er admin
 
@@ -78,6 +88,13 @@ La console admin contient un onglet **Journal**. Il affiche les actions sensible
 - admin acteur, compte cible, date et motif éventuel.
 
 Le journal est exportable en CSV pour revue DPO/RSSI/DSI.
+
+Depuis le durcissement post-scan Codex Security, les validations/refus/suspensions
+ne sont plus écrits en deux appels client séparés. Le client appelle une RPC
+Supabase ; la modification du profil et l'insertion dans `admin_audit_events`
+sont exécutées dans la même transaction. Les droits directs `UPDATE`/`DELETE`
+sur `profiles` et `INSERT` sur `admin_audit_events` sont retirés du rôle
+`authenticated`.
 
 ## 4. Variables d'environnement
 
@@ -127,6 +144,10 @@ valide via la session Supabase du demandeur que son propre profil existe bien
 en `status='pending'`, puis lit côté serveur les abonnements des admins actifs.
 La notification envoyée est générique : pas de nom, matricule, service, email
 ni donnée patient dans le push.
+
+La déduplication des notifications est stockée dans
+`public.access_request_notifications` avec une fenêtre de 6 h. Elle ne dépend
+plus seulement de la mémoire de l'instance Vercel.
 
 3. Dans la console admin MediURG, cliquer sur **Activer notifications** sur
    chaque téléphone admin qui doit recevoir les pop-ups.
