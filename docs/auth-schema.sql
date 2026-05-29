@@ -347,8 +347,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, v_target.id, v_target.matricule, v_target.email,
-    v_target.prenom, v_target.nom, 'approve', null
+    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
+    (v_target).prenom, (v_target).nom, 'approve', null
   );
 end;
 $$;
@@ -381,8 +381,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, v_target.id, v_target.matricule, v_target.email,
-    v_target.prenom, v_target.nom, 'reject', null
+    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
+    (v_target).prenom, (v_target).nom, 'reject', null
   );
 
   delete from public.profiles where id = p_target_profile_id;
@@ -424,8 +424,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, v_target.id, v_target.matricule, v_target.email,
-    v_target.prenom, v_target.nom, 'ban', v_reason
+    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
+    (v_target).prenom, (v_target).nom, 'ban', v_reason
   );
 end;
 $$;
@@ -464,8 +464,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, v_target.id, v_target.matricule, v_target.email,
-    v_target.prenom, v_target.nom, 'unban', null
+    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
+    (v_target).prenom, (v_target).nom, 'unban', null
   );
 end;
 $$;
