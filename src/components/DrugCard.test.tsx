@@ -195,6 +195,31 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Préparation MORPHINE", () => {
+    test("bascule entre bolus/titration et PSE", () => {
+      const morphine = DRUGS.find((drug) => drug.nom === "MORPHINE")!;
+
+      render(<DrugCard drug={morphine} patientWeight="80" />);
+      fireEvent.click(screen.getByText("MORPHINE").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /Bolus \/ titration.*1 mg\/mL/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getByText("1 mL de morphine 10 mg/1 mL (= 10 mg)")).toBeInTheDocument();
+      expect(screen.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(
+        screen.queryByText("5 mL d'une ampoule 100 mg/10 mL (= 50 mg)")
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /PSE.*1 mg\/mL/i }));
+
+      expect(screen.getByText("5 mL d'une ampoule 100 mg/10 mL (= 50 mg)")).toBeInTheDocument();
+      expect(screen.getByText("50 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.queryByText("0.8 mL du produit")).not.toBeInTheDocument();
+    });
+  });
+
   describe("Favoris", () => {
     test("affiche l'étoile creuse si non favori", () => {
       render(<DrugCard drug={mockDrug} isFavorite={false} onToggleFavorite={() => {}} />);

@@ -84,7 +84,7 @@ export const DRUGS_ANALGESIE = [
       "Rétention urinaire",
       "Risque de surdosage",
     ],
-    cond: ["Ampoule 10 mg/1 mL", "Ampoule 20 mg/1 mL"],
+    cond: ["Ampoule 10 mg/1 mL", "Ampoule 20 mg/1 mL", "Ampoule 100 mg/10 mL"],
     poso: {
       a: [
         "IVD : 1 ampoule qsp 10 mL NaCl 0,9% (soit 1 mg/mL)",
@@ -96,17 +96,31 @@ export const DRUGS_ANALGESIE = [
     },
     prep: {
       solvant: "NaCl 0,9%",
-      volume_final: 10,
       conc_finale: "1 mg/mL",
-      conc_produit: 10,
-      unite: "mg",
-      dose_kg: 0.1,
-      duree: "Titration bolus /5 min ou IVSE",
+      duree: "Bolus ou PSE",
       stabilite: "24h à 25°C",
+      preparations: [
+        {
+          titre: "Bolus / titration",
+          mode: "bolus",
+          tag: "1 mg/mL",
+          prelever: "1 mL de morphine 10 mg/1 mL (= 10 mg)",
+          completer: "10 mL avec NaCl 0,9%",
+          concentration: "1 mg/mL",
+        },
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "1 mg/mL",
+          prelever: "5 mL d'une ampoule 100 mg/10 mL (= 50 mg)",
+          completer: "50 mL avec NaCl 0,9%",
+          concentration: "1 mg/mL",
+        },
+      ],
       etapes: [
-        "Ampoule 10 mg/1 mL (10 mg/mL)",
-        "Titration : 1 ampoule qsp 10 mL NaCl 0,9% → 1 mg/mL",
-        "PSE : concentration 1 mg/mL NaCl 0,9% — régler selon kg/h",
+        "Bolus / titration : prélever 1 mL de morphine 10 mg/1 mL et compléter à 10 mL NaCl 0,9% → 1 mg/mL",
+        "PSE : prélever 5 mL d'une ampoule 100 mg/10 mL et compléter à 50 mL NaCl 0,9% → 1 mg/mL",
+        "PSE : régler selon mg/kg/h",
       ],
       notes: [
         "Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules",
