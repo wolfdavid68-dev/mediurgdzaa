@@ -195,7 +195,7 @@ export const DRUGS_ELECTROLYTES = [
         "Ampoule 1,5 g/10 mL (15%)",
         "1-2 g dans 100 mL NaCl 0,9% — perfusion 20 min",
         "Torsades : 2 g en 2-3 min",
-        "PSE entretien : 1 g dans 100 mL sur 15 min",
+        "PSE entretien éclampsie : 1 g/h (ex. 1 g dans 100 mL NaCl 0,9% à 100 mL/h)",
       ],
       notes: [
         "Antidote surdosage : Gluconate de Calcium IV",

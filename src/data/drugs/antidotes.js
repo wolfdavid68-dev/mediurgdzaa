@@ -30,7 +30,7 @@ export const DRUGS_ANTIDOTES = [
         "IVD : 1 ampoule qsp 10 mL NaCl 0,9% (soit 0,04 mg/mL)",
         "Bolus mL par mL — titration jusqu'à respiration efficace",
         "PSE : 10 ampoules qsp 40 mL (soit 0,1 mg/mL)",
-        "Débuter PSE à la dose efficace en bolus/heure",
+        "Débuter PSE à 2/3 de la dose efficace en bolus/heure",
         "IN : administrer PUR",
         "Voies : VVP, VVC ou IN",
       ],
@@ -49,6 +49,7 @@ export const DRUGS_ANTIDOTES = [
         "Ampoule 0,4 mg/1 mL",
         "Bolus : 1 ampoule qsp 10 mL NaCl 0,9% → 0,04 mg/mL — injecter 1 mL (= 0,04 mg)",
         "PSE si rechute : 10 ampoules qsp 40 mL NaCl 0,9% → 0,1 mg/mL",
+        "Débuter le PSE à 2/3 de la dose efficace en bolus/heure",
         "IN : administrer pur",
       ],
       notes: [
@@ -185,7 +186,7 @@ export const DRUGS_ANTIDOTES = [
         "Hypoglycémie : 1 mg SC ou IM",
         "Voies : VVP ou VVC",
       ],
-      p: ["< 25 kg : 0,5 mg SC/IM", "> 25 kg : 1 mg SC/IM"],
+      p: ["< 25 kg : 0,5 mg SC/IM", "≥ 25 kg : 1 mg SC/IM"],
     },
     prep: {
       solvant: "G5%",

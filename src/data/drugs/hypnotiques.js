@@ -43,7 +43,7 @@ export const DRUGS_HYPNOTIQUES = [
         "Entretien PSE : 0,5-4 mg/kg/h",
         "Voies : VVP ou VVC",
       ],
-      p: ["Induction : 2,5-3,5 mg/kg IV"],
+      p: ["Sédation procédurale : 1 mg/kg IV", "Induction : 2,5-3,5 mg/kg IV"],
     },
     prep: {
       solvant: "Pur (émulsion)",
@@ -59,6 +59,7 @@ export const DRUGS_HYPNOTIQUES = [
         "Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure",
         "Induction : 1–2,5 mg/kg IV titration lente",
         "Sédation procédurale : 0,5–1 mg/kg IV en titration",
+        "Enfant : sédation procédurale 1 mg/kg IV",
         "IVSE réa : 0,5–4 mg/kg/h — régler selon poids",
       ],
       notes: [

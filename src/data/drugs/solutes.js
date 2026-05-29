@@ -71,7 +71,7 @@ export const DRUGS_SOLUTES = [
     ei: ["Surcharge hydrosodée", "Hyperkaliémie (fortes doses)"],
     cond: ["Flacons 250, 500, 1000 mL"],
     poso: {
-      a: ["IVL", "Remplissage : 500-1000 mL selon hémodynamique", "Voies : VVP ou VVC"],
+      a: ["IVL", "Remplissage : 30 mL/kg selon hémodynamique", "Voies : VVP ou VVC"],
       p: ["10-20 mL/kg en bolus selon état hémodynamique"],
     },
   },

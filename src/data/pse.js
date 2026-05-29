@@ -41,13 +41,14 @@ export const PSE = {
     steps: [0.05, 0.1, 0.15, 0.2],
   },
   4: { // Kétamine — dilué 50 mg/5 mL NaCl → 10 mg/mL
-    conc: 10, unite: "mg/kg/h", min: 0.1, max: 0.5,
-    steps: [0.1, 0.2, 0.3, 0.5],
+    conc: 10, unite: "mg/kg/h", min: 0.5, max: 3,
+    steps: [0.5, 1, 2, 3],
   },
 
   // ── MORPHINIQUES ─────────────────────────────────────────
   5: { // Sufentanil — table de dilution adaptée au poids : 1 mL/h = 0,1 µg/kg/h ⇒ mL/h = dose × 10
     conc: 1, unite: "µg/kg/h", min: 0.2, max: 2, factor: 10,
+    tag: "1 mL/h = 0,1 µg/kg/h · 250 µg/50 mL",
     steps: [0.2, 0.5, 1, 1.5, 2],
   },
   6: { // Morphine — 10 mg qsp 10 mL NaCl → 1 mg/mL
@@ -70,12 +71,27 @@ export const PSE = {
     conc: 1, unite: "mg/h", min: 1, max: 10,
     steps: [1, 2, 3, 5, 10],
   },
+  50: { // Sandostatine — 6 ampoules 100 µg qsp 48 mL/24h → 12,5 µg/mL = 0,0125 mg/mL
+    conc: 0.0125, unite: "mg/h", min: 0.025, max: 0.05,
+    tag: "12,5 µg/mL · seringue",
+    steps: [0.025, 0.05],
+  },
+  51: { // Nimotop — ampoule 10 mg/50 mL pure → 0,2 mg/mL
+    conc: 0.2, unite: "mg/h", min: 1, max: 2,
+    steps: [1, 2],
+  },
 
   // ── ANTICOAGULANTS ────────────────────────────────────────
   42: { // Héparine — 4 mL HNF 5000 UI/mL + 44 mL NaCl 0,9% → 20 000 UI / 48 mL = 416,7 UI/mL
     conc: 416.7, unite: "UI/kg/h", min: 15, max: 25,
     steps: [15, 18, 20, 22, 25],
     extra: { unite: "UI/24h", min: 10000, max: 40000, steps: [10000, 15000, 20000, 25000, 30000, 35000, 40000] },
+  },
+
+  // ── DIURÉTIQUES / ÉLECTROLYTES ───────────────────────────
+  36: { // Lasilix — ampoule 250 mg/25 mL pure → 10 mg/mL
+    conc: 10, unite: "mg/h", min: 5, max: 20,
+    steps: [5, 10, 15, 20],
   },
 
   // ── ANTIDOTES ─────────────────────────────────────────────

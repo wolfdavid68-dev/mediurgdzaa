@@ -8,7 +8,7 @@ Généré le 2026-05-29 pour v110.
 | --- | ---: |
 | Médicaments | 81 |
 | Médicaments avec préparation | 73 |
-| Entrées PSE | 15 |
+| Entrées PSE | 18 |
 | Protocoles | 14 |
 | Kits de préparation | 8 |
 | Entrées incompatibilités | 61 |

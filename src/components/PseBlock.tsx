@@ -89,7 +89,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
       <div className="pse-body">
         {pse.note && <div className="pse-note">{pse.note}</div>}
 
-        {!pse.extra && reverse && (
+        {reverse && (
           <>
             <div className="pse-input-row">
               <span className="pse-input-label">Débit réglé</span>
@@ -118,7 +118,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
           </>
         )}
 
-        {!pse.extra && !reverse && (
+        {!reverse && (
           <>
             <div className="pse-input-row">
               <span className="pse-input-label">Dose cible</span>
