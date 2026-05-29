@@ -24,7 +24,10 @@ const CHUNK_GZIP_LIMITS_KB = {
   "vendor-react": 65,
   "vendor-supabase": 60,
   auth: 55,
-  "auth-admin": 15,
+  // Console admin : inclut les contrôles MFA/journalisation. Le budget
+  // régressif précis reste suivi par verify:bundle-budget ; ici on garde un
+  // plafond statique plus large pour éviter les faux positifs CI.
+  "auth-admin": 18,
   "auth-mobile": 15,
   index: 45,
   acr: 30,
