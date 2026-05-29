@@ -30,6 +30,12 @@ et exécuter. Cela crée :
 - Policies RLS : un user voit son profile, un admin voit tout
 - Contrainte unique sur `matricule` (un matricule = un compte)
 - Table `push_subscriptions` : abonnements Web Push des admins, protégés par RLS
+- Fonction `public.is_admin_mfa()` : admin actif + session MFA `aal2`
+- Table `admin_audit_events` : journal des approbations, refus, suspensions et rétablissements
+
+Si le schéma existe déjà et que seule la protection MFA admin doit être ajoutée, utiliser le patch
+ciblé [`docs/auth-admin-mfa-patch.sql`](./auth-admin-mfa-patch.sql) au lieu de relancer tout le
+fichier `auth-schema.sql`.
 
 ## 3. Promouvoir le 1er admin
 
@@ -44,6 +50,34 @@ where email = 'wolfdavid68@gmail.com';
 
 À partir de là, tu peux te login et utiliser la console admin pour
 approuver les autres demandes (aucune intervention SQL future nécessaire).
+
+## 3 bis. MFA administrateur
+
+Le MFA est imposé uniquement aux administrateurs lors de l'ouverture de la console admin. Les
+utilisateurs non admin gardent le parcours habituel.
+
+Premier accès admin :
+
+1. Se connecter avec le matricule et le mot de passe.
+2. Faire l'appui long sur le logo pour ouvrir la console admin.
+3. Scanner le QR code MFA avec une application TOTP compatible.
+4. Saisir le code à 6 chiffres.
+5. La console admin s'ouvre après passage de la session Supabase en `aal2`.
+
+La perte du second facteur doit être traitée par une procédure institutionnelle de récupération
+admin, à valider avec DSI/RSSI.
+
+## 3 ter. Journal admin
+
+La console admin contient un onglet **Journal**. Il affiche les actions sensibles :
+
+- approbation d'un compte ;
+- refus d'une demande ;
+- suspension ;
+- rétablissement ;
+- admin acteur, compte cible, date et motif éventuel.
+
+Le journal est exportable en CSV pour revue DPO/RSSI/DSI.
 
 ## 4. Variables d'environnement
 
@@ -130,6 +164,8 @@ Une fois Supabase configuré, tester en local avec
 - [ ] Promotion via SQL → connexion OK
 - [ ] Console admin accessible par **appui long (~600 ms) sur le logo**
       (role=admin uniquement ; aucun bouton visible — accès discret)
+- [ ] Premier accès admin → écran MFA, scan QR code, code TOTP à 6 chiffres
+- [ ] Console admin → onglet Journal visible après MFA et export CSV possible
 - [ ] Console admin → **Activer notifications** sur le téléphone admin
 - [ ] Nouvelle demande créée depuis un autre compte → pop-up générique reçu
 - [ ] Approve / reject / ban / unban depuis la console

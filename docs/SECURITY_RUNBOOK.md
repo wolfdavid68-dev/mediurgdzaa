@@ -47,6 +47,8 @@ publication, voir [`PROCEDURE_RELEASE.md`](./PROCEDURE_RELEASE.md).
   installée, nouvelle version en attente, clic sur « Mettre à jour », puis usage hors ligne.
 - Pour tout changement Web Push, vérifier que la notification de demande d'accès reste générique :
   pas de nom, matricule, email, service, IPP ou donnée patient dans le payload.
+- Pour tout changement auth/admin, tester le MFA admin : enrôlement TOTP, challenge, ouverture de
+  la console, lecture du journal et export CSV.
 
 ## Audit Supabase prod
 
@@ -55,7 +57,7 @@ publication, voir [`PROCEDURE_RELEASE.md`](./PROCEDURE_RELEASE.md).
 ### Dernière vérification MediURG
 
 Vérifié en production le 26 mai 2026 via le SQL Editor Supabase.
-Revue locale du code `main` le 28 mai 2026 après ajout des notifications PWA admin.
+Revue locale du code `main` le 29 mai 2026 après ajout du MFA admin et du journal consultable.
 
 - `public.profiles` : RLS active (`rowsecurity = true`).
 - `public.admin_audit_events` : RLS active (`rowsecurity = true`) si le journal admin a été
@@ -63,7 +65,7 @@ Revue locale du code `main` le 28 mai 2026 après ajout des notifications PWA ad
 - `public.push_subscriptions` : RLS active (`rowsecurity = true`) si les notifications admin ont
   été déployées.
 - Policies finales sur `public.profiles` : `self_read`, `admin_read_all`, `admin_update_all`,
-  `admin_delete`.
+  `admin_delete`. Les policies admin sensibles doivent utiliser `public.is_admin_mfa()`.
 - Aucune policy `anon` ou `public` sur `public.profiles`.
 - Privilège direct `anon` sur `public.profiles` : `SELECT = false`.
 - Privilèges `authenticated` conservés sur `public.profiles` : `SELECT = true`,
@@ -125,8 +127,9 @@ order by policyname;
 ```
 
 Attendu : lecture de son propre profil, lecture admin, update admin, delete admin. Pas de policy
-de lecture anonyme.
-Pour `admin_audit_events` : lecture admin et insertion admin uniquement, avec `actor_id =
+de lecture anonyme. Les policies admin doivent référencer `public.is_admin_mfa()` pour exiger une
+session MFA `aal2`.
+Pour `admin_audit_events` : lecture admin MFA et insertion admin MFA uniquement, avec `actor_id =
 auth.uid()`.
 Pour `push_subscriptions` : lecture/suppression limitées à `user_id = auth.uid()` ; insertion et
 mise à jour limitées aux admins actifs avec `user_id = auth.uid()`.
@@ -142,7 +145,7 @@ select
 from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
-  and p.proname in ('matricule_to_email', 'is_admin', 'handle_new_user')
+  and p.proname in ('matricule_to_email', 'is_admin', 'is_admin_mfa', 'handle_new_user')
 order by p.proname;
 ```
 
@@ -152,7 +155,7 @@ Attendu : `security_definer = true` et `search_path=` présent dans `proconfig`.
 select routine_name, grantee, privilege_type
 from information_schema.routine_privileges
 where routine_schema = 'public'
-  and routine_name in ('matricule_to_email', 'is_admin', 'handle_new_user')
+  and routine_name in ('matricule_to_email', 'is_admin', 'is_admin_mfa', 'handle_new_user')
 order by routine_name, grantee;
 ```
 
@@ -165,6 +168,9 @@ matricule avant authentification. Pas de grant inutile sur `PUBLIC`.
 - Vérifier que le profil arrive en `pending`.
 - Vérifier qu'un compte `pending` ne peut pas entrer.
 - Promouvoir un admin, puis approuver/rejeter/bannir depuis la console.
+- Premier accès admin : vérifier l'écran MFA, scanner le QR code TOTP et valider un code à
+  6 chiffres.
+- Console admin : vérifier l'onglet Journal et l'export CSV.
 - Depuis un téléphone admin, activer puis désactiver les notifications PWA.
 - Créer une demande d'accès test et vérifier qu'une notification générique arrive aux admins
   abonnés.
@@ -251,6 +257,9 @@ le cache local ne doit jamais autoriser une mutation.
 - Les policies SQL admin doivent utiliser `public.is_admin_mfa()` pour la lecture globale des
   profils, les approbations/refus/suspensions, le journal `admin_audit_events` et l'inscription des
   appareils Web Push admin.
+- Si le schéma Supabase existe déjà, appliquer le patch ciblé
+  [`auth-admin-mfa-patch.sql`](./auth-admin-mfa-patch.sql) plutôt que de relancer tout
+  `auth-schema.sql`.
 - Test fonctionnel minimal : ouvrir la console avec un admin sans MFA, configurer le QR code,
   valider un code à 6 chiffres, vérifier l'accès au journal puis exporter le CSV.
 

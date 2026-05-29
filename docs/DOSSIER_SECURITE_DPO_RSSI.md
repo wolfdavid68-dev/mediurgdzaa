@@ -13,8 +13,9 @@ en français, utilisable hors ligne après installation.
 La base technique a été durcie :
 
 - accès Supabase `public.profiles` restreint aux utilisateurs authentifiés via RLS ;
+- MFA TOTP obligatoire pour les administrateurs avant ouverture de la console ;
 - traçabilité des actions d'administration via `public.admin_audit_events` : approbation, refus,
-  suspension, rétablissement ;
+  suspension, rétablissement, avec consultation et export CSV depuis la console ;
 - notifications PWA admin pour les nouvelles demandes d'accès, avec payload générique non
   nominatif ;
 - absence de lecture anonyme sur `profiles` vérifiée en production le 26 mai 2026 ;
@@ -29,6 +30,24 @@ La base technique a été durcie :
 
 Conclusion opérationnelle : base technique saine pour poursuivre, mais validation DPO/RSSI/DSI
 requise avant qualification institutionnelle.
+
+## Changements opérationnels récents
+
+Depuis le durcissement admin, l'accès clinique standard ne change pas pour les soignants : login,
+usage hors ligne et consultation restent identiques. Le changement porte sur la surface
+d'administration.
+
+Pour un administrateur :
+
+- l'appui long sur le logo ouvre d'abord un écran MFA ;
+- le premier passage demande l'enrôlement TOTP via QR code ;
+- les accès suivants exigent un code temporaire à 6 chiffres si la session n'est pas déjà `aal2` ;
+- la console admin donne accès à un onglet **Journal** listant les approbations, refus,
+  suspensions et rétablissements ;
+- le journal est exportable en CSV pour revue DPO/RSSI/DSI.
+
+Côté Supabase, les policies admin sensibles doivent référencer `public.is_admin_mfa()` : elles
+vérifient à la fois le rôle admin actif et le niveau de session `aal2`.
 
 ## Périmètre fonctionnel
 
