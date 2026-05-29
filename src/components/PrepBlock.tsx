@@ -485,6 +485,8 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
         );
       })()
     : null;
+  const prepTableCurrentRow =
+    prep.table && validKg ? prep.table.rows.find((row) => row.poids === kg) : null;
   const prepTableBlock = prep.table ? (
     <div className="prep-table-card">
       <div className="prep-table-head">
@@ -492,6 +494,42 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
         <span>{prep.table.titre}</span>
       </div>
       {prep.table.description && <p className="prep-table-desc">{prep.table.description}</p>}
+      {validKg && prepTableCurrentRow ? (
+        <div className="prep-table-current" aria-label={`Préparation pour ${kg} kg`}>
+          <div className="prep-table-current-head">
+            <PrepIcon />
+            Pour {kg} kg
+          </div>
+          <div className="prep-table-current-grid">
+            <div>
+              <span>Vi</span>
+              <strong>{formatDoseNumber(prepTableCurrentRow.vi)} mL</strong>
+            </div>
+            <div>
+              <span>Vf</span>
+              <strong>{prepTableCurrentRow.vf} mL</strong>
+            </div>
+            <div>
+              <span>Vitesse</span>
+              <strong>{prepTableCurrentRow.vitesse} mL/h</strong>
+            </div>
+            <div>
+              <span>Débit EP</span>
+              <strong>{formatDoseNumber(prepTableCurrentRow.debitEp)} mg/min</strong>
+            </div>
+            <div>
+              <span>Temps</span>
+              <strong>{prepTableCurrentRow.temps} min</strong>
+            </div>
+          </div>
+        </div>
+      ) : (
+        validKg && (
+          <div className="prep-table-current prep-table-current-muted">
+            Poids non listé dans la table : choisir la ligne selon le protocole local.
+          </div>
+        )
+      )}
       <div className="prep-table-scroll" role="region" aria-label={prep.table.titre}>
         <table className="prep-table">
           <thead>
