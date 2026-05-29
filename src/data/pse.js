@@ -40,7 +40,7 @@ export const PSE = {
     conc: 1, unite: "mg/kg/h", min: 0.02, max: 0.2,
     steps: [0.05, 0.1, 0.15, 0.2],
   },
-  4: { // Kétamine — dilué 50 mg/5 mL NaCl → 10 mg/mL
+  4: { // Kétamine — 2 ampoules 250 mg/5 mL qsp 50 mL NaCl → 10 mg/mL
     conc: 10, unite: "mg/kg/h", min: 0.5, max: 3,
     steps: [0.5, 1, 2, 3],
   },

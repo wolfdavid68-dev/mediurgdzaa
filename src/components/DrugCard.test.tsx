@@ -167,6 +167,24 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Préparation KÉTAMINE", () => {
+    test("affiche la seringue PSE 10 mg/mL sans calcul de bolus", () => {
+      const ketamine = DRUGS.find((drug) => drug.nom === "KÉTAMINE")!;
+
+      render(<DrugCard drug={ketamine} patientWeight="80" />);
+      fireEvent.click(screen.getByText("KÉTAMINE").closest("button")!);
+
+      expect(screen.getByText("Seringue PSE")).toBeInTheDocument();
+      expect(screen.getByText("2 ampoules 250 mg/5 mL")).toBeInTheDocument();
+      expect(
+        screen.getByText(/Sédation : prélever 2 mL.*compléter à 10 mL.*10 mg\/mL/)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Compléter à 50 mL avec NaCl 0,9%.*10 mg\/mL/)).toBeInTheDocument();
+      expect(screen.queryByText("160-240 mg")).not.toBeInTheDocument();
+      expect(screen.queryByText("3.2-4.8 mL du produit")).not.toBeInTheDocument();
+    });
+  });
+
   describe("Favoris", () => {
     test("affiche l'étoile creuse si non favori", () => {
       render(<DrugCard drug={mockDrug} isFavorite={false} onToggleFavorite={() => {}} />);
