@@ -75,6 +75,9 @@
   margin-bottom: 5px;
   flex-wrap: wrap;
 }
+.drug-card-monitored .drug-title-row {
+  padding-right: 112px;
+}
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
 }
@@ -107,38 +110,38 @@
   position: absolute;
   top: 0;
   right: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 4px;
-  max-width: min(56%, 250px);
-  pointer-events: none;
-  z-index: 2;
-}
-
-.monitor-card {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-width: 82px;
-  max-width: 110px;
-  padding: 6px 8px 6px 9px;
+  gap: 5px;
+  max-width: 118px;
+  padding: 5px 8px 5px 9px;
   border-radius: 0 11px 0 9px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 950;
   line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.45px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 2;
   transform: translateY(-1px);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.06),
     0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
+.drug-monitor-corner span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .monitor-wave {
-  width: 30px;
-  height: 13px;
+  width: 20px;
+  height: 12px;
   flex-shrink: 0;
   fill: none;
   stroke: currentColor;
@@ -2266,22 +2269,21 @@
   .drug-title-row {
     gap: 6px;
   }
+  .drug-card-monitored .drug-title-row {
+    padding-right: 72px;
+  }
   .drug-subtitle {
     gap: 4px;
   }
   .drug-monitor-corner {
-    right: 0;
-    max-width: 66%;
-  }
-  .monitor-card {
-    min-width: 58px;
-    max-width: 72px;
-    padding: 5px 6px;
-    gap: 4px;
-    font-size: 9px;
+    max-width: 78px;
+    padding: 4px 6px;
+    gap: 3px;
+    font-size: 8px;
   }
   .monitor-wave {
-    width: 20px;
+    width: 18px;
+    height: 10px;
   }
   .logo-text p {
     font-size: 9px;

@@ -51,7 +51,7 @@ describe("DrugCard", () => {
 
       render(<DrugCard drug={kcl} />);
 
-      expect(screen.getByText("Scope")).toBeInTheDocument();
+      expect(screen.getByLabelText(/Surveillance requise : Scope/)).toBeInTheDocument();
       expect(screen.queryByText("Surveillance")).not.toBeInTheDocument();
     });
   });

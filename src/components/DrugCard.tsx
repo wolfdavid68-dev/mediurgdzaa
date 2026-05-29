@@ -107,6 +107,8 @@ const DrugCard = ({
       return { label, className: preset?.className || "monitor-custom" };
     });
   }, [drug]);
+  const monitoringLabel = monitoringBadges.map((badge) => badge.label).join(" + ");
+  const monitoringClass = monitoringBadges[0]?.className || "monitor-custom";
 
   // onOpen volontairement exclu des deps : addToHistory est recréé à chaque render
   // parent, ce qui relancerait l'effet et écraserait l'onglet sélectionné par l'utilisateur.
@@ -299,7 +301,11 @@ const DrugCard = ({
   };
 
   return (
-    <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
+    <div
+      className={`drug-card ${open ? "drug-card-open" : ""} ${
+        monitoringBadges.length > 0 ? "drug-card-monitored" : ""
+      }`}
+    >
       <div className="drug-row">
         <button
           className="drug-header"
@@ -343,13 +349,12 @@ const DrugCard = ({
             <polyline points="6 9 12 15 18 9" />
           </svg>
           {monitoringBadges.length > 0 && (
-            <div className="drug-monitor-corner" aria-label="Surveillance requise">
-              {monitoringBadges.map((badge) => (
-                <span key={badge.label} className={`monitor-card ${badge.className}`}>
-                  <MonitoringWaveIcon />
-                  <span>{badge.label}</span>
-                </span>
-              ))}
+            <div
+              className={`drug-monitor-corner ${monitoringClass}`}
+              aria-label={`Surveillance requise : ${monitoringLabel}`}
+            >
+              <MonitoringWaveIcon />
+              <span>{monitoringLabel}</span>
             </div>
           )}
         </button>
