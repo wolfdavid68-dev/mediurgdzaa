@@ -154,7 +154,7 @@ export const DRUGS_HYPNOTIQUES = [
       a: [
         "IVD : administrer PUR ou dilué",
         "PSE : 1 ampoule qsp 50 mL NaCl 0,9%",
-        "EME : 10 mg IM",
+        "EME : 10 mg IM ou IN : 5 mg dans chaque narine",
         "Sédation : titration par bolus de 1-3 mg",
         "Voies : VVP ou VVC",
       ],
@@ -174,6 +174,7 @@ export const DRUGS_HYPNOTIQUES = [
       stabilite: "24h à 25°C",
       etapes: [
         "Ampoule 50 mg/10 mL (5 mg/mL)",
+        "EME : 10 mg IM ou IN : 5 mg dans chaque narine",
         "PSE : 1 ampoule 50 mg qsp 50 mL NaCl 0,9% → 1 mg/mL",
         "Bolus titrés : ampoule 5 mg/5 mL (1 mg/mL) utilisée pure",
       ],
