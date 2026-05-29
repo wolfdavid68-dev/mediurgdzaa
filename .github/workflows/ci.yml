@@ -1,12 +1,8 @@
 name: CI
 
-# Filet de sécurité avant que le code arrive en prod via Vercel auto-deploy.
+# Filet de securite avant que le code arrive en prod via Vercel auto-deploy.
 # Tourne sur PR et sur push main : si quelqu'un commit avec --no-verify
 # (bypass du pre-commit hook husky), CI rattrape le coup.
-#
-# Étapes : lint + typecheck + format + knip (code mort) + test + build.
-# Pas de coverage thresholds bloquants pour l'instant — à activer quand
-# on aura un baseline stable (cf. vite.config.ts → test.coverage).
 
 on:
   push:
@@ -14,16 +10,15 @@ on:
   pull_request:
     branches: [main]
 
-# Annule les anciens runs quand un nouveau commit arrive sur la même branche
-# (évite la file d'attente si on push plusieurs fois rapidement).
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ci:
+  quality:
+    name: Qualite code et donnees
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -31,9 +26,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          # Node 22 LTS (Active LTS, Maintenance jusqu'à avril 2027). Aligné
-          # sur le runtime Vercel "Node.js 22.x". Node 20 'Iron' part en EOL
-          # avril 2026 → on bouge maintenant pour ne pas se faire surprendre.
           node-version: "22"
           cache: "npm"
 
@@ -58,5 +50,139 @@ jobs:
       - name: Tests (vitest)
         run: npm test
 
+      - name: Clinical data report (strict)
+        run: npm run report:data:strict
+
+      - name: Upload clinical report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-donnees-cliniques
+          path: docs/RAPPORT_DONNEES_CLINIQUES.md
+          if-no-files-found: ignore
+
+  security:
+    name: Securite config
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security config check
+        run: npm run verify:security
+
+  build:
+    name: Build et budgets
+    runs-on: ubuntu-latest
+    needs: [quality, security]
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build (vite + workbox)
         run: npm run build
+
+      - name: Security config check (build)
+        run: npm run verify:security
+
+      - name: Bundle budget JS/CSS
+        run: npm run verify:bundle-budget
+
+      - name: PWA manifest check
+        run: npm run verify:pwa-manifest
+
+      - name: PWA offline static checks
+        run: npm run verify:pwa-offline
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build
+          if-no-files-found: error
+
+      - name: Upload bundle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-budget
+          path: build/reports
+          if-no-files-found: ignore
+
+  offline:
+    name: Offline navigateur et clavier
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build
+        uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: PWA offline browser checks
+        run: npm run verify:pwa-offline:browser
+
+      - name: Offline screenshots baseline
+        run: npm run verify:offline-screenshots
+
+      - name: Keyboard accessibility checks
+        run: npm run verify:a11y-keyboard
+
+      - name: Critical E2E flow
+        run: npm run verify:e2e-critical
+
+      - name: Runtime performance budget
+        run: npm run verify:perf-runtime
+
+      - name: Upload offline screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: offline-screenshots
+          path: build/offline-screenshots
+          if-no-files-found: ignore
+
+      - name: Upload runtime reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-reports
+          path: build/reports
+          if-no-files-found: ignore

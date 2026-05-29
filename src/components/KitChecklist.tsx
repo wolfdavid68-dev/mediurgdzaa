@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import KitScaleIllustration from "./KitScaleIllustration";
 import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
+import { storageKey } from "../lib/storageKeys";
 import type { ChecklistItem, ChecklistSection } from "../types/data";
 
 // Check-list interactive d'un kit (ex : ISR / intubation). Trois types
@@ -13,7 +14,6 @@ import type { ChecklistItem, ChecklistSection } from "../types/data";
 // check-list matériel (mediurg-kit-check-{kitId}) pour éviter toute collision.
 
 const CHECK_MAX_AGE_MS = 3 * 60 * 60 * 1000; // 3 h
-const storageKey = (kitId: string) => `mediurg-kit-checklist-${kitId}`;
 
 type Drogue = { nom: string; role?: string };
 
@@ -48,13 +48,13 @@ const collapsedFromDone = (done: boolean[]): Set<number> =>
   new Set(done.flatMap((d, i) => (d ? [i] : [])));
 
 const loadValues = (kitId: string): Values => {
-  const parsed = safeGetJson<StoredValues | null>(storageKey(kitId), null);
+  const parsed = safeGetJson<StoredValues | null>(storageKey.kitChecklist(kitId), null);
   if (!parsed || typeof parsed.ts !== "number" || !parsed.values) {
-    safeRemoveItem(storageKey(kitId));
+    safeRemoveItem(storageKey.kitChecklist(kitId));
     return {};
   }
   if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
-    safeRemoveItem(storageKey(kitId));
+    safeRemoveItem(storageKey.kitChecklist(kitId));
     return {};
   }
   return parsed.values;
@@ -99,7 +99,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   const focusedSection = useRef<number | null>(null);
 
   useEffect(() => {
-    safeSetJson(storageKey(kitId), { ts: Date.now(), values });
+    safeSetJson(storageKey.kitChecklist(kitId), { ts: Date.now(), values });
   }, [values, kitId]);
 
   // Auto-repli sur la transition incomplète → complète (uniquement à ce

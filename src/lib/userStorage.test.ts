@@ -79,16 +79,18 @@ describe("userStorage — mode authentifié (userId=abc)", () => {
 });
 
 describe("migrateAnonymousData", () => {
-  test("copie favorites/history/theme/notes anonymes vers user", () => {
+  test("copie favorites/history/theme/notes/kits anonymes vers user", () => {
     // Setup : données anonymes pré-existantes
     lsStore.set("mediurg-favorites", "[1,2,3]");
     lsStore.set("mediurg-history", "[10,20]");
     lsStore.set("mediurg-theme", "dark");
     lsStore.set("mediurg-note-12", "Note Adrénaline");
     lsStore.set("mediurg-note-23", "Note Amiodarone");
+    lsStore.set("mediurg-kit-check-isr", JSON.stringify({ ts: 1, items: { 0: true } }));
+    lsStore.set("mediurg-kit-checklist-acr", JSON.stringify({ ts: 2, values: { dose: "ok" } }));
 
     const result = migrateAnonymousData("user1", [12, 23, 99]);
-    expect(result.migrated).toBe(5); // 3 settings + 2 notes
+    expect(result.migrated).toBe(7); // 3 settings + 2 notes + 2 kits
     expect(result.skipped).toBe(0);
 
     expect(readUserItem("user1", "favorites")).toBe("[1,2,3]");
@@ -96,9 +98,23 @@ describe("migrateAnonymousData", () => {
     expect(readUserItem("user1", "theme")).toBe("dark");
     expect(readUserNote("user1", 12)).toBe("Note Adrénaline");
     expect(readUserNote("user1", 23)).toBe("Note Amiodarone");
+    expect(readUserItem("user1", "kit-check-isr")).toBe(
+      JSON.stringify({ ts: 1, items: { 0: true } })
+    );
+    expect(readUserItem("user1", "kit-checklist-acr")).toBe(
+      JSON.stringify({ ts: 2, values: { dose: "ok" } })
+    );
 
     // Les clés anonymes restent (fallback pour autres users du device)
     expect(lsStore.get("mediurg-favorites")).toBe("[1,2,3]");
+  });
+
+  test("ne pas écraser une checklist kit user déjà présente", () => {
+    lsStore.set("mediurg-kit-check-isr", "anon");
+    lsStore.set("mediurg-uuser1-kit-check-isr", "user");
+    const result = migrateAnonymousData("user1", []);
+    expect(result.skipped).toBe(1);
+    expect(readUserItem("user1", "kit-check-isr")).toBe("user");
   });
 
   test("idempotent : ré-exécution = no-op", () => {

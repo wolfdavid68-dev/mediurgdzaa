@@ -39,6 +39,7 @@ import { useAuthProfile } from "./lib/authProfile";
 import { TUTORAT_URL } from "./lib/tutorat";
 import { filterDrugs as searchDrugs, getRecentDrugs as readRecentDrugs } from "./lib/drugSearch";
 import { safeGetItem, safeGetJson, safeSetItem, safeSetJson } from "./lib/safeStorage";
+import { STORAGE_KEYS } from "./lib/storageKeys";
 
 const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SMUR", "SAU"];
@@ -78,10 +79,10 @@ const App = () => {
   // l'historique navigateur (pushNav { protoCategory: ... }).
   const [protoCategory, setProtoCategory] = useState("PISU");
   const [theme, setTheme] = useState(() => {
-    return safeGetItem("mediurg-theme") || "dark";
+    return safeGetItem(STORAGE_KEYS.theme) || "dark";
   });
   const [bigFont, setBigFont] = useState(() => {
-    return safeGetItem("mediurg-bigfont") === "1";
+    return safeGetItem(STORAGE_KEYS.bigFont) === "1";
   });
   // Accès caché à la console admin : appui long (~600 ms) sur le logo
   // émet un event intercepté par AuthGate (qui ne l'honore que pour un
@@ -90,10 +91,10 @@ const App = () => {
   const adminLongPress = useLongPress(() => window.dispatchEvent(new Event("mediurg:open-admin")));
 
   const [favorites, setFavorites] = useState<Set<number>>(() => {
-    return new Set<number>(safeGetJson<number[]>("mediurg-favorites", []));
+    return new Set<number>(safeGetJson<number[]>(STORAGE_KEYS.favorites, []));
   });
   const [history, setHistory] = useState(() => {
-    return safeGetJson<number[]>("mediurg-history", []);
+    return safeGetJson<number[]>(STORAGE_KEYS.history, []);
   });
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   // IDs des fiches médicament actuellement déployées. Tant qu'au moins une
@@ -193,7 +194,7 @@ const App = () => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
-      safeSetJson("mediurg-favorites", [...next]);
+      safeSetJson(STORAGE_KEYS.favorites, [...next]);
       return next;
     });
   };
@@ -201,19 +202,19 @@ const App = () => {
   const addToHistory = (id: number) => {
     setHistory((prev: number[]) => {
       const next = [id, ...prev.filter((x: number) => x !== id)].slice(0, 5);
-      safeSetJson("mediurg-history", next);
+      safeSetJson(STORAGE_KEYS.history, next);
       return next;
     });
   };
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    safeSetItem("mediurg-theme", theme);
+    safeSetItem(STORAGE_KEYS.theme, theme);
   }, [theme]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-fontsize", bigFont ? "large" : "normal");
-    safeSetItem("mediurg-bigfont", bigFont ? "1" : "0");
+    safeSetItem(STORAGE_KEYS.bigFont, bigFont ? "1" : "0");
   }, [bigFont]);
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));

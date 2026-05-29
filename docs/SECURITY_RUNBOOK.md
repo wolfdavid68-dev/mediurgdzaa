@@ -3,18 +3,32 @@
 Ce document complète [`AUTH_SETUP.md`](./AUTH_SETUP.md). Il sert de checklist courte avant
 déploiement et de procédure d'audit périodique pour la PWA, Supabase et les données locales. Pour
 un support de validation institutionnelle, voir aussi
-[`DOSSIER_SECURITE_DPO_RSSI.md`](./DOSSIER_SECURITE_DPO_RSSI.md).
+[`DOSSIER_SECURITE_DPO_RSSI.md`](./DOSSIER_SECURITE_DPO_RSSI.md). Pour la checklist complète de
+publication, voir [`PROCEDURE_RELEASE.md`](./PROCEDURE_RELEASE.md).
 
 ## Avant chaque mise en production
 
 - Lancer `npm audit --audit-level=moderate`.
 - Lancer `npm run typecheck`, `npm run lint`, `npm run knip`, `npm test`, puis `npm run build`.
+- Lancer `npm run verify:security` pour contrôler `vercel.json`, CSP, headers et absence de
+  variables `VITE_` sensibles.
+- Lancer `npm run report:data:strict` si les données cliniques ont changé, puis relire
+  `RAPPORT_DONNEES_CLINIQUES.md`.
+- Lancer `npm run verify:bundle-budget` après le build pour détecter une régression de taille gzip
+  JS/CSS supérieure au baseline autorisé.
+- Lancer `npm run verify:pwa-manifest` après le build pour contrôler manifest, icônes et
+  raccourcis PWA.
 - Lancer `npm run verify:pwa-offline` après le build : précache Workbox, budgets gzip par chunk,
   scan d'indices de secrets serveur dans les assets buildés.
 - Lancer `npm run verify:pwa-offline:browser` pour valider les routes cliniques hors-ligne dans
   Chromium et régénérer les captures mobiles factices dans `build/offline-screenshots/`.
-- Lancer `npm run report:data` si les données cliniques ont changé, puis relire
-  `RAPPORT_DONNEES_CLINIQUES.md`.
+- Lancer `npm run verify:offline-screenshots` après le test navigateur pour comparer les captures
+  générées à la baseline de dimensions/tailles.
+- Lancer `npm run verify:a11y-keyboard` si la release touche ACR, Kits, Incompatibilités,
+  modales ou navigation clavier.
+- Lancer `npm run verify:e2e-critical` et `npm run verify:perf-runtime` pour valider les parcours
+  métier offline et les seuils de performance runtime.
+- Pour une vérification complète avant publication, lancer `npm run release:check`.
 - Vérifier que `vercel.json` contient toujours les headers globaux : CSP, `nosniff`,
   `Referrer-Policy`, `Permissions-Policy`, HSTS et `frame-ancestors 'none'`.
 - Si le script bootstrap inline de `index.html` change, recalculer le hash `sha256-...` dans la

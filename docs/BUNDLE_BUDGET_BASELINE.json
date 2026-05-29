@@ -1,0 +1,35 @@
+{
+  "allowGrowthKb": 10,
+  "allowCssGrowthKb": 5,
+  "chunks": {
+    "acr": 22.6,
+    "auth": 9.4,
+    "auth-admin": 13.46,
+    "auth-mobile": 13.56,
+    "data-medic": 29.43,
+    "echelles": 4.13,
+    "index": 41.1,
+    "medicaments": 10.76,
+    "protocoles": 1.79,
+    "protocoles-ecg": 7.84,
+    "protocoles-incompat": 10.56,
+    "protocoles-kits": 21.18,
+    "protocoles-pisu": 9.7,
+    "rolldown-runtime": 0.42,
+    "vendor-react": 60.19,
+    "vendor-supabase": 50.35,
+    "workbox-window.prod.es5": 2.2
+  },
+  "css": {
+    "acr": 5.7,
+    "auth": 4.65,
+    "auth-mobile": 3.88,
+    "echelles": 1.69,
+    "index": 7.14,
+    "medicaments": 4.63,
+    "protocoles": 1.17,
+    "protocoles-ecg": 3.19,
+    "protocoles-incompat": 2.62,
+    "protocoles-kits": 2.25
+  }
+}

@@ -229,6 +229,21 @@ cas de départ d'un agent ou de perte d'appareil.
 | Notification exposant une identité          | faible         | payload push générique               | valider règle de contenu notification   |
 | Erreur de contenu clinique                  | élevé          | versioning, PWA update prompt        | définir procédure de correction urgente |
 
+## Matrice risques / mesures / preuves
+
+| Domaine | Risque | Mesures de réduction | Preuves automatisées ou documentaires |
+| --- | --- | --- | --- |
+| Authentification | Accès clinique par compte non approuvé ou suspendu | Écrans `pending`/`banned`, cache profil isolé, tests AuthGate | `npm test -- src/components/AuthGate.integration.test.tsx`, `docs/SECURITY_RUNBOOK.md` |
+| Administration | Ouverture console admin par utilisateur standard | Accès admin conditionné à `role=admin` ou fonction cadre, geste admin ignoré sinon | `src/lib/auth.test.ts`, `src/components/AuthGate.integration.test.tsx` |
+| Secrets | Exposition accidentelle de secrets dans client/build | Allowlist `VITE_`, scan `public/`, `build/`, CSP/headers | `npm run verify:security`, `.env.example`, `vercel.json` |
+| Offline | Route clinique indisponible sans réseau | Workbox précache, test navigateur offline multi-routes | `npm run verify:pwa-offline`, `npm run verify:pwa-offline:browser` |
+| Données locales | Collisions multi-utilisateurs sur appareil partagé | Préfixes par userId, migration anonyme vers compte, tests notes/kits | `src/lib/userStorage.test.ts`, `src/lib/storageKeys.ts` |
+| Données patient | Saisie libre de donnée nominative dans notes/export | Avertissements UI, local uniquement, procédure DPO/RSSI | `docs/SECURITY_RUNBOOK.md`, `docs/DOSSIER_SECURITE_DPO_RSSI.md` |
+| Contenu clinique | Référence orpheline ou incohérence structurelle | Rapport strict données cliniques, tests incompatibilités | `npm run report:data:strict`, `src/lib/incompatibilityIndex.test.ts` |
+| Performance | Dégradation du temps d'accès en urgence | Budgets JS/CSS, mesures runtime Médicaments/Kits/Incompatibilités | `npm run verify:bundle-budget`, `npm run verify:perf-runtime` |
+| Accessibilité | Parcours clavier bloqué sur vues critiques | Tests axe et audit clavier Playwright | `src/components/a11y.test.tsx`, `npm run verify:a11y-keyboard` |
+| Release | Publication sans vérification complète | Script orchestrateur et artefacts CI | `npm run release:check`, artefacts GitHub Actions |
+
 ## Points à valider
 
 - Responsable de traitement et base légale RGPD.
@@ -269,6 +284,7 @@ npm run lint
 npm run knip
 npm test
 npm run build
+npm run release:check
 ```
 
 ## Références internes

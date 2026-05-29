@@ -5,6 +5,7 @@ import {
   matchesIncompatSearch,
   type IncompatEntry,
 } from "./incompatibilityIndex";
+import { INCOMPATIBILITIES } from "../data/incompatibilities";
 
 const entries: IncompatEntry[] = [
   {
@@ -65,5 +66,57 @@ describe("incompatibilityIndex", () => {
   test("applique les overrides d'affichage sans modifier la donnée source", () => {
     expect(getIncompatDisplayName("DrugA", { DrugA: "Drogue A" })).toBe("Drogue A");
     expect(getIncompatDisplayName("DrugB", { DrugA: "Drogue A" })).toBe("DrugB");
+  });
+});
+
+describe("données incompatibilités", () => {
+  const clinicalEntries = INCOMPATIBILITIES as IncompatEntry[];
+  const names = new Set(clinicalEntries.map((entry) => entry.drug));
+  const clinicalIndex = createIncompatibilityIndex(clinicalEntries);
+
+  test("ne contient ni doublon ni référence introuvable", () => {
+    expect(names.size).toBe(clinicalEntries.length);
+
+    const missing = clinicalEntries.flatMap((entry) => [
+      ...(entry.items ?? [])
+        .filter((item) => !names.has(item.with))
+        .map((item) => `${entry.drug} -> ${item.with}`),
+      ...(entry.compatibleWith ?? [])
+        .filter((drug) => !names.has(drug))
+        .map((drug) => `${entry.drug} -> ${drug}`),
+    ]);
+
+    expect(missing).toEqual([]);
+  });
+
+  test("conserve une matrice symétrique pour incompatibles, pH et compatibles", () => {
+    clinicalEntries.forEach((entry) => {
+      (entry.items ?? []).forEach((item) => {
+        expect(getIncompatRelation(clinicalIndex, entry.drug, item.with)).toEqual(
+          getIncompatRelation(clinicalIndex, item.with, entry.drug)
+        );
+      });
+      (entry.compatibleWith ?? []).forEach((drug) => {
+        expect(getIncompatRelation(clinicalIndex, entry.drug, drug)).toEqual(
+          getIncompatRelation(clinicalIndex, drug, entry.drug)
+        );
+      });
+    });
+  });
+
+  test("couvre les familles critiques fréquemment utilisées en urgence", () => {
+    const criticalNeedles = [
+      "Adrénaline",
+      "Noradrénaline",
+      "Amiodarone",
+      "Dobutamine",
+      "Furosémide",
+      "Kétamine",
+      "Midazolam",
+    ];
+
+    criticalNeedles.forEach((needle) => {
+      expect(clinicalEntries.some((entry) => entry.drug.includes(needle))).toBe(true);
+    });
   });
 });

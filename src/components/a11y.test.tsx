@@ -23,6 +23,9 @@ import MedicamentsPage from "../pages/MedicamentsPage";
 import ProtocolCard from "./ProtocolCard";
 import CharterModal from "./CharterModal";
 import OfflineBanner from "./OfflineBanner";
+import AcrModeModal from "./AcrModeModal";
+import KitChecklist from "./KitChecklist";
+import IncompatibilityList from "./IncompatibilityList";
 import type { Drug, Protocol } from "../types/data";
 
 expect.extend(toHaveNoViolations);
@@ -84,6 +87,18 @@ const mockProtocol: Protocol = {
   ],
 };
 
+const mockChecklist = [
+  {
+    titre: "Préparation",
+    items: [
+      { type: "check" as const, label: "Patient monitoré" },
+      { type: "choice" as const, label: "Pré-oxygénation", options: ["MHC", "VNI"] },
+      { type: "select" as const, label: "Hypnotique", from: "Hypnotique" },
+      { type: "text" as const, label: "Dose", unit: "mg" },
+    ],
+  },
+];
+
 describe("a11y — axe-core", () => {
   test("MedicamentsPage : liste fermée, aucune violation axe", async () => {
     const { container } = render(<MedicamentsPage {...baseProps} />);
@@ -109,6 +124,32 @@ describe("a11y — axe-core", () => {
     const { container } = render(
       <CharterModal open onAccept={() => {}} onClose={() => {}} requireAccept />
     );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test("AcrModeModal ouverte : aucune violation sur le picker urgence", async () => {
+    const { container } = render(<AcrModeModal open onClose={() => {}} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test("KitChecklist : aucune violation sur check-list interactive", async () => {
+    const { container } = render(
+      <KitChecklist
+        kitId="a11y-kit"
+        titre="Kit accessibilité"
+        checklist={mockChecklist}
+        couleur="#FF453A"
+        drogues={[{ nom: "Étomidate", role: "Hypnotique d'induction" }]}
+      />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test("IncompatibilityList : aucune violation sur matrice et vues", async () => {
+    const { container } = render(<IncompatibilityList />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

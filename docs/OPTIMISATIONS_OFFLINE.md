@@ -168,6 +168,8 @@ cliniques tout en gardant les tables `src/data/*.js` en JavaScript dense.
 
 Script : `npm run verify:pwa-offline`
 
+Script manifest : `npm run verify:pwa-manifest`
+
 Script navigateur : `npm run verify:pwa-offline:browser`
 
 Le script `scripts/verify-pwa-offline.cjs` s'execute apres un build et verifie :
@@ -177,6 +179,9 @@ Le script `scripts/verify-pwa-offline.cjs` s'execute apres un build et verifie :
 - que le service worker importe toujours `push-handler.js` ;
 - que les assets references par `index.html` existent ;
 - qu'aucun chunk JS ne depasse 500 kB.
+
+Le script `scripts/verify-pwa-manifest.cjs` controle le manifest genere :
+metadonnees PWA, icones, icone maskable et raccourcis cliniques.
 
 Ce n'est pas un remplacement d'un vrai test navigateur offline, mais c'est un
 garde-fou automatisable sans dependance supplementaire.
@@ -188,18 +193,51 @@ reseau du contexte navigateur, puis recharge des routes cliniques (`Protocoles`,
 comportement reel du service worker en navigation offline, en complement du
 controle statique des assets.
 
-Il genere aussi des captures mobiles offline dans `build/offline-screenshots/`
-pour ACR, Kits, Incompatibilites et Login. Les donnees utilisees sont factices :
-aucune donnee patient ni note utilisateur ne doit entrer dans ces captures.
+Il genere aussi des captures offline dans `build/offline-screenshots/` pour
+mobile, tablette et desktop sur ACR, Kits, Incompatibilites, Medicaments et
+Login. Les donnees utilisees sont factices : aucune donnee patient ni note
+utilisateur ne doit entrer dans ces captures.
+
+Script comparaison captures : `npm run verify:offline-screenshots`
+
+Ce controle compare les captures generees a
+`docs/OFFLINE_SCREENSHOT_BASELINE.json` : fichiers attendus, largeur, hauteur
+minimale et taille minimale. Il evite les faux positifs de diff pixel entre OS,
+mais bloque les captures absentes, tronquees ou manifestement vides.
+
+Script clavier : `npm run verify:a11y-keyboard`
+
+Ce controle Playwright verifie que les vues ACR, Kits et Incompatibilites ont
+des parcours clavier exploitables et qu'un changement de vue important
+(`Comparer`) s'active avec Entrée.
+
+Script E2E critique : `npm run verify:e2e-critical`
+
+Ce parcours Playwright installe le service worker, bascule le contexte en
+hors-ligne, puis vérifie un flux métier : recherche Adrénaline, calcul pondéral,
+ouverture du Kit ACR, coche d'une check-list ISR et retour vers les
+Incompatibilités.
+
+Script performance runtime : `npm run verify:perf-runtime`
+
+Ce controle mesure les temps de rendu des vues Médicaments, Kits,
+Incompatibilités et la recherche Adrénaline. Il écrit
+`build/reports/runtime-performance.json` et `.md` pour la revue CI.
 
 ## Donnees et cybersecurite
 
 Script : `npm run report:data`
 
+Script strict CI : `npm run report:data:strict`
+
 Le script `scripts/report-clinical-data.mjs` genere
 `docs/RAPPORT_DONNEES_CLINIQUES.md` avec les volumes par domaine, les liens
 internes et les alertes structurelles. Ce rapport ne valide pas la justesse
 clinique, mais donne une vue lisible pour revue.
+
+Le mode strict echoue si le rapport detecte une alerte de coherence clinique
+structurelle. Les points de vigilance restent informatifs pour permettre une
+relecture humaine sans bloquer une release lorsqu'ils sont attendus.
 
 Script : `npm run verify:pwa-offline`
 
@@ -208,6 +246,10 @@ assets buildes pour des patrons evidents de secrets serveur (`service_role`,
 cle privee Web Push, `DATABASE_URL`, `JWT_SECRET`, cle privee PEM, `sk-...`).
 Les cles publiques prevues pour navigateur, comme la cle publishable Supabase,
 restent autorisees.
+
+Le budget bundle suivi par `npm run verify:bundle-budget` couvre les chunks JS
+et CSS. Il ecrit aussi `build/reports/bundle-budget.json` et
+`build/reports/bundle-budget.md`, uploades par la CI pour revue.
 
 Voir aussi `docs/SECURITY_RUNBOOK.md` et `docs/DOSSIER_SECURITE_DPO_RSSI.md`.
 

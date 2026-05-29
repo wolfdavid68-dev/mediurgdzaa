@@ -237,7 +237,7 @@ const IncompatibilityList = () => {
 
   return (
     <div className="incompat-wrap">
-      <div className="incompat-mode-tabs" role="tablist" aria-label="Vue des incompatibilités">
+      <div className="incompat-mode-tabs" role="group" aria-label="Vue des incompatibilités">
         <button
           type="button"
           className={viewMode === "fiche" ? "incompat-mode-active" : ""}
@@ -442,7 +442,9 @@ const IncompatibilityList = () => {
           <table className="incompat-matrix">
             <thead>
               <tr>
-                <th className="incompat-corner" />
+                <th className="incompat-corner">
+                  <span className="incompat-corner-label">Médicament</span>
+                </th>
                 {DRUGS_INCOMPAT.map((d) => (
                   <th key={d.drug} className="incompat-col-head">
                     <span className="incompat-col-dot" style={{ background: d.color }} />

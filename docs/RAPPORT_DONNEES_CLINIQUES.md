@@ -1,6 +1,6 @@
 # Rapport données cliniques MediURG
 
-Généré le 2026-05-28 pour v110.
+Généré le 2026-05-29 pour v110.
 
 ## Synthèse
 
@@ -71,6 +71,11 @@ Généré le 2026-05-28 pour v110.
 ## Alertes automatiques
 
 Aucune alerte de cohérence détectée.
+
+## Points de vigilance
+
+- PSE 73 OCTAPLEX : aucune préparation structurée dans DRUGS
+- PISU 3 ENF mentionne "physiologique" sans DRUG_PATTERNS évident
 
 ## Notes
 

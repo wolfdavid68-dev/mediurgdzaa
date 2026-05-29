@@ -1,5 +1,6 @@
 import type { Profile } from "./auth";
 import { safeGetJson, safeRemoveItem, safeSetJson } from "./safeStorage";
+import { STORAGE_KEYS } from "./storageKeys";
 
 // Cache du profil auth en localStorage pour l'usage HORS-LIGNE.
 //
@@ -15,7 +16,7 @@ import { safeGetJson, safeRemoveItem, safeSetJson } from "./safeStorage";
 // hors-ligne conserve l'accès jusqu'au retour du réseau (le contenu
 // clinique prime sur l'enforcement temps réel pour un outil d'urgence).
 
-const KEY = "mediurg-profile-cache-v1";
+const KEY = STORAGE_KEYS.profileCache;
 
 type CachedEntry = { id: string; profile: Profile; at: number };
 

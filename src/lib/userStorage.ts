@@ -13,29 +13,43 @@
 // même device se logueront ensuite). Cf. migrateAnonymousData().
 
 import { safeGetItem, safeRemoveItem, safeSetItem } from "./safeStorage";
-
-const ANON_PREFIX = "mediurg-";
+import { STORAGE_PREFIXES, storageKey } from "./storageKeys";
 
 // Clés à migrer du mode anonyme vers le mode authentifié au 1er login.
-// Ne PAS inclure les notes par drug (mediurg-note-{id}) qui sont gérées
-// séparément (voir migrateAnonymousNotes).
-const MIGRATABLE_KEYS = ["favorites", "history", "theme", "bigfont", "acr-protocol", "coach-mode"];
+// Ne PAS inclure les notes/kits dynamiques, gérés séparément plus bas.
+const MIGRATABLE_KEYS = [
+  "favorites",
+  "history",
+  "theme",
+  "bigfont",
+  "acr-protocol",
+  "acr-coach",
+  "coach-mode",
+];
+const MIGRATABLE_DYNAMIC_PREFIXES = [STORAGE_PREFIXES.kitCheck, STORAGE_PREFIXES.kitChecklist];
 
-const userPrefix = (userId: string | null): string =>
-  userId ? `mediurg-u${userId}-` : ANON_PREFIX;
+const listLocalStorageKeys = (): string[] => {
+  try {
+    return Array.from({ length: localStorage.length }, (_, index) =>
+      localStorage.key(index)
+    ).filter((key): key is string => Boolean(key));
+  } catch {
+    return [];
+  }
+};
 
 // Lecture sécurisée — retourne null si localStorage indisponible (mode privé,
 // quotas, etc.) ou si la clé n'existe pas.
 export const readUserItem = (userId: string | null, key: string): string | null => {
-  return safeGetItem(userPrefix(userId) + key);
+  return safeGetItem(storageKey.userItem(userId, key));
 };
 
 export const writeUserItem = (userId: string | null, key: string, value: string): void => {
-  safeSetItem(userPrefix(userId) + key, value);
+  safeSetItem(storageKey.userItem(userId, key), value);
 };
 
 export const removeUserItem = (userId: string | null, key: string): void => {
-  safeRemoveItem(userPrefix(userId) + key);
+  safeRemoveItem(storageKey.userItem(userId, key));
 };
 
 // Notes par médicament — convention spécifique : `mediurg-note-{drugId}` en
@@ -53,14 +67,12 @@ export const removeUserNote = (userId: string | null, drugId: number): void =>
 // Appelée une fois par AuthGate juste après le 1er login réussi du device.
 // Idempotente : si la migration a déjà été faite pour cet user, no-op.
 
-const MIGRATION_DONE_KEY_PREFIX = "mediurg-migrated-to-";
-
 export const migrateAnonymousData = (
   userId: string,
   drugIds: number[]
 ): { migrated: number; skipped: number } => {
   if (!userId) return { migrated: 0, skipped: 0 };
-  if (safeGetItem(MIGRATION_DONE_KEY_PREFIX + userId) === "1") {
+  if (safeGetItem(storageKey.migrationDone(userId)) === "1") {
     return { migrated: 0, skipped: 0 };
   }
 
@@ -69,9 +81,9 @@ export const migrateAnonymousData = (
 
   // Migre les clés simples
   for (const key of MIGRATABLE_KEYS) {
-    const anonValue = safeGetItem(ANON_PREFIX + key);
+    const anonValue = safeGetItem(storageKey.userItem(null, key));
     if (anonValue === null) continue;
-    const userKey = userPrefix(userId) + key;
+    const userKey = storageKey.userItem(userId, key);
     // Si l'user a déjà une valeur, on ne l'écrase pas (priorité aux
     // données déjà associées à son compte).
     if (safeGetItem(userKey) !== null) {
@@ -84,9 +96,25 @@ export const migrateAnonymousData = (
 
   // Migre les notes par drug
   for (const drugId of drugIds) {
-    const anonValue = safeGetItem(`${ANON_PREFIX}note-${drugId}`);
+    const anonValue = safeGetItem(storageKey.note(drugId));
     if (!anonValue) continue;
-    const userKey = `${userPrefix(userId)}note-${drugId}`;
+    const userKey = storageKey.userItem(userId, `note-${drugId}`);
+    if (safeGetItem(userKey) !== null) {
+      skipped++;
+      continue;
+    }
+    if (safeSetItem(userKey, anonValue)) migrated++;
+    else skipped++;
+  }
+
+  // Migre les check-lists de kits, dont les clés dépendent de l'id du kit.
+  for (const anonKey of listLocalStorageKeys()) {
+    const prefix = MIGRATABLE_DYNAMIC_PREFIXES.find((item) => anonKey.startsWith(item));
+    if (!prefix) continue;
+    const anonValue = safeGetItem(anonKey);
+    if (!anonValue) continue;
+    const dynamicKey = anonKey.slice(STORAGE_PREFIXES.anonymous.length);
+    const userKey = storageKey.userItem(userId, dynamicKey);
     if (safeGetItem(userKey) !== null) {
       skipped++;
       continue;
@@ -96,7 +124,7 @@ export const migrateAnonymousData = (
   }
 
   // Marque la migration comme faite pour cet user
-  safeSetItem(MIGRATION_DONE_KEY_PREFIX + userId, "1");
+  safeSetItem(storageKey.migrationDone(userId), "1");
 
   return { migrated, skipped };
 };

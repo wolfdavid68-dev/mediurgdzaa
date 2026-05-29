@@ -1,4 +1,5 @@
 import { safeGetSessionItem, safeSetSessionItem } from "./safeStorage";
+import { storageKey } from "./storageKeys";
 
 // Feature flags — interrupteurs pour activer / désactiver des features
 // pas encore prêtes pour la prod sans avoir à supprimer le code.
@@ -25,14 +26,12 @@ const URL_PARAM_OVERRIDE: Record<string, string[]> = {
 // sauter le query param) → les features preview disparaîtraient au cours
 // de la navigation. Sticky pour toute la session d'onglet ; fermer l'onglet
 // « sort » du mode preview. N'affecte jamais la prod publique.
-const STICKY_PREFIX = "mediurg-preview-";
-
 const isPreviewing = (flagName: string): boolean => {
   if (typeof window === "undefined") return false;
   const params = URL_PARAM_OVERRIDE[flagName];
   if (!params || params.length === 0) return false;
   // Clé sticky canonique = 1ᵉʳ alias (indépendante de l'alias tapé).
-  const stickyKey = STICKY_PREFIX + params[0];
+  const stickyKey = storageKey.preview(params[0]);
   try {
     const search = new URLSearchParams(window.location.search);
     const inUrl = params.some((p) => search.get(p) === "preview");

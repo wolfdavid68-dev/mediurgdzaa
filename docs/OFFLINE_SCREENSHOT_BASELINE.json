@@ -1,0 +1,96 @@
+{
+  "maxShrinkRatio": 0.35,
+  "maxGrowthRatio": 1.75,
+  "screenshots": {
+    "desktop-acr.png": {
+      "width": 1280,
+      "minHeight": 900,
+      "minBytes": 250000,
+      "referenceBytes": 559606
+    },
+    "desktop-incompatibilites.png": {
+      "width": 1280,
+      "minHeight": 900,
+      "minBytes": 60000,
+      "referenceBytes": 127498
+    },
+    "desktop-kits.png": {
+      "width": 1280,
+      "minHeight": 900,
+      "minBytes": 60000,
+      "referenceBytes": 120764
+    },
+    "desktop-login.png": {
+      "width": 1280,
+      "minHeight": 900,
+      "minBytes": 30000,
+      "referenceBytes": 64526
+    },
+    "desktop-medicaments.png": {
+      "width": 1280,
+      "minHeight": 900,
+      "minBytes": 250000,
+      "referenceBytes": 646368
+    },
+    "mobile-acr.png": {
+      "width": 390,
+      "minHeight": 844,
+      "minBytes": 250000,
+      "referenceBytes": 550992
+    },
+    "mobile-incompatibilites.png": {
+      "width": 390,
+      "minHeight": 844,
+      "minBytes": 35000,
+      "referenceBytes": 72832
+    },
+    "mobile-kits.png": {
+      "width": 390,
+      "minHeight": 844,
+      "minBytes": 40000,
+      "referenceBytes": 79816
+    },
+    "mobile-login.png": {
+      "width": 390,
+      "minHeight": 844,
+      "minBytes": 20000,
+      "referenceBytes": 41124
+    },
+    "mobile-medicaments.png": {
+      "width": 390,
+      "minHeight": 844,
+      "minBytes": 250000,
+      "referenceBytes": 592965
+    },
+    "tablette-acr.png": {
+      "width": 768,
+      "minHeight": 1024,
+      "minBytes": 250000,
+      "referenceBytes": 555139
+    },
+    "tablette-incompatibilites.png": {
+      "width": 768,
+      "minHeight": 1024,
+      "minBytes": 60000,
+      "referenceBytes": 122755
+    },
+    "tablette-kits.png": {
+      "width": 768,
+      "minHeight": 1024,
+      "minBytes": 60000,
+      "referenceBytes": 122103
+    },
+    "tablette-login.png": {
+      "width": 768,
+      "minHeight": 1024,
+      "minBytes": 35000,
+      "referenceBytes": 75944
+    },
+    "tablette-medicaments.png": {
+      "width": 768,
+      "minHeight": 1024,
+      "minBytes": 250000,
+      "referenceBytes": 643929
+    }
+  }
+}

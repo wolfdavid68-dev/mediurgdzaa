@@ -56,6 +56,7 @@ import App from "./App";
 import AuthGate from "./components/auth/AuthGate";
 import UpdatePrompt from "./components/UpdatePrompt";
 import { safeGetSessionItem, safeSetSessionItem } from "./lib/safeStorage";
+import { STORAGE_KEYS } from "./lib/storageKeys";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("#root introuvable dans index.html");
@@ -79,10 +80,10 @@ window.addEventListener("error", (e) => {
 //-fou anti-boucle : un seul reload auto par session d'onglet.
 window.addEventListener("vite:preloadError", (e) => {
   const onLine = typeof navigator === "undefined" || navigator.onLine;
-  const already = safeGetSessionItem("mediurg-preload-reloaded") === "1";
+  const already = safeGetSessionItem(STORAGE_KEYS.preloadReloaded) === "1";
   if (onLine && !already) {
     e.preventDefault();
-    safeSetSessionItem("mediurg-preload-reloaded", "1");
+    safeSetSessionItem(STORAGE_KEYS.preloadReloaded, "1");
     window.location.reload();
   }
 });

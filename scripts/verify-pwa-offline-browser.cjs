@@ -12,6 +12,11 @@ const indexPath = path.join(buildDir, "index.html");
 const screenshotDir = path.join(buildDir, "offline-screenshots");
 let port = Number(process.env.PWA_TEST_PORT || 4173);
 let baseUrl = `http://127.0.0.1:${port}`;
+const VIEWPORTS = [
+  { name: "mobile", width: 390, height: 844 },
+  { name: "tablette", width: 768, height: 1024 },
+  { name: "desktop", width: 1280, height: 900 },
+];
 
 const fail = (message) => {
   console.error(`✗ ${message}`);
@@ -153,8 +158,8 @@ const expectVisibleText = async (page, pattern, label) => {
   throw new Error(`${label} introuvable dans la page offline`);
 };
 
-const screenshotOfflineRoute = async (page, route, pattern, label, filename) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+const screenshotOfflineRoute = async (page, viewport, route, pattern, label, filename) => {
+  await page.setViewportSize({ width: viewport.width, height: viewport.height });
   await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
   await expectVisibleText(page, pattern, label);
   const filePath = path.join(screenshotDir, filename);
@@ -227,27 +232,44 @@ const screenshotOfflineRoute = async (page, route, pattern, label, filename) => 
     await expectVisibleText(page, /M[ée]dicaments|Recherche/i, "route Médicaments");
     ok("navigation Médicaments servie hors-ligne");
 
-    await screenshotOfflineRoute(
-      page,
-      "/?mode=acr",
-      /Urgence vitale|ACR|Adulte|Enfant/i,
-      "capture mobile ACR",
-      "mobile-acr.png"
-    );
-    await screenshotOfflineRoute(
-      page,
-      "/?page=protocoles&tab=kits",
-      /Kits|Kit ISR|R.armement/i,
-      "capture mobile Kits",
-      "mobile-kits.png"
-    );
-    await screenshotOfflineRoute(
-      page,
-      "/?page=protocoles&tab=incompatibilites",
-      /Protocoles|Incompatibilit/i,
-      "capture mobile Incompatibilites",
-      "mobile-incompatibilites.png"
-    );
+    const clinicalScreens = [
+      {
+        route: "/?mode=acr",
+        pattern: /Urgence vitale|ACR|Adulte|Enfant/i,
+        label: "capture ACR",
+        file: "acr",
+      },
+      {
+        route: "/?page=protocoles&tab=kits",
+        pattern: /Kits|Kit ISR|R.armement/i,
+        label: "capture Kits",
+        file: "kits",
+      },
+      {
+        route: "/?page=protocoles&tab=incompatibilites",
+        pattern: /Protocoles|Incompatibilit/i,
+        label: "capture Incompatibilites",
+        file: "incompatibilites",
+      },
+      {
+        route: "/?page=medicaments",
+        pattern: /M[ée]dicaments|Recherche/i,
+        label: "capture Medicaments",
+        file: "medicaments",
+      },
+    ];
+    for (const viewport of VIEWPORTS) {
+      for (const screen of clinicalScreens) {
+        await screenshotOfflineRoute(
+          page,
+          viewport,
+          screen.route,
+          screen.pattern,
+          `${screen.label} ${viewport.name}`,
+          `${viewport.name}-${screen.file}.png`
+        );
+      }
+    }
 
     await page.evaluate(() => {
       localStorage.removeItem("mediurg-profile-cache-v1");
@@ -255,14 +277,17 @@ const screenshotOfflineRoute = async (page, route, pattern, label, filename) => 
         .filter((key) => key.startsWith("sb-") || key.includes("supabase"))
         .forEach((key) => localStorage.removeItem(key));
     });
-    await screenshotOfflineRoute(
-      page,
-      "/",
-      /Connexion|Matricule|Mot de passe/i,
-      "capture mobile Login",
-      "mobile-login.png"
-    );
-    ok("captures mobiles offline enregistrées");
+    for (const viewport of VIEWPORTS) {
+      await screenshotOfflineRoute(
+        page,
+        viewport,
+        "/",
+        /Connexion|Matricule|Mot de passe/i,
+        `capture Login ${viewport.name}`,
+        `${viewport.name}-login.png`
+      );
+    }
+    ok("captures offline multi-viewports enregistrées");
 
     await context.setOffline(false);
     await context.close();

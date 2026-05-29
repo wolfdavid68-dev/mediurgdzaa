@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { safeGetJson, safeRemoveItem, safeSetJson } from "./safeStorage";
+import { STORAGE_KEYS } from "./storageKeys";
 
 // Poids patient partagé entre toutes les fiches médicament (poso, prep, PSE).
 // Persisté en localStorage avec auto-expiration 3 h pour ne pas traîner d'un
 // patient à l'autre entre 2 gardes. Au-delà du délai, on repart vierge à la
 // prochaine ouverture (lecture protégée par try/catch — quota privé OK).
-const WEIGHT_LS_KEY = "mediurg-patient-weight";
+const WEIGHT_LS_KEY = STORAGE_KEYS.patientWeight;
 const WEIGHT_MAX_AGE_MS = 3 * 60 * 60 * 1000;
 
 type StoredPatientWeight = { ts?: number; kg?: unknown };

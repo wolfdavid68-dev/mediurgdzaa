@@ -3,6 +3,7 @@ import AcrTimer from "./AcrTimer";
 import ModalDialog from "./ModalDialog";
 import TestVersionBanner from "./TestVersionBanner";
 import { safeGetItem, safeSetItem } from "../lib/safeStorage";
+import { STORAGE_KEYS } from "../lib/storageKeys";
 import { useWakeLock } from "../lib/useWakeLock";
 
 // Modale plein écran déclenchée par le bouton URGENCE.
@@ -11,7 +12,7 @@ import { useWakeLock } from "../lib/useWakeLock";
 //
 // <dialog> natif : focus trap, ESC, scroll lock côté navigateur. Plus de
 // useEffect ESC ni d'override sur document.body.style.overflow.
-const PROTOCOL_LS_KEY = "mediurg-acr-protocol";
+const PROTOCOL_LS_KEY = STORAGE_KEYS.acrProtocol;
 const readProtocol = () => {
   const v = safeGetItem(PROTOCOL_LS_KEY);
   if (v === "erc" || v === "acls") return v;

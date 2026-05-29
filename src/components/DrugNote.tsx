@@ -1,5 +1,6 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import { safeGetItem, safeRemoveItem, safeSetItem } from "../lib/safeStorage";
+import { storageKey } from "../lib/storageKeys";
 
 // Note personnelle par drug, persistée dans localStorage (mediurg-note-{id}).
 // onChange(hasContent) permet au parent d'afficher l'indicateur ✎ dans l'en-tête.
@@ -8,21 +9,21 @@ type DrugNoteProps = { drugId: number; onChange?: (hasContent: boolean) => void 
 const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
-  const storageKey = `mediurg-note-${drugId}`;
+  const noteKey = storageKey.note(drugId);
 
   useEffect(() => {
-    const saved = safeGetItem(storageKey);
+    const saved = safeGetItem(noteKey);
     if (saved) {
       setNote(saved);
       if (onChange) onChange(true);
     }
-  }, [onChange, storageKey]);
+  }, [onChange, noteKey]);
 
   const handleNoteChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setNote(value);
-    if (value.trim()) safeSetItem(storageKey, value);
-    else safeRemoveItem(storageKey);
+    if (value.trim()) safeSetItem(noteKey, value);
+    else safeRemoveItem(noteKey);
     setNoteSaved(true);
     setTimeout(() => setNoteSaved(false), 1500);
     if (onChange) onChange(!!value.trim());

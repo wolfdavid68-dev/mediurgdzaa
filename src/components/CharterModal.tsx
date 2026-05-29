@@ -1,4 +1,5 @@
 import { useEffect, useRef, type MouseEvent } from "react";
+import { STORAGE_KEYS } from "../lib/storageKeys";
 
 // Modale « Charte d'utilisation ».
 //
@@ -18,7 +19,7 @@ import { useEffect, useRef, type MouseEvent } from "react";
 // charte change matériellement à l'avenir.
 
 export const CHARTER_VERSION = "1.0";
-export const CHARTER_LS_KEY = "mediurg-charter-accepted";
+export const CHARTER_LS_KEY = STORAGE_KEYS.charterAccepted;
 
 type Props = {
   open: boolean;

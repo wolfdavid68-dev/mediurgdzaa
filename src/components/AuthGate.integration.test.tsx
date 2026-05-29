@@ -29,11 +29,32 @@ const h = vi.hoisted(() => ({
   onAuthStateChange: vi.fn(() => () => {}),
   getCachedProfile: vi.fn(),
   getLastCachedProfile: vi.fn(),
+  migrateAnonymousData: vi.fn(),
 }));
 
 vi.mock("../lib/featureFlags", () => ({ isAuthEnabled: h.isAuthEnabled }));
 vi.mock("../lib/useIsMobile", () => ({ useIsMobile: () => false }));
-vi.mock("../lib/userStorage", () => ({ migrateAnonymousData: vi.fn() }));
+vi.mock("../lib/userStorage", () => ({ migrateAnonymousData: h.migrateAnonymousData }));
+vi.mock("./auth/AdminDashboard", () => ({
+  default: ({ onLogout }: { onLogout: () => void }) => (
+    <div>
+      <span>ADMIN_CONSOLE</span>
+      <button type="button" onClick={onLogout}>
+        Déconnexion admin
+      </button>
+    </div>
+  ),
+}));
+vi.mock("./auth/mobile/MobileAdminDashboard", () => ({
+  default: ({ onLogout }: { onLogout: () => void }) => (
+    <div>
+      <span>ADMIN_CONSOLE_MOBILE</span>
+      <button type="button" onClick={onLogout}>
+        Déconnexion admin
+      </button>
+    </div>
+  ),
+}));
 vi.mock("../lib/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../lib/auth")>();
   return {
@@ -60,6 +81,7 @@ describe("AuthGate — garantie offline (auth activée)", () => {
     vi.clearAllMocks();
     h.isAuthEnabled.mockReturnValue(true);
     h.onAuthStateChange.mockReturnValue(() => {});
+    h.migrateAnonymousData.mockReset();
     setOnline(true);
   });
 
@@ -105,5 +127,74 @@ describe("AuthGate — garantie offline (auth activée)", () => {
 
     await waitFor(() => expect(screen.getByText(/Se connecter/i)).toBeInTheDocument());
     expect(screen.queryByText("CONTENU_APP")).not.toBeInTheDocument();
+  });
+
+  test("profil pending → accès clinique bloqué et pas de migration locale", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValue({
+      ok: true,
+      data: { ...activeProfile, status: "pending" },
+    });
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText(/validation|attente/i)).toBeInTheDocument());
+    expect(screen.queryByText("CONTENU_APP")).not.toBeInTheDocument();
+    expect(h.migrateAnonymousData).not.toHaveBeenCalled();
+  });
+
+  test("profil suspendu → accès clinique bloqué avec motif affiché", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValue({
+      ok: true,
+      data: { ...activeProfile, status: "banned", ban_reason: "Compte test suspendu" },
+    });
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText(/Compte test suspendu/i)).toBeInTheDocument());
+    expect(screen.queryByText("CONTENU_APP")).not.toBeInTheDocument();
+    expect(h.migrateAnonymousData).not.toHaveBeenCalled();
+  });
+
+  test("geste admin ignoré pour un utilisateur non admin", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValue({ ok: true, data: activeProfile });
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
+    window.dispatchEvent(new Event("mediurg:open-admin"));
+    expect(screen.queryByText("ADMIN_CONSOLE")).not.toBeInTheDocument();
+  });
+
+  test("geste admin ouvre la console uniquement pour un profil autorisé", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "admin-1" } });
+    h.fetchProfile.mockResolvedValue({
+      ok: true,
+      data: { ...activeProfile, id: "admin-1", role: "admin" },
+    });
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
+    window.dispatchEvent(new Event("mediurg:open-admin"));
+    await waitFor(() => expect(screen.getByText("ADMIN_CONSOLE")).toBeInTheDocument());
   });
 });

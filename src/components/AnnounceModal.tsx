@@ -1,4 +1,5 @@
 import ModalDialog from "./ModalDialog";
+import { STORAGE_KEYS } from "../lib/storageKeys";
 
 // Annonce ponctuelle affichée à l'ouverture de l'app pour présenter le
 // nouvel outil d'aide à l'interprétation ECG. Vue une seule fois par
@@ -6,7 +7,7 @@ import ModalDialog from "./ModalDialog";
 // (×, backdrop, bouton). Bump ANNOUNCE_VERSION pour ré-annoncer plus tard.
 
 export const ANNOUNCE_VERSION = "ecg-1";
-export const ANNOUNCE_LS_KEY = "mediurg-announce";
+export const ANNOUNCE_LS_KEY = STORAGE_KEYS.announce;
 
 type Props = { open: boolean; onClose: () => void };
 

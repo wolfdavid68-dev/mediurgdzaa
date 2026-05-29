@@ -2,6 +2,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { DRUGS } from "../data/drugs";
 import { APP_VERSION } from "../data/changelog";
 import { safeGetItem, safeSetItem } from "../lib/safeStorage";
+import { storageKey } from "../lib/storageKeys";
 
 // Backup utilisateur des notes personnelles par médicament. Les notes vivent
 // dans localStorage (`mediurg-note-{drugId}`) et survivent normalement aux
@@ -27,8 +28,6 @@ import { safeGetItem, safeSetItem } from "../lib/safeStorage";
 // migre la note vers le nouvel id (utile si on a renuméroté — ne devrait pas
 // arriver grâce à drug-ids.snapshot.json mais filet de sécurité).
 
-const NOTE_KEY_PREFIX = "mediurg-note-";
-
 type NoteEntry = { drugId: number; drugName: string; note: string };
 type ExportPayload = {
   schema: number;
@@ -40,7 +39,7 @@ type ExportPayload = {
 const collectNotes = (): NoteEntry[] => {
   const out: NoteEntry[] = [];
   for (const drug of DRUGS as Array<{ id: number; nom: string }>) {
-    const note = safeGetItem(`${NOTE_KEY_PREFIX}${drug.id}`);
+    const note = safeGetItem(storageKey.note(drug.id));
     if (note && note.trim()) {
       out.push({ drugId: drug.id, drugName: drug.nom, note });
     }
@@ -119,7 +118,7 @@ const NotesBackup = () => {
           skipped++;
           continue;
         }
-        if (safeSetItem(`${NOTE_KEY_PREFIX}${target.id}`, entry.note)) {
+        if (safeSetItem(storageKey.note(target.id), entry.note)) {
           imported++;
         } else {
           skipped++;

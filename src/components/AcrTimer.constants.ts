@@ -1,6 +1,7 @@
 // Constantes et data tables pour AcrTimer.tsx. Extrait pour alléger le
 // composant principal (qui faisait 1643 lignes). Tout ce qui ne change pas
 // au runtime et qui peut être référencé sans contexte React est ici.
+import { STORAGE_KEYS } from "../lib/storageKeys";
 
 // Cycles RCP (recommandations ERC/AHA 2021)
 export const CYCLE_ANALYSE_S = 120; // analyse rythme DSA toutes les 2 min
@@ -14,7 +15,7 @@ export const BPM_OPTIONS = [100, 110, 120];
 //   visual = visuel + bips + métronome (sans voix) — sweet spot SAUV bruyante
 //   silent = aucun feedback (pas de bip, pas de zoom, pas de voix)
 // ─────────────────────────────────────────────────────────
-export const COACH_LS_KEY = "mediurg-acr-coach";
+export const COACH_LS_KEY = STORAGE_KEYS.acrCoach;
 export const COACH_NEXT = { full: "visual", visual: "silent", silent: "full" } as const;
 export const COACH_ICON = { full: "🔊", visual: "👁", silent: "🔇" } as const;
 export const COACH_NAME = { full: "Complet", visual: "Visuel", silent: "Muet" } as const;
