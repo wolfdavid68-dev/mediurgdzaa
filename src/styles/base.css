@@ -89,16 +89,16 @@ html {
 }
 
 [data-theme="light"] {
-  --bg: #eef0f5;
-  --bg-elevated: #e5e8f0;
-  --card: #f8f9fc;
-  --card-hover: #eef0f6;
-  --border: #d4d8e8;
-  --border-strong: #b8bcd0;
-  --text: #1a1a2a;
-  --text-dim: #44445e;
+  --bg: #e8edf5;
+  --bg-elevated: #f8fafc;
+  --card: #ffffff;
+  --card-hover: #f4f7fb;
+  --border: #c8d1e1;
+  --border-strong: #94a3b8;
+  --text: #111827;
+  --text-dim: #334155;
   /* WCAG AA : #84849c sur #eef0f5 était à 3.4:1. #5e5e74 atteint ~6:1. */
-  --text-mute: #5e5e74;
+  --text-mute: #64748b;
   --info: #0a7ae0;
   --info: oklch(55% 0.2 245);
   --warn: #c47a00;
@@ -108,8 +108,8 @@ html {
   --success: #1a9440;
   --success: oklch(53% 0.18 145);
 
-  --header-bg: rgba(238, 240, 245, 0.92);
-  --nav-bg: rgba(238, 240, 245, 0.96);
+  --header-bg: #f8fafc;
+  --nav-bg: #f8fafc;
 }
 
 body {

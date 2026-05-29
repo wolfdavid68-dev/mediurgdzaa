@@ -23,6 +23,23 @@
   background: var(--bg-elevated);
 }
 
+[data-theme="light"] .drug-card {
+  background: #ffffff;
+  border-color: #c7d2e3;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 22px rgba(15, 23, 42, 0.03);
+}
+
+[data-theme="light"] .drug-card:hover,
+[data-theme="light"] .drug-card-open {
+  border-color: #94a3b8;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
 /* (Container queries activées via container-type: inline-size sur .drug-card
    ci-dessus, mais on n'a pas encore de règles @container utilisées —
    l'infra est en place quand on voudra une vue tablette horizontale.) */
@@ -131,6 +148,11 @@
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.06),
     0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="light"] .drug-monitor-corner {
+  transform: none;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.14);
 }
 
 .drug-monitor-corner span {
@@ -282,7 +304,21 @@
 }
 
 [data-theme="light"] .drug-classe {
-  color: #1f2937;
+  color: #334155;
+}
+
+[data-theme="light"] .drug-meta {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .drug-meta strong {
+  color: #475569;
+}
+
+[data-theme="light"] .drug-desc {
+  color: #334155;
+  border-bottom-color: #cbd5e1;
 }
 
 .badge {
@@ -407,6 +443,30 @@
   background: linear-gradient(135deg, rgba(88, 28, 135, 0.95), rgba(167, 139, 250, 0.18));
   color: #c4b5fd;
   border: 1px solid rgba(167, 139, 250, 0.62);
+}
+
+[data-theme="light"] .monitor-scope {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #422006;
+  border-color: rgba(146, 64, 14, 0.28);
+}
+
+[data-theme="light"] .monitor-ecg {
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  color: #eff6ff;
+  border-color: rgba(30, 64, 175, 0.28);
+}
+
+[data-theme="light"] .monitor-capno {
+  background: linear-gradient(135deg, #0f766e, #2dd4bf);
+  color: #ecfeff;
+  border-color: rgba(15, 118, 110, 0.28);
+}
+
+[data-theme="light"] .monitor-custom {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  color: #faf5ff;
+  border-color: rgba(109, 40, 217, 0.28);
 }
 
 .chevron {
@@ -924,6 +984,17 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px 14px;
+}
+
+[data-theme="light"] .poso-box {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .poso-filter-hint {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
 }
 
 .poso-title {
@@ -2058,9 +2129,9 @@
 }
 
 [data-theme="light"] .prep-calc-box {
-  background: rgba(29, 78, 216, 0.06);
-  border-bottom-color: rgba(29, 78, 216, 0.25);
-  border-top-color: rgba(29, 78, 216, 0.25);
+  background: #eff6ff;
+  border-bottom-color: #bfdbfe;
+  border-top-color: #bfdbfe;
 }
 
 [data-theme="light"] .prep-calc-header {
@@ -2097,17 +2168,72 @@
 }
 
 [data-theme="light"] .prep-v2 {
-  border-color: rgba(220, 38, 38, 0.26);
-  background: rgba(220, 38, 38, 0.05);
+  border-color: #fca5a5;
+  background: #fff7f7;
+}
+
+[data-theme="light"] .prep-head {
+  background: #fff1f2;
+  border-bottom-color: #fecdd3;
+}
+
+[data-theme="light"] .prep-head-title {
+  color: #991b1b;
 }
 
 [data-theme="light"] .prep-tag,
 [data-theme="light"] .prep-v2 .prep-calc {
-  background: rgba(255, 255, 255, 0.72);
+  background: #ffffff;
+  border-color: #fecdd3;
+}
+
+[data-theme="light"] .prep-tag {
+  color: #334155;
+  border-color: #cbd5e1;
 }
 
 [data-theme="light"] .prep-v2 .prep-calc-header {
   color: #b91c1c;
+}
+
+[data-theme="light"] .prep-mode-option {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+[data-theme="light"] .prep-mode-option small {
+  color: #64748b;
+}
+
+[data-theme="light"] .prep-mode-option.is-active {
+  background: #fff1f2;
+  border-color: #fb7185;
+  color: #991b1b;
+}
+
+[data-theme="light"] .prep-mode-option.prep-recipe-pse.is-active {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #1e3a8a;
+}
+
+[data-theme="light"] .prep-mode-option.prep-recipe-pse.is-active small {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-calc-box.prep-recipe-pse,
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-pse {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-pse .prep-calc-header {
+  color: #1e3a8a;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-pse .prep-highlight {
+  color: #1d4ed8;
 }
 
 [data-theme="light"] .prep-v2 .prep-highlight {
