@@ -321,13 +321,18 @@ set search_path = ''
 as $$
 declare
   v_actor uuid := (select auth.uid());
-  v_target public.profiles%rowtype;
+  v_target_id uuid;
+  v_target_matricule text;
+  v_target_email text;
+  v_target_prenom text;
+  v_target_nom text;
 begin
   if v_actor is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select * into v_target
+  select id, matricule, email, prenom, nom
+  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
   from public.profiles
   where id = p_target_profile_id
   for update;
@@ -347,8 +352,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
-    (v_target).prenom, (v_target).nom, 'approve', null
+    v_actor, v_target_id, v_target_matricule, v_target_email,
+    v_target_prenom, v_target_nom, 'approve', null
   );
 end;
 $$;
@@ -361,13 +366,18 @@ set search_path = ''
 as $$
 declare
   v_actor uuid := (select auth.uid());
-  v_target public.profiles%rowtype;
+  v_target_id uuid;
+  v_target_matricule text;
+  v_target_email text;
+  v_target_prenom text;
+  v_target_nom text;
 begin
   if v_actor is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select * into v_target
+  select id, matricule, email, prenom, nom
+  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
   from public.profiles
   where id = p_target_profile_id
   for update;
@@ -381,8 +391,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
-    (v_target).prenom, (v_target).nom, 'reject', null
+    v_actor, v_target_id, v_target_matricule, v_target_email,
+    v_target_prenom, v_target_nom, 'reject', null
   );
 
   delete from public.profiles where id = p_target_profile_id;
@@ -397,14 +407,19 @@ set search_path = ''
 as $$
 declare
   v_actor uuid := (select auth.uid());
-  v_target public.profiles%rowtype;
+  v_target_id uuid;
+  v_target_matricule text;
+  v_target_email text;
+  v_target_prenom text;
+  v_target_nom text;
   v_reason text := nullif(btrim(coalesce(p_reason, '')), '');
 begin
   if v_actor is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select * into v_target
+  select id, matricule, email, prenom, nom
+  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
   from public.profiles
   where id = p_target_profile_id
   for update;
@@ -424,8 +439,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
-    (v_target).prenom, (v_target).nom, 'ban', v_reason
+    v_actor, v_target_id, v_target_matricule, v_target_email,
+    v_target_prenom, v_target_nom, 'ban', v_reason
   );
 end;
 $$;
@@ -438,13 +453,18 @@ set search_path = ''
 as $$
 declare
   v_actor uuid := (select auth.uid());
-  v_target public.profiles%rowtype;
+  v_target_id uuid;
+  v_target_matricule text;
+  v_target_email text;
+  v_target_prenom text;
+  v_target_nom text;
 begin
   if v_actor is null or not public.is_admin_mfa() then
     raise exception 'admin_mfa_required' using errcode = '42501';
   end if;
 
-  select * into v_target
+  select id, matricule, email, prenom, nom
+  into v_target_id, v_target_matricule, v_target_email, v_target_prenom, v_target_nom
   from public.profiles
   where id = p_target_profile_id
   for update;
@@ -464,8 +484,8 @@ begin
     target_prenom, target_nom, action, reason
   )
   values (
-    v_actor, (v_target).id, (v_target).matricule, (v_target).email,
-    (v_target).prenom, (v_target).nom, 'unban', null
+    v_actor, v_target_id, v_target_matricule, v_target_email,
+    v_target_prenom, v_target_nom, 'unban', null
   );
 end;
 $$;
