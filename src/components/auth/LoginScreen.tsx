@@ -78,7 +78,7 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
               <span className="auth-side-meta-dot auth-side-meta-dot-ok" />
               Système opérationnel
             </div>
-            <div className="auth-side-meta-row">73 médicaments référencés · 22 protocoles</div>
+            <div className="auth-side-meta-row">81 médicaments référencés · 22 protocoles</div>
           </div>
           <div className="auth-side-foot">MediURG · GHR Mulhouse Sud-Alsace</div>
         </aside>

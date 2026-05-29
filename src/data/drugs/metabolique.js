@@ -1,10 +1,33 @@
 // ============================================================
 // MediURG — Catégorie : Métabolique
-// 5 médicaments.
+// 6 médicaments.
 // Auto-extrait de drugs.js (split par catégorie).
 // ============================================================
 
 export const DRUGS_METABOLIQUE = [
+  {
+    id: 83,
+    nom: "CÉLESTÈNE",
+    commercial: "Bétaméthasone",
+    dci: "Bétaméthasone",
+    classe: "Corticostéroïde",
+    cat: "Métabolique",
+    svc: ["SMUR", "SAU"],
+    couleur: "#30D158",
+    icon: "💊",
+    desc: "Corticostéroïde en solution buvable. Utilisé par voie orale, notamment en pédiatrie.",
+    indic: [
+      "Asthme et exacerbation respiratoire selon protocole",
+      "Réaction inflammatoire ou allergique selon contexte",
+    ],
+    ci: ["Pas de CI absolue si urgence vitale", "Infection systémique non contrôlée (relative)"],
+    ei: ["Hyperglycémie", "Hypokaliémie", "Insomnie", "Agitation chez l'enfant"],
+    cond: ["Solution buvable 0,05% : 0,5 mg/mL — flacon 30 mL (≈ 600 gouttes)"],
+    poso: {
+      a: ["Per os : 1-2 mg selon indication"],
+      p: ["Per os : 15 gouttes/kg (= 0,75 mg/kg) — dose max 60 gouttes"],
+    },
+  },
   {
     id: 45,
     nom: "SOLUMEDROL",
@@ -180,6 +203,23 @@ export const DRUGS_METABOLIQUE = [
       ],
       p: ["Non recommandé < 18 ans"],
     },
+    prep: {
+      solvant: "Pur ou NaCl 0,9%",
+      volume_final: 10,
+      conc_finale: "10 mg pur ou qsp 10 mL",
+      conc_produit: 5,
+      unite: "mg",
+      duree: "IV lente",
+      prelever_total: true,
+      prelever_label: "1 ampoule 10 mg/2 mL",
+      etapes: [
+        "Ampoule 10 mg/2 mL",
+        "Administrer pur en IV lente",
+        "Peut se diluer qsp 10 mL NaCl 0,9%",
+        "Renouveler /8h si besoin",
+      ],
+      notes: ["Non recommandé < 18 ans", "Surveiller syndrome extrapyramidal et somnolence"],
+    },
   },
   {
     id: 49,
@@ -203,6 +243,23 @@ export const DRUGS_METABOLIQUE = [
     poso: {
       a: ["IVD : administrer PUR", "4-8 mg IV /8h", "Voies : VVP ou VVC"],
       p: ["0,1 mg/kg IV (max 4 mg)"],
+    },
+    prep: {
+      solvant: "Pur",
+      volume_final: null,
+      conc_finale: "2 mg/mL",
+      conc_produit: 2,
+      unite: "mg",
+      dose_kg: 0.1,
+      duree: "IVD",
+      stabilite: "Utiliser immédiatement après ouverture",
+      etapes: [
+        "Ampoule 4 mg/2 mL ou 8 mg/4 mL (2 mg/mL)",
+        "Administrer pur",
+        "Adulte : 4-8 mg IV /8h",
+        "Pédiatrie : 0,1 mg/kg IV (max 4 mg)",
+      ],
+      notes: ["Surveiller allongement QT, surtout sujet âgé"],
     },
   },
 ];

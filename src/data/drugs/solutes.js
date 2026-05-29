@@ -138,5 +138,26 @@ export const DRUGS_SOLUTES = [
       ],
       p: ["0,5-1 g/kg IV sur 20-30 min"],
     },
+    prep: {
+      solvant: "Pur",
+      volume_final: null,
+      conc_finale: "0,2 g/mL",
+      conc_produit: 0.2,
+      unite: "g",
+      dose_kg: 0.5,
+      dose_max_kg: 1,
+      duree: "20-30 min",
+      stabilite: "Utiliser immédiatement après ouverture",
+      etapes: [
+        "Flacon de mannitol 20% = 0,2 g/mL",
+        "Administrer pur par voie IV",
+        "Dose usuelle : 0,5-1 g/kg sur 20-30 min",
+        "Engagement cérébral : 1 g/kg IV rapide",
+      ],
+      notes: [
+        "Surveiller diurèse, osmolalité et fonction rénale",
+        "Éviter si osmolalité > 320 mosmol/kg",
+      ],
+    },
   },
 ];

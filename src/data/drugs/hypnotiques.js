@@ -102,6 +102,23 @@ export const DRUGS_HYPNOTIQUES = [
       ],
       p: ["0,3 mg/kg IV lente (> 2 ans)"],
     },
+    prep: {
+      solvant: "Pur",
+      volume_final: null,
+      conc_finale: "2 mg/mL",
+      conc_produit: 2,
+      unite: "mg",
+      dose_kg: 0.3,
+      duree: "IVD en 30-60 sec",
+      stabilite: "Utiliser immédiatement après ouverture",
+      etapes: [
+        "Ampoule 20 mg/10 mL (2 mg/mL)",
+        "Administrer pur",
+        "ISR : 0,3 mg/kg IV en 30-60 sec",
+        "Sujet âgé : 0,2 mg/kg",
+      ],
+      notes: ["Surveiller myoclonies, hypotension et insuffisance surrénale transitoire"],
+    },
   },
   {
     id: 3,

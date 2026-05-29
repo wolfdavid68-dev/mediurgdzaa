@@ -79,6 +79,23 @@ export const DRUGS_ANTIDOTES = [
       a: ["IVD — urgence CICO : 16 mg/kg", "Voies : VVP ou VVC"],
       p: ["4-16 mg/kg IV selon profondeur du bloc"],
     },
+    prep: {
+      solvant: "Pur",
+      volume_final: null,
+      conc_finale: "100 mg/mL",
+      conc_produit: 100,
+      unite: "mg",
+      dose_kg: 16,
+      duree: "IVD",
+      stabilite: "Utiliser immédiatement après ouverture",
+      etapes: [
+        "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL)",
+        "Administrer pur en IVD",
+        "Urgence CICO : 16 mg/kg",
+        "Pédiatrie : 4-16 mg/kg IV selon profondeur du bloc",
+      ],
+      notes: ["Surveiller anaphylaxie, bradycardie et recurarisation si dose insuffisante"],
+    },
   },
   {
     id: 29,
@@ -212,6 +229,22 @@ export const DRUGS_ANTIDOTES = [
     poso: {
       a: ["IVD : 1 ampoule — administrer PUR", "Voies : VVP ou VVC"],
       p: ["0,1 mg/kg IV (max 5 mg)"],
+    },
+    prep: {
+      solvant: "Pur",
+      volume_final: null,
+      conc_finale: "5 mg/mL",
+      conc_produit: 5,
+      unite: "mg",
+      dose_kg: 0.1,
+      duree: "IVD",
+      stabilite: "Utiliser immédiatement après ouverture",
+      etapes: [
+        "Ampoule 5 mg/1 mL",
+        "Adulte : administrer 1 ampoule pure",
+        "Pédiatrie : 0,1 mg/kg IV (max 5 mg)",
+      ],
+      notes: ["Surveiller malaise vagal, hypotension orthostatique et somnolence"],
     },
   },
   {

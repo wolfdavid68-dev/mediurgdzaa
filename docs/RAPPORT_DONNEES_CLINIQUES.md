@@ -6,9 +6,9 @@ Généré le 2026-05-29 pour v110.
 
 | Domaine | Volume |
 | --- | ---: |
-| Médicaments | 78 |
-| Médicaments avec préparation | 51 |
-| Entrées PSE | 14 |
+| Médicaments | 81 |
+| Médicaments avec préparation | 73 |
+| Entrées PSE | 15 |
 | Protocoles | 14 |
 | Kits de préparation | 8 |
 | Entrées incompatibilités | 61 |
@@ -22,13 +22,13 @@ Généré le 2026-05-29 pour v110.
 | Antibiotiques | 12 |
 | Anticoagulants | 3 |
 | Antidotes | 7 |
-| Cardiologie | 11 |
+| Cardiologie | 13 |
 | Catécholamines | 5 |
 | Curares | 3 |
 | Diurétiques | 1 |
 | Électrolytes | 4 |
 | Hypnotiques | 4 |
-| Métabolique | 5 |
+| Métabolique | 6 |
 | Neurologie | 5 |
 | Pneumologie | 3 |
 | Produits sanguins | 5 |
@@ -38,8 +38,8 @@ Généré le 2026-05-29 pour v110.
 
 | Service | Nombre |
 | --- | ---: |
-| SAU | 78 |
-| SMUR | 31 |
+| SAU | 81 |
+| SMUR | 32 |
 
 ## Protocoles
 
@@ -74,7 +74,6 @@ Aucune alerte de cohérence détectée.
 
 ## Points de vigilance
 
-- PSE 73 OCTAPLEX : aucune préparation structurée dans DRUGS
 - PISU 3 ENF mentionne "physiologique" sans DRUG_PATTERNS évident
 
 ## Notes

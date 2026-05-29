@@ -137,6 +137,22 @@ export const DRUGS_PRODUITS_SANGUINS = [
       ],
       p: ["0,5-1 g/kg IV selon indication"],
     },
+    prep: {
+      solvant: "Prêt à l'emploi",
+      volume_final: null,
+      conc_finale: "4% ou 20%",
+      duree: "IVL selon indication",
+      etapes: [
+        "Flacon prêt à l'emploi",
+        "Appel d'air obligatoire (flacon en verre)",
+        "Administrer selon indication et prescription",
+        "Assurer traçabilité + documents pharmacie",
+      ],
+      notes: [
+        "Médicament dérivé du sang : traçabilité obligatoire",
+        "Surveiller surcharge volémique",
+      ],
+    },
   },
   {
     id: 73,
@@ -171,6 +187,24 @@ export const DRUGS_PRODUITS_SANGUINS = [
         "Voies : VVP ou VVC",
       ],
       p: ["25-50 UI/kg selon INR"],
+    },
+    prep: {
+      solvant: "Solvant fourni",
+      volume_final: null,
+      conc_finale: "Selon flacon reconstitué",
+      duree: "PSE 0,12 mL/kg/min · max 8 mL/min",
+      etapes: [
+        "Flacon lyophilisé + solvant fourni",
+        "Reconstituer la poudre avec le solvant",
+        "Administrer en PSE",
+        "AVK INR 2-3,9 : 25 UI/kg ; INR 4-6 : 35 UI/kg ; INR > 6 : 50 UI/kg (max 3000 UI)",
+        "AOD : 50 UI/kg",
+      ],
+      notes: [
+        "Traçabilité obligatoire — documents à envoyer à la pharmacie",
+        "Débit PSE : 0,12 mL/kg/min, maximum 8 mL/min (480 mL/h)",
+        "Si AVK : associer Vitamine K1 10 mg IV",
+      ],
     },
   },
 ];

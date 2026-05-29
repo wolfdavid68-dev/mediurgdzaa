@@ -312,6 +312,18 @@
     {
       "id": 80,
       "nom": "NALBUPHINE"
+    },
+    {
+      "id": 81,
+      "nom": "ISOPTINE"
+    },
+    {
+      "id": 82,
+      "nom": "TILDIEM"
+    },
+    {
+      "id": 83,
+      "nom": "CÉLESTÈNE"
     }
   ]
 }

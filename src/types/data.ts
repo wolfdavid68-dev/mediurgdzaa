@@ -41,6 +41,21 @@ type DrugPrepPhase = {
   solvant_vol?: number;
 };
 
+type DrugPrepTableRow = {
+  poids: number;
+  vi: number;
+  vf: number;
+  vitesse: number;
+  debitEp: number;
+  temps: number;
+};
+
+type DrugPrepTable = {
+  titre: string;
+  description?: string;
+  rows: DrugPrepTableRow[];
+};
+
 type DrugPrep = {
   solvant?: string;
   volume_final?: number | null;
@@ -55,6 +70,7 @@ type DrugPrep = {
   etapes?: string[];
   notes?: string[];
   pedTable?: PedTable;
+  table?: DrugPrepTable;
   phases?: DrugPrepPhase[];
   // dose_threshold (ex : Anexate) : sélection d'ampoules selon une dose-seuil
   dose_threshold?: number;
@@ -68,6 +84,7 @@ type DrugPrep = {
   fixed_dilution?: boolean;
   fd_prelever?: string;
   prelever_total?: boolean;
+  prelever_label?: string;
   prelever_vol?: number;
   dose_calc?: boolean;
 };

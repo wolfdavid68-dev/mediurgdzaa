@@ -55,6 +55,12 @@ export const PSE = {
     steps: [0.02, 0.03, 0.04, 0.05],
   },
 
+  // ── PNEUMOLOGIE ──────────────────────────────────────────
+  44: { // Ventoline — 1 ampoule 5 mg/5 mL qsp 50 mL → 0,1 mg/mL = 100 µg/mL
+    conc: 100, unite: "µg/kg/min", min: 0.1, max: 0.3,
+    steps: [0.1, 0.2, 0.3],
+  },
+
   // ── CARDIOLOGIE / VASODILATATEURS / ANTI-HTA ──────────────
   26: { // Loxen (nicardipine) — ampoule 10 mg/10 mL pure → 1 mg/mL
     conc: 1, unite: "mg/h", min: 1, max: 15,

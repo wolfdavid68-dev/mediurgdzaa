@@ -122,6 +122,28 @@ export const DRUGS_ELECTROLYTES = [
       ],
       p: ["0,5-1 mmol/kg/h IV (max 40 mmol/L sur VVP)"],
     },
+    prep: {
+      solvant: "NaCl 0,9%",
+      volume_final: null,
+      conc_finale: "IVL variable ; PSE 1 g/60 mL",
+      conc_produit: 100,
+      unite: "mg",
+      duree: "Débit maximum 1 g/h",
+      stabilite: "Utiliser immédiatement après dilution",
+      etapes: [
+        "Ampoule 1 g/10 mL",
+        "IVL : 1 g dans 250 mL NaCl 0,9%",
+        "IVL : 2 g dans 500 mL NaCl 0,9%",
+        "IVL : ≥ 3 g dans 1000 mL NaCl 0,9%",
+        "PSE : 1 g dans 60 mL",
+      ],
+      notes: [
+        "JAMAIS en IVD directe (létal)",
+        "Débit maximum 1 g/h ; en PSE privilégier 0,5 g/h",
+        "Surveillance ECG obligatoire",
+        "Veinotoxique : VVP gros calibre ou VVC",
+      ],
+    },
   },
   {
     id: 40,
