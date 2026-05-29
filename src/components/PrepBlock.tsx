@@ -66,7 +66,7 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
       return (
         <div className="prep-calc-box">
           <div className="prep-calc-header">
-            <PrepIcon /> Pour {kg} kg
+            <PrepIcon /> {prep.calc_titre || `Pour ${kg} kg`}
           </div>
           <div className="prep-calc-row">
             <span className="prep-calc-step">Prélever</span>
@@ -257,7 +257,7 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
       return (
         <div className="prep-calc">
           <div className="prep-calc-header">
-            <span>Pour {kg} kg</span>
+            <span>{prep.calc_titre || `Pour ${kg} kg`}</span>
             <span>{prep.debit || prep.duree || "Préparation"}</span>
           </div>
           <div className="prep-calc-row">

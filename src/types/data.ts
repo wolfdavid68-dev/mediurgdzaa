@@ -82,6 +82,7 @@ type DrugPrep = {
   sufenta_table?: boolean;
   // fixed_dilution (preview) : recette unique non poids-dépendante
   fixed_dilution?: boolean;
+  calc_titre?: string;
   fd_prelever?: string;
   prelever_total?: boolean;
   prelever_label?: string;
