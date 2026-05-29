@@ -60,10 +60,21 @@ type DrugPrepRecipe = {
   titre: string;
   mode?: string;
   tag?: string;
-  prelever: string;
+  prelever?: string;
   completer?: string;
   concentration?: string;
   note?: string;
+  etapes?: string[];
+  notes?: string[];
+  empty?: boolean;
+  sufenta_table?: boolean;
+  effective_input_label?: string;
+  effective_input_unit?: string;
+  effective_input_conc?: number;
+  effective_fraction?: number;
+  effective_output_conc?: number;
+  effective_output_label?: string;
+  effective_placeholder?: string;
 };
 
 type DrugPrep = {
@@ -74,6 +85,7 @@ type DrugPrep = {
   unite?: string;
   dose_kg?: number;
   dose_max_kg?: number;
+  display_below_kg?: number;
   duree?: string;
   stabilite?: string;
   debit?: string;
@@ -85,10 +97,16 @@ type DrugPrep = {
   phases?: DrugPrepPhase[];
   // dose_threshold (ex : Anexate) : sélection d'ampoules selon une dose-seuil
   dose_threshold?: number;
+  dose_threshold_input_label?: string;
+  dose_threshold_input_unit?: string;
+  dose_threshold_input_conc?: number;
+  dose_threshold_placeholder?: string;
   amp_high?: number;
   amp_low?: number;
   vol_high?: number;
   vol_low?: number;
+  dose_threshold_result_label?: string;
+  dose_threshold_result_unit?: string;
   // sufenta_table : table Vi/Vf pédiatrique par poids
   sufenta_table?: boolean;
   // fixed_dilution (preview) : recette unique non poids-dépendante

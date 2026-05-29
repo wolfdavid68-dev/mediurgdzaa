@@ -110,28 +110,4 @@ export const DRUGS_PREVIEW = {
       ],
     },
   },
-  5: {
-    prep: {
-      solvant: "NaCl 0,9%",
-      conc_finale: "5 µg/mL",
-      unite: "µg",
-      duree: "IVSE 0,2 à 2 µg/kg/h",
-      stabilite: "24h à 25°C",
-      fixed_dilution: true,
-      fd_prelever: "1 ampoule 250 µg (5 mL)",
-      volume_final: 50,
-      etapes: [
-        "Ampoule 250 µg/5 mL (50 µg/mL)",
-        "Diluer 1 ampoule entière (250 µg / 5 mL) qsp 50 mL NaCl 0,9% → 5 µg/mL",
-        "Débit IVSE (mL/h) = dose (µg/kg/h) × poids ÷ 5",
-        "Posologie : 0,2 à 2 µg/kg/h",
-      ],
-      notes: [
-        "Nouvelle préparation service — dilution FIXE 5 µg/mL",
-        "Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules",
-        "Dépression respiratoire dose-dépendante",
-        "Antidote : Naloxone",
-      ],
-    },
-  },
 };

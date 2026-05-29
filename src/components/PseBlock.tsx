@@ -18,9 +18,13 @@ type PseEntry = PseFormula & {
   steps: number[];
   tag?: string;
   note?: string;
-  inputMode?: "mlh";
+  inputMode?: "mlh" | "effectiveDose";
   mlhSteps?: number[];
   dosePrecision?: number;
+  effectiveFraction?: number;
+  effectiveInputLabel?: string;
+  effectiveInputUnit?: string;
+  effectiveInputConc?: number;
   extra?: PseExtra;
 };
 
@@ -50,12 +54,30 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   // poids → on déduit la dose (µg/kg/min…). Sinon mode classique
   // (saisie dose → mL/h). Choisi par `inputMode: "mlh"` sur l'entrée.
   const reverse = pse.inputMode === "mlh";
+  const effectiveMode = pse.inputMode === "effectiveDose";
+  const effectiveFraction = pse.effectiveFraction ?? 2 / 3;
+  const effectiveInput = parseFloat(pseTarget);
+  const effectiveDose =
+    effectiveMode && Number.isFinite(effectiveInput) && effectiveInput > 0
+      ? effectiveInput * (pse.effectiveInputConc ?? 1)
+      : Number.NaN;
+  const effectiveHourlyDose =
+    effectiveMode && Number.isFinite(effectiveDose) && effectiveDose > 0
+      ? +(effectiveDose * effectiveFraction).toFixed(3)
+      : null;
+  const effectiveDebit =
+    effectiveHourlyDose !== null ? +(effectiveHourlyDose / pse.conc).toFixed(2) : null;
   const mlhSteps: number[] = Array.isArray(pse.mlhSteps)
     ? pse.mlhSteps
     : [1, 2, 3, 5, 8, 10, 15, 20];
 
-  const debit = calcDebit(pse, pseTarget, weight);
-  const outRange = debit && (parseFloat(pseTarget) < pse.min || parseFloat(pseTarget) > pse.max);
+  const debit = effectiveMode ? null : calcDebit(pse, pseTarget, weight);
+  const outRange =
+    !effectiveMode && debit && (parseFloat(pseTarget) < pse.min || parseFloat(pseTarget) > pse.max);
+  const effectiveOutRange =
+    effectiveMode &&
+    effectiveDebit !== null &&
+    (effectiveInput < pse.min || effectiveInput > pse.max);
 
   // Précision d'affichage de la dose (nb de décimales) par médicament.
   const dosePrec: number = Number.isInteger(pse.dosePrecision) ? Number(pse.dosePrecision) : 3;
@@ -118,7 +140,23 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
           </>
         )}
 
-        {!reverse && (
+        {effectiveMode && (
+          <>
+            {effectiveDebit !== null && (
+              <div className="pse-result-box">
+                <span className="pse-result-label">Débit PSE</span>
+                <span className="pse-result-value">{effectiveDebit}</span>
+                <span className="pse-result-unit">mL/h</span>
+                <span className="pse-result-unit">
+                  2/3 dose = {effectiveHourlyDose?.toString().replace(".", ",")} mg/h
+                </span>
+                {effectiveOutRange && <span className="pse-range-warn">⚠ hors plage</span>}
+              </div>
+            )}
+          </>
+        )}
+
+        {!reverse && !effectiveMode && (
           <>
             <div className="pse-input-row">
               <span className="pse-input-label">Dose cible</span>
@@ -163,6 +201,28 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
                   <tr key={step} className={isActive ? "pse-row-active" : ""}>
                     <td>{step}</td>
                     <td>{fmtDose(dv)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : effectiveMode ? (
+          <table className="pse-table">
+            <thead>
+              <tr>
+                <th>Dose efficace ({pse.effectiveInputUnit || "mg"})</th>
+                <th>Débit PSE</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pse.steps.map((step: number) => {
+                const hourly = step * (pse.effectiveInputConc ?? 1) * effectiveFraction;
+                const rate = +(hourly / pse.conc).toFixed(2);
+                const isActive = parseFloat(pseTarget) === step;
+                return (
+                  <tr key={step} className={isActive ? "pse-row-active" : ""}>
+                    <td>{step}</td>
+                    <td>{rate} mL/h</td>
                   </tr>
                 );
               })}

@@ -449,6 +449,7 @@ describe("Plausibilité — débits PSE (pse.js)", () => {
       // cap maxMlH) — on les exclut de cette borne 100 mL/h conçue pour
       // les perfusions continues classiques.
       if (p.unite === "mL/kg/min") return;
+      if ("inputMode" in p && p.inputMode === "effectiveDose") return;
       const mid = (p.min + p.max) / 2;
       const rate = calcDebit(p, mid, REF_KG);
       if (rate === null) {

@@ -1202,6 +1202,11 @@
   background: rgba(37, 99, 235, 0.2);
 }
 
+.prep-mode-option.prep-recipe-in.is-active {
+  border-color: rgba(45, 212, 191, 0.72);
+  background: rgba(15, 118, 110, 0.2);
+}
+
 .prep-calc-box.prep-recipe-bolus,
 .prep-v2 .prep-calc.prep-recipe-bolus {
   border-color: rgba(248, 113, 113, 0.45);
@@ -1222,9 +1227,29 @@
   color: #dbeafe;
 }
 
+.prep-calc-empty {
+  padding: 12px 14px;
+  border: 1px dashed rgba(45, 212, 191, 0.55);
+  border-radius: 8px;
+  background: rgba(15, 118, 110, 0.12);
+}
+
+.prep-calc-empty .prep-calc-header {
+  color: #5eead4;
+}
+
+.prep-empty-text {
+  margin-top: 8px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.45;
+}
+
 .prep-calc-header {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   font-size: 11px;
   font-weight: 800;
@@ -1233,6 +1258,43 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: 10px;
+}
+
+.prep-inline-input {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: #bfdbfe;
+  background: #1d4ed830;
+  border: 1px solid #60a5fa70;
+  border-radius: 7px;
+  padding: 3px 7px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.prep-inline-input input {
+  width: 64px;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid #60a5fa80;
+  border-radius: 5px;
+  background: #070b18;
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+}
+
+.prep-inline-input input:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 2px #60a5fa30;
 }
 
 .prep-calc-row {
@@ -1367,6 +1429,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 8px;
   color: #fecaca;
@@ -2002,6 +2065,18 @@
 
 [data-theme="light"] .prep-calc-header {
   color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-inline-input {
+  color: #1e40af;
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+[data-theme="light"] .prep-inline-input input {
+  background: #ffffff;
+  color: #172554;
+  border-color: #93c5fd;
 }
 
 [data-theme="light"] .prep-calc-step {

@@ -41,23 +41,97 @@ const InfoIcon = () => (
   </svg>
 );
 
-type PrepBlockProps = { drug: Drug; weight: string; produitFinal: string };
+type PrepBlockProps = { drug: Drug; weight: string; produitFinal?: string };
 
 // Bloc Préparation : étapes + calculateur (4 variantes selon la shape de prep).
-// produitFinal vient du parent car son input vit au-dessus du bloc poso (input swap).
 const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   const [doseLibre, setDoseLibre] = useState("");
   const [activePrepIndex, setActivePrepIndex] = useState(0);
+  const [effectivePrepInput, setEffectivePrepInput] = useState("");
+  const [thresholdInput, setThresholdInput] = useState("");
   const prep = resolvePrep(drug);
   if (!prep) return null;
 
   const kg = parseFloat(weight);
   const validKg = kg && kg > 0 && kg <= 300;
+  if (prep.display_below_kg !== undefined && (!validKg || kg >= prep.display_below_kg)) {
+    return null;
+  }
   const formatDoseNumber = (value: number) =>
     Number.isInteger(value) ? String(value) : String(value).replace(".", ",");
   const activeRecipeIndex = prep.preparations?.[activePrepIndex] ? activePrepIndex : 0;
   const recipeModeClass = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
     recipe.mode ? ` prep-recipe-${recipe.mode}` : "";
+  const getEffectivePrep = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => {
+    if (!recipe.effective_input_conc || !recipe.effective_output_conc) return null;
+    const volume = parseFloat(effectivePrepInput);
+    if (!Number.isFinite(volume) || volume <= 0) return null;
+    const fraction = recipe.effective_fraction ?? 2 / 3;
+    const hourlyDose = +(volume * recipe.effective_input_conc * fraction).toFixed(3);
+    const rate = +(hourlyDose / recipe.effective_output_conc).toFixed(2);
+    return { hourlyDose, rate };
+  };
+  const renderEffectivePrepInput = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+    recipe.effective_input_conc && recipe.effective_output_conc ? (
+      <label className="prep-inline-input">
+        <span>{recipe.effective_input_label || "Dose efficace"}</span>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder={recipe.effective_placeholder || "mL"}
+          aria-label={recipe.effective_input_label || "Dose efficace"}
+          value={effectivePrepInput}
+          onChange={(event) => setEffectivePrepInput(event.target.value)}
+        />
+        <span>{recipe.effective_input_unit || "mL"}</span>
+      </label>
+    ) : null;
+  const renderEffectivePrepRows = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => {
+    const result = getEffectivePrep(recipe);
+    if (!result) return null;
+    return (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">{recipe.effective_output_label || "Débit"}</span>
+          <span className="prep-calc-val prep-highlight">{result.rate} mL/h</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Repère</span>
+          <span className="prep-calc-val">
+            2/3 dose = {result.hourlyDose.toString().replace(".", ",")} mg/h
+          </span>
+        </div>
+      </>
+    );
+  };
+  const thresholdValue = thresholdInput || produitFinal || "";
+  const renderThresholdInput = () => (
+    <label className="prep-inline-input">
+      <span>{prep.dose_threshold_input_label || "Dose efficace"}</span>
+      <input
+        type="number"
+        min="0"
+        step="0.1"
+        placeholder={prep.dose_threshold_placeholder || prep.dose_threshold_input_unit || "mg"}
+        aria-label={prep.dose_threshold_input_label || "Dose efficace"}
+        value={thresholdInput}
+        onChange={(event) => setThresholdInput(event.target.value)}
+      />
+      <span>{prep.dose_threshold_input_unit || "mg"}</span>
+    </label>
+  );
+  const getThresholdDose = () => {
+    const value = parseFloat(thresholdValue);
+    if (!Number.isFinite(value) || value <= 0) return "";
+    return prep.dose_threshold_input_conc ? value * prep.dose_threshold_input_conc : value;
+  };
+  const getThresholdTitle = (pf?: number) => {
+    if (thresholdValue && prep.dose_threshold_input_unit) {
+      return `Pour ${thresholdValue} ${prep.dose_threshold_input_unit}`;
+    }
+    return pf ? `Pour ${pf} mg` : "PSE entretien";
+  };
 
   const renderRecipeSwitch = () =>
     prep.preparations && prep.preparations.length > 1 ? (
@@ -79,72 +153,156 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
       </div>
     ) : null;
 
-  const renderRecipeCalcBox = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
-    <div key={recipe.titre} className={`prep-calc-box${recipeModeClass(recipe)}`}>
+  const renderRecipeEmpty = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
+    <div className={`prep-calc-empty${recipeModeClass(recipe)}`}>
       <div className="prep-calc-header">
-        <PrepIcon /> {recipe.titre}
+        <InfoIcon /> {recipe.titre}
         {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
       </div>
-      <div className="prep-calc-row">
-        <span className="prep-calc-step">Prélever</span>
-        <span className="prep-calc-val prep-calc-highlight">{recipe.prelever}</span>
-      </div>
-      {recipe.completer && (
+      <div className="prep-empty-text">{recipe.note || "Préparation à compléter."}</div>
+    </div>
+  );
+
+  const renderRecipeSufentaTable = (
+    recipe: NonNullable<DrugPrep["preparations"]>[number],
+    variant: "classic" | "v2"
+  ) => {
+    const r = calcPrepSufentaTable(weight);
+    if (!r) return null;
+    if (variant === "v2") {
+      return (
+        <div className={`prep-calc${recipeModeClass(recipe)}`}>
+          <div className="prep-calc-header">
+            <span>Pour {r.kg} kg</span>
+            <span>{recipe.tag || "IVSE"}</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Prélever</span>
+            <span className="prep-calc-val prep-highlight">{r.vi} mL d'ampoule pure</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Diluer</span>
+            <span className="prep-calc-val">à {r.vf} mL dans la seringue</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Débit</span>
+            <span className="prep-calc-val">2 à 20 mL/h (= 0,2 à 2 µg/kg/h)</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`prep-calc-box${recipeModeClass(recipe)}`}>
+        <div className="prep-calc-header">
+          <PrepIcon /> Pour {r.kg} kg
+          {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
+        </div>
         <div className="prep-calc-row">
-          <span className="prep-calc-step">Compléter à</span>
+          <span className="prep-calc-step">Vi (prélever)</span>
+          <span className="prep-calc-val prep-calc-highlight">{r.vi} mL d'ampoule pure</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Vf (diluer à)</span>
           <span
             className="prep-calc-val prep-calc-highlight"
             style={{ color: "#60a5fa", fontWeight: 800 }}
           >
-            {recipe.completer}
+            {r.vf} mL dans la seringue
           </span>
         </div>
-      )}
-      {recipe.concentration && (
         <div className="prep-calc-row">
-          <span className="prep-calc-step">Final</span>
-          <span className="prep-calc-val">{recipe.concentration}</span>
+          <span className="prep-calc-step">Débit IVSE</span>
+          <span className="prep-calc-val">2 à 20 mL/h (= 0,2 à 2 µg/kg/h)</span>
         </div>
-      )}
-      {recipe.note && (
-        <div className="prep-calc-row">
-          <span className="prep-calc-step">Note</span>
-          <span className="prep-calc-val">{recipe.note}</span>
-        </div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  };
 
-  const renderRecipeCalc = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
-    <div key={recipe.titre} className={`prep-calc${recipeModeClass(recipe)}`}>
-      <div className="prep-calc-header">
-        <span>{recipe.titre}</span>
-        {recipe.tag && <span>{recipe.tag}</span>}
+  const renderRecipeCalcBox = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+    recipe.empty ? (
+      renderRecipeEmpty(recipe)
+    ) : recipe.sufenta_table ? (
+      renderRecipeSufentaTable(recipe, "classic")
+    ) : (
+      <div key={recipe.titre} className={`prep-calc-box${recipeModeClass(recipe)}`}>
+        <div className="prep-calc-header">
+          <PrepIcon /> {recipe.titre}
+          {renderEffectivePrepInput(recipe)}
+          {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
+        </div>
+        {recipe.prelever && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Prélever</span>
+            <span className="prep-calc-val prep-calc-highlight">{recipe.prelever}</span>
+          </div>
+        )}
+        {recipe.completer && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Compléter à</span>
+            <span
+              className="prep-calc-val prep-calc-highlight"
+              style={{ color: "#60a5fa", fontWeight: 800 }}
+            >
+              {recipe.completer}
+            </span>
+          </div>
+        )}
+        {renderEffectivePrepRows(recipe)}
+        {recipe.concentration && !recipe.effective_output_label && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Final</span>
+            <span className="prep-calc-val">{recipe.concentration}</span>
+          </div>
+        )}
+        {recipe.note && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Note</span>
+            <span className="prep-calc-val">{recipe.note}</span>
+          </div>
+        )}
       </div>
-      <div className="prep-calc-row">
-        <span className="prep-calc-step">Prélever</span>
-        <span className="prep-calc-val prep-highlight">{recipe.prelever}</span>
+    );
+
+  const renderRecipeCalc = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+    recipe.empty ? (
+      renderRecipeEmpty(recipe)
+    ) : recipe.sufenta_table ? (
+      renderRecipeSufentaTable(recipe, "v2")
+    ) : (
+      <div key={recipe.titre} className={`prep-calc${recipeModeClass(recipe)}`}>
+        <div className="prep-calc-header">
+          <span>{recipe.titre}</span>
+          {renderEffectivePrepInput(recipe)}
+          {recipe.tag && <span>{recipe.tag}</span>}
+        </div>
+        {recipe.prelever && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Prélever</span>
+            <span className="prep-calc-val prep-highlight">{recipe.prelever}</span>
+          </div>
+        )}
+        {recipe.completer && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Compléter</span>
+            <span className="prep-calc-val">{recipe.completer}</span>
+          </div>
+        )}
+        {renderEffectivePrepRows(recipe)}
+        {recipe.concentration && !recipe.effective_output_label && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Final</span>
+            <span className="prep-calc-val prep-highlight">{recipe.concentration}</span>
+          </div>
+        )}
+        {recipe.note && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Note</span>
+            <span className="prep-calc-val">{recipe.note}</span>
+          </div>
+        )}
       </div>
-      {recipe.completer && (
-        <div className="prep-calc-row">
-          <span className="prep-calc-step">Compléter</span>
-          <span className="prep-calc-val">{recipe.completer}</span>
-        </div>
-      )}
-      {recipe.concentration && (
-        <div className="prep-calc-row">
-          <span className="prep-calc-step">Final</span>
-          <span className="prep-calc-val prep-highlight">{recipe.concentration}</span>
-        </div>
-      )}
-      {recipe.note && (
-        <div className="prep-calc-row">
-          <span className="prep-calc-step">Note</span>
-          <span className="prep-calc-val">{recipe.note}</span>
-        </div>
-      )}
-    </div>
-  );
+    );
 
   const renderPrepCalc = () => {
     if (!validKg) return null;
@@ -187,28 +345,36 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     }
 
     if (prep.dose_threshold !== undefined) {
-      const r = calcPrepThreshold(prep, produitFinal);
-      if (!r) return null;
+      const r = calcPrepThreshold(prep, getThresholdDose());
+      const resultLabel = prep.dose_threshold_result_label || "Injecter";
+      const resultUnit = prep.dose_threshold_result_unit || "mL";
       return (
         <div className="prep-calc-box">
           <div className="prep-calc-header">
-            <PrepIcon /> Pour {r.pf} mg
+            <PrepIcon /> {getThresholdTitle(r?.pf)}
+            {renderThresholdInput()}
           </div>
-          <div className="prep-calc-row">
-            <span className="prep-calc-step">Prendre</span>
-            <span className="prep-calc-val prep-calc-highlight">
-              {r.ampCount} ampoules soit {r.vol} mL
-            </span>
-          </div>
-          <div className="prep-calc-row">
-            <span className="prep-calc-step">Injecter</span>
-            <span
-              className="prep-calc-val prep-calc-highlight"
-              style={{ color: "#60a5fa", fontWeight: 800 }}
-            >
-              {r.injectMl} mL
-            </span>
-          </div>
+          {r ? (
+            <>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Prendre</span>
+                <span className="prep-calc-val prep-calc-highlight">
+                  {r.ampCount} ampoules soit {r.vol} mL
+                </span>
+              </div>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">{resultLabel}</span>
+                <span
+                  className="prep-calc-val prep-calc-highlight"
+                  style={{ color: "#60a5fa", fontWeight: 800 }}
+                >
+                  {r.injectMl} {resultUnit}
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="prep-empty-text">Saisir la dose efficace pour calculer le débit.</div>
+          )}
         </div>
       );
     }
@@ -386,24 +552,34 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     }
 
     if (prep.dose_threshold !== undefined) {
-      const r = calcPrepThreshold(prep, produitFinal);
-      if (!r) return null;
+      const r = calcPrepThreshold(prep, getThresholdDose());
+      const resultLabel = prep.dose_threshold_result_label || "Injecter";
+      const resultUnit = prep.dose_threshold_result_unit || "mL";
       return (
         <div className="prep-calc">
           <div className="prep-calc-header">
-            <span>Pour {r.pf} mg</span>
+            <span>{getThresholdTitle(r?.pf)}</span>
+            {renderThresholdInput()}
             <span>{prep.duree || "Bolus"}</span>
           </div>
-          <div className="prep-calc-row">
-            <span className="prep-calc-step">Prendre</span>
-            <span className="prep-calc-val prep-highlight">
-              {r.ampCount} ampoules soit {r.vol} mL
-            </span>
-          </div>
-          <div className="prep-calc-row">
-            <span className="prep-calc-step">Injecter</span>
-            <span className="prep-calc-val prep-highlight prep-inject">{r.injectMl} mL</span>
-          </div>
+          {r ? (
+            <>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Prendre</span>
+                <span className="prep-calc-val prep-highlight">
+                  {r.ampCount} ampoules soit {r.vol} mL
+                </span>
+              </div>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">{resultLabel}</span>
+                <span className="prep-calc-val prep-highlight prep-inject">
+                  {r.injectMl} {resultUnit}
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="prep-empty-text">Saisir la dose efficace pour calculer le débit.</div>
+          )}
         </div>
       );
     }
@@ -513,6 +689,11 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   const previewMode = isPreview();
   const prepCalcBlock = renderPrepCalc();
   const prepCalcV2Block = renderPrepCalcV2();
+  const activeRecipe = prep.preparations?.[activeRecipeIndex];
+  const visibleEtapes =
+    activeRecipe && Object.hasOwn(activeRecipe, "etapes") ? activeRecipe.etapes : prep.etapes;
+  const visibleNotes =
+    activeRecipe && Object.hasOwn(activeRecipe, "notes") ? activeRecipe.notes : prep.notes;
   const pedTableBlock = prep.pedTable
     ? (() => {
         const r = calcPedTable(prep, weight);
@@ -757,9 +938,9 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
           {prepCalcV2Block}
 
           <div>
-            {prep.etapes && prep.etapes.length > 0 && (
+            {visibleEtapes && visibleEtapes.length > 0 && (
               <div className="prep-steps">
-                {prep.etapes.map((e: string, i: number) => (
+                {visibleEtapes.map((e: string, i: number) => (
                   <div key={i} className="prep-step">
                     <span className="prep-step-num">{i + 1}</span>
                     <span className="prep-step-text">{e}</span>
@@ -768,9 +949,9 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
               </div>
             )}
 
-            {prep.notes && prep.notes.length > 0 && (
+            {visibleNotes && visibleNotes.length > 0 && (
               <div className="prep-alerts">
-                {prep.notes.map((n: string, i: number) => (
+                {visibleNotes.map((n: string, i: number) => (
                   <div key={i} className="prep-alert">
                     <span aria-hidden="true">⚠</span>
                     <span>{n}</span>
@@ -809,9 +990,9 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
         )}
       </div>
 
-      {prep.etapes && prep.etapes.length > 0 && (
+      {visibleEtapes && visibleEtapes.length > 0 && (
         <ol className="prep-etapes">
-          {prep.etapes.map((e: string, i: number) => (
+          {visibleEtapes.map((e: string, i: number) => (
             <li key={i} className="prep-etape">
               {e}
             </li>
@@ -824,9 +1005,9 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
       {prepTableBlock}
       {doseLibreBlock}
 
-      {prep.notes && prep.notes.length > 0 && (
+      {visibleNotes && visibleNotes.length > 0 && (
         <ul className="prep-notes">
-          {prep.notes.map((n: string, i: number) => (
+          {visibleNotes.map((n: string, i: number) => (
             <li key={i} className="prep-note-item">
               <svg
                 viewBox="0 0 24 24"

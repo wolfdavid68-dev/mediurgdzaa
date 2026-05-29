@@ -1,7 +1,5 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { calcDose, ciSeverity } from "../lib/calc";
-import { isPreview } from "../lib/featureFlags";
-import { DRUGS_PREVIEW } from "../data/drugs.preview";
 import { findProtocolsForDrug } from "../lib/crossref";
 import type { Drug } from "../types/data";
 import DrugNote from "./DrugNote";
@@ -66,7 +64,6 @@ const DrugCard = ({
   // Poids partagé : vient du bandeau global (App.tsx → PatientWeightBanner) via
   // le prop. Plus d'input local dans la fiche (évite le doublon avec le bandeau).
   const weight = patientWeight;
-  const [produitFinal, setProduitFinal] = useState("");
   // Clé d'instance unique : une même drogue peut être rendue 2 fois
   // simultanément (section Récents + liste filtrée). Utiliser drug.id
   // comme clé d'état « ouvert » ferait que le montage de la 2e carte
@@ -141,11 +138,6 @@ const DrugCard = ({
   };
 
   const renderPosoTab = () => {
-    // Overlay preview : en ?author=preview, un `prep` redéfini dans
-    // drugs.preview.js remplace celui de drugs.js (public inchangé).
-    const previewPrepByDrugId = DRUGS_PREVIEW as Record<number, { prep?: Drug["prep"] }>;
-    const prep = (isPreview() && previewPrepByDrugId[drug.id]?.prep) || drug.prep || null;
-
     // Filtrage des colonnes posologie selon le poids saisi :
     //  < 30 kg → pédiatrique · > 70 kg → adulte · 30–70 kg (inclus) ou pas de
     //  poids → les deux. Repli : si la colonne pertinente n'est pas renseignée
@@ -200,44 +192,6 @@ const DrugCard = ({
 
     return (
       <>
-        {prep?.dose_threshold !== undefined && (
-          <div className="poso-calc">
-            <svg
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <span className="poso-calc-label">Produit final</span>
-            <input
-              className="poso-calc-input"
-              type="number"
-              min="0"
-              step="0.1"
-              placeholder="mg"
-              value={produitFinal}
-              onChange={(e) => setProduitFinal(e.target.value)}
-            />
-            <span className="poso-calc-unit">mg</span>
-            {produitFinal && (
-              <button
-                type="button"
-                className="poso-calc-clear"
-                onClick={() => setProduitFinal("")}
-                aria-label="Effacer la dose"
-              >
-                ×
-              </button>
-            )}
-          </div>
-        )}
-
         {posoHint && <div className="poso-filter-hint">{posoHint}</div>}
         <div className={`poso-grid ${single ? "poso-grid-single" : ""}`}>
           {showAdult && (
@@ -254,7 +208,7 @@ const DrugCard = ({
           )}
         </div>
 
-        <PrepBlock drug={drug} weight={weight} produitFinal={produitFinal} />
+        <PrepBlock drug={drug} weight={weight} />
         <PseBlock drug={drug} weight={weight} />
         <DrugNote drugId={drug.id} onChange={setHasNote} />
       </>

@@ -13,6 +13,17 @@
  *   µg/kg/h   → mL/h = dose × poids       / conc(µg/mL)
  */
 export const PSE = {
+  8: { // Narcan — entrée = volume efficace du bolus IVD 0,04 mg/mL ; PSE 0,1 mg/mL
+    conc: 0.1, unite: "mg/h", min: 1, max: 50,
+    inputMode: "effectiveDose",
+    effectiveInputLabel: "Dose efficace",
+    effectiveInputUnit: "mL",
+    effectiveInputConc: 0.04,
+    effectiveFraction: 2 / 3,
+    tag: "0,1 mg/mL · PSE",
+    note: "Saisir le volume total efficace du bolus IVD (solution 0,04 mg/mL). Départ PSE = 2/3 de cette dose par heure.",
+    steps: [1, 2, 3, 5, 10, 15, 20, 30, 40, 50],
+  },
   // ── CATÉCHOLAMINES ────────────────────────────────────────
   13: { // Adrénaline — 2 amp 5 mg/5 mL qsp 50 mL G5% → 200 µg/mL
     conc: 200, unite: "µg/kg/min", min: 0.05, max: 1,
@@ -97,6 +108,9 @@ export const PSE = {
   // ── ANTIDOTES ─────────────────────────────────────────────
   29: { // Anexate — ampoule pure 0,5 mg/5 mL = 0,1 mg/mL ; débit sans facteur poids
     conc: 0.1, unite: "mg/h", min: 0.1, max: 1,
+    inputMode: "mlh",
+    tag: "0,1 mg/mL · entrée mL/h",
+    mlhSteps: [1, 2, 5, 10, 12, 15, 20],
     steps: [0.1, 0.2, 0.3, 0.5, 1],
   },
 

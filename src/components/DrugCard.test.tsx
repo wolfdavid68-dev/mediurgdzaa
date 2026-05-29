@@ -176,6 +176,108 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Préparation ANEXATE", () => {
+    test("affiche le résultat de préparation comme un débit, pas comme une injection", () => {
+      const anexate = DRUGS.find((drug) => drug.nom === "ANEXATE")!;
+
+      render(<DrugCard drug={anexate} patientWeight="80" />);
+      fireEvent.click(screen.getByText("ANEXATE").closest("button")!);
+      expect(screen.getByText("PSE entretien")).toBeInTheDocument();
+      fireEvent.change(screen.getByLabelText("Dose efficace"), { target: { value: "12" } });
+
+      expect(screen.getByText("Débit")).toBeInTheDocument();
+      expect(screen.getByText("Pour 12 mL")).toBeInTheDocument();
+      expect(screen.getByText("4 ampoules soit 20 mL")).toBeInTheDocument();
+      expect(screen.getByText("12 mL/h")).toBeInTheDocument();
+      expect(screen.queryByText("Produit final")).not.toBeInTheDocument();
+      expect(screen.queryByText("Injecter")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Préparation NARCAN", () => {
+    test("sépare la préparation IVD de la préparation PSE", () => {
+      const narcan = DRUGS.find((drug) => drug.nom === "NARCAN")!;
+
+      render(<DrugCard drug={narcan} patientWeight="80" />);
+      fireEvent.click(screen.getByText("NARCAN").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /IVD.*0,04 mg\/mL/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getByRole("button", { name: /PSE.*0,1 mg\/mL/i })).toBeInTheDocument();
+      expect(screen.getByText("1 ampoule 0,4 mg/1 mL")).toBeInTheDocument();
+      expect(screen.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /PSE.*0,1 mg\/mL/i }));
+
+      expect(screen.getByText("10 ampoules 0,4 mg/1 mL (= 4 mg)")).toBeInTheDocument();
+      expect(screen.getByText("40 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.getAllByText(/10 ampoules qsp 40 mL/).length).toBeGreaterThan(0);
+      expect(screen.queryByText("1 ampoule 0,4 mg/1 mL")).not.toBeInTheDocument();
+
+      expect(screen.getByText("Dose efficace")).toBeInTheDocument();
+      fireEvent.change(screen.getByLabelText("Dose efficace"), { target: { value: "10" } });
+
+      expect(screen.getByText("Débit")).toBeInTheDocument();
+      expect(screen.getAllByText("Débit PSE").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("2.67 mL/h").length).toBeGreaterThan(0);
+      expect(screen.getByText("2/3 dose = 0,267 mg/h")).toBeInTheDocument();
+    });
+  });
+
+  describe("Préparation CYANOKIT", () => {
+    test("n'affiche pas de préparation adulte, mais l'affiche chez l'enfant", () => {
+      const cyanokit = DRUGS.find((drug) => drug.nom === "CYANOKIT")!;
+
+      const { unmount } = render(<DrugCard drug={cyanokit} patientWeight="80" />);
+      fireEvent.click(screen.getByText("CYANOKIT").closest("button")!);
+
+      expect(screen.queryByText("Préparation")).not.toBeInTheDocument();
+      expect(screen.queryByText(/Flacon lyophilisé 5 g/)).not.toBeInTheDocument();
+
+      unmount();
+
+      render(<DrugCard drug={cyanokit} patientWeight="20" />);
+      fireEvent.click(screen.getByText("CYANOKIT").closest("button")!);
+
+      expect(screen.getByText("Préparation")).toBeInTheDocument();
+      expect(screen.getByText(/Flacon lyophilisé 5 g/)).toBeInTheDocument();
+    });
+  });
+
+  describe("Préparation SUFENTANIL", () => {
+    test("affiche la préparation PSE et une préparation intranasale vide", () => {
+      const sufentanil = DRUGS.find((drug) => drug.nom === "SUFENTANIL")!;
+
+      render(<DrugCard drug={sufentanil} patientWeight="80" />);
+      fireEvent.click(screen.getByText("SUFENTANIL").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /PSE.*5 µg\/mL/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getByText("1 ampoule entière 250 µg/5 mL (= 250 µg)")).toBeInTheDocument();
+      expect(screen.getByText("50 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(
+        screen.getByText("Diluer 1 ampoule entière (250 µg / 5 mL) qsp 50 mL NaCl 0,9% → 5 µg/mL")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Débit IVSE (mL/h) = dose (µg/kg/h) × poids ÷ 5")
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /Intranasal.*À compléter/i }));
+
+      expect(
+        screen.getByText("Dilution intranasale à compléter ultérieurement.")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("1 ampoule entière 250 µg/5 mL (= 250 µg)")
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText(/Diluer 1 ampoule entière/)).not.toBeInTheDocument();
+    });
+  });
+
   describe("Préparation KÉTAMINE", () => {
     test("bascule visuellement entre bolus/sédation et PSE sans calcul de bolus", () => {
       const ketamine = DRUGS.find((drug) => drug.nom === "KÉTAMINE")!;
