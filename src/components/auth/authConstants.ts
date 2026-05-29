@@ -13,7 +13,7 @@ export const FONCTIONS = [
   "Cadre de santé",
 ] as const;
 
-export const SERVICES = ["SAU", "SMUR", "UHCD", "Réanimation", "Régulation 15"] as const;
+export const SERVICES = ["SAU", "SMUR", "UHCD"] as const;
 
 export const BAN_REASONS = [
   "Fin de stage",
