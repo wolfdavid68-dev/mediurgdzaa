@@ -56,11 +56,12 @@ const startPreview = async () => {
         })
       : spawn("npm", args, {
           cwd: root,
+          detached: true,
           env: { ...process.env, BROWSER: "none" },
-          stdio: ["ignore", "pipe", "pipe"],
+          stdio: ["ignore", "ignore", "ignore"],
         });
-  child.stdout.resume();
-  child.stderr.resume();
+  child.stdout?.resume();
+  child.stderr?.resume();
 
   let exitCode = null;
   child.on("exit", (code) => {
@@ -83,8 +84,26 @@ const startPreview = async () => {
 const stopPreview = (child) =>
   new Promise((resolve) => {
     if (process.platform !== "win32") {
-      child.kill();
-      resolve();
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        resolve();
+      };
+      child.once("exit", finish);
+      try {
+        process.kill(-child.pid, "SIGTERM");
+      } catch {
+        child.kill();
+      }
+      setTimeout(() => {
+        try {
+          process.kill(-child.pid, "SIGKILL");
+        } catch {
+          // Processus deja termine.
+        }
+        finish();
+      }, 3000).unref?.();
       return;
     }
     const killer = spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore" });

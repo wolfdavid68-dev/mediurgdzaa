@@ -67,11 +67,12 @@ const startPreview = async () => {
         })
       : spawn("npm", args, {
           cwd: root,
+          detached: true,
           env: { ...process.env, BROWSER: "none" },
-          stdio: ["ignore", "pipe", "pipe"],
+          stdio: ["ignore", "ignore", "ignore"],
         });
-  child.stdout.resume();
-  child.stderr.resume();
+  child.stdout?.resume();
+  child.stderr?.resume();
   await waitForPreview(child);
   return child;
 };
@@ -79,8 +80,26 @@ const startPreview = async () => {
 const stopPreview = (child) =>
   new Promise((resolve) => {
     if (process.platform !== "win32") {
-      child.kill();
-      resolve();
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        resolve();
+      };
+      child.once("exit", finish);
+      try {
+        process.kill(-child.pid, "SIGTERM");
+      } catch {
+        child.kill();
+      }
+      setTimeout(() => {
+        try {
+          process.kill(-child.pid, "SIGKILL");
+        } catch {
+          // Processus deja termine.
+        }
+        finish();
+      }, 3000).unref?.();
       return;
     }
     const killer = spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
@@ -147,7 +166,9 @@ const assertTabStops = async (page, route, pattern, label, minStops) => {
     if (signature) seen.add(signature);
   }
   if (seen.size < minStops) {
-    throw new Error(`${label}: seulement ${seen.size} focus clavier distinct(s), attendu ${minStops}`);
+    throw new Error(
+      `${label}: seulement ${seen.size} focus clavier distinct(s), attendu ${minStops}`
+    );
   }
 };
 
@@ -195,14 +216,11 @@ if (!fs.existsSync(indexPath)) {
     await context.setOffline(true);
 
     await assertTabStops(page, "/?mode=acr", /Urgence vitale|ACR|Adulte|Enfant/i, "ACR", 3);
-    await page.locator(".acr-mode-close").click({ timeout: 5000 }).catch(() => {});
-    await assertTabStops(
-      page,
-      "/?page=protocoles&tab=kits",
-      /Kits|Kit ISR|Réarmement/i,
-      "Kits",
-      8
-    );
+    await page
+      .locator(".acr-mode-close")
+      .click({ timeout: 5000 })
+      .catch(() => {});
+    await assertTabStops(page, "/?page=protocoles&tab=kits", /Kits|Kit ISR|Réarmement/i, "Kits", 8);
     await assertTabStops(
       page,
       "/?page=protocoles&tab=incompatibilites",
