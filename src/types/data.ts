@@ -56,6 +56,15 @@ type DrugPrepTable = {
   rows: DrugPrepTableRow[];
 };
 
+type DrugPrepRecipe = {
+  titre: string;
+  tag?: string;
+  prelever: string;
+  completer?: string;
+  concentration?: string;
+  note?: string;
+};
+
 type DrugPrep = {
   solvant?: string;
   volume_final?: number | null;
@@ -71,6 +80,7 @@ type DrugPrep = {
   notes?: string[];
   pedTable?: PedTable;
   table?: DrugPrepTable;
+  preparations?: DrugPrepRecipe[];
   phases?: DrugPrepPhase[];
   // dose_threshold (ex : Anexate) : sélection d'ampoules selon une dose-seuil
   dose_threshold?: number;

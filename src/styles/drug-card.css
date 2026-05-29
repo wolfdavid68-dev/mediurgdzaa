@@ -1077,6 +1077,12 @@
   border-top: 1px solid rgba(100, 180, 255, 0.25);
 }
 
+.prep-calc-list {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
 .prep-calc-header {
   display: flex;
   align-items: center;

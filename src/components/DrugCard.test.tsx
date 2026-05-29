@@ -168,14 +168,18 @@ describe("DrugCard", () => {
   });
 
   describe("Préparation KÉTAMINE", () => {
-    test("affiche la seringue PSE 10 mg/mL sans calcul de bolus", () => {
+    test("affiche les deux préparations sédation et PSE sans calcul de bolus", () => {
       const ketamine = DRUGS.find((drug) => drug.nom === "KÉTAMINE")!;
 
       render(<DrugCard drug={ketamine} patientWeight="80" />);
       fireEvent.click(screen.getByText("KÉTAMINE").closest("button")!);
 
-      expect(screen.getByText("Seringue PSE")).toBeInTheDocument();
-      expect(screen.getByText("2 ampoules 250 mg/5 mL")).toBeInTheDocument();
+      expect(screen.getByText("Sédation")).toBeInTheDocument();
+      expect(screen.getByText("2 mL de kétamine 250 mg/5 mL (= 100 mg)")).toBeInTheDocument();
+      expect(screen.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.getByText("PSE")).toBeInTheDocument();
+      expect(screen.getByText("2 ampoules 250 mg/5 mL (= 500 mg)")).toBeInTheDocument();
+      expect(screen.getByText("50 mL avec NaCl 0,9%")).toBeInTheDocument();
       expect(
         screen.getByText(/Sédation : prélever 2 mL.*compléter à 10 mL.*10 mg\/mL/)
       ).toBeInTheDocument();

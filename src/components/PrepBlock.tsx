@@ -55,8 +55,79 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   const formatDoseNumber = (value: number) =>
     Number.isInteger(value) ? String(value) : String(value).replace(".", ",");
 
+  const renderRecipeCalcBox = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
+    <div key={recipe.titre} className="prep-calc-box">
+      <div className="prep-calc-header">
+        <PrepIcon /> {recipe.titre}
+        {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
+      </div>
+      <div className="prep-calc-row">
+        <span className="prep-calc-step">Prélever</span>
+        <span className="prep-calc-val prep-calc-highlight">{recipe.prelever}</span>
+      </div>
+      {recipe.completer && (
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Compléter à</span>
+          <span
+            className="prep-calc-val prep-calc-highlight"
+            style={{ color: "#60a5fa", fontWeight: 800 }}
+          >
+            {recipe.completer}
+          </span>
+        </div>
+      )}
+      {recipe.concentration && (
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Final</span>
+          <span className="prep-calc-val">{recipe.concentration}</span>
+        </div>
+      )}
+      {recipe.note && (
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Note</span>
+          <span className="prep-calc-val">{recipe.note}</span>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderRecipeCalc = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
+    <div key={recipe.titre} className="prep-calc">
+      <div className="prep-calc-header">
+        <span>{recipe.titre}</span>
+        {recipe.tag && <span>{recipe.tag}</span>}
+      </div>
+      <div className="prep-calc-row">
+        <span className="prep-calc-step">Prélever</span>
+        <span className="prep-calc-val prep-highlight">{recipe.prelever}</span>
+      </div>
+      {recipe.completer && (
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Compléter</span>
+          <span className="prep-calc-val">{recipe.completer}</span>
+        </div>
+      )}
+      {recipe.concentration && (
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Final</span>
+          <span className="prep-calc-val prep-highlight">{recipe.concentration}</span>
+        </div>
+      )}
+      {recipe.note && (
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Note</span>
+          <span className="prep-calc-val">{recipe.note}</span>
+        </div>
+      )}
+    </div>
+  );
+
   const renderPrepCalc = () => {
     if (!validKg) return null;
+
+    if (prep.preparations && prep.preparations.length > 0) {
+      return <div className="prep-calc-list">{prep.preparations.map(renderRecipeCalcBox)}</div>;
+    }
 
     // Dilution FIXE (nouvelle prépa service) : préparation indépendante
     // du poids (toujours la même seringue). Boîte bleue « Pour X kg »
@@ -252,6 +323,10 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
 
   const renderPrepCalcV2 = () => {
     if (!validKg) return null;
+
+    if (prep.preparations && prep.preparations.length > 0) {
+      return <div className="prep-calc-list">{prep.preparations.map(renderRecipeCalc)}</div>;
+    }
 
     if (prep.fixed_dilution) {
       return (

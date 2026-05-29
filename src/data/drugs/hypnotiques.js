@@ -229,14 +229,26 @@ export const DRUGS_HYPNOTIQUES = [
     },
     prep: {
       solvant: "NaCl 0,9%",
-      volume_final: 50,
       conc_finale: "10 mg/mL",
-      fixed_dilution: true,
-      calc_titre: "Seringue PSE",
-      fd_prelever: "2 ampoules 250 mg/5 mL",
-      duree: "PSE",
+      duree: "Sédation ou PSE",
       debit: "PSE 10 mg/mL",
       stabilite: "Utiliser immédiatement après ouverture",
+      preparations: [
+        {
+          titre: "Sédation",
+          tag: "10 mL",
+          prelever: "2 mL de kétamine 250 mg/5 mL (= 100 mg)",
+          completer: "10 mL avec NaCl 0,9%",
+          concentration: "10 mg/mL",
+        },
+        {
+          titre: "PSE",
+          tag: "50 mL",
+          prelever: "2 ampoules 250 mg/5 mL (= 500 mg)",
+          completer: "50 mL avec NaCl 0,9%",
+          concentration: "10 mg/mL",
+        },
+      ],
       etapes: [
         "Bolus / IM : ampoule 250 mg/5 mL (50 mg/mL) utilisée pure",
         "Sédation : prélever 2 mL (100 mg) et compléter à 10 mL avec NaCl 0,9% → 10 mg/mL",
