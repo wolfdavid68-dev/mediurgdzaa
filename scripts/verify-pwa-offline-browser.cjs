@@ -2,9 +2,8 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { spawn } = require("node:child_process");
-const net = require("node:net");
 const { chromium } = require("@playwright/test");
+const { findFreePort, sleep, startPreview, stopPreview } = require("./lib/preview-server.cjs");
 
 const root = process.cwd();
 const buildDir = path.join(root, "build");
@@ -12,6 +11,7 @@ const indexPath = path.join(buildDir, "index.html");
 const screenshotDir = path.join(buildDir, "offline-screenshots");
 let port = Number(process.env.PWA_TEST_PORT || 4173);
 let baseUrl = `http://127.0.0.1:${port}`;
+const SCRIPT_TIMEOUT_MS = Number(process.env.PWA_BROWSER_TIMEOUT_MS || 180000);
 const VIEWPORTS = [
   { name: "mobile", width: 390, height: 844 },
   { name: "tablette", width: 768, height: 1024 },
@@ -19,98 +19,18 @@ const VIEWPORTS = [
 ];
 
 const fail = (message) => {
-  console.error(`✗ ${message}`);
+  console.error(`ERREUR - ${message}`);
   process.exitCode = 1;
 };
 
 const ok = (message) => {
-  console.log(`✓ ${message}`);
+  console.log(`OK - ${message}`);
 };
-
-const findFreePort = (candidate) =>
-  new Promise((resolve) => {
-    const server = net.createServer();
-    server.once("error", () => resolve(findFreePort(candidate + 1)));
-    server.once("listening", () => {
-      server.close(() => resolve(candidate));
-    });
-    server.listen(candidate, "127.0.0.1");
-  });
 
 if (!fs.existsSync(indexPath)) {
   fail("build/ doit exister avant le test navigateur offline (lancer npm run build)");
   process.exit();
 }
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const waitForPreview = async (child) => {
-  let exitCode = null;
-  child.on("exit", (code) => {
-    exitCode = code;
-  });
-
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < 20000) {
-    if (exitCode !== null) {
-      throw new Error(`vite preview s'est arrêté trop tôt (code ${exitCode})`);
-    }
-    try {
-      const resp = await fetch(baseUrl);
-      if (resp.ok) return;
-    } catch {
-      // Serveur pas encore prêt.
-    }
-    await sleep(250);
-  }
-  throw new Error("vite preview n'a pas démarré dans les temps");
-};
-
-const startPreview = async () => {
-  const args = [
-    "run",
-    "preview",
-    "--",
-    "--host",
-    "127.0.0.1",
-    "--port",
-    String(port),
-    "--strictPort",
-  ];
-  const child =
-    process.platform === "win32"
-      ? spawn(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", `npm ${args.join(" ")}`], {
-          cwd: root,
-          env: { ...process.env, BROWSER: "none" },
-          stdio: ["ignore", "pipe", "pipe"],
-        })
-      : spawn("npm", args, {
-          cwd: root,
-          env: { ...process.env, BROWSER: "none" },
-          stdio: ["ignore", "pipe", "pipe"],
-        });
-  child.stdout.resume();
-  child.stderr.resume();
-  await waitForPreview(child);
-  return child;
-};
-
-const stopPreview = (child) =>
-  new Promise((resolve) => {
-    if (process.platform !== "win32") {
-      child.kill();
-      resolve();
-      return;
-    }
-    const killer = spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
-      stdio: "ignore",
-    });
-    killer.on("exit", resolve);
-    killer.on("error", () => {
-      child.kill();
-      resolve();
-    });
-  });
 
 const waitForServiceWorker = async (page) => {
   await page.evaluate(async () => {
@@ -130,7 +50,7 @@ const waitForServiceWorker = async (page) => {
         }
       })(),
       new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("service worker non prêt après 15 s")), 15000);
+        setTimeout(() => reject(new Error("service worker non pret apres 15 s")), 15000);
       }),
     ]);
   });
@@ -163,29 +83,54 @@ const screenshotOfflineRoute = async (page, viewport, route, pattern, label, fil
   await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
   await expectVisibleText(page, pattern, label);
   const filePath = path.join(screenshotDir, filename);
-  await page.screenshot({ path: filePath, fullPage: true });
+  console.log(`Capture offline ${filename}`);
+  await page.screenshot({
+    path: filePath,
+    fullPage: true,
+    animations: "disabled",
+    caret: "hide",
+    timeout: 20000,
+  });
   const bytes = fs.statSync(filePath).size;
   if (bytes < 1000) {
     throw new Error(`capture ${filename} vide ou trop petite (${bytes} octets)`);
   }
 };
 
+let preview;
+let browser;
+let cleanupStarted = false;
+
+const cleanup = async () => {
+  if (cleanupStarted) return;
+  cleanupStarted = true;
+  if (browser) await browser.close().catch(() => {});
+  if (preview) await stopPreview(preview);
+};
+
+const hardTimeout = setTimeout(() => {
+  console.error(`ERREUR - audit navigateur offline interrompu apres ${SCRIPT_TIMEOUT_MS} ms`);
+  cleanup().finally(() => process.exit(1));
+  setTimeout(() => process.exit(1), 5000).unref?.();
+}, SCRIPT_TIMEOUT_MS);
+hardTimeout.unref?.();
+
 (async () => {
-  let preview;
-  let browser;
   try {
     port = await findFreePort(port);
     baseUrl = `http://127.0.0.1:${port}`;
     fs.rmSync(screenshotDir, { recursive: true, force: true });
     fs.mkdirSync(screenshotDir, { recursive: true });
-    preview = await startPreview();
-    browser = await chromium.launch();
+    preview = await startPreview({ root, port });
+    browser = await chromium.launch(
+      process.env.CI ? { args: ["--disable-dev-shm-usage"] } : undefined
+    );
     const context = await browser.newContext({ serviceWorkers: "allow" });
     const page = await context.newPage();
 
     await page.goto(baseUrl, { waitUntil: "networkidle" });
     await waitForServiceWorker(page);
-    ok("service worker installé et contrôleur actif en navigateur");
+    ok("service worker installe et controleur actif en navigateur");
 
     await page.evaluate(() => {
       const profile = {
@@ -194,7 +139,7 @@ const screenshotOfflineRoute = async (page, viewport, route, pattern, label, fil
         email: "offline.test@ghrmsa.fr",
         prenom: "Test",
         nom: "Offline",
-        fonction: "Médecin urgentiste",
+        fonction: "Medecin urgentiste",
         service: "SAU",
         status: "active",
         role: "user",
@@ -229,8 +174,8 @@ const screenshotOfflineRoute = async (page, viewport, route, pattern, label, fil
     ok("raccourci ACR servi hors-ligne");
 
     await page.goto(`${baseUrl}/?page=medicaments`, { waitUntil: "domcontentloaded" });
-    await expectVisibleText(page, /M[ée]dicaments|Recherche/i, "route Médicaments");
-    ok("navigation Médicaments servie hors-ligne");
+    await expectVisibleText(page, /M[eé]dicaments|Recherche/i, "route Medicaments");
+    ok("navigation Medicaments servie hors-ligne");
 
     const clinicalScreens = [
       {
@@ -253,7 +198,7 @@ const screenshotOfflineRoute = async (page, viewport, route, pattern, label, fil
       },
       {
         route: "/?page=medicaments",
-        pattern: /M[ée]dicaments|Recherche/i,
+        pattern: /M[eé]dicaments|Recherche/i,
         label: "capture Medicaments",
         file: "medicaments",
       },
@@ -287,16 +232,14 @@ const screenshotOfflineRoute = async (page, viewport, route, pattern, label, fil
         `${viewport.name}-login.png`
       );
     }
-    ok("captures offline multi-viewports enregistrées");
+    ok("captures offline multi-viewports enregistrees");
 
     await context.setOffline(false);
     await context.close();
   } catch (err) {
     fail(err instanceof Error ? err.message : String(err));
   } finally {
-    if (browser) await browser.close().catch(() => {});
-    if (preview) {
-      await stopPreview(preview);
-    }
+    clearTimeout(hardTimeout);
+    await cleanup();
   }
 })();
