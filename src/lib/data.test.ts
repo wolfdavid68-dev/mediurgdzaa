@@ -107,6 +107,34 @@ describe("DRUGS — intégrité", () => {
     ).map((d) => `${d.id} ${d.nom}`);
     expect(broken).toEqual([]);
   });
+
+  test("les médicaments à scopage obligatoire déclarent monitoring Scope", () => {
+    const scopedCategories = new Set([
+      "Hypnotiques",
+      "Curares",
+      "Catécholamines",
+      "Cardiologie",
+      "Neurologie",
+      "Produits sanguins",
+    ]);
+    const scopedIds = new Set([
+      5, // SUFENTANIL
+      6, // MORPHINE
+      8, // NARCAN
+      12, // BRIDION
+      29, // ANEXATE
+      30, // GLUCAGEN
+      39, // KCL
+      40, // SULFATE DE MAGNÉSIUM
+      42, // HÉPARINE SODIQUE
+      43, // CLOTTAFACT
+    ]);
+    const missing = DRUGS.filter((drug) => scopedCategories.has(drug.cat) || scopedIds.has(drug.id))
+      .filter((drug) => !(drug.monitoring || []).includes("Scope"))
+      .map((drug) => `${drug.id} ${drug.nom}`);
+
+    expect(missing).toEqual([]);
+  });
 });
 
 // ════════════════════════════════════════════════════════════════
