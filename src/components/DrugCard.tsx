@@ -35,6 +35,12 @@ const MONITORING_BADGES = [
   },
 ];
 
+const MonitoringWaveIcon = () => (
+  <svg viewBox="0 0 34 14" aria-hidden="true" className="monitor-wave">
+    <path d="M1 8h6l3-6 5 11 4-8h5l2-3 3 6h4" />
+  </svg>
+);
+
 type DrugCardProps = {
   drug: Drug;
   isFavorite?: boolean;
@@ -322,11 +328,6 @@ const DrugCard = ({
                   {s}
                 </span>
               ))}
-              {monitoringBadges.map((badge) => (
-                <span key={badge.label} className={`badge badge-monitor ${badge.className}`}>
-                  {badge.label}
-                </span>
-              ))}
               <span className="drug-classe">{drug.classe}</span>
             </div>
           </div>
@@ -341,6 +342,16 @@ const DrugCard = ({
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
+          {monitoringBadges.length > 0 && (
+            <div className="drug-monitor-corner" aria-label="Surveillance requise">
+              {monitoringBadges.map((badge) => (
+                <span key={badge.label} className={`monitor-card ${badge.className}`}>
+                  <MonitoringWaveIcon />
+                  <span>{badge.label}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </button>
         {onToggleFavorite && (
           <button
