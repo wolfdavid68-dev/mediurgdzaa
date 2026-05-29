@@ -93,7 +93,7 @@
   flex-wrap: wrap;
 }
 .drug-card-monitored .drug-title-row {
-  padding-right: 112px;
+  padding-right: min(142px, 42vw);
 }
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
@@ -130,7 +130,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  max-width: 118px;
+  max-width: min(142px, 42vw);
   padding: 5px 8px 5px 9px;
   border-radius: 0 11px 0 9px;
   font-family: var(--mono);
@@ -2471,13 +2471,13 @@
     gap: 6px;
   }
   .drug-card-monitored .drug-title-row {
-    padding-right: 72px;
+    padding-right: min(124px, 44vw);
   }
   .drug-subtitle {
     gap: 4px;
   }
   .drug-monitor-corner {
-    max-width: 78px;
+    max-width: min(124px, 44vw);
     padding: 4px 6px;
     gap: 3px;
     font-size: 8px;
