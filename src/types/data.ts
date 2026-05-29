@@ -113,6 +113,7 @@ export type Drug = {
   icon: string;
   desc: string;
   indic: string[];
+  monitoring?: string[];
   ci?: string[];
   ei?: string[];
   cond?: string[];

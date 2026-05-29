@@ -45,6 +45,15 @@ describe("DrugCard", () => {
       // La description vit dans le drug-body, masqué tant que open=false
       expect(screen.queryByText(/Description longue du médicament/)).not.toBeInTheDocument();
     });
+
+    test("affiche immédiatement le badge Scope si une surveillance scopée est requise", () => {
+      const kcl = DRUGS.find((drug) => drug.nom === "KCL")!;
+
+      render(<DrugCard drug={kcl} />);
+
+      expect(screen.getByText("Scope")).toBeInTheDocument();
+      expect(screen.queryByText("Surveillance")).not.toBeInTheDocument();
+    });
   });
 
   describe("Toggle open / close", () => {

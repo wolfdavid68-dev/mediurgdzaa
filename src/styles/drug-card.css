@@ -337,6 +337,36 @@
   border: 1px solid rgba(255, 71, 87, 0.3);
 }
 
+.badge-monitor {
+  border-radius: 999px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.monitor-scope {
+  background: rgba(251, 191, 36, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+}
+
+.monitor-ecg {
+  background: rgba(96, 165, 250, 0.16);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+}
+
+.monitor-capno {
+  background: rgba(45, 212, 191, 0.14);
+  color: #5eead4;
+  border: 1px solid rgba(45, 212, 191, 0.45);
+}
+
+.monitor-custom {
+  background: rgba(167, 139, 250, 0.16);
+  color: #c4b5fd;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+}
+
 .chevron {
   color: var(--text-mute);
   flex-shrink: 0;

@@ -16,6 +16,25 @@ const TABS = [
   { key: "cond", label: "Conditionnements", type: "neutral" },
 ];
 
+const MONITORING_BADGES = [
+  {
+    label: "Scope",
+    className: "monitor-scope",
+    pattern:
+      /sous scope|surveillance scop|scope|monitorage ecg|surveillance ecg|surveillance cardiaque/i,
+  },
+  {
+    label: "ECG",
+    className: "monitor-ecg",
+    pattern: /ecg obligatoire|ecg long|electrocardioscope|électrocardioscope/i,
+  },
+  {
+    label: "Capno",
+    className: "monitor-capno",
+    pattern: /capno|etco2|etco₂/i,
+  },
+];
+
 type DrugCardProps = {
   drug: Drug;
   isFavorite?: boolean;
@@ -54,6 +73,34 @@ const DrugCard = ({
   // useMemo ici sert juste à éviter de relancer la lookup à chaque toggle
   // d'onglet ou changement de poids.
   const relatedProtocols = useMemo(() => findProtocolsForDrug(drug.nom), [drug.nom]);
+  const monitoringBadges = useMemo(() => {
+    const labels = new Set((drug.monitoring || []).map((item) => item.trim()).filter(Boolean));
+    const text = [
+      drug.desc,
+      ...(drug.indic || []),
+      ...(drug.ci || []),
+      ...(drug.ei || []),
+      ...(drug.cond || []),
+      ...(drug.poso?.a || []),
+      ...(drug.poso?.p || []),
+      drug.prep?.duree,
+      ...(drug.prep?.etapes || []),
+      ...(drug.prep?.notes || []),
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    MONITORING_BADGES.forEach((badge) => {
+      if (badge.pattern.test(text)) labels.add(badge.label);
+    });
+
+    return Array.from(labels).map((label) => {
+      const preset = MONITORING_BADGES.find(
+        (badge) => badge.label.toLowerCase() === label.toLowerCase()
+      );
+      return { label, className: preset?.className || "monitor-custom" };
+    });
+  }, [drug]);
 
   // onOpen volontairement exclu des deps : addToHistory est recréé à chaque render
   // parent, ce qui relancerait l'effet et écraserait l'onglet sélectionné par l'utilisateur.
@@ -275,6 +322,11 @@ const DrugCard = ({
                   {s}
                 </span>
               ))}
+              {monitoringBadges.map((badge) => (
+                <span key={badge.label} className={`badge badge-monitor ${badge.className}`}>
+                  {badge.label}
+                </span>
+              ))}
               <span className="drug-classe">{drug.classe}</span>
             </div>
           </div>
@@ -310,6 +362,12 @@ const DrugCard = ({
               <strong>DCI</strong>
               <span>{drug.dci}</span>
             </div>
+            {monitoringBadges.length > 0 && (
+              <div>
+                <strong>Surveillance</strong>
+                <span>{monitoringBadges.map((badge) => badge.label).join(" · ")}</span>
+              </div>
+            )}
           </div>
           <p className="drug-desc">{drug.desc}</p>
 
