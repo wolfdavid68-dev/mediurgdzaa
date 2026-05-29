@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { DRUGS } from "../data/drugs";
 import DrugCard from "./DrugCard";
 
 // Drug mock minimal mais réaliste : structure copiée de src/data/drugs.js (id 1
@@ -145,6 +146,20 @@ describe("DrugCard", () => {
       expect(result).toBeTruthy();
       expect(result!.textContent).toMatch(/⚠ max/);
       expect(result!.className).toContain("calc-over");
+    });
+  });
+
+  describe("Préparation HYPNOVEL", () => {
+    test("distingue bolus pur 5 mg/5 mL et seringue PSE 50 mg/10 mL", () => {
+      const hypnovel = DRUGS.find((drug) => drug.nom === "HYPNOVEL")!;
+
+      render(<DrugCard drug={hypnovel} patientWeight="80" />);
+      fireEvent.click(screen.getByText("HYPNOVEL").closest("button")!);
+
+      expect(screen.getByText(/Bolus titrés : ampoule 5 mg\/5 mL/)).toBeInTheDocument();
+      expect(screen.getByText(/PSE : ampoule 50 mg\/10 mL qsp 50 mL/)).toBeInTheDocument();
+      expect(screen.getByText("8 mL du produit")).toBeInTheDocument();
+      expect(screen.queryByText("1.6 mL du produit")).not.toBeInTheDocument();
     });
   });
 

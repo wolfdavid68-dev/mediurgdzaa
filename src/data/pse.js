@@ -36,7 +36,7 @@ export const PSE = {
     conc: 10, unite: "mg/kg/h", min: 0.5, max: 4,
     steps: [1, 2, 3, 4],
   },
-  3: { // Midazolam — 50 mg qsp 50 mL NaCl → 1 mg/mL
+  3: { // Midazolam — ampoule 50 mg/10 mL qsp 50 mL NaCl → 1 mg/mL
     conc: 1, unite: "mg/kg/h", min: 0.02, max: 0.2,
     steps: [0.05, 0.1, 0.15, 0.2],
   },
