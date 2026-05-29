@@ -168,16 +168,22 @@ describe("DrugCard", () => {
   });
 
   describe("Préparation KÉTAMINE", () => {
-    test("affiche les deux préparations sédation et PSE sans calcul de bolus", () => {
+    test("bascule visuellement entre bolus/sédation et PSE sans calcul de bolus", () => {
       const ketamine = DRUGS.find((drug) => drug.nom === "KÉTAMINE")!;
 
       render(<DrugCard drug={ketamine} patientWeight="80" />);
       fireEvent.click(screen.getByText("KÉTAMINE").closest("button")!);
 
-      expect(screen.getByText("Sédation")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Bolus \/ sédation.*10 mL/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
       expect(screen.getByText("2 mL de kétamine 250 mg/5 mL (= 100 mg)")).toBeInTheDocument();
       expect(screen.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
-      expect(screen.getByText("PSE")).toBeInTheDocument();
+      expect(screen.queryByText("2 ampoules 250 mg/5 mL (= 500 mg)")).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /PSE.*50 mL/i }));
+
       expect(screen.getByText("2 ampoules 250 mg/5 mL (= 500 mg)")).toBeInTheDocument();
       expect(screen.getByText("50 mL avec NaCl 0,9%")).toBeInTheDocument();
       expect(

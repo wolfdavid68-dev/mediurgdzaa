@@ -58,6 +58,7 @@ type DrugPrepTable = {
 
 type DrugPrepRecipe = {
   titre: string;
+  mode?: string;
   tag?: string;
   prelever: string;
   completer?: string;

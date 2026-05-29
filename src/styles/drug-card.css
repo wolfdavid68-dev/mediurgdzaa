@@ -1083,6 +1083,73 @@
   min-width: 0;
 }
 
+.prep-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.prep-mode-option {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 9px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prep-mode-option span,
+.prep-mode-option small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prep-mode-option small {
+  margin-top: 2px;
+  color: var(--text-mute);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.prep-mode-option.is-active {
+  color: var(--text);
+  border-color: rgba(248, 113, 113, 0.65);
+  background: rgba(248, 113, 113, 0.14);
+}
+
+.prep-mode-option.prep-recipe-pse.is-active {
+  border-color: rgba(96, 165, 250, 0.72);
+  background: rgba(37, 99, 235, 0.2);
+}
+
+.prep-calc-box.prep-recipe-bolus,
+.prep-v2 .prep-calc.prep-recipe-bolus {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(127, 29, 29, 0.18);
+}
+
+.prep-calc-box.prep-recipe-pse,
+.prep-v2 .prep-calc.prep-recipe-pse {
+  border-color: rgba(96, 165, 250, 0.55);
+  background: rgba(30, 64, 175, 0.2);
+}
+
+.prep-v2 .prep-calc.prep-recipe-pse .prep-calc-header {
+  color: #bfdbfe;
+}
+
+.prep-v2 .prep-calc.prep-recipe-pse .prep-highlight {
+  color: #dbeafe;
+}
+
 .prep-calc-header {
   display: flex;
   align-items: center;

@@ -47,6 +47,7 @@ type PrepBlockProps = { drug: Drug; weight: string; produitFinal: string };
 // produitFinal vient du parent car son input vit au-dessus du bloc poso (input swap).
 const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   const [doseLibre, setDoseLibre] = useState("");
+  const [activePrepIndex, setActivePrepIndex] = useState(0);
   const prep = resolvePrep(drug);
   if (!prep) return null;
 
@@ -54,9 +55,32 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   const validKg = kg && kg > 0 && kg <= 300;
   const formatDoseNumber = (value: number) =>
     Number.isInteger(value) ? String(value) : String(value).replace(".", ",");
+  const activeRecipeIndex = prep.preparations?.[activePrepIndex] ? activePrepIndex : 0;
+  const recipeModeClass = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+    recipe.mode ? ` prep-recipe-${recipe.mode}` : "";
+
+  const renderRecipeSwitch = () =>
+    prep.preparations && prep.preparations.length > 1 ? (
+      <div className="prep-mode-switch" role="group" aria-label="Choix de préparation">
+        {prep.preparations.map((recipe, index) => (
+          <button
+            key={recipe.titre}
+            type="button"
+            className={`prep-mode-option${recipeModeClass(recipe)}${
+              index === activeRecipeIndex ? " is-active" : ""
+            }`}
+            aria-pressed={index === activeRecipeIndex}
+            onClick={() => setActivePrepIndex(index)}
+          >
+            <span>{recipe.titre}</span>
+            {recipe.tag && <small>{recipe.tag}</small>}
+          </button>
+        ))}
+      </div>
+    ) : null;
 
   const renderRecipeCalcBox = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
-    <div key={recipe.titre} className="prep-calc-box">
+    <div key={recipe.titre} className={`prep-calc-box${recipeModeClass(recipe)}`}>
       <div className="prep-calc-header">
         <PrepIcon /> {recipe.titre}
         {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
@@ -92,7 +116,7 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   );
 
   const renderRecipeCalc = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
-    <div key={recipe.titre} className="prep-calc">
+    <div key={recipe.titre} className={`prep-calc${recipeModeClass(recipe)}`}>
       <div className="prep-calc-header">
         <span>{recipe.titre}</span>
         {recipe.tag && <span>{recipe.tag}</span>}
@@ -126,7 +150,13 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     if (!validKg) return null;
 
     if (prep.preparations && prep.preparations.length > 0) {
-      return <div className="prep-calc-list">{prep.preparations.map(renderRecipeCalcBox)}</div>;
+      const activeRecipe = prep.preparations[activeRecipeIndex];
+      return (
+        <div className="prep-calc-list">
+          {renderRecipeSwitch()}
+          {renderRecipeCalcBox(activeRecipe)}
+        </div>
+      );
     }
 
     // Dilution FIXE (nouvelle prépa service) : préparation indépendante
@@ -325,7 +355,13 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     if (!validKg) return null;
 
     if (prep.preparations && prep.preparations.length > 0) {
-      return <div className="prep-calc-list">{prep.preparations.map(renderRecipeCalc)}</div>;
+      const activeRecipe = prep.preparations[activeRecipeIndex];
+      return (
+        <div className="prep-calc-list">
+          {renderRecipeSwitch()}
+          {renderRecipeCalc(activeRecipe)}
+        </div>
+      );
     }
 
     if (prep.fixed_dilution) {

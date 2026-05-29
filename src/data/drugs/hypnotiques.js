@@ -235,7 +235,8 @@ export const DRUGS_HYPNOTIQUES = [
       stabilite: "Utiliser immédiatement après ouverture",
       preparations: [
         {
-          titre: "Sédation",
+          titre: "Bolus / sédation",
+          mode: "bolus",
           tag: "10 mL",
           prelever: "2 mL de kétamine 250 mg/5 mL (= 100 mg)",
           completer: "10 mL avec NaCl 0,9%",
@@ -243,6 +244,7 @@ export const DRUGS_HYPNOTIQUES = [
         },
         {
           titre: "PSE",
+          mode: "pse",
           tag: "50 mL",
           prelever: "2 ampoules 250 mg/5 mL (= 500 mg)",
           completer: "50 mL avec NaCl 0,9%",
