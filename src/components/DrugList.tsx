@@ -12,6 +12,7 @@ type DrugListProps = {
   drugs: Drug[];
   favorites?: Set<number>;
   patientWeight?: string;
+  prepPopulation?: "adulte" | "enfant" | null;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
   onOpenChange?: (key: string, open: boolean) => void;
@@ -22,6 +23,7 @@ const DrugList = ({
   drugs,
   favorites,
   patientWeight,
+  prepPopulation,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -35,6 +37,7 @@ const DrugList = ({
             drug={drug}
             isFavorite={favorites?.has(drug.id) || false}
             patientWeight={patientWeight}
+            prepPopulation={prepPopulation}
             onToggleFavorite={onToggleFavorite}
             onOpen={onOpen}
             onOpenChange={onOpenChange}

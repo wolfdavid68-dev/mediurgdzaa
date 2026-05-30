@@ -154,7 +154,10 @@ export const DRUGS_CURARES = [
         "Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL",
         "Posologie : 0,15 mg/kg IV",
       ],
-      notes: ["Pas d'hyperkaliémie"],
+      notes: [
+        "Pas d'hyperkaliémie",
+        "Indication ≠ Célocurine : entretien de curarisation, pas l'ISR",
+      ],
     },
   },
 ];

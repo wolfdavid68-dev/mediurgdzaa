@@ -9,10 +9,16 @@ import { type ChangeEvent } from "react";
 type Props = {
   weight: string;
   onChange: (kg: string) => void;
+  population?: "adulte" | "enfant" | null;
+  onPopulationChange?: (population: "adulte" | "enfant" | null) => void;
 };
 
-const PatientWeightBanner = ({ weight, onChange }: Props) => {
+const PatientWeightBanner = ({ weight, onChange, population, onPopulationChange }: Props) => {
   const handle = (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value);
+  const kg = parseFloat(weight);
+  const validKg = kg > 0 && kg <= 300;
+  const activePopulation = population || (validKg && kg < 30 ? "enfant" : "adulte");
+
   return (
     <div className="patient-weight" role="group" aria-label="Poids patient">
       <svg
@@ -41,11 +47,34 @@ const PatientWeightBanner = ({ weight, onChange }: Props) => {
         aria-label="Poids patient en kilogrammes"
       />
       <span className="patient-weight-unit">kg</span>
+      {validKg && onPopulationChange && (
+        <div className="patient-population-switch" role="group" aria-label="Choix adulte ou enfant">
+          <button
+            type="button"
+            className={`patient-population-option${activePopulation === "adulte" ? " is-active" : ""}`}
+            aria-pressed={activePopulation === "adulte"}
+            onClick={() => onPopulationChange("adulte")}
+          >
+            Adulte
+          </button>
+          <button
+            type="button"
+            className={`patient-population-option${activePopulation === "enfant" ? " is-active" : ""}`}
+            aria-pressed={activePopulation === "enfant"}
+            onClick={() => onPopulationChange("enfant")}
+          >
+            Enfant
+          </button>
+        </div>
+      )}
       {weight && (
         <button
           type="button"
           className="patient-weight-clear"
-          onClick={() => onChange("")}
+          onClick={() => {
+            onChange("");
+            onPopulationChange?.(null);
+          }}
           aria-label="Effacer le poids"
         >
           ×

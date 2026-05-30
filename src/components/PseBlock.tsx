@@ -95,16 +95,18 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
 
   const dose = reverse ? calcDoseFromRate(pse, pseRate, weight, dosePrec) : null;
   const doseOut = dose != null && (dose < pse.min || dose > pse.max);
+  const patientTableTitle = validKg ? `Pour ${kg} kg — ${kg < 30 ? "enfant" : "adulte"}` : null;
+  const referenceTablesForWeight = validKg ? undefined : pse.referenceTables;
   const referenceTables =
-    pse.referenceTables && pse.referenceTables.length > 0 ? (
-      <div className="pse-ref-grid" aria-label="Repères PSE">
-        {pse.referenceTables.map((table) => (
-          <div key={`${table.title}-${table.weightKg}`} className="pse-ref-card">
-            <div className="pse-ref-head">
+    referenceTablesForWeight && referenceTablesForWeight.length > 0 ? (
+      <div className="pse-reference-list" aria-label="Repères PSE">
+        {referenceTablesForWeight.map((table) => (
+          <div key={`${table.title}-${table.weightKg}`} className="pse-reference-item">
+            <div className="pse-reference-title">
               <span>{table.title}</span>
               <strong>{table.subtitle || `${table.weightKg} kg`}</strong>
             </div>
-            <table className="pse-table pse-ref-table">
+            <table className="pse-table pse-reference-table">
               <thead>
                 <tr>
                   <th>Dose</th>
@@ -115,7 +117,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
                 {(table.steps || pse.steps).map((step: number) => (
                   <tr key={step}>
                     <td>
-                      {step} <small>{pse.unite}</small>
+                      {step} {pse.unite}
                     </td>
                     <td>{calcDebit(pse, step, table.weightKg)}</td>
                   </tr>
@@ -226,26 +228,29 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
         )}
 
         {validKg && reverse ? (
-          <table className="pse-table">
-            <thead>
-              <tr>
-                <th>mL/h</th>
-                <th>Dose ({pse.unite})</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mlhSteps.map((step: number) => {
-                const dv = calcDoseFromRate(pse, step, weight, dosePrec);
-                const isActive = parseFloat(pseRate) === step;
-                return (
-                  <tr key={step} className={isActive ? "pse-row-active" : ""}>
-                    <td>{step}</td>
-                    <td>{fmtDose(dv)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <>
+            {patientTableTitle && <div className="pse-current-title">{patientTableTitle}</div>}
+            <table className="pse-table">
+              <thead>
+                <tr>
+                  <th>mL/h</th>
+                  <th>Dose ({pse.unite})</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mlhSteps.map((step: number) => {
+                  const dv = calcDoseFromRate(pse, step, weight, dosePrec);
+                  const isActive = parseFloat(pseRate) === step;
+                  return (
+                    <tr key={step} className={isActive ? "pse-row-active" : ""}>
+                      <td>{step}</td>
+                      <td>{fmtDose(dv)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </>
         ) : effectiveMode ? (
           <table className="pse-table">
             <thead>
@@ -269,30 +274,33 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
             </tbody>
           </table>
         ) : (validKg || pse.unite === "mg/h") && !reverse ? (
-          <table className="pse-table">
-            <thead>
-              <tr>
-                <th>Dose ({pse.unite})</th>
-                <th>mL/h</th>
-                {pse.unite === "UI/kg/h" && <th>UI/24h</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {pse.steps.map((step: number) => {
-                const d = calcDebit(pse, step, weight);
-                const isActive = parseFloat(pseTarget) === step;
-                return (
-                  <tr key={step} className={isActive ? "pse-row-active" : ""}>
-                    <td>{step}</td>
-                    <td>{d}</td>
-                    {pse.unite === "UI/kg/h" && (
-                      <td>{Math.round(step * parseFloat(weight) * 24)}</td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <>
+            {patientTableTitle && <div className="pse-current-title">{patientTableTitle}</div>}
+            <table className="pse-table">
+              <thead>
+                <tr>
+                  <th>Dose ({pse.unite})</th>
+                  <th>mL/h</th>
+                  {pse.unite === "UI/kg/h" && <th>UI/24h</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {pse.steps.map((step: number) => {
+                  const d = calcDebit(pse, step, weight);
+                  const isActive = parseFloat(pseTarget) === step;
+                  return (
+                    <tr key={step} className={isActive ? "pse-row-active" : ""}>
+                      <td>{step}</td>
+                      <td>{d}</td>
+                      {pse.unite === "UI/kg/h" && (
+                        <td>{Math.round(step * parseFloat(weight) * 24)}</td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </>
         ) : null}
       </div>
 

@@ -41,12 +41,18 @@ const InfoIcon = () => (
   </svg>
 );
 
-type PrepBlockProps = { drug: Drug; weight: string; produitFinal?: string };
+type PrepBlockProps = {
+  drug: Drug;
+  weight: string;
+  produitFinal?: string;
+  prepPopulation?: "adulte" | "enfant" | null;
+};
 
 // Bloc Préparation : étapes + calculateur (4 variantes selon la shape de prep).
-const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
+const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProps) => {
   const [doseLibre, setDoseLibre] = useState("");
   const [activePrepIndex, setActivePrepIndex] = useState(0);
+  const [activePedPrep, setActivePedPrep] = useState<"ivd" | "im" | "pse">("ivd");
   const [effectivePrepInput, setEffectivePrepInput] = useState("");
   const [thresholdInput, setThresholdInput] = useState("");
   const prep = resolvePrep(drug);
@@ -687,93 +693,263 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   };
 
   const previewMode = isPreview();
-  const prepCalcBlock = renderPrepCalc();
-  const prepCalcV2Block = renderPrepCalcV2();
+  const inferredPopulation = validKg && kg < 30 ? "enfant" : "adulte";
+  const activePopulation = prepPopulation || inferredPopulation;
+  const pediatricPrepOnly = Boolean(
+    previewMode && prep.pedTable && validKg && activePopulation === "enfant"
+  );
+  const prepCalcBlock = pediatricPrepOnly ? null : renderPrepCalc();
+  const prepCalcV2Block = pediatricPrepOnly ? null : renderPrepCalcV2();
   const activeRecipe = prep.preparations?.[activeRecipeIndex];
-  const visibleEtapes =
-    activeRecipe && Object.hasOwn(activeRecipe, "etapes") ? activeRecipe.etapes : prep.etapes;
-  const visibleNotes =
-    activeRecipe && Object.hasOwn(activeRecipe, "notes") ? activeRecipe.notes : prep.notes;
+  const visibleEtapes = pediatricPrepOnly
+    ? []
+    : activeRecipe && Object.hasOwn(activeRecipe, "etapes")
+      ? activeRecipe.etapes
+      : prep.etapes;
+  const visibleNotes = pediatricPrepOnly
+    ? []
+    : activeRecipe && Object.hasOwn(activeRecipe, "notes")
+      ? activeRecipe.notes
+      : prep.notes;
+  const pedTableResult = prep.pedTable ? calcPedTable(prep, weight) : null;
+  const pedImDoseMg = validKg ? Math.min(kg * 0.01, 0.5) : null;
+  const pedImVolumeMl = pedImDoseMg !== null ? +pedImDoseMg.toFixed(2) : null;
+  const pedVisibleEtapes =
+    pediatricPrepOnly && activePedPrep === "pse"
+      ? [
+          "Ampoule 5 mg/5 mL (1 mg/mL)",
+          "PSE : 2 ampoules (10 mg) qsp 50 mL G5% → 0,2 mg/mL",
+          "Débit selon µg/kg/min — voir bloc « Débit PSE »",
+        ]
+      : pediatricPrepOnly &&
+          activePedPrep === "im" &&
+          pedImDoseMg !== null &&
+          pedImVolumeMl !== null
+        ? [
+            "Ampoule adrénaline 5 mg/5 mL (1 mg/mL)",
+            `Prélever ${formatDoseNumber(pedImVolumeMl)} mL (= ${formatDoseNumber(pedImDoseMg)} mg)`,
+            "Injecter en IM face antérieure de cuisse",
+          ]
+        : pediatricPrepOnly && pedTableResult?.mode === "dilute"
+          ? [
+              pedTableResult.preparation,
+              `Prélever ${pedTableResult.vol_med} mL de produit`,
+              `Compléter avec ${pedTableResult.vol_solvant} mL ${pedTableResult.solvant} → ${pedTableResult.volume_final} mL`,
+              pedTableResult.admin ? `Injecter : ${pedTableResult.admin}` : "",
+            ].filter(Boolean)
+          : [];
+  const pedVisibleNotes =
+    pediatricPrepOnly && activePedPrep === "pse"
+      ? [
+          "Administrer toujours au plus proche du patient",
+          "IVSE : débit constant — pas de bolus sur cette voie",
+          "Voie centrale proximale idéale en PSE",
+          "Surveillance cardiaque rapprochée + état cutané",
+        ]
+      : pediatricPrepOnly && activePedPrep === "im"
+        ? ["Anaphylaxie : 0,01 mg/kg IM (max 0,5 mg)."]
+        : pediatricPrepOnly && prep.pedTable?.description
+          ? [prep.pedTable.description]
+          : [];
   const pedTableBlock = prep.pedTable
     ? (() => {
-        const r = calcPedTable(prep, weight);
+        const r = pedTableResult;
         return (
-          <div className="prep-ped-card">
-            <div className="prep-ped-head">
-              <PrepIcon />
-              <span>{prep.pedTable.titre}</span>
+          <div className={previewMode ? "prep-calc prep-recipe-ped" : "prep-calc-box"}>
+            <div className="prep-calc-header">
+              {previewMode ? (
+                <>
+                  <span>Préparation pédiatrique</span>
+                  <span>{r?.volume_final ? `${r.volume_final} mL` : "Pédiatrique"}</span>
+                </>
+              ) : (
+                <>
+                  <PrepIcon />
+                  {prep.pedTable.titre}
+                </>
+              )}
             </div>
-            {prep.pedTable.description && (
-              <p className="prep-ped-desc">{prep.pedTable.description}</p>
+            {!previewMode && prep.pedTable.description && (
+              <p className="prep-table-desc">{prep.pedTable.description}</p>
             )}
             {!validKg && (
-              <div className="prep-ped-empty">
+              <div className="prep-empty-text">
                 Saisir le poids de l'enfant ci-dessus pour calculer.
               </div>
             )}
             {validKg && !r && (
-              <div className="prep-ped-empty">
+              <div className="prep-empty-text">
                 Hors plage de la table — utiliser la posologie adulte.
               </div>
             )}
             {validKg && r && (
-              <div className="prep-ped-body">
-                <div className="prep-ped-summary">
-                  <span>Pour {r.kg} kg</span>
-                  {r.dose && r.dose_unit && (
-                    <strong>
+              <>
+                <div className="prep-calc-row">
+                  <span className="prep-calc-step">Pour</span>
+                  <span className="prep-calc-val prep-calc-highlight">{r.kg} kg</span>
+                </div>
+                {r.dose && r.dose_unit && (
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">Dose</span>
+                    <span className="prep-calc-val prep-calc-highlight">
                       {formatDoseNumber(r.dose)} {r.dose_unit}
-                    </strong>
-                  )}
-                  {r.admin_volume && (
-                    <small>
-                      {r.admin_route || "IV"} : {formatDoseNumber(r.admin_volume)} mL{" "}
-                      {r.admin_interval}
-                    </small>
-                  )}
-                </div>
-                <div className="prep-ped-steps">
-                  <div>
-                    <span>Préparation</span>
-                    <strong>{r.preparation}</strong>
+                    </span>
                   </div>
-                  {r.mode === "inject" && (
-                    <div>
-                      <span>Injecter</span>
-                      <strong>{r.vol_inject} mL</strong>
+                )}
+                {r.mode === "inject" && (
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">Injecter</span>
+                    <span className="prep-calc-val prep-calc-highlight">{r.vol_inject} mL</span>
+                  </div>
+                )}
+                {r.mode === "dilute" && (
+                  <>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Prélever</span>
+                      <span className="prep-calc-val prep-calc-highlight">
+                        {r.vol_med} mL de produit
+                      </span>
                     </div>
-                  )}
-                  {r.mode === "dilute" && (
-                    <>
-                      <div>
-                        <span>Prélever</span>
-                        <strong>{r.vol_med} mL de produit</strong>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Compléter</span>
+                      <span className="prep-calc-val">
+                        {r.vol_solvant} mL {r.solvant}
+                      </span>
+                    </div>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Préparation</span>
+                      <span className="prep-calc-val">{r.preparation}</span>
+                    </div>
+                    <div className="prep-calc-row">
+                      <span className="prep-calc-step">Final</span>
+                      <span className="prep-calc-val">{r.volume_final} mL</span>
+                    </div>
+                    {r.admin && (
+                      <div className="prep-calc-row">
+                        <span className="prep-calc-step">Injecter</span>
+                        <span className="prep-calc-val prep-calc-highlight">{r.admin}</span>
                       </div>
-                      <div>
-                        <span>Compléter</span>
-                        <strong>
-                          {r.vol_solvant} mL {r.solvant}
-                        </strong>
-                      </div>
-                      <div>
-                        <span>Seringue finale</span>
-                        <strong>{r.volume_final} mL</strong>
-                      </div>
-                      {r.admin && (
-                        <div className="prep-ped-admin">
-                          <span>Injecter</span>
-                          <strong>{r.admin}</strong>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
+                    )}
+                  </>
+                )}
+                {r.admin_volume && !("admin" in r && r.admin) && (
+                  <div className="prep-calc-row">
+                    <span className="prep-calc-step">{r.admin_route || "IV"}</span>
+                    <span className="prep-calc-val prep-calc-highlight">
+                      {formatDoseNumber(r.admin_volume)} mL {r.admin_interval}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
           </div>
         );
       })()
     : null;
+  const pedImBlock =
+    pediatricPrepOnly && pedImDoseMg !== null && pedImVolumeMl !== null ? (
+      <div className={previewMode ? "prep-calc prep-recipe-ped-im" : "prep-calc-box"}>
+        <div className="prep-calc-header">
+          {previewMode ? (
+            <>
+              <span>IM anaphylaxie</span>
+              <span>1 mg/mL pur</span>
+            </>
+          ) : (
+            <>
+              <PrepIcon />
+              IM anaphylaxie
+            </>
+          )}
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Pour</span>
+          <span className="prep-calc-val prep-calc-highlight">{kg} kg</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Dose</span>
+          <span className="prep-calc-val prep-calc-highlight">
+            {formatDoseNumber(pedImDoseMg)} mg
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Prélever</span>
+          <span className="prep-calc-val prep-calc-highlight">
+            {formatDoseNumber(pedImVolumeMl)} mL du produit
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Final</span>
+          <span className="prep-calc-val">1 mg/mL</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Injecter</span>
+          <span className="prep-calc-val prep-calc-highlight">IM cuisse</span>
+        </div>
+      </div>
+    ) : null;
+  const pedPseBlock = pediatricPrepOnly ? (
+    <div className={previewMode ? "prep-calc prep-recipe-pse" : "prep-calc-box"}>
+      <div className="prep-calc-header">
+        {previewMode ? (
+          <>
+            <span>PSE</span>
+            <span>0,2 mg/mL</span>
+          </>
+        ) : (
+          <>
+            <PrepIcon />
+            PSE
+          </>
+        )}
+      </div>
+      <div className="prep-calc-row">
+        <span className="prep-calc-step">Prélever</span>
+        <span className="prep-calc-val prep-calc-highlight">2 ampoules 5 mg/5 mL (= 10 mg)</span>
+      </div>
+      <div className="prep-calc-row">
+        <span className="prep-calc-step">Compléter</span>
+        <span className="prep-calc-val">50 mL avec G5%</span>
+      </div>
+      <div className="prep-calc-row">
+        <span className="prep-calc-step">Final</span>
+        <span className="prep-calc-val prep-calc-highlight">0,2 mg/mL (200 µg/mL)</span>
+      </div>
+    </div>
+  ) : null;
+  const pediatricPrepBlock =
+    activePedPrep === "pse" ? pedPseBlock : activePedPrep === "im" ? pedImBlock : pedTableBlock;
+  const pediatricModeSwitch = pediatricPrepOnly ? (
+    <div className="prep-mode-switch" role="group" aria-label="Choix de préparation pédiatrique">
+      <button
+        type="button"
+        className={`prep-mode-option prep-recipe-ped${activePedPrep === "ivd" ? " is-active" : ""}`}
+        aria-pressed={activePedPrep === "ivd"}
+        onClick={() => setActivePedPrep("ivd")}
+      >
+        <span>IVD ACR</span>
+        <small>10 mL</small>
+      </button>
+      <button
+        type="button"
+        className={`prep-mode-option prep-recipe-ped-im${activePedPrep === "im" ? " is-active" : ""}`}
+        aria-pressed={activePedPrep === "im"}
+        onClick={() => setActivePedPrep("im")}
+      >
+        <span>IM anaphylaxie</span>
+        <small>1 mg/mL pur</small>
+      </button>
+      <button
+        type="button"
+        className={`prep-mode-option prep-recipe-pse${activePedPrep === "pse" ? " is-active" : ""}`}
+        aria-pressed={activePedPrep === "pse"}
+        onClick={() => setActivePedPrep("pse")}
+      >
+        <span>PSE</span>
+        <small>0,2 mg/mL</small>
+      </button>
+    </div>
+  ) : null;
   const prepTableCurrentRow =
     prep.table && validKg ? prep.table.rows.find((row) => row.poids === kg) : null;
   const prepTableBlock = prep.table ? (
@@ -911,9 +1087,9 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     ) : null;
 
   if (previewMode) {
-    const tags = [prep.solvant, prep.conc_finale, prep.duree, prep.stabilite, prep.debit].filter(
-      Boolean
-    );
+    const tags = pediatricPrepOnly
+      ? ["Pédiatrique"]
+      : [prep.solvant, prep.conc_finale, prep.duree, prep.stabilite, prep.debit].filter(Boolean);
 
     return (
       <section className="prep-v2" aria-label="Préparation v2">
@@ -930,12 +1106,31 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
             ))}
           </div>
         </div>
-
-        <div className={`prep-body ${prepCalcV2Block ? "" : "prep-body-single"}`}>
-          {prepCalcV2Block}
+        <div
+          className={`prep-body ${!pediatricPrepOnly && !prepCalcV2Block ? "prep-body-single" : ""}`}
+        >
+          {pediatricPrepOnly ? (
+            <div className="prep-calc-list">
+              {pediatricModeSwitch}
+              {pediatricPrepBlock}
+            </div>
+          ) : (
+            prepCalcV2Block
+          )}
 
           <div>
-            {visibleEtapes && visibleEtapes.length > 0 && (
+            {pediatricPrepOnly && pedVisibleEtapes.length > 0 && (
+              <div className="prep-steps">
+                {pedVisibleEtapes.map((e: string, i: number) => (
+                  <div key={i} className="prep-step">
+                    <span className="prep-step-num">{i + 1}</span>
+                    <span className="prep-step-text">{e}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!pediatricPrepOnly && visibleEtapes && visibleEtapes.length > 0 && (
               <div className="prep-steps">
                 {visibleEtapes.map((e: string, i: number) => (
                   <div key={i} className="prep-step">
@@ -946,7 +1141,18 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
               </div>
             )}
 
-            {visibleNotes && visibleNotes.length > 0 && (
+            {pediatricPrepOnly && pedVisibleNotes.length > 0 && (
+              <div className="prep-alerts">
+                {pedVisibleNotes.map((n: string, i: number) => (
+                  <div key={i} className="prep-alert">
+                    <span aria-hidden="true">⚠</span>
+                    <span>{n}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!pediatricPrepOnly && visibleNotes && visibleNotes.length > 0 && (
               <div className="prep-alerts">
                 {visibleNotes.map((n: string, i: number) => (
                   <div key={i} className="prep-alert">
@@ -959,9 +1165,8 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
           </div>
         </div>
 
-        {(pedTableBlock || prepTableBlock || doseLibreBlock) && (
+        {!pediatricPrepOnly && (prepTableBlock || doseLibreBlock) && (
           <div className="prep-v2-extra">
-            {pedTableBlock}
             {prepTableBlock}
             {doseLibreBlock}
           </div>
@@ -977,15 +1182,18 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
         <span>Préparation</span>
         <span className="prep-solvant-tag">{prep.solvant}</span>
       </div>
-
-      <div className="prep-meta-row">
-        {prep.duree && <span className="prep-meta-chip">{prep.duree}</span>}
-        {prep.stabilite && <span className="prep-meta-chip prep-chip-stab">{prep.stabilite}</span>}
-        {prep.debit && <span className="prep-meta-chip prep-chip-debit">{prep.debit}</span>}
-        {prep.conc_finale && (
-          <span className="prep-meta-chip prep-chip-conc">{prep.conc_finale}</span>
-        )}
-      </div>
+      {!pediatricPrepOnly && (
+        <div className="prep-meta-row">
+          {prep.duree && <span className="prep-meta-chip">{prep.duree}</span>}
+          {prep.stabilite && (
+            <span className="prep-meta-chip prep-chip-stab">{prep.stabilite}</span>
+          )}
+          {prep.debit && <span className="prep-meta-chip prep-chip-debit">{prep.debit}</span>}
+          {prep.conc_finale && (
+            <span className="prep-meta-chip prep-chip-conc">{prep.conc_finale}</span>
+          )}
+        </div>
+      )}
 
       {visibleEtapes && visibleEtapes.length > 0 && (
         <ol className="prep-etapes">
@@ -998,7 +1206,7 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
       )}
 
       {prepCalcBlock}
-      {pedTableBlock}
+      {pediatricPrepOnly && pedTableBlock}
       {prepTableBlock}
       {doseLibreBlock}
 

@@ -43,6 +43,7 @@ type DrugCardProps = {
   drug: Drug;
   isFavorite?: boolean;
   patientWeight?: string;
+  prepPopulation?: "adulte" | "enfant" | null;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
   onOpenChange?: (key: string, open: boolean) => void;
@@ -53,6 +54,7 @@ const DrugCard = ({
   drug,
   isFavorite,
   patientWeight = "",
+  prepPopulation,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -209,7 +211,7 @@ const DrugCard = ({
           )}
         </div>
 
-        <PrepBlock drug={drug} weight={weight} />
+        <PrepBlock drug={drug} weight={weight} prepPopulation={prepPopulation} />
         <PseBlock drug={drug} weight={weight} />
         <DrugNote drugId={drug.id} onChange={setHasNote} />
       </>

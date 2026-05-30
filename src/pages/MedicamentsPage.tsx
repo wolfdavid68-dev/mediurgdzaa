@@ -13,6 +13,7 @@ type MedicamentsPageProps = {
   favorites: Set<number>;
   showFavoritesOnly: boolean;
   patientWeight: string;
+  prepPopulation?: "adulte" | "enfant" | null;
   onToggleFavorite: (id: number) => void;
   onOpen: (id: number) => void;
   onOpenChange: (key: string, open: boolean) => void;
@@ -25,6 +26,7 @@ const MedicamentsPage = ({
   favorites,
   showFavoritesOnly,
   patientWeight,
+  prepPopulation,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -70,6 +72,7 @@ const MedicamentsPage = ({
             onOpenChange={onOpenChange}
             onProtocolOpen={onProtocolOpen}
             patientWeight={patientWeight}
+            prepPopulation={prepPopulation}
           />
         </div>
       )}
@@ -81,6 +84,7 @@ const MedicamentsPage = ({
         onOpenChange={onOpenChange}
         onProtocolOpen={onProtocolOpen}
         patientWeight={patientWeight}
+        prepPopulation={prepPopulation}
       />
     </>
   );

@@ -62,7 +62,8 @@ const TutoratOnlyView = () => (
 
 const App = () => {
   const authProfile = useAuthProfile();
-  const accessMode = getPreviewAccessMode(authProfile, isPreview());
+  const previewMode = isPreview();
+  const accessMode = getPreviewAccessMode(authProfile, previewMode);
   const hasFullAppAccess = accessMode === "full";
   const allowedPages = hasFullAppAccess ? ALL_PAGES : MEDICAMENTS_ONLY_PAGES;
   const [page, setPage] = useState("medicaments");
@@ -119,6 +120,7 @@ const App = () => {
   // Tant qu'au moins une fiche est déployée, on tient un wake lock écran
   // (procédure en cours → ne pas verrouiller mains gantées).
   const [patientWeight, setPatientWeight] = usePatientWeight();
+  const [prepPopulation, setPrepPopulation] = useState<"adulte" | "enfant" | null>(null);
   useWakeLock(anyDrugOpen);
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== "undefined" ? navigator.onLine : true
@@ -343,7 +345,7 @@ const App = () => {
             onOpenNotesBackup={openNotesBackup}
             onToggleFont={toggleFont}
             onToggleTheme={toggleTheme}
-            showTutorat={hasFullAppAccess && isPreview()}
+            showTutorat={hasFullAppAccess && previewMode}
           >
             {page === "medicaments" && (
               <div className="search-row">
@@ -380,7 +382,12 @@ const App = () => {
                     )}
                   </div>
                 )}
-                <PatientWeightBanner weight={patientWeight} onChange={setPatientWeight} />
+                <PatientWeightBanner
+                  weight={patientWeight}
+                  onChange={setPatientWeight}
+                  population={previewMode ? prepPopulation : null}
+                  onPopulationChange={previewMode ? setPrepPopulation : undefined}
+                />
               </div>
             )}
             {page === "medicaments" && !anyDrugOpen && (
@@ -441,6 +448,7 @@ const App = () => {
                 favorites={favorites}
                 showFavoritesOnly={showFavoritesOnly}
                 patientWeight={patientWeight}
+                prepPopulation={prepPopulation}
                 onToggleFavorite={toggleFavorite}
                 onOpen={addToHistory}
                 onOpenChange={handleDrugOpenChange}

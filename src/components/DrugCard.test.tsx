@@ -247,21 +247,41 @@ describe("DrugCard", () => {
   });
 
   describe("Adrénaline", () => {
-    test("affiche les repères PSE adulte/enfant et la préparation ACR enfant IVD", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche la table PSE enfant et la préparation ACR enfant IVD pour un poids pédiatrique", () => {
       const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
 
-      render(<DrugCard drug={adrenaline} patientWeight="20" />);
+      render(<DrugCard drug={adrenaline} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(screen.getByText("PSE adulte")).toBeInTheDocument();
-      expect(screen.getByText("Repère 70 kg")).toBeInTheDocument();
-      expect(screen.getByText("PSE enfant")).toBeInTheDocument();
-      expect(screen.getByText("Repère 20 kg")).toBeInTheDocument();
+      expect(screen.getByText("Pour 20 kg — enfant")).toBeInTheDocument();
+      expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
+      expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
 
       expect(screen.getAllByText("200 µg").length).toBeGreaterThan(0);
       expect(screen.getByText("2 mL de produit")).toBeInTheDocument();
       expect(screen.getByText("8 mL NaCl 0,9%")).toBeInTheDocument();
       expect(screen.getByText("1 mL IVD toutes les 4 min")).toBeInTheDocument();
+    });
+
+    test("affiche uniquement la table PSE adulte pour un poids adulte", () => {
+      const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
+
+      render(<DrugCard drug={adrenaline} patientWeight="80" prepPopulation="adulte" />);
+      fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
+
+      expect(screen.getByText("Pour 80 kg — adulte")).toBeInTheDocument();
+      expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
+      expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
     });
   });
 
