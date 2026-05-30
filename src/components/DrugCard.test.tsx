@@ -370,6 +370,38 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Metalyse preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("calcule la dose et le volume de bolus selon le palier de poids", () => {
+      const metalyse = DRUGS.find((drug) => drug.nom === "METALYSE")!;
+
+      const { unmount } = render(<DrugCard drug={metalyse} patientWeight="55" />);
+      fireEvent.click(screen.getByText("METALYSE").closest("button")!);
+
+      expect(screen.getByText("30 mg = 6 mL")).toBeInTheDocument();
+      expect(screen.getByText(/Reconstituer le lyophilisat 10 000 UI/)).toBeInTheDocument();
+      expect(screen.getByText("Flacon reconstitue 50 mg/10 mL")).toBeInTheDocument();
+      expect(screen.getByText(/Injection IV bolus unique strict < 10 sec/)).toBeInTheDocument();
+      expect(screen.queryByText(/Adapter la dose au POIDS/)).not.toBeInTheDocument();
+
+      unmount();
+
+      render(<DrugCard drug={metalyse} patientWeight="80" />);
+      fireEvent.click(screen.getByText("METALYSE").closest("button")!);
+
+      expect(screen.getByText("45 mg = 9 mL")).toBeInTheDocument();
+    });
+  });
+
   describe("Atropine preview", () => {
     beforeEach(() => {
       sessionStorage.clear();
@@ -514,6 +546,75 @@ describe("DrugCard", () => {
       );
       expect(screen.getByText("Débit : 1-6 mL/h avec ampoule pure à 5 mg/mL")).toBeInTheDocument();
       expect(screen.getByText("Voies : VVP ou VVC")).toBeInTheDocument();
+    });
+  });
+
+  describe("Loxen preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche les préparations bolus et PSE en v2", () => {
+      const loxen = DRUGS.find((drug) => drug.nom === "LOXEN")!;
+
+      render(<DrugCard drug={loxen} patientWeight="80" />);
+      fireEvent.click(screen.getByText("LOXEN").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getByText("Bolus initial")).toBeInTheDocument();
+      expect(screen.getByText("1 mg = 1 mL")).toBeInTheDocument();
+      expect(screen.getByText("Bolus initial : 1 mg IV (= 1 mL)")).toBeInTheDocument();
+      expect(screen.getByText("1 ampoule 10 mg/10 mL")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /^PSE/i }));
+      expect(screen.getByText("Débit usuel")).toBeInTheDocument();
+      expect(screen.getByText("1-15 mg/h = 1-15 mL/h")).toBeInTheDocument();
+      expect(screen.getAllByText("PSE : administrer PUR (1 mg/mL)").length).toBeGreaterThan(0);
+      expect(screen.getByText("Soit 1-15 mL/h avec ampoule pure")).toBeInTheDocument();
+      expect(screen.queryByText("Débit PSE")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Risordan preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche les préparations bolus et PSE en v2 sans bloc débit dupliqué", () => {
+      const risordan = DRUGS.find((drug) => drug.nom === "RISORDAN")!;
+
+      render(<DrugCard drug={risordan} patientWeight="80" />);
+      fireEvent.click(screen.getByText("RISORDAN").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getAllByText("IVD en bolus : administrer PUR").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Ampoule 10 mg/10 mL").length).toBeGreaterThan(0);
+
+      fireEvent.click(screen.getByRole("button", { name: /^PSE/i }));
+
+      expect(screen.getByText("Débit usuel")).toBeInTheDocument();
+      expect(screen.getByText("1-10 mg/h = 1-10 mL/h")).toBeInTheDocument();
+      expect(screen.getAllByText("PSE : administrer PUR (1 mg/mL)").length).toBeGreaterThan(0);
+      expect(screen.getByText("Soit 1-10 mL/h avec ampoule pure")).toBeInTheDocument();
+      expect(screen.queryByText("Débit PSE")).not.toBeInTheDocument();
     });
   });
 

@@ -69,17 +69,28 @@ type DrugPrepRecipe = {
   prelever?: string;
   completer?: string;
   concentration?: string;
+  rate_label?: string;
+  rate_value?: string;
   hide_final?: boolean;
   hide_phase_volume?: boolean;
   phase_doses?: Array<{
     label: string;
-    unit?: "mg" | "µg/min";
+    unit?: "mg" | "mg/h" | "µg/min";
     duree?: string;
     dose_kg?: number;
     dose_max_kg?: number;
     dose_fixed?: number;
     dose_max_fixed?: number;
     max?: number;
+  }>;
+  weight_bands?: Array<{
+    label?: string;
+    lt?: number;
+    lte?: number;
+    gt?: number;
+    gte?: number;
+    dose: number;
+    unit?: "mg";
   }>;
   note?: string;
   etapes?: string[];

@@ -25,6 +25,12 @@
  * fois validé, déplacer l'entrée vers pse.js et retirer d'ici.
  */
 export const PSE_PREVIEW = {
+  // LOXEN : la seringue est pure à 1 mg/mL, donc le bloc débit PSE
+  // duplique strictement la préparation (mg/h = mL/h). Masqué en preview.
+  26: undefined,
+  // RISORDAN : meme logique, la PSE pure a 1 mg/mL est deja dans la preparation v2.
+  28: undefined,
+
   // Saisie = débit réglé sur la PSE (mL/h) + poids → dose déduite.
   13: {
     // Adrénaline — Amp 5 mg/5 mL ; 2 amp qsp 50 mL → 0,2 mg/mL

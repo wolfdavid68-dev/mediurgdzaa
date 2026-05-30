@@ -425,6 +425,102 @@ export const DRUGS_PREVIEW = {
       notes: ["Surveillance hémodynamique", "Surveiller tout signe hémorragique"],
     },
   },
+  25: {
+    prep: {
+      solvant: "EPPI fourni",
+      volume_final: 10,
+      conc_finale: "5 mg/mL",
+      conc_produit: 5,
+      unite: "mg",
+      duree: "Bolus IV unique < 10 sec",
+      stabilite: "Utiliser immediatement apres reconstitution",
+      preparations: [
+        {
+          titre: "Bolus IV",
+          mode: "bolus",
+          tag: "dose poids",
+          prelever: "Flacon reconstitue 50 mg/10 mL",
+          concentration: "5 mg/mL",
+          weight_bands: [
+            { lt: 60, dose: 30 },
+            { gte: 60, lt: 70, dose: 35 },
+            { gte: 70, lt: 80, dose: 40 },
+            { gte: 80, lt: 90, dose: 45 },
+            { gte: 90, dose: 50 },
+          ],
+          etapes: [
+            "Reconstituer le lyophilisat 10 000 UI (50 mg) avec les 10 mL EPPI fournis",
+            "Prelever le volume calcule selon le poids",
+            "Injection IV bolus unique strict < 10 sec - ne pas perfuser",
+          ],
+          notes: [
+            "BOLUS UNIQUE - dose adaptee au poids",
+            "Ne pas secouer le flacon lors de la reconstitution",
+            "Ne pas melanger avec G5% dans la meme ligne",
+            "Associer systematiquement anticoagulation (HNF)",
+          ],
+        },
+      ],
+      etapes: [
+        "Reconstituer le lyophilisat 10 000 UI (50 mg) avec les 10 mL EPPI fournis",
+        "Prelever le volume calcule selon le poids",
+        "Injection IV bolus unique strict < 10 sec - ne pas perfuser",
+      ],
+      notes: [
+        "BOLUS UNIQUE - dose adaptee au poids",
+        "Ne pas secouer le flacon lors de la reconstitution",
+        "Ne pas melanger avec G5% dans la meme ligne",
+        "Associer systematiquement anticoagulation (HNF)",
+      ],
+    },
+  },
+  26: {
+    prep: {
+      solvant: "Pur (NaCl 0,9% si dilution)",
+      volume_final: null,
+      conc_finale: "1 mg/mL",
+      conc_produit: 1,
+      unite: "mg",
+      duree: "Bolus puis IVSE",
+      stabilite: "24h à 25°C",
+      preparations: [
+        {
+          titre: "Bolus",
+          mode: "bolus",
+          tag: "pur 1 mg/mL",
+          prelever: "1 ampoule 10 mg/10 mL",
+          phase_doses: [{ label: "Bolus initial", dose_fixed: 1 }],
+          etapes: [
+            "Bolus initial : 1 mg IV (= 1 mL)",
+            "Administrer pur (1 mg/mL)",
+            "Surveillance hémodynamique rapprochée",
+          ],
+          notes: [
+            "Conserver l'ampoule dans son emballage (photosensible)",
+            "Titrer par paliers — ne pas dépasser baisse PA > 25% en 1h",
+          ],
+        },
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "1-15 mg/h",
+          prelever: "1 ampoule 10 mg/10 mL",
+          concentration: "1 mg/mL",
+          rate_label: "Débit usuel",
+          rate_value: "1-15 mg/h = 1-15 mL/h",
+          etapes: [
+            "PSE : administrer PUR (1 mg/mL)",
+            "Débit usuel : 1-15 mg/h selon TA cible",
+            "Soit 1-15 mL/h avec ampoule pure",
+          ],
+          notes: [
+            "Conserver l'ampoule dans son emballage (photosensible)",
+            "Titrer par paliers — ne pas dépasser baisse PA > 25% en 1h",
+          ],
+        },
+      ],
+    },
+  },
   27: {
     prep: {
       solvant: "NaCl 0,9%",
@@ -449,6 +545,54 @@ export const DRUGS_PREVIEW = {
           notes: [
             "Conserver l'ampoule dans son emballage à l'abri de la lumière",
             "Surveillance hémodynamique",
+          ],
+        },
+      ],
+    },
+  },
+  28: {
+    prep: {
+      solvant: "Pur (NaCl 0,9% si dilution)",
+      volume_final: null,
+      conc_finale: "1 mg/mL",
+      conc_produit: 1,
+      unite: "mg",
+      duree: "Bolus puis IVSE",
+      stabilite: "Utiliser immediatement",
+      preparations: [
+        {
+          titre: "Bolus",
+          mode: "bolus",
+          tag: "pur 1 mg/mL",
+          prelever: "Ampoule 10 mg/10 mL",
+          concentration: "1 mg/mL",
+          hide_final: true,
+          etapes: [
+            "IVD en bolus : administrer PUR",
+            "Utiliser l'ampoule pure a 1 mg/mL",
+            "Titrer selon PA cible",
+          ],
+          notes: [
+            "CI absolue si inhibiteurs PDE5 < 48h (effondrement PA mortel)",
+            "Surveiller PA en continu",
+          ],
+        },
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "1-10 mg/h",
+          prelever: "Ampoule 10 mg/10 mL",
+          concentration: "1 mg/mL",
+          rate_label: "Débit usuel",
+          rate_value: "1-10 mg/h = 1-10 mL/h",
+          etapes: [
+            "PSE : administrer PUR (1 mg/mL)",
+            "Debit usuel : 1-10 mg/h selon PA cible",
+            "Soit 1-10 mL/h avec ampoule pure",
+          ],
+          notes: [
+            "CI absolue si inhibiteurs PDE5 < 48h (effondrement PA mortel)",
+            "Surveiller PA en continu",
           ],
         },
       ],

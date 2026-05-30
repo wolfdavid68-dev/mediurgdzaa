@@ -22,6 +22,7 @@ type DrugPrep = NonNullable<Drug["prep"]>;
 type PreviewPrepByDrugId = Partial<Record<number, { prep?: Partial<DrugPrep> }>>;
 type PrepRecipe = NonNullable<DrugPrep["preparations"]>[number];
 type PrepRecipePhase = NonNullable<PrepRecipe["phase_doses"]>[number];
+type PrepRecipeWeightBand = NonNullable<PrepRecipe["weight_bands"]>[number];
 type PrepRecipePhaseRow = PrepRecipePhase & {
   dose: number | null;
   doseMax: number | null;
@@ -140,9 +141,11 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       const roundedDose = +dose.toFixed(1);
       const roundedDoseMax = doseMax !== null ? +doseMax.toFixed(1) : null;
       const volume =
-        unit === "mg" && prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
+        (unit === "mg" || unit === "mg/h") && prep.conc_produit
+          ? +(dose / prep.conc_produit).toFixed(1)
+          : null;
       const volumeMax =
-        unit === "mg" && prep.conc_produit && doseMax !== null
+        (unit === "mg" || unit === "mg/h") && prep.conc_produit && doseMax !== null
           ? +(doseMax / prep.conc_produit).toFixed(1)
           : null;
       const durationHours = getDurationHours(phase.duree);
@@ -162,6 +165,40 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       });
     });
     return rows;
+  };
+  const getRecipeWeightBand = (recipe: PrepRecipe) => {
+    if (!recipe.weight_bands?.length) return null;
+    if (!validKg) return { band: null, dose: null, volume: null };
+    const band = recipe.weight_bands.find((candidate: PrepRecipeWeightBand) => {
+      const aboveMin =
+        (candidate.gt === undefined || kg > candidate.gt) &&
+        (candidate.gte === undefined || kg >= candidate.gte);
+      const belowMax =
+        (candidate.lt === undefined || kg < candidate.lt) &&
+        (candidate.lte === undefined || kg <= candidate.lte);
+      return aboveMin && belowMax;
+    });
+    if (!band) return { band: null, dose: null, volume: null };
+    const volume = prep.conc_produit ? +(band.dose / prep.conc_produit).toFixed(1) : null;
+    return { band, dose: band.dose, volume };
+  };
+  const renderRecipeWeightBand = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const result = getRecipeWeightBand(recipe);
+    if (!result) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    const label = result.band?.label || "Dose poids";
+    const value =
+      result.dose === null
+        ? "Saisir le poids"
+        : `${formatDoseNumber(result.dose)} ${result.band?.unit || prep.unite || "mg"}${
+            result.volume !== null ? ` = ${formatDoseNumber(result.volume)} mL` : ""
+          }`;
+    return (
+      <div className="prep-calc-row">
+        <span className="prep-calc-step">{label}</span>
+        <span className={`prep-calc-val ${highlightClass}`}>{value}</span>
+      </div>
+    );
   };
   const renderRecipePhaseRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     const rows = getRecipePhaseRows(recipe);
@@ -362,6 +399,13 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
             </span>
           </div>
         )}
+        {renderRecipeWeightBand(recipe, "classic")}
+        {recipe.rate_label && recipe.rate_value && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">{recipe.rate_label}</span>
+            <span className="prep-calc-val prep-calc-highlight">{recipe.rate_value}</span>
+          </div>
+        )}
         {renderRecipePhaseRows(recipe, "classic")}
         {renderEffectivePrepRows(recipe)}
         {recipe.concentration && !recipe.effective_output_label && !recipe.hide_final && (
@@ -401,6 +445,13 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           <div className="prep-calc-row">
             <span className="prep-calc-step">Compléter</span>
             <span className="prep-calc-val">{recipe.completer}</span>
+          </div>
+        )}
+        {renderRecipeWeightBand(recipe, "v2")}
+        {recipe.rate_label && recipe.rate_value && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">{recipe.rate_label}</span>
+            <span className="prep-calc-val prep-highlight">{recipe.rate_value}</span>
           </div>
         )}
         {renderRecipePhaseRows(recipe, "v2")}
