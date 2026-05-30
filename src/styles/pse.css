@@ -73,6 +73,68 @@
   border-color: #fcd34d;
 }
 
+.pse-ref-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pse-ref-card {
+  overflow: hidden;
+  border: 1px solid #38bdf855;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #38bdf814, transparent 70%), #0b1728;
+}
+
+.pse-ref-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #0ea5e920;
+  border-bottom: 1px solid #38bdf833;
+  color: #bae6fd;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pse-ref-head strong {
+  color: #f8fafc;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.pse-ref-table {
+  font-size: 10.5px;
+}
+
+.pse-ref-table small {
+  color: var(--text-mute);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+[data-theme="light"] .pse-ref-card {
+  background: #ffffff;
+  border-color: #93c5fd;
+}
+
+[data-theme="light"] .pse-ref-head {
+  background: #e0f2fe;
+  border-bottom-color: #bae6fd;
+  color: #075985;
+}
+
+[data-theme="light"] .pse-ref-head strong {
+  color: #1e3a8a;
+}
+
 .pse-input-row {
   display: flex;
   align-items: center;
@@ -219,4 +281,10 @@
 .pse-table tr.pse-row-active td {
   color: #60a5fa;
   font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .pse-ref-grid {
+    grid-template-columns: 1fr;
+  }
 }

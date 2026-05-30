@@ -305,8 +305,6 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     );
 
   const renderPrepCalc = () => {
-    if (!validKg) return null;
-
     if (prep.preparations && prep.preparations.length > 0) {
       const activeRecipe = prep.preparations[activeRecipeIndex];
       return (
@@ -316,6 +314,8 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
         </div>
       );
     }
+
+    if (!validKg) return null;
 
     // Dilution FIXE (nouvelle prépa service) : préparation indépendante
     // du poids (toujours la même seringue). Boîte bleue « Pour X kg »
@@ -518,8 +518,6 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
   };
 
   const renderPrepCalcV2 = () => {
-    if (!validKg) return null;
-
     if (prep.preparations && prep.preparations.length > 0) {
       const activeRecipe = prep.preparations[activeRecipeIndex];
       return (
@@ -529,6 +527,8 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
         </div>
       );
     }
+
+    if (!validKg) return null;
 
     if (prep.fixed_dilution) {
       return (
@@ -698,80 +698,77 @@ const PrepBlock = ({ drug, weight, produitFinal }: PrepBlockProps) => {
     ? (() => {
         const r = calcPedTable(prep, weight);
         return (
-          <div className="prep-calc-box" style={{ marginTop: 8, borderColor: "#ec4899" }}>
-            <div className="prep-calc-header" style={{ color: "#ec4899" }}>
+          <div className="prep-ped-card">
+            <div className="prep-ped-head">
               <PrepIcon />
-              {prep.pedTable.titre}
+              <span>{prep.pedTable.titre}</span>
             </div>
             {prep.pedTable.description && (
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-dim)",
-                  marginBottom: 6,
-                  lineHeight: 1.4,
-                }}
-              >
-                {prep.pedTable.description}
-              </div>
+              <p className="prep-ped-desc">{prep.pedTable.description}</p>
             )}
             {!validKg && (
-              <div style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic" }}>
+              <div className="prep-ped-empty">
                 Saisir le poids de l'enfant ci-dessus pour calculer.
               </div>
             )}
             {validKg && !r && (
-              <div style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic" }}>
+              <div className="prep-ped-empty">
                 Hors plage de la table — utiliser la posologie adulte.
               </div>
             )}
             {validKg && r && (
-              <>
-                <div className="prep-calc-row">
-                  <span className="prep-calc-step">Préparation</span>
-                  <span className="prep-calc-val" style={{ textAlign: "right", fontSize: 12 }}>
-                    {r.preparation}
-                  </span>
+              <div className="prep-ped-body">
+                <div className="prep-ped-summary">
+                  <span>Pour {r.kg} kg</span>
+                  {r.dose && r.dose_unit && (
+                    <strong>
+                      {formatDoseNumber(r.dose)} {r.dose_unit}
+                    </strong>
+                  )}
+                  {r.admin_volume && (
+                    <small>
+                      {r.admin_route || "IV"} : {formatDoseNumber(r.admin_volume)} mL{" "}
+                      {r.admin_interval}
+                    </small>
+                  )}
                 </div>
-                {r.mode === "inject" && (
-                  <div className="prep-calc-row">
-                    <span className="prep-calc-step">Volume à injecter ({r.kg} kg)</span>
-                    <span
-                      className="prep-calc-val prep-calc-highlight"
-                      style={{ color: "#60a5fa", fontWeight: 800 }}
-                    >
-                      {r.vol_inject} mL
-                    </span>
+                <div className="prep-ped-steps">
+                  <div>
+                    <span>Préparation</span>
+                    <strong>{r.preparation}</strong>
                   </div>
-                )}
-                {r.mode === "dilute" && (
-                  <>
-                    <div className="prep-calc-row">
-                      <span className="prep-calc-step">Volume médicament ({r.kg} kg)</span>
-                      <span className="prep-calc-val prep-calc-highlight">{r.vol_med} mL</span>
+                  {r.mode === "inject" && (
+                    <div>
+                      <span>Injecter</span>
+                      <strong>{r.vol_inject} mL</strong>
                     </div>
-                    <div className="prep-calc-row">
-                      <span className="prep-calc-step">Compléter avec {r.solvant}</span>
-                      <span className="prep-calc-val prep-calc-highlight">{r.vol_solvant} mL</span>
-                    </div>
-                    <div className="prep-calc-row">
-                      <span className="prep-calc-step">Volume final</span>
-                      <span
-                        className="prep-calc-val prep-calc-highlight"
-                        style={{ color: "#60a5fa", fontWeight: 800 }}
-                      >
-                        {r.volume_final} mL
-                      </span>
-                    </div>
-                    {r.admin && (
-                      <div className="prep-calc-row">
-                        <span className="prep-calc-step">Administration</span>
-                        <span className="prep-calc-val">{r.admin}</span>
+                  )}
+                  {r.mode === "dilute" && (
+                    <>
+                      <div>
+                        <span>Prélever</span>
+                        <strong>{r.vol_med} mL de produit</strong>
                       </div>
-                    )}
-                  </>
-                )}
-              </>
+                      <div>
+                        <span>Compléter</span>
+                        <strong>
+                          {r.vol_solvant} mL {r.solvant}
+                        </strong>
+                      </div>
+                      <div>
+                        <span>Seringue finale</span>
+                        <strong>{r.volume_final} mL</strong>
+                      </div>
+                      {r.admin && (
+                        <div className="prep-ped-admin">
+                          <span>Injecter</span>
+                          <strong>{r.admin}</strong>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         );

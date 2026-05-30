@@ -8,6 +8,7 @@ import {
   calcPrepSufentaTable,
   calcPrepPhases,
   calcPrepDoseKg,
+  calcPedTable,
   calcDoseLibre,
   validateDoseValue,
 } from "./calc";
@@ -335,6 +336,48 @@ describe("calcDoseFromRate", () => {
     expect(calcDoseFromRate(pse, "", 70)).toBeNull();
     expect(calcDoseFromRate(pse, 5, 0)).toBeNull();
     expect(calcDoseFromRate(pse, 5, null)).toBeNull();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// calcPedTable — préparation pédiatrique IVD
+// ════════════════════════════════════════════════════════════════
+describe("calcPedTable", () => {
+  test("Adrénaline ACR enfant — 20 kg → 200 µg, 2 mL + 8 mL NaCl, injecter 1 mL", () => {
+    const prep = {
+      pedTable: {
+        bandes: [
+          {
+            kg_min: 1,
+            kg_max: 45,
+            mode: "dilute" as const,
+            preparation: "Ampoule 5 mg/5 mL (1 mg/mL)",
+            vol_per_kg: 0.1,
+            dose_per_kg: 10,
+            dose_unit: "µg",
+            volume_final: 10,
+            solvant: "NaCl 0,9%",
+            admin: "1 mL IVD toutes les 4 min",
+            admin_volume: 1,
+            admin_route: "IVD",
+            admin_interval: "toutes les 4 min",
+          },
+        ],
+      },
+    };
+
+    expect(calcPedTable(prep, 20)).toMatchObject({
+      mode: "dilute",
+      kg: 20,
+      dose: 200,
+      dose_unit: "µg",
+      vol_med: 2,
+      vol_solvant: 8,
+      volume_final: 10,
+      admin: "1 mL IVD toutes les 4 min",
+      admin_volume: 1,
+      admin_route: "IVD",
+    });
   });
 });
 

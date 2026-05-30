@@ -50,9 +50,14 @@ type PedTableBandInput = {
   mode: "inject" | "dilute";
   preparation: string;
   vol_per_kg: number;
+  dose_per_kg?: number;
+  dose_unit?: string;
   volume_final?: number;
   solvant?: string;
   admin?: string;
+  admin_volume?: number;
+  admin_route?: string;
+  admin_interval?: string;
   step?: number;
   round_mode?: "up" | "down" | "round";
 };
@@ -298,7 +303,12 @@ export function calcPedTable(
       mode: "inject",
       kg,
       preparation: bande.preparation,
+      dose: bande.dose_per_kg ? +(bande.dose_per_kg * kg).toFixed(2) : null,
+      dose_unit: bande.dose_unit,
       vol_inject: +vol.toFixed(2),
+      admin_volume: bande.admin_volume,
+      admin_route: bande.admin_route,
+      admin_interval: bande.admin_interval,
     };
   }
 
@@ -311,11 +321,16 @@ export function calcPedTable(
       mode: "dilute",
       kg,
       preparation: bande.preparation,
+      dose: bande.dose_per_kg ? +(bande.dose_per_kg * kg).toFixed(2) : null,
+      dose_unit: bande.dose_unit,
       vol_med: +volMed.toFixed(1),
       vol_solvant: volSolv,
       volume_final: bande.volume_final,
       solvant: bande.solvant,
       admin: bande.admin,
+      admin_volume: bande.admin_volume,
+      admin_route: bande.admin_route,
+      admin_interval: bande.admin_interval,
     };
   }
 

@@ -21,9 +21,14 @@ type PedTableBande = {
   mode: "inject" | "dilute";
   preparation: string;
   vol_per_kg: number;
+  dose_per_kg?: number;
+  dose_unit?: string;
   volume_final?: number;
   solvant?: string;
   admin?: string;
+  admin_volume?: number;
+  admin_route?: string;
+  admin_interval?: string;
   step?: number;
   round_mode?: "up" | "down" | "round";
 };

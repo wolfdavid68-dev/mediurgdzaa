@@ -273,11 +273,17 @@ export const DRUGS_ANTIDOTES = [
       solvant: "Pur",
       volume_final: null,
       conc_finale: "5 mg/mL",
-      conc_produit: 5,
-      unite: "mg",
-      dose_kg: 0.1,
       duree: "IVD",
       stabilite: "Utiliser immédiatement après ouverture",
+      preparations: [
+        {
+          titre: "IVD pur",
+          mode: "bolus",
+          tag: "1 ampoule",
+          prelever: "1 ampoule 5 mg/1 mL",
+          concentration: "5 mg/mL",
+        },
+      ],
       etapes: [
         "Ampoule 5 mg/1 mL",
         "Adulte : administrer 1 ampoule pure",

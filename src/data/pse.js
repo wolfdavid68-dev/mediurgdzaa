@@ -28,6 +28,20 @@ export const PSE = {
   13: { // Adrénaline — 2 amp 5 mg/5 mL qsp 50 mL G5% → 200 µg/mL
     conc: 200, unite: "µg/kg/min", min: 0.05, max: 1,
     steps: [0.1, 0.2, 0.3, 0.5, 1],
+    referenceTables: [
+      {
+        title: "PSE adulte",
+        subtitle: "Repère 70 kg",
+        weightKg: 70,
+        steps: [0.05, 0.1, 0.2, 0.3, 0.5, 1],
+      },
+      {
+        title: "PSE enfant",
+        subtitle: "Repère 20 kg",
+        weightKg: 20,
+        steps: [0.05, 0.1, 0.2, 0.3, 0.5, 1],
+      },
+    ],
   },
   17: { // Noradrénaline — 2 amp 8 mg/4 mL qsp 48 mL G5% → 333 µg/mL
     conc: 333, unite: "µg/kg/min", min: 0.05, max: 2,

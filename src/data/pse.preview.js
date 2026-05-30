@@ -37,6 +37,20 @@ export const PSE_PREVIEW = {
     mlhSteps: [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
     steps: [0.1, 0.2, 0.3, 0.5, 1],
     tag: "2 amp 5 mg qsp 50 mL G5% → 0,2 mg/mL",
+    referenceTables: [
+      {
+        title: "PSE adulte",
+        subtitle: "Repère 70 kg",
+        weightKg: 70,
+        steps: [0.05, 0.1, 0.2, 0.3, 0.5, 1],
+      },
+      {
+        title: "PSE enfant",
+        subtitle: "Repère 20 kg",
+        weightKg: 20,
+        steps: [0.05, 0.1, 0.2, 0.3, 0.5, 1],
+      },
+    ],
   },
   17: {
     // Noradrénaline — Amp 8 mg/4 mL ; 2 amp qsp 48 mL → 0,33 mg/mL

@@ -246,6 +246,25 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Adrénaline", () => {
+    test("affiche les repères PSE adulte/enfant et la préparation ACR enfant IVD", () => {
+      const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
+
+      render(<DrugCard drug={adrenaline} patientWeight="20" />);
+      fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
+
+      expect(screen.getByText("PSE adulte")).toBeInTheDocument();
+      expect(screen.getByText("Repère 70 kg")).toBeInTheDocument();
+      expect(screen.getByText("PSE enfant")).toBeInTheDocument();
+      expect(screen.getByText("Repère 20 kg")).toBeInTheDocument();
+
+      expect(screen.getAllByText("200 µg").length).toBeGreaterThan(0);
+      expect(screen.getByText("2 mL de produit")).toBeInTheDocument();
+      expect(screen.getByText("8 mL NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.getByText("1 mL IVD toutes les 4 min")).toBeInTheDocument();
+    });
+  });
+
   describe("Préparation SUFENTANIL", () => {
     test("affiche la préparation PSE et une préparation intranasale vide", () => {
       const sufentanil = DRUGS.find((drug) => drug.nom === "SUFENTANIL")!;

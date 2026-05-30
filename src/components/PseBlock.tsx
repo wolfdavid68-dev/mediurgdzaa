@@ -12,6 +12,13 @@ type PseExtra = {
   steps: number[];
 };
 
+type PseReferenceTable = {
+  title: string;
+  subtitle?: string;
+  weightKg: number;
+  steps?: number[];
+};
+
 type PseEntry = PseFormula & {
   min: number;
   max: number;
@@ -25,6 +32,7 @@ type PseEntry = PseFormula & {
   effectiveInputLabel?: string;
   effectiveInputUnit?: string;
   effectiveInputConc?: number;
+  referenceTables?: PseReferenceTable[];
   extra?: PseExtra;
 };
 
@@ -87,6 +95,37 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
 
   const dose = reverse ? calcDoseFromRate(pse, pseRate, weight, dosePrec) : null;
   const doseOut = dose != null && (dose < pse.min || dose > pse.max);
+  const referenceTables =
+    pse.referenceTables && pse.referenceTables.length > 0 ? (
+      <div className="pse-ref-grid" aria-label="Repères PSE">
+        {pse.referenceTables.map((table) => (
+          <div key={`${table.title}-${table.weightKg}`} className="pse-ref-card">
+            <div className="pse-ref-head">
+              <span>{table.title}</span>
+              <strong>{table.subtitle || `${table.weightKg} kg`}</strong>
+            </div>
+            <table className="pse-table pse-ref-table">
+              <thead>
+                <tr>
+                  <th>Dose</th>
+                  <th>mL/h</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(table.steps || pse.steps).map((step: number) => (
+                  <tr key={step}>
+                    <td>
+                      {step} <small>{pse.unite}</small>
+                    </td>
+                    <td>{calcDebit(pse, step, table.weightKg)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    ) : null;
 
   return (
     <div className="pse-block">
@@ -110,6 +149,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
       </div>
       <div className="pse-body">
         {pse.note && <div className="pse-note">{pse.note}</div>}
+        {referenceTables}
 
         {reverse && (
           <>

@@ -94,10 +94,9 @@ export const DRUGS_CURARES = [
         "IVD en bolus à l'induction",
         "Administrer PUR",
         "ISR : 1,2 mg/kg IV rapide",
-        "Entretien : 0,1-0,2 mg/kg /20-30 min",
         "Voies : VVP ou VVC",
       ],
-      p: ["ISR : 1,2 mg/kg IV", "Entretien : 0,1-0,15 mg/kg IV"],
+      p: ["ISR : 1,2 mg/kg IV"],
     },
     prep: {
       solvant: "NaCl 0,9%",
@@ -131,22 +130,12 @@ export const DRUGS_CURARES = [
     couleur: "#DC2626",
     icon: "⚙️",
     desc: "Curare non dépolarisant à délai long. FRIGO (Déchoc 1). Nécessite une mobilisation limitée du patient en bloc et une attention particulière au niveau des cervicales.",
-    indic: [
-      "Curarisation pour ventilation mécanique prolongée",
-      "Entretien curarisation en PSE",
-      "Insuffisance hépatique / rénale (métabolisme de Hofmann)",
-    ],
+    indic: ["Curarisation ponctuelle", "Insuffisance hépatique / rénale (métabolisme de Hofmann)"],
     ci: ["Allergie"],
     ei: ["Anaphylaxie (rare)", "Hypotension si injection rapide", "Bradycardie"],
     cond: ["Ampoule 20 mg/10 mL (2 mg/mL)"],
     poso: {
-      a: [
-        "Administrer PUR",
-        "Peut être administré en PSE",
-        "Bolus initial : 0,15 mg/kg IV",
-        "Entretien : 0,03 mg/kg /20-30 min",
-        "Voies : VVP ou VVC",
-      ],
+      a: ["Administrer PUR", "Bolus initial : 0,15 mg/kg IV", "Voies : VVP ou VVC"],
       p: ["0,1 mg/kg IV"],
     },
     prep: {
@@ -156,7 +145,7 @@ export const DRUGS_CURARES = [
       conc_produit: 1,
       unite: "mg",
       dose_kg: 0.15,
-      duree: "Bolus ou IVSE",
+      duree: "Bolus IV",
       stabilite: "24h à 25°C",
       prelever_total: true,
       prelever_vol: 10,
@@ -165,11 +154,7 @@ export const DRUGS_CURARES = [
         "Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL",
         "Posologie : 0,15 mg/kg IV",
       ],
-      notes: [
-        "Administrer dilué pour éviter l'allergie",
-        "Pas d'hyperkaliémie",
-        "Indication ≠ Célocurine : entretien de curarisation, pas l'ISR",
-      ],
+      notes: ["Pas d'hyperkaliémie"],
     },
   },
 ];
