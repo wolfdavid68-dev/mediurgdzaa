@@ -64,10 +64,23 @@ type DrugPrepTable = {
 type DrugPrepRecipe = {
   titre: string;
   mode?: string;
+  population?: "adulte" | "enfant";
   tag?: string;
   prelever?: string;
   completer?: string;
   concentration?: string;
+  hide_final?: boolean;
+  hide_phase_volume?: boolean;
+  phase_doses?: Array<{
+    label: string;
+    unit?: "mg" | "µg/min";
+    duree?: string;
+    dose_kg?: number;
+    dose_max_kg?: number;
+    dose_fixed?: number;
+    dose_max_fixed?: number;
+    max?: number;
+  }>;
   note?: string;
   etapes?: string[];
   notes?: string[];

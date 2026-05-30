@@ -285,6 +285,263 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Éphédrine preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche la dilution fixe à 3 mg/mL sans calcul pondéral de préparation", () => {
+      const ephedrine = DRUGS.find((drug) => drug.nom === "ÉPHÉDRINE")!;
+
+      render(<DrugCard drug={ephedrine} patientWeight="35" />);
+      fireEvent.click(screen.getByText("ÉPHÉDRINE").closest("button")!);
+
+      expect(screen.getByText("1 ampoule 30 mg/1 mL")).toBeInTheDocument();
+      expect(screen.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.getAllByText("3 mg/mL").length).toBeGreaterThan(0);
+      expect(screen.queryByText("3.5 mg")).not.toBeInTheDocument();
+      expect(screen.queryByText("0.1 mL du produit")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Noradrénaline preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche la préparation PSE enfant sans cohabitation adulte", () => {
+      const noradrenaline = DRUGS.find((drug) => drug.nom === "NORADRÉNALINE")!;
+
+      render(<DrugCard drug={noradrenaline} patientWeight="20" />);
+      fireEvent.click(screen.getByText("NORADRÉNALINE").closest("button")!);
+
+      expect(screen.getByText("Pour 20 kg — enfant")).toBeInTheDocument();
+      expect(screen.getByText("PSE enfant")).toBeInTheDocument();
+      expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
+      expect(screen.getByText("Pédia : 0,05-2 µg/kg/min IVSE")).toBeInTheDocument();
+      expect(screen.queryByText("Repères dose → débit — enfant")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Actilyse preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche les préparations IDM, EP massive et AVC calculées au poids", () => {
+      const actilyse = DRUGS.find((drug) => drug.nom === "ACTILYSE")!;
+
+      render(<DrugCard drug={actilyse} patientWeight="80" />);
+      fireEvent.click(screen.getByText("ACTILYSE").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /IDM/i })).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByText("Bolus IV")).toBeInTheDocument();
+      expect(screen.getByText("15 mg")).toBeInTheDocument();
+      expect(screen.getByText("60 mg — débit 120 mL/h")).toBeInTheDocument();
+      expect(screen.getByText("40 mg — débit 40 mL/h")).toBeInTheDocument();
+      expect(screen.queryByText("Final")).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /EP massive/i }));
+      expect(screen.getByText("10 mg")).toBeInTheDocument();
+      expect(screen.getByText("90 mg — débit 45 mL/h")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /AVC/i }));
+      expect(screen.getAllByText("72 mg").length).toBeGreaterThan(0);
+      expect(screen.getByText("7,2 mg")).toBeInTheDocument();
+      expect(screen.getByText("64,8 mg — débit 64,8 mL/h")).toBeInTheDocument();
+    });
+  });
+
+  describe("Atropine preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche une préparation pure adulte sans calcul pondéral", () => {
+      const atropine = DRUGS.find((drug) => drug.nom === "ATROPINE")!;
+
+      render(<DrugCard drug={atropine} patientWeight="80" />);
+      fireEvent.click(screen.getByText("ATROPINE").closest("button")!);
+
+      expect(screen.getByText("2 ampoules")).toBeInTheDocument();
+      expect(screen.getByText("1 mg = 2 mL")).toBeInTheDocument();
+      expect(
+        screen.getByText("Bradycardie : 0,5-1 mg IV, répéter toutes les 3-5 min (max 3 mg)")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("1.6 mg")).not.toBeInTheDocument();
+      expect(screen.queryByText("3.2 mL du produit")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Brevibloc preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("sépare la dose de charge et le PSE avec le débit calculé", () => {
+      const brevibloc = DRUGS.find((drug) => drug.nom === "BREVIBLOC")!;
+
+      render(<DrugCard drug={brevibloc} patientWeight="80" />);
+      fireEvent.click(screen.getByText("BREVIBLOC").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /Charge 1 min/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getByText("Dose de charge")).toBeInTheDocument();
+      expect(screen.getByText("40 mg = 4 mL")).toBeInTheDocument();
+      expect(screen.getByText("Entretien PSE : 50 µg/kg/min")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /PSE entretien/i }));
+
+      expect(screen.getByText("4000 µg/min — débit 24 mL/h")).toBeInTheDocument();
+      expect(screen.queryByText("4000 mg/min")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Cordarone preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("regroupe les ACR puis sépare charge et PSE entretien", () => {
+      const cordarone = DRUGS.find((drug) => drug.nom === "CORDARONE")!;
+
+      render(<DrugCard drug={cordarone} patientWeight="80" />);
+      fireEvent.click(screen.getByText("CORDARONE").closest("button")!);
+
+      expect(screen.getByRole("button", { name: /ACR/i })).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByText("Ampoule 150 mg/3 mL (50 mg/mL)")).toBeInTheDocument();
+      expect(screen.getByText("300 mg = 6 mL")).toBeInTheDocument();
+      expect(screen.getByText("150 mg = 3 mL")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /IVL dose de charge/i }));
+      expect(screen.getByText("300 mg = 6 mL")).toBeInTheDocument();
+      expect(screen.getByText("G5% STRICT sur 30 min")).toBeInTheDocument();
+      expect(screen.getByText("IVL : dose de charge 5 mg/kg dans G5% STRICT")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /PSE entretien/i }));
+      expect(screen.getByText("4 ampoules 150 mg/3 mL (= 600 mg/12 mL)")).toBeInTheDocument();
+      expect(screen.getByText("à 48 mL avec G5%")).toBeInTheDocument();
+      expect(screen.getByText("12,5 mg/mL")).toBeInTheDocument();
+    });
+  });
+
+  describe("Digoxine preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche la préparation IVL en v2", () => {
+      const digoxine = DRUGS.find((drug) => drug.nom === "DIGOXINE NATIVELLE")!;
+
+      render(<DrugCard drug={digoxine} patientWeight="80" />);
+      fireEvent.click(screen.getByText("DIGOXINE NATIVELLE").closest("button")!);
+
+      expect(screen.getByText("1 ampoule 0,5 mg/2 mL")).toBeInTheDocument();
+      expect(screen.getByText("mini-flac 100 mL NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.getAllByText("0,5 mg/100 mL = 5 µg/mL").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("ECG obligatoire avant injection").length).toBeGreaterThan(0);
+      expect(screen.getByText("Marge thérapeutique étroite")).toBeInTheDocument();
+      expect(screen.queryByText("Final")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Eupressyl preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche la préparation PSE pure en v2 sans bolus", () => {
+      const eupressyl = DRUGS.find((drug) => drug.nom === "EUPRESSYL")!;
+
+      render(<DrugCard drug={eupressyl} patientWeight="80" />);
+      fireEvent.click(screen.getByText("EUPRESSYL").closest("button")!);
+
+      expect(screen.queryByRole("button", { name: /Bolus pur/i })).not.toBeInTheDocument();
+      expect(screen.getAllByText("PSE : administrer PUR").length).toBeGreaterThan(0);
+      expect(screen.getByText("Ampoule 25 mg/5 mL")).toBeInTheDocument();
+      expect(screen.getAllByText("Dose usuelle : 5-30 mg/h selon TA cible").length).toBeGreaterThan(
+        0
+      );
+      expect(screen.getByText("Débit : 1-6 mL/h avec ampoule pure à 5 mg/mL")).toBeInTheDocument();
+      expect(screen.getByText("Voies : VVP ou VVC")).toBeInTheDocument();
+    });
+  });
+
+  describe("Isoptine preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche une préparation IVL v2 avec dose et volume injectés", () => {
+      const isoptine = DRUGS.find((drug) => drug.nom === "ISOPTINE")!;
+
+      render(<DrugCard drug={isoptine} patientWeight="50" />);
+      fireEvent.click(screen.getByText("ISOPTINE").closest("button")!);
+
+      expect(screen.getByText("1 ampoule 5 mg/2 mL")).toBeInTheDocument();
+      expect(screen.getByText("à 10 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.getByText("Injecter")).toBeInTheDocument();
+      expect(screen.getByText("3,8-7,5 mg = 7,5-15 mL")).toBeInTheDocument();
+      expect(screen.getByText("Injecter lentement en 2 à 3 min")).toBeInTheDocument();
+    });
+  });
+
   describe("Préparation SUFENTANIL", () => {
     test("affiche la préparation PSE et une préparation intranasale vide", () => {
       const sufentanil = DRUGS.find((drug) => drug.nom === "SUFENTANIL")!;

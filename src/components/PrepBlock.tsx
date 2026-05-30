@@ -20,6 +20,15 @@ import type { Drug } from "../types/data";
 // drogues à pedTable présentes dans l'override) disparaît en preview.
 type DrugPrep = NonNullable<Drug["prep"]>;
 type PreviewPrepByDrugId = Partial<Record<number, { prep?: Partial<DrugPrep> }>>;
+type PrepRecipe = NonNullable<DrugPrep["preparations"]>[number];
+type PrepRecipePhase = NonNullable<PrepRecipe["phase_doses"]>[number];
+type PrepRecipePhaseRow = PrepRecipePhase & {
+  dose: number | null;
+  doseMax: number | null;
+  volume: number | null;
+  volumeMax: number | null;
+  rate: number | null;
+};
 
 const resolvePrep = (drug: Drug): DrugPrep | null => {
   const override = isPreview() ? (DRUGS_PREVIEW as PreviewPrepByDrugId)[drug.id]?.prep : null;
@@ -65,10 +74,20 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   }
   const formatDoseNumber = (value: number) =>
     Number.isInteger(value) ? String(value) : String(value).replace(".", ",");
-  const activeRecipeIndex = prep.preparations?.[activePrepIndex] ? activePrepIndex : 0;
-  const recipeModeClass = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+  const formatNumberRange = (min: number, max: number | null) =>
+    max !== null && max !== min
+      ? `${formatDoseNumber(min)}-${formatDoseNumber(max)}`
+      : formatDoseNumber(min);
+  const previewMode = isPreview();
+  const inferredPopulation = validKg && kg < 30 ? "enfant" : "adulte";
+  const activePopulation = prepPopulation || inferredPopulation;
+  const visiblePreparations = (prep.preparations || []).filter(
+    (recipe) => !recipe.population || recipe.population === activePopulation
+  );
+  const activeRecipeIndex = visiblePreparations[activePrepIndex] ? activePrepIndex : 0;
+  const recipeModeClass = (recipe: PrepRecipe) =>
     recipe.mode ? ` prep-recipe-${recipe.mode}` : "";
-  const getEffectivePrep = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => {
+  const getEffectivePrep = (recipe: PrepRecipe) => {
     if (!recipe.effective_input_conc || !recipe.effective_output_conc) return null;
     const volume = parseFloat(effectivePrepInput);
     if (!Number.isFinite(volume) || volume <= 0) return null;
@@ -77,7 +96,99 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     const rate = +(hourlyDose / recipe.effective_output_conc).toFixed(2);
     return { hourlyDose, rate };
   };
-  const renderEffectivePrepInput = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+  const getRecipePhaseRows = (recipe: PrepRecipe): PrepRecipePhaseRow[] => {
+    if (!recipe.phase_doses?.length) return [];
+    const getDurationHours = (duration?: string) => {
+      if (!duration) return null;
+      const normalized = duration.toLowerCase().replace(",", ".");
+      const match = normalized.match(/^(\d+(?:\.\d+)?)\s*(min|h)$/);
+      if (!match) return null;
+      const value = Number(match[1]);
+      if (!Number.isFinite(value) || value <= 0) return null;
+      return match[2] === "min" ? value / 60 : value;
+    };
+    const rows: PrepRecipePhaseRow[] = [];
+    recipe.phase_doses.forEach((phase) => {
+      if (phase.dose_fixed === undefined && phase.dose_kg === undefined) return;
+      if (phase.dose_kg !== undefined && !validKg) {
+        rows.push({
+          ...phase,
+          dose: null,
+          doseMax: null,
+          volume: null,
+          volumeMax: null,
+          rate: null,
+        });
+        return;
+      }
+      const rawDose =
+        phase.dose_fixed !== undefined ? phase.dose_fixed : Number(phase.dose_kg) * kg;
+      const rawDoseMax =
+        phase.dose_max_fixed !== undefined
+          ? phase.dose_max_fixed
+          : phase.dose_max_kg !== undefined && validKg
+            ? phase.dose_max_kg * kg
+            : null;
+      const dose = phase.max !== undefined ? Math.min(rawDose, phase.max) : rawDose;
+      const doseMax =
+        rawDoseMax !== null
+          ? phase.max !== undefined
+            ? Math.min(rawDoseMax, phase.max)
+            : rawDoseMax
+          : null;
+      const unit = phase.unit || "mg";
+      const roundedDose = +dose.toFixed(1);
+      const roundedDoseMax = doseMax !== null ? +doseMax.toFixed(1) : null;
+      const volume =
+        unit === "mg" && prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
+      const volumeMax =
+        unit === "mg" && prep.conc_produit && doseMax !== null
+          ? +(doseMax / prep.conc_produit).toFixed(1)
+          : null;
+      const durationHours = getDurationHours(phase.duree);
+      const rate =
+        unit === "µg/min" && prep.conc_produit
+          ? +(((roundedDose / 1000) * 60) / prep.conc_produit).toFixed(1)
+          : volume !== null && durationHours && phase.label.toLowerCase().includes("pse")
+            ? +(volume / durationHours).toFixed(1)
+            : null;
+      rows.push({
+        ...phase,
+        dose: roundedDose,
+        doseMax: roundedDoseMax,
+        volume,
+        volumeMax,
+        rate,
+      });
+    });
+    return rows;
+  };
+  const renderRecipePhaseRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const rows = getRecipePhaseRows(recipe);
+    if (!rows.length) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    return (
+      <>
+        {rows.map((phase) => (
+          <div key={`${recipe.titre}-${phase.label}`} className="prep-calc-row">
+            <span className="prep-calc-step">{phase.label}</span>
+            <span className={`prep-calc-val ${highlightClass}`}>
+              {phase.dose === null
+                ? "Saisir le poids"
+                : `${formatNumberRange(phase.dose, phase.doseMax)} ${phase.unit || "mg"}${
+                    phase.volume !== null && !recipe.hide_phase_volume
+                      ? ` = ${formatNumberRange(phase.volume, phase.volumeMax)} mL`
+                      : ""
+                  }${phase.duree && !recipe.hide_phase_volume ? ` / ${phase.duree}` : ""}${
+                    phase.rate !== null ? ` — débit ${formatDoseNumber(phase.rate)} mL/h` : ""
+                  }`}
+            </span>
+          </div>
+        ))}
+      </>
+    );
+  };
+  const renderEffectivePrepInput = (recipe: PrepRecipe) =>
     recipe.effective_input_conc && recipe.effective_output_conc ? (
       <label className="prep-inline-input">
         <span>{recipe.effective_input_label || "Dose efficace"}</span>
@@ -93,7 +204,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         <span>{recipe.effective_input_unit || "mL"}</span>
       </label>
     ) : null;
-  const renderEffectivePrepRows = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => {
+  const renderEffectivePrepRows = (recipe: PrepRecipe) => {
     const result = getEffectivePrep(recipe);
     if (!result) return null;
     return (
@@ -140,9 +251,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   };
 
   const renderRecipeSwitch = () =>
-    prep.preparations && prep.preparations.length > 1 ? (
+    visiblePreparations.length > 1 ? (
       <div className="prep-mode-switch" role="group" aria-label="Choix de préparation">
-        {prep.preparations.map((recipe, index) => (
+        {visiblePreparations.map((recipe, index) => (
           <button
             key={recipe.titre}
             type="button"
@@ -159,7 +270,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       </div>
     ) : null;
 
-  const renderRecipeEmpty = (recipe: NonNullable<DrugPrep["preparations"]>[number]) => (
+  const renderRecipeEmpty = (recipe: PrepRecipe) => (
     <div className={`prep-calc-empty${recipeModeClass(recipe)}`}>
       <div className="prep-calc-header">
         <InfoIcon /> {recipe.titre}
@@ -169,10 +280,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     </div>
   );
 
-  const renderRecipeSufentaTable = (
-    recipe: NonNullable<DrugPrep["preparations"]>[number],
-    variant: "classic" | "v2"
-  ) => {
+  const renderRecipeSufentaTable = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     const r = calcPrepSufentaTable(weight);
     if (!r) return null;
     if (variant === "v2") {
@@ -225,7 +333,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
   };
 
-  const renderRecipeCalcBox = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+  const renderRecipeCalcBox = (recipe: PrepRecipe) =>
     recipe.empty ? (
       renderRecipeEmpty(recipe)
     ) : recipe.sufenta_table ? (
@@ -254,8 +362,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
             </span>
           </div>
         )}
+        {renderRecipePhaseRows(recipe, "classic")}
         {renderEffectivePrepRows(recipe)}
-        {recipe.concentration && !recipe.effective_output_label && (
+        {recipe.concentration && !recipe.effective_output_label && !recipe.hide_final && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Final</span>
             <span className="prep-calc-val">{recipe.concentration}</span>
@@ -270,7 +379,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       </div>
     );
 
-  const renderRecipeCalc = (recipe: NonNullable<DrugPrep["preparations"]>[number]) =>
+  const renderRecipeCalc = (recipe: PrepRecipe) =>
     recipe.empty ? (
       renderRecipeEmpty(recipe)
     ) : recipe.sufenta_table ? (
@@ -294,8 +403,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
             <span className="prep-calc-val">{recipe.completer}</span>
           </div>
         )}
+        {renderRecipePhaseRows(recipe, "v2")}
         {renderEffectivePrepRows(recipe)}
-        {recipe.concentration && !recipe.effective_output_label && (
+        {recipe.concentration && !recipe.effective_output_label && !recipe.hide_final && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Final</span>
             <span className="prep-calc-val prep-highlight">{recipe.concentration}</span>
@@ -311,8 +421,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
 
   const renderPrepCalc = () => {
-    if (prep.preparations && prep.preparations.length > 0) {
-      const activeRecipe = prep.preparations[activeRecipeIndex];
+    if (visiblePreparations.length > 0) {
+      const activeRecipe = visiblePreparations[activeRecipeIndex];
       return (
         <div className="prep-calc-list">
           {renderRecipeSwitch()}
@@ -524,8 +634,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   };
 
   const renderPrepCalcV2 = () => {
-    if (prep.preparations && prep.preparations.length > 0) {
-      const activeRecipe = prep.preparations[activeRecipeIndex];
+    if (visiblePreparations.length > 0) {
+      const activeRecipe = visiblePreparations[activeRecipeIndex];
       return (
         <div className="prep-calc-list">
           {renderRecipeSwitch()}
@@ -692,15 +802,12 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
   };
 
-  const previewMode = isPreview();
-  const inferredPopulation = validKg && kg < 30 ? "enfant" : "adulte";
-  const activePopulation = prepPopulation || inferredPopulation;
   const pediatricPrepOnly = Boolean(
     previewMode && prep.pedTable && validKg && activePopulation === "enfant"
   );
   const prepCalcBlock = pediatricPrepOnly ? null : renderPrepCalc();
   const prepCalcV2Block = pediatricPrepOnly ? null : renderPrepCalcV2();
-  const activeRecipe = prep.preparations?.[activeRecipeIndex];
+  const activeRecipe = visiblePreparations[activeRecipeIndex];
   const visibleEtapes = pediatricPrepOnly
     ? []
     : activeRecipe && Object.hasOwn(activeRecipe, "etapes")
