@@ -144,14 +144,6 @@ export const DRUGS_NEUROLOGIE = [
           notes: ["Risque d'apnée et de dépression respiratoire", "Dose pédiatrique max 10 mg"],
         },
       ],
-      etapes: [
-        "Ampoule 20 mg/2 mL (10 mg/mL)",
-        "IVD : administrer pur lentement",
-        "Adulte : 10 mg en cas de crise convulsive",
-        "IVL possible : 10 mg en miniflac sur 30 min",
-        "IM ou intra-rectal possible selon indication",
-      ],
-      notes: ["Risque d'apnée et de dépression respiratoire", "Dose pédiatrique max 10 mg"],
     },
   },
   {
@@ -333,16 +325,6 @@ export const DRUGS_NEUROLOGIE = [
             "Surveillance hémodynamique obligatoire : hypotension, bradycardie, troubles du rythme",
           ],
         },
-      ],
-      etapes: [
-        "Prodilantin 750 mg (= 500 mg EP)/10 mL",
-        "Prélever le volume Vi d'ampoule pure selon le poids",
-        "Diluer avec G5% ou NaCl 0,9% (PHY) pour obtenir le volume Vf",
-        "Administrer à 200 mL/h selon la table",
-      ],
-      notes: [
-        "Table basée sur 15 mg EP/kg",
-        "Surveillance hémodynamique obligatoire : hypotension, bradycardie, troubles du rythme",
       ],
       table: {
         titre: "Table de dilution PRODILANTIN 750 mg (500 mg EP)/10 mL",

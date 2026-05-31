@@ -823,13 +823,6 @@ export const DRUGS_CARDIOLOGIE = [
           notes: ["Surveillance hémodynamique"],
         },
       ],
-      etapes: [
-        "Flacon 25 mg poudre",
-        "Reconstituer puis diluer 1 ampoule qsp 25 mL NaCl 0,9% → 1 mg/mL",
-        "Injecter la dose calculée en 2 min",
-        "TSV ou FA : 25 mg sur 20 min",
-      ],
-      notes: ["Surveillance hémodynamique"],
     },
   },
 ];

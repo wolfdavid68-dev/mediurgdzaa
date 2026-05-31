@@ -1,14 +1,14 @@
 # Rapport données cliniques MediURG
 
-Généré le 2026-05-29 pour v110.
+Généré le 2026-05-31 pour v110.
 
 ## Synthèse
 
 | Domaine | Volume |
 | --- | ---: |
 | Médicaments | 81 |
-| Médicaments avec préparation | 73 |
-| Entrées PSE | 18 |
+| Médicaments avec préparation | 72 |
+| Entrées PSE | 19 |
 | Protocoles | 14 |
 | Kits de préparation | 8 |
 | Entrées incompatibilités | 61 |

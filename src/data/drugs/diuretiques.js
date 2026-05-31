@@ -112,12 +112,6 @@ export const DRUGS_DIURETIQUES = [
           ],
         },
       ],
-      etapes: [
-        "Ampoule 20 mg/2 mL (10 mg/mL) — administrer pure en bolus",
-        "PSE entretien : ampoule 250 mg/25 mL pure",
-        "Ototoxicité si injection rapide : toujours > 2 min",
-      ],
-      notes: ["Rincer la tubulure avant et après (incompatibilités nombreuses)"],
     },
   },
 ];
