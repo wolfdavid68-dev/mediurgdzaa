@@ -47,13 +47,103 @@ export const DRUGS_NEUROLOGIE = [
       p: ["IVD : 0,3-0,5 mg/kg lente (max 10 mg)", "Rectal : 0,5 mg/kg (max 10 mg)"],
     },
     prep: {
-      solvant: "Pur",
+      solvant: "Pur / NaCl 0,9% si IVL",
       volume_final: null,
       conc_finale: "10 mg/mL",
       conc_produit: 10,
       unite: "mg",
-      duree: "IV lente",
+      duree: "IVD, IVL ou IM",
       stabilite: "Utiliser immédiatement",
+      preparations: [
+        {
+          titre: "IVD crise convulsive",
+          mode: "bolus",
+          population: "adulte",
+          tag: "10 mg pur",
+          prelever: "1 mL (= 10 mg)",
+          rate_label: "Injecter",
+          rate_value: "IVD pur",
+          hide_final: true,
+          etapes: [
+            "Ampoule 20 mg/2 mL (10 mg/mL)",
+            "IVD : administrer 10 mg pur en cas de crise convulsive",
+          ],
+          notes: ["Risque d'apnée et de dépression respiratoire"],
+        },
+        {
+          titre: "IVL",
+          mode: "bolus",
+          population: "adulte",
+          tag: "30 min",
+          prelever: "1 mL (= 10 mg)",
+          rows: [
+            { label: "Diluer", value: "en miniflac NaCl 0,9%" },
+            { label: "Perfuser", value: "sur 30 min", highlight: true },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 20 mg/2 mL (10 mg/mL)",
+            "IVL : 10 mg en miniflac NaCl 0,9%",
+            "Perfuser sur 30 min",
+          ],
+          notes: ["Risque d'apnée et de dépression respiratoire"],
+        },
+        {
+          titre: "IM",
+          mode: "bolus",
+          population: "adulte",
+          tag: "10 mg pur",
+          prelever: "1 mL (= 10 mg)",
+          rate_label: "Injecter",
+          rate_value: "IM pur",
+          hide_final: true,
+          etapes: ["Ampoule 20 mg/2 mL (10 mg/mL)", "IM : administrer 10 mg pur"],
+          notes: ["Risque d'apnée et de dépression respiratoire"],
+        },
+        {
+          titre: "IVD enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "0,3-0,5 mg/kg max 10 mg",
+          phase_doses: [
+            {
+              label: "Injecter",
+              dose_kg: 0.3,
+              dose_max_kg: 0.5,
+              max: 10,
+              unit: "mg",
+              suffix: " IVD lente",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 20 mg/2 mL (10 mg/mL)",
+            "Injecter la dose calculée à gauche en IVD lente",
+          ],
+          notes: ["Risque d'apnée et de dépression respiratoire", "Dose pédiatrique max 10 mg"],
+        },
+        {
+          titre: "Rectal enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "0,5 mg/kg max 10 mg",
+          phase_doses: [
+            {
+              label: "Administrer",
+              dose_kg: 0.5,
+              max: 10,
+              unit: "mg",
+              suffix: " intra-rectal pur",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 20 mg/2 mL (10 mg/mL)",
+            "Administrer la dose calculée à gauche en intra-rectal pur",
+          ],
+          notes: ["Risque d'apnée et de dépression respiratoire", "Dose pédiatrique max 10 mg"],
+        },
+      ],
       etapes: [
         "Ampoule 20 mg/2 mL (10 mg/mL)",
         "IVD : administrer pur lentement",
@@ -131,6 +221,7 @@ export const DRUGS_NEUROLOGIE = [
     cond: ["Ampoule 500 mg/5 mL"],
     poso: {
       a: [
+        "40 à 60 mg/kg IV (max 4 g)",
         "IVL : sur 15-20 min dans NaCl 0,9%",
         "Jusqu'à 1000 mg dans 100 mL",
         "> 1000 mg dans 250 mL",
@@ -147,6 +238,38 @@ export const DRUGS_NEUROLOGIE = [
       dose_kg: 60,
       duree: "15-20 min",
       stabilite: "Stable 24h à 25°C",
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "40-60 mg/kg max 4 g",
+          phase_doses: [
+            {
+              label: "Dose / prélever",
+              dose_kg: 40,
+              dose_max_kg: 60,
+              max: 4000,
+              unit: "mg",
+            },
+          ],
+          dose_based_dilution: {
+            threshold: 1000,
+            below_or_equal: "100 mL NaCl 0,9%",
+            above: "250 mL NaCl 0,9%",
+          },
+          rows: [{ label: "Perfuser", value: "sur 15-20 min" }],
+          hide_final: true,
+          etapes: [
+            "Ampoule 500 mg/5 mL (100 mg/mL)",
+            "Dose adulte : 40 à 60 mg/kg IV (max 4 g)",
+            "Jusqu'à 1000 mg : diluer dans 100 mL NaCl 0,9%",
+            "> 1000 mg : diluer dans 250 mL NaCl 0,9%",
+            "Perfuser sur 15-20 min",
+          ],
+          notes: ["Ne pas mélanger avec solutions glucosées dans la même ligne"],
+        },
+      ],
       etapes: [
         "Flacon 500 mg/5 mL (100 mg/mL)",
         "Jusqu'à 1 000 mg : diluer dans 100 mL NaCl 0,9%",
@@ -189,8 +312,28 @@ export const DRUGS_NEUROLOGIE = [
       conc_produit: 50,
       unite: "mg EP",
       debit: "200 mL/h",
-      duree: "6-15 min",
+      duree: "PSE",
       stabilite: "Utiliser immédiatement",
+      preparations: [
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "Table dose-poids",
+          use_table_row: true,
+          rows: [{ label: "Solvant", value: "NaCl 0,9% ou G5%", highlight: true }],
+          hide_final: true,
+          etapes: [
+            "Prodilantin 750 mg (= 500 mg EP)/10 mL",
+            "Prélever le volume Vi d'ampoule pure selon le poids",
+            "Compléter avec NaCl 0,9% ou G5% jusqu'au volume final Vf indiqué dans le tableau",
+            "Administrer à 200 mL/h selon la table",
+          ],
+          notes: [
+            "Table basée sur 15 mg EP/kg",
+            "Surveillance hémodynamique obligatoire : hypotension, bradycardie, troubles du rythme",
+          ],
+        },
+      ],
       etapes: [
         "Prodilantin 750 mg (= 500 mg EP)/10 mL",
         "Prélever le volume Vi d'ampoule pure selon le poids",
@@ -202,9 +345,9 @@ export const DRUGS_NEUROLOGIE = [
         "Surveillance hémodynamique obligatoire : hypotension, bradycardie, troubles du rythme",
       ],
       table: {
-        titre: "Table de dilution PRODILANTIN",
+        titre: "Table de dilution PRODILANTIN 750 mg (500 mg EP)/10 mL",
         description:
-          "Prodilantin 750 mg (= 500 mg EP)/10 mL. Prélever Vi puis compléter avec G5% ou NaCl 0,9% (PHY) jusqu'au volume final Vf.",
+          "Prélever le volume Vi de Prodilantin pur puis diluer avec G5% ou NaCl 0,9% pour obtenir le volume final Vf.",
         rows: [
           { poids: 5, vi: 1.5, vf: 20, vitesse: 200, debitEp: 12.5, temps: 6 },
           { poids: 10, vi: 3, vf: 20, vitesse: 200, debitEp: 25, temps: 6 },
@@ -267,6 +410,7 @@ export const DRUGS_NEUROLOGIE = [
       a: [
         "PSE : administrer PUR",
         "Débit : 1 mg/h soit 5 mL/h",
+        "Objectif TA : 140/90",
         "Surveillance hémodynamique",
         "Voies : VVP ou VVC",
       ],
@@ -281,12 +425,27 @@ export const DRUGS_NEUROLOGIE = [
       debit: "1 mg/h = 5 mL/h",
       duree: "Continu IVSE 5-14j",
       stabilite: "Conserver à l'abri de la lumière",
+      preparations: [
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "Pur",
+          prelever: "Ampoule 10 mg/50 mL (0,2 mg/mL)",
+          rate_label: "Débit",
+          rate_value: "1 mg/h = 5 mL/h",
+          rows: [{ label: "Objectif TA", value: "140/90", highlight: true }],
+          hide_final: true,
+        },
+      ],
       etapes: [
         "Flacon 10 mg/50 mL (0,2 mg/mL) — administrer pur",
         "1 mg/h = 5 mL/h en IVSE",
-        "2 mg/h = 10 mL/h en IVSE",
+        "Objectif TA : 140/90",
       ],
-      notes: ["Conserver à l'abri de la lumière — tubulure opaque recommandée"],
+      notes: [
+        "Conserver à l'abri de la lumière — tubulure opaque recommandée",
+        "Surveillance hémodynamique",
+      ],
     },
   },
 ];

@@ -618,6 +618,30 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Préparation v2 générique", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("structure aussi les anciennes préparations sans calcul dédié", () => {
+      const rivotril = DRUGS.find((drug) => drug.nom === "RIVOTRIL")!;
+
+      render(<DrugCard drug={rivotril} patientWeight="" />);
+      fireEvent.click(screen.getByText("RIVOTRIL").closest("button")!);
+
+      expect(screen.getByText("Préparer")).toBeInTheDocument();
+      expect(screen.getAllByText("Ampoule 1 mg/1 mL").length).toBeGreaterThan(0);
+      expect(screen.getByText("Final")).toBeInTheDocument();
+      expect(screen.getAllByText("1 mg/mL").length).toBeGreaterThan(0);
+    });
+  });
+
   describe("Isoptine preview", () => {
     beforeEach(() => {
       sessionStorage.clear();

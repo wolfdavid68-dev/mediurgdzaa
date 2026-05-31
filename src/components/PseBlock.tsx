@@ -33,6 +33,7 @@ type PseEntry = PseFormula & {
   effectiveInputUnit?: string;
   effectiveInputConc?: number;
   referenceTables?: PseReferenceTable[];
+  hideBlock?: boolean;
   extra?: PseExtra;
 };
 
@@ -54,6 +55,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const [pseRate, setPseRate] = useState("");
   const pse = resolvePse()[drug.id];
   if (!pse) return null;
+  if (pse.hideBlock) return null;
 
   const kg = parseFloat(weight);
   const validKg = kg > 0 && kg <= 300;

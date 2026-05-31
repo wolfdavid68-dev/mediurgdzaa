@@ -218,7 +218,42 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
                       : ""
                   }${phase.duree && !recipe.hide_phase_volume ? ` / ${phase.duree}` : ""}${
                     phase.rate !== null ? ` — débit ${formatDoseNumber(phase.rate)} mL/h` : ""
-                  }`}
+                  }${phase.suffix || ""}`}
+            </span>
+          </div>
+        ))}
+      </>
+    );
+  };
+  const renderRecipeDoseBasedDilution = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    if (!recipe.dose_based_dilution) return null;
+    const phase = getRecipePhaseRows(recipe)[0];
+    if (!phase || phase.dose === null) return null;
+    const { threshold, below_or_equal, above, label = "Diluer" } = recipe.dose_based_dilution;
+    const dilution =
+      phase.doseMax !== null && phase.dose <= threshold && phase.doseMax > threshold
+        ? `${below_or_equal} si ≤ ${threshold} mg / ${above} si > ${threshold} mg`
+        : (phase.doseMax ?? phase.dose) > threshold
+          ? above
+          : below_or_equal;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    return (
+      <div className="prep-calc-row">
+        <span className="prep-calc-step">{label}</span>
+        <span className={`prep-calc-val ${highlightClass}`}>{dilution}</span>
+      </div>
+    );
+  };
+  const renderRecipeCustomRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    if (!recipe.rows?.length) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    return (
+      <>
+        {recipe.rows.map((row) => (
+          <div key={`${recipe.titre}-${row.label}`} className="prep-calc-row">
+            <span className="prep-calc-step">{row.label}</span>
+            <span className={`prep-calc-val${row.highlight ? ` ${highlightClass}` : ""}`}>
+              {row.value}
             </span>
           </div>
         ))}
@@ -257,6 +292,91 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           </span>
         </div>
       </>
+    );
+  };
+  const renderPrepTableCurrentRows = (variant: "classic" | "v2") => {
+    if (!prep.table || !validKg) return null;
+    const currentRow = prep.table.rows.find((row) => row.poids === kg);
+    if (!currentRow) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    return (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Pour</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{kg} kg</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Prélever Vi</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {formatDoseNumber(currentRow.vi)} mL de produit
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Compléter Vf</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {currentRow.vf} mL avec {prep.solvant}
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Vitesse</span>
+          <span className="prep-calc-val">{currentRow.vitesse} mL/h</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Débit EP</span>
+          <span className="prep-calc-val">{formatDoseNumber(currentRow.debitEp)} mg/min</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Temps</span>
+          <span className="prep-calc-val">{currentRow.temps} min</span>
+        </div>
+      </>
+    );
+  };
+  const getPrepTableCurrentSteps = () => {
+    if (!prep.table || !validKg) return null;
+    const currentRow = prep.table.rows.find((row) => row.poids === kg);
+    if (!currentRow) return null;
+    return [
+      `Pour ${kg} kg`,
+      `Prélever ${formatDoseNumber(currentRow.vi)} mL de produit`,
+      `Compléter à ${currentRow.vf} mL avec ${prep.solvant}`,
+      `Administrer à ${currentRow.vitesse} mL/h pendant ${currentRow.temps} min`,
+      `Débit EP : ${formatDoseNumber(currentRow.debitEp)} mg/min`,
+    ];
+  };
+  const renderStaticPrepCalcV2 = () => {
+    const preleverLabel = prep.prelever_label || prep.fd_prelever;
+    const firstStep = prep.etapes?.[0];
+    const hasUsefulFirstStep = firstStep && !firstStep.toLowerCase().startsWith("débit");
+    const rows = [
+      preleverLabel
+        ? { label: "Prélever", value: preleverLabel, highlight: true }
+        : hasUsefulFirstStep
+          ? { label: "Préparer", value: firstStep, highlight: true }
+          : null,
+      prep.volume_final && prep.solvant
+        ? { label: "Compléter", value: `${prep.volume_final} mL avec ${prep.solvant}` }
+        : null,
+      prep.debit ? { label: "Débit", value: prep.debit, highlight: true } : null,
+      prep.conc_finale ? { label: "Final", value: prep.conc_finale, highlight: true } : null,
+    ].filter(Boolean) as Array<{ label: string; value: string; highlight?: boolean }>;
+
+    if (!rows.length) return null;
+    return (
+      <div className="prep-calc">
+        <div className="prep-calc-header">
+          <span>Préparation</span>
+          {prep.duree && <span>{prep.duree}</span>}
+        </div>
+        {rows.map((row) => (
+          <div key={row.label} className="prep-calc-row">
+            <span className="prep-calc-step">{row.label}</span>
+            <span className={`prep-calc-val${row.highlight ? " prep-highlight" : ""}`}>
+              {row.value}
+            </span>
+          </div>
+        ))}
+      </div>
     );
   };
   const thresholdValue = thresholdInput || produitFinal || "";
@@ -407,6 +527,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           </div>
         )}
         {renderRecipePhaseRows(recipe, "classic")}
+        {recipe.use_table_row && renderPrepTableCurrentRows("classic")}
+        {renderRecipeDoseBasedDilution(recipe, "classic")}
+        {renderRecipeCustomRows(recipe, "classic")}
         {renderEffectivePrepRows(recipe)}
         {recipe.concentration && !recipe.effective_output_label && !recipe.hide_final && (
           <div className="prep-calc-row">
@@ -455,6 +578,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           </div>
         )}
         {renderRecipePhaseRows(recipe, "v2")}
+        {recipe.use_table_row && renderPrepTableCurrentRows("v2")}
+        {renderRecipeDoseBasedDilution(recipe, "v2")}
+        {renderRecipeCustomRows(recipe, "v2")}
         {renderEffectivePrepRows(recipe)}
         {recipe.concentration && !recipe.effective_output_label && !recipe.hide_final && (
           <div className="prep-calc-row">
@@ -482,7 +608,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       );
     }
 
-    if (!validKg) return null;
+    const staticPrepCalc = renderStaticPrepCalcV2();
+    if (!validKg && !staticPrepCalc) return null;
 
     // Dilution FIXE (nouvelle prépa service) : préparation indépendante
     // du poids (toujours la même seringue). Boîte bleue « Pour X kg »
@@ -630,7 +757,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     }
 
     const r = calcPrepDoseKg(prep, weight);
-    if (!r) return null;
+    if (!r) return staticPrepCalc;
     const { volMin, volMax } = r;
     const volLabel = volMax && volMax !== volMin ? `${volMin}–${volMax} mL` : `${volMin} mL`;
     const doseLabel = r.doseMax ? `${r.dose}–${r.doseMax} ${r.unite}` : `${r.dose} ${r.unite}`;
@@ -695,13 +822,14 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       );
     }
 
-    if (!validKg) return null;
+    const staticPrepCalc = renderStaticPrepCalcV2();
+    if (!validKg && !staticPrepCalc) return null;
 
     if (prep.fixed_dilution) {
       return (
         <div className="prep-calc">
           <div className="prep-calc-header">
-            <span>{prep.calc_titre || `Pour ${kg} kg`}</span>
+            <span>{prep.calc_titre || (validKg ? `Pour ${kg} kg` : "Préparation")}</span>
             <span>{prep.debit || prep.duree || "Préparation"}</span>
           </div>
           <div className="prep-calc-row">
@@ -811,7 +939,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     }
 
     const r = calcPrepDoseKg(prep, weight);
-    if (!r) return null;
+    if (!r) return staticPrepCalc;
     const { volMin, volMax } = r;
     const volLabel = volMax && volMax !== volMin ? `${volMin}–${volMax} mL` : `${volMin} mL`;
     const doseLabel = r.doseMax ? `${r.dose}–${r.doseMax} ${r.unite}` : `${r.dose} ${r.unite}`;
@@ -861,9 +989,11 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   const activeRecipe = visiblePreparations[activeRecipeIndex];
   const visibleEtapes = pediatricPrepOnly
     ? []
-    : activeRecipe && Object.hasOwn(activeRecipe, "etapes")
-      ? activeRecipe.etapes
-      : prep.etapes;
+    : activeRecipe?.use_table_row && getPrepTableCurrentSteps()
+      ? getPrepTableCurrentSteps()
+      : activeRecipe && Object.hasOwn(activeRecipe, "etapes")
+        ? activeRecipe.etapes
+        : prep.etapes;
   const visibleNotes = pediatricPrepOnly
     ? []
     : activeRecipe && Object.hasOwn(activeRecipe, "notes")
@@ -1323,12 +1453,13 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           </div>
         </div>
 
-        {!pediatricPrepOnly && (prepTableBlock || doseLibreBlock) && (
-          <div className="prep-v2-extra">
-            {prepTableBlock}
-            {doseLibreBlock}
-          </div>
-        )}
+        {!pediatricPrepOnly &&
+          ((prepTableBlock && !visiblePreparations.length) || doseLibreBlock) && (
+            <div className="prep-v2-extra">
+              {!visiblePreparations.length && prepTableBlock}
+              {doseLibreBlock}
+            </div>
+          )}
       </section>
     );
   }

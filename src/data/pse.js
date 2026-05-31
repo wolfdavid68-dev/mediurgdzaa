@@ -117,6 +117,7 @@ export const PSE = {
   36: { // Lasilix — ampoule 250 mg/25 mL pure → 10 mg/mL
     conc: 10, unite: "mg/h", min: 5, max: 20,
     steps: [5, 10, 15, 20],
+    hideBlock: true,
   },
 
   // ── ANTIDOTES ─────────────────────────────────────────────

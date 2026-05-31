@@ -71,6 +71,17 @@ type DrugPrepRecipe = {
   concentration?: string;
   rate_label?: string;
   rate_value?: string;
+  rows?: Array<{
+    label: string;
+    value: string;
+    highlight?: boolean;
+  }>;
+  dose_based_dilution?: {
+    threshold: number;
+    label?: string;
+    below_or_equal: string;
+    above: string;
+  };
   hide_final?: boolean;
   hide_phase_volume?: boolean;
   phase_doses?: Array<{
@@ -82,6 +93,7 @@ type DrugPrepRecipe = {
     dose_fixed?: number;
     dose_max_fixed?: number;
     max?: number;
+    suffix?: string;
   }>;
   weight_bands?: Array<{
     label?: string;
@@ -104,6 +116,7 @@ type DrugPrepRecipe = {
   effective_output_conc?: number;
   effective_output_label?: string;
   effective_placeholder?: string;
+  use_table_row?: boolean;
 };
 
 type DrugPrep = {
