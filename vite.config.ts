@@ -209,6 +209,16 @@ export default defineConfig({
               test: /(@supabase|node_modules[\\/]@supabase|[\\/]src[\\/]lib[\\/]supabase)/,
               priority: 95,
             },
+            {
+              name: "export-image",
+              test: /node_modules[\\/]html-to-image/,
+              priority: 93,
+            },
+            {
+              name: "data-preview",
+              test: /[\\/]src[\\/]data[\\/](drugs|pse)\.preview/,
+              priority: 92,
+            },
             { name: "data-medic", test: /[\\/]src[\\/]data[\\/](drugs|pse|aliases)/, priority: 90 },
             {
               name: "auth-admin",
@@ -247,7 +257,7 @@ export default defineConfig({
             },
             {
               name: "protocoles-pisu",
-              test: /([\\/]src[\\/]components[\\/]ProtocolCard|[\\/]src[\\/]data[\\/]protocols|[\\/]src[\\/]lib[\\/]protocolText)/,
+              test: /([\\/]src[\\/]components[\\/]ProtocolCard|[\\/]src[\\/]data[\\/]protocols|[\\/]src[\\/]lib[\\/](protocolText|crossref))/,
               priority: 62,
             },
             {

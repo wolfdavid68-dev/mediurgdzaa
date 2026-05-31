@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   calcPrepThreshold,
   calcPrepSufentaTable,
@@ -8,7 +8,6 @@ import {
   calcDoseLibre,
 } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
-import { DRUGS_PREVIEW } from "../data/drugs.preview";
 import type { Drug } from "../types/data";
 
 // `prep` public (drugs.js) éventuellement enrichi par l'override preview
@@ -31,8 +30,11 @@ type PrepRecipePhaseRow = PrepRecipePhase & {
   rate: number | null;
 };
 
-const resolvePrep = (drug: Drug): DrugPrep | null => {
-  const override = isPreview() ? (DRUGS_PREVIEW as PreviewPrepByDrugId)[drug.id]?.prep : null;
+const resolvePrep = (
+  drug: Drug,
+  previewPrepByDrugId: PreviewPrepByDrugId | null
+): DrugPrep | null => {
+  const override = previewPrepByDrugId?.[drug.id]?.prep ?? null;
   if (override) return { ...drug.prep, ...override };
   return drug.prep || null;
 };
@@ -65,7 +67,30 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   const [activePedPrep, setActivePedPrep] = useState<"ivd" | "im" | "pse">("ivd");
   const [effectivePrepInput, setEffectivePrepInput] = useState("");
   const [thresholdInput, setThresholdInput] = useState("");
-  const prep = resolvePrep(drug);
+  const previewMode = isPreview();
+  const [previewPrepByDrugId, setPreviewPrepByDrugId] = useState<PreviewPrepByDrugId | null>(null);
+
+  useEffect(() => {
+    if (!previewMode) {
+      setPreviewPrepByDrugId(null);
+      return;
+    }
+
+    let active = true;
+    import("../data/drugs.preview")
+      .then(({ DRUGS_PREVIEW }) => {
+        if (active) setPreviewPrepByDrugId(DRUGS_PREVIEW as PreviewPrepByDrugId);
+      })
+      .catch(() => {
+        if (active) setPreviewPrepByDrugId({});
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [previewMode]);
+
+  const prep = resolvePrep(drug, previewMode ? previewPrepByDrugId : null);
   if (!prep) return null;
 
   const kg = parseFloat(weight);
@@ -79,7 +104,6 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     max !== null && max !== min
       ? `${formatDoseNumber(min)}-${formatDoseNumber(max)}`
       : formatDoseNumber(min);
-  const previewMode = isPreview();
   const inferredPopulation = validKg && kg < 30 ? "enfant" : "adulte";
   const activePopulation = prepPopulation || inferredPopulation;
   const visiblePreparations = (prep.preparations || []).filter(

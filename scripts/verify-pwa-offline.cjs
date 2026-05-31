@@ -38,7 +38,9 @@ const CHUNK_GZIP_LIMITS_KB = {
   "protocoles-ecg": 22,
   protocoles: 10,
   echelles: 8,
+  "data-preview": 8,
   "data-medic": 37,
+  "export-image": 8,
 };
 
 const fail = (message) => {

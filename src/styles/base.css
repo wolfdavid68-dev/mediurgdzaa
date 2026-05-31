@@ -158,9 +158,8 @@ a,
   outline-offset: 2px;
   border-radius: 4px;
 }
-/* Inputs / textareas : les outlines de focus sont gérés inline par les
-   règles existantes (.search-bar input:focus, .poso-calc-input:focus,
-   etc.). On garde leur design custom mais on s'assure qu'ils sont aussi
+/* Inputs / textareas : les outlines de focus sont gérés inline par les règles
+   de domaine. On garde leur design custom mais on s'assure qu'ils sont aussi
    couverts par focus-visible avec un fallback discret. */
 
 /* ── Animations partagées ───────────────────────────────────

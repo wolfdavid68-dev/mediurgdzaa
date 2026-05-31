@@ -88,6 +88,10 @@ Le build utilise `manualChunks` par domaine fonctionnel :
 
 - `vendor-react` : React et scheduler ;
 - `data-medic` : donnees medicaments / PSE / alias ;
+- `data-preview` : donnees internes de preparation preview, chargees seulement
+  en mode `?author=preview` mais toujours precachees pour rester offline ;
+- `export-image` : moteur d'export PNG `html-to-image`, charge seulement au
+  clic sur l'export du bilan ACR mais toujours precache pour rester offline ;
 - `medicaments` : UI et logique de la page Medicaments ;
 - `protocoles` : protocoles, incompatibilites, ECG, kits et assistant KTC ;
 - `acr` : mode urgence ACR ;
@@ -108,6 +112,11 @@ vivre en chunks separes car Workbox precache tous les fichiers JS generes via
 `src/lib/auth.ts` et `src/lib/pushNotifications.ts` chargent le client Supabase
 au moment de l'action auth/admin, pas au chargement du module. Cela garde les
 helpers auth plus legers tout en conservant le chunk `vendor-supabase` precache.
+
+La cross-reference medicament -> protocoles (`src/lib/crossref.ts`) est chargee
+au moment ou une fiche medicament s'ouvre. Cela evite de tirer les donnees PISU
+dans le chemin principal Medicaments tout en conservant les chips "Utilisee dans"
+hors-ligne, car le chunk `protocoles-pisu` reste precache.
 
 ## Stockage local securise
 

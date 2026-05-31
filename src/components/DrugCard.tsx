@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { calcDose, ciSeverity } from "../lib/calc";
-import { findProtocolsForDrug } from "../lib/crossref";
+import type { ProtocolRef } from "../lib/crossref";
 import type { Drug } from "../types/data";
 import DrugNote from "./DrugNote";
 import PrepBlock from "./PrepBlock";
@@ -75,9 +75,30 @@ const DrugCard = ({
 
   // Protocoles qui mentionnent cette drogue. Cache global dans crossref.ts
   // — l'appel est instantané après le premier rendu de la session.
-  // useMemo ici sert juste à éviter de relancer la lookup à chaque toggle
-  // d'onglet ou changement de poids.
-  const relatedProtocols = useMemo(() => findProtocolsForDrug(drug.nom), [drug.nom]);
+  // Chargé à l'ouverture seulement pour ne pas faire dépendre la liste
+  // Médicaments du chunk Protocoles tant que la fiche reste repliée.
+  const canOpenProtocol = Boolean(onProtocolOpen);
+  const [relatedProtocols, setRelatedProtocols] = useState<ProtocolRef[]>([]);
+  useEffect(() => {
+    if (!open || !canOpenProtocol) {
+      setRelatedProtocols([]);
+      return;
+    }
+
+    let active = true;
+    import("../lib/crossref")
+      .then(({ findProtocolsForDrug }) => {
+        if (active) setRelatedProtocols(findProtocolsForDrug(drug.nom));
+      })
+      .catch(() => {
+        if (active) setRelatedProtocols([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [open, canOpenProtocol, drug.nom]);
+
   const monitoringBadges = useMemo(() => {
     const labels = new Set((drug.monitoring || []).map((item) => item.trim()).filter(Boolean));
     const text = [

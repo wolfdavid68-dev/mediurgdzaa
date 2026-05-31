@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PSE } from "../data/pse";
-import { PSE_PREVIEW } from "../data/pse.preview";
 import { isPsePreview } from "../lib/featureFlags";
 import { calcDebit, calcDoseFromRate, type PseFormula } from "../lib/calc";
 import type { Drug } from "../types/data";
@@ -37,13 +36,15 @@ type PseEntry = PseFormula & {
   extra?: PseExtra;
 };
 
+type PseByDrugId = Record<number, PseEntry>;
+
 // PSE public, ou PSE + overlay preview si ?author=preview (cf. featureFlags).
 // L'overlay remplace/ajoute par drug id ; le public ne voit jamais
 // pse.preview.js tant que le flag PSE_PREVIEW reste false.
-const resolvePse = (): Record<number, PseEntry> =>
-  isPsePreview()
-    ? ({ ...PSE, ...PSE_PREVIEW } as unknown as Record<number, PseEntry>)
-    : (PSE as unknown as Record<number, PseEntry>);
+const resolvePse = (previewPseByDrugId: Partial<PseByDrugId> | null): PseByDrugId =>
+  previewPseByDrugId
+    ? ({ ...PSE, ...previewPseByDrugId } as unknown as PseByDrugId)
+    : (PSE as unknown as PseByDrugId);
 
 // Bloc PSE (pousse-seringue électrique) : input dose cible + calcul mL/h
 // + table des paliers. Gère le mode "extra" (héparine UI/24h en plus).
@@ -53,7 +54,30 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const [pseTarget, setPseTarget] = useState("");
   const [pseTarget2, setPseTarget2] = useState("");
   const [pseRate, setPseRate] = useState("");
-  const pse = resolvePse()[drug.id];
+  const previewMode = isPsePreview();
+  const [previewPseByDrugId, setPreviewPseByDrugId] = useState<Partial<PseByDrugId> | null>(null);
+
+  useEffect(() => {
+    if (!previewMode) {
+      setPreviewPseByDrugId(null);
+      return;
+    }
+
+    let active = true;
+    import("../data/pse.preview")
+      .then(({ PSE_PREVIEW }) => {
+        if (active) setPreviewPseByDrugId(PSE_PREVIEW as unknown as Partial<PseByDrugId>);
+      })
+      .catch(() => {
+        if (active) setPreviewPseByDrugId({});
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [previewMode]);
+
+  const pse = resolvePse(previewMode ? previewPseByDrugId : null)[drug.id];
   if (!pse) return null;
   if (pse.hideBlock) return null;
 

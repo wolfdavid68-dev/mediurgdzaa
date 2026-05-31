@@ -296,13 +296,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la dilution fixe à 3 mg/mL sans calcul pondéral de préparation", () => {
+    test("affiche la dilution fixe à 3 mg/mL sans calcul pondéral de préparation", async () => {
       const ephedrine = DRUGS.find((drug) => drug.nom === "ÉPHÉDRINE")!;
 
       render(<DrugCard drug={ephedrine} patientWeight="35" />);
       fireEvent.click(screen.getByText("ÉPHÉDRINE").closest("button")!);
 
-      expect(screen.getByText("1 ampoule 30 mg/1 mL")).toBeInTheDocument();
+      expect(await screen.findByText("1 ampoule 30 mg/1 mL")).toBeInTheDocument();
       expect(screen.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
       expect(screen.getAllByText("3 mg/mL").length).toBeGreaterThan(0);
       expect(screen.queryByText("3.5 mg")).not.toBeInTheDocument();
@@ -321,14 +321,14 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la préparation PSE enfant sans cohabitation adulte", () => {
+    test("affiche la préparation PSE enfant sans cohabitation adulte", async () => {
       const noradrenaline = DRUGS.find((drug) => drug.nom === "NORADRÉNALINE")!;
 
       render(<DrugCard drug={noradrenaline} patientWeight="20" />);
       fireEvent.click(screen.getByText("NORADRÉNALINE").closest("button")!);
 
+      expect(await screen.findByText("PSE enfant")).toBeInTheDocument();
       expect(screen.getByText("Pour 20 kg — enfant")).toBeInTheDocument();
-      expect(screen.getByText("PSE enfant")).toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.getByText("Pédia : 0,05-2 µg/kg/min IVSE")).toBeInTheDocument();
       expect(screen.queryByText("Repères dose → débit — enfant")).not.toBeInTheDocument();
@@ -346,14 +346,14 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche les préparations IDM, EP massive et AVC calculées au poids", () => {
+    test("affiche les préparations IDM, EP massive et AVC calculées au poids", async () => {
       const actilyse = DRUGS.find((drug) => drug.nom === "ACTILYSE")!;
 
       render(<DrugCard drug={actilyse} patientWeight="80" />);
       fireEvent.click(screen.getByText("ACTILYSE").closest("button")!);
 
+      expect(await screen.findByText("Bolus IV")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /IDM/i })).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByText("Bolus IV")).toBeInTheDocument();
       expect(screen.getByText("15 mg")).toBeInTheDocument();
       expect(screen.getByText("60 mg — débit 120 mL/h")).toBeInTheDocument();
       expect(screen.getByText("40 mg — débit 40 mL/h")).toBeInTheDocument();
@@ -381,13 +381,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("calcule la dose et le volume de bolus selon le palier de poids", () => {
+    test("calcule la dose et le volume de bolus selon le palier de poids", async () => {
       const metalyse = DRUGS.find((drug) => drug.nom === "METALYSE")!;
 
       const { unmount } = render(<DrugCard drug={metalyse} patientWeight="55" />);
       fireEvent.click(screen.getByText("METALYSE").closest("button")!);
 
-      expect(screen.getByText("30 mg = 6 mL")).toBeInTheDocument();
+      expect(await screen.findByText("30 mg = 6 mL")).toBeInTheDocument();
       expect(screen.getByText(/Reconstituer le lyophilisat 10 000 UI/)).toBeInTheDocument();
       expect(screen.getByText("Flacon reconstitue 50 mg/10 mL")).toBeInTheDocument();
       expect(screen.getByText(/Injection IV bolus unique strict < 10 sec/)).toBeInTheDocument();
@@ -398,7 +398,7 @@ describe("DrugCard", () => {
       render(<DrugCard drug={metalyse} patientWeight="80" />);
       fireEvent.click(screen.getByText("METALYSE").closest("button")!);
 
-      expect(screen.getByText("45 mg = 9 mL")).toBeInTheDocument();
+      expect(await screen.findByText("45 mg = 9 mL")).toBeInTheDocument();
     });
   });
 
@@ -413,13 +413,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche une préparation pure adulte sans calcul pondéral", () => {
+    test("affiche une préparation pure adulte sans calcul pondéral", async () => {
       const atropine = DRUGS.find((drug) => drug.nom === "ATROPINE")!;
 
       render(<DrugCard drug={atropine} patientWeight="80" />);
       fireEvent.click(screen.getByText("ATROPINE").closest("button")!);
 
-      expect(screen.getByText("2 ampoules")).toBeInTheDocument();
+      expect(await screen.findByText("2 ampoules")).toBeInTheDocument();
       expect(screen.getByText("1 mg = 2 mL")).toBeInTheDocument();
       expect(
         screen.getByText("Bradycardie : 0,5-1 mg IV, répéter toutes les 3-5 min (max 3 mg)")
@@ -440,17 +440,17 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("sépare la dose de charge et le PSE avec le débit calculé", () => {
+    test("sépare la dose de charge et le PSE avec le débit calculé", async () => {
       const brevibloc = DRUGS.find((drug) => drug.nom === "BREVIBLOC")!;
 
       render(<DrugCard drug={brevibloc} patientWeight="80" />);
       fireEvent.click(screen.getByText("BREVIBLOC").closest("button")!);
 
+      expect(await screen.findByText("Dose de charge")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /Charge 1 min/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-      expect(screen.getByText("Dose de charge")).toBeInTheDocument();
       expect(screen.getByText("40 mg = 4 mL")).toBeInTheDocument();
       expect(screen.getByText("Entretien PSE : 50 µg/kg/min")).toBeInTheDocument();
 
@@ -472,14 +472,14 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("regroupe les ACR puis sépare charge et PSE entretien", () => {
+    test("regroupe les ACR puis sépare charge et PSE entretien", async () => {
       const cordarone = DRUGS.find((drug) => drug.nom === "CORDARONE")!;
 
       render(<DrugCard drug={cordarone} patientWeight="80" />);
       fireEvent.click(screen.getByText("CORDARONE").closest("button")!);
 
+      expect(await screen.findByText("Ampoule 150 mg/3 mL (50 mg/mL)")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /ACR/i })).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByText("Ampoule 150 mg/3 mL (50 mg/mL)")).toBeInTheDocument();
       expect(screen.getByText("300 mg = 6 mL")).toBeInTheDocument();
       expect(screen.getByText("150 mg = 3 mL")).toBeInTheDocument();
 
@@ -506,13 +506,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la préparation IVL en v2", () => {
+    test("affiche la préparation IVL en v2", async () => {
       const digoxine = DRUGS.find((drug) => drug.nom === "DIGOXINE NATIVELLE")!;
 
       render(<DrugCard drug={digoxine} patientWeight="80" />);
       fireEvent.click(screen.getByText("DIGOXINE NATIVELLE").closest("button")!);
 
-      expect(screen.getByText("1 ampoule 0,5 mg/2 mL")).toBeInTheDocument();
+      expect((await screen.findAllByText("1 ampoule 0,5 mg/2 mL")).length).toBeGreaterThan(0);
       expect(screen.getByText("mini-flac 100 mL NaCl 0,9%")).toBeInTheDocument();
       expect(screen.getAllByText("0,5 mg/100 mL = 5 µg/mL").length).toBeGreaterThan(0);
       expect(screen.getAllByText("ECG obligatoire avant injection").length).toBeGreaterThan(0);
@@ -532,15 +532,15 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la préparation PSE pure en v2 sans bolus", () => {
+    test("affiche la préparation PSE pure en v2 sans bolus", async () => {
       const eupressyl = DRUGS.find((drug) => drug.nom === "EUPRESSYL")!;
 
       render(<DrugCard drug={eupressyl} patientWeight="80" />);
       fireEvent.click(screen.getByText("EUPRESSYL").closest("button")!);
 
+      expect(await screen.findByText("Ampoule 25 mg/5 mL")).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: /Bolus pur/i })).not.toBeInTheDocument();
       expect(screen.getAllByText("PSE : administrer PUR").length).toBeGreaterThan(0);
-      expect(screen.getByText("Ampoule 25 mg/5 mL")).toBeInTheDocument();
       expect(screen.getAllByText("Dose usuelle : 5-30 mg/h selon TA cible").length).toBeGreaterThan(
         0
       );
@@ -560,17 +560,17 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche les préparations bolus et PSE en v2", () => {
+    test("affiche les préparations bolus et PSE en v2", async () => {
       const loxen = DRUGS.find((drug) => drug.nom === "LOXEN")!;
 
       render(<DrugCard drug={loxen} patientWeight="80" />);
       fireEvent.click(screen.getByText("LOXEN").closest("button")!);
 
+      expect(await screen.findByText("Bolus initial")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-      expect(screen.getByText("Bolus initial")).toBeInTheDocument();
       expect(screen.getByText("1 mg = 1 mL")).toBeInTheDocument();
       expect(screen.getByText("Bolus initial : 1 mg IV (= 1 mL)")).toBeInTheDocument();
       expect(screen.getByText("1 ampoule 10 mg/10 mL")).toBeInTheDocument();
@@ -595,12 +595,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche les préparations bolus et PSE en v2 sans bloc débit dupliqué", () => {
+    test("affiche les préparations bolus et PSE en v2 sans bloc débit dupliqué", async () => {
       const risordan = DRUGS.find((drug) => drug.nom === "RISORDAN")!;
 
       render(<DrugCard drug={risordan} patientWeight="80" />);
       fireEvent.click(screen.getByText("RISORDAN").closest("button")!);
 
+      expect(await screen.findByText(/IVD en bolus : administrer PUR/)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
         "aria-pressed",
         "true"
@@ -629,13 +630,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("structure aussi les anciennes préparations sans calcul dédié", () => {
+    test("structure aussi les anciennes préparations sans calcul dédié", async () => {
       const rivotril = DRUGS.find((drug) => drug.nom === "RIVOTRIL")!;
 
       render(<DrugCard drug={rivotril} patientWeight="" />);
       fireEvent.click(screen.getByText("RIVOTRIL").closest("button")!);
 
-      expect(screen.getByText("Préparer")).toBeInTheDocument();
+      expect(await screen.findByText("Préparer")).toBeInTheDocument();
       expect(screen.getAllByText("Ampoule 1 mg/1 mL").length).toBeGreaterThan(0);
       expect(screen.getByText("Final")).toBeInTheDocument();
       expect(screen.getAllByText("1 mg/mL").length).toBeGreaterThan(0);
@@ -653,13 +654,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche une préparation IVL v2 avec dose et volume injectés", () => {
+    test("affiche une préparation IVL v2 avec dose et volume injectés", async () => {
       const isoptine = DRUGS.find((drug) => drug.nom === "ISOPTINE")!;
 
       render(<DrugCard drug={isoptine} patientWeight="50" />);
       fireEvent.click(screen.getByText("ISOPTINE").closest("button")!);
 
-      expect(screen.getByText("1 ampoule 5 mg/2 mL")).toBeInTheDocument();
+      expect(await screen.findByText("1 ampoule 5 mg/2 mL")).toBeInTheDocument();
       expect(screen.getByText("à 10 mL avec NaCl 0,9%")).toBeInTheDocument();
       expect(screen.getByText("Injecter")).toBeInTheDocument();
       expect(screen.getByText("3,8-7,5 mg = 7,5-15 mL")).toBeInTheDocument();

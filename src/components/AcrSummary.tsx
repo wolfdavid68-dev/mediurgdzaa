@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import { toPng } from "html-to-image";
 import { fmt, fmtWall } from "./AcrTimer.helpers";
 import ModalDialog from "./ModalDialog";
 
@@ -127,6 +126,7 @@ const AcrSummary = ({
   // « Télécharger » (download direct dans Downloads/).
   const generatePng = useCallback(async () => {
     if (!captureRef.current) return null;
+    const { toPng } = await import("html-to-image");
     const bg =
       getComputedStyle(document.documentElement).getPropertyValue("--card").trim() || "#161620";
     const dataUrl = await toPng(captureRef.current, {
