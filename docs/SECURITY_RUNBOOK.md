@@ -20,6 +20,9 @@ publication, voir [`PROCEDURE_RELEASE.md`](./PROCEDURE_RELEASE.md).
   raccourcis PWA.
 - Lancer `npm run verify:pwa-offline` après le build : précache Workbox, budgets gzip par chunk,
   scan d'indices de secrets serveur dans les assets buildés.
+- Vérifier que les chunks chargés à la demande (`data-preview`, `export-image`, cross-références
+  protocoles) restent présents dans le précache Workbox : ils peuvent être lazy côté React, mais
+  doivent fonctionner hors-ligne.
 - Lancer `npm run verify:pwa-offline:browser` pour valider les routes cliniques hors-ligne dans
   Chromium et régénérer les captures mobiles factices dans `build/offline-screenshots/`.
 - Lancer `npm run verify:offline-screenshots` après le test navigateur pour comparer les captures
@@ -221,6 +224,15 @@ Les captures offline générées par les tests utilisent uniquement un profil fa
 modifier ces scripts pour injecter un compte réel, une note utilisateur, un IPP ou une donnée
 patient.
 
+Tests de non-régression à conserver pour l'auth offline :
+
+- session valide mais fetch profil en échec : repli sur le profil caché ;
+- absence de session hors-ligne sur appareil déjà appairé : accès clinique conservé ;
+- perte de session hors-ligne après appairage : accès clinique conservé via cache ;
+- perte de session en ligne : retour au login, sans utiliser le cache offline ;
+- profil `pending` ou `banned` récupéré en ligne : accès clinique bloqué ;
+- retour Supabase `PASSWORD_RECOVERY` : écran de réinitialisation prioritaire.
+
 ## Build client et secrets
 
 Tout ce qui est livré dans `build/` est public et inspectable côté navigateur.
@@ -235,6 +247,12 @@ Interdit dans le build client :
 Accepté côté client : clés publiques explicitement prévues pour navigateur, par exemple clé
 publishable/anon Supabase et clé publique Web Push. Ces clés publiques ne remplacent jamais les
 policies RLS côté Supabase.
+
+Le build doit rester vérifié par `npm run verify:pwa-offline` : le script scanne `index.html`,
+`service-worker.js`, `manifest.webmanifest` et les assets JS/CSS générés pour repérer les motifs de
+secrets serveur (`service_role`, VAPID privée, `DATABASE_URL`, `JWT_SECRET`, clés privées, etc.).
+Ce contrôle complète `.env.example` et `verify:security`, il ne remplace pas la revue des variables
+Vercel/Supabase.
 
 ## Notifications Web Push admin
 

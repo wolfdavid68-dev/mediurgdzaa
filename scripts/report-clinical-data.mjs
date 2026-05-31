@@ -139,6 +139,8 @@ const genericDrugTerms = new Set([
   "glucose",
   "sodium",
   "chlorure",
+  "physiologique",
+  "physiologiques",
 ]);
 const drugTerms = DRUGS.flatMap((drug) => [drug.nom, drug.dci, drug.commercial])
   .flatMap((value) => String(value ?? "").split(/[+/(),®\s]+/))

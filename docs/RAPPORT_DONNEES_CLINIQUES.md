@@ -74,7 +74,7 @@ Aucune alerte de cohérence détectée.
 
 ## Points de vigilance
 
-- PISU 3 ENF mentionne "physiologique" sans DRUG_PATTERNS évident
+Aucun point de vigilance structurel détecté.
 
 ## Notes
 

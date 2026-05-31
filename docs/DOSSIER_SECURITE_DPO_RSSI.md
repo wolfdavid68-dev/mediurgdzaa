@@ -27,7 +27,15 @@ La base technique a été durcie :
 - secrets non suivis par Git ;
 - audit npm ajouté en CI ;
 - scan automatisé des assets buildés pour repérer l'embarquement accidentel de secrets serveur ;
-- budgets gzip par chunk et captures mobiles hors-ligne de test avec profil factice ;
+- budgets gzip par chunk, précache Workbox vérifié et captures mobiles hors-ligne de test avec
+  profil factice ;
+- chunks chargés à la demande (`data-preview`, export PNG ACR, cross-références protocoles)
+  conservés dans le précache afin de préserver le fonctionnement hors-ligne ;
+- tests de non-régression AuthGate couvrant le repli sur profil caché, la perte de session
+  hors-ligne, le retour au login en ligne, les profils suspendus et la réinitialisation de mot de
+  passe ;
+- rapport strict des données cliniques générable en CI, avec alerte sur les incohérences de
+  structure et de liens internes ;
 - runbook sécurité créé.
 
 Conclusion opérationnelle : base technique saine pour poursuivre, mais validation DPO/RSSI/DSI
@@ -177,6 +185,8 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
   d'indices de secrets serveur dans les assets livrés.
 - Vérification `verify:pwa-offline:browser` : rechargement hors-ligne réel de Protocoles, Kits,
   URGENCE ACR, Médicaments et Login, avec captures mobiles factices.
+- Les chunks lazy nécessaires aux fonctions offline (`export-image`, `data-preview`,
+  `protocoles-pisu`) sont précachés par Workbox et surveillés par le budget bundle.
 
 ### API ECG
 
@@ -195,6 +205,8 @@ identifiants si la photo est mal cadrée ou si l'anonymisation automatique ne ma
 - Vérifications utilisées : typecheck, lint, knip, tests, build.
 - Rapport de cohérence des données cliniques générable via `npm run report:data`, sans donnée
   patient.
+- Rapport strict `npm run report:data:strict` utilisé comme garde-fou de CI pour détecter les
+  références orphelines ou incohérences de structure avant publication.
 
 ### Supabase
 
@@ -267,18 +279,20 @@ cas de départ d'un agent ou de perte d'appareil.
 
 ## Matrice risques / mesures / preuves
 
-| Domaine | Risque | Mesures de réduction | Preuves automatisées ou documentaires |
-| --- | --- | --- | --- |
-| Authentification | Accès clinique par compte non approuvé ou suspendu | Écrans `pending`/`banned`, cache profil isolé, tests AuthGate | `npm test -- src/components/AuthGate.integration.test.tsx`, `docs/SECURITY_RUNBOOK.md` |
-| Administration | Ouverture console admin par utilisateur standard | Accès admin conditionné à `role=admin` ou fonction cadre, geste admin ignoré sinon | `src/lib/auth.test.ts`, `src/components/AuthGate.integration.test.tsx` |
-| Secrets | Exposition accidentelle de secrets dans client/build | Allowlist `VITE_`, scan `public/`, `build/`, CSP/headers | `npm run verify:security`, `.env.example`, `vercel.json` |
-| Offline | Route clinique indisponible sans réseau | Workbox précache, test navigateur offline multi-routes | `npm run verify:pwa-offline`, `npm run verify:pwa-offline:browser` |
-| Données locales | Collisions multi-utilisateurs sur appareil partagé | Préfixes par userId, migration anonyme vers compte, tests notes/kits | `src/lib/userStorage.test.ts`, `src/lib/storageKeys.ts` |
-| Données patient | Saisie libre de donnée nominative dans notes/export | Avertissements UI, local uniquement, procédure DPO/RSSI | `docs/SECURITY_RUNBOOK.md`, `docs/DOSSIER_SECURITE_DPO_RSSI.md` |
-| Contenu clinique | Référence orpheline ou incohérence structurelle | Rapport strict données cliniques, tests incompatibilités | `npm run report:data:strict`, `src/lib/incompatibilityIndex.test.ts` |
-| Performance | Dégradation du temps d'accès en urgence | Budgets JS/CSS, mesures runtime Médicaments/Kits/Incompatibilités | `npm run verify:bundle-budget`, `npm run verify:perf-runtime` |
-| Accessibilité | Parcours clavier bloqué sur vues critiques | Tests axe et audit clavier Playwright | `src/components/a11y.test.tsx`, `npm run verify:a11y-keyboard` |
-| Release | Publication sans vérification complète | Script orchestrateur et artefacts CI | `npm run release:check`, artefacts GitHub Actions |
+| Domaine          | Risque                                                            | Mesures de réduction                                                                           | Preuves automatisées ou documentaires                                                  |
+| ---------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Authentification | Accès clinique par compte non approuvé ou suspendu                | Écrans `pending`/`banned`, cache profil isolé, tests AuthGate                                  | `npm test -- src/components/AuthGate.integration.test.tsx`, `docs/SECURITY_RUNBOOK.md` |
+| Auth offline     | Mur de login inaccessible après expiration de session hors réseau | Profil agent caché après appairage, repli seulement en contexte offline, retour login en ligne | `src/components/AuthGate.integration.test.tsx`                                         |
+| Administration   | Ouverture console admin par utilisateur standard                  | Accès admin conditionné à `role=admin` ou fonction cadre, geste admin ignoré sinon             | `src/lib/auth.test.ts`, `src/components/AuthGate.integration.test.tsx`                 |
+| Secrets          | Exposition accidentelle de secrets dans client/build              | Allowlist `VITE_`, scan `public/`, `build/`, CSP/headers                                       | `npm run verify:security`, `.env.example`, `vercel.json`                               |
+| Offline          | Route clinique indisponible sans réseau                           | Workbox précache, test navigateur offline multi-routes                                         | `npm run verify:pwa-offline`, `npm run verify:pwa-offline:browser`                     |
+| Données locales  | Collisions multi-utilisateurs sur appareil partagé                | Préfixes par userId, migration anonyme vers compte, tests notes/kits                           | `src/lib/userStorage.test.ts`, `src/lib/storageKeys.ts`                                |
+| Données patient  | Saisie libre de donnée nominative dans notes/export               | Avertissements UI, local uniquement, procédure DPO/RSSI                                        | `docs/SECURITY_RUNBOOK.md`, `docs/DOSSIER_SECURITE_DPO_RSSI.md`                        |
+| Contenu clinique | Référence orpheline ou incohérence structurelle                   | Rapport strict données cliniques, tests incompatibilités                                       | `npm run report:data:strict`, `src/lib/incompatibilityIndex.test.ts`                   |
+| PWA offline      | Fonction lazy indisponible hors réseau                            | Chunks lazy précachés, contrôle statique du service worker, parcours navigateur offline        | `npm run verify:pwa-offline`, `npm run verify:e2e-critical`                            |
+| Performance      | Dégradation du temps d'accès en urgence                           | Budgets JS/CSS, mesures runtime Médicaments/Kits/Incompatibilités                              | `npm run verify:bundle-budget`, `npm run verify:perf-runtime`                          |
+| Accessibilité    | Parcours clavier bloqué sur vues critiques                        | Tests axe et audit clavier Playwright                                                          | `src/components/a11y.test.tsx`, `npm run verify:a11y-keyboard`                         |
+| Release          | Publication sans vérification complète                            | Script orchestrateur et artefacts CI                                                           | `npm run release:check`, artefacts GitHub Actions                                      |
 
 ## Points à valider
 

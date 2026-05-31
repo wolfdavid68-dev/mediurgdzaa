@@ -22,12 +22,19 @@ const activeProfile = {
   ban_reason: null,
 } as Profile;
 
+type AuthStateCallback = (user: { id: string } | null) => void | Promise<void>;
+type AuthRecoveryCallback = () => void;
+
 const h = vi.hoisted(() => ({
   isAuthEnabled: vi.fn(() => true),
   getCurrentSession: vi.fn(),
   fetchProfile: vi.fn(),
   getAdminMfaStatus: vi.fn(),
-  onAuthStateChange: vi.fn(() => () => {}),
+  onAuthStateChange: vi.fn(
+    (_callback: AuthStateCallback, _onRecovery?: AuthRecoveryCallback) => () => {}
+  ),
+  authStateCallback: undefined as undefined | AuthStateCallback,
+  authRecoveryCallback: undefined as undefined | AuthRecoveryCallback,
   getCachedProfile: vi.fn(),
   getLastCachedProfile: vi.fn(),
   migrateAnonymousData: vi.fn(),
@@ -56,6 +63,12 @@ vi.mock("./auth/mobile/MobileAdminDashboard", () => ({
     </div>
   ),
 }));
+vi.mock("./auth/ResetPasswordScreen", () => ({
+  default: () => <div>RESET_PASSWORD_SCREEN</div>,
+}));
+vi.mock("./auth/mobile/MobileResetPasswordScreen", () => ({
+  default: () => <div>RESET_PASSWORD_SCREEN_MOBILE</div>,
+}));
 vi.mock("../lib/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../lib/auth")>();
   return {
@@ -82,7 +95,15 @@ describe("AuthGate — garantie offline (auth activée)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     h.isAuthEnabled.mockReturnValue(true);
-    h.onAuthStateChange.mockReturnValue(() => {});
+    h.authStateCallback = undefined;
+    h.authRecoveryCallback = undefined;
+    h.onAuthStateChange.mockImplementation(
+      (callback: AuthStateCallback, onRecovery?: AuthRecoveryCallback) => {
+        h.authStateCallback = callback;
+        h.authRecoveryCallback = onRecovery;
+        return () => {};
+      }
+    );
     h.getAdminMfaStatus.mockResolvedValue({ ok: true, data: { state: "verified" } });
     h.migrateAnonymousData.mockReset();
     setOnline(true);
@@ -166,6 +187,89 @@ describe("AuthGate — garantie offline (auth activée)", () => {
     await waitFor(() => expect(screen.getByText(/Compte test suspendu/i)).toBeInTheDocument());
     expect(screen.queryByText("CONTENU_APP")).not.toBeInTheDocument();
     expect(h.migrateAnonymousData).not.toHaveBeenCalled();
+  });
+
+  test("session perdue hors-ligne après appairage → conserve l'accès clinique via cache", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValue({ ok: true, data: activeProfile });
+    h.getLastCachedProfile.mockReturnValue(activeProfile);
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
+    setOnline(false);
+    await act(async () => {
+      await h.authStateCallback?.(null);
+    });
+
+    expect(screen.getByText("CONTENU_APP")).toBeInTheDocument();
+    expect(screen.queryByText(/Se connecter/i)).not.toBeInTheDocument();
+  });
+
+  test("session perdue en ligne → revient au login sans utiliser le cache offline", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValue({ ok: true, data: activeProfile });
+    h.getLastCachedProfile.mockReturnValue(activeProfile);
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
+    setOnline(true);
+    await act(async () => {
+      await h.authStateCallback?.(null);
+    });
+
+    await waitFor(() => expect(screen.getByText(/Se connecter/i)).toBeInTheDocument());
+    expect(screen.queryByText("CONTENU_APP")).not.toBeInTheDocument();
+  });
+
+  test("retour reset password Supabase → écran de réinitialisation prioritaire", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValue({ ok: true, data: activeProfile });
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
+    act(() => {
+      h.authRecoveryCallback?.();
+    });
+
+    await waitFor(() => expect(screen.getByText("RESET_PASSWORD_SCREEN")).toBeInTheDocument());
+    expect(screen.queryByText("CONTENU_APP")).not.toBeInTheDocument();
+  });
+
+  test("profil devenu suspendu après reconnexion → bloque l'accès clinique", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValueOnce({ ok: true, data: activeProfile }).mockResolvedValueOnce({
+      ok: true,
+      data: { ...activeProfile, status: "banned", ban_reason: "Suspension RSSI" },
+    });
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
+    await act(async () => {
+      await h.authStateCallback?.({ id: "u1" });
+    });
+
+    await waitFor(() => expect(screen.getByText(/Suspension RSSI/i)).toBeInTheDocument());
+    expect(screen.queryByText("CONTENU_APP")).not.toBeInTheDocument();
   });
 
   test("geste admin ignoré pour un utilisateur non admin", async () => {
