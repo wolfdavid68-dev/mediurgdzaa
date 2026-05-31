@@ -63,6 +63,12 @@ vi.mock("./auth/mobile/MobileAdminDashboard", () => ({
     </div>
   ),
 }));
+vi.mock("./auth/LoginScreen", () => ({
+  default: () => <div>Se connecter</div>,
+}));
+vi.mock("./auth/mobile/MobileLoginScreen", () => ({
+  default: () => <div>Se connecter</div>,
+}));
 vi.mock("./auth/ResetPasswordScreen", () => ({
   default: () => <div>RESET_PASSWORD_SCREEN</div>,
 }));
