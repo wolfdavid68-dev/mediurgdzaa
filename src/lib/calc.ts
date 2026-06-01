@@ -255,6 +255,19 @@ export function calcPrepSufentaTable(weightKg: string | number | null | undefine
 }
 
 // ── Préparation : phases successives (Hidonac) ────────────────
+export function calcPrepSufentaIntranasal(weightKg: string | number | null | undefined) {
+  if (!isValidWeight(weightKg)) return null;
+  const kg = parseFloat(String(weightKg));
+  const cappedKg = Math.min(kg, 100);
+  const demiDose = +(0.15 * cappedKg).toFixed(2);
+  const dose = +(0.3 * cappedKg).toFixed(2);
+  const demiVolume = +(demiDose / 50).toFixed(2);
+  const volume = +(dose / 50).toFixed(2);
+  const narine1 = volume > 0.5 ? 0.3 : volume;
+  const narine2 = volume > 0.5 ? +(volume - 0.3).toFixed(2) : null;
+  return { kg, cappedKg, demiDose, dose, demiVolume, volume, narine1, narine2 };
+}
+
 export function calcPrepPhases(
   prep: PrepFormula | null | undefined,
   weightKg: string | number | null | undefined

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   calcPrepThreshold,
   calcPrepSufentaTable,
+  calcPrepSufentaIntranasal,
   calcPrepPhases,
   calcPrepDoseKg,
   calcPedTable,
@@ -66,6 +67,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   const [activePrepIndex, setActivePrepIndex] = useState(0);
   const [activePedPrep, setActivePedPrep] = useState<"ivd" | "im" | "pse">("ivd");
   const [effectivePrepInput, setEffectivePrepInput] = useState("");
+  const [dosePrepInput, setDosePrepInput] = useState("");
   const [thresholdInput, setThresholdInput] = useState("");
   const previewMode = isPreview();
   const [previewPrepByDrugId, setPreviewPrepByDrugId] = useState<PreviewPrepByDrugId | null>(null);
@@ -120,6 +122,14 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     const hourlyDose = +(volume * recipe.effective_input_conc * fraction).toFixed(3);
     const rate = +(hourlyDose / recipe.effective_output_conc).toFixed(2);
     return { hourlyDose, rate };
+  };
+  const getRecipeDoseInputValue = (recipe: PrepRecipe) => {
+    const raw = dosePrepInput || String(recipe.dose_input_default ?? "");
+    const value = parseFloat(raw.replace(",", "."));
+    const min = recipe.dose_input_min ?? 0;
+    const max = recipe.dose_input_max;
+    if (!Number.isFinite(value) || value <= 0) return null;
+    return Math.min(Math.max(value, min), max ?? value);
   };
   const getRecipePhaseRows = (recipe: PrepRecipe): PrepRecipePhaseRow[] => {
     if (!recipe.phase_doses?.length) return [];
@@ -300,6 +310,92 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         <span>{recipe.effective_input_unit || "mL"}</span>
       </label>
     ) : null;
+  const renderRecipeDoseInput = (recipe: PrepRecipe) =>
+    recipe.kcl_ivl || recipe.kcl_pediatric ? (
+      <label className="prep-inline-input">
+        <span>{recipe.dose_input_label || "Dose"}</span>
+        <input
+          type="number"
+          min={recipe.dose_input_min ?? 0}
+          max={recipe.dose_input_max}
+          step={recipe.dose_input_step ?? 1}
+          placeholder={String(recipe.dose_input_default ?? "")}
+          aria-label={recipe.dose_input_label || "Dose"}
+          value={dosePrepInput}
+          onChange={(event) => setDosePrepInput(event.target.value)}
+        />
+        <span>{recipe.dose_input_unit || "g"}</span>
+      </label>
+    ) : null;
+  const renderKclIvlRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    if (!recipe.kcl_ivl) return null;
+    const dose = getRecipeDoseInputValue(recipe);
+    if (!dose) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    const volume = dose <= 1 ? 250 : dose <= 2 ? 500 : 1000;
+    const doseLabel = formatDoseNumber(dose);
+    const prelever =
+      Number.isInteger(dose) && dose >= 1
+        ? `${doseLabel} ampoule${dose > 1 ? "s" : ""} 1 g/10 mL (= ${doseLabel} g)`
+        : `${formatDoseNumber(dose * 10)} mL de KCl 1 g/10 mL (= ${doseLabel} g)`;
+    return (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Dose</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{doseLabel} g</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Prélever</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{prelever}</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Diluer</span>
+          <span className="prep-calc-val">{volume} mL avec NaCl 0,9%</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Débit max</span>
+          <span className="prep-calc-val">1 g/h</span>
+        </div>
+      </>
+    );
+  };
+  const renderKclPediatricRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    if (!recipe.kcl_pediatric || !validKg) return null;
+    const targetDose = getRecipeDoseInputValue(recipe);
+    if (!targetDose) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    const mmol = +(kg * targetDose).toFixed(1);
+    const productMl = +(mmol / 1.34).toFixed(1);
+    const minFinalMl = Math.ceil(mmol * 25);
+    return (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Pour</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{formatDoseNumber(kg)} kg</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Dose</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{formatDoseNumber(mmol)} mmol/h</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Prélever</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {formatDoseNumber(productMl)} mL de KCl 1 g/10 mL
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Diluer</span>
+          <span className="prep-calc-val">
+            au moins {formatDoseNumber(minFinalMl)} mL NaCl 0,9%
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Limite VVP</span>
+          <span className="prep-calc-val">max 40 mmol/L</span>
+        </div>
+      </>
+    );
+  };
   const renderEffectivePrepRows = (recipe: PrepRecipe) => {
     const result = getEffectivePrep(recipe);
     if (!result) return null;
@@ -514,18 +610,61 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
   };
 
+  const renderRecipeSufentaIntranasal = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const r = calcPrepSufentaIntranasal(weight);
+    if (!r) return null;
+    const boxClass = variant === "v2" ? "prep-calc" : "prep-calc-box";
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    const secondNarine = r.narine2 !== null ? `${formatDoseNumber(r.narine2)} mL` : "non";
+    return (
+      <div className={`${boxClass}${recipeModeClass(recipe)}`}>
+        <div className="prep-calc-header">
+          <span>Pour {r.kg} kg</span>
+          <span>{recipe.tag || "Intranasal"}</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Dose pleine</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {formatDoseNumber(r.dose)} µg = {formatDoseNumber(r.volume)} mL
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Narine n°1</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {formatDoseNumber(r.narine1)} mL
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Narine n°2</span>
+          <span className="prep-calc-val">{secondNarine}</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Rappel demi-dose</span>
+          <span className="prep-calc-val">
+            {formatDoseNumber(r.demiDose)} µg = {formatDoseNumber(r.demiVolume)} mL
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   const renderRecipeCalcBox = (recipe: PrepRecipe) =>
     recipe.empty ? (
       renderRecipeEmpty(recipe)
     ) : recipe.sufenta_table ? (
       renderRecipeSufentaTable(recipe, "classic")
+    ) : recipe.sufenta_intranasal ? (
+      renderRecipeSufentaIntranasal(recipe, "classic")
     ) : (
       <div key={recipe.titre} className={`prep-calc-box${recipeModeClass(recipe)}`}>
         <div className="prep-calc-header">
           <PrepIcon /> {recipe.titre}
           {renderEffectivePrepInput(recipe)}
+          {renderRecipeDoseInput(recipe)}
           {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
         </div>
+        {renderKclIvlRows(recipe, "classic")}
+        {renderKclPediatricRows(recipe, "classic")}
         {recipe.prelever && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Prélever</span>
@@ -575,13 +714,18 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       renderRecipeEmpty(recipe)
     ) : recipe.sufenta_table ? (
       renderRecipeSufentaTable(recipe, "v2")
+    ) : recipe.sufenta_intranasal ? (
+      renderRecipeSufentaIntranasal(recipe, "v2")
     ) : (
       <div key={recipe.titre} className={`prep-calc${recipeModeClass(recipe)}`}>
         <div className="prep-calc-header">
           <span>{recipe.titre}</span>
           {renderEffectivePrepInput(recipe)}
+          {renderRecipeDoseInput(recipe)}
           {recipe.tag && <span>{recipe.tag}</span>}
         </div>
+        {renderKclIvlRows(recipe, "v2")}
+        {renderKclPediatricRows(recipe, "v2")}
         {recipe.prelever && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Prélever</span>
@@ -631,6 +775,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         </div>
       );
     }
+    if (prep.preparations?.length) return null;
 
     const staticPrepCalc = renderStaticPrepCalcV2();
     if (!validKg && !staticPrepCalc) return null;
@@ -845,6 +990,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         </div>
       );
     }
+    if (prep.preparations?.length) return null;
 
     const staticPrepCalc = renderStaticPrepCalcV2();
     if (!validKg && !staticPrepCalc) return null;
@@ -1397,6 +1543,10 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         })()}
       </div>
     ) : null;
+
+  if (prep.preparations?.length && visiblePreparations.length === 0 && !pediatricPrepOnly) {
+    return null;
+  }
 
   if (previewMode) {
     const tags = pediatricPrepOnly

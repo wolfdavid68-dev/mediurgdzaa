@@ -669,10 +669,10 @@ describe("DrugCard", () => {
   });
 
   describe("Préparation SUFENTANIL", () => {
-    test("affiche la préparation PSE et une préparation intranasale vide", () => {
+    test("affiche la préparation PSE et la préparation intranasale dose-poids", () => {
       const sufentanil = DRUGS.find((drug) => drug.nom === "SUFENTANIL")!;
 
-      render(<DrugCard drug={sufentanil} patientWeight="80" />);
+      render(<DrugCard drug={sufentanil} patientWeight="85" />);
       fireEvent.click(screen.getByText("SUFENTANIL").closest("button")!);
 
       expect(screen.getByRole("button", { name: /PSE.*5 µg\/mL/i })).toHaveAttribute(
@@ -688,11 +688,13 @@ describe("DrugCard", () => {
         screen.getByText("Débit IVSE (mL/h) = dose (µg/kg/h) × poids ÷ 5")
       ).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /Intranasal.*À compléter/i }));
+      fireEvent.click(screen.getByRole("button", { name: /Intranasal.*0,3 µg\/kg/i }));
 
-      expect(
-        screen.getByText("Dilution intranasale à compléter ultérieurement.")
-      ).toBeInTheDocument();
+      expect(screen.getByText("25,5 µg = 0,51 mL")).toBeInTheDocument();
+      expect(screen.getByText("0,3 mL")).toBeInTheDocument();
+      expect(screen.getByText("0,21 mL")).toBeInTheDocument();
+      expect(screen.getByText("12,75 µg = 0,26 mL")).toBeInTheDocument();
+      expect(screen.getByText("Demi-dose de rappel : 0,15 µg/kg")).toBeInTheDocument();
       expect(
         screen.queryByText("1 ampoule entière 250 µg/5 mL (= 250 µg)")
       ).not.toBeInTheDocument();

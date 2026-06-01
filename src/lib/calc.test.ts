@@ -6,6 +6,7 @@ import {
   calcDoseFromRate,
   calcPrepThreshold,
   calcPrepSufentaTable,
+  calcPrepSufentaIntranasal,
   calcPrepPhases,
   calcPrepDoseKg,
   calcPedTable,
@@ -464,6 +465,41 @@ describe("calcPrepSufentaTable", () => {
 // ════════════════════════════════════════════════════════════════
 // calcPrepPhases — Hidonac (3 phases)
 // ════════════════════════════════════════════════════════════════
+describe("calcPrepSufentaIntranasal", () => {
+  test("85 kg → dose pleine répartie sur 2 narines", () => {
+    expect(calcPrepSufentaIntranasal(85)).toEqual({
+      kg: 85,
+      cappedKg: 85,
+      demiDose: 12.75,
+      dose: 25.5,
+      demiVolume: 0.26,
+      volume: 0.51,
+      narine1: 0.3,
+      narine2: 0.21,
+    });
+  });
+
+  test("80 kg → dose pleine sur une seule narine", () => {
+    expect(calcPrepSufentaIntranasal(80)).toMatchObject({
+      dose: 24,
+      volume: 0.48,
+      narine1: 0.48,
+      narine2: null,
+    });
+  });
+
+  test("100 kg et plus → ligne plafonnée à 100 kg", () => {
+    expect(calcPrepSufentaIntranasal(120)).toMatchObject({
+      kg: 120,
+      cappedKg: 100,
+      dose: 30,
+      volume: 0.6,
+      narine1: 0.3,
+      narine2: 0.3,
+    });
+  });
+});
+
 describe("calcPrepPhases", () => {
   const prep = {
     conc_produit: 200,

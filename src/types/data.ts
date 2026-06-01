@@ -109,6 +109,15 @@ type DrugPrepRecipe = {
   notes?: string[];
   empty?: boolean;
   sufenta_table?: boolean;
+  sufenta_intranasal?: boolean;
+  kcl_ivl?: boolean;
+  kcl_pediatric?: boolean;
+  dose_input_label?: string;
+  dose_input_unit?: string;
+  dose_input_default?: number;
+  dose_input_min?: number;
+  dose_input_max?: number;
+  dose_input_step?: number;
   effective_input_label?: string;
   effective_input_unit?: string;
   effective_input_conc?: number;
