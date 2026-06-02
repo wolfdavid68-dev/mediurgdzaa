@@ -86,7 +86,7 @@ type DrugPrepRecipe = {
   hide_phase_volume?: boolean;
   phase_doses?: Array<{
     label: string;
-    unit?: "mg" | "mg/h" | "µg/min";
+    unit?: "mg" | "mg/h" | "UI" | "UI/h" | "µg/min";
     duree?: string;
     dose_kg?: number;
     dose_max_kg?: number;
@@ -112,6 +112,7 @@ type DrugPrepRecipe = {
   sufenta_intranasal?: boolean;
   kcl_ivl?: boolean;
   kcl_pediatric?: boolean;
+  clottafact_pediatric?: boolean;
   dose_input_label?: string;
   dose_input_unit?: string;
   dose_input_default?: number;

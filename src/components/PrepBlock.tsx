@@ -396,6 +396,34 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       </>
     );
   };
+  const renderClottafactPediatricRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    if (!recipe.clottafact_pediatric || !validKg) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    const doseMg = Math.round(kg * 70);
+    const doseG = +(doseMg / 1000).toFixed(2);
+    const flacons = Math.ceil(doseG / 1.5);
+
+    return (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Pour</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{formatDoseNumber(kg)} kg</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Dose</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {doseMg} mg = {formatDoseNumber(doseG)} g
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Reconstituer</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {flacons} flacon{flacons > 1 ? "s" : ""} de 1,5 g
+          </span>
+        </div>
+      </>
+    );
+  };
   const renderEffectivePrepRows = (recipe: PrepRecipe) => {
     const result = getEffectivePrep(recipe);
     if (!result) return null;
@@ -665,6 +693,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         </div>
         {renderKclIvlRows(recipe, "classic")}
         {renderKclPediatricRows(recipe, "classic")}
+        {renderClottafactPediatricRows(recipe, "classic")}
         {recipe.prelever && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Prélever</span>
@@ -726,6 +755,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         </div>
         {renderKclIvlRows(recipe, "v2")}
         {renderKclPediatricRows(recipe, "v2")}
+        {renderClottafactPediatricRows(recipe, "v2")}
         {recipe.prelever && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Prélever</span>
@@ -1543,6 +1573,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         })()}
       </div>
     ) : null;
+  const prepTableV2Block = !visiblePreparations.length ? prepTableBlock : null;
+  const prepMainV2Block = prepCalcV2Block || prepTableV2Block;
 
   if (prep.preparations?.length && visiblePreparations.length === 0 && !pediatricPrepOnly) {
     return null;
@@ -1569,7 +1601,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           </div>
         </div>
         <div
-          className={`prep-body ${!pediatricPrepOnly && !prepCalcV2Block ? "prep-body-single" : ""}`}
+          className={`prep-body ${!pediatricPrepOnly && !prepMainV2Block ? "prep-body-single" : ""}`}
         >
           {pediatricPrepOnly ? (
             <div className="prep-calc-list">
@@ -1577,7 +1609,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
               {pediatricPrepBlock}
             </div>
           ) : (
-            prepCalcV2Block
+            prepMainV2Block
           )}
 
           <div>
@@ -1627,13 +1659,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           </div>
         </div>
 
-        {!pediatricPrepOnly &&
-          ((prepTableBlock && !visiblePreparations.length) || doseLibreBlock) && (
-            <div className="prep-v2-extra">
-              {!visiblePreparations.length && prepTableBlock}
-              {doseLibreBlock}
-            </div>
-          )}
+        {!pediatricPrepOnly && doseLibreBlock && (
+          <div className="prep-v2-extra">{doseLibreBlock}</div>
+        )}
       </section>
     );
   }

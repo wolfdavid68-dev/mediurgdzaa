@@ -56,6 +56,72 @@
   gap: 10px;
 }
 
+.pse-table-details {
+  overflow: hidden;
+  border: 1px solid #1d4ed840;
+  border-radius: 9px;
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.pse-table-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 8px 10px;
+  cursor: pointer;
+  list-style: none;
+  color: #bfdbfe;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pse-table-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.pse-table-details summary::after {
+  content: "Afficher";
+  flex: 0 0 auto;
+  border: 1px solid #60a5fa55;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: rgba(29, 78, 216, 0.18);
+  color: #93c5fd;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.pse-table-details[open] summary {
+  border-bottom: 1px solid #1d4ed840;
+  background: rgba(29, 78, 216, 0.12);
+}
+
+.pse-table-details[open] summary::after {
+  content: "Masquer";
+}
+
+.pse-table-details summary small {
+  min-width: 0;
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pse-extra-converter {
+  display: grid;
+  gap: 10px;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
 .pse-note {
   font-size: 12px;
   font-weight: 600;
@@ -76,7 +142,8 @@
 .pse-reference-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 10px;
+  padding: 10px;
 }
 
 .pse-reference-item {
@@ -147,6 +214,26 @@
 
 [data-theme="light"] .pse-reference-table td:last-child {
   color: #1d4ed8;
+}
+
+[data-theme="light"] .pse-table-details {
+  background: #ffffff;
+  border-color: #bfdbfe;
+}
+
+[data-theme="light"] .pse-table-details summary {
+  color: #1e3a8a;
+}
+
+[data-theme="light"] .pse-table-details summary::after {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .pse-table-details[open] summary {
+  background: #eff6ff;
+  border-bottom-color: #bfdbfe;
 }
 
 .pse-input-row {
