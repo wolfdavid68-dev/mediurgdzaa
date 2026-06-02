@@ -5,9 +5,9 @@ import { VitePWA } from "vite-plugin-pwa";
 import checker from "vite-plugin-checker";
 import { visualizer } from "rollup-plugin-visualizer";
 
-// (defineConfig de vite ne connaît pas la clé `test` que vitest étend. On
-// pourrait passer par `vitest/config` mais ça crée un conflit de versions
-// Vite imbriquées. Le simplest : cast la config en `any` à la fin.)
+// `defineConfig` de Vite ne connaît pas la clé `test` que Vitest étend. On
+// pourrait passer par `vitest/config`, mais ça crée un conflit de versions
+// Vite imbriquées ; on garde donc un `@ts-expect-error` local sur cette clé.
 
 // Migration v46 : CRA → Vite + React 19.
 // Phase B (v49) : SW artisanal → Workbox via vite-plugin-pwa.

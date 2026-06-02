@@ -3,6 +3,9 @@
 // Toute modification ici doit être validée par calc.test.js.
 
 import { normalize } from "./normalize";
+import type { PseFormula } from "../types/data";
+
+export type { PseFormula } from "../types/data";
 
 const KG_MIN = 0;
 const KG_MAX = 300;
@@ -28,13 +31,6 @@ const DOSE_DANGER_THRESHOLDS = {
   U: 5000000,
   mmol: 500,
   mEq: 500,
-};
-
-export type PseFormula = {
-  unite: string;
-  conc: number;
-  factor?: number;
-  maxMlH?: number;
 };
 
 type PrepPhaseInput = {

@@ -1,50 +1,14 @@
 import { useEffect, useState } from "react";
 import { PSE } from "../data/pse";
 import { isPsePreview } from "../lib/featureFlags";
-import { calcDebit, calcDoseFromRate, type PseFormula } from "../lib/calc";
-import type { Drug } from "../types/data";
-
-type PseExtra = {
-  unite: string;
-  min: number;
-  max: number;
-  steps: number[];
-};
-
-type PseReferenceTable = {
-  title: string;
-  subtitle?: string;
-  weightKg: number;
-  steps?: number[];
-};
-
-type PseEntry = PseFormula & {
-  min: number;
-  max: number;
-  steps: number[];
-  tag?: string;
-  note?: string;
-  inputMode?: "mlh" | "effectiveDose";
-  mlhSteps?: number[];
-  dosePrecision?: number;
-  effectiveFraction?: number;
-  effectiveInputLabel?: string;
-  effectiveInputUnit?: string;
-  effectiveInputConc?: number;
-  referenceTables?: PseReferenceTable[];
-  hideBlock?: boolean;
-  extra?: PseExtra;
-};
-
-type PseByDrugId = Record<number, PseEntry>;
+import { calcDebit, calcDoseFromRate } from "../lib/calc";
+import type { Drug, PseLookupByDrugId, PsePreviewByDrugId } from "../types/data";
 
 // PSE public, ou PSE + overlay preview si ?author=preview (cf. featureFlags).
 // L'overlay remplace/ajoute par drug id ; le public ne voit jamais
 // pse.preview.js tant que le flag PSE_PREVIEW reste false.
-const resolvePse = (previewPseByDrugId: Partial<PseByDrugId> | null): PseByDrugId =>
-  previewPseByDrugId
-    ? ({ ...PSE, ...previewPseByDrugId } as unknown as PseByDrugId)
-    : (PSE as unknown as PseByDrugId);
+const resolvePse = (previewPseByDrugId: PsePreviewByDrugId | null): PseLookupByDrugId =>
+  previewPseByDrugId ? { ...PSE, ...previewPseByDrugId } : PSE;
 
 // Bloc PSE (pousse-seringue électrique) : input dose cible + calcul mL/h
 // + table des paliers. Gère le mode "extra" (héparine UI/24h en plus).
@@ -55,7 +19,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const [pseTarget2, setPseTarget2] = useState("");
   const [pseRate, setPseRate] = useState("");
   const previewMode = isPsePreview();
-  const [previewPseByDrugId, setPreviewPseByDrugId] = useState<Partial<PseByDrugId> | null>(null);
+  const [previewPseByDrugId, setPreviewPseByDrugId] = useState<PsePreviewByDrugId | null>(null);
 
   useEffect(() => {
     if (!previewMode) {
@@ -66,7 +30,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
     let active = true;
     import("../data/pse.preview")
       .then(({ PSE_PREVIEW }) => {
-        if (active) setPreviewPseByDrugId(PSE_PREVIEW as unknown as Partial<PseByDrugId>);
+        if (active) setPreviewPseByDrugId(PSE_PREVIEW);
       })
       .catch(() => {
         if (active) setPreviewPseByDrugId({});

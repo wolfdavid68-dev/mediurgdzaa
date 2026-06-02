@@ -5,51 +5,76 @@ import { useIsMobile } from "../lib/useIsMobile";
 // "dom" (happy-dom + renderHook) → fichier placé sous src/components.
 // On stube window.matchMedia (happy-dom n'évalue pas réellement la requête).
 
-type Listener = () => void;
+type MatchMediaListener = ((event: Event) => void) | { handleEvent(event: Event): void };
 
 const makeMatchMedia = (initial: boolean) => {
   let matches = initial;
-  const listeners = new Set<Listener>();
-  const mql = {
+  let media = "";
+  const listeners = new Set<MatchMediaListener>();
+  const mql: MediaQueryList = {
     get matches() {
       return matches;
     },
-    media: "",
-    addEventListener: (_: string, cb: Listener) => listeners.add(cb),
-    removeEventListener: (_: string, cb: Listener) => listeners.delete(cb),
+    get media() {
+      return media;
+    },
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: (_type: string, cb: MatchMediaListener | null) => {
+      if (cb) listeners.add(cb);
+    },
+    removeEventListener: (_type: string, cb: MatchMediaListener | null) => {
+      if (cb) listeners.delete(cb);
+    },
+    dispatchEvent: () => true,
   };
-  const fn = vi.fn(() => mql);
+  const fn: typeof window.matchMedia = vi.fn((query: string) => {
+    media = query;
+    return mql;
+  });
   const set = (v: boolean) => {
     matches = v;
-    listeners.forEach((cb) => cb());
+    const event = new Event("change");
+    listeners.forEach((listener) => {
+      if (typeof listener === "function") listener(event);
+      else listener.handleEvent(event);
+    });
   };
   return { fn, set, mql };
 };
 
+const installMatchMedia = (matchMedia: typeof window.matchMedia) => {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: matchMedia,
+  });
+};
+
 describe("useIsMobile", () => {
   afterEach(() => {
-    // @ts-expect-error nettoyage du stub entre tests
-    delete window.matchMedia;
+    Object.defineProperty(window, "matchMedia", { configurable: true, value: undefined });
     vi.restoreAllMocks();
   });
 
   test("retourne true quand la media query matche au montage", () => {
     const mm = makeMatchMedia(true);
-    window.matchMedia = mm.fn as unknown as typeof window.matchMedia;
+    installMatchMedia(mm.fn);
     const { result } = renderHook(() => useIsMobile());
     expect(result.current).toBe(true);
   });
 
   test("retourne false quand elle ne matche pas", () => {
     const mm = makeMatchMedia(false);
-    window.matchMedia = mm.fn as unknown as typeof window.matchMedia;
+    installMatchMedia(mm.fn);
     const { result } = renderHook(() => useIsMobile());
     expect(result.current).toBe(false);
   });
 
   test("réagit à un changement (rotation / resize) via l'event change", () => {
     const mm = makeMatchMedia(false);
-    window.matchMedia = mm.fn as unknown as typeof window.matchMedia;
+    installMatchMedia(mm.fn);
     const { result } = renderHook(() => useIsMobile());
     expect(result.current).toBe(false);
     act(() => mm.set(true));
@@ -60,7 +85,7 @@ describe("useIsMobile", () => {
 
   test("interroge bien la requête côté-court (max-width OU max-height+coarse)", () => {
     const mm = makeMatchMedia(false);
-    window.matchMedia = mm.fn as unknown as typeof window.matchMedia;
+    installMatchMedia(mm.fn);
     renderHook(() => useIsMobile());
     expect(mm.fn).toHaveBeenCalledWith(
       "(max-width: 600px), (max-height: 600px) and (pointer: coarse)"
@@ -70,7 +95,7 @@ describe("useIsMobile", () => {
   test("désabonne le listener au démontage (pas de fuite)", () => {
     const mm = makeMatchMedia(false);
     const removeSpy = vi.spyOn(mm.mql, "removeEventListener");
-    window.matchMedia = mm.fn as unknown as typeof window.matchMedia;
+    installMatchMedia(mm.fn);
     const { unmount } = renderHook(() => useIsMobile());
     unmount();
     expect(removeSpy).toHaveBeenCalled();

@@ -16,7 +16,6 @@ import idsSnapshot from "../data/drug-ids.snapshot.json";
 // Poids de référence pour les tests de plausibilité clinique
 const REF_KG = 70;
 
-type LooseRecord = Record<string, unknown>;
 type DrugForIntegrity = Drug & { prep?: PrepFormula | null };
 type PseEntryForIntegrity = PseFormula & {
   min: number;
@@ -29,8 +28,8 @@ type PseEntryForIntegrity = PseFormula & {
   };
 };
 
-const hasMissingKeys = (value: LooseRecord, keys: string[]) =>
-  keys.filter((key) => value[key] === undefined || value[key] === null);
+const hasMissingKeys = <T extends object>(value: T, keys: string[]) =>
+  keys.filter((key) => value[key as keyof T] === undefined || value[key as keyof T] === null);
 
 const drugsForIntegrity = DRUGS as DrugForIntegrity[];
 const pseForIntegrity = PSE as Record<string, PseEntryForIntegrity>;
@@ -56,7 +55,7 @@ describe("DRUGS — intégrité", () => {
     const broken = DRUGS.map((d) => ({
       id: d.id,
       nom: d.nom,
-      missing: hasMissingKeys(d as LooseRecord, required),
+      missing: hasMissingKeys(d, required),
     })).filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });
@@ -153,7 +152,7 @@ describe("PSE — cohérence avec DRUGS", () => {
   test("chaque entrée PSE a conc, unite, min, max, steps", () => {
     const required = ["conc", "unite", "min", "max", "steps"];
     const broken = Object.entries(pseForIntegrity)
-      .map(([id, p]) => ({ id, missing: hasMissingKeys(p as unknown as LooseRecord, required) }))
+      .map(([id, p]) => ({ id, missing: hasMissingKeys(p, required) }))
       .filter((x) => x.missing.length > 0);
     expect(broken).toEqual([]);
   });

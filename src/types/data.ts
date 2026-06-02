@@ -191,6 +191,50 @@ export type Drug = {
   prep?: DrugPrep | null;
 };
 
+// ── PSE (pousse-seringue électrique) ───────────────────────
+export type PseFormula = {
+  unite: string;
+  conc: number;
+  factor?: number;
+  maxMlH?: number;
+};
+
+type PseExtra = {
+  unite: string;
+  min: number;
+  max: number;
+  steps: number[];
+};
+
+type PseReferenceTable = {
+  title: string;
+  subtitle?: string;
+  weightKg: number;
+  steps?: number[];
+};
+
+type PseEntry = PseFormula & {
+  min: number;
+  max: number;
+  steps: number[];
+  tag?: string;
+  note?: string;
+  inputMode?: "mlh" | "effectiveDose";
+  mlhSteps?: number[];
+  dosePrecision?: number;
+  effectiveFraction?: number;
+  effectiveInputLabel?: string;
+  effectiveInputUnit?: string;
+  effectiveInputConc?: number;
+  referenceTables?: PseReferenceTable[];
+  hideBlock?: boolean;
+  extra?: PseExtra;
+};
+
+export type PseByDrugId = Record<number, PseEntry>;
+export type PsePreviewByDrugId = Partial<Record<number, PseEntry | undefined>>;
+export type PseLookupByDrugId = Record<number, PseEntry | undefined>;
+
 // ── Protocole (PISU / SAUV) ───────────────────────────────────
 type ProtocolSectionType =
   | "inclusion"
