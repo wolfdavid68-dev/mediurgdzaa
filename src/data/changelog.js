@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v111";
+export const APP_VERSION = "v112";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v112",
+    date: "2026-06-16",
+    titre: "Badge de surveillance en ligne + noms de médicaments sur une seule ligne",
+    changes: [
+      {
+        type: "fix",
+        text: "Le badge de surveillance (SCOPE / SCOPE+ECG) passe du coin de la carte à la rangée des pastilles (catégorie / service) sous le titre. La ligne de titre récupère toute la largeur : les noms longs (DIGOXINE NATIVELLE, CHLORURE DE CALCIUM…) restent désormais sur une seule ligne.",
+      },
+      {
+        type: "chore",
+        text: "Correction des vulnérabilités npm signalées par l'audit CI (vite, js-yaml, @babel/core) via mise à jour du lockfile vers les versions patchées.",
+      },
+    ],
+  },
   {
     version: "v111",
     date: "2026-06-16",
