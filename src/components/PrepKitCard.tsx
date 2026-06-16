@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { DRUGS } from "../data/drugs";
 import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
 import { storageKey } from "../lib/storageKeys";
@@ -283,7 +283,7 @@ const DrugPreparations = ({ kit }: { kit: PrepKit }) => (
   </div>
 );
 
-const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+const Row = ({ label, children }: { label: string; children: ReactNode }) => (
   <div className="prepkit-drug-row">
     <span className="prepkit-drug-label">{label}</span>
     <span className="prepkit-drug-value">{children}</span>
@@ -299,7 +299,7 @@ const MaterialChecklist = ({
 }: {
   kit: PrepKit;
   checkedItems: Record<number, boolean>;
-  setCheckedItems: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
+  setCheckedItems: Dispatch<SetStateAction<Record<number, boolean>>>;
   checkedCount: number;
   checkableCount: number;
 }) => (
