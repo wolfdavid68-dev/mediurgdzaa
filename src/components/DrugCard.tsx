@@ -279,11 +279,7 @@ const DrugCard = ({
   };
 
   return (
-    <div
-      className={`drug-card ${open ? "drug-card-open" : ""} ${
-        monitoringBadges.length > 0 ? "drug-card-monitored" : ""
-      }`}
-    >
+    <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
       <div className="drug-row">
         <button
           className="drug-header"
@@ -296,6 +292,16 @@ const DrugCard = ({
             <div className="drug-title-row">
               <span className="drug-icon">{drug.icon}</span>
               <div className="drug-name-block">
+                {monitoringBadges.length > 0 && (
+                  <div
+                    className={`drug-monitor-corner ${monitoringClass}`}
+                    aria-label={`Surveillance requise : ${monitoringLabel}`}
+                    title={`Surveillance requise : ${monitoringLabel}`}
+                  >
+                    <MonitoringWaveIcon />
+                    <span>{monitoringCornerLabel}</span>
+                  </div>
+                )}
                 <span className="drug-name-row">
                   <span className="drug-name">{drug.nom}</span>
                   {hasNote && (
@@ -330,16 +336,6 @@ const DrugCard = ({
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
-          {monitoringBadges.length > 0 && (
-            <div
-              className={`drug-monitor-corner ${monitoringClass}`}
-              aria-label={`Surveillance requise : ${monitoringLabel}`}
-              title={`Surveillance requise : ${monitoringLabel}`}
-            >
-              <MonitoringWaveIcon />
-              <span>{monitoringCornerLabel}</span>
-            </div>
-          )}
         </button>
         {onToggleFavorite && (
           <button
