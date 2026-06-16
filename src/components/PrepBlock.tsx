@@ -10,49 +10,19 @@ import {
 } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
 import type { Drug } from "../types/data";
-
-// `prep` public (drugs.js) éventuellement enrichi par l'override preview
-// (drugs.preview.js) si ?author=preview. On FUSIONNE l'override par-dessus le
-// public (au lieu de le remplacer) : l'override preview ne porte que la
-// nouvelle dilution fixe (fixed_dilution + étapes), donc les champs qu'il ne
-// redéfinit pas — notamment `pedTable`, la table de dilution PÉDIATRIQUE —
-// doivent survivre. Sans fusion, la table pédiatrique d'Adrénaline (et autres
-// drogues à pedTable présentes dans l'override) disparaît en preview.
-type DrugPrep = NonNullable<Drug["prep"]>;
-type PreviewPrepByDrugId = Partial<Record<number, { prep?: Partial<DrugPrep> }>>;
-type PrepRecipe = NonNullable<DrugPrep["preparations"]>[number];
-type PrepRecipePhase = NonNullable<PrepRecipe["phase_doses"]>[number];
-type PrepRecipeWeightBand = NonNullable<PrepRecipe["weight_bands"]>[number];
-type PrepRecipePhaseRow = PrepRecipePhase & {
-  dose: number | null;
-  doseMax: number | null;
-  volume: number | null;
-  volumeMax: number | null;
-  rate: number | null;
-};
-
-const resolvePrep = (
-  drug: Drug,
-  previewPrepByDrugId: PreviewPrepByDrugId | null
-): DrugPrep | null => {
-  const override = previewPrepByDrugId?.[drug.id]?.prep ?? null;
-  if (override) return { ...drug.prep, ...override };
-  return drug.prep || null;
-};
-
-const PrepIcon = () => (
-  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
-  </svg>
-);
-
-const InfoIcon = () => (
-  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="8" x2="12" y2="12" />
-    <line x1="12" y1="16" x2="12.01" y2="16" />
-  </svg>
-);
+import {
+  formatDoseNumber,
+  formatNumberRange,
+  InfoIcon,
+  PrepIcon,
+  resolvePrep,
+} from "./PrepBlock.parts";
+import type {
+  PreviewPrepByDrugId,
+  PrepRecipe,
+  PrepRecipePhaseRow,
+  PrepRecipeWeightBand,
+} from "./PrepBlock.parts";
 
 type PrepBlockProps = {
   drug: Drug;
@@ -100,12 +70,6 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   if (prep.display_below_kg !== undefined && (!validKg || kg >= prep.display_below_kg)) {
     return null;
   }
-  const formatDoseNumber = (value: number) =>
-    Number.isInteger(value) ? String(value) : String(value).replace(".", ",");
-  const formatNumberRange = (min: number, max: number | null) =>
-    max !== null && max !== min
-      ? `${formatDoseNumber(min)}-${formatDoseNumber(max)}`
-      : formatDoseNumber(min);
   const inferredPopulation = validKg && kg < 30 ? "enfant" : "adulte";
   const activePopulation = prepPopulation || inferredPopulation;
   const visiblePreparations = (prep.preparations || []).filter(
