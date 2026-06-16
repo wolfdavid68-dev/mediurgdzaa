@@ -296,13 +296,15 @@ const DrugCard = ({
             <div className="drug-title-row">
               <span className="drug-icon">{drug.icon}</span>
               <div className="drug-name-block">
-                <span className="drug-name">{drug.nom}</span>
-                <span className="drug-commercial">{drug.commercial}</span>
-                {hasNote && (
-                  <span className="note-indicator" title="Note personnelle ajoutée">
-                    ✎
-                  </span>
-                )}
+                <span className="drug-name-row">
+                  <span className="drug-name">{drug.nom}</span>
+                  {hasNote && (
+                    <span className="note-indicator" title="Note personnelle ajoutée">
+                      ✎
+                    </span>
+                  )}
+                </span>
+                {drug.commercial && <span className="drug-commercial">{drug.commercial}</span>}
               </div>
             </div>
             <div className="drug-subtitle">

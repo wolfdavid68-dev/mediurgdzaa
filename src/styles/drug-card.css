@@ -93,43 +93,53 @@
   flex-wrap: nowrap;
 }
 .drug-card-monitored .drug-title-row {
-  padding-right: min(108px, 30vw);
+  padding-right: min(94px, 28vw);
 }
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
   flex-shrink: 0;
   line-height: 1.35;
 }
-/* Bloc nom + nom commercial : flex-item qui occupe la largeur restante à
-   droite de l'icône (min-width:0 pour autoriser le rétrécissement). La
-   réservation `padding-right` sur .drug-title-row (cartes surveillées) garde
-   ce bloc à l'écart du badge SCOPE en coin. */
+/* Bloc nom : colonne à droite de l'icône. Ligne 1 = nom du médicament (+
+   éventuel marqueur de note), ligne 2 = nom commercial en gris. Mise en page
+   identique pour TOUS les médicaments (le commercial est toujours en
+   dessous, jamais à côté). min-width:0 pour autoriser l'ellipse du nom. */
 .drug-name-block {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2px;
+}
+.drug-name-row {
+  display: flex;
   align-items: baseline;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
 }
-/* Le nom tient sur une seule ligne (white-space: nowrap) : il ne se replie
-   jamais sous l'icône ni sous le badge SCOPE. Si un nom très long dépasse la
-   place disponible, il est tronqué par une ellipse plutôt que de chevaucher
-   le badge. Le nom commercial passe alors sous le nom (flex-wrap du bloc). */
+/* Le nom tient sur une seule ligne (white-space: nowrap) avec le logo : il ne
+   se replie jamais. La réservation `padding-right` du titre (cartes
+   surveillées) garde le nom à l'écart du badge SCOPE en coin. L'ellipse n'est
+   qu'un filet de sécurité pour un nom exceptionnellement long. */
 .drug-name {
-  font-size: clamp(15px, 1.7vw, 17px);
+  font-size: clamp(14px, 1.5vw, 16px);
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  min-width: 0;
 }
 .drug-commercial {
   font-size: clamp(11px, 1.2vw, 13px);
   font-family: var(--mono);
   color: var(--text-dim);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .drug-subtitle {
@@ -155,7 +165,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  max-width: min(108px, 30vw);
+  max-width: min(94px, 28vw);
   padding: 5px 8px 5px 9px;
   border-radius: 0 11px 0 9px;
   font-family: var(--mono);
@@ -2073,18 +2083,18 @@
     gap: 6px;
   }
   .drug-card-monitored .drug-title-row {
-    padding-right: min(92px, 32vw);
+    padding-right: min(84px, 30vw);
   }
-  /* Sur très petit écran, on réduit un peu la police du nom pour que les
-     noms longs (CHLORURE DE CALCIUM…) tiennent sur une ligne sans ellipse. */
+  /* Sur très petit écran, on réduit encore un peu la police du nom pour que
+     les noms longs (CHLORURE DE CALCIUM…) tiennent sur une ligne sans ellipse. */
   .drug-name {
-    font-size: 14px;
+    font-size: 13.5px;
   }
   .drug-subtitle {
     gap: 4px;
   }
   .drug-monitor-corner {
-    max-width: min(92px, 32vw);
+    max-width: min(84px, 30vw);
     padding: 4px 6px;
     gap: 3px;
     font-size: 8px;
