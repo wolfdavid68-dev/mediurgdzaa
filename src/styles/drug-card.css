@@ -92,33 +92,37 @@
   margin-bottom: 5px;
   flex-wrap: nowrap;
 }
+.drug-card-monitored .drug-title-row {
+  padding-right: min(84px, 26vw);
+}
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
   flex-shrink: 0;
   line-height: 1.35;
 }
-/* Bloc nom : contexte de formatage de bloc (flow-root) à droite de l'icône.
-   Le badge de surveillance (s'il existe) y flotte à droite : le nom et le nom
-   commercial s'écoulent automatiquement dans la largeur restante, SANS valeur
-   de réservation codée en dur. Chaque carte réserve donc exactement la
-   largeur de SON badge (un « SCOPE » prend moins de place qu'un
-   « SCOPE+CAPNO »). Ligne 1 = nom + logo, ligne 2 = nom commercial. */
+/* Bloc nom : colonne à droite de l'icône. Ligne 1 = nom du médicament (+
+   éventuel marqueur de note), ligne 2 = nom commercial en gris. Mise en page
+   identique pour TOUS les médicaments (le commercial est toujours en
+   dessous, jamais à côté). min-width:0 pour autoriser l'ellipse du nom. */
 .drug-name-block {
   flex: 1 1 auto;
   min-width: 0;
-  display: flow-root;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-/* overflow:hidden → nouveau contexte de formatage : la ligne du nom rétrécit
-   pour se placer À CÔTÉ du badge flottant au lieu de passer dessous. */
 .drug-name-row {
   display: flex;
   align-items: baseline;
   gap: 6px;
   min-width: 0;
-  overflow: hidden;
+  max-width: 100%;
 }
-/* Le nom tient sur une seule ligne pour tous les médicaments. L'ellipse n'est
-   qu'un filet de sécurité pour un écran exceptionnellement étroit. */
+/* Le nom occupe la 1re ligne avec le logo, sur une SEULE ligne pour tous les
+   médicaments. Le badge de surveillance en coin est réduit à son icône (pas
+   de texte « SCOPE »), ce qui libère assez de largeur pour que même le nom le
+   plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne. L'ellipse
+   n'est qu'un filet de sécurité pour un écran exceptionnellement étroit. */
 .drug-name {
   font-size: clamp(13px, 1.5vw, 15px);
   font-weight: 600;
@@ -129,9 +133,6 @@
   min-width: 0;
 }
 .drug-commercial {
-  display: block;
-  clear: both;
-  margin-top: 2px;
   font-size: clamp(11px, 1.2vw, 13px);
   font-family: var(--mono);
   color: var(--text-dim);
@@ -139,6 +140,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .drug-subtitle {
@@ -158,20 +160,20 @@
   font-weight: 500;
 }
 
-/* Badge de surveillance (SCOPE / SCOPE+ECG / SCOPE+CAPNO) avec son texte en
-   petite police. Il FLOTTE à droite dans le bloc nom : il réserve donc
-   automatiquement sa propre largeur sur la 1re ligne, sans nombre magique, et
-   le nom s'écoule à sa gauche. max-width relatif pour qu'un badge ne mange
-   jamais plus de la moitié de la ligne. */
+/* Badge de surveillance en coin haut-droit, avec son texte (SCOPE /
+   SCOPE+ECG) en petite police pour rester compact et laisser le nom du
+   médicament sur une seule ligne. La ligne de titre réserve sa largeur
+   (.drug-card-monitored .drug-title-row). */
 .drug-monitor-corner {
-  float: right;
-  margin: 0 0 2px 8px;
+  position: absolute;
+  top: 0;
+  right: 0;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  max-width: 55%;
-  padding: 3px 7px;
-  border-radius: 6px;
+  max-width: min(84px, 26vw);
+  padding: 4px 6px;
+  border-radius: 0 11px 0 9px;
   font-family: var(--mono);
   font-size: 7px;
   font-weight: 950;
@@ -182,13 +184,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none;
+  z-index: 2;
+  transform: translateY(-1px);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.2);
+    0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
 [data-theme="light"] .drug-monitor-corner {
-  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
+  transform: none;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.14);
 }
 
 .drug-monitor-corner span {
@@ -2088,8 +2093,12 @@
   .drug-title-row {
     gap: 6px;
   }
+  .drug-card-monitored .drug-title-row {
+    padding-right: min(78px, 28vw);
+  }
   /* Sur très petit écran, on réduit un peu la police du nom pour que même le
-     nom le plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne. */
+     nom le plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne malgré
+     le badge texte. */
   .drug-name {
     font-size: 12px;
   }
@@ -2097,6 +2106,8 @@
     gap: 4px;
   }
   .drug-monitor-corner {
+    max-width: min(78px, 28vw);
+    padding: 4px 5px;
     font-size: 6.5px;
   }
   .monitor-wave {
