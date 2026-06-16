@@ -149,7 +149,11 @@
   gap: 6px;
   flex-wrap: wrap;
 }
+/* Classe thérapeutique : toujours sur sa propre ligne (4e ligne de la carte),
+   sous la rangée des pastilles, identique pour tous les médicaments. */
 .drug-classe {
+  display: block;
+  margin-top: 4px;
   font-size: clamp(10px, 1.1vw, 12px);
   color: #cbd5e1;
   font-style: italic;

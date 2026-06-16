@@ -315,8 +315,8 @@ const DrugCard = ({
                   {s}
                 </span>
               ))}
-              <span className="drug-classe">{drug.classe}</span>
             </div>
+            {drug.classe && <div className="drug-classe">{drug.classe}</div>}
           </div>
           <svg
             className={`chevron ${open ? "chevron-open" : ""}`}

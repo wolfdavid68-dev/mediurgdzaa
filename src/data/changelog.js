@@ -17,7 +17,7 @@ export const CHANGELOG = [
       },
       {
         type: "fix",
-        text: "Mise en page identique pour toutes les cartes médicament : ligne 1 = nom + logo sur une seule ligne (même les noms les plus longs comme VIALEBEX / ALBUMINE HUMAINE), ligne 2 = nom commercial en gris. Le badge de surveillance en coin est réduit à son icône (onde ECG) pour libérer la place ; le libellé Scope / Scope+ECG reste visible à l'ouverture de la carte.",
+        text: "Mise en page identique pour toutes les cartes médicament : ligne 1 = nom + logo sur une seule ligne (même les noms les plus longs comme VIALEBEX / ALBUMINE HUMAINE), ligne 2 = nom commercial en gris, ligne 3 = pastilles catégorie/service, ligne 4 = classe thérapeutique (toujours sur sa propre ligne). Le badge de surveillance en coin est réduit à son icône (onde ECG) pour libérer la place ; le libellé Scope / Scope+ECG reste visible à l'ouverture de la carte.",
       },
       {
         type: "fix",
