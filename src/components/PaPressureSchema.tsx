@@ -9,123 +9,111 @@ const PaPressureSchema = () => {
         aria-label="Schéma du système de pression artérielle invasive"
         role="img"
         style={{
-          position: "relative",
-          minHeight: 620,
+          width: "100%",
+          maxWidth: 430,
+          margin: "0 auto",
           overflow: "hidden",
           border: "1px solid var(--border)",
           borderRadius: 14,
           background: "linear-gradient(135deg, #f8fdff 0%, #eef9fb 100%)",
+          boxShadow: "0 10px 24px rgba(11, 47, 95, 0.08)",
         }}
       >
-        <div style={{ position: "absolute", left: 24, top: 22, color: "#0b2f5f", fontSize: 26, fontWeight: 900 }}>
-          Schéma du kit PA
-        </div>
-        <div style={{ position: "absolute", left: 24, top: 58, color: "#07969b", fontSize: 16, fontWeight: 800 }}>
-          Pression artérielle invasive
-        </div>
+        <svg viewBox="0 0 360 430" width="100%" height="auto" style={{ display: "block" }}>
+          <defs>
+            <filter id="pa-soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#0b2f5f" floodOpacity="0.12" />
+            </filter>
+            <marker id="pa-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#07969b" />
+            </marker>
+          </defs>
 
-        <div style={{ position: "absolute", left: 54, top: 225, width: 170, height: 118, border: "3px solid #718495", borderRadius: 16, background: "#eef3f7" }}>
-          <div style={{ position: "absolute", left: 18, top: 20, width: 108, height: 72, borderRadius: 7, background: "#0c243b" }}>
-            <div style={{ position: "absolute", left: 12, top: 36, width: 84, height: 3, background: "#2fd4c8", boxShadow: "22px -14px 0 -1px #2fd4c8, 42px 12px 0 -1px #2fd4c8, 66px -10px 0 -1px #2fd4c8" }} />
-            <div style={{ position: "absolute", right: 8, top: 18, color: "#41e0d0", fontSize: 19, fontWeight: 900 }}>120</div>
-            <div style={{ position: "absolute", right: 10, top: 44, color: "#41e0d0", fontSize: 19, fontWeight: 900 }}>80</div>
-          </div>
-          <div style={{ position: "absolute", right: 16, top: 30, width: 18, height: 18, borderRadius: 999, background: "#07969b" }} />
-          <div style={{ position: "absolute", right: 16, top: 58, width: 18, height: 18, borderRadius: 999, background: "#f59e0b" }} />
-        </div>
-        <Label left={40} top={160}>Scope</Label>
-        <Line left={112} top={203} width={80} rotate={35} color="#07969b" />
-        <Line left={224} top={315} width={292} rotate={25} />
-        <Label left={56} top={430}>Câble interface</Label>
-        <Line left={190} top={454} width={145} rotate={-8} color="#07969b" />
+          <text x="18" y="28" fill="#0b2f5f" fontSize="21" fontWeight="900">
+            Schéma du kit PA
+          </text>
+          <text x="18" y="50" fill="#07969b" fontSize="13" fontWeight="800">
+            Pression artérielle invasive
+          </text>
 
-        <div style={{ position: "absolute", left: 430, top: 86, width: 10, height: 498, borderRadius: 999, background: "#9aa9b5" }} />
-        <div style={{ position: "absolute", left: 378, top: 82, width: 116, height: 10, borderRadius: 999, background: "#9aa9b5" }} />
+          <g filter="url(#pa-soft-shadow)">
+            <rect x="16" y="74" width="132" height="86" rx="15" fill="#eef3f7" stroke="#718495" strokeWidth="3" />
+            <rect x="38" y="98" width="83" height="44" rx="7" fill="#0c243b" />
+            <path d="M48 123 H115 M67 111 H122 M74 134 H124" stroke="#2fd4c8" strokeWidth="3" strokeLinecap="round" />
+            <text x="94" y="122" fill="#41e0d0" fontSize="17" fontWeight="900">
+              120
+            </text>
+            <text x="101" y="140" fill="#41e0d0" fontSize="16" fontWeight="900">
+              80
+            </text>
+            <circle cx="129" cy="112" r="9" fill="#07969b" />
+            <circle cx="129" cy="136" r="9" fill="#f59e0b" />
+          </g>
+          <SchemaLabel x={25} y={64} width={76} text="Scope" />
+          <SchemaLabel x={30} y={176} width={104} text="Câble interface" small />
+          <path d="M126 162 C153 176 165 194 174 216" stroke="#07969b" strokeWidth="5" strokeLinecap="round" fill="none" markerEnd="url(#pa-arrow)" />
 
-        <div style={{ position: "absolute", left: 498, top: 112, width: 104, height: 166, borderRadius: 48, border: "3px solid #6b7f8f", background: "rgba(255,255,255,.76)" }}>
-          <div style={{ position: "absolute", left: 8, right: 8, bottom: 22, height: 70, borderRadius: "0 0 42px 42px", background: "rgba(117,218,231,.55)" }} />
-          <div style={{ position: "absolute", left: -8, right: -8, bottom: 42, height: 50, borderRadius: 10, background: "rgba(7,150,155,.82)" }} />
-          <div style={{ position: "absolute", left: 25, top: 52, color: "#0b2f5f", fontSize: 18, fontWeight: 900 }}>NaCl</div>
-          <div style={{ position: "absolute", left: 24, top: 76, color: "#0b2f5f", fontSize: 18, fontWeight: 900 }}>0,9 %</div>
-        </div>
-        <Label left={710} top={136}>Poche NaCl 0,9 %</Label>
-        <Line left={602} top={164} width={104} color="#07969b" />
+          <g filter="url(#pa-soft-shadow)">
+            <path d="M250 67 H292 A19 19 0 0 1 311 86 V148 A31 31 0 0 1 280 179 A31 31 0 0 1 249 148 V68 Z" fill="rgba(255,255,255,.85)" stroke="#6b7f8f" strokeWidth="3" />
+            <path d="M253 129 H307 V149 A27 27 0 0 1 280 176 A27 27 0 0 1 253 149 Z" fill="rgba(117,218,231,.55)" />
+            <rect x="242" y="120" width="76" height="32" rx="8" fill="rgba(7,150,155,.82)" />
+            <text x="263" y="103" fill="#0b2f5f" fontSize="16" fontWeight="900">
+              NaCl
+            </text>
+            <text x="260" y="121" fill="#0b2f5f" fontSize="15" fontWeight="900">
+              0,9 %
+            </text>
+          </g>
+          <SchemaLabel x={212} y={28} width={126} text="Poche NaCl 0,9 %" />
 
-        <div style={{ position: "absolute", left: 620, top: 260, width: 46, height: 46, borderRadius: 999, border: "3px solid #6b7f8f", background: "#fff" }}>
-          <div style={{ position: "absolute", left: 22, top: 22, width: 20, height: 3, background: "#cf2434", transform: "rotate(-40deg)", transformOrigin: "left center" }} />
-        </div>
-        <div style={{ position: "absolute", left: 631, top: 306, width: 22, height: 40, borderRadius: 8, background: "#485b68" }} />
-        <div style={{ position: "absolute", left: 605, top: 345, width: 72, height: 108, borderRadius: 40, background: "#0b5eaa", border: "3px solid #063b70" }} />
-        <Line left={588} top={205} width={92} rotate={70} />
-        <Label left={720} top={263}>Manomètre</Label>
-        <Line left={666} top={284} width={50} color="#07969b" />
-        <Label left={720} top={380}>Manchon de pression<br /><span style={{ fontWeight: 600, fontSize: 12 }}>met la poche sous pression</span></Label>
-        <Line left={676} top={399} width={40} color="#07969b" />
+          <g filter="url(#pa-soft-shadow)">
+            <circle cx="279" cy="209" r="21" fill="#fff" stroke="#6b7f8f" strokeWidth="3" />
+            <path d="M280 209 l14 -12" stroke="#cf2434" strokeWidth="3" strokeLinecap="round" />
+            <rect x="268" y="229" width="22" height="36" rx="7" fill="#485b68" />
+            <rect x="247" y="260" width="64" height="72" rx="30" fill="#0b5eaa" stroke="#063b70" strokeWidth="3" />
+          </g>
+          <SchemaLabel x={202} y={337} width={142} text="Manchon de pression" small />
+          <text x="216" y="365" fill="#0b2f5f" fontSize="11" fontWeight="700">
+            met la poche sous pression
+          </text>
+          <path d="M279 179 V205" stroke="#8ca0ad" strokeWidth="5" strokeLinecap="round" />
 
-        <Line left={550} top={278} width={210} rotate={90} color="#07969b" />
-        <div style={{ position: "absolute", left: 520, top: 415, width: 135, height: 120, border: "3px solid #6b7f8f", borderRadius: 17, background: "rgba(255,255,255,.8)" }}>
-          <div style={{ position: "absolute", left: 50, top: 22, width: 38, height: 74, borderRadius: 8, border: "3px solid #6b7f8f", background: "#e7eef3" }} />
-          <div style={{ position: "absolute", left: 60, top: 42, width: 18, height: 38, borderRadius: 4, background: "#f59e0b" }} />
-          <div style={{ position: "absolute", left: 92, top: 46, width: 17, height: 45, borderRadius: 4, background: "#d7e3ea" }} />
-        </div>
-        <Label left={720} top={482}>Tête de pression (capteur)</Label>
-        <Line left={654} top={502} width={62} color="#07969b" />
-        <Label left={720} top={548}>Dispositif de rinçage intégré</Label>
-        <Line left={654} top={570} width={62} color="#07969b" />
+          <path d="M248 296 C224 286 217 274 214 257" stroke="#07969b" strokeWidth="5" strokeLinecap="round" fill="none" markerEnd="url(#pa-arrow)" />
+          <g filter="url(#pa-soft-shadow)">
+            <rect x="114" y="222" width="112" height="74" rx="14" fill="rgba(255,255,255,.9)" stroke="#6b7f8f" strokeWidth="3" />
+            <rect x="157" y="237" width="32" height="44" rx="6" fill="#e7eef3" stroke="#6b7f8f" strokeWidth="3" />
+            <rect x="163" y="249" width="14" height="27" rx="4" fill="#f59e0b" />
+            <rect x="191" y="252" width="15" height="29" rx="4" fill="#d7e3ea" />
+          </g>
+          <SchemaLabel x={83} y={306} width={174} text="Tête de pression / capteur" />
+          <text x="103" y="334" fill="#0b2f5f" fontSize="11" fontWeight="700">
+            dispositif de rinçage intégré
+          </text>
 
-        <Line left={585} top={535} width={260} rotate={13} color="#07969b" />
-        <div style={{ position: "absolute", left: 810, top: 562, width: 58, height: 58, borderRadius: 999, border: "5px solid #0b5eaa", background: "#fff" }}>
-          <div style={{ position: "absolute", left: 21, top: -23, width: 16, height: 104, borderRadius: 999, background: "#0b5eaa" }} />
-          <div style={{ position: "absolute", left: -23, top: 21, width: 104, height: 16, borderRadius: 999, background: "#0b5eaa" }} />
-        </div>
-        <Line left={868} top={591} width={250} color="#07969b" />
-        <div style={{ position: "absolute", left: 1045, top: 578, width: 58, height: 28, borderRadius: 8, border: "3px solid #6b7f8f", background: "#e7eef3" }} />
-        <div style={{ position: "absolute", left: 1118, top: 591, width: 105, height: 4, borderRadius: 999, background: "#6b7f8f" }} />
-        <div style={{ position: "absolute", left: 1198, top: 585, width: 25, height: 14, background: "#cf2434" }} />
-        <Label left={710} top={635}>Robinet 3 voies<br /><span style={{ fontWeight: 600, fontSize: 12 }}>port de prélèvement</span></Label>
-        <Line left={840} top={620} width={34} rotate={90} color="#07969b" />
-        <Label left={1020} top={635}>Cathéter artériel</Label>
-        <Line left={1110} top={620} width={34} rotate={90} color="#07969b" />
+          <path d="M170 296 V356" stroke="#07969b" strokeWidth="5" strokeLinecap="round" markerEnd="url(#pa-arrow)" />
+          <g filter="url(#pa-soft-shadow)">
+            <circle cx="170" cy="367" r="25" fill="#fff" stroke="#0b5eaa" strokeWidth="5" />
+            <path d="M170 327 V407 M130 367 H210" stroke="#0b5eaa" strokeWidth="10" strokeLinecap="round" />
+          </g>
+          <SchemaLabel x={22} y={352} width={102} text="Robinet 3 voies" small />
+          <path d="M195 384 C226 395 251 396 279 388" stroke="#07969b" strokeWidth="5" strokeLinecap="round" fill="none" markerEnd="url(#pa-arrow)" />
+          <rect x="283" y="374" width="44" height="18" rx="6" fill="#e7eef3" stroke="#6b7f8f" strokeWidth="3" />
+          <path d="M327 383 H347" stroke="#6b7f8f" strokeWidth="4" strokeLinecap="round" />
+          <path d="M341 379 h13 v8 h-13 z" fill="#cf2434" />
+          <SchemaLabel x={219} y={399} width={124} text="Cathéter artériel" small />
+        </svg>
       </div>
     </div>
   );
 };
 
-const Label = ({ left, top, children }: { left: number; top: number; children: React.ReactNode }) => (
-  <div
-    style={{
-      position: "absolute",
-      left,
-      top,
-      border: "2px solid #07969b",
-      borderRadius: 12,
-      padding: "8px 12px",
-      background: "#fff",
-      color: "#0b2f5f",
-      fontWeight: 800,
-      fontSize: 14,
-      lineHeight: 1.2,
-      boxShadow: "0 6px 18px rgba(11, 47, 95, 0.08)",
-    }}
-  >
-    {children}
-  </div>
-);
-
-const Line = ({ left, top, width, rotate = 0, color = "#8ca0ad" }: { left: number; top: number; width: number; rotate?: number; color?: string }) => (
-  <div
-    style={{
-      position: "absolute",
-      left,
-      top,
-      width,
-      height: 6,
-      borderRadius: 999,
-      background: color,
-      transform: `rotate(${rotate}deg)`,
-      transformOrigin: "left center",
-    }}
-  />
+const SchemaLabel = ({ x, y, width, text, small = false }: { x: number; y: number; width: number; text: string; small?: boolean }) => (
+  <g>
+    <rect x={x} y={y} width={width} height={small ? 28 : 30} rx="10" fill="#fff" stroke="#07969b" strokeWidth="2" />
+    <text x={x + width / 2} y={y + (small ? 18 : 20)} textAnchor="middle" fill="#0b2f5f" fontSize={small ? 11 : 12} fontWeight="800">
+      {text}
+    </text>
+  </g>
 );
 
 export default PaPressureSchema;
