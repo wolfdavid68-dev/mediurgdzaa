@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v110";
+export const APP_VERSION = "v111";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v111",
+    date: "2026-06-16",
+    titre: "Schémas KTC/KT PA en image + correctif d'affichage des noms",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouveau schéma d'appareillage des KTC (infographie GHR) et schéma image du kit KT PA, affichés dans l'onglet Schéma des kits avec légende et zoom.",
+      },
+      {
+        type: "fix",
+        text: "Correction de l'affichage des cartes médicament : les noms longs (ex. CHLORURE DE CALCIUM, DIGOXINE NATIVELLE) ne repassent plus sous l'icône quand un badge de surveillance est présent — le nom reste aligné à droite de l'icône.",
+      },
+    ],
+  },
   {
     version: "v110",
     date: "2026-05-28",

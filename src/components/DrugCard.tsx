@@ -295,13 +295,15 @@ const DrugCard = ({
           <div className="drug-main">
             <div className="drug-title-row">
               <span className="drug-icon">{drug.icon}</span>
-              <span className="drug-name">{drug.nom}</span>
-              <span className="drug-commercial">{drug.commercial}</span>
-              {hasNote && (
-                <span className="note-indicator" title="Note personnelle ajoutée">
-                  ✎
-                </span>
-              )}
+              <div className="drug-name-block">
+                <span className="drug-name">{drug.nom}</span>
+                <span className="drug-commercial">{drug.commercial}</span>
+                {hasNote && (
+                  <span className="note-indicator" title="Note personnelle ajoutée">
+                    ✎
+                  </span>
+                )}
+              </div>
             </div>
             <div className="drug-subtitle">
               <span className="badge badge-cat" data-cat={drug.cat}>

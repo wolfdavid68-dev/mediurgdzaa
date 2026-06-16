@@ -87,21 +87,36 @@
 
 .drug-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   margin-bottom: 5px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .drug-card-monitored .drug-title-row {
   padding-right: min(112px, 30vw);
 }
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
+  flex-shrink: 0;
+  line-height: 1.35;
+}
+/* Bloc nom + nom commercial : flex-item qui occupe la largeur restante à
+   droite de l'icône (min-width:0 pour autoriser le rétrécissement). Le nom
+   peut désormais passer sur deux lignes SANS repasser sous l'icône — c'est
+   l'intérieur de ce bloc qui se replie, pas le nom par rapport à l'icône. */
+.drug-name-block {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
 }
 .drug-name {
   font-size: clamp(15px, 1.7vw, 17px);
   font-weight: 600;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 .drug-commercial {
   font-size: clamp(11px, 1.2vw, 13px);
