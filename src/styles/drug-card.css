@@ -92,15 +92,18 @@
   margin-bottom: 5px;
   flex-wrap: nowrap;
 }
+.drug-card-monitored .drug-title-row {
+  padding-right: min(108px, 30vw);
+}
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
   flex-shrink: 0;
   line-height: 1.35;
 }
 /* Bloc nom + nom commercial : flex-item qui occupe la largeur restante à
-   droite de l'icône (min-width:0 pour autoriser le rétrécissement). Le nom
-   peut désormais passer sur deux lignes SANS repasser sous l'icône — c'est
-   l'intérieur de ce bloc qui se replie, pas le nom par rapport à l'icône. */
+   droite de l'icône (min-width:0 pour autoriser le rétrécissement). La
+   réservation `padding-right` sur .drug-title-row (cartes surveillées) garde
+   ce bloc à l'écart du badge SCOPE en coin. */
 .drug-name-block {
   flex: 1 1 auto;
   min-width: 0;
@@ -109,11 +112,18 @@
   align-items: baseline;
   gap: 6px;
 }
+/* Le nom tient sur une seule ligne (white-space: nowrap) : il ne se replie
+   jamais sous l'icône ni sous le badge SCOPE. Si un nom très long dépasse la
+   place disponible, il est tronqué par une ellipse plutôt que de chevaucher
+   le badge. Le nom commercial passe alors sous le nom (flex-wrap du bloc). */
 .drug-name {
   font-size: clamp(15px, 1.7vw, 17px);
   font-weight: 600;
   color: var(--text);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .drug-commercial {
   font-size: clamp(11px, 1.2vw, 13px);
@@ -135,26 +145,45 @@
   font-weight: 500;
 }
 
-/* Badge de surveillance désormais en ligne avec les pastilles (catégorie /
-   service) sous le titre, plus en coin de carte : ça libère toute la largeur
-   du titre pour que les noms longs restent sur une seule ligne. */
-.drug-monitor-inline {
+/* Badge de surveillance en coin haut-droit de la carte. La ligne de titre
+   réserve sa largeur (.drug-card-monitored .drug-title-row) pour que le nom
+   du médicament reste sur une seule ligne sans passer dessous. */
+.drug-monitor-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 7px;
-  border-radius: 4px;
+  gap: 5px;
+  max-width: min(108px, 30vw);
+  padding: 5px 8px 5px 9px;
+  border-radius: 0 11px 0 9px;
   font-family: var(--mono);
-  font-size: clamp(9px, 1vw, 11px);
-  font-weight: 800;
-  line-height: 1.3;
-  letter-spacing: 0.3px;
+  font-size: 9px;
+  font-weight: 950;
+  line-height: 1;
   text-transform: uppercase;
+  letter-spacing: 0.45px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 2;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 8px 18px rgba(0, 0, 0, 0.22);
 }
-.drug-monitor-inline .monitor-wave {
-  width: 16px;
-  height: 10px;
+
+[data-theme="light"] .drug-monitor-corner {
+  transform: none;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.14);
+}
+
+.drug-monitor-corner span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .monitor-wave {
@@ -2043,8 +2072,26 @@
   .drug-title-row {
     gap: 6px;
   }
+  .drug-card-monitored .drug-title-row {
+    padding-right: min(92px, 32vw);
+  }
+  /* Sur très petit écran, on réduit un peu la police du nom pour que les
+     noms longs (CHLORURE DE CALCIUM…) tiennent sur une ligne sans ellipse. */
+  .drug-name {
+    font-size: 14px;
+  }
   .drug-subtitle {
     gap: 4px;
+  }
+  .drug-monitor-corner {
+    max-width: min(92px, 32vw);
+    padding: 4px 6px;
+    gap: 3px;
+    font-size: 8px;
+  }
+  .monitor-wave {
+    width: 18px;
+    height: 10px;
   }
   .logo-text p {
     font-size: 9px;
