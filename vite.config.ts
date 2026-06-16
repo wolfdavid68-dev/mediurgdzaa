@@ -78,7 +78,7 @@ export default defineConfig({
         // re-matche via le glob, il se retrouve listé 2× avec 2 révisions
         // différentes → Workbox lève « add-to-cache-list-conflicting-entries »
         // à l'installation → précache KO → écran figé au reload hors-ligne.
-        globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,ico,woff2}"],
+        globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,webp,svg,ico,woff2}"],
         // stats.html (visualizer) jamais précaché. Subsets de police non
         // utilisés exclus du precache : MediURG est FR only → seul le
         // subset « latin » sert (les accents FR é è à ç ù sont en

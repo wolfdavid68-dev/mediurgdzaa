@@ -346,7 +346,7 @@ export const PREP_KITS = [
       "Étiquetage rouge \"ARTÈRE\" obligatoire",
     ],
     schema: {
-      img: "/pa-schema.png",
+      img: "/pa-schema.webp",
       alt: "Schéma du kit KT PA — système de pression artérielle invasive",
       source: "MediURG — Schéma du kit KT PA",
       intro:
@@ -544,7 +544,7 @@ export const PREP_KITS = [
     // octopus → voie) ; la légende reprend mot pour mot toutes les
     // étiquettes du document pour lecture rapide. Image zoomable côté UI.
     schema: {
-      img: "/ktc-schema.png",
+      img: "/ktc-schema.webp",
       alt: "Schéma d'appareillage des KTC — réanimations adultes (GHR)",
       source: "GHR — Schéma d'appareillage des KTC · Réanimations adultes",
       intro:
