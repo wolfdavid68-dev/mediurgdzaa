@@ -93,7 +93,7 @@
   flex-wrap: nowrap;
 }
 .drug-card-monitored .drug-title-row {
-  padding-right: min(94px, 28vw);
+  padding-right: min(104px, 30vw);
 }
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
@@ -118,17 +118,17 @@
   min-width: 0;
   max-width: 100%;
 }
-/* Le nom tient sur une seule ligne (white-space: nowrap) avec le logo : il ne
-   se replie jamais. La réservation `padding-right` du titre (cartes
-   surveillées) garde le nom à l'écart du badge SCOPE en coin. L'ellipse n'est
-   qu'un filet de sécurité pour un nom exceptionnellement long. */
+/* Le nom occupe la 1re ligne avec le logo. Les noms courants tiennent sur une
+   seule ligne ; les noms exceptionnellement longs (VIALEBEX / ALBUMINE
+   HUMAINE…) se replient sur une 2e ligne PLUTÔT que d'être tronqués par une
+   ellipse. Le repli reste à droite de l'icône (le bloc nom est une colonne),
+   jamais sous l'icône. La réservation `padding-right` du titre garde la 1re
+   ligne à l'écart du badge SCOPE en coin. */
 .drug-name {
   font-size: clamp(14px, 1.5vw, 16px);
   font-weight: 600;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
   min-width: 0;
 }
 .drug-commercial {
@@ -165,7 +165,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  max-width: min(94px, 28vw);
+  max-width: min(104px, 30vw);
   padding: 5px 8px 5px 9px;
   border-radius: 0 11px 0 9px;
   font-family: var(--mono);
@@ -2083,10 +2083,11 @@
     gap: 6px;
   }
   .drug-card-monitored .drug-title-row {
-    padding-right: min(84px, 30vw);
+    padding-right: min(96px, 32vw);
   }
-  /* Sur très petit écran, on réduit encore un peu la police du nom pour que
-     les noms longs (CHLORURE DE CALCIUM…) tiennent sur une ligne sans ellipse. */
+  /* Sur très petit écran, on réduit un peu la police du nom pour limiter le
+     repli ; les noms trop longs passent quand même sur 2 lignes (jamais
+     d'ellipse). */
   .drug-name {
     font-size: 13.5px;
   }
@@ -2094,7 +2095,7 @@
     gap: 4px;
   }
   .drug-monitor-corner {
-    max-width: min(84px, 30vw);
+    max-width: min(96px, 32vw);
     padding: 4px 6px;
     gap: 3px;
     font-size: 8px;

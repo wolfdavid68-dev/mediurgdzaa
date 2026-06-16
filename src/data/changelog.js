@@ -17,7 +17,7 @@ export const CHANGELOG = [
       },
       {
         type: "fix",
-        text: "Mise en page identique pour toutes les cartes médicament : ligne 1 = nom + logo (sur une seule ligne, sans troncature), ligne 2 = nom commercial en gris. Le badge de surveillance (SCOPE / SCOPE+ECG) reste en coin de carte sans pousser le nom sur deux lignes.",
+        text: "Mise en page identique pour toutes les cartes médicament : ligne 1 = nom + logo, ligne 2 = nom commercial en gris. Plus aucune troncature « … » : les noms très longs (VIALEBEX / ALBUMINE HUMAINE…) se replient sur une 2e ligne au lieu d'être coupés. Le badge de surveillance (SCOPE / SCOPE+ECG) reste en coin de carte, toujours lisible en entier.",
       },
       {
         type: "chore",
