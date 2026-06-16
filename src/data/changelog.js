@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v110";
+export const APP_VERSION = "v111";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v111",
+    date: "2026-06-16",
+    titre: "Schémas KTC/KT PA en image + cartes médicament uniformisées",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouveau schéma d'appareillage des KTC (infographie GHR) et schéma image du kit KT PA, affichés dans l'onglet Schéma des kits avec légende et zoom.",
+      },
+      {
+        type: "fix",
+        text: "Mise en page identique pour toutes les cartes médicament : ligne 1 = nom + logo (sur une seule ligne, sans troncature), ligne 2 = nom commercial en gris. Le badge de surveillance (SCOPE / SCOPE+ECG) reste en coin de carte sans pousser le nom sur deux lignes.",
+      },
+      {
+        type: "chore",
+        text: "Correction des vulnérabilités npm signalées par l'audit CI (vite, js-yaml, @babel/core) via mise à jour du lockfile, et fiabilisation d'un test d'intégration AuthGate parfois trop lent en CI.",
+      },
+    ],
+  },
   {
     version: "v110",
     date: "2026-05-28",
