@@ -128,7 +128,6 @@ const DrugCard = ({
     });
   }, [drug]);
   const monitoringLabel = monitoringBadges.map((badge) => badge.label).join(" + ");
-  const monitoringCornerLabel = monitoringBadges.map((badge) => badge.label).join("+");
   const monitoringClass = monitoringBadges[0]?.className || "monitor-custom";
 
   // onOpen volontairement exclu des deps : addToHistory est recréé à chaque render
@@ -334,9 +333,9 @@ const DrugCard = ({
             <div
               className={`drug-monitor-corner ${monitoringClass}`}
               aria-label={`Surveillance requise : ${monitoringLabel}`}
+              title={`Surveillance requise : ${monitoringLabel}`}
             >
               <MonitoringWaveIcon />
-              <span>{monitoringCornerLabel}</span>
             </div>
           )}
         </button>

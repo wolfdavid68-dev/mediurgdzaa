@@ -93,7 +93,7 @@
   flex-wrap: nowrap;
 }
 .drug-card-monitored .drug-title-row {
-  padding-right: min(104px, 30vw);
+  padding-right: 42px;
 }
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
@@ -118,17 +118,18 @@
   min-width: 0;
   max-width: 100%;
 }
-/* Le nom occupe la 1re ligne avec le logo. Les noms courants tiennent sur une
-   seule ligne ; les noms exceptionnellement longs (VIALEBEX / ALBUMINE
-   HUMAINE…) se replient sur une 2e ligne PLUTÔT que d'être tronqués par une
-   ellipse. Le repli reste à droite de l'icône (le bloc nom est une colonne),
-   jamais sous l'icône. La réservation `padding-right` du titre garde la 1re
-   ligne à l'écart du badge SCOPE en coin. */
+/* Le nom occupe la 1re ligne avec le logo, sur une SEULE ligne pour tous les
+   médicaments. Le badge de surveillance en coin est réduit à son icône (pas
+   de texte « SCOPE »), ce qui libère assez de largeur pour que même le nom le
+   plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne. L'ellipse
+   n'est qu'un filet de sécurité pour un écran exceptionnellement étroit. */
 .drug-name {
   font-size: clamp(14px, 1.5vw, 16px);
   font-weight: 600;
   color: var(--text);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
 }
 .drug-commercial {
@@ -155,28 +156,21 @@
   font-weight: 500;
 }
 
-/* Badge de surveillance en coin haut-droit de la carte. La ligne de titre
-   réserve sa largeur (.drug-card-monitored .drug-title-row) pour que le nom
-   du médicament reste sur une seule ligne sans passer dessous. */
+/* Badge de surveillance en coin haut-droit de la carte, réduit à son icône
+   (onde ECG) — pas de texte « SCOPE » — pour libérer la largeur du titre et
+   garder le nom du médicament sur une seule ligne. Le libellé complet
+   (Scope / Scope+ECG) reste visible quand la carte est ouverte (ligne
+   « Surveillance ») et dans l'attribut title/aria-label. */
 .drug-monitor-corner {
   position: absolute;
   top: 0;
   right: 0;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  max-width: min(104px, 30vw);
-  padding: 5px 8px 5px 9px;
+  justify-content: center;
+  padding: 5px 9px;
   border-radius: 0 11px 0 9px;
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 950;
   line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.45px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   pointer-events: none;
   z-index: 2;
   transform: translateY(-1px);
@@ -188,12 +182,6 @@
 [data-theme="light"] .drug-monitor-corner {
   transform: none;
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.14);
-}
-
-.drug-monitor-corner span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .monitor-wave {
@@ -2083,22 +2071,18 @@
     gap: 6px;
   }
   .drug-card-monitored .drug-title-row {
-    padding-right: min(96px, 32vw);
+    padding-right: 38px;
   }
-  /* Sur très petit écran, on réduit un peu la police du nom pour limiter le
-     repli ; les noms trop longs passent quand même sur 2 lignes (jamais
-     d'ellipse). */
+  /* Sur très petit écran, on réduit un peu la police du nom pour que même le
+     nom le plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne. */
   .drug-name {
-    font-size: 13.5px;
+    font-size: 13px;
   }
   .drug-subtitle {
     gap: 4px;
   }
   .drug-monitor-corner {
-    max-width: min(96px, 32vw);
-    padding: 4px 6px;
-    gap: 3px;
-    font-size: 8px;
+    padding: 4px 7px;
   }
   .monitor-wave {
     width: 18px;
