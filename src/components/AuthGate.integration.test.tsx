@@ -308,6 +308,11 @@ describe("AuthGate — garantie offline (auth activée)", () => {
 
     await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
     act(() => window.dispatchEvent(new Event("mediurg:open-admin")));
-    await waitFor(() => expect(screen.getByText("ADMIN_CONSOLE")).toBeInTheDocument());
+    // La console admin est lazy-loadée derrière une vérification MFA asynchrone :
+    // sur un runner CI lent, le timeout waitFor par défaut (1 s) peut expirer
+    // avant la résolution de l'import dynamique. On laisse plus de marge.
+    await waitFor(() => expect(screen.getByText("ADMIN_CONSOLE")).toBeInTheDocument(), {
+      timeout: 5000,
+    });
   });
 });
