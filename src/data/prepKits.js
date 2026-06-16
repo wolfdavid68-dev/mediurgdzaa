@@ -345,6 +345,31 @@ export const PREP_KITS = [
       "Ne JAMAIS injecter de médicament dans une voie artérielle (risque ischémique majeur)",
       "Étiquetage rouge \"ARTÈRE\" obligatoire",
     ],
+    schema: {
+      img: "/pa-schema.png",
+      alt: "Schéma du kit KT PA — système de pression artérielle invasive",
+      source: "MediURG — Schéma du kit KT PA",
+      intro:
+        "Montage du système de pression artérielle invasive : la poche de NaCl 0,9 % sous pression dans le manchon alimente le rinçage continu jusqu'au cathéter, la tête de pression transmet la courbe au moniteur via le câble interface. Toucher l'image pour l'agrandir.",
+      legende: [
+        {
+          titre: "Monitorage",
+          items: ["Moniteur (courbe de PA)", "Câble interface", "Manomètre"],
+        },
+        {
+          titre: "Pressurisation",
+          items: ["Manchon de pression", "Poche de NaCl 0,9 %"],
+        },
+        {
+          titre: "Tête de pression",
+          items: ["Capteur de pression", "Dispositif de rinçage intégré"],
+        },
+        {
+          titre: "Voie patient",
+          items: ["Robinet 3 voies (port de prélèvement)", "Cathéter artériel"],
+        },
+      ],
+    },
   },
   {
     id: "drain-thoracique",
@@ -519,9 +544,9 @@ export const PREP_KITS = [
     // octopus → voie) ; la légende reprend mot pour mot toutes les
     // étiquettes du document pour lecture rapide. Image zoomable côté UI.
     schema: {
-      img: "/ktc-schema.jpg",
+      img: "/ktc-schema.png",
       alt: "Schéma d'appareillage des KTC — réanimations adultes (GHR)",
-      source: "GHR — Schéma d'appareillage des KTC · Réanimations adultes (p. 3)",
+      source: "GHR — Schéma d'appareillage des KTC · Réanimations adultes",
       intro:
         "Montage de référence d'un KTC 4 lumières en réanimation adulte. Toucher l'image pour l'agrandir. Respecter l'étiquetage de chaque lumière.",
       legende: [

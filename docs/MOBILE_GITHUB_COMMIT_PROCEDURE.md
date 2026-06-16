@@ -21,4 +21,4 @@ Notes importantes :
 - Ne pas laisser de branches temporaires avec fichiers test si elles sont visibles ou reutilisees.
 - Toujours citer le SHA du commit final dans la reponse utilisateur.
 - Pour les schemas MediURG, privilegier un composant TSX interne quand l upload image ou SVG brut est bloque.
-- Pour le kit PA, le composant ajoute est src/components/PaPressureSchema.tsx et PrepKitCard.tsx affiche le composant lorsque kit.id vaut pa.
+- Le kit PA utilise depuis le 2026-06-16 le meme schema image que le KTC (public/pa-schema.png + kit.schema dans prepKits.js) une fois l upload d image redevenu possible ; le composant PaPressureSchema.tsx a ete retire.
