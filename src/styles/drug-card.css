@@ -119,10 +119,10 @@
   max-width: 100%;
 }
 /* Le nom occupe la 1re ligne avec le logo, sur une SEULE ligne pour tous les
-   médicaments. Le badge de surveillance en coin est réduit à son icône (pas
-   de texte « SCOPE »), ce qui libère assez de largeur pour que même le nom le
-   plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne. L'ellipse
-   n'est qu'un filet de sécurité pour un écran exceptionnellement étroit. */
+   médicaments. La ligne de titre réserve la largeur du badge de surveillance
+   en coin (.drug-card-monitored .drug-title-row) pour que même le nom le plus
+   long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne. L'ellipse n'est
+   qu'un filet de sécurité pour un écran exceptionnellement étroit. */
 .drug-name {
   font-size: clamp(13px, 1.5vw, 15px);
   font-weight: 600;
