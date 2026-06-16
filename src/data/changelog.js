@@ -20,6 +20,10 @@ export const CHANGELOG = [
         text: "Mise en page identique pour toutes les cartes médicament : ligne 1 = nom + logo, ligne 2 = nom commercial en gris. Plus aucune troncature « … » : les noms très longs (VIALEBEX / ALBUMINE HUMAINE…) se replient sur une 2e ligne au lieu d'être coupés. Le badge de surveillance (SCOPE / SCOPE+ECG) reste en coin de carte, toujours lisible en entier.",
       },
       {
+        type: "fix",
+        text: "Détection des mises à jour beaucoup plus rapide : l'app vérifie la présence d'une nouvelle version au démarrage et à chaque retour sur l'app (avant : une fois par heure seulement). Le toast « Mettre à jour » apparaît donc juste après un déploiement au lieu de rester bloqué sur l'ancienne version en cache.",
+      },
+      {
         type: "chore",
         text: "Correction des vulnérabilités npm signalées par l'audit CI (vite, js-yaml, @babel/core) via mise à jour du lockfile, et fiabilisation d'un test d'intégration AuthGate parfois trop lent en CI.",
       },

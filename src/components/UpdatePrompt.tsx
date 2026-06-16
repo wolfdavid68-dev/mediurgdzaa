@@ -8,22 +8,43 @@ import { useRegisterSW } from "virtual:pwa-register/react";
 // skipWaiting + reload. L'user contrôle le moment de la mise à jour
 // (jamais d'auto-update en plein milieu d'une réa).
 const UpdatePrompt = () => {
+  const [swReg, setSwReg] = useState<ServiceWorkerRegistration | null>(null);
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     offlineReady: [offlineReady, setOfflineReady],
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(reg) {
-      // Vérification d'update toutes les heures tant que la page reste ouverte.
-      // Utile pour les sessions longues (entre 2 réas, le tel reste sur l'app).
-      if (reg) {
-        setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
-      }
+      if (reg) setSwReg(reg);
     },
     onRegisterError(err) {
       console.warn("SW registration error", err);
     },
   });
+
+  // Recherche d'une nouvelle version : immédiatement à l'enregistrement, à
+  // chaque retour sur l'app (l'onglet redevient visible / la fenêtre reprend
+  // le focus) et toutes les 5 min en session longue. Avant, la vérification
+  // n'avait lieu qu'une fois par heure : après un déploiement, le toast
+  // « Mettre à jour » pouvait mettre jusqu'à 1 h à apparaître et l'app
+  // continuait de servir l'ancienne version en cache. On garde le toast
+  // actionnable (pas d'auto-update en pleine réa).
+  useEffect(() => {
+    if (!swReg) return;
+    const check = () => swReg.update().catch(() => {});
+    check();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", check);
+    const id = setInterval(check, 5 * 60 * 1000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", check);
+      clearInterval(id);
+    };
+  }, [swReg]);
 
   // Cache la nouvelle version après reload (l'utilisateur n'a pas besoin de
   // voir le toast s'il a déjà cliqué « Mettre à jour »).

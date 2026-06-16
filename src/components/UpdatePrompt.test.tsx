@@ -76,20 +76,43 @@ describe("UpdatePrompt", () => {
     expect(toast).toHaveAttribute("aria-live", "polite");
   });
 
-  test("onRegistered : si reg fourni, programme un setInterval (vérification 1h)", () => {
+  test("onRegistered : vérifie tout de suite puis toutes les 5 min", () => {
     vi.useFakeTimers();
     mockNeedRefresh = false;
     render(<UpdatePrompt />);
     expect(mockOnRegistered).toBeDefined();
     const update = vi.fn().mockResolvedValue(undefined);
-    mockOnRegistered!({ update });
-    // Avance 1h ⇒ update() doit avoir été appelé une fois
-    vi.advanceTimersByTime(60 * 60 * 1000);
+    // L'enregistrement déclenche une vérification immédiate.
+    act(() => {
+      mockOnRegistered!({ update });
+    });
     expect(update).toHaveBeenCalledTimes(1);
-    // 2h ⇒ 2 appels
-    vi.advanceTimersByTime(60 * 60 * 1000);
+    // +5 min ⇒ 2e vérification
+    act(() => {
+      vi.advanceTimersByTime(5 * 60 * 1000);
+    });
     expect(update).toHaveBeenCalledTimes(2);
+    // +5 min ⇒ 3e
+    act(() => {
+      vi.advanceTimersByTime(5 * 60 * 1000);
+    });
+    expect(update).toHaveBeenCalledTimes(3);
     vi.useRealTimers();
+  });
+
+  test("onRegistered : re-vérifie quand l'app redevient visible", () => {
+    mockNeedRefresh = false;
+    render(<UpdatePrompt />);
+    const update = vi.fn().mockResolvedValue(undefined);
+    act(() => {
+      mockOnRegistered!({ update });
+    });
+    expect(update).toHaveBeenCalledTimes(1); // vérification immédiate
+    // Retour sur l'app (onglet redevient visible) ⇒ nouvelle vérification
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(update).toHaveBeenCalledTimes(2);
   });
 
   test("onRegistered avec reg=null : pas de setInterval (no-op)", () => {
