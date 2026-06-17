@@ -11,18 +11,18 @@ import {
 import { isPreview } from "../lib/featureFlags";
 import type { Drug } from "../types/data";
 import {
+  computeEffectivePrep,
+  computeRecipeDoseInputValue,
+  computeRecipePhaseRows,
+  computeRecipeWeightBand,
   formatDoseNumber,
   formatNumberRange,
   InfoIcon,
   PrepIcon,
+  recipeModeClass,
   resolvePrep,
 } from "./PrepBlock.parts";
-import type {
-  PreviewPrepByDrugId,
-  PrepRecipe,
-  PrepRecipePhaseRow,
-  PrepRecipeWeightBand,
-} from "./PrepBlock.parts";
+import type { PreviewPrepByDrugId, PrepRecipe, PrepRecipePhaseRow } from "./PrepBlock.parts";
 
 type PrepBlockProps = {
   drug: Drug;
@@ -76,110 +76,17 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     (recipe) => !recipe.population || recipe.population === activePopulation
   );
   const activeRecipeIndex = visiblePreparations[activePrepIndex] ? activePrepIndex : 0;
-  const recipeModeClass = (recipe: PrepRecipe) =>
-    recipe.mode ? ` prep-recipe-${recipe.mode}` : "";
-  const getEffectivePrep = (recipe: PrepRecipe) => {
-    if (!recipe.effective_input_conc || !recipe.effective_output_conc) return null;
-    const volume = parseFloat(effectivePrepInput);
-    if (!Number.isFinite(volume) || volume <= 0) return null;
-    const fraction = recipe.effective_fraction ?? 2 / 3;
-    const hourlyDose = +(volume * recipe.effective_input_conc * fraction).toFixed(3);
-    const rate = +(hourlyDose / recipe.effective_output_conc).toFixed(2);
-    return { hourlyDose, rate };
-  };
-  const getRecipeDoseInputValue = (recipe: PrepRecipe) => {
-    const raw = dosePrepInput || String(recipe.dose_input_default ?? "");
-    const value = parseFloat(raw.replace(",", "."));
-    const min = recipe.dose_input_min ?? 0;
-    const max = recipe.dose_input_max;
-    if (!Number.isFinite(value) || value <= 0) return null;
-    return Math.min(Math.max(value, min), max ?? value);
-  };
-  const getRecipePhaseRows = (recipe: PrepRecipe): PrepRecipePhaseRow[] => {
-    if (!recipe.phase_doses?.length) return [];
-    const getDurationHours = (duration?: string) => {
-      if (!duration) return null;
-      const normalized = duration.toLowerCase().replace(",", ".");
-      const match = normalized.match(/^(\d+(?:\.\d+)?)\s*(min|h)$/);
-      if (!match) return null;
-      const value = Number(match[1]);
-      if (!Number.isFinite(value) || value <= 0) return null;
-      return match[2] === "min" ? value / 60 : value;
-    };
-    const rows: PrepRecipePhaseRow[] = [];
-    recipe.phase_doses.forEach((phase) => {
-      if (phase.dose_fixed === undefined && phase.dose_kg === undefined) return;
-      if (phase.dose_kg !== undefined && !validKg) {
-        rows.push({
-          ...phase,
-          dose: null,
-          doseMax: null,
-          volume: null,
-          volumeMax: null,
-          rate: null,
-        });
-        return;
-      }
-      const rawDose =
-        phase.dose_fixed !== undefined ? phase.dose_fixed : Number(phase.dose_kg) * kg;
-      const rawDoseMax =
-        phase.dose_max_fixed !== undefined
-          ? phase.dose_max_fixed
-          : phase.dose_max_kg !== undefined && validKg
-            ? phase.dose_max_kg * kg
-            : null;
-      const dose = phase.max !== undefined ? Math.min(rawDose, phase.max) : rawDose;
-      const doseMax =
-        rawDoseMax !== null
-          ? phase.max !== undefined
-            ? Math.min(rawDoseMax, phase.max)
-            : rawDoseMax
-          : null;
-      const unit = phase.unit || "mg";
-      const roundedDose = +dose.toFixed(1);
-      const roundedDoseMax = doseMax !== null ? +doseMax.toFixed(1) : null;
-      const volume =
-        (unit === "mg" || unit === "mg/h") && prep.conc_produit
-          ? +(dose / prep.conc_produit).toFixed(1)
-          : null;
-      const volumeMax =
-        (unit === "mg" || unit === "mg/h") && prep.conc_produit && doseMax !== null
-          ? +(doseMax / prep.conc_produit).toFixed(1)
-          : null;
-      const durationHours = getDurationHours(phase.duree);
-      const rate =
-        unit === "µg/min" && prep.conc_produit
-          ? +(((roundedDose / 1000) * 60) / prep.conc_produit).toFixed(1)
-          : volume !== null && durationHours && phase.label.toLowerCase().includes("pse")
-            ? +(volume / durationHours).toFixed(1)
-            : null;
-      rows.push({
-        ...phase,
-        dose: roundedDose,
-        doseMax: roundedDoseMax,
-        volume,
-        volumeMax,
-        rate,
-      });
-    });
-    return rows;
-  };
-  const getRecipeWeightBand = (recipe: PrepRecipe) => {
-    if (!recipe.weight_bands?.length) return null;
-    if (!validKg) return { band: null, dose: null, volume: null };
-    const band = recipe.weight_bands.find((candidate: PrepRecipeWeightBand) => {
-      const aboveMin =
-        (candidate.gt === undefined || kg > candidate.gt) &&
-        (candidate.gte === undefined || kg >= candidate.gte);
-      const belowMax =
-        (candidate.lt === undefined || kg < candidate.lt) &&
-        (candidate.lte === undefined || kg <= candidate.lte);
-      return aboveMin && belowMax;
-    });
-    if (!band) return { band: null, dose: null, volume: null };
-    const volume = prep.conc_produit ? +(band.dose / prep.conc_produit).toFixed(1) : null;
-    return { band, dose: band.dose, volume };
-  };
+  // Wrappers fins : la logique pure vit dans PrepBlock.parts (testée à part).
+  // Ici on ne fait que la lier au closure du composant (kg, validKg, prep,
+  // saisies) pour garder les sites d'appel JSX inchangés.
+  const okKg = Boolean(validKg);
+  const getEffectivePrep = (recipe: PrepRecipe) => computeEffectivePrep(recipe, effectivePrepInput);
+  const getRecipeDoseInputValue = (recipe: PrepRecipe) =>
+    computeRecipeDoseInputValue(recipe, dosePrepInput);
+  const getRecipePhaseRows = (recipe: PrepRecipe): PrepRecipePhaseRow[] =>
+    computeRecipePhaseRows(recipe, prep, kg, okKg);
+  const getRecipeWeightBand = (recipe: PrepRecipe) =>
+    computeRecipeWeightBand(recipe, prep, kg, okKg);
   const renderRecipeWeightBand = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     const result = getRecipeWeightBand(recipe);
     if (!result) return null;
