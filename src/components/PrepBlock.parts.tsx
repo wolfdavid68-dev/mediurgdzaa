@@ -172,6 +172,46 @@ export const computeRecipeWeightBand = (
   return { band, dose: band.dose, volume };
 };
 
+// Étapes de préparation lues dans la table pondérale fixe (prep.table) pour le
+// poids courant : prélèvement, dilution, vitesse, débit EP. null si pas de
+// table ou pas de ligne pour ce poids exact.
+export const computePrepTableCurrentSteps = (
+  prep: DrugPrep,
+  kg: number,
+  validKg: boolean
+): string[] | null => {
+  if (!prep.table || !validKg) return null;
+  const currentRow = prep.table.rows.find((row) => row.poids === kg);
+  if (!currentRow) return null;
+  return [
+    `Pour ${kg} kg`,
+    `Prélever ${formatDoseNumber(currentRow.vi)} mL de produit`,
+    `Compléter à ${currentRow.vf} mL avec ${prep.solvant}`,
+    `Administrer à ${currentRow.vitesse} mL/h pendant ${currentRow.temps} min`,
+    `Débit EP : ${formatDoseNumber(currentRow.debitEp)} mg/min`,
+  ];
+};
+
+// Dose seuil (type Anexate) : la saisie « dose efficace » convertie en dose
+// réelle via dose_threshold_input_conc. "" si saisie invalide.
+export const computeThresholdDose = (prep: DrugPrep, thresholdValue: string): number | "" => {
+  const value = parseFloat(thresholdValue);
+  if (!Number.isFinite(value) || value <= 0) return "";
+  return prep.dose_threshold_input_conc ? value * prep.dose_threshold_input_conc : value;
+};
+
+// Titre du bloc seuil : reprend la saisie si présente, sinon le produit final.
+export const computeThresholdTitle = (
+  prep: DrugPrep,
+  thresholdValue: string,
+  pf?: number
+): string => {
+  if (thresholdValue && prep.dose_threshold_input_unit) {
+    return `Pour ${thresholdValue} ${prep.dose_threshold_input_unit}`;
+  }
+  return pf ? `Pour ${pf} mg` : "PSE entretien";
+};
+
 export const PrepIcon = () => (
   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />

@@ -1,8 +1,11 @@
 import {
   computeEffectivePrep,
+  computePrepTableCurrentSteps,
   computeRecipeDoseInputValue,
   computeRecipePhaseRows,
   computeRecipeWeightBand,
+  computeThresholdDose,
+  computeThresholdTitle,
   recipeModeClass,
 } from "./PrepBlock.parts";
 import type { DrugPrep, PrepRecipe } from "./PrepBlock.parts";
@@ -152,5 +155,62 @@ describe("computeEffectivePrep", () => {
   });
   test("volume invalide → null", () => {
     expect(computeEffectivePrep(r, "0")).toBeNull();
+  });
+});
+
+describe("computePrepTableCurrentSteps", () => {
+  const withTable = prep({
+    solvant: "NaCl 0,9%",
+    table: {
+      rows: [
+        { poids: 10, vi: 0.5, vf: 50, vitesse: 20, temps: 30, debitEp: 0.2 },
+        { poids: 20, vi: 1, vf: 50, vitesse: 25, temps: 30, debitEp: 0.4 },
+      ],
+    },
+  } as Partial<DrugPrep>);
+
+  test("ligne correspondant au poids → 5 étapes formatées", () => {
+    const steps = computePrepTableCurrentSteps(withTable, 20, true);
+    expect(steps).toHaveLength(5);
+    expect(steps?.[0]).toBe("Pour 20 kg");
+    expect(steps?.[1]).toBe("Prélever 1 mL de produit");
+    expect(steps?.[2]).toBe("Compléter à 50 mL avec NaCl 0,9%");
+  });
+
+  test("poids sans ligne exacte → null", () => {
+    expect(computePrepTableCurrentSteps(withTable, 15, true)).toBeNull();
+  });
+
+  test("poids invalide → null", () => {
+    expect(computePrepTableCurrentSteps(withTable, NaN, false)).toBeNull();
+  });
+
+  test("pas de table → null", () => {
+    expect(computePrepTableCurrentSteps(prep({}), 20, true)).toBeNull();
+  });
+});
+
+describe("computeThresholdDose", () => {
+  test("convertit la saisie via dose_threshold_input_conc", () => {
+    expect(computeThresholdDose(prep({ dose_threshold_input_conc: 5 }), "2")).toBe(10);
+  });
+  test("sans conc → la saisie telle quelle", () => {
+    expect(computeThresholdDose(prep({}), "3")).toBe(3);
+  });
+  test("saisie invalide → chaîne vide", () => {
+    expect(computeThresholdDose(prep({}), "0")).toBe("");
+    expect(computeThresholdDose(prep({}), "abc")).toBe("");
+  });
+});
+
+describe("computeThresholdTitle", () => {
+  test("reprend la saisie + l'unité si présentes", () => {
+    expect(computeThresholdTitle(prep({ dose_threshold_input_unit: "mg" }), "4")).toBe("Pour 4 mg");
+  });
+  test("sinon le produit final s'il est fourni", () => {
+    expect(computeThresholdTitle(prep({}), "", 8)).toBe("Pour 8 mg");
+  });
+  test("sinon « PSE entretien »", () => {
+    expect(computeThresholdTitle(prep({}), "")).toBe("PSE entretien");
   });
 });

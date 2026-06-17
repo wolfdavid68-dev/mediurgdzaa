@@ -12,9 +12,12 @@ import { isPreview } from "../lib/featureFlags";
 import type { Drug } from "../types/data";
 import {
   computeEffectivePrep,
+  computePrepTableCurrentSteps,
   computeRecipeDoseInputValue,
   computeRecipePhaseRows,
   computeRecipeWeightBand,
+  computeThresholdDose,
+  computeThresholdTitle,
   formatDoseNumber,
   formatNumberRange,
   InfoIcon,
@@ -351,18 +354,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       </>
     );
   };
-  const getPrepTableCurrentSteps = () => {
-    if (!prep.table || !validKg) return null;
-    const currentRow = prep.table.rows.find((row) => row.poids === kg);
-    if (!currentRow) return null;
-    return [
-      `Pour ${kg} kg`,
-      `Prélever ${formatDoseNumber(currentRow.vi)} mL de produit`,
-      `Compléter à ${currentRow.vf} mL avec ${prep.solvant}`,
-      `Administrer à ${currentRow.vitesse} mL/h pendant ${currentRow.temps} min`,
-      `Débit EP : ${formatDoseNumber(currentRow.debitEp)} mg/min`,
-    ];
-  };
+  const getPrepTableCurrentSteps = () => computePrepTableCurrentSteps(prep, kg, okKg);
   const renderStaticPrepCalcV2 = () => {
     const preleverLabel = prep.prelever_label || prep.fd_prelever;
     const firstStep = prep.etapes?.[0];
@@ -414,17 +406,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       <span>{prep.dose_threshold_input_unit || "mg"}</span>
     </label>
   );
-  const getThresholdDose = () => {
-    const value = parseFloat(thresholdValue);
-    if (!Number.isFinite(value) || value <= 0) return "";
-    return prep.dose_threshold_input_conc ? value * prep.dose_threshold_input_conc : value;
-  };
-  const getThresholdTitle = (pf?: number) => {
-    if (thresholdValue && prep.dose_threshold_input_unit) {
-      return `Pour ${thresholdValue} ${prep.dose_threshold_input_unit}`;
-    }
-    return pf ? `Pour ${pf} mg` : "PSE entretien";
-  };
+  const getThresholdDose = () => computeThresholdDose(prep, thresholdValue);
+  const getThresholdTitle = (pf?: number) => computeThresholdTitle(prep, thresholdValue, pf);
 
   const renderRecipeSwitch = () =>
     visiblePreparations.length > 1 ? (
