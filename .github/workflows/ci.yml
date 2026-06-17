@@ -14,11 +14,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Force le runtime Node 24 pour toutes les JavaScript actions et fait taire
-# l'avertissement de dépréciation Node 20 — les artifact-actions déclarent
-# encore Node 20 dans leur metadata bien qu'elles tournent déjà sur Node 24.
-# Transitoire : à retirer quand GitHub aura publié des versions ciblant
-# nativement Node 24 (cf. deprecation 2025-09-19).
+# Runtime Node 24 explicite pour toutes les JavaScript actions — fait taire
+# l'avertissement de dépréciation Node 20 émis par les artifact-actions, qui
+# déclarent encore node20 dans leur metadata (vérifié : actions/upload-artifact
+# et download-artifact @v4 ET @v5 = node20 ; seule la branche main, non taguée,
+# passe à node24). Le runtime des runners est déjà Node 24 depuis la date de
+# dépréciation (2025-09-19), donc ce flag ne change que l'étiquette/le warning.
+#
+# Choix DÉLIBÉRÉ de garder ce flag plutôt que :
+#  - épingler les actions à @main (code non publié, cible mouvante), ou
+#  - supprimer les artifact-actions (on perdrait les artefacts de diagnostic :
+#    rapports, captures offline).
+# C'est la solution officielle GitHub et la moins invasive. À réévaluer si/quand
+# une version TAGUÉE des artifact-actions cible nativement node24 (alors : bump
+# de version + retrait possible de ce flag).
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
