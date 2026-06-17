@@ -20,6 +20,10 @@ export const CHANGELOG = [
         text: "Ajout d'un schéma image au kit Drain Thoracique (système de drainage pleural Pleur-Evac et sites de ponction), affiché dans l'onglet Schéma avec légende et zoom.",
       },
       {
+        type: "refactor",
+        text: "Kit ACR recentré pour éviter le doublon avec le mode URGENCE ACR (bouton rouge) : il regroupe désormais le matériel et les drogues des causes réversibles 4H4T (Atropine, Bicarbonate, Chlorure de calcium, Sulfate de magnésium). La conduite minutée et la préparation Adrénaline/Amiodarone restent pilotées par le chrono URGENCE ACR.",
+      },
+      {
         type: "fix",
         text: "Mise en page identique pour toutes les cartes médicament : ligne 1 = nom + logo sur une seule ligne (même les noms les plus longs comme VIALEBEX / ALBUMINE HUMAINE), ligne 2 = nom commercial en gris, ligne 3 = pastilles catégorie/service, ligne 4 = classe thérapeutique (toujours sur sa propre ligne). Le badge de surveillance en coin garde son texte (SCOPE / SCOPE+ECG) mais en plus petite police pour rester compact et laisser le nom sur une seule ligne.",
       },
