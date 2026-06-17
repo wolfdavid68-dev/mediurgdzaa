@@ -2,13 +2,8 @@ import { useEffect, useState } from "react";
 import { PSE } from "../data/pse";
 import { isPsePreview } from "../lib/featureFlags";
 import { calcDebit, calcDoseFromRate } from "../lib/calc";
-import type { Drug, PseLookupByDrugId, PsePreviewByDrugId } from "../types/data";
-
-// PSE public, ou PSE + overlay preview si ?author=preview (cf. featureFlags).
-// L'overlay remplace/ajoute par drug id ; le public ne voit jamais
-// pse.preview.js tant que le flag PSE_PREVIEW reste false.
-const resolvePse = (previewPseByDrugId: PsePreviewByDrugId | null): PseLookupByDrugId =>
-  previewPseByDrugId ? { ...PSE, ...previewPseByDrugId } : PSE;
+import { computeEffectivePse, resolvePse } from "./PseBlock.parts";
+import type { Drug, PsePreviewByDrugId } from "../types/data";
 
 // Bloc PSE (pousse-seringue électrique) : input dose cible + calcul mL/h
 // + table des paliers. Gère le mode "extra" (héparine UI/24h en plus).
@@ -41,7 +36,7 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
     };
   }, [previewMode]);
 
-  const pse = resolvePse(previewMode ? previewPseByDrugId : null)[drug.id];
+  const pse = resolvePse(PSE, previewMode ? previewPseByDrugId : null)[drug.id];
   if (!pse) return null;
   if (pse.hideBlock) return null;
 
@@ -55,16 +50,10 @@ const PseBlock = ({ drug, weight }: PseBlockProps) => {
   const effectiveMode = pse.inputMode === "effectiveDose";
   const effectiveFraction = pse.effectiveFraction ?? 2 / 3;
   const effectiveInput = parseFloat(pseTarget);
-  const effectiveDose =
-    effectiveMode && Number.isFinite(effectiveInput) && effectiveInput > 0
-      ? effectiveInput * (pse.effectiveInputConc ?? 1)
-      : Number.NaN;
-  const effectiveHourlyDose =
-    effectiveMode && Number.isFinite(effectiveDose) && effectiveDose > 0
-      ? +(effectiveDose * effectiveFraction).toFixed(3)
-      : null;
-  const effectiveDebit =
-    effectiveHourlyDose !== null ? +(effectiveHourlyDose / pse.conc).toFixed(2) : null;
+  // Calcul « dose efficace → débit » extrait dans PseBlock.parts (testé).
+  const effective = computeEffectivePse(pse, pseTarget);
+  const effectiveHourlyDose = effective?.hourlyDose ?? null;
+  const effectiveDebit = effective?.debit ?? null;
   const mlhSteps: number[] = Array.isArray(pse.mlhSteps)
     ? pse.mlhSteps
     : [1, 2, 3, 5, 8, 10, 15, 20];
