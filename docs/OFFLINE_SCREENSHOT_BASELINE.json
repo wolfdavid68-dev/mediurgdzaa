@@ -23,8 +23,8 @@
     "desktop-login.png": {
       "width": 1280,
       "minHeight": 900,
-      "minBytes": 30000,
-      "referenceBytes": 64526
+      "minBytes": 150000,
+      "referenceBytes": 255120
     },
     "desktop-medicaments.png": {
       "width": 1280,
@@ -83,8 +83,8 @@
     "tablette-login.png": {
       "width": 768,
       "minHeight": 1024,
-      "minBytes": 35000,
-      "referenceBytes": 75944
+      "minBytes": 130000,
+      "referenceBytes": 216283
     },
     "tablette-medicaments.png": {
       "width": 768,

@@ -63,6 +63,13 @@ Object.entries(expected).forEach(([file, spec]) => {
   if (referenceBytes > 0 && bytes.length > referenceBytes * growthRatio) {
     fail(`${file}: taille en hausse suspecte (${bytes.length} vs ref ${referenceBytes})`);
   }
+
+  // Journalise systématiquement la taille de CHAQUE capture (pas seulement en
+  // cas d'échec). Sans ça, diagnostiquer une dérive de baseline imposait de
+  // télécharger l'artefact ; ici le ratio observé vs ref est lisible direct
+  // dans le log CI → re-baseline trivial.
+  const ratio = referenceBytes > 0 ? (bytes.length / referenceBytes).toFixed(2) : "—";
+  console.log(`  ${file}: ${bytes.length} octets (ref ${referenceBytes}, ×${ratio})`);
 });
 
 const unknown = [...existing].filter((file) => !(file in expected));
