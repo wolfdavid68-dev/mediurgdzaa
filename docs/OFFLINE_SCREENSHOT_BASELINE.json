@@ -5,20 +5,20 @@
     "desktop-acr.png": {
       "width": 1280,
       "minHeight": 900,
-      "minBytes": 250000,
-      "referenceBytes": 559606
+      "minBytes": 390000,
+      "referenceBytes": 786573
     },
     "desktop-incompatibilites.png": {
       "width": 1280,
       "minHeight": 900,
-      "minBytes": 60000,
-      "referenceBytes": 127498
+      "minBytes": 65000,
+      "referenceBytes": 131572
     },
     "desktop-kits.png": {
       "width": 1280,
       "minHeight": 900,
-      "minBytes": 60000,
-      "referenceBytes": 120764
+      "minBytes": 65000,
+      "referenceBytes": 134065
     },
     "desktop-login.png": {
       "width": 1280,
@@ -29,56 +29,56 @@
     "desktop-medicaments.png": {
       "width": 1280,
       "minHeight": 900,
-      "minBytes": 250000,
-      "referenceBytes": 646368
+      "minBytes": 450000,
+      "referenceBytes": 904647
     },
     "mobile-acr.png": {
       "width": 390,
       "minHeight": 844,
-      "minBytes": 250000,
-      "referenceBytes": 550992
+      "minBytes": 370000,
+      "referenceBytes": 753024
     },
     "mobile-incompatibilites.png": {
       "width": 390,
       "minHeight": 844,
-      "minBytes": 35000,
-      "referenceBytes": 72832
+      "minBytes": 28000,
+      "referenceBytes": 56301
     },
     "mobile-kits.png": {
       "width": 390,
       "minHeight": 844,
-      "minBytes": 40000,
-      "referenceBytes": 79816
+      "minBytes": 29000,
+      "referenceBytes": 59086
     },
     "mobile-login.png": {
       "width": 390,
       "minHeight": 844,
-      "minBytes": 20000,
-      "referenceBytes": 41124
+      "minBytes": 35000,
+      "referenceBytes": 71292
     },
     "mobile-medicaments.png": {
       "width": 390,
       "minHeight": 844,
-      "minBytes": 250000,
-      "referenceBytes": 592965
+      "minBytes": 380000,
+      "referenceBytes": 767783
     },
     "tablette-acr.png": {
       "width": 768,
       "minHeight": 1024,
-      "minBytes": 250000,
-      "referenceBytes": 555139
+      "minBytes": 380000,
+      "referenceBytes": 774314
     },
     "tablette-incompatibilites.png": {
       "width": 768,
       "minHeight": 1024,
-      "minBytes": 60000,
-      "referenceBytes": 122755
+      "minBytes": 48000,
+      "referenceBytes": 98003
     },
     "tablette-kits.png": {
       "width": 768,
       "minHeight": 1024,
-      "minBytes": 60000,
-      "referenceBytes": 122103
+      "minBytes": 47000,
+      "referenceBytes": 95835
     },
     "tablette-login.png": {
       "width": 768,
@@ -89,8 +89,8 @@
     "tablette-medicaments.png": {
       "width": 768,
       "minHeight": 1024,
-      "minBytes": 250000,
-      "referenceBytes": 643929
+      "minBytes": 410000,
+      "referenceBytes": 832742
     }
   }
 }
