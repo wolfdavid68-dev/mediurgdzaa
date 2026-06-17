@@ -47,6 +47,9 @@ jobs:
       - name: Dead code check (knip)
         run: npm run knip
 
+      - name: Asset references check
+        run: npm run verify:asset-refs
+
       - name: Tests (vitest)
         run: npm test
 
@@ -55,7 +58,7 @@ jobs:
 
       - name: Upload clinical report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rapport-donnees-cliniques
           path: docs/RAPPORT_DONNEES_CLINIQUES.md
@@ -115,7 +118,7 @@ jobs:
         run: npm run verify:pwa-offline
 
       - name: Upload build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build
           path: build
@@ -123,7 +126,7 @@ jobs:
 
       - name: Upload bundle report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: bundle-budget
           path: build/reports
@@ -173,7 +176,7 @@ jobs:
 
       - name: Upload offline screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: offline-screenshots
           path: build/offline-screenshots
@@ -181,7 +184,7 @@ jobs:
 
       - name: Upload runtime reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: runtime-reports
           path: build/reports

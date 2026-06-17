@@ -78,10 +78,23 @@ const expectVisibleText = async (page, pattern, label) => {
   throw new Error(`${label} introuvable dans la page offline`);
 };
 
+// Le splash de lancement (#splash dans index.html) recouvre l'app en
+// position:fixed z-index:9999 le temps que React monte (min 1 s). Tant qu'il
+// est là, la capture montre l'écran de splash et non la page — et son texte
+// (« Matricule » etc.) reste lisible derrière dans le DOM, donc
+// expectVisibleText ne suffit pas à garantir que la page est visible. On
+// attend donc son retrait effectif du DOM avant de capturer. Sans ça, un
+// splash à l'image cassée produisait des captures quasi-vides qui passaient
+// le seuil de taille minimal mais cassaient la baseline (incident logo GHR).
+const waitForSplashGone = async (page) => {
+  await page.waitForFunction(() => !document.getElementById("splash"), null, { timeout: 10000 });
+};
+
 const screenshotOfflineRoute = async (page, viewport, route, pattern, label, filename) => {
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
   await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
   await expectVisibleText(page, pattern, label);
+  await waitForSplashGone(page);
   const filePath = path.join(screenshotDir, filename);
   console.log(`Capture offline ${filename}`);
   await page.screenshot({
