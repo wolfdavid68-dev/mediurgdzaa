@@ -14,6 +14,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Force le runtime Node 24 pour toutes les JavaScript actions et fait taire
+# l'avertissement de dépréciation Node 20 — les artifact-actions déclarent
+# encore Node 20 dans leur metadata bien qu'elles tournent déjà sur Node 24.
+# Transitoire : à retirer quand GitHub aura publié des versions ciblant
+# nativement Node 24 (cf. deprecation 2025-09-19).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   quality:
     name: Qualite code et donnees
@@ -49,6 +57,9 @@ jobs:
 
       - name: Asset references check
         run: npm run verify:asset-refs
+
+      - name: Dead CSS check
+        run: npm run verify:dead-css
 
       - name: Tests (vitest)
         run: npm test

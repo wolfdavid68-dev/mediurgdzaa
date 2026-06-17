@@ -1,18 +1,23 @@
 // scripts/audit-dead-css.cjs
-// Audit one-shot : repère les sélecteurs de classe CSS définis dans
+// Garde-fou CI : repère les sélecteurs de classe CSS définis dans
 // src/styles/ qui n'apparaissent (apparemment) nulle part dans le code source.
+// Échoue (exit 1) si du CSS mort subsiste après filtrage des faux positifs.
 //
 // Heuristique : pour chaque `.foo` défini dans un fichier CSS, on cherche
 // la chaîne `foo` ailleurs (TSX/JSX/TS/JS/HTML). Si elle n'est trouvée que
 // dans des fichiers CSS, la classe est marquée orpheline.
 //
-// Limites connues (à reviewer à la main avant suppression) :
-//  - Classes construites par template string (ex: `dot-${type}`) →
-//    `dot-poso` paraîtra orphelin si seul `dot-${tab.type}` existe.
-//  - Classes injectées dynamiquement (rares ici).
-//  - Pseudo-classes, attributs (`[data-cat=…]`) ignorés.
+// Faux positifs gérés automatiquement :
+//  - Classes construites par template string (ex: `dot-${type}`) → un préfixe
+//    injecté en `prefix${` suffit à considérer la classe comme référencée.
+//  - Contenus de `url(...)` (data: URIs, liens) ignorés : sans ça, l'URL
+//    `www.w3.org` d'un SVG inline faisait passer `.w3` et `.org` pour des
+//    classes orphelines (incident du parser).
 //
-// Usage : node scripts/audit-dead-css.cjs
+// Pour une classe réellement dynamique qu'aucune heuristique n'attrape,
+// l'ajouter à ALLOWLIST ci-dessous (avec un commentaire justifiant pourquoi).
+//
+// Usage : node scripts/audit-dead-css.cjs  (aussi `npm run verify:dead-css`)
 
 const fs = require("fs");
 const path = require("path");
@@ -20,6 +25,11 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..");
 const STYLES_DIR = path.join(ROOT, "src/styles");
 const SEARCH_DIRS = [path.join(ROOT, "src"), path.join(ROOT, "index.html")];
+
+// Classes légitimement référencées d'une manière que l'heuristique ne voit
+// pas (injection runtime exotique, etc.). Vide pour l'instant — le stylesheet
+// est propre. Ajouter ici plutôt que désactiver le check.
+const ALLOWLIST = new Set([]);
 
 function walk(dir, out = []) {
   if (!fs.existsSync(dir)) return out;
@@ -55,12 +65,14 @@ let totalOrphans = 0;
 
 for (const css of cssFiles) {
   const content = fs.readFileSync(css, "utf8");
-  // ignore les classes définies à l'intérieur d'une string ou commentaire :
-  // on bombarde le CSS hors block comment + hors string url(). Approximatif
-  // mais suffisant pour un audit.
-  const noComments = content.replace(/\/\*[\s\S]*?\*\//g, "");
+  // Retire les block comments PUIS les contenus de `url(...)` (data: URIs,
+  // liens) avant d'extraire les classes : un point dans une URL (www.w3.org)
+  // n'est pas un sélecteur de classe.
+  const cleaned = content
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/url\([^)]*\)/g, "url()");
   const classes = new Set();
-  for (const m of noComments.matchAll(CLASS_RE)) {
+  for (const m of cleaned.matchAll(CLASS_RE)) {
     classes.add(m[1]);
   }
   totalClasses += classes.size;
@@ -88,7 +100,7 @@ for (const css of cssFiles) {
         break;
       }
     }
-    if (!dynamic) orphans.push(cls);
+    if (!dynamic && !ALLOWLIST.has(cls)) orphans.push(cls);
   }
   if (orphans.length === 0) continue;
   totalOrphans += orphans.length;
@@ -108,5 +120,12 @@ for (const { file, total, orphans } of summary) {
 console.log("\n─────────────────────────────────────────────────────────");
 console.log(`Total : ${totalOrphans} classes apparemment orphelines sur ${totalClasses}`);
 console.log("─────────────────────────────────────────────────────────");
-console.log("\n⚠ Faux positifs possibles : classes construites par template");
-console.log("  string (ex: `dot-${type}`). Reviewer à la main avant suppression.");
+
+if (totalOrphans > 0) {
+  console.error(
+    "\n✗ CSS mort détecté. Supprime les classes inutilisées, OU si l'une est" +
+      "\n  référencée dynamiquement, ajoute-la à ALLOWLIST dans ce script.\n"
+  );
+  process.exit(1);
+}
+console.log(`\n✓ Aucune classe CSS orpheline (${totalClasses} classes vérifiées)`);
