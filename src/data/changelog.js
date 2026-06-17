@@ -9,11 +9,15 @@ export const CHANGELOG = [
   {
     version: "v111",
     date: "2026-06-16",
-    titre: "Schémas KTC/KT PA en image + cartes médicament uniformisées",
+    titre: "Schémas KTC/KT PA/Drain thoracique en image + cartes médicament uniformisées",
     changes: [
       {
         type: "feat",
         text: "Nouveau schéma d'appareillage des KTC (infographie GHR) et schéma image du kit KT PA, affichés dans l'onglet Schéma des kits avec légende et zoom.",
+      },
+      {
+        type: "feat",
+        text: "Ajout d'un schéma image au kit Drain Thoracique (système de drainage pleural Pleur-Evac et sites de ponction), affiché dans l'onglet Schéma avec légende et zoom.",
       },
       {
         type: "fix",

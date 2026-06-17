@@ -453,6 +453,55 @@ export const PREP_KITS = [
       "Complications : malposition, hémorragie, infection, œdème post-réexpansion (limiter évacuation < 1,5 L initiaux)",
       "Pédiatrie : drains plus petits, anesthésie générale souvent nécessaire",
     ],
+    // Schéma infirmier du montage (système Pleur-Evac SAHARA S-1100) + sites de
+    // ponction. L'image EST la source de vérité ; la légende reprend les
+    // étiquettes du document pour lecture rapide. Image zoomable côté UI.
+    schema: {
+      img: "/drain-schema.webp",
+      alt: "Schéma du kit Drain Thoracique — système de drainage pleural Pleur-Evac et sites de ponction",
+      source: "MediURG — Guide infirmier · Schéma du drain thoracique",
+      intro:
+        "Montage du drainage pleural sur cassette d'aspiration Pleur-Evac (SAHARA S-1100) et repérage des sites de ponction. Toucher l'image pour l'agrandir. Maintenir le système en déclive sous le niveau du thorax.",
+      legende: [
+        {
+          titre: "Système Pleur-Evac (SAHARA S-1100)",
+          items: [
+            "Embout de connexion pour source de vide",
+            "Réglage d'aspiration",
+            "Valve manuelle d'excès de pression négative",
+            "Indicateur de fuite d'air",
+            "Site de prélèvement et d'autotransfusion",
+            "Port patient",
+            "Clamp / pince de sécurité",
+          ],
+        },
+        {
+          titre: "Sites de ponction",
+          items: [
+            "Site 1 — abord antérieur : 2ᵉ EIC ligne médio-claviculaire (exsufflation / décompression d'un pneumothorax)",
+            "Site 2 — abord latéral : 4-5ᵉ EIC ligne axillaire moyenne (triangle de sécurité — drain thoracique standard)",
+            "Passer au bord supérieur de la côte inférieure pour éviter le paquet vasculo-nerveux",
+          ],
+        },
+        {
+          titre: "Préparation",
+          items: [
+            "Injecter 20 mL d'eau stérile par l'orifice d'injection / remplissage (chambre de scellement sous eau)",
+          ],
+        },
+        {
+          titre: "Surveillance infirmière",
+          items: [
+            "Vérifier la perméabilité du système",
+            "Surveiller le bullage / fuite d'air",
+            "Contrôler le niveau d'eau et l'oscillation",
+            "Mesurer le volume et l'aspect du drainage",
+            "Maintenir le système en déclive",
+            "Rechercher douleur, dyspnée, emphysème sous-cutané",
+          ],
+        },
+      ],
+    },
   },
   {
     id: "ktc",
