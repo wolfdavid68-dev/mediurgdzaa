@@ -355,18 +355,22 @@ describe("DrugCard", () => {
       expect(await screen.findByText("Bolus IV")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /IDM/i })).toHaveAttribute("aria-pressed", "true");
       expect(screen.getByText("15 mg")).toBeInTheDocument();
-      expect(screen.getByText("60 mg — débit 120 mL/h")).toBeInTheDocument();
-      expect(screen.getByText("40 mg — débit 40 mL/h")).toBeInTheDocument();
+      expect(screen.getAllByText("60 mg").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("120 mL/h").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("40 mg").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("40 mL/h").length).toBeGreaterThan(0);
       expect(screen.queryByText("Final")).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: /EP massive/i }));
       expect(screen.getByText("10 mg")).toBeInTheDocument();
-      expect(screen.getByText("90 mg — débit 45 mL/h")).toBeInTheDocument();
+      expect(screen.getAllByText("90 mg").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("45 mL/h").length).toBeGreaterThan(0);
 
       fireEvent.click(screen.getByRole("button", { name: /AVC/i }));
       expect(screen.getAllByText("72 mg").length).toBeGreaterThan(0);
       expect(screen.getByText("7,2 mg")).toBeInTheDocument();
-      expect(screen.getByText("64,8 mg — débit 64,8 mL/h")).toBeInTheDocument();
+      expect(screen.getAllByText("64,8 mg").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("64,8 mL/h").length).toBeGreaterThan(0);
     });
   });
 
@@ -399,6 +403,20 @@ describe("DrugCard", () => {
       fireEvent.click(screen.getByText("METALYSE").closest("button")!);
 
       expect(await screen.findByText("45 mg = 9 mL")).toBeInTheDocument();
+    });
+  });
+
+  describe("Célestène", () => {
+    test("affiche la posologie et la préparation pédiatrique en gouttes", async () => {
+      const celestene = DRUGS.find((drug) => drug.nom === "CÉLESTÈNE")!;
+
+      render(<DrugCard drug={celestene} patientWeight="30" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("CÉLESTÈNE").closest("button")!);
+
+      expect(await screen.findByText("Per os enfant")).toBeInTheDocument();
+      expect(screen.getAllByText("60 gouttes").length).toBeGreaterThan(0);
+      expect(screen.getByText("15 gouttes/kg = 0,75 mg/kg")).toBeInTheDocument();
+      expect(screen.queryByText("22.5 mg")).not.toBeInTheDocument();
     });
   });
 
@@ -456,7 +474,8 @@ describe("DrugCard", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /PSE entretien/i }));
 
-      expect(screen.getByText("4000 µg/min — débit 24 mL/h")).toBeInTheDocument();
+      expect(screen.getAllByText("4000 µg/min").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("24 mL/h").length).toBeGreaterThan(0);
       expect(screen.queryByText("4000 mg/min")).not.toBeInTheDocument();
     });
   });

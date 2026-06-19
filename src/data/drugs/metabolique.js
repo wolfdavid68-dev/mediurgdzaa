@@ -27,6 +27,49 @@ export const DRUGS_METABOLIQUE = [
       a: ["Per os : 1-2 mg selon indication"],
       p: ["Per os : 15 gouttes/kg (= 0,75 mg/kg) — dose max 60 gouttes"],
     },
+    prep: {
+      solvant: "Solution buvable",
+      conc_finale: "0,5 mg/mL",
+      duree: "Per os",
+      stabilite: "Flacon 30 mL (≈ 600 gouttes)",
+      preparations: [
+        {
+          titre: "Per os adulte",
+          mode: "po",
+          population: "adulte",
+          tag: "1-2 mg",
+          rows: [
+            { label: "Dose", value: "1-2 mg selon indication", highlight: true },
+            { label: "Administrer", value: "per os" },
+          ],
+          etapes: ["Solution buvable 0,05% : 0,5 mg/mL", "Adulte : 1-2 mg per os selon indication"],
+        },
+        {
+          titre: "Per os enfant",
+          mode: "po",
+          population: "enfant",
+          tag: "15 gouttes/kg",
+          phase_doses: [
+            {
+              label: "Dose",
+              unit: "gouttes",
+              dose_kg: 15,
+              max: 60,
+            },
+          ],
+          rows: [
+            { label: "Équivalence", value: "15 gouttes/kg = 0,75 mg/kg" },
+            { label: "Max", value: "60 gouttes", highlight: true },
+            { label: "Administrer", value: "per os" },
+          ],
+          etapes: [
+            "Solution buvable 0,05% : 0,5 mg/mL",
+            "Pédia : 15 gouttes/kg per os",
+            "Ne pas dépasser 60 gouttes",
+          ],
+        },
+      ],
+    },
   },
   {
     id: 45,

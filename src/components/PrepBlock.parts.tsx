@@ -14,6 +14,7 @@ export type PrepRecipePhaseRow = PrepRecipePhase & {
   volume: number | null;
   volumeMax: number | null;
   rate: number | null;
+  rateMax: number | null;
 };
 
 // On FUSIONNE l'override preview par-dessus le public (au lieu de le remplacer) :
@@ -102,6 +103,7 @@ export const computeRecipePhaseRows = (
         volume: null,
         volumeMax: null,
         rate: null,
+        rateMax: null,
       });
       return;
     }
@@ -137,6 +139,12 @@ export const computeRecipePhaseRows = (
         : volume !== null && durationHours && phase.label.toLowerCase().includes("pse")
           ? +(volume / durationHours).toFixed(1)
           : null;
+    const rateMax =
+      unit === "µg/min" && prep.conc_produit && roundedDoseMax !== null
+        ? +(((roundedDoseMax / 1000) * 60) / prep.conc_produit).toFixed(1)
+        : volumeMax !== null && durationHours && phase.label.toLowerCase().includes("pse")
+          ? +(volumeMax / durationHours).toFixed(1)
+          : null;
     rows.push({
       ...phase,
       dose: roundedDose,
@@ -144,6 +152,7 @@ export const computeRecipePhaseRows = (
       volume,
       volumeMax,
       rate,
+      rateMax,
     });
   });
   return rows;

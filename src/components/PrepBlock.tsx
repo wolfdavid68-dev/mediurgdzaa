@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   calcPrepThreshold,
   calcPrepSufentaTable,
@@ -114,22 +114,34 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
     return (
       <>
-        {rows.map((phase) => (
-          <div key={`${recipe.titre}-${phase.label}`} className="prep-calc-row">
-            <span className="prep-calc-step">{phase.label}</span>
-            <span className={`prep-calc-val ${highlightClass}`}>
-              {phase.dose === null
-                ? "Saisir le poids"
-                : `${formatNumberRange(phase.dose, phase.doseMax)} ${phase.unit || "mg"}${
-                    phase.volume !== null && !recipe.hide_phase_volume
-                      ? ` = ${formatNumberRange(phase.volume, phase.volumeMax)} mL`
-                      : ""
-                  }${phase.duree && !recipe.hide_phase_volume ? ` / ${phase.duree}` : ""}${
-                    phase.rate !== null ? ` — débit ${formatDoseNumber(phase.rate)} mL/h` : ""
-                  }${phase.suffix || ""}`}
-            </span>
-          </div>
-        ))}
+        {rows.map((phase) => {
+          const doseText =
+            phase.dose === null
+              ? "Saisir le poids"
+              : `${formatNumberRange(phase.dose, phase.doseMax)} ${phase.unit || "mg"}${
+                  phase.volume !== null && !recipe.hide_phase_volume
+                    ? ` = ${formatNumberRange(phase.volume, phase.volumeMax)} mL`
+                    : ""
+                }${phase.duree && !recipe.hide_phase_volume ? ` / ${phase.duree}` : ""}${
+                  phase.suffix || ""
+                }`;
+          return (
+            <Fragment key={`${recipe.titre}-${phase.label}`}>
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">{phase.label}</span>
+                <span className={`prep-calc-val ${highlightClass}`}>{doseText}</span>
+              </div>
+              {phase.rate !== null && (
+                <div className="prep-calc-row">
+                  <span className="prep-calc-step">Débit PSE</span>
+                  <span className={`prep-calc-val ${highlightClass}`}>
+                    {formatNumberRange(phase.rate, phase.rateMax)} mL/h
+                  </span>
+                </div>
+              )}
+            </Fragment>
+          );
+        })}
       </>
     );
   };

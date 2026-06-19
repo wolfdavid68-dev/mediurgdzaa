@@ -25,6 +25,7 @@ const DOSE_DANGER_THRESHOLDS = {
   µg: 500000, // 500 mg
   mcg: 500000,
   g: 50,
+  gouttes: 1000,
   mL: 1000,
   ml: 1000,
   UI: 5000000,
@@ -88,7 +89,7 @@ export function calcDose(text: string, w: string | number | null | undefined) {
   if (!kg || kg <= 0 || kg > 300) return null;
 
   const match = text.match(
-    /(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)\/kg(?:\/(min|h|j|24h))?/i
+    /(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(mg|µg|mcg|mL|ml|gouttes|g|UI|U|mmol|mEq)\/kg(?:\/(min|h|j|24h))?/i
   );
   if (!match) return null;
 
@@ -106,7 +107,9 @@ export function calcDose(text: string, w: string | number | null | undefined) {
   let doseMin = +(min * kg).toFixed(2);
   let doseMax = max ? +(max * kg).toFixed(2) : null;
 
-  const maxMatch = text.match(/max\s+(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|mL|ml|g|UI|U|mmol|mEq)/i);
+  const maxMatch = text.match(
+    /max\s+(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|mL|ml|gouttes|g|UI|U|mmol|mEq)/i
+  );
   let capped = false;
   if (maxMatch && maxMatch[2].toLowerCase() === unit.toLowerCase()) {
     const cap = parseFloat(maxMatch[1].replace(",", "."));

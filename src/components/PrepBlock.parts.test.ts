@@ -76,6 +76,28 @@ describe("computeRecipePhaseRows", () => {
     expect(rows[0].rate).toBe(1);
   });
 
+  test("débit PSE en plage pour une phase µg/min min-max", () => {
+    const r = recipe({
+      titre: "Ventoline",
+      phase_doses: [{ label: "Débit", dose_kg: 0.1, dose_max_kg: 0.2, unit: "µg/min" }],
+    });
+    const rows = computeRecipePhaseRows(r, prep({ conc_produit: 0.1 }), 80, true);
+    expect(rows[0].dose).toBe(8);
+    expect(rows[0].doseMax).toBe(16);
+    expect(rows[0].rate).toBe(4.8);
+    expect(rows[0].rateMax).toBe(9.6);
+  });
+
+  test("dose en gouttes/kg plafonnée sans volume dérivé", () => {
+    const r = recipe({
+      titre: "Célestène",
+      phase_doses: [{ label: "Dose", dose_kg: 15, unit: "gouttes", max: 60 }],
+    });
+    const rows = computeRecipePhaseRows(r, prep({}), 30, true);
+    expect(rows[0].dose).toBe(60);
+    expect(rows[0].volume).toBeNull();
+  });
+
   test("phase sans dose_fixed ni dose_kg est ignorée", () => {
     const r = recipe({ titre: "X", phase_doses: [{ label: "Vide" }] });
     expect(computeRecipePhaseRows(r, prep({}), 70, true)).toHaveLength(0);

@@ -90,6 +90,11 @@ describe("calcDose", () => {
     const r = calcDose("Bolus 70 UI/kg", 80);
     expect(r).toEqual({ value: "5600 UI", capped: false, validation: "ok" });
   });
+
+  test("dose en gouttes/kg prioritaire sur l'équivalence mg/kg", () => {
+    const r = calcDose("Per os : 15 gouttes/kg (= 0,75 mg/kg) — dose max 60 gouttes", 30);
+    expect(r).toEqual({ value: "60 gouttes", capped: true, validation: "ok" });
+  });
 });
 
 // ════════════════════════════════════════════════════════════════
