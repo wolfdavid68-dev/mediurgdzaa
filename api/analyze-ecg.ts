@@ -18,6 +18,49 @@
 // ⚠️ Contenu non-diagnostique : le prompt impose des disclaimers ; la
 // validation médicale obligatoire reste affichée côté UI (EcgReader.tsx).
 import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const Severite = z.enum(["info", "attention", "critique"]);
+
+const EcgAnalysisSchema = z.object({
+  lisible: z.literal(true),
+  rythme: z
+    .object({
+      type: z.string().optional(),
+      regulier: z.boolean().nullable().optional(),
+      frequence_estimee_bpm: z.number().nullable().optional(),
+    })
+    .optional(),
+  axe: z.string().nullable().optional(),
+  intervalles: z
+    .object({
+      PR_ms: z.number().nullable().optional(),
+      QRS_ms: z.number().nullable().optional(),
+      QT_ms: z.number().nullable().optional(),
+    })
+    .optional(),
+  verdict: z
+    .object({
+      kicker: z.string().optional(),
+      titre: z.string().optional(),
+      sous_titre: z.string().optional(),
+      severite: Severite.optional(),
+    })
+    .optional(),
+  anomalies_visibles: z
+    .array(
+      z.object({
+        libelle: z.string(),
+        derivations: z.array(z.string()).optional(),
+        severite: Severite.optional(),
+      })
+    )
+    .optional(),
+  orientations_therapeutiques: z
+    .array(z.object({ label: z.string(), query: z.string() }))
+    .optional(),
+  limites_lecture: z.string().optional(),
+});
 
 // Le chemin Gemini → repli Mistral peut enchaîner deux appels réseau :
 // on relève le plafond (défaut Hobby = 10 s) pour éviter un timeout.
@@ -348,25 +391,33 @@ export default async function handler(req: VercelReq, res: VercelRes) {
     return;
   }
 
-  let parsed: Record<string, unknown>;
+  let raw: unknown;
   try {
-    parsed = JSON.parse(attempt.text);
+    raw = JSON.parse(attempt.text);
   } catch {
     res.status(502).json({ error: "Réponse non exploitable du service d'analyse." });
     return;
   }
 
-  if (parsed.lisible === false) {
+  if (
+    typeof raw === "object" &&
+    raw !== null &&
+    (raw as Record<string, unknown>).lisible === false
+  ) {
+    const raison = (raw as Record<string, unknown>).raison;
     res.status(422).json({
       error: "ecg-illisible",
-      message:
-        typeof parsed.raison === "string"
-          ? parsed.raison
-          : "L'image ne semble pas être un ECG lisible.",
+      message: typeof raison === "string" ? raison : "L'image ne semble pas être un ECG lisible.",
     });
     return;
   }
 
+  const validated = EcgAnalysisSchema.safeParse(raw);
+  if (!validated.success) {
+    res.status(502).json({ error: "Réponse non exploitable du service d'analyse." });
+    return;
+  }
+
   res.setHeader("X-Ecg-Provider", usedFallback ? "mistral" : "gemini");
-  res.status(200).json(parsed);
+  res.status(200).json(validated.data);
 }

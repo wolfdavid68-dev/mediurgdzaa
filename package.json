@@ -12,7 +12,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-error-boundary": "^6.1.1",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zod": "^4.4.3"
   },
   "scripts": {
     "start": "vite",
