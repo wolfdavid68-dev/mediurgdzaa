@@ -4,9 +4,10 @@ import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
 import { storageKey } from "../lib/storageKeys";
 import type { ChecklistItem, ChecklistSection } from "../types/data";
 
-// Check-list interactive d'un kit (ex : ISR / intubation). Trois types
-// d'items : `check` (case à cocher), `choice` (options exclusives en chips),
-// `text` (saisie libre, unité optionnelle). L'état est persisté localement
+// Check-list interactive d'un kit (ex : ISR / intubation). Types d'items :
+// `check` (case à cocher), `choice` (chips mono-sélection), `multicheck`
+// (chips multi-sélection), `text` (saisie libre, unité optionnelle).
+// L'état est persisté localement
 // par kit, avec auto-expiration ~3 h (comme la check-list matériel) pour ne
 // pas traîner les valeurs d'un patient/garde précédent.
 //
@@ -147,7 +148,8 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   const itemValue = (item: ChecklistItem, key: string): string => {
     const v = values[key];
     if (item.type === "check") return v === true ? "OUI" : "—";
-    if (item.type === "choice" || item.type === "select") return v ? String(v) : "—";
+    if (item.type === "choice" || item.type === "select" || item.type === "multicheck")
+      return v ? String(v) : "—";
     const txt = (v as string) || "";
     if (!txt) return "—";
     return item.unit ? `${txt} ${item.unit}` : txt;
@@ -451,6 +453,40 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                             couleur={couleur}
                           />
                         )}
+                      </li>
+                    );
+                  }
+                  if (item.type === "multicheck") {
+                    const raw = (values[key] as string) || "";
+                    const selected = new Set(raw ? raw.split(",") : []);
+                    return (
+                      <li key={ii} className="kit-checklist-field">
+                        <span className="kit-checklist-flabel">{item.label}</span>
+                        <div className="kit-checklist-chips" role="group" aria-label={item.label}>
+                          {item.options.map((opt) => {
+                            const active = selected.has(opt);
+                            return (
+                              <button
+                                key={opt}
+                                type="button"
+                                aria-pressed={active}
+                                className={`kit-checklist-chip ${active ? "kit-checklist-chip-active" : ""}`}
+                                style={active ? { background: couleur, borderColor: couleur } : {}}
+                                onClick={() => {
+                                  const next = new Set(selected);
+                                  if (next.has(opt)) next.delete(opt);
+                                  else next.add(opt);
+                                  setValues((p) => ({
+                                    ...p,
+                                    [key]: [...next].join(","),
+                                  }));
+                                }}
+                              >
+                                {opt}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </li>
                     );
                   }

@@ -301,6 +301,7 @@ export type ChecklistItem =
       options: string[];
       scale?: "mallampati" | "cormack";
     }
+  | { type: "multicheck"; label: string; options: string[] }
   | { type: "select"; label: string; from?: string; options?: string[] }
   | { type: "text"; label: string; placeholder?: string; unit?: string };
 

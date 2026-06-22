@@ -151,7 +151,7 @@ export const PREP_KITS = [
         titre: "Technique d'intubation",
         items: [
           {
-            type: "choice",
+            type: "multicheck",
             label: "1ʳᵉ intention",
             options: ["Vidéolaryngoscope", "Mandrin semi-rigide", "Laryngoscopie directe"],
           },
