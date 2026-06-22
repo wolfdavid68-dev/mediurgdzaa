@@ -132,8 +132,13 @@ export const PREP_KITS = [
           { type: "check", label: "Aspiration opérationnelle + sonde branchée" },
           { type: "check", label: "BAVU complet et raccordé à l'O₂" },
           {
+            type: "choice",
+            label: "Taille de sonde IOT",
+            options: ["6,5", "7,0", "7,5", "8,0", "8,5"],
+          },
+          {
             type: "check",
-            label: "Sonde d'intubation : bonne taille, lubrifiée, mandrin, ballonnet testé",
+            label: "Sonde lubrifiée, mandrin en place, ballonnet testé",
           },
           { type: "check", label: "Respirateur complet, chargé, réglages effectués" },
           { type: "text", label: "FiO₂", unit: "%" },
@@ -184,7 +189,8 @@ export const PREP_KITS = [
       {
         titre: "Post-intubation",
         items: [
-          { type: "check", label: "Sonde fixée + repère commissure noté" },
+          { type: "check", label: "Sonde fixée" },
+          { type: "text", label: "Repère commissure", unit: "cm" },
           { type: "text", label: "Capnographie (EtCO₂)", unit: "mmHg" },
           { type: "check", label: "Pression du ballonnet contrôlée" },
           { type: "check", label: "Réglages du respirateur adéquats" },
