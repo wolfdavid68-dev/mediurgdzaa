@@ -32,7 +32,10 @@ const DRUG_SEARCH_ALIASES: Record<string, string[]> = {
 type Selected = { drugA: string; drugB: string; type: string; note: string };
 type ViewMode = "fiche" | "comparaison" | "matrice";
 
-const DRUGS_INCOMPAT = INCOMPATIBILITIES as IncompatEntry[];
+const COLLATOR = new Intl.Collator("fr", { sensitivity: "base" });
+const DRUGS_INCOMPAT = [...(INCOMPATIBILITIES as IncompatEntry[])].sort((a, b) =>
+  COLLATOR.compare(a.drug, b.drug)
+);
 const INCOMPAT_INDEX = createIncompatibilityIndex(DRUGS_INCOMPAT, {
   displayOverrides: DRUG_DISPLAY_OVERRIDES,
   searchAliases: DRUG_SEARCH_ALIASES,
