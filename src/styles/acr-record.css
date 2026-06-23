@@ -1,14 +1,4 @@
 @layer components {
-  .acr-btn-dossier {
-    background: linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--info) 28%, var(--card)),
-      var(--card)
-    );
-    border-color: color-mix(in oklab, var(--info) 55%, var(--border));
-    color: var(--text);
-  }
-
   .acr-record-dialog {
     width: min(1180px, calc(100vw - 16px));
     max-width: min(1180px, calc(100vw - 16px));

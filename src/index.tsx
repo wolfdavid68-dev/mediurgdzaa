@@ -36,7 +36,6 @@ import "./styles/acr-zoom.css";
 import "./styles/acr-prep.css";
 import "./styles/acr-postrosc.css";
 import "./styles/acr-ht.css";
-import "./styles/acr-summary.css";
 import "./styles/acr-record.css";
 import "./styles/ecg.css";
 import "./styles/ecg-reader.css";

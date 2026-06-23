@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import ModalDialog from "./ModalDialog";
 import {
   ACR_H_CAUSES,
@@ -144,6 +144,53 @@ const displayPatient = (record: AcrFullSession) => {
   return name || "Patient non renseigné";
 };
 
+// Texte de transmission copiable, construit depuis le dossier saisi.
+// Repris du Bilan ACR (AcrSummary) lors de la fusion Bilan = Dossier.
+const buildRecordText = (record: AcrFullSession): string => {
+  const lines: string[] = [];
+  const s = record.stats;
+  lines.push(
+    `BILAN ACR — ${record.pediatric ? "Enfant" : "Adulte"} · ${record.protocol === "acls" ? "ACLS" : "ERC"}`
+  );
+  lines.push(`Patient      : ${displayPatient(record)}`);
+  const ident = [
+    record.patient.age,
+    record.patient.sexe,
+    record.patient.ipp && `IPP ${record.patient.ipp}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  if (ident) lines.push(`Identité     : ${ident}`);
+  const ctx = [record.contexte.equipe, record.contexte.lit].filter(Boolean).join(" · ");
+  if (ctx) lines.push(`Contexte     : ${ctx}`);
+  lines.push(`Durée RCP    : ${formatAcrElapsed(s.elapsed)} (cycle ${s.cycle})`);
+  lines.push(`Chocs        : ${s.shocks}`);
+  lines.push(`Adrénaline   : ${s.adres}`);
+  lines.push(`Amiodarone   : ${s.amios}`);
+  if (record.horaires.survenueAcr || record.horaires.debutRcp || record.racs.heure) {
+    lines.push("");
+    lines.push("Horaires :");
+    if (record.horaires.survenueAcr) lines.push(`  Survenue ACR : ${record.horaires.survenueAcr}`);
+    if (record.horaires.debutRcp) lines.push(`  Début RCP    : ${record.horaires.debutRcp}`);
+    if (record.racs.heure || record.horaires.racs)
+      lines.push(`  RACS         : ${record.racs.heure || record.horaires.racs}`);
+  }
+  if (record.cycles.length > 0) {
+    lines.push("");
+    lines.push("Cycles :");
+    record.cycles.forEach((c) => {
+      const acts = [c.choc, c.drogues].filter(Boolean).join(" · ") || c.actions.join(" · ") || "—";
+      lines.push(`  C${c.cycle} (T+${formatAcrElapsed(c.t)}) ${c.rhythm || "—"} → ${acts}`);
+    });
+  }
+  if (record.devenir.destination || record.devenir.commentaires) {
+    lines.push("");
+    if (record.devenir.destination) lines.push(`Devenir      : ${record.devenir.destination}`);
+    if (record.devenir.commentaires) lines.push(`Commentaires : ${record.devenir.commentaires}`);
+  }
+  return lines.join("\n");
+};
+
 const AcrRecordView = ({
   open,
   onClose,
@@ -165,6 +212,10 @@ const AcrRecordView = ({
     mergeTimerSnapshotIntoSession(readStoredRecord(), snapshot)
   );
   const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportStatus, setExportStatus] = useState<null | "shared" | "downloaded" | "error">(null);
+  const captureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setRecord((prev) => mergeTimerSnapshotIntoSession(prev, snapshot));
@@ -221,6 +272,82 @@ const AcrRecordView = ({
     }));
   };
 
+  const onCopy = async () => {
+    const text = buildRecordText(record);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  // Capture le dossier rempli en PNG. html-to-image clone le DOM : les valeurs
+  // des <input>/<textarea> sont des propriétés (non reflétées en attributs), on
+  // les synchronise donc en attribut avant capture pour qu'elles apparaissent.
+  const generatePng = async () => {
+    const node = captureRef.current;
+    if (!node) return null;
+    node.querySelectorAll("input").forEach((input) => input.setAttribute("value", input.value));
+    node.querySelectorAll("textarea").forEach((area) => {
+      area.textContent = area.value;
+    });
+    const { toPng } = await import("html-to-image");
+    const bg =
+      getComputedStyle(document.documentElement).getPropertyValue("--card").trim() || "#161620";
+    const dataUrl = await toPng(node, { backgroundColor: bg, pixelRatio: 2, cacheBust: true });
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "_").slice(0, 19);
+    return { dataUrl, filename: `dossier-acr_${stamp}.png` };
+  };
+
+  // Partage natif de l'image (Android share sheet → WhatsApp, Drive, Photos…),
+  // avec repli en téléchargement direct si la Web Share API est absente.
+  const onShareImage = async () => {
+    if (exporting) return;
+    saveNow();
+    setExporting(true);
+    setExportStatus(null);
+    try {
+      const result = await generatePng();
+      if (!result) throw new Error("capture failed");
+      const { dataUrl, filename } = result;
+      try {
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], filename, { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: "Dossier ACR" });
+          setExportStatus("shared");
+          window.setTimeout(() => setExportStatus(null), 2500);
+          return;
+        }
+      } catch (shareErr) {
+        if ((shareErr as Error).name === "AbortError") {
+          setExportStatus(null);
+          return;
+        }
+      }
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+      setExportStatus("downloaded");
+      window.setTimeout(() => setExportStatus(null), 2500);
+    } catch {
+      setExportStatus("error");
+      window.setTimeout(() => setExportStatus(null), 3000);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <ModalDialog
       open={open}
@@ -251,7 +378,7 @@ const AcrRecordView = ({
           </button>
         </header>
 
-        <div className="acr-record-content">
+        <div className="acr-record-content" ref={captureRef}>
           <div className="acr-record-topcards">
             <div className="acr-record-timecard">
               <span>Temps écoulé</span>
@@ -835,8 +962,27 @@ const AcrRecordView = ({
           <button type="button" onClick={saveNow}>
             {saved ? "✓ Sauvegardé" : "Enregistrer"}
           </button>
+          <button
+            type="button"
+            onClick={onShareImage}
+            disabled={exporting}
+            title="Partager l'image du dossier (menu Android : WhatsApp, Drive, Photos…)"
+          >
+            {exporting
+              ? "…"
+              : exportStatus === "shared"
+                ? "✓ Partagé"
+                : exportStatus === "downloaded"
+                  ? "✓ Image"
+                  : exportStatus === "error"
+                    ? "Erreur"
+                    : "🖼 Partager"}
+          </button>
           <button type="button" onClick={printPdf}>
             Exporter PDF
+          </button>
+          <button type="button" onClick={onCopy}>
+            {copied ? "✓ Copié" : "Copier"}
           </button>
           <button type="button" onClick={exportJson}>
             JSON

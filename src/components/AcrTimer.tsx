@@ -30,7 +30,6 @@ import {
 } from "./AcrTimer.parts";
 import { useWakeLock } from "../lib/useWakeLock";
 import { safeSetItem } from "../lib/safeStorage";
-import AcrSummary from "./AcrSummary";
 import AcrPrepOverlay from "./AcrPrepOverlay";
 import AcrRecordView from "./AcrRecordView";
 
@@ -68,7 +67,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     events,
   } = session;
   const { elapsed, elapsedRef, resetChrono } = useAcrChrono(running);
-  const [showSummary, setShowSummary] = useState(false);
   const [showRecord, setShowRecord] = useState(false);
   const [coachMode, setCoachMode] = useState<"full" | "visual" | "silent">(readCoach);
   const audioOn = coachMode !== "silent";
@@ -134,7 +132,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     if (!window.confirm("Réinitialiser le chrono ACR (cycle, historique, compteurs) ?")) return;
     dispatch({ type: "RESET" });
     resetChrono();
-    setShowSummary(false);
     setShowRecord(false);
     setHtChecked(new Set());
     setHtExpanded(false);
@@ -300,28 +297,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
             ⏸ Pause
           </button>
         )}
-        <button
-          type="button"
-          className="acr-btn acr-btn-dossier"
-          onClick={() => setShowRecord(true)}
-        >
-          🗂 Dossier
-        </button>
-        <button
-          type="button"
-          className="acr-btn acr-btn-dossier"
-          onClick={() => setShowRecord(true)}
-        >
-          🗂 Dossier
-        </button>
-        <button
-          type="button"
-          className="acr-btn acr-btn-bilan"
-          onClick={() => setShowSummary(true)}
-          disabled={
-            elapsed === 0 && shocks === 0 && adres === 0 && amios === 0 && history.length === 0
-          }
-        >
+        <button type="button" className="acr-btn acr-btn-bilan" onClick={() => setShowRecord(true)}>
           📋 Bilan
         </button>
         <button
@@ -335,20 +311,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
           ↻ Reset
         </button>
       </div>
-
-      {showSummary && (
-        <AcrSummary
-          pediatric={pediatric}
-          elapsed={elapsed}
-          shocks={shocks}
-          adres={adres}
-          amios={amios}
-          history={history}
-          events={events}
-          cycle={cycle}
-          onClose={() => setShowSummary(false)}
-        />
-      )}
 
       {showRecord && (
         <AcrRecordView
