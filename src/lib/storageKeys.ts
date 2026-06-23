@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   charterAccepted: "mediurg-charter-accepted",
   acrProtocol: "mediurg-acr-protocol",
   acrCoach: "mediurg-acr-coach",
+  acrSession: "mediurg-acr-session-v1",
   preloadReloaded: "mediurg-preload-reloaded",
 } as const;
 

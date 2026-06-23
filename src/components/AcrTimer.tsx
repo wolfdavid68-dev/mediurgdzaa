@@ -32,6 +32,7 @@ import { useWakeLock } from "../lib/useWakeLock";
 import { safeSetItem } from "../lib/safeStorage";
 import AcrSummary from "./AcrSummary";
 import AcrPrepOverlay from "./AcrPrepOverlay";
+import AcrRecordView from "./AcrRecordView";
 
 type AcrTimerProps = {
   pediatric?: boolean;
@@ -41,7 +42,6 @@ type AcrTimerProps = {
 
 // phase ∈ "rcp" | "analyse" | "actions" | "post-rosc"
 const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerProps) => {
-  // Doses de référence ERC pour ce patient — affichées en permanence
   const refDoses = pediatric
     ? [
         { drug: "Adrénaline", dose: "0,01 mg/kg", note: "IV / IO" },
@@ -52,10 +52,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         { drug: "Amiodarone", dose: "300 mg → 150 mg", note: "3e puis 5e choc" },
       ];
 
-  // Toute la session ACR (running, phase, cycle, cycleStartedAt, currentRhythm,
-  // pendingActions, history, shocks, adres, amios, lastAdreAt, events) vit dans
-  // un reducer pour que les transitions soient atomiques et testables. Cf.
-  // AcrTimer.reducer.ts. Le reset = un seul dispatch au lieu de 12 setters.
   const [session, dispatch] = useReducer(sessionReducer, initialSessionState);
   const {
     running,
@@ -73,41 +69,29 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
   } = session;
   const { elapsed, elapsedRef, resetChrono } = useAcrChrono(running);
   const [showSummary, setShowSummary] = useState(false);
+  const [showRecord, setShowRecord] = useState(false);
   const [coachMode, setCoachMode] = useState<"full" | "visual" | "silent">(readCoach);
-  // Dérivés alignés sur la table : seul "voix" distingue full ↔ visual
-  const audioOn = coachMode !== "silent"; // bips + métronome
-  const visualOn = coachMode !== "silent"; // zoom DSA + flashs
-  const voiceOn = coachMode === "full"; // annonces TTS françaises
+  const audioOn = coachMode !== "silent";
+  const visualOn = coachMode !== "silent";
+  const voiceOn = coachMode === "full";
   useEffect(() => {
     safeSetItem(COACH_LS_KEY, coachMode);
   }, [coachMode]);
   const [showHistory, setShowHistory] = useState(false);
   const [metroOn, setMetroOn] = useState(false);
-  const [metroBpm, setMetroBpm] = useState(110); // ERC : 100-120 / min, défaut au milieu
+  const [metroBpm, setMetroBpm] = useState(110);
   const [editingTally, setEditingTally] = useState(false);
-  // Overlay préparation rapide (Adré / Cordarone) — affiché par-dessus le
-  // chrono. Permet de consulter la dilution sans quitter le mode ACR.
-  // null = pas d'overlay. Clé = "Adrénaline" | "Amiodarone".
   const [prepDrug, setPrepDrug] = useState<string | null>(null);
-  // Causes réversibles (H&T) : Set d'ids d'items investigués/exclus. Persiste
-  // au sein de la session (pas reset entre cycles — c'est le but).
   const [htChecked, setHtChecked] = useState(() => new Set<string>());
   const [htExpanded, setHtExpanded] = useState(false);
-  const [htDetail, setHtDetail] = useState<string | null>(null); // id de l'item dont on affiche l'action
+  const [htDetail, setHtDetail] = useState<string | null>(null);
   const htCauses = HT_CAUSES[protocol as keyof typeof HT_CAUSES] || HT_CAUSES.erc;
 
-  // Wake Lock pendant que le chrono tourne (l'écran ne doit pas s'éteindre).
-  // La modale parent tient déjà un lock global ; ce 2nd lock est défensif
-  // au cas où AcrTimer serait monté en dehors d'AcrModeModal.
   useWakeLock(running);
-
   useAcrMetronome(metroOn, audioOn, metroBpm);
 
-  // Compteurs de cycle (rappels temporels)
-  // Cycle analyse : relatif au début du cycle RCP courant (cycleStartedAt)
   const rcpInCycle = Math.max(0, elapsed - cycleStartedAt);
   const nextAnalyseIn = Math.max(0, CYCLE_ANALYSE_S - rcpInCycle);
-  // Cycle adré : relatif à la dernière dose (4 min)
   const adreIdx = lastAdreAt === null ? -1 : Math.floor((elapsed - lastAdreAt) / CYCLE_ADRE_S);
   const nextAdreIn =
     lastAdreAt === null ? null : CYCLE_ADRE_S - (elapsed - lastAdreAt - adreIdx * CYCLE_ADRE_S);
@@ -127,17 +111,8 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
   useAcrAnalysisCue(running, visualOn, audioOn, phase, nextAnalyseIn);
   useAcrAnalysisVoice(running, voiceOn, phase, nextAnalyseIn, cycleStartedAt);
 
-  // Wrappers fins autour du dispatch pour passer aux sous-composants. Chaque
-  // appel capture elapsedRef.current pour que l'horodatage soit précis même
-  // si plusieurs actions enchaînent au même tick.
   const onRhythm = (rhythm: "choquable" | "non_choquable") => {
-    dispatch({
-      type: "PICK_RHYTHM",
-      rhythm,
-      elapsed: elapsedRef.current,
-      pediatric,
-      protocol,
-    });
+    dispatch({ type: "PICK_RHYTHM", rhythm, elapsed: elapsedRef.current, pediatric, protocol });
   };
   const onRosc = () => dispatch({ type: "ROSC", elapsed: elapsedRef.current });
   const onReAcr = () => dispatch({ type: "RE_ACR", elapsed: elapsedRef.current });
@@ -160,6 +135,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     dispatch({ type: "RESET" });
     resetChrono();
     setShowSummary(false);
+    setShowRecord(false);
     setHtChecked(new Set());
     setHtExpanded(false);
     setHtDetail(null);
@@ -174,7 +150,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
 
   return (
     <div className="acr-timer" role="region" aria-label="Chrono RCP">
-      {/* En-tête : chrono + cycle */}
       <div className="acr-timer-top">
         <div className="acr-timer-title">
           <span className="acr-timer-pulse" aria-hidden="true" />
@@ -186,9 +161,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
           className={`acr-coach-toggle acr-coach-${coachMode}`}
           onClick={() => {
             const next = COACH_NEXT[coachMode];
-            // Réveille les moteurs audio dans le geste utilisateur :
-            // - AudioContext (bips, métronome) dès qu'on quitte "silent"
-            // - Speech synthesis (voix) si on bascule vers "full"
             if (next !== "silent") ensureAudio();
             if (next === "full") speak("Coach activé");
             setCoachMode(next);
@@ -212,7 +184,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         adreAlert={adreAlert}
       />
 
-      {/* Doses de référence (adaptées au protocole) */}
       <div className="acr-doses">
         <div className="acr-doses-label">
           Doses {pediatric ? "Enfant" : "Adulte"}
@@ -249,13 +220,11 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         </div>
       </div>
 
-      {/* Métronome MCE (100-120/min) */}
       <div className={`acr-metro ${metroOn ? "acr-metro-on" : ""}`}>
         <button
           type="button"
           className="acr-metro-toggle"
           onClick={() => {
-            // Réveille l'AudioContext dans le geste utilisateur (politiques d'autoplay)
             ensureAudio();
             setMetroOn((o) => !o);
           }}
@@ -300,7 +269,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         onPrepDrug={setPrepDrug}
       />
 
-      {/* Causes réversibles (H&T) — collapsible, masqué en post-ROSC */}
       {running && phase !== "post-rosc" && (
         <AcrHTPanel
           protocol={protocol}
@@ -314,7 +282,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         />
       )}
 
-      {/* Boutons généraux */}
       <div className="acr-timer-controls">
         {!running ? (
           <button
@@ -333,6 +300,13 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
             ⏸ Pause
           </button>
         )}
+        <button
+          type="button"
+          className="acr-btn acr-btn-dossier"
+          onClick={() => setShowRecord(true)}
+        >
+          🗂 Dossier
+        </button>
         <button
           type="button"
           className="acr-btn acr-btn-bilan"
@@ -355,7 +329,6 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         </button>
       </div>
 
-      {/* Modale Bilan */}
       {showSummary && (
         <AcrSummary
           pediatric={pediatric}
@@ -370,6 +343,22 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         />
       )}
 
+      {showRecord && (
+        <AcrRecordView
+          open={showRecord}
+          onClose={() => setShowRecord(false)}
+          pediatric={pediatric}
+          protocol={protocol}
+          elapsed={elapsed}
+          shocks={shocks}
+          adres={adres}
+          amios={amios}
+          history={history}
+          events={events}
+          cycle={cycle}
+        />
+      )}
+
       <AcrTallyEditor
         shocks={shocks}
         adres={adres}
@@ -377,21 +366,13 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         historyLength={history.length}
         editingTally={editingTally}
         onSetEditingTally={setEditingTally}
-        onAdjustTally={(kind, delta) =>
-          dispatch({
-            type: "ADJUST_TALLY",
-            kind,
-            delta,
-            elapsed: elapsedRef.current,
-            pediatric,
-          })
+        onAdjustTally={(kind: "choc" | "adre" | "amio", delta: 1 | -1) =>
+          dispatch({ type: "ADJUST_TALLY", kind, delta, elapsed: elapsedRef.current, pediatric })
         }
       />
 
-      {/* Overlay « zoom préparation DSA » — checklist ACLS High-Performance CPR */}
       {showZoom && <AcrZoomOverlay nextAnalyseIn={nextAnalyseIn} onSkip={skipToAnalyse} />}
 
-      {/* Overlay « Préparation rapide » — Adré / Cordarone, sans quitter le mode ACR */}
       {prepDrug && PREP_CONTENT[prepDrug as keyof typeof PREP_CONTENT] && (
         <AcrPrepOverlay
           drugName={prepDrug}
@@ -419,8 +400,5 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     </div>
   );
 };
-
-// Sous-composants AcrSummary et AcrPrepOverlay extraits dans leurs fichiers
-// respectifs. Code restant : machine d'état du chrono + rendu principal.
 
 export default AcrTimer;
