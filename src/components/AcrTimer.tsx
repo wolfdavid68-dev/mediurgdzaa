@@ -309,6 +309,13 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         </button>
         <button
           type="button"
+          className="acr-btn acr-btn-dossier"
+          onClick={() => setShowRecord(true)}
+        >
+          🗂 Dossier
+        </button>
+        <button
+          type="button"
           className="acr-btn acr-btn-bilan"
           onClick={() => setShowSummary(true)}
           disabled={
