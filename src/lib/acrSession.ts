@@ -36,7 +36,8 @@ export type AcrFullSession = {
     amios: number;
     cycle: number;
   };
-  patient: { nom?: string; prenom?: string; age?: string; sexe?: string; ipp?: string };
+  // Dossier anonyme : aucune donnée nominative (pas de nom/prénom/IPP).
+  patient: { age?: string; sexe?: string };
   contexte: { equipe?: string; lit?: string; medecinLeader?: string; infirmierReferent?: string };
   horaires: {
     survenueAcr?: string;
@@ -192,7 +193,16 @@ export const coerceAcrSession = (value: unknown): AcrFullSession => {
       amios: typeof stats.amios === "number" ? stats.amios : base.stats.amios,
       cycle: typeof stats.cycle === "number" ? stats.cycle : base.stats.cycle,
     },
-    patient: { ...base.patient, ...asObject(raw.patient) },
+    // Dossier anonyme : on ne reprend que l'âge et le sexe, jamais de
+    // donnée nominative — scrube aussi un éventuel ancien dossier stocké
+    // qui contiendrait encore nom/prénom/IPP.
+    patient: (() => {
+      const p = asObject(raw.patient);
+      return {
+        ...(typeof p.age === "string" ? { age: p.age } : {}),
+        ...(typeof p.sexe === "string" ? { sexe: p.sexe } : {}),
+      };
+    })(),
     contexte: { ...base.contexte, ...asObject(raw.contexte) },
     horaires: { ...base.horaires, ...asObject(raw.horaires) },
     initial: { ...base.initial, ...asObject(raw.initial) },

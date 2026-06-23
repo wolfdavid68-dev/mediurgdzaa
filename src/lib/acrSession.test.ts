@@ -91,17 +91,27 @@ describe("coerceAcrSession", () => {
     const s = coerceAcrSession({
       protocol: "acls",
       pediatric: true,
-      patient: { nom: "Doe", age: "57" },
+      patient: { age: "57", sexe: "M" },
       stats: { shocks: 3 },
     });
     expect(s.protocol).toBe("acls");
     expect(s.pediatric).toBe(true);
-    expect(s.patient.nom).toBe("Doe");
     expect(s.patient.age).toBe("57");
+    expect(s.patient.sexe).toBe("M");
     expect(s.stats.shocks).toBe(3);
     // les stats manquantes retombent sur les valeurs par défaut
     expect(s.stats.elapsed).toBe(0);
     expect(s.stats.cycle).toBe(1);
+  });
+
+  test("scrube toute donnée nominative résiduelle (nom/prénom/IPP)", () => {
+    const s = coerceAcrSession({
+      patient: { nom: "Doe", prenom: "Jane", ipp: "12345", age: "57", sexe: "F" },
+    });
+    expect(s.patient).toEqual({ age: "57", sexe: "F" });
+    expect("nom" in s.patient).toBe(false);
+    expect("prenom" in s.patient).toBe(false);
+    expect("ipp" in s.patient).toBe(false);
   });
 
   test("ignore les types invalides au profit des défauts", () => {

@@ -139,28 +139,27 @@ const parseOptionalNumber = (value: string): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
+// Dossier anonyme : pas de nom patient. Résumé clinique non identifiant.
 const displayPatient = (record: AcrFullSession) => {
-  const name = [record.patient.prenom, record.patient.nom].filter(Boolean).join(" ").trim();
-  return name || "Patient non renseigné";
+  const summary = [record.patient.age && `${record.patient.age} ans`, record.patient.sexe]
+    .filter(Boolean)
+    .join(" · ");
+  return summary || "Patient anonyme";
 };
 
 // Texte de transmission copiable, construit depuis le dossier saisi.
 // Repris du Bilan ACR (AcrSummary) lors de la fusion Bilan = Dossier.
+// Dossier anonyme : aucune donnée nominative patient (nom, prénom, IPP).
 const buildRecordText = (record: AcrFullSession): string => {
   const lines: string[] = [];
   const s = record.stats;
   lines.push(
-    `BILAN ACR — ${record.pediatric ? "Enfant" : "Adulte"} · ${record.protocol === "acls" ? "ACLS" : "ERC"}`
+    `BILAN ACR ANONYME — ${record.pediatric ? "Enfant" : "Adulte"} · ${record.protocol === "acls" ? "ACLS" : "ERC"}`
   );
-  lines.push(`Patient      : ${displayPatient(record)}`);
-  const ident = [
-    record.patient.age,
-    record.patient.sexe,
-    record.patient.ipp && `IPP ${record.patient.ipp}`,
-  ]
+  const ident = [record.patient.age && `${record.patient.age} ans`, record.patient.sexe]
     .filter(Boolean)
     .join(" · ");
-  if (ident) lines.push(`Identité     : ${ident}`);
+  if (ident) lines.push(`Patient      : ${ident}`);
   const ctx = [record.contexte.equipe, record.contexte.lit].filter(Boolean).join(" · ");
   if (ctx) lines.push(`Contexte     : ${ctx}`);
   lines.push(`Durée RCP    : ${formatAcrElapsed(s.elapsed)} (cycle ${s.cycle})`);
@@ -386,11 +385,10 @@ const AcrRecordView = ({
               <small>Depuis le début de la RCP</small>
             </div>
             <div className="acr-record-patient-card">
-              <span>Patient</span>
+              <span>Patient (anonyme)</span>
               <strong>{displayPatient(record)}</strong>
               <small>
-                {record.patient.age || "—"} · {record.patient.sexe || "—"} · IPP :{" "}
-                {record.patient.ipp || "—"}
+                Âge : {record.patient.age || "—"} · Sexe : {record.patient.sexe || "—"}
               </small>
               <em>
                 {pediatric ? "Enfant" : "Adulte"} · {protocol === "acls" ? "ACLS" : "ERC"} · Cycle{" "}
@@ -402,27 +400,10 @@ const AcrRecordView = ({
           <main className="acr-record-grid">
             <div className="acr-record-left">
               <Section title="1. Informations générales">
+                <p className="acr-record-anon-note">
+                  Dossier anonyme — aucune donnée nominative patient (nom, prénom, IPP).
+                </p>
                 <div className="acr-record-fields acr-record-fields-two">
-                  <Field
-                    label="Nom"
-                    value={record.patient.nom}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        patient: { ...prev.patient, nom: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Prénom"
-                    value={record.patient.prenom}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        patient: { ...prev.patient, prenom: value },
-                      }))
-                    }
-                  />
                   <Field
                     label="Âge"
                     value={record.patient.age}
@@ -440,16 +421,6 @@ const AcrRecordView = ({
                       updateRecord((prev) => ({
                         ...prev,
                         patient: { ...prev.patient, sexe: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="IPP"
-                    value={record.patient.ipp}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        patient: { ...prev.patient, ipp: value },
                       }))
                     }
                   />
