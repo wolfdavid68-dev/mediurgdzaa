@@ -1,18 +1,7 @@
 @layer components {
-  .acr-record-anon-note {
-    margin: 0 0 10px;
-    padding: 7px 10px;
-    border: 1px solid color-mix(in oklab, var(--info) 40%, var(--border));
-    border-radius: 10px;
-    background: color-mix(in oklab, var(--info) 12%, var(--card));
-    color: color-mix(in oklab, var(--text) 80%, var(--info));
-    font-size: 0.82rem;
-    line-height: 1.3;
-  }
-
   .acr-record-dialog {
-    width: min(1180px, calc(100vw - 16px));
-    max-width: min(1180px, calc(100vw - 16px));
+    width: min(860px, calc(100vw - 16px));
+    max-width: min(860px, calc(100vw - 16px));
     height: min(920px, calc(100dvh - 16px));
     max-height: calc(100dvh - 16px);
     margin: auto;
@@ -134,17 +123,17 @@
     padding: 14px;
   }
 
+  /* ── Top cards ────────────────────────────────── */
   .acr-record-topcards {
     display: grid;
     grid-template-columns: minmax(130px, 0.85fr) minmax(0, 1.15fr);
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .acr-record-timecard,
   .acr-record-patient-card,
-  .acr-record-section,
-  .acr-record-cycle-card {
+  .acr-record-section {
     border: 1px solid color-mix(in oklab, var(--border) 74%, var(--info));
     border-radius: 18px;
     background: color-mix(in oklab, var(--card) 94%, #0b1b33);
@@ -162,8 +151,8 @@
     background: color-mix(in oklab, var(--success) 10%, var(--card));
   }
 
-  .acr-record-timecard span,
-  .acr-record-patient-card span {
+  .acr-record-timecard > span,
+  .acr-record-patient-card > span {
     display: block;
     color: var(--text-mute);
     font-size: 11px;
@@ -181,8 +170,8 @@
   }
 
   .acr-record-timecard small,
-  .acr-record-patient-card small,
-  .acr-record-patient-card em {
+  .acr-record-patient-card > small,
+  .acr-record-patient-card > em {
     display: block;
     margin-top: 4px;
     color: var(--text-dim);
@@ -191,7 +180,7 @@
     font-weight: 700;
   }
 
-  .acr-record-patient-card strong {
+  .acr-record-patient-card > strong {
     display: block;
     margin-top: 5px;
     color: var(--text);
@@ -200,32 +189,91 @@
     overflow-wrap: anywhere;
   }
 
-  .acr-record-patient-card em {
+  .acr-record-patient-card > em {
     color: var(--info);
   }
 
-  .acr-record-grid {
-    display: grid;
-    grid-template-columns: minmax(280px, 0.95fr) minmax(420px, 1.35fr) minmax(300px, 1fr);
-    gap: 12px;
+  /* Inputs inline Âge / Sexe dans la carte patient */
+  .acr-record-patient-inline {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 4px;
   }
 
-  .acr-record-left,
-  .acr-record-right,
-  .acr-record-cycle-list,
-  .acr-record-check-grid,
-  .acr-record-fields {
+  .acr-record-patient-inline label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .acr-record-patient-inline small {
+    display: block;
+    color: var(--text-mute);
+    font-size: 10px;
+    font-weight: 850;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .acr-record-patient-input-wrap {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--bg-elevated);
+    overflow: hidden;
+    min-height: 32px;
+  }
+
+  .acr-record-patient-input-wrap input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    padding: 5px 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 750;
+  }
+
+  .acr-record-patient-input-wrap em {
+    padding-right: 7px;
+    color: var(--text-mute);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 800;
+  }
+
+  /* ── Context strip ────────────────────────────── */
+  .acr-record-context-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .acr-record-context-strip .acr-record-field > span {
+    font-size: 11px;
+  }
+
+  .acr-record-context-strip .acr-record-input-wrap {
+    min-height: 36px;
+  }
+
+  .acr-record-context-strip .acr-record-input-wrap input {
+    font-size: 13px;
+    padding: 7px 9px;
+  }
+
+  /* ── Sections (colonne unique) ────────────────── */
+  .acr-record-sections {
     display: grid;
     gap: 10px;
   }
 
-  .acr-record-section,
-  .acr-record-cycle-card {
+  .acr-record-section {
     overflow: hidden;
-  }
-
-  .acr-record-section-feature {
-    align-self: start;
   }
 
   .acr-record-section-head {
@@ -254,6 +302,11 @@
     color: #fff;
     font-weight: 900;
     font-size: 13px;
+    flex: 0 0 auto;
+  }
+
+  .acr-record-section-head-text {
+    min-width: 0;
   }
 
   .acr-record-section-head h4 {
@@ -262,6 +315,14 @@
     font-size: 15px;
     font-weight: 900;
     letter-spacing: -0.01em;
+  }
+
+  .acr-record-section-subtitle {
+    margin: 3px 0 0;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 700;
+    font-style: italic;
   }
 
   .acr-record-section-status {
@@ -280,19 +341,24 @@
     padding: 12px 14px 14px;
   }
 
+  /* ── Champs de saisie ─────────────────────────── */
+  .acr-record-check-grid,
+  .acr-record-fields {
+    display: grid;
+    gap: 10px;
+  }
+
   .acr-record-fields-two {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .acr-record-fields-three,
-  .acr-record-cycle-main {
+  .acr-record-fields-three {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .acr-record-field,
   .acr-record-textarea,
-  .acr-record-causes,
-  .acr-record-cycle-main {
+  .acr-record-causes {
     display: grid;
     gap: 6px;
     min-width: 0;
@@ -300,7 +366,6 @@
 
   .acr-record-field > span,
   .acr-record-textarea > span,
-  .acr-record-cycle-main span,
   .acr-record-causes > div > strong {
     color: var(--text-mute);
     font-size: 12px;
@@ -343,11 +408,20 @@
     font-weight: 800;
   }
 
+  /* ── Chips ────────────────────────────────────── */
   .acr-record-chip-group {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
+    align-items: center;
+  }
+
+  .acr-record-chip-label {
+    color: var(--text-mute);
+    font-size: 12px;
+    font-weight: 850;
+    white-space: nowrap;
   }
 
   .acr-record-chip,
@@ -388,14 +462,16 @@
     flex: 0 0 auto;
   }
 
+  /* ── Causes 5H / 5T ──────────────────────────── */
   .acr-record-causes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-top: 10px;
   }
 
+  /* ── Stats badges ─────────────────────────────── */
   .acr-record-stats {
-    margin: 0 14px 12px;
+    margin: 0 0 12px;
   }
 
   .acr-record-stats span {
@@ -412,47 +488,133 @@
     color: var(--text);
   }
 
-  .acr-record-cycle-list {
-    padding: 0 14px 14px;
+  /* ── Tableau de cycles ────────────────────────── */
+  .acr-record-cycle-table-wrap {
+    overflow-x: auto;
+    margin: 0 -14px -14px;
   }
 
-  .acr-record-cycle-card {
-    border-left: 4px solid var(--success);
-    padding: 12px;
+  .acr-record-cycle-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
   }
 
-  .acr-record-cycle-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
+  .acr-record-cycle-table th {
+    padding: 8px 12px;
+    background: var(--bg-elevated);
+    color: var(--text-mute);
+    font-size: 11px;
+    font-weight: 850;
+    text-align: left;
+    white-space: nowrap;
+    border-top: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
   }
 
-  .acr-record-cycle-head strong {
+  .acr-record-cycle-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .acr-record-cycle-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .acr-cycle-num {
+    white-space: nowrap;
+  }
+
+  .acr-cycle-num strong {
+    display: block;
     color: var(--success);
     font-size: 14px;
+    font-weight: 900;
   }
 
-  .acr-record-cycle-head span {
+  .acr-cycle-num span {
+    display: block;
     color: var(--text-mute);
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 11px;
   }
 
-  .acr-record-cycle-main {
+  .acr-cycle-num em {
+    display: block;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-style: normal;
+  }
+
+  .acr-cycle-choc {
+    color: var(--danger) !important;
+    font-weight: 900 !important;
+  }
+
+  .acr-cycle-drugs {
+    max-width: 200px;
+  }
+
+  .acr-cycle-comment {
+    display: block;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-style: italic;
+    font-weight: 700;
+    margin-top: 3px;
+  }
+
+  .acr-cycle-input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .acr-cycle-input input {
+    min-width: 54px;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 7px;
+    background: var(--bg-elevated);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 750;
+    outline: 0;
+  }
+
+  .acr-cycle-input em {
+    color: var(--text-mute);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  /* ── Analyse row (section 3 : heure + rythme côte à côte) */
+  .acr-record-analyse-row {
     display: grid;
-    gap: 10px;
+    grid-template-columns: minmax(160px, 0.6fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  /* ── VVP row (heure + voie côte à côte) ──────── */
+  .acr-record-vvp-row {
+    display: grid;
+    grid-template-columns: minmax(160px, 0.6fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
     margin-bottom: 10px;
   }
 
-  .acr-record-cycle-main strong {
-    color: var(--text);
-    font-size: 14px;
-    overflow-wrap: anywhere;
-  }
-
+  /* ── Divers ───────────────────────────────────── */
   .acr-record-empty {
-    margin: 0 14px 14px;
     border: 1px dashed var(--border-strong);
     border-radius: 16px;
     padding: 18px;
@@ -466,6 +628,7 @@
     resize: vertical;
   }
 
+  /* ── Événements horodatés ─────────────────────── */
   .acr-record-events {
     display: grid;
     gap: 8px;
@@ -494,6 +657,7 @@
     overflow-wrap: anywhere;
   }
 
+  /* ── Toolbar ──────────────────────────────────── */
   .acr-record-toolbar {
     flex: 0 0 auto;
     display: grid;
@@ -525,6 +689,7 @@
     color: var(--danger) !important;
   }
 
+  /* ── Responsive mobile ────────────────────────── */
   @media (max-width: 980px) {
     .acr-record-dialog {
       width: 100vw;
@@ -574,8 +739,7 @@
 
     .acr-record-timecard,
     .acr-record-patient-card,
-    .acr-record-section,
-    .acr-record-cycle-card {
+    .acr-record-section {
       border-radius: 15px;
     }
 
@@ -588,18 +752,21 @@
       font-size: clamp(24px, 7vw, 34px);
     }
 
-    .acr-record-patient-card strong {
+    .acr-record-patient-card > strong {
       font-size: 14px;
     }
 
-    .acr-record-grid,
+    .acr-record-context-strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .acr-record-fields-two,
     .acr-record-fields-three,
     .acr-record-causes {
       grid-template-columns: 1fr;
     }
 
-    .acr-record-grid {
+    .acr-record-sections {
       gap: 10px;
     }
 
@@ -610,6 +777,10 @@
 
     .acr-record-section-head h4 {
       font-size: 14px;
+    }
+
+    .acr-record-section-subtitle {
+      font-size: 10px;
     }
 
     .acr-record-section-body {
@@ -624,7 +795,6 @@
 
     .acr-record-field > span,
     .acr-record-textarea > span,
-    .acr-record-cycle-main span,
     .acr-record-causes > div > strong {
       font-size: 12px;
     }
@@ -639,12 +809,9 @@
       padding: 9px 10px;
     }
 
-    .acr-record-cycle-main {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .acr-record-cycle-fields {
-      display: none;
+    .acr-record-analyse-row,
+    .acr-record-vvp-row {
+      grid-template-columns: 1fr;
     }
 
     .acr-record-toolbar {
@@ -665,11 +832,16 @@
       grid-template-columns: 1fr;
     }
 
+    .acr-record-context-strip {
+      grid-template-columns: 1fr;
+    }
+
     .acr-record-header h3 {
       font-size: 22px;
     }
   }
 
+  /* ── Print / PDF ──────────────────────────────── */
   @media print {
     body:has(.acr-record-dialog[open]) * {
       visibility: hidden !important;
@@ -695,7 +867,7 @@
 
     .acr-record-modal,
     .acr-record-content,
-    .acr-record-grid {
+    .acr-record-sections {
       height: auto;
       overflow: visible;
       background: #fff !important;
@@ -708,13 +880,12 @@
       display: none !important;
     }
 
-    .acr-record-grid {
+    .acr-record-sections {
       display: block;
       padding: 0;
     }
 
     .acr-record-section,
-    .acr-record-cycle-card,
     .acr-record-timecard,
     .acr-record-patient-card {
       break-inside: avoid;

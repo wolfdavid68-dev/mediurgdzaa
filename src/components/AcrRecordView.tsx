@@ -72,7 +72,15 @@ const Field = ({ label, value, type = "text", placeholder, suffix, onChange }: F
   </label>
 );
 
-const Section = ({ title, children }: { title: string; children: ReactNode }) => {
+const Section = ({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) => {
   const match = /^(\d+)\.\s*(.*)$/.exec(title);
   const index = match?.[1];
   const cleanTitle = match?.[2] ?? title;
@@ -80,7 +88,10 @@ const Section = ({ title, children }: { title: string; children: ReactNode }) =>
     <section className="acr-record-section">
       <header className="acr-record-section-head">
         {index && <span className="acr-record-section-index">{index}</span>}
-        <h4>{cleanTitle}</h4>
+        <div className="acr-record-section-head-text">
+          <h4>{cleanTitle}</h4>
+          {subtitle && <p className="acr-record-section-subtitle">{subtitle}</p>}
+        </div>
         <span className="acr-record-section-status" aria-hidden="true">
           ✓
         </span>
@@ -147,9 +158,7 @@ const displayPatient = (record: AcrFullSession) => {
   return summary || "Patient anonyme";
 };
 
-// Texte de transmission copiable, construit depuis le dossier saisi.
-// Repris du Bilan ACR (AcrSummary) lors de la fusion Bilan = Dossier.
-// Dossier anonyme : aucune donnée nominative patient (nom, prénom, IPP).
+// Texte de transmission copiable, dossier anonyme — aucune donnée nominative.
 const buildRecordText = (record: AcrFullSession): string => {
   const lines: string[] = [];
   const s = record.stats;
@@ -289,9 +298,9 @@ const AcrRecordView = ({
     } catch {}
   };
 
-  // Capture le dossier rempli en PNG. html-to-image clone le DOM : les valeurs
-  // des <input>/<textarea> sont des propriétés (non reflétées en attributs), on
-  // les synchronise donc en attribut avant capture pour qu'elles apparaissent.
+  // Capture le dossier en PNG. html-to-image clone le DOM : les valeurs
+  // des <input>/<textarea> sont des propriétés (non reflétées en attributs),
+  // on les synchronise en attribut avant capture.
   const generatePng = async () => {
     const node = captureRef.current;
     if (!node) return null;
@@ -307,8 +316,7 @@ const AcrRecordView = ({
     return { dataUrl, filename: `dossier-acr_${stamp}.png` };
   };
 
-  // Partage natif de l'image (Android share sheet → WhatsApp, Drive, Photos…),
-  // avec repli en téléchargement direct si la Web Share API est absente.
+  // Partage natif (Android share sheet) avec repli téléchargement direct.
   const onShareImage = async () => {
     if (exporting) return;
     saveNow();
@@ -378,6 +386,7 @@ const AcrRecordView = ({
         </header>
 
         <div className="acr-record-content" ref={captureRef}>
+          {/* Cartes supérieures : chrono + patient anonyme */}
           <div className="acr-record-topcards">
             <div className="acr-record-timecard">
               <span>Temps écoulé</span>
@@ -387,9 +396,39 @@ const AcrRecordView = ({
             <div className="acr-record-patient-card">
               <span>Patient (anonyme)</span>
               <strong>{displayPatient(record)}</strong>
-              <small>
-                Âge : {record.patient.age || "—"} · Sexe : {record.patient.sexe || "—"}
-              </small>
+              <div className="acr-record-patient-inline">
+                <label>
+                  <small>Âge</small>
+                  <div className="acr-record-patient-input-wrap">
+                    <input
+                      value={record.patient.age ?? ""}
+                      placeholder="—"
+                      onChange={(e) =>
+                        updateRecord((prev) => ({
+                          ...prev,
+                          patient: { ...prev.patient, age: e.currentTarget.value },
+                        }))
+                      }
+                    />
+                    <em>ans</em>
+                  </div>
+                </label>
+                <label>
+                  <small>Sexe</small>
+                  <div className="acr-record-patient-input-wrap">
+                    <input
+                      value={record.patient.sexe ?? ""}
+                      placeholder="M/F"
+                      onChange={(e) =>
+                        updateRecord((prev) => ({
+                          ...prev,
+                          patient: { ...prev.patient, sexe: e.currentTarget.value },
+                        }))
+                      }
+                    />
+                  </div>
+                </label>
+              </div>
               <em>
                 {pediatric ? "Enfant" : "Adulte"} · {protocol === "acls" ? "ACLS" : "ERC"} · Cycle{" "}
                 {cycle}
@@ -397,536 +436,548 @@ const AcrRecordView = ({
             </div>
           </div>
 
-          <main className="acr-record-grid">
-            <div className="acr-record-left">
-              <Section title="1. Informations générales">
-                <p className="acr-record-anon-note">
-                  Dossier anonyme — aucune donnée nominative patient (nom, prénom, IPP).
-                </p>
-                <div className="acr-record-fields acr-record-fields-two">
-                  <Field
-                    label="Âge"
-                    value={record.patient.age}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        patient: { ...prev.patient, age: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Sexe"
-                    value={record.patient.sexe}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        patient: { ...prev.patient, sexe: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Équipe / secteur"
-                    value={record.contexte.equipe}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        contexte: { ...prev.contexte, equipe: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Lit / lieu"
-                    value={record.contexte.lit}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        contexte: { ...prev.contexte, lit: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Médecin leader"
-                    value={record.contexte.medecinLeader}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        contexte: { ...prev.contexte, medecinLeader: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="IDE référent"
-                    value={record.contexte.infirmierReferent}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        contexte: { ...prev.contexte, infirmierReferent: value },
-                      }))
-                    }
-                  />
-                </div>
-              </Section>
+          {/* Contexte : équipe, lit, médecin, IDE — compact 4 colonnes */}
+          <div className="acr-record-context-strip">
+            <Field
+              label="Équipe / secteur"
+              value={record.contexte.equipe}
+              onChange={(value) =>
+                updateRecord((prev) => ({
+                  ...prev,
+                  contexte: { ...prev.contexte, equipe: value },
+                }))
+              }
+            />
+            <Field
+              label="Lit / lieu"
+              value={record.contexte.lit}
+              onChange={(value) =>
+                updateRecord((prev) => ({
+                  ...prev,
+                  contexte: { ...prev.contexte, lit: value },
+                }))
+              }
+            />
+            <Field
+              label="Médecin leader"
+              value={record.contexte.medecinLeader}
+              onChange={(value) =>
+                updateRecord((prev) => ({
+                  ...prev,
+                  contexte: { ...prev.contexte, medecinLeader: value },
+                }))
+              }
+            />
+            <Field
+              label="IDE référent"
+              value={record.contexte.infirmierReferent}
+              onChange={(value) =>
+                updateRecord((prev) => ({
+                  ...prev,
+                  contexte: { ...prev.contexte, infirmierReferent: value },
+                }))
+              }
+            />
+          </div>
 
-              <Section title="2. Demande de renfort">
-                <div className="acr-record-fields acr-record-fields-two acr-record-compact-fields">
-                  <Field
-                    label="Heure de survenue ACR"
-                    value={record.horaires.survenueAcr}
-                    placeholder="HH:MM"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        horaires: { ...prev.horaires, survenueAcr: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Durée no-flow estimée"
-                    type="number"
-                    value={record.initial.noFlowMin}
-                    suffix="min"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        initial: { ...prev.initial, noFlowMin: parseOptionalNumber(value) },
-                      }))
-                    }
-                  />
-                </div>
-              </Section>
+          <div className="acr-record-sections">
+            {/* 1. Demande de renfort */}
+            <Section title="1. Demande de renfort">
+              <div className="acr-record-fields acr-record-fields-two acr-record-compact-fields">
+                <Field
+                  label="Heure de survenue ACR"
+                  value={record.horaires.survenueAcr}
+                  placeholder="HH:MM"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      horaires: { ...prev.horaires, survenueAcr: value },
+                    }))
+                  }
+                />
+                <Field
+                  label="Durée no-flow estimée"
+                  type="number"
+                  value={record.initial.noFlowMin}
+                  suffix="min"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      initial: { ...prev.initial, noFlowMin: parseOptionalNumber(value) },
+                    }))
+                  }
+                />
+              </div>
+            </Section>
 
-              <Section title="3. RCP et première analyse">
-                <div className="acr-record-fields acr-record-fields-two acr-record-compact-fields">
-                  <Field
-                    label="Heure de début RCP"
-                    value={record.horaires.debutRcp}
-                    placeholder="auto"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        horaires: { ...prev.horaires, debutRcp: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Heure 1ère analyse"
-                    value={record.horaires.premiereAnalyse}
-                    placeholder="auto"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        horaires: { ...prev.horaires, premiereAnalyse: value },
-                      }))
-                    }
-                  />
-                </div>
-                <div className="acr-record-chip-group" role="group" aria-label="Rythme initial">
-                  {ACR_RHYTHMS.map((rhythm) => (
-                    <Chip
-                      key={rhythm}
-                      active={record.initial.rythmeInitial === rhythm}
-                      onClick={() =>
-                        updateRecord((prev) => ({
-                          ...prev,
-                          initial: { ...prev.initial, rythmeInitial: rhythm as AcrRhythm },
-                        }))
-                      }
-                    >
-                      {rhythm}
-                    </Chip>
-                  ))}
-                </div>
-              </Section>
+            {/* 2. RCP */}
+            <Section
+              title="2. RCP"
+              subtitle="massage sur plan dur, 100–120/min, 5–6 cm, profondeur optimale"
+            >
+              <div className="acr-record-fields acr-record-compact-fields">
+                <Field
+                  label="Heure de début de la RCP"
+                  value={record.horaires.debutRcp}
+                  placeholder="auto"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      horaires: { ...prev.horaires, debutRcp: value },
+                    }))
+                  }
+                />
+              </div>
+            </Section>
 
-              <Section title="4. VVP & pronostic">
-                <div className="acr-record-chip-group" role="group" aria-label="Voie d'abord">
-                  {VOIES.map((voie) => (
-                    <Chip
-                      key={voie}
-                      active={record.initial.voieVvp === voie}
-                      onClick={() =>
-                        updateRecord((prev) => ({
-                          ...prev,
-                          initial: { ...prev.initial, voieVvp: voie },
-                        }))
-                      }
-                    >
-                      {voie}
-                    </Chip>
-                  ))}
+            {/* 3. Première analyse + pose du défibrillateur */}
+            <Section title="3. Première analyse + pose du défibrillateur">
+              <div className="acr-record-analyse-row">
+                <Field
+                  label="Heure de la 1ère analyse"
+                  value={record.horaires.premiereAnalyse}
+                  placeholder="auto"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      horaires: { ...prev.horaires, premiereAnalyse: value },
+                    }))
+                  }
+                />
+                <div>
+                  <div className="acr-record-chip-group" role="group" aria-label="Rythme initial">
+                    <span className="acr-record-chip-label">Rythme</span>
+                    {ACR_RHYTHMS.map((rhythm) => (
+                      <Chip
+                        key={rhythm}
+                        active={record.initial.rythmeInitial === rhythm}
+                        onClick={() =>
+                          updateRecord((prev) => ({
+                            ...prev,
+                            initial: {
+                              ...prev.initial,
+                              rythmeInitial: rhythm as AcrRhythm,
+                            },
+                          }))
+                        }
+                      >
+                        {rhythm}
+                      </Chip>
+                    ))}
+                  </div>
                 </div>
-                <div className="acr-record-fields acr-record-fields-three acr-record-compact-fields">
-                  <Field
-                    label="Heure pose VVP"
-                    value={record.horaires.poseVvp}
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        horaires: { ...prev.horaires, poseVvp: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Température"
-                    value={record.initial.temperature}
-                    suffix="°C"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        initial: { ...prev.initial, temperature: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Glycémie"
-                    value={record.initial.glycemie}
-                    suffix="g/L"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        initial: { ...prev.initial, glycemie: value },
-                      }))
-                    }
-                  />
-                  <Field
-                    label="Capno initiale"
-                    value={record.initial.capnoInitiale}
-                    suffix="mmHg"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        initial: { ...prev.initial, capnoInitiale: value },
-                      }))
-                    }
-                  />
-                </div>
-              </Section>
-            </div>
+              </div>
+            </Section>
 
-            <section className="acr-record-center acr-record-section acr-record-section-feature">
+            {/* 4. VVP & pronostic */}
+            <Section title="4. VVP & pronostic">
+              <div className="acr-record-vvp-row">
+                <Field
+                  label="Heure pose VVP"
+                  value={record.horaires.poseVvp}
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      horaires: { ...prev.horaires, poseVvp: value },
+                    }))
+                  }
+                />
+                <div>
+                  <div className="acr-record-chip-group" role="group" aria-label="Voie d'abord VVP">
+                    <span className="acr-record-chip-label">Voie</span>
+                    {VOIES.map((voie) => (
+                      <Chip
+                        key={voie}
+                        active={record.initial.voieVvp === voie}
+                        onClick={() =>
+                          updateRecord((prev) => ({
+                            ...prev,
+                            initial: { ...prev.initial, voieVvp: voie as AcrVoie },
+                          }))
+                        }
+                      >
+                        {voie}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="acr-record-fields acr-record-fields-three acr-record-compact-fields">
+                <Field
+                  label="Température"
+                  value={record.initial.temperature}
+                  suffix="°C"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      initial: { ...prev.initial, temperature: value },
+                    }))
+                  }
+                />
+                <Field
+                  label="Glycémie"
+                  value={record.initial.glycemie}
+                  suffix="g/L"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      initial: { ...prev.initial, glycemie: value },
+                    }))
+                  }
+                />
+                <Field
+                  label="Capnographie initiale"
+                  value={record.initial.capnoInitiale}
+                  suffix="mmHg"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      initial: { ...prev.initial, capnoInitiale: value },
+                    }))
+                  }
+                />
+              </div>
+            </Section>
+
+            {/* 5. Suivi de la réanimation — tableau de cycles */}
+            <section className="acr-record-section">
               <header className="acr-record-section-head">
                 <span className="acr-record-section-index">5</span>
-                <h4>Suivi de la réanimation</h4>
+                <div className="acr-record-section-head-text">
+                  <h4>Suivi de la réanimation</h4>
+                </div>
                 <span className="acr-record-section-chevron" aria-hidden="true">
                   ⌄
                 </span>
               </header>
-              <div className="acr-record-stats">
-                <span>
-                  <strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}
-                </span>
-                <span>
-                  <strong>{adres}</strong> adré
-                </span>
-                <span>
-                  <strong>{amios}</strong> amio
-                </span>
-                <span>
-                  <strong>{history.length}</strong> cycle{history.length > 1 ? "s" : ""}
-                </span>
+              <div className="acr-record-section-body">
+                <div className="acr-record-stats">
+                  <span>
+                    <strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}
+                  </span>
+                  <span>
+                    <strong>{adres}</strong> adré
+                  </span>
+                  <span>
+                    <strong>{amios}</strong> amio
+                  </span>
+                  <span>
+                    <strong>{history.length}</strong> cycle{history.length > 1 ? "s" : ""}
+                  </span>
+                </div>
+                {record.cycles.length === 0 ? (
+                  <div className="acr-record-empty">
+                    Aucun cycle clos pour l'instant. Les cycles du chrono apparaîtront ici
+                    automatiquement.
+                  </div>
+                ) : (
+                  <div className="acr-record-cycle-table-wrap">
+                    <table className="acr-record-cycle-table">
+                      <thead>
+                        <tr>
+                          <th>Cycle</th>
+                          <th>Rythme</th>
+                          <th>Choc</th>
+                          <th>Médicaments</th>
+                          <th>Voie aérienne</th>
+                          <th>Capno</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {record.cycles.map((item) => (
+                          <tr key={item.cycle}>
+                            <td className="acr-cycle-num">
+                              <strong>C{item.cycle}</strong>
+                              <span>T+{formatAcrElapsed(item.t)}</span>
+                              {item.wallTime && <em>{item.wallTime}</em>}
+                            </td>
+                            <td>{item.rhythm || "—"}</td>
+                            <td className={item.choc ? "acr-cycle-choc" : ""}>
+                              {item.choc || "—"}
+                            </td>
+                            <td className="acr-cycle-drugs">
+                              {item.drogues || item.actions.join(" · ") || "—"}
+                              {item.commentaire && (
+                                <em className="acr-cycle-comment">{item.commentaire}</em>
+                              )}
+                            </td>
+                            <td>
+                              <div className="acr-cycle-input">
+                                <input
+                                  value={item.ventilation ?? ""}
+                                  placeholder="IOT, BAVU…"
+                                  onChange={(e) =>
+                                    updateCycle(item.cycle, {
+                                      ventilation: e.currentTarget.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            </td>
+                            <td>
+                              <div className="acr-cycle-input">
+                                <input
+                                  value={item.capno ?? ""}
+                                  placeholder="—"
+                                  onChange={(e) =>
+                                    updateCycle(item.cycle, { capno: e.currentTarget.value })
+                                  }
+                                />
+                                <em>mmHg</em>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-              {record.cycles.length === 0 ? (
-                <div className="acr-record-empty">
-                  Aucun cycle clos pour l’instant. Les cycles du chrono apparaîtront ici
-                  automatiquement.
-                </div>
-              ) : (
-                <div className="acr-record-cycle-list">
-                  {record.cycles.map((item) => (
-                    <article key={item.cycle} className="acr-record-cycle-card">
-                      <div className="acr-record-cycle-head">
-                        <strong>Cycle {item.cycle}</strong>
-                        <span>
-                          T+{formatAcrElapsed(item.t)} {item.wallTime ? `· ${item.wallTime}` : ""}
-                        </span>
-                      </div>
-                      <div className="acr-record-cycle-main">
-                        <div>
-                          <span>Rythme</span>
-                          <strong>{item.rhythm || "—"}</strong>
-                        </div>
-                        <div>
-                          <span>Choc</span>
-                          <strong>{item.choc || "—"}</strong>
-                        </div>
-                        <div>
-                          <span>Médicaments</span>
-                          <strong>{item.drogues || item.actions.join(" · ") || "—"}</strong>
-                        </div>
-                        <div>
-                          <span>Voie aérienne</span>
-                          <strong>{item.ventilation || "—"}</strong>
-                        </div>
-                        <div>
-                          <span>Capno</span>
-                          <strong>{item.capno || "—"}</strong>
-                        </div>
-                      </div>
-                      <div className="acr-record-fields acr-record-fields-three acr-record-cycle-fields">
-                        <Field
-                          label="Voie aérienne / ventilation"
-                          value={item.ventilation}
-                          placeholder="IOT, BAVU, ventilateur…"
-                          onChange={(value) => updateCycle(item.cycle, { ventilation: value })}
-                        />
-                        <Field
-                          label="Capno"
-                          value={item.capno}
-                          suffix="mmHg"
-                          onChange={(value) => updateCycle(item.cycle, { capno: value })}
-                        />
-                        <Field
-                          label="Commentaire cycle"
-                          value={item.commentaire}
-                          onChange={(value) => updateCycle(item.cycle, { commentaire: value })}
-                        />
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
             </section>
 
-            <div className="acr-record-right">
-              <Section title="6. Analyse du dossier médical">
+            {/* 6. Analyse du dossier médical */}
+            <Section title="6. Analyse du dossier médical">
+              <Check
+                checked={Boolean(record.analyseDossier.directivesAnticipeesContraireRcp)}
+                onChange={() =>
+                  updateRecord((prev) => ({
+                    ...prev,
+                    analyseDossier: {
+                      ...prev.analyseDossier,
+                      directivesAnticipeesContraireRcp:
+                        !prev.analyseDossier.directivesAnticipeesContraireRcp,
+                    },
+                  }))
+                }
+              >
+                Directives anticipées / niveau de soins contraire à la RCP
+              </Check>
+              <div className="acr-record-causes">
+                <div>
+                  <strong>5H</strong>
+                  <div className="acr-record-chip-group">
+                    {ACR_H_CAUSES.map((cause) => (
+                      <Chip
+                        key={cause}
+                        active={record.analyseDossier.causesH.includes(cause)}
+                        onClick={() =>
+                          updateRecord((prev) => ({
+                            ...prev,
+                            analyseDossier: {
+                              ...prev.analyseDossier,
+                              causesH: toggleInArray(prev.analyseDossier.causesH, cause),
+                            },
+                          }))
+                        }
+                      >
+                        {cause}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <strong>5T</strong>
+                  <div className="acr-record-chip-group">
+                    {ACR_T_CAUSES.map((cause) => (
+                      <Chip
+                        key={cause}
+                        active={record.analyseDossier.causesT.includes(cause)}
+                        onClick={() =>
+                          updateRecord((prev) => ({
+                            ...prev,
+                            analyseDossier: {
+                              ...prev.analyseDossier,
+                              causesT: toggleInArray(prev.analyseDossier.causesT, cause),
+                            },
+                          }))
+                        }
+                      >
+                        {cause}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="acr-record-check-grid">
                 <Check
-                  checked={Boolean(record.analyseDossier.directivesAnticipeesContraireRcp)}
+                  checked={Boolean(record.analyseDossier.ecmoRecherche)}
                   onChange={() =>
                     updateRecord((prev) => ({
                       ...prev,
                       analyseDossier: {
                         ...prev.analyseDossier,
-                        directivesAnticipeesContraireRcp:
-                          !prev.analyseDossier.directivesAnticipeesContraireRcp,
+                        ecmoRecherche: !prev.analyseDossier.ecmoRecherche,
                       },
                     }))
                   }
                 >
-                  Directives anticipées / niveau de soins contraire à la RCP
+                  ECMO recherchée
                 </Check>
-                <div className="acr-record-causes">
-                  <div>
-                    <strong>5H</strong>
-                    <div className="acr-record-chip-group">
-                      {ACR_H_CAUSES.map((cause) => (
-                        <Chip
-                          key={cause}
-                          active={record.analyseDossier.causesH.includes(cause)}
-                          onClick={() =>
-                            updateRecord((prev) => ({
-                              ...prev,
-                              analyseDossier: {
-                                ...prev.analyseDossier,
-                                causesH: toggleInArray(prev.analyseDossier.causesH, cause),
-                              },
-                            }))
-                          }
-                        >
-                          {cause}
-                        </Chip>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <strong>5T</strong>
-                    <div className="acr-record-chip-group">
-                      {ACR_T_CAUSES.map((cause) => (
-                        <Chip
-                          key={cause}
-                          active={record.analyseDossier.causesT.includes(cause)}
-                          onClick={() =>
-                            updateRecord((prev) => ({
-                              ...prev,
-                              analyseDossier: {
-                                ...prev.analyseDossier,
-                                causesT: toggleInArray(prev.analyseDossier.causesT, cause),
-                              },
-                            }))
-                          }
-                        >
-                          {cause}
-                        </Chip>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="acr-record-check-grid">
-                  <Check
-                    checked={Boolean(record.analyseDossier.ecmoRecherche)}
-                    onChange={() =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        analyseDossier: {
-                          ...prev.analyseDossier,
-                          ecmoRecherche: !prev.analyseDossier.ecmoRecherche,
-                        },
-                      }))
-                    }
-                  >
-                    ECMO recherchée
-                  </Check>
-                  <Check
-                    checked={Boolean(record.analyseDossier.inclusionEcmo)}
-                    onChange={() =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        analyseDossier: {
-                          ...prev.analyseDossier,
-                          inclusionEcmo: !prev.analyseDossier.inclusionEcmo,
-                        },
-                      }))
-                    }
-                  >
-                    Critères ECMO présents
-                  </Check>
-                  <Check
-                    checked={Boolean(record.analyseDossier.nonEligibleEcmo)}
-                    onChange={() =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        analyseDossier: {
-                          ...prev.analyseDossier,
-                          nonEligibleEcmo: !prev.analyseDossier.nonEligibleEcmo,
-                        },
-                      }))
-                    }
-                  >
-                    Non éligible ECMO
-                  </Check>
-                </div>
-              </Section>
-
-              <Section title="7. RACS">
-                <div className="acr-record-fields acr-record-compact-fields">
-                  <Field
-                    label="Heure RACS"
-                    value={record.racs.heure || record.horaires.racs}
-                    placeholder="auto"
-                    onChange={(value) =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        horaires: { ...prev.horaires, racs: value },
-                        racs: { ...prev.racs, heure: value },
-                      }))
-                    }
-                  />
-                </div>
                 <Check
-                  checked={Boolean(record.racs.obtenu)}
+                  checked={Boolean(record.analyseDossier.inclusionEcmo)}
                   onChange={() =>
                     updateRecord((prev) => ({
                       ...prev,
-                      racs: { ...prev.racs, obtenu: !prev.racs.obtenu },
+                      analyseDossier: {
+                        ...prev.analyseDossier,
+                        inclusionEcmo: !prev.analyseDossier.inclusionEcmo,
+                      },
                     }))
                   }
                 >
-                  RACS obtenu
+                  Critères ECMO présents
                 </Check>
-                <div className="acr-record-chip-group">
-                  {SIGNE_REVEIL.map((signe) => (
-                    <Chip
-                      key={signe}
-                      active={record.racs.signesReveil.includes(signe)}
-                      onClick={() =>
-                        updateRecord((prev) => ({
-                          ...prev,
-                          racs: {
-                            ...prev.racs,
-                            signesReveil: toggleInArray(prev.racs.signesReveil, signe),
-                          },
-                        }))
-                      }
-                    >
-                      {signe}
-                    </Chip>
-                  ))}
-                </div>
-                <div className="acr-record-check-grid">
-                  <Check
-                    checked={Boolean(record.racs.monitorageComplet)}
-                    onChange={() =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        racs: { ...prev.racs, monitorageComplet: !prev.racs.monitorageComplet },
-                      }))
-                    }
-                  >
-                    Monitorage complet
-                  </Check>
-                  <Check
-                    checked={Boolean(record.racs.ecg18d)}
-                    onChange={() =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        racs: { ...prev.racs, ecg18d: !prev.racs.ecg18d },
-                      }))
-                    }
-                  >
-                    ECG 18D
-                  </Check>
-                  <Check
-                    checked={Boolean(record.racs.sedationAmines)}
-                    onChange={() =>
-                      updateRecord((prev) => ({
-                        ...prev,
-                        racs: { ...prev.racs, sedationAmines: !prev.racs.sedationAmines },
-                      }))
-                    }
-                  >
-                    Sédation / amines
-                  </Check>
-                </div>
-              </Section>
+                <Check
+                  checked={Boolean(record.analyseDossier.nonEligibleEcmo)}
+                  onChange={() =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      analyseDossier: {
+                        ...prev.analyseDossier,
+                        nonEligibleEcmo: !prev.analyseDossier.nonEligibleEcmo,
+                      },
+                    }))
+                  }
+                >
+                  Non éligible ECMO
+                </Check>
+              </div>
+            </Section>
 
-              <Section title="8. Devenir & commentaires">
-                <div className="acr-record-chip-group">
-                  {DESTINATIONS.map((destination) => (
-                    <Chip
-                      key={destination}
-                      active={record.devenir.destination === destination}
-                      onClick={() =>
-                        updateRecord((prev) => ({
-                          ...prev,
-                          devenir: { ...prev.devenir, destination },
-                        }))
-                      }
-                    >
-                      {destination}
-                    </Chip>
-                  ))}
-                </div>
-                <label className="acr-record-textarea">
-                  <span>Commentaires</span>
-                  <textarea
-                    value={record.devenir.commentaires ?? ""}
-                    placeholder="Transmission, décisions, destination, éléments médico-légaux…"
-                    onChange={(event: { currentTarget: HTMLTextAreaElement }) =>
+            {/* 7. RACS */}
+            <Section title="7. RACS (reprise d'activité cardiaque spontanée)">
+              <div className="acr-record-fields acr-record-compact-fields">
+                <Field
+                  label="Heure RACS"
+                  value={record.racs.heure || record.horaires.racs}
+                  placeholder="auto"
+                  onChange={(value) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      horaires: { ...prev.horaires, racs: value },
+                      racs: { ...prev.racs, heure: value },
+                    }))
+                  }
+                />
+              </div>
+              <Check
+                checked={Boolean(record.racs.obtenu)}
+                onChange={() =>
+                  updateRecord((prev) => ({
+                    ...prev,
+                    racs: { ...prev.racs, obtenu: !prev.racs.obtenu },
+                  }))
+                }
+              >
+                RACS obtenu
+              </Check>
+              <div className="acr-record-chip-group" role="group" aria-label="Signes de réveil">
+                <span className="acr-record-chip-label">Signes de réveil</span>
+                {SIGNE_REVEIL.map((signe) => (
+                  <Chip
+                    key={signe}
+                    active={record.racs.signesReveil.includes(signe)}
+                    onClick={() =>
                       updateRecord((prev) => ({
                         ...prev,
-                        devenir: { ...prev.devenir, commentaires: event.currentTarget.value },
+                        racs: {
+                          ...prev.racs,
+                          signesReveil: toggleInArray(prev.racs.signesReveil, signe),
+                        },
                       }))
                     }
-                  />
-                </label>
-              </Section>
+                  >
+                    {signe}
+                  </Chip>
+                ))}
+              </div>
+              <div className="acr-record-check-grid">
+                <Check
+                  checked={Boolean(record.racs.monitorageComplet)}
+                  onChange={() =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      racs: { ...prev.racs, monitorageComplet: !prev.racs.monitorageComplet },
+                    }))
+                  }
+                >
+                  Monitorage complet (PA, SpO₂, ECG)
+                </Check>
+                <Check
+                  checked={Boolean(record.racs.ecg18d)}
+                  onChange={() =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      racs: { ...prev.racs, ecg18d: !prev.racs.ecg18d },
+                    }))
+                  }
+                >
+                  ECG 18D
+                </Check>
+                <Check
+                  checked={Boolean(record.racs.sedationAmines)}
+                  onChange={() =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      racs: { ...prev.racs, sedationAmines: !prev.racs.sedationAmines },
+                    }))
+                  }
+                >
+                  Sédation / amines si besoin
+                </Check>
+              </div>
+            </Section>
 
-              <Section title="9. Événements horodatés">
-                <ul className="acr-record-events">
-                  {events.length === 0 ? (
-                    <li>Aucun événement horodaté.</li>
-                  ) : (
-                    events.map((event) => (
-                      <li key={event.id}>
-                        <span>{formatWallTime(event.at)}</span>
-                        <strong>T+{formatAcrElapsed(event.t)}</strong>
-                        <em>{event.label}</em>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </Section>
-            </div>
-          </main>
+            {/* 8. Devenir & commentaires */}
+            <Section title="8. Devenir & commentaires">
+              <div className="acr-record-chip-group">
+                {DESTINATIONS.map((destination) => (
+                  <Chip
+                    key={destination}
+                    active={record.devenir.destination === destination}
+                    onClick={() =>
+                      updateRecord((prev) => ({
+                        ...prev,
+                        devenir: { ...prev.devenir, destination },
+                      }))
+                    }
+                  >
+                    {destination}
+                  </Chip>
+                ))}
+              </div>
+              <label className="acr-record-textarea">
+                <span>Commentaires</span>
+                <textarea
+                  value={record.devenir.commentaires ?? ""}
+                  placeholder="Transmission, décisions, destination, éléments médico-légaux…"
+                  onChange={(event: { currentTarget: HTMLTextAreaElement }) =>
+                    updateRecord((prev) => ({
+                      ...prev,
+                      devenir: { ...prev.devenir, commentaires: event.currentTarget.value },
+                    }))
+                  }
+                />
+              </label>
+            </Section>
+
+            {/* 9. Événements horodatés */}
+            <Section title="9. Événements horodatés">
+              <ul className="acr-record-events">
+                {events.length === 0 ? (
+                  <li>Aucun événement horodaté.</li>
+                ) : (
+                  events.map((event) => (
+                    <li key={event.id}>
+                      <span>{formatWallTime(event.at)}</span>
+                      <strong>T+{formatAcrElapsed(event.t)}</strong>
+                      <em>{event.label}</em>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </Section>
+          </div>
         </div>
 
         <footer className="acr-record-toolbar" data-export-ignore="true">
