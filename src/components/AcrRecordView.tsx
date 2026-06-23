@@ -150,9 +150,7 @@ const AcrRecordView = ({
   };
 
   const resetRecord = () => {
-    if (!window.confirm("Réinitialiser uniquement le dossier ACR saisi ? Le chrono live n'est pas modifié.")) {
-      return;
-    }
+    if (!window.confirm("Réinitialiser uniquement le dossier ACR saisi ? Le chrono live n'est pas modifié.")) return;
     setRecord(mergeTimerSnapshotIntoSession(createEmptyAcrSession(), snapshot));
     setSaved(false);
   };
@@ -163,8 +161,6 @@ const AcrRecordView = ({
       cycles: prev.cycles.map((item) => (item.cycle === cycleNumber ? { ...item, ...patch } : item)),
     }));
   };
-
-  const emptyCycles = record.cycles.length === 0;
 
   return (
     <ModalDialog open={open} onClose={onClose} className="acr-record-dialog" aria-labelledby="acr-record-title">
@@ -250,7 +246,7 @@ const AcrRecordView = ({
                 <span><strong>{amios}</strong> amio</span>
               </div>
             </div>
-            {emptyCycles ? (
+            {record.cycles.length === 0 ? (
               <div className="acr-record-empty">Aucun cycle clos pour l’instant. Les cycles du chrono apparaîtront ici automatiquement.</div>
             ) : (
               <div className="acr-record-cycle-list">
