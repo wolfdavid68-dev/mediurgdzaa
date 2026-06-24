@@ -102,9 +102,19 @@ const removeLastEventOfType = (state: SessionState, type: string): SessionState 
   return state;
 };
 
+const lastElapsedOfType = (events: EventEntry[], type: string): number | null => {
+  let last: number | null = null;
+  for (const event of events) {
+    if (event.type === type && (last === null || event.t > last)) last = event.t;
+  }
+  return last;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 export type SessionAction =
   | { type: "START"; elapsed: number }
+  | { type: "SET_START_TIME"; at: number; elapsed: number }
+  | { type: "SET_EVENT_TIME"; eventId: string; at: number; elapsed: number }
   | { type: "PAUSE"; elapsed: number }
   | {
       type: "PICK_RHYTHM";
@@ -141,6 +151,51 @@ export const sessionReducer = (state: SessionState, action: SessionAction): Sess
       const label = isFirstStart ? "Début ACR" : "Reprise";
       const evType = isFirstStart ? "start" : "resume";
       return addEvent(next, evType, label, action.elapsed).state;
+    }
+
+    case "SET_START_TIME": {
+      const existingStart = state.events.find((event) => event.type === "start");
+      const startEvent: EventEntry = {
+        id: existingStart?.id ?? nextEventId(),
+        type: "start",
+        label: "Début ACR",
+        t: 0,
+        at: action.at,
+      };
+      const recalculatedEvents = [
+        startEvent,
+        ...state.events
+          .filter((event) => event.type !== "start")
+          .map((event) => ({
+            ...event,
+            t: Math.max(0, Math.floor((event.at - action.at) / 1000)),
+          })),
+      ];
+      return {
+        ...state,
+        running: true,
+        phase:
+          state.phase === "rcp" && !state.running && state.cycleStartedAt === 0
+            ? "analyse"
+            : state.phase,
+        events: recalculatedEvents,
+        lastAdreAt: lastElapsedOfType(recalculatedEvents, "adre"),
+      };
+    }
+
+    case "SET_EVENT_TIME": {
+      let updatedType: string | null = null;
+      const events = state.events.map((event) => {
+        if (event.id !== action.eventId) return event;
+        updatedType = event.type;
+        return { ...event, at: action.at, t: Math.max(0, Math.floor(action.elapsed)) };
+      });
+      if (!updatedType) return state;
+      return {
+        ...state,
+        events,
+        lastAdreAt: updatedType === "adre" ? lastElapsedOfType(events, "adre") : state.lastAdreAt,
+      };
     }
 
     case "PAUSE": {

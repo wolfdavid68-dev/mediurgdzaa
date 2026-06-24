@@ -39,6 +39,19 @@ type AcrTimerProps = {
   onOpenDrug?: (name: string) => void;
 };
 
+const parseTodayTime = (value: string): number | null => {
+  const match = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
+  if (!match) return null;
+  const [, hh, mm, ss = "0"] = match;
+  const date = new Date();
+  date.setHours(Number(hh), Number(mm), Number(ss), 0);
+  if (date.getTime() > Date.now() + 60_000) date.setDate(date.getDate() - 1);
+  return date.getTime();
+};
+
+const elapsedBetween = (fromTs: number, toTs: number) =>
+  Math.max(0, Math.floor((toTs - fromTs) / 1000));
+
 // phase ∈ "rcp" | "analyse" | "actions" | "post-rosc"
 const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerProps) => {
   const refDoses = pediatric
@@ -66,7 +79,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     lastAdreAt,
     events,
   } = session;
-  const { elapsed, elapsedRef, resetChrono } = useAcrChrono(running);
+  const { elapsed, elapsedRef, setElapsedSeconds, resetChrono } = useAcrChrono(running);
   const [showRecord, setShowRecord] = useState(false);
   const [coachMode, setCoachMode] = useState<"full" | "visual" | "silent">(readCoach);
   const audioOn = coachMode !== "silent";
@@ -118,6 +131,26 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
   const toggleAction = (idx: number) =>
     dispatch({ type: "TOGGLE_ACTION", idx, elapsed: elapsedRef.current });
   const finishCycle = () => dispatch({ type: "FINISH_CYCLE", elapsed: elapsedRef.current });
+  const setStartTime = (value: string) => {
+    const startAt = parseTodayTime(value);
+    if (startAt === null) return;
+    const nextElapsed = elapsedBetween(startAt, Date.now());
+    setElapsedSeconds(nextElapsed);
+    dispatch({ type: "SET_START_TIME", at: startAt, elapsed: nextElapsed });
+    resetAlerts();
+  };
+  const setEventTime = (eventId: string, value: string) => {
+    const eventAt = parseTodayTime(value);
+    if (eventAt === null) return;
+    const startAt =
+      events.find((event) => event.type === "start")?.at ?? Date.now() - elapsedRef.current * 1000;
+    dispatch({
+      type: "SET_EVENT_TIME",
+      eventId,
+      at: eventAt,
+      elapsed: elapsedBetween(startAt, eventAt),
+    });
+  };
 
   const toggleHt = (id: string) => {
     setHtChecked((prev) => {
@@ -332,12 +365,15 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         shocks={shocks}
         adres={adres}
         amios={amios}
+        events={events}
         historyLength={history.length}
         editingTally={editingTally}
         onSetEditingTally={setEditingTally}
         onAdjustTally={(kind: "choc" | "adre" | "amio", delta: 1 | -1) =>
           dispatch({ type: "ADJUST_TALLY", kind, delta, elapsed: elapsedRef.current, pediatric })
         }
+        onSetStartTime={setStartTime}
+        onSetEventTime={setEventTime}
       />
 
       {showZoom && <AcrZoomOverlay nextAnalyseIn={nextAnalyseIn} onSkip={skipToAnalyse} />}

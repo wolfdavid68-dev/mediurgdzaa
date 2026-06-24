@@ -99,6 +99,22 @@ describe("useAcrChrono", () => {
     expect(result.current.elapsedRef.current).toBe(0);
   });
 
+  test("setElapsedSeconds() recale le chrono puis continue depuis cette valeur", () => {
+    const { result } = renderHook(() => useAcrChrono(true));
+
+    act(() => {
+      result.current.setElapsedSeconds(180);
+    });
+    expect(result.current.elapsed).toBe(180);
+    expect(result.current.elapsedRef.current).toBe(180);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(result.current.elapsed).toBe(182);
+    expect(result.current.elapsedRef.current).toBe(182);
+  });
+
   test("après reset, redémarrer repart bien de 0", () => {
     const { result, rerender } = renderHook(({ running }) => useAcrChrono(running), {
       initialProps: { running: true },

@@ -300,6 +300,53 @@ describe("sessionReducer · ADJUST_TALLY", () => {
   });
 });
 
+describe("sessionReducer · horaires manuels", () => {
+  test("SET_START_TIME recale les T+ existants depuis le début RCP", () => {
+    const start = make({
+      running: false,
+      phase: "rcp",
+      events: [
+        { id: "c1", type: "choc", label: "Choc", t: 0, at: 10_120_000 },
+        { id: "a1", type: "adre", label: "Adrénaline 1 mg", t: 0, at: 10_240_000 },
+      ],
+      lastAdreAt: 0,
+    });
+
+    const next = sessionReducer(start, {
+      type: "SET_START_TIME",
+      at: 10_000_000,
+      elapsed: 300,
+    });
+
+    expect(next.running).toBe(true);
+    expect(next.phase).toBe("analyse");
+    expect(next.events).toEqual([
+      expect.objectContaining({ type: "start", t: 0, at: 10_000_000 }),
+      expect.objectContaining({ id: "c1", t: 120 }),
+      expect.objectContaining({ id: "a1", t: 240 }),
+    ]);
+    expect(next.lastAdreAt).toBe(240);
+  });
+
+  test("SET_EVENT_TIME modifie l'heure d'une adré et recale le rappel 4 min", () => {
+    const start = make({
+      adres: 1,
+      lastAdreAt: 120,
+      events: [{ id: "a1", type: "adre", label: "Adrénaline 1 mg", t: 120, at: 10_120_000 }],
+    });
+
+    const next = sessionReducer(start, {
+      type: "SET_EVENT_TIME",
+      eventId: "a1",
+      at: 10_300_000,
+      elapsed: 300,
+    });
+
+    expect(next.events[0]).toMatchObject({ id: "a1", at: 10_300_000, t: 300 });
+    expect(next.lastAdreAt).toBe(300);
+  });
+});
+
 describe("sessionReducer · RESET", () => {
   test("RESET : retour à l'état initial peu importe ce qui précède", () => {
     const dirty = make({

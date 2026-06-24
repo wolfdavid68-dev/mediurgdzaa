@@ -301,129 +301,209 @@ export const AcrHTPanel = ({
 // Tally rapide / éditable. Mode lecture (compacts) ou mode édition (steppers).
 // Permet d'ajuster ce qui a déjà été fait par le DSA avant l'arrivée de l'équipe.
 type TallyKind = "choc" | "adre" | "amio";
+type TallyEvent = {
+  id: string;
+  type: string;
+  label: string;
+  t: number;
+  at: number;
+};
 
 type TallyEditorProps = {
   shocks: number;
   adres: number;
   amios: number;
+  events: TallyEvent[];
   historyLength: number;
   editingTally: boolean;
   onSetEditingTally: (v: boolean) => void;
   // Un seul callback : le parent décide (typiquement dispatch ADJUST_TALLY).
   // La logique +/- (label, lastAdreAt, events) vit dans le reducer.
   onAdjustTally: (kind: TallyKind, delta: 1 | -1) => void;
+  onSetStartTime: (value: string) => void;
+  onSetEventTime: (eventId: string, value: string) => void;
 };
 
 export const AcrTallyEditor = ({
   shocks,
   adres,
   amios,
+  events,
   historyLength,
   editingTally,
   onSetEditingTally,
   onAdjustTally,
-}: TallyEditorProps) => (
-  <div className={`acr-tally ${editingTally ? "acr-tally-editing" : ""}`}>
-    {!editingTally ? (
-      <>
-        <span>
-          <strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}
-        </span>
-        <span className="acr-tally-sep">·</span>
-        <span>
-          <strong>{adres}</strong> adré
-        </span>
-        <span className="acr-tally-sep">·</span>
-        <span>
-          <strong>{amios}</strong> cordarone
-        </span>
-        <span className="acr-tally-sep">·</span>
-        <span>
-          <strong>{historyLength}</strong> cycle{historyLength > 1 ? "s" : ""}
-        </span>
-        <button
-          type="button"
-          className="acr-tally-edit-btn"
-          onClick={() => onSetEditingTally(true)}
-          title="Préciser ce qui a déjà été fait avant l'arrivée"
-        >
-          ✏︎ Modifier
-        </button>
-      </>
+  onSetStartTime,
+  onSetEventTime,
+}: TallyEditorProps) => {
+  const startEvent = events.find((event) => event.type === "start");
+  const tallyEvents = (type: TallyKind) => events.filter((event) => event.type === type);
+  const shockEvents = tallyEvents("choc");
+  const adreEvents = tallyEvents("adre");
+  const amioEvents = tallyEvents("amio");
+
+  return (
+    <div className={`acr-tally ${editingTally ? "acr-tally-editing" : ""}`}>
+      {!editingTally ? (
+        <>
+          <span>
+            <strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}
+          </span>
+          <span className="acr-tally-sep">·</span>
+          <span>
+            <strong>{adres}</strong> adré
+          </span>
+          <span className="acr-tally-sep">·</span>
+          <span>
+            <strong>{amios}</strong> cordarone
+          </span>
+          <span className="acr-tally-sep">·</span>
+          <span>
+            <strong>{historyLength}</strong> cycle{historyLength > 1 ? "s" : ""}
+          </span>
+          <button
+            type="button"
+            className="acr-tally-edit-btn"
+            onClick={() => onSetEditingTally(true)}
+            title="Préciser ce qui a déjà été fait avant l'arrivée"
+          >
+            ✏︎ Modifier
+          </button>
+        </>
+      ) : (
+        <div className="acr-tally-edit-grid">
+          <div className="acr-tally-time-row">
+            <label className="acr-tally-time-label" htmlFor="acr-start-time">
+              Début RCP
+            </label>
+            <input
+              id="acr-start-time"
+              className="acr-tally-time-input"
+              type="time"
+              step="1"
+              value={formatTimeInput(startEvent?.at)}
+              onChange={(event) => onSetStartTime(event.currentTarget.value)}
+              aria-label="Heure de début de la RCP"
+            />
+            <span className="acr-tally-time-note">base du chrono</span>
+          </div>
+          <div className="acr-tally-edit-row">
+            <div className="acr-tally-edit-copy">
+              <span className="acr-tally-edit-label">Chocs déjà donnés</span>
+              <TallyTimeInputs events={shockEvents} onSetEventTime={onSetEventTime} />
+            </div>
+            <div className="acr-tally-stepper">
+              <button
+                type="button"
+                onClick={() => onAdjustTally("choc", -1)}
+                aria-label="Moins un choc"
+                disabled={shocks === 0}
+              >
+                −
+              </button>
+              <span className="acr-tally-num">{shocks}</span>
+              <button
+                type="button"
+                onClick={() => onAdjustTally("choc", 1)}
+                aria-label="Plus un choc"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className="acr-tally-edit-row">
+            <div className="acr-tally-edit-copy">
+              <span className="acr-tally-edit-label">Adré déjà donnée</span>
+              <TallyTimeInputs events={adreEvents} onSetEventTime={onSetEventTime} />
+            </div>
+            <div className="acr-tally-stepper">
+              <button
+                type="button"
+                onClick={() => onAdjustTally("adre", -1)}
+                aria-label="Moins une adrénaline"
+                disabled={adres === 0}
+              >
+                −
+              </button>
+              <span className="acr-tally-num">{adres}</span>
+              <button
+                type="button"
+                onClick={() => onAdjustTally("adre", 1)}
+                aria-label="Plus une adrénaline"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className="acr-tally-edit-row">
+            <div className="acr-tally-edit-copy">
+              <span className="acr-tally-edit-label">Cordarone déjà donnée</span>
+              <TallyTimeInputs events={amioEvents} onSetEventTime={onSetEventTime} />
+            </div>
+            <div className="acr-tally-stepper">
+              <button
+                type="button"
+                onClick={() => onAdjustTally("amio", -1)}
+                aria-label="Moins une cordarone"
+                disabled={amios === 0}
+              >
+                −
+              </button>
+              <span className="acr-tally-num">{amios}</span>
+              <button
+                type="button"
+                onClick={() => onAdjustTally("amio", 1)}
+                aria-label="Plus une cordarone"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className="acr-tally-edit-hint">
+            À l'arrivée, ajuste les chocs déjà délivrés par le DSA et toute adré déjà reçue. Chaque
+            heure modifiée recalcule son T+ depuis le début RCP.
+          </div>
+          <button type="button" className="acr-tally-done" onClick={() => onSetEditingTally(false)}>
+            Terminé
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const formatTimeInput = (ts?: number) => {
+  if (!ts) return "";
+  const date = new Date(ts);
+  return [date.getHours(), date.getMinutes(), date.getSeconds()]
+    .map((part) => String(part).padStart(2, "0"))
+    .join(":");
+};
+
+const TallyTimeInputs = ({
+  events,
+  onSetEventTime,
+}: {
+  events: TallyEvent[];
+  onSetEventTime: (eventId: string, value: string) => void;
+}) => (
+  <div className="acr-tally-times">
+    {events.length > 0 ? (
+      events.map((event, index) => (
+        <label key={event.id} className="acr-tally-time-chip">
+          <span>{events.length > 1 ? `${index + 1}` : event.label}</span>
+          <input
+            type="time"
+            step="1"
+            value={formatTimeInput(event.at)}
+            onChange={(inputEvent) => onSetEventTime(event.id, inputEvent.currentTarget.value)}
+            aria-label={`${event.label} à`}
+          />
+          <em>T+{fmt(event.t)}</em>
+        </label>
+      ))
     ) : (
-      <div className="acr-tally-edit-grid">
-        <div className="acr-tally-edit-row">
-          <span className="acr-tally-edit-label">Chocs déjà donnés</span>
-          <div className="acr-tally-stepper">
-            <button
-              type="button"
-              onClick={() => onAdjustTally("choc", -1)}
-              aria-label="Moins un choc"
-              disabled={shocks === 0}
-            >
-              −
-            </button>
-            <span className="acr-tally-num">{shocks}</span>
-            <button
-              type="button"
-              onClick={() => onAdjustTally("choc", 1)}
-              aria-label="Plus un choc"
-            >
-              +
-            </button>
-          </div>
-        </div>
-        <div className="acr-tally-edit-row">
-          <span className="acr-tally-edit-label">Adré déjà donnée</span>
-          <div className="acr-tally-stepper">
-            <button
-              type="button"
-              onClick={() => onAdjustTally("adre", -1)}
-              aria-label="Moins une adrénaline"
-              disabled={adres === 0}
-            >
-              −
-            </button>
-            <span className="acr-tally-num">{adres}</span>
-            <button
-              type="button"
-              onClick={() => onAdjustTally("adre", 1)}
-              aria-label="Plus une adrénaline"
-            >
-              +
-            </button>
-          </div>
-        </div>
-        <div className="acr-tally-edit-row">
-          <span className="acr-tally-edit-label">Cordarone déjà donnée</span>
-          <div className="acr-tally-stepper">
-            <button
-              type="button"
-              onClick={() => onAdjustTally("amio", -1)}
-              aria-label="Moins une cordarone"
-              disabled={amios === 0}
-            >
-              −
-            </button>
-            <span className="acr-tally-num">{amios}</span>
-            <button
-              type="button"
-              onClick={() => onAdjustTally("amio", 1)}
-              aria-label="Plus une cordarone"
-            >
-              +
-            </button>
-          </div>
-        </div>
-        <div className="acr-tally-edit-hint">
-          À l'arrivée, ajuste les chocs déjà délivrés par le DSA et toute adré déjà reçue. Le
-          prochain choc sera proposé en cohérence (ex : si chocs = 2, le suivant est le 3e →
-          suggestion Amio 300 mg).
-        </div>
-        <button type="button" className="acr-tally-done" onClick={() => onSetEditingTally(false)}>
-          Terminé
-        </button>
-      </div>
+      <span className="acr-tally-empty-time">Administré à —</span>
     )}
   </div>
 );

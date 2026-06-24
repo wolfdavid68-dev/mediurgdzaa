@@ -33,12 +33,18 @@ export const useAcrChrono = (running: boolean) => {
   // Encapsule la remise à zéro pour que les call-sites n'aient pas à muter
   // elapsedRef.current eux-mêmes (React Compiler n'aime pas les mutations
   // de refs lus dans le JSX, et c'est plus propre).
-  const resetChrono = () => {
-    elapsedRef.current = 0;
-    setElapsed(0);
+  const setElapsedSeconds = (nextElapsed: number) => {
+    const safeElapsed = Math.max(0, Math.floor(nextElapsed));
+    elapsedRef.current = safeElapsed;
+    startedAtRef.current = Date.now() - safeElapsed * 1000;
+    setElapsed(safeElapsed);
   };
 
-  return { elapsed, elapsedRef, setElapsed, resetChrono };
+  const resetChrono = () => {
+    setElapsedSeconds(0);
+  };
+
+  return { elapsed, elapsedRef, setElapsedSeconds, resetChrono };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
