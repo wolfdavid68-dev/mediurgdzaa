@@ -34,6 +34,7 @@ import { useLongPress } from "./lib/useLongPress";
 import { useWakeLock } from "./lib/useWakeLock";
 import { usePatientWeight } from "./lib/usePatientWeight";
 import { getPreviewAccessMode } from "./lib/access";
+import { isMedicalFunction } from "./lib/auth";
 import { isPreview } from "./lib/featureFlags";
 import { useAuthProfile } from "./lib/authProfile";
 import { TUTORAT_URL } from "./lib/tutorat";
@@ -65,6 +66,8 @@ const App = () => {
   const previewMode = isPreview();
   const accessMode = getPreviewAccessMode(authProfile, previewMode);
   const hasFullAppAccess = accessMode === "full";
+  const isMedicalProfile = authProfile ? isMedicalFunction(authProfile.fonction) : false;
+  const showTutoratAccess = hasFullAppAccess && !isMedicalProfile;
   const allowedPages = hasFullAppAccess ? ALL_PAGES : MEDICAMENTS_ONLY_PAGES;
   const [page, setPage] = useState("medicaments");
   const [search, setSearch] = useState("");
@@ -345,7 +348,7 @@ const App = () => {
             onOpenNotesBackup={openNotesBackup}
             onToggleFont={toggleFont}
             onToggleTheme={toggleTheme}
-            showTutorat={hasFullAppAccess}
+            showTutorat={showTutoratAccess}
           >
             {page === "medicaments" && (
               <div className="search-row">
@@ -513,7 +516,7 @@ const App = () => {
               onClose={acceptCharter}
             />
           )}
-          {!showCharter && showAnnounce && (
+          {!showCharter && showAnnounce && showTutoratAccess && (
             <AnnounceModal open={showAnnounce} onClose={dismissAnnounce} />
           )}
         </>
