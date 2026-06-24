@@ -399,6 +399,11 @@ const AcrRecordView = ({
               <span>Lit : {record.contexte.lit || "—"}</span>
             </div>
           </div>
+          <div className="acr-record-desktop-status" aria-hidden="true">
+            <span>ACR en cours</span>
+            <strong>{formatAcrElapsed(elapsed)}</strong>
+            <small>Début RCP : {record.horaires.debutRcp || "auto"}</small>
+          </div>
           <button
             type="button"
             className="acr-record-header-action"
@@ -417,6 +422,17 @@ const AcrRecordView = ({
             <X size={23} strokeWidth={2.5} aria-hidden="true" />
           </button>
         </header>
+
+        <div className="acr-record-desktop-strip" aria-hidden="true">
+          <span>Patient : {displayPatient(record)}</span>
+          <span>Âge : {record.patient.age || "—"}</span>
+          <span>Sexe : {record.patient.sexe || "—"}</span>
+          <span>Équipe : {record.contexte.equipe || "—"}</span>
+          <span>Lit : {record.contexte.lit || "—"}</span>
+          <strong>
+            Protocole : {protocol === "acls" ? "ACLS" : "ERC"} ({pediatric ? "Enfant" : "Adulte"})
+          </strong>
+        </div>
 
         <div className="acr-record-content" ref={captureRef}>
           {/* Cartes supérieures : chrono + patient anonyme */}

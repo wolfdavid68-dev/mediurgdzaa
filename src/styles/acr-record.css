@@ -1853,6 +1853,260 @@
   justify-content: flex-start;
 }
 
+.acr-record-desktop-status,
+.acr-record-desktop-strip {
+  display: none;
+}
+
+@media screen and (min-width: 981px) {
+  .acr-record-dialog {
+    width: min(1280px, calc(100vw - 64px));
+    max-width: min(1280px, calc(100vw - 64px));
+    height: min(880px, calc(100dvh - 48px));
+    max-height: calc(100dvh - 48px);
+    margin: auto;
+    border: 1px solid #263044;
+    border-radius: 22px;
+    background: #080d16;
+    box-shadow:
+      0 32px 90px rgb(0 0 0 / 0.62),
+      0 0 0 1px rgb(255 255 255 / 0.03);
+  }
+
+  .acr-record-modal {
+    border-radius: inherit;
+    background: #080d16;
+  }
+
+  .acr-record-header {
+    grid-template-columns: auto minmax(260px, 1fr) auto auto auto;
+    min-height: 76px;
+    padding: max(14px, var(--safe-top)) 24px 14px;
+    border-bottom-color: #253044;
+  }
+
+  .acr-record-brand {
+    width: 52px;
+    height: 52px;
+  }
+
+  .acr-record-header h3 {
+    font-size: 29px;
+  }
+
+  .acr-record-desktop-status {
+    display: grid;
+    justify-items: start;
+    min-width: 150px;
+    color: #a8b2c4;
+  }
+
+  .acr-record-desktop-status span {
+    color: var(--acr-red);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .acr-record-desktop-status strong {
+    color: var(--acr-red);
+    font-family: var(--mono);
+    font-size: 28px;
+    line-height: 0.95;
+  }
+
+  .acr-record-desktop-status small {
+    color: #a8b2c4;
+    font-size: 11px;
+    font-weight: 750;
+  }
+
+  .acr-record-desktop-strip {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 18px;
+    min-height: 34px;
+    padding: 0 24px;
+    border-bottom: 1px solid #253044;
+    background: #073456;
+    color: #dbe8f6;
+    font-size: 12px;
+    font-weight: 760;
+    white-space: nowrap;
+  }
+
+  .acr-record-desktop-strip strong {
+    margin-left: auto;
+    color: #ffffff;
+    font-weight: 850;
+  }
+
+  .acr-record-content {
+    display: grid;
+    grid-template-columns: minmax(260px, 290px) minmax(430px, 1fr) minmax(260px, 300px);
+    grid-auto-flow: dense;
+    align-items: start;
+    gap: 12px;
+    padding: 14px 20px 18px;
+    overflow: auto;
+  }
+
+  .acr-record-topcards {
+    display: none;
+  }
+
+  .acr-record-timecard,
+  .acr-record-patient-card {
+    min-height: 118px;
+    box-shadow: 0 14px 34px rgb(0 0 0 / 0.3);
+  }
+
+  .acr-record-timecard {
+    padding: 20px 16px 16px 76px;
+  }
+
+  .acr-record-time-icon {
+    left: 20px;
+    top: 38px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .acr-record-timecard strong {
+    font-size: 40px;
+  }
+
+  .acr-record-patient-card {
+    padding: 14px;
+  }
+
+  .acr-record-patient-card > strong {
+    font-size: 17px;
+  }
+
+  .acr-record-patient-inline {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .acr-record-sections {
+    display: contents;
+  }
+
+  .acr-record-section {
+    border-radius: 12px;
+  }
+
+  .acr-record-section:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .acr-record-section:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .acr-record-section:nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .acr-record-section:nth-child(4) {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+  }
+
+  .acr-record-section:nth-child(5) {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .acr-record-section:nth-child(6) {
+    grid-column: 2;
+    grid-row: 4;
+  }
+
+  .acr-record-section:nth-child(7) {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .acr-record-section:nth-child(8) {
+    grid-column: 3;
+    grid-row: 3 / span 2;
+  }
+
+  .acr-record-section-head {
+    min-height: 42px;
+    padding: 8px 11px;
+  }
+
+  .acr-record-section-body {
+    padding: 9px 11px 11px;
+  }
+
+  .acr-record-analyse-row,
+  .acr-record-vvp-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .acr-record-section:nth-child(3) .acr-record-analyse-row {
+    grid-template-columns: minmax(230px, 0.5fr) minmax(0, 1fr);
+  }
+
+  .acr-record-fields-three {
+    grid-template-columns: 1fr;
+  }
+
+  .acr-record-section:nth-child(1) .acr-record-fields-two {
+    grid-template-columns: 1fr;
+  }
+
+  .acr-record-section:nth-child(4) .acr-record-fields-three {
+    gap: 8px;
+  }
+
+  .acr-record-chip {
+    white-space: nowrap;
+  }
+
+  .acr-record-causes .acr-record-chip-group {
+    grid-template-columns: 1fr;
+  }
+
+  .acr-record-causes .acr-record-chip {
+    min-height: 30px;
+    font-size: 11.5px;
+  }
+
+  .acr-record-racs-obtained {
+    display: inline-flex;
+  }
+
+  .acr-record-wake-signs {
+    display: flex;
+  }
+
+  .acr-record-wake-signs + .acr-record-check-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-top: 8px;
+  }
+
+  .acr-record-toolbar {
+    grid-template-columns: minmax(180px, 220px) minmax(180px, 220px) minmax(220px, 260px);
+    justify-content: end;
+    gap: 14px;
+    padding: 14px 24px calc(14px + var(--safe-bottom));
+  }
+}
+
 @media (max-width: 980px) {
   .acr-record-content {
     padding: 8px 20px 14px;
