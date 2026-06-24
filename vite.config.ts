@@ -100,6 +100,11 @@ export default defineConfig({
         // SPA : toute nav non-précachée renvoie index.html pour que React
         // route côté client.
         navigateFallback: "index.html",
+        // …SAUF /tutorat/* : ce sous-chemin est proxifié vers le déploiement
+        // Tutorat (origine unifiée). Sans cette exclusion, le SW MediURG
+        // (scope "/") servirait sa propre coquille index.html à la place de
+        // l'app Tutorat → écran MediURG au lieu du Tutorat.
+        navigateFallbackDenylist: [/^\/tutorat(\/|$)/],
         // Workbox skip silencieusement les fichiers > 2 MB par défaut. On
         // monte à 5 MB pour couvrir les futurs assets lourds (image hi-res
         // ECG, PDF protocole) sans risquer un asset hors cache → 404 offline.
