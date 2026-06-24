@@ -2,9 +2,15 @@ import { describe, expect, test } from "vitest";
 import { getPreviewAccessMode } from "./access";
 
 describe("getPreviewAccessMode", () => {
-  test("hors preview, tout le monde garde l'acces complet", () => {
+  test("hors preview, les soignants autorisés gardent l'accès complet", () => {
     expect(getPreviewAccessMode({ fonction: "Medecin urgentiste" }, false)).toBe("full");
-    expect(getPreviewAccessMode({ fonction: "Aide-soignant" }, false)).toBe("full");
+    expect(getPreviewAccessMode({ fonction: "Infirmier" }, false)).toBe("full");
+  });
+
+  test("hors preview, AS et etudiants ouvrent le tutorat en main", () => {
+    expect(getPreviewAccessMode({ fonction: "Aide-soignant" }, false)).toBe("tutorat");
+    expect(getPreviewAccessMode({ fonction: "Etudiant infirmier" }, false)).toBe("tutorat");
+    expect(getPreviewAccessMode({ fonction: "Etudiant AS" }, false)).toBe("tutorat");
   });
 
   test("medecin, interne et pharmacienne voient seulement les medicaments en preview", () => {

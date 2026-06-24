@@ -3,7 +3,7 @@ import { isAuthEnabled, isPreview, isPsePreview } from "../lib/featureFlags";
 // Régression : l'override ?author=preview doit rester actif même quand
 // l'app réécrit l'URL et fait sauter le query param. Depuis l'ouverture
 // officielle du login, cet override ne pilote plus l'auth : il ne garde
-// que les features internes (Tutorat, PSE preview, etc.).
+// que les features internes (PSE/drugs preview, etc.).
 
 const store = new Map<string, string>();
 beforeEach(() => {

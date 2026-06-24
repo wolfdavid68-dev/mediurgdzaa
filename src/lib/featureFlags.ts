@@ -13,7 +13,7 @@ import { storageKey } from "./storageKeys";
 // pour cette session (lue à chaque appel, pas mémorisée).
 
 // Preview UNIFIÉE : un seul point d'entrée active les features internes
-// encore non publiques (Tutorat, overlays PSE/drugs, etc.). Depuis
+// encore non publiques (overlays PSE/drugs, etc.). Depuis
 // l'ouverture officielle du login, l'auth n'est plus pilotée par ce mode :
 // `?author=preview` reste l'URL de preview dédiée.
 const URL_PARAM_OVERRIDE: Record<string, string[]> = {
@@ -90,6 +90,6 @@ export const isPsePreview = (): boolean => PSE_PREVIEW || isPreviewing("AUTH_ENA
 
 // Preview unifiée générique : true dès qu'on est en mode preview
 // (?author=preview, collant). Pour les features preview
-// qui ne sont pas pilotées par un flag de prod dédié (ex. lecteur ECG
-// expérimental). Public hors preview → toujours false.
+// qui ne sont pas pilotées par un flag de prod dédié. Public hors preview
+// → toujours false.
 export const isPreview = (): boolean => isPreviewing("AUTH_ENABLED");

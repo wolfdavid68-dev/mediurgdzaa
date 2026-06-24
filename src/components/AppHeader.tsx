@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { useLongPress } from "../lib/useLongPress";
-import { isPreview } from "../lib/featureFlags";
 import { TUTORAT_URL } from "../lib/tutorat";
 
-// Pastille « Tutorat ↗ » : visible uniquement en mode preview unifié
-// (?author=preview, sticky pour la session). Navigation dans le même
-// onglet (symétrique au retour Tutorat → MediURG qui utilise aussi
-// window.location.href). Pas de token JWT pour l'instant : le Tutorat
-// tombera en mode démo côté useAuth.
+// Pastille « Tutorat ↗ » : accès main vers le compagnon Tutorat démo.
+// Navigation dans le même onglet (symétrique au retour Tutorat → MediURG
+// qui utilise aussi window.location.href). Pas de token JWT pour l'instant :
+// le Tutorat tombe en mode démo côté useAuth.
 const TutoratLink = () => (
   <a
     href={TUTORAT_URL}
@@ -75,7 +73,7 @@ const AppHeader = ({
   onOpenNotesBackup,
   onToggleFont,
   onToggleTheme,
-  showTutorat = isPreview(),
+  showTutorat = true,
   children,
 }: AppHeaderProps) => {
   // Menu kebab : regroupe thème / police / sauvegarde notes derrière un seul

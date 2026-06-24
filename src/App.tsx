@@ -50,9 +50,9 @@ const TutoratOnlyView = () => (
   <main className="main-content main-content-tutorat-only">
     <section className="tutorat-only" aria-labelledby="tutorat-only-title">
       <img src="/logo-sau.png" alt="Urgences Mulhouse" draggable={false} />
-      <p className="tutorat-only-kicker">Accès preview dédié</p>
+      <p className="tutorat-only-kicker">Tutorat démo dédié</p>
       <h1 id="tutorat-only-title">Tutorat SAU Mulhouse</h1>
-      <p>Ton profil ouvre directement le compagnon de tutorat ESI/AS.</p>
+      <p>Ton profil ouvre directement le compagnon de tutorat démo ESI/AS.</p>
       <a className="tutorat-only-btn" href={TUTORAT_URL}>
         Ouvrir le tutorat ↗
       </a>
@@ -345,7 +345,7 @@ const App = () => {
             onOpenNotesBackup={openNotesBackup}
             onToggleFont={toggleFont}
             onToggleTheme={toggleTheme}
-            showTutorat={hasFullAppAccess && previewMode}
+            showTutorat={hasFullAppAccess}
           >
             {page === "medicaments" && (
               <div className="search-row">

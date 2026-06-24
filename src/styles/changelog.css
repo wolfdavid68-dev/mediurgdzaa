@@ -248,12 +248,12 @@
   }
 }
 
-/* ── Annonce ponctuelle à l'ouverture (nouvel outil ECG) ───── */
+/* ── Annonce ponctuelle à l'ouverture ─────────────────────── */
 .announce-dialog {
   border: none;
   background: transparent;
   padding: 0;
-  max-width: 380px;
+  max-width: 420px;
   width: calc(100vw - 32px);
 }
 .announce-dialog::backdrop {
@@ -261,29 +261,67 @@
   backdrop-filter: blur(2px);
 }
 .announce-card {
-  background: var(--card);
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--info) 12%, transparent), transparent 42%),
+    var(--card);
   border: 1px solid var(--border-strong);
-  border-radius: 16px;
-  padding: 22px 20px 18px;
+  border-radius: 18px;
+  padding: 18px 18px 16px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.announce-card-tutorat {
+  border-color: color-mix(in srgb, var(--info) 45%, var(--border-strong));
+}
+.announce-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 82px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--info) 35%, var(--border));
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--card) 84%, var(--info)),
+    var(--bg-elevated)
+  );
+}
+.announce-logo {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-elevated) 76%, white);
+  border: 1px solid var(--border);
+}
+.announce-logo img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
 }
 .announce-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
 }
 .announce-title {
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 800;
   color: var(--text);
   margin: 0;
@@ -294,8 +332,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--warn);
-  background: color-mix(in srgb, var(--warn) 18%, transparent);
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 18%, transparent);
   padding: 2px 7px;
   border-radius: 999px;
   vertical-align: middle;
@@ -306,13 +344,32 @@
   color: var(--text-dim);
   margin: 0;
 }
+.announce-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  gap: 8px;
+}
+.announce-points span {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
 .announce-where {
   font-size: 13px;
   color: var(--text-mute);
   margin: 0;
 }
 .announce-btn {
-  margin-top: 8px;
+  margin-top: 4px;
   width: 100%;
   padding: 12px;
   border: none;
@@ -326,6 +383,18 @@
 }
 .announce-btn:active {
   transform: scale(0.98);
+}
+
+@media (max-width: 430px) {
+  .announce-card {
+    padding: 16px;
+  }
+  .announce-points {
+    grid-template-columns: 1fr;
+  }
+  .announce-points span {
+    min-height: 36px;
+  }
 }
 
 /* ── Backup notes utilisateur (export/import JSON) ───────────

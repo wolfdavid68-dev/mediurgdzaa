@@ -7,10 +7,11 @@ export const getPreviewAccessMode = (
   profile: Pick<Profile, "fonction"> | null,
   preview: boolean
 ): PreviewAccessMode => {
-  if (!preview || !profile) return "full";
+  if (!profile) return "full";
 
   const fonction = profile.fonction;
-  if (isMedicalFunction(fonction)) return "medicaments";
   if (isAsFunction(fonction) || isStudentFunction(fonction)) return "tutorat";
+  if (!preview) return "full";
+  if (isMedicalFunction(fonction)) return "medicaments";
   return "full";
 };

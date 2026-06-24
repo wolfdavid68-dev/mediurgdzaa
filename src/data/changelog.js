@@ -1,11 +1,42 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v112";
+export const APP_VERSION = "v113";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v113",
+    date: "2026-06-24",
+    titre: "Tutorat démo en main + horaires ACR recalés",
+    changes: [
+      {
+        type: "feat",
+        text: "Tutorat démo SAU Mulhouse passé en accès main : la pastille « Tutorat » est visible hors preview pour les profils à accès complet, et les profils Aide-soignant / étudiants ouvrent directement le compagnon tutorat dédié.",
+      },
+      {
+        type: "feat",
+        text: "Nouvelle annonce d'ouverture plus visuelle pour présenter le Tutorat démo et indiquer où le retrouver dans l'application.",
+      },
+      {
+        type: "feat",
+        text: "Bilan ACR desktop agrandi et réorganisé : conteneur plus large, RCP déplacée dans la colonne gauche, sections moins étirées et meilleure utilisation de la largeur écran.",
+      },
+      {
+        type: "fix",
+        text: "Bilan ACR : les horaires automatiques ne sont plus préremplis au repos. Les champs restent vides tant que la RCP, l'analyse ou le RACS n'ont pas réellement été démarrés ou renseignés.",
+      },
+      {
+        type: "feat",
+        text: "Chrono ACR : saisie manuelle de l'heure de début RCP, puis recalage automatique du chrono en cours. Les heures de chocs, adrénaline et amiodarone sont éditables et recalculent leur T+ depuis ce début RCP.",
+      },
+      {
+        type: "fix",
+        text: "Adrénaline ACR : modifier l'heure d'administration recale aussi le rappel des 4 minutes, pour garder la prochaine dose cohérente avec le terrain.",
+      },
+    ],
+  },
   {
     version: "v112",
     date: "2026-06-24",
