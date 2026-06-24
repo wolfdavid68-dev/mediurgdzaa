@@ -45,12 +45,12 @@ const AnnounceModal = ({ open, onClose }: Props) => {
         </h2>
         <p className="announce-text">
           Le compagnon de tutorat SAU Mulhouse passe en accès main. Il sert de support de
-          démonstration pour accompagner les ESI et EAS dans les repères du service.
+          démonstration pour accompagner les ESI/EAS dans les repères du service.
         </p>
         <div className="announce-points" aria-label="Points clés du tutorat démo">
           <span>Parcours d'accueil</span>
           <span>Repères terrain</span>
-          <span>Accès ESI / EAS</span>
+          <span>Accès ESI/EAS</span>
         </div>
         <p className="announce-where">Disponible via la pastille Tutorat dans l'en-tête.</p>
         <button type="button" className="announce-btn" onClick={onClose} autoFocus>
