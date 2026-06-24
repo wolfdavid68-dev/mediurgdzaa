@@ -841,6 +841,710 @@
     }
   }
 
+  /* ── Direction visuelle "Prise en charge ACR" ───
+     Référence mobile : fond nuit, contours rouges, sections numérotées,
+     dossier clinique compact et barre d'actions basse.
+     ─────────────────────────────────────────────── */
+  .acr-record-dialog {
+    width: min(720px, 100vw);
+    max-width: min(720px, 100vw);
+    height: min(1280px, 100dvh);
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    background: #070b13;
+    box-shadow: 0 30px 110px rgb(0 0 0 / 0.72);
+  }
+
+  .acr-record-modal {
+    --acr-red: #f04455;
+    --acr-red-soft: rgb(240 68 85 / 0.2);
+    --acr-red-line: rgb(240 68 85 / 0.58);
+    --acr-panel: #101722;
+    --acr-panel-2: #0d131d;
+    --acr-field: #111925;
+    --acr-line: #222b3a;
+    --acr-muted: #8d98aa;
+    --acr-soft: #c5cad5;
+    --acr-green: #55b987;
+    --acr-blue: #5aa7ff;
+    background: linear-gradient(180deg, rgb(13 18 29 / 0.94), #080d16 38%, #070b13), #080d16;
+    color: #eef2f8;
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .acr-record-header {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: 12px;
+    min-height: 70px;
+    padding: max(12px, var(--safe-top)) 20px 12px;
+    border-bottom: 1px solid var(--acr-line);
+    background: #090e18;
+  }
+
+  .acr-record-brand {
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--acr-red);
+    border-radius: 50%;
+    background: rgb(240 68 85 / 0.08);
+    color: var(--acr-red);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0;
+    box-shadow:
+      0 0 0 5px rgb(240 68 85 / 0.06),
+      inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  }
+
+  .acr-record-kicker {
+    display: none;
+  }
+
+  .acr-record-header h3 {
+    color: #f4f6fb;
+    font-size: clamp(23px, 4.7vw, 27px);
+    font-weight: 850;
+    line-height: 1.05;
+    letter-spacing: 0;
+  }
+
+  .acr-record-subtitle {
+    gap: 10px;
+    margin-top: 5px;
+    color: var(--acr-muted);
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .acr-record-subtitle span + span::before {
+    content: "•";
+    margin-right: 10px;
+    color: #586174;
+  }
+
+  .acr-record-close,
+  .acr-record-header-action {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #283142;
+    border-radius: 50%;
+    background: #0e1520;
+    color: #d4d9e3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .acr-record-header-action {
+    font-family: var(--mono);
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    padding-bottom: 8px;
+  }
+
+  .acr-record-close {
+    font-size: 26px;
+  }
+
+  .acr-record-content {
+    padding: 8px 20px 14px;
+    background: #080d16;
+  }
+
+  .acr-record-topcards {
+    grid-template-columns: 0.92fr 1.18fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .acr-record-timecard,
+  .acr-record-patient-card,
+  .acr-record-section {
+    border: 1px solid var(--acr-line);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #111824, #0d131d);
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.28);
+  }
+
+  .acr-record-timecard {
+    position: relative;
+    min-height: 104px;
+    padding: 17px 18px 14px 74px;
+    border-color: var(--acr-red-line);
+    background: linear-gradient(180deg, rgb(240 68 85 / 0.08), transparent 62%), #11131f;
+  }
+
+  .acr-record-timecard::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 33px;
+    width: 38px;
+    height: 38px;
+    border: 5px solid var(--acr-red);
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 0 10px #11131f,
+      0 -13px 0 -8px var(--acr-red);
+  }
+
+  .acr-record-timecard > span,
+  .acr-record-patient-card > span {
+    color: var(--acr-muted);
+    font-size: 12px;
+    font-weight: 850;
+    text-transform: none;
+  }
+
+  .acr-record-timecard strong {
+    margin-top: 5px;
+    color: var(--acr-red);
+    font-family: var(--mono);
+    font-size: clamp(35px, 7vw, 46px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: 0;
+  }
+
+  .acr-record-timecard small {
+    color: var(--acr-muted);
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .acr-record-patient-card {
+    min-height: 104px;
+    padding: 13px 15px 12px;
+  }
+
+  .acr-record-patient-card > strong {
+    margin-top: 4px;
+    color: #f1f3f8;
+    font-size: 16px;
+    font-weight: 850;
+  }
+
+  .acr-record-patient-card > em {
+    color: var(--acr-muted);
+    font-size: 12px;
+  }
+
+  .acr-record-patient-inline {
+    gap: 8px;
+    margin: 8px 0 4px;
+  }
+
+  .acr-record-patient-inline small {
+    color: #778295;
+    font-size: 10px;
+    font-weight: 850;
+    text-transform: none;
+  }
+
+  .acr-record-patient-input-wrap,
+  .acr-record-input-wrap,
+  .acr-record-textarea textarea,
+  .acr-cycle-input input {
+    border-color: #263040;
+    border-radius: 6px;
+    background: #101722;
+  }
+
+  .acr-record-patient-input-wrap {
+    min-height: 30px;
+  }
+
+  .acr-record-patient-input-wrap input {
+    color: #e9edf5;
+    font-size: 13px;
+    font-weight: 750;
+  }
+
+  .acr-record-sections {
+    gap: 6px;
+  }
+
+  .acr-record-section {
+    overflow: hidden;
+  }
+
+  .acr-record-section-head {
+    min-height: 44px;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #202838;
+    background: #101722;
+  }
+
+  .acr-record-section-index {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--acr-red);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--acr-red);
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .acr-record-section-head h4 {
+    color: #f0f3f8;
+    font-size: 16px;
+    font-weight: 850;
+    letter-spacing: 0;
+  }
+
+  .acr-record-section-subtitle {
+    margin-top: 1px;
+    color: #a9b0bf;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .acr-record-section-status {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgb(85 185 135 / 0.18);
+    color: var(--acr-green);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .acr-record-section-chevron {
+    color: #a4adbd;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .acr-record-section-body {
+    padding: 10px 12px 11px;
+    background: #0d131d;
+  }
+
+  .acr-record-field,
+  .acr-record-textarea,
+  .acr-record-causes {
+    gap: 6px;
+  }
+
+  .acr-record-field > span,
+  .acr-record-textarea > span,
+  .acr-record-causes > div > strong {
+    color: var(--acr-muted);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .acr-record-input-wrap {
+    min-height: 32px;
+  }
+
+  .acr-record-input-wrap input,
+  .acr-record-textarea textarea {
+    color: #e9edf5;
+    font-size: 14px;
+    font-weight: 750;
+    padding: 7px 10px;
+  }
+
+  .acr-record-input-wrap em,
+  .acr-cycle-input em {
+    color: #8893a5;
+    font-size: 11px;
+    font-weight: 750;
+  }
+
+  .acr-record-analyse-row,
+  .acr-record-vvp-row {
+    grid-template-columns: minmax(178px, 0.54fr) minmax(0, 1fr);
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .acr-record-vvp-row + .acr-record-fields {
+    margin-top: 0;
+  }
+
+  .acr-record-chip-group {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .acr-record-chip-label {
+    color: var(--acr-muted);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .acr-record-chip,
+  .acr-record-check,
+  .acr-record-toolbar button,
+  .acr-record-actions-menu button {
+    border-color: #253044;
+    border-radius: 6px;
+    background: #101722;
+    color: #aab2c1;
+    font-size: 12px;
+    font-weight: 800;
+    min-height: 32px;
+    padding: 7px 11px;
+  }
+
+  .acr-record-chip-active,
+  .acr-record-check-on {
+    border-color: var(--acr-red-line);
+    background: linear-gradient(180deg, #e53749, #bb2232);
+    color: #fff;
+    box-shadow: 0 0 18px rgb(240 68 85 / 0.22);
+  }
+
+  .acr-record-check {
+    min-height: 34px;
+    gap: 8px;
+  }
+
+  .acr-record-check span {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+  }
+
+  .acr-record-causes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .acr-record-causes > div {
+    border: 1px solid var(--acr-red-line);
+    border-radius: 9px;
+    padding: 9px;
+    background: #0f1521;
+  }
+
+  .acr-record-causes .acr-record-chip-group {
+    margin-top: 8px;
+  }
+
+  .acr-record-stats {
+    display: none;
+  }
+
+  .acr-record-cycle-table-wrap {
+    overflow: visible;
+    margin: 0;
+  }
+
+  .acr-record-cycle-table {
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    font-size: 12px;
+  }
+
+  .acr-record-cycle-table thead {
+    display: none;
+  }
+
+  .acr-record-cycle-table tr {
+    display: grid;
+    grid-template-columns: 102px 78px 82px minmax(120px, 1fr) minmax(105px, 0.82fr) 80px;
+    align-items: center;
+    border: 1px solid var(--acr-red-line);
+    border-radius: 9px;
+    background: #111722;
+    overflow: hidden;
+  }
+
+  .acr-record-cycle-table td {
+    border: 0;
+    padding: 9px 10px;
+    color: #dbe1eb;
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .acr-record-cycle-table td + td {
+    border-left: 1px solid #2a3344;
+  }
+
+  .acr-cycle-num strong {
+    color: var(--acr-red);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .acr-cycle-num span,
+  .acr-cycle-num em {
+    color: #a6afbf;
+    font-size: 12px;
+  }
+
+  .acr-cycle-choc {
+    color: var(--acr-red) !important;
+    font-size: 14px !important;
+  }
+
+  .acr-cycle-drugs {
+    max-width: none;
+  }
+
+  .acr-cycle-input input {
+    min-height: 28px;
+    font-size: 12px;
+    padding: 5px 7px;
+  }
+
+  .acr-record-empty {
+    border-color: #39465a;
+    border-radius: 9px;
+    color: var(--acr-muted);
+    background: #0f1520;
+  }
+
+  .acr-record-textarea textarea {
+    min-height: 54px;
+    resize: vertical;
+  }
+
+  .acr-record-events-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .acr-record-toolbar {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.96fr) minmax(0, 1.22fr);
+    gap: 20px;
+    padding: 14px 20px calc(14px + var(--safe-bottom));
+    border-top: 1px solid #222b3a;
+    background: #090e18;
+  }
+
+  .acr-record-toolbar button {
+    min-height: 46px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .acr-record-toolbar-primary {
+    border-color: rgb(255 255 255 / 0.1) !important;
+    background: linear-gradient(180deg, #e03a49, #b91e2d) !important;
+    color: #fff !important;
+    box-shadow: 0 12px 24px rgb(240 68 85 / 0.24);
+  }
+
+  .acr-record-toolbar-outline {
+    border-color: var(--acr-red-line) !important;
+    background: transparent !important;
+    color: #ff6574 !important;
+  }
+
+  .acr-record-actions-wrap {
+    position: relative;
+    min-width: 0;
+  }
+
+  .acr-record-toolbar-action {
+    width: 100%;
+    border-color: rgb(90 167 255 / 0.62) !important;
+    background: rgb(90 167 255 / 0.08) !important;
+    color: #79b8ff !important;
+  }
+
+  .acr-record-toolbar-action::after {
+    content: none;
+    margin-left: 9px;
+    color: #79b8ff;
+  }
+
+  .acr-record-actions-menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 9px);
+    z-index: 5;
+    width: min(260px, calc(100vw - 40px));
+    display: grid;
+    gap: 7px;
+    padding: 9px;
+    border: 1px solid #263044;
+    border-radius: 10px;
+    background: #101722;
+    box-shadow: 0 20px 42px rgb(0 0 0 / 0.45);
+  }
+
+  .acr-record-actions-menu button {
+    width: 100%;
+    text-align: left;
+  }
+
+  .acr-record-danger {
+    border-color: var(--acr-red-line) !important;
+    color: #ff6574 !important;
+  }
+
+  @media (max-width: 980px) {
+    .acr-record-dialog {
+      width: 100vw;
+      max-width: 100vw;
+      height: 100dvh;
+      max-height: 100dvh;
+    }
+
+    .acr-record-content {
+      padding: 8px 20px 14px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .acr-record-header {
+      padding-right: 14px;
+      padding-left: 14px;
+    }
+
+    .acr-record-content {
+      padding-right: 12px;
+      padding-left: 12px;
+    }
+
+    .acr-record-brand {
+      width: 42px;
+      height: 42px;
+      font-size: 11px;
+    }
+
+    .acr-record-header h3 {
+      font-size: 23px;
+    }
+
+    .acr-record-close,
+    .acr-record-header-action {
+      width: 38px;
+      height: 38px;
+    }
+
+    .acr-record-topcards {
+      grid-template-columns: 1fr 1.27fr;
+      gap: 8px;
+    }
+
+    .acr-record-timecard {
+      padding: 13px 10px 12px 56px;
+    }
+
+    .acr-record-timecard::before {
+      left: 13px;
+      top: 31px;
+      width: 30px;
+      height: 30px;
+      border-width: 4px;
+    }
+
+    .acr-record-timecard strong {
+      font-size: clamp(28px, 8.8vw, 38px);
+    }
+
+    .acr-record-patient-card {
+      padding: 11px 10px;
+    }
+
+    .acr-record-section-head h4 {
+      font-size: 15px;
+    }
+
+    .acr-record-analyse-row,
+    .acr-record-vvp-row,
+    .acr-record-fields-two,
+    .acr-record-fields-three {
+      grid-template-columns: 1fr;
+    }
+
+    .acr-record-compact-fields .acr-record-field {
+      grid-template-columns: minmax(0, 1fr) minmax(94px, 0.62fr);
+      gap: 8px;
+    }
+
+    .acr-record-cycle-table,
+    .acr-record-cycle-table tbody {
+      display: grid;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .acr-record-cycle-table tr {
+      display: grid;
+      grid-template-columns: 0.9fr 0.72fr 0.72fr;
+      gap: 0;
+      padding: 0;
+    }
+
+    .acr-record-cycle-table td {
+      min-width: 0;
+      padding: 8px 9px;
+    }
+
+    .acr-record-cycle-table td:nth-child(4),
+    .acr-record-cycle-table td:nth-child(5),
+    .acr-record-cycle-table td:nth-child(6) {
+      grid-column: auto;
+    }
+
+    .acr-record-cycle-table td + td {
+      border-left: 1px solid #2a3344;
+    }
+
+    .acr-record-cycle-table td:nth-child(4) {
+      grid-column: 1 / -1;
+      border-top: 1px solid #2a3344;
+      border-left: 0;
+    }
+
+    .acr-record-cycle-table td:nth-child(5),
+    .acr-record-cycle-table td:nth-child(6) {
+      grid-column: span 1;
+      border-top: 1px solid #2a3344;
+    }
+
+    .acr-record-toolbar {
+      gap: 8px;
+      padding-right: 12px;
+      padding-left: 12px;
+    }
+
+    .acr-record-toolbar button {
+      font-size: 12px;
+      padding: 8px 8px;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .acr-record-topcards {
+      grid-template-columns: 1fr;
+    }
+
+    .acr-record-causes {
+      grid-template-columns: 1fr;
+    }
+
+    .acr-record-toolbar {
+      grid-template-columns: 1fr;
+    }
+  }
+
   /* ── Print / PDF ──────────────────────────────── */
   @media print {
     body:has(.acr-record-dialog[open]) * {
@@ -895,5 +1599,308 @@
       background: #fff !important;
       color: #111 !important;
     }
+  }
+}
+
+/* Hors @layer : le reset global non-layer (`* { margin/padding: 0 }`) gagne
+   sinon sur les espacements du composant. Ces règles portent uniquement le
+   layout visuel du dossier ACR et laissent les règles colorimétriques ci-dessus. */
+.acr-record-header {
+  padding: max(12px, var(--safe-top)) 20px 12px;
+}
+
+.acr-record-brand,
+.acr-record-close,
+.acr-record-header-action,
+.acr-record-time-icon,
+.acr-record-section-index,
+.acr-record-section-status,
+.acr-record-check span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acr-record-title-block,
+.acr-record-section-head-text {
+  min-width: 0;
+}
+
+.acr-record-header h3 {
+  margin: 0;
+}
+
+.acr-record-header-action,
+.acr-record-close {
+  padding: 0;
+}
+
+.acr-record-subtitle {
+  margin-top: 5px;
+}
+
+.acr-record-subtitle span + span::before {
+  margin-right: 10px;
+}
+
+.acr-record-content {
+  padding: 8px 20px 10px;
+}
+
+.acr-record-topcards {
+  margin-bottom: 10px;
+}
+
+.acr-record-timecard {
+  min-height: 104px;
+  padding: 15px 18px 12px 74px;
+}
+
+.acr-record-timecard::before {
+  content: none;
+}
+
+.acr-record-time-icon {
+  position: absolute;
+  left: 20px;
+  top: 33px;
+  width: 38px;
+  height: 38px;
+  color: var(--acr-red);
+}
+
+.acr-record-timecard strong {
+  margin-top: 5px;
+}
+
+.acr-record-timecard small,
+.acr-record-patient-card > em {
+  margin-top: 4px;
+}
+
+.acr-record-patient-card {
+  min-height: 104px;
+  padding: 13px 15px 12px;
+}
+
+.acr-record-patient-card > strong {
+  margin-top: 4px;
+}
+
+.acr-record-patient-inline {
+  display: none;
+}
+
+.acr-record-patient-inline small {
+  margin-bottom: 3px;
+}
+
+.acr-record-patient-input-wrap input {
+  padding: 5px 8px;
+}
+
+.acr-record-patient-input-wrap em {
+  padding-right: 7px;
+}
+
+.acr-record-section-head {
+  min-height: 38px;
+  padding: 7px 12px;
+}
+
+.acr-record-section-subtitle {
+  margin-top: 1px;
+}
+
+.acr-record-section-body {
+  padding: 7px 12px 8px;
+}
+
+.acr-record-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.acr-record-fields-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.acr-record-fields-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.acr-record-compact-fields .acr-record-field {
+  grid-template-columns: minmax(0, 1fr) minmax(100px, 0.72fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.acr-record-input-wrap input,
+.acr-record-textarea textarea {
+  padding: 5px 10px;
+}
+
+.acr-record-input-wrap em {
+  padding-right: 10px;
+}
+
+.acr-record-analyse-row,
+.acr-record-vvp-row {
+  margin-bottom: 8px;
+}
+
+.acr-record-analyse-row {
+  grid-template-columns: minmax(225px, 0.55fr) minmax(0, 1fr);
+}
+
+.acr-record-vvp-row {
+  grid-template-columns: minmax(225px, 0.55fr) minmax(0, 1fr);
+}
+
+.acr-record-vvp-row + .acr-record-fields {
+  margin-top: 0;
+}
+
+.acr-record-chip-group {
+  margin-top: 8px;
+}
+
+.acr-record-chip,
+.acr-record-check,
+.acr-record-toolbar button,
+.acr-record-actions-menu button {
+  padding: 5px 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.acr-record-causes {
+  margin-top: 10px;
+}
+
+.acr-record-causes > div {
+  padding: 7px;
+}
+
+.acr-record-causes .acr-record-chip-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 7px;
+}
+
+.acr-record-causes .acr-record-chip {
+  min-height: 27px;
+  padding: 4px 8px;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.acr-record-section-body > .acr-record-check:has(+ .acr-record-causes) {
+  display: none;
+}
+
+.acr-record-wake-signs {
+  display: none;
+}
+
+.acr-record-racs-obtained {
+  display: none;
+}
+
+.acr-record-wake-signs + .acr-record-check-grid {
+  display: none;
+}
+
+.acr-record-causes + .acr-record-check-grid {
+  display: none;
+}
+
+.acr-record-cycle-table {
+  border-spacing: 0 6px;
+}
+
+.acr-record-cycle-table td {
+  padding: 9px 10px;
+}
+
+.acr-cycle-comment {
+  margin-top: 3px;
+}
+
+.acr-cycle-input input {
+  padding: 5px 7px;
+}
+
+.acr-record-empty {
+  padding: 7px 12px;
+}
+
+.acr-record-toolbar {
+  padding: 14px 20px calc(14px + var(--safe-bottom));
+}
+
+.acr-record-toolbar-action::after {
+  content: none;
+}
+
+.acr-record-actions-menu {
+  padding: 9px;
+}
+
+.acr-record-actions-menu button {
+  justify-content: flex-start;
+}
+
+@media (max-width: 980px) {
+  .acr-record-content {
+    padding: 8px 20px 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .acr-record-header {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .acr-record-content {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .acr-record-timecard {
+    padding: 13px 10px 12px 56px;
+  }
+
+  .acr-record-timecard::before {
+    left: 13px;
+    top: 31px;
+  }
+
+  .acr-record-patient-card {
+    padding: 11px 10px;
+  }
+
+  .acr-record-cycle-table td {
+    padding: 8px 9px;
+  }
+
+  .acr-record-fields-two,
+  .acr-record-fields-three,
+  .acr-record-causes,
+  .acr-record-analyse-row,
+  .acr-record-vvp-row {
+    grid-template-columns: 1fr;
+  }
+
+  .acr-record-toolbar {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .acr-record-toolbar button {
+    padding: 8px;
   }
 }

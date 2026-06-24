@@ -1,4 +1,20 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Check as CheckIcon,
+  CheckCircle2,
+  ChevronDown,
+  ClipboardCopy,
+  Download,
+  FileText,
+  HeartPulse,
+  MoreHorizontal,
+  RotateCcw,
+  Save,
+  Share2,
+  TimerReset,
+  X,
+  Zap,
+} from "lucide-react";
 import ModalDialog from "./ModalDialog";
 import {
   ACR_H_CAUSES,
@@ -92,12 +108,18 @@ const Section = ({
           <h4>{cleanTitle}</h4>
           {subtitle && <p className="acr-record-section-subtitle">{subtitle}</p>}
         </div>
-        <span className="acr-record-section-status" aria-hidden="true">
-          ✓
-        </span>
-        <span className="acr-record-section-chevron" aria-hidden="true">
-          ⌄
-        </span>
+        <CheckCircle2
+          className="acr-record-section-status"
+          size={20}
+          strokeWidth={2.7}
+          aria-hidden="true"
+        />
+        <ChevronDown
+          className="acr-record-section-chevron"
+          size={20}
+          strokeWidth={2.4}
+          aria-hidden="true"
+        />
       </header>
       <div className="acr-record-section-body">{children}</div>
     </section>
@@ -122,21 +144,23 @@ const Chip = ({
   </button>
 );
 
-const Check = ({
+const CheckOption = ({
   checked,
   children,
+  className,
   onChange,
 }: {
   checked: boolean;
   children: ReactNode;
+  className?: string;
   onChange: () => void;
 }) => (
   <button
     type="button"
-    className={`acr-record-check ${checked ? "acr-record-check-on" : ""}`}
+    className={`acr-record-check ${checked ? "acr-record-check-on" : ""} ${className ?? ""}`}
     onClick={onChange}
   >
-    <span aria-hidden="true">{checked ? "✓" : ""}</span>
+    <span aria-hidden="true">{checked && <CheckIcon size={14} strokeWidth={3} />}</span>
     {children}
   </button>
 );
@@ -223,6 +247,7 @@ const AcrRecordView = ({
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<null | "shared" | "downloaded" | "error">(null);
+  const [showActions, setShowActions] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -365,10 +390,9 @@ const AcrRecordView = ({
       <div className="acr-record-modal">
         <header className="acr-record-header">
           <div className="acr-record-brand" aria-hidden="true">
-            ♥
+            <HeartPulse size={26} strokeWidth={2.5} />
           </div>
           <div className="acr-record-title-block">
-            <p className="acr-record-kicker">Dossier ACR numérique</p>
             <h3 id="acr-record-title">Prise en charge ACR</h3>
             <div className="acr-record-subtitle">
               <span>Équipe : {record.contexte.equipe || "—"}</span>
@@ -377,11 +401,20 @@ const AcrRecordView = ({
           </div>
           <button
             type="button"
+            className="acr-record-header-action"
+            onClick={() => setShowActions((value) => !value)}
+            aria-label="Actions rapides du dossier ACR"
+            aria-expanded={showActions}
+          >
+            <MoreHorizontal size={22} strokeWidth={2.5} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
             className="acr-record-close"
             onClick={onClose}
             aria-label="Fermer le dossier ACR"
           >
-            ×
+            <X size={23} strokeWidth={2.5} aria-hidden="true" />
           </button>
         </header>
 
@@ -389,6 +422,9 @@ const AcrRecordView = ({
           {/* Cartes supérieures : chrono + patient anonyme */}
           <div className="acr-record-topcards">
             <div className="acr-record-timecard">
+              <span className="acr-record-time-icon" aria-hidden="true">
+                <TimerReset size={34} strokeWidth={2.5} />
+              </span>
               <span>Temps écoulé</span>
               <strong>{formatAcrElapsed(elapsed)}</strong>
               <small>Depuis le début de la RCP</small>
@@ -434,50 +470,6 @@ const AcrRecordView = ({
                 {cycle}
               </em>
             </div>
-          </div>
-
-          {/* Contexte : équipe, lit, médecin, IDE — compact 4 colonnes */}
-          <div className="acr-record-context-strip">
-            <Field
-              label="Équipe / secteur"
-              value={record.contexte.equipe}
-              onChange={(value) =>
-                updateRecord((prev) => ({
-                  ...prev,
-                  contexte: { ...prev.contexte, equipe: value },
-                }))
-              }
-            />
-            <Field
-              label="Lit / lieu"
-              value={record.contexte.lit}
-              onChange={(value) =>
-                updateRecord((prev) => ({
-                  ...prev,
-                  contexte: { ...prev.contexte, lit: value },
-                }))
-              }
-            />
-            <Field
-              label="Médecin leader"
-              value={record.contexte.medecinLeader}
-              onChange={(value) =>
-                updateRecord((prev) => ({
-                  ...prev,
-                  contexte: { ...prev.contexte, medecinLeader: value },
-                }))
-              }
-            />
-            <Field
-              label="IDE référent"
-              value={record.contexte.infirmierReferent}
-              onChange={(value) =>
-                updateRecord((prev) => ({
-                  ...prev,
-                  contexte: { ...prev.contexte, infirmierReferent: value },
-                }))
-              }
-            />
           </div>
 
           <div className="acr-record-sections">
@@ -646,9 +638,12 @@ const AcrRecordView = ({
                 <div className="acr-record-section-head-text">
                   <h4>Suivi de la réanimation</h4>
                 </div>
-                <span className="acr-record-section-chevron" aria-hidden="true">
-                  ⌄
-                </span>
+                <ChevronDown
+                  className="acr-record-section-chevron"
+                  size={20}
+                  strokeWidth={2.4}
+                  aria-hidden="true"
+                />
               </header>
               <div className="acr-record-section-body">
                 <div className="acr-record-stats">
@@ -671,7 +666,11 @@ const AcrRecordView = ({
                     automatiquement.
                   </div>
                 ) : (
-                  <div className="acr-record-cycle-table-wrap">
+                  <div
+                    className="acr-record-cycle-table-wrap"
+                    role="region"
+                    aria-label="Cycles ACR"
+                  >
                     <table className="acr-record-cycle-table">
                       <thead>
                         <tr>
@@ -687,7 +686,7 @@ const AcrRecordView = ({
                         {record.cycles.map((item) => (
                           <tr key={item.cycle}>
                             <td className="acr-cycle-num">
-                              <strong>C{item.cycle}</strong>
+                              <strong>Cycle {item.cycle}</strong>
                               <span>T+{formatAcrElapsed(item.t)}</span>
                               {item.wallTime && <em>{item.wallTime}</em>}
                             </td>
@@ -737,7 +736,7 @@ const AcrRecordView = ({
 
             {/* 6. Analyse du dossier médical */}
             <Section title="6. Analyse du dossier médical">
-              <Check
+              <CheckOption
                 checked={Boolean(record.analyseDossier.directivesAnticipeesContraireRcp)}
                 onChange={() =>
                   updateRecord((prev) => ({
@@ -751,7 +750,7 @@ const AcrRecordView = ({
                 }
               >
                 Directives anticipées / niveau de soins contraire à la RCP
-              </Check>
+              </CheckOption>
               <div className="acr-record-causes">
                 <div>
                   <strong>5H</strong>
@@ -799,7 +798,7 @@ const AcrRecordView = ({
                 </div>
               </div>
               <div className="acr-record-check-grid">
-                <Check
+                <CheckOption
                   checked={Boolean(record.analyseDossier.ecmoRecherche)}
                   onChange={() =>
                     updateRecord((prev) => ({
@@ -812,8 +811,8 @@ const AcrRecordView = ({
                   }
                 >
                   ECMO recherchée
-                </Check>
-                <Check
+                </CheckOption>
+                <CheckOption
                   checked={Boolean(record.analyseDossier.inclusionEcmo)}
                   onChange={() =>
                     updateRecord((prev) => ({
@@ -826,8 +825,8 @@ const AcrRecordView = ({
                   }
                 >
                   Critères ECMO présents
-                </Check>
-                <Check
+                </CheckOption>
+                <CheckOption
                   checked={Boolean(record.analyseDossier.nonEligibleEcmo)}
                   onChange={() =>
                     updateRecord((prev) => ({
@@ -840,7 +839,7 @@ const AcrRecordView = ({
                   }
                 >
                   Non éligible ECMO
-                </Check>
+                </CheckOption>
               </div>
             </Section>
 
@@ -860,7 +859,8 @@ const AcrRecordView = ({
                   }
                 />
               </div>
-              <Check
+              <CheckOption
+                className="acr-record-racs-obtained"
                 checked={Boolean(record.racs.obtenu)}
                 onChange={() =>
                   updateRecord((prev) => ({
@@ -870,8 +870,12 @@ const AcrRecordView = ({
                 }
               >
                 RACS obtenu
-              </Check>
-              <div className="acr-record-chip-group" role="group" aria-label="Signes de réveil">
+              </CheckOption>
+              <div
+                className="acr-record-chip-group acr-record-wake-signs"
+                role="group"
+                aria-label="Signes de réveil"
+              >
                 <span className="acr-record-chip-label">Signes de réveil</span>
                 {SIGNE_REVEIL.map((signe) => (
                   <Chip
@@ -892,7 +896,7 @@ const AcrRecordView = ({
                 ))}
               </div>
               <div className="acr-record-check-grid">
-                <Check
+                <CheckOption
                   checked={Boolean(record.racs.monitorageComplet)}
                   onChange={() =>
                     updateRecord((prev) => ({
@@ -902,8 +906,8 @@ const AcrRecordView = ({
                   }
                 >
                   Monitorage complet (PA, SpO₂, ECG)
-                </Check>
-                <Check
+                </CheckOption>
+                <CheckOption
                   checked={Boolean(record.racs.ecg18d)}
                   onChange={() =>
                     updateRecord((prev) => ({
@@ -913,8 +917,8 @@ const AcrRecordView = ({
                   }
                 >
                   ECG 18D
-                </Check>
-                <Check
+                </CheckOption>
+                <CheckOption
                   checked={Boolean(record.racs.sedationAmines)}
                   onChange={() =>
                     updateRecord((prev) => ({
@@ -924,7 +928,7 @@ const AcrRecordView = ({
                   }
                 >
                   Sédation / amines si besoin
-                </Check>
+                </CheckOption>
               </div>
             </Section>
 
@@ -961,57 +965,83 @@ const AcrRecordView = ({
               </label>
             </Section>
 
-            {/* 9. Événements horodatés */}
-            <Section title="9. Événements horodatés">
-              <ul className="acr-record-events">
-                {events.length === 0 ? (
-                  <li>Aucun événement horodaté.</li>
-                ) : (
-                  events.map((event) => (
-                    <li key={event.id}>
-                      <span>{formatWallTime(event.at)}</span>
-                      <strong>T+{formatAcrElapsed(event.t)}</strong>
-                      <em>{event.label}</em>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </Section>
+            <div className="acr-record-events-sr" aria-label="Événements horodatés">
+              {events.length === 0
+                ? "Aucun événement horodaté."
+                : events
+                    .map(
+                      (event) =>
+                        `${formatWallTime(event.at)} · T+${formatAcrElapsed(event.t)} · ${event.label}`
+                    )
+                    .join(" | ")}
+            </div>
           </div>
         </div>
 
         <footer className="acr-record-toolbar" data-export-ignore="true">
-          <button type="button" onClick={saveNow}>
-            {saved ? "✓ Sauvegardé" : "Enregistrer"}
+          <button type="button" className="acr-record-toolbar-primary" onClick={saveNow}>
+            {saved ? (
+              <>
+                <CheckIcon size={17} strokeWidth={3} aria-hidden="true" />
+                Sauvegardé
+              </>
+            ) : (
+              <>
+                <Save size={17} strokeWidth={2.4} aria-hidden="true" />
+                Enregistrer
+              </>
+            )}
           </button>
-          <button
-            type="button"
-            onClick={onShareImage}
-            disabled={exporting}
-            title="Partager l'image du dossier (menu Android : WhatsApp, Drive, Photos…)"
-          >
-            {exporting
-              ? "…"
-              : exportStatus === "shared"
-                ? "✓ Partagé"
-                : exportStatus === "downloaded"
-                  ? "✓ Image"
-                  : exportStatus === "error"
-                    ? "Erreur"
-                    : "🖼 Partager"}
-          </button>
-          <button type="button" onClick={printPdf}>
+          <button type="button" className="acr-record-toolbar-outline" onClick={printPdf}>
+            <FileText size={17} strokeWidth={2.4} aria-hidden="true" />
             Exporter PDF
           </button>
-          <button type="button" onClick={onCopy}>
-            {copied ? "✓ Copié" : "Copier"}
-          </button>
-          <button type="button" onClick={exportJson}>
-            JSON
-          </button>
-          <button type="button" className="acr-record-danger" onClick={resetRecord}>
-            Reset dossier
-          </button>
+          <div className="acr-record-actions-wrap">
+            <button
+              type="button"
+              className="acr-record-toolbar-action"
+              onClick={() => setShowActions((value) => !value)}
+              aria-expanded={showActions}
+              aria-controls="acr-record-actions-menu"
+            >
+              <Zap size={17} strokeWidth={2.5} aria-hidden="true" />
+              Actions rapides
+              <ChevronDown size={15} strokeWidth={2.5} aria-hidden="true" />
+            </button>
+            {showActions && (
+              <div id="acr-record-actions-menu" className="acr-record-actions-menu">
+                <button
+                  type="button"
+                  onClick={onShareImage}
+                  disabled={exporting}
+                  title="Partager l'image du dossier (menu Android : WhatsApp, Drive, Photos…)"
+                >
+                  <Share2 size={16} strokeWidth={2.4} aria-hidden="true" />
+                  {exporting
+                    ? "Capture en cours…"
+                    : exportStatus === "shared"
+                      ? "Image partagée"
+                      : exportStatus === "downloaded"
+                        ? "Image téléchargée"
+                        : exportStatus === "error"
+                          ? "Erreur de capture"
+                          : "Partager l'image"}
+                </button>
+                <button type="button" onClick={onCopy}>
+                  <ClipboardCopy size={16} strokeWidth={2.4} aria-hidden="true" />
+                  {copied ? "Transmission copiée" : "Copier la transmission"}
+                </button>
+                <button type="button" onClick={exportJson}>
+                  <Download size={16} strokeWidth={2.4} aria-hidden="true" />
+                  Exporter JSON
+                </button>
+                <button type="button" className="acr-record-danger" onClick={resetRecord}>
+                  <RotateCcw size={16} strokeWidth={2.4} aria-hidden="true" />
+                  Reset dossier
+                </button>
+              </div>
+            )}
+          </div>
         </footer>
       </div>
     </ModalDialog>
