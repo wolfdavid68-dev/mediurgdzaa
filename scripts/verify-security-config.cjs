@@ -61,9 +61,20 @@ if (!fs.existsSync(vercelPath)) {
   fail("vercel.json introuvable");
 } else {
   const config = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
-  const globalHeaders = config.headers?.find((entry) => entry.source === "/(.*)")?.headers ?? [];
+  const headerEntries = config.headers ?? [];
+  const tutoratRewriteSources = new Set((config.rewrites ?? []).map((entry) => entry.source));
+  const hasTutoratProxy =
+    tutoratRewriteSources.has("/tutorat") && tutoratRewriteSources.has("/tutorat/(.*)");
+  const securityHeaderEntry = headerEntries.find((entry) => entry.source === "/(.*)");
+  const mediurgOnlyHeaderEntry = headerEntries.find((entry) => entry.source === "/((?!tutorat).*)");
+
+  if (mediurgOnlyHeaderEntry && !hasTutoratProxy) {
+    fail("exception headers /tutorat sans rewrites proxy /tutorat");
+  }
+
+  const securityHeaders = (securityHeaderEntry ?? mediurgOnlyHeaderEntry)?.headers ?? [];
   const headerMap = new Map(
-    globalHeaders.map((header) => [header.key.toLowerCase(), header.value])
+    securityHeaders.map((header) => [header.key.toLowerCase(), header.value])
   );
   const requiredHeaders = [
     "content-security-policy",
@@ -74,7 +85,7 @@ if (!fs.existsSync(vercelPath)) {
     "x-frame-options",
   ];
   requiredHeaders.forEach((header) => {
-    if (!headerMap.has(header)) fail(`header global manquant: ${header}`);
+    if (!headerMap.has(header)) fail(`header securite manquant: ${header}`);
   });
 
   const csp = headerMap.get("content-security-policy") ?? "";
@@ -102,7 +113,7 @@ if (!fs.existsSync(vercelPath)) {
   );
 
   const bySource = new Map(
-    (config.headers ?? []).map((entry) => [entry.source, entry.headers ?? []])
+    headerEntries.map((entry) => [entry.source, entry.headers ?? []])
   );
   const cacheHeader = (source) =>
     bySource.get(source)?.find((header) => header.key.toLowerCase() === "cache-control")?.value ??

@@ -5,9 +5,19 @@
       "maxDuration": 30
     }
   },
+  "rewrites": [
+    {
+      "source": "/tutorat",
+      "destination": "https://tutorat-sau-mulhouse.vercel.app/tutorat"
+    },
+    {
+      "source": "/tutorat/(.*)",
+      "destination": "https://tutorat-sau-mulhouse.vercel.app/tutorat/$1"
+    }
+  ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/((?!tutorat).*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
