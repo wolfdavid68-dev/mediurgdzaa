@@ -67,6 +67,7 @@ const SIGNE_REVEIL = [
 ];
 const DESTINATIONS: AcrDevenir[] = ["Décès", "Transfert réa", "Retour domicile", "Autre"];
 const VOIES: AcrVoie[] = ["Périphérique", "Centrale", "IO"];
+const TIMELINE_EVENT_TYPES = new Set(["start", "choc", "adre", "amio", "rosc"]);
 
 const readStoredRecord = () =>
   coerceAcrSession(safeGetJson<unknown>(STORAGE_KEYS.acrSession, createEmptyAcrSession()));
@@ -182,10 +183,14 @@ const displayPatient = (record: AcrFullSession) => {
   return summary || "Patient anonyme";
 };
 
+const getTimelineEvents = (record: AcrFullSession) =>
+  record.events.filter((event) => TIMELINE_EVENT_TYPES.has(event.type));
+
 // Texte de transmission copiable, dossier anonyme — aucune donnée nominative.
 const buildRecordText = (record: AcrFullSession): string => {
   const lines: string[] = [];
   const s = record.stats;
+  const timelineEvents = getTimelineEvents(record);
   lines.push(
     `BILAN ACR ANONYME — ${record.pediatric ? "Enfant" : "Adulte"} · ${record.protocol === "acls" ? "ACLS" : "ERC"}`
   );
@@ -206,6 +211,13 @@ const buildRecordText = (record: AcrFullSession): string => {
     if (record.horaires.debutRcp) lines.push(`  Début RCP    : ${record.horaires.debutRcp}`);
     if (record.racs.heure || record.horaires.racs)
       lines.push(`  RACS         : ${record.racs.heure || record.horaires.racs}`);
+  }
+  if (timelineEvents.length > 0) {
+    lines.push("");
+    lines.push("Horaires RCP / traitements :");
+    timelineEvents.forEach((event) => {
+      lines.push(`  ${formatWallTime(event.at)} · T+${formatAcrElapsed(event.t)} · ${event.label}`);
+    });
   }
   if (record.cycles.length > 0) {
     lines.push("");
@@ -249,6 +261,7 @@ const AcrRecordView = ({
   const [exportStatus, setExportStatus] = useState<null | "shared" | "downloaded" | "error">(null);
   const [showActions, setShowActions] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
+  const timelineEvents = getTimelineEvents(record);
 
   useEffect(() => {
     setRecord((prev) => mergeTimerSnapshotIntoSession(prev, snapshot));
@@ -981,16 +994,20 @@ const AcrRecordView = ({
               </label>
             </Section>
 
-            <div className="acr-record-events-sr" aria-label="Événements horodatés">
-              {events.length === 0
-                ? "Aucun événement horodaté."
-                : events
-                    .map(
-                      (event) =>
-                        `${formatWallTime(event.at)} · T+${formatAcrElapsed(event.t)} · ${event.label}`
-                    )
-                    .join(" | ")}
-            </div>
+            {timelineEvents.length > 0 && (
+              <section className="acr-record-events-card" aria-label="Horaires RCP et traitements">
+                <h4>Horaires RCP / traitements</h4>
+                <ul className="acr-record-events">
+                  {timelineEvents.map((event) => (
+                    <li key={event.id}>
+                      <strong>{formatWallTime(event.at)}</strong>
+                      <span>T+{formatAcrElapsed(event.t)}</span>
+                      <em>{event.label}</em>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
         </div>
 

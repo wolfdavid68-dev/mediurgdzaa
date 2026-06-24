@@ -244,16 +244,56 @@ const mergeCycle = (
   commentaire: previous?.commentaire ?? incoming.commentaire,
 });
 
+const isPristineTimerSnapshot = (snapshot: AcrTimerSnapshot) =>
+  snapshot.elapsed === 0 &&
+  snapshot.shocks === 0 &&
+  snapshot.adres === 0 &&
+  snapshot.amios === 0 &&
+  snapshot.history.length === 0 &&
+  snapshot.events.length === 0;
+
+const clearStaleTimerDerivedFields = (session: AcrFullSession): AcrFullSession => {
+  const hasPreviousTimerTrace =
+    session.events.length > 0 ||
+    session.cycles.length > 0 ||
+    session.stats.elapsed > 0 ||
+    session.stats.shocks > 0 ||
+    session.stats.adres > 0 ||
+    session.stats.amios > 0;
+
+  if (!hasPreviousTimerTrace) return session;
+
+  const {
+    debutRcp: _debutRcp,
+    premiereAnalyse: _premiereAnalyse,
+    racs: _racs,
+    ...horaires
+  } = session.horaires;
+
+  return {
+    ...session,
+    horaires,
+    racs: {
+      ...session.racs,
+      obtenu: undefined,
+      heure: undefined,
+    },
+  };
+};
+
 export const mergeTimerSnapshotIntoSession = (
   session: AcrFullSession,
   snapshot: AcrTimerSnapshot
 ): AcrFullSession => {
+  const sourceSession = isPristineTimerSnapshot(snapshot)
+    ? clearStaleTimerDerivedFields(session)
+    : session;
   const eventStart = snapshot.events.find((event) => event.type === "start");
   const eventRosc = snapshot.events.find((event) => event.type === "rosc");
   const eventFirstTherapy = snapshot.events.find((event) =>
     ["choc", "adre", "amio"].includes(event.type)
   );
-  const previousByCycle = new Map(session.cycles.map((item) => [item.cycle, item]));
+  const previousByCycle = new Map(sourceSession.cycles.map((item) => [item.cycle, item]));
   const cycles = snapshot.history.map((entry) => {
     const incoming: AcrCycleRecord = {
       cycle: entry.cycle,
@@ -268,7 +308,7 @@ export const mergeTimerSnapshotIntoSession = (
   });
 
   return {
-    ...session,
+    ...sourceSession,
     updatedAt: Date.now(),
     pediatric: snapshot.pediatric,
     protocol: snapshot.protocol,
@@ -280,15 +320,16 @@ export const mergeTimerSnapshotIntoSession = (
       cycle: snapshot.cycle,
     },
     horaires: {
-      ...session.horaires,
-      debutRcp: session.horaires.debutRcp || formatWallTime(eventStart?.at),
-      premiereAnalyse: session.horaires.premiereAnalyse || formatWallTime(eventFirstTherapy?.at),
-      racs: session.horaires.racs || formatWallTime(eventRosc?.at),
+      ...sourceSession.horaires,
+      debutRcp: sourceSession.horaires.debutRcp || formatWallTime(eventStart?.at),
+      premiereAnalyse:
+        sourceSession.horaires.premiereAnalyse || formatWallTime(eventFirstTherapy?.at),
+      racs: sourceSession.horaires.racs || formatWallTime(eventRosc?.at),
     },
     racs: {
-      ...session.racs,
-      obtenu: session.racs.obtenu || Boolean(eventRosc),
-      heure: session.racs.heure || formatWallTime(eventRosc?.at),
+      ...sourceSession.racs,
+      obtenu: sourceSession.racs.obtenu || Boolean(eventRosc),
+      heure: sourceSession.racs.heure || formatWallTime(eventRosc?.at),
     },
     cycles,
     events: snapshot.events,

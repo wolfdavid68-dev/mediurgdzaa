@@ -244,6 +244,36 @@ describe("mergeTimerSnapshotIntoSession", () => {
     expect(out.racs.heure).not.toBe("");
   });
 
+  test("ne reprend pas les horaires d'un ancien chrono quand le chrono actuel est vierge", () => {
+    const oldSession: AcrFullSession = {
+      ...createEmptyAcrSession(),
+      stats: { ...createEmptyAcrSession().stats, elapsed: 12 },
+      horaires: {
+        ...createEmptyAcrSession().horaires,
+        debutRcp: "10:26:24",
+        premiereAnalyse: "10:26:28",
+        racs: "10:26:33",
+      },
+      racs: {
+        ...createEmptyAcrSession().racs,
+        obtenu: true,
+        heure: "10:26:33",
+      },
+      events: [
+        { id: "e1", type: "start", label: "Début ACR", t: 0, at: 1000 },
+        { id: "e2", type: "rosc", label: "RACS", t: 12, at: 12000 },
+      ],
+    };
+
+    const out = mergeTimerSnapshotIntoSession(oldSession, makeSnapshot());
+
+    expect(out.horaires.debutRcp).toBe("");
+    expect(out.horaires.premiereAnalyse).toBe("");
+    expect(out.horaires.racs).toBe("");
+    expect(out.racs.obtenu).toBe(false);
+    expect(out.racs.heure).toBe("");
+  });
+
   test("ne piétine pas les horaires déjà saisis manuellement", () => {
     const base: AcrFullSession = {
       ...createEmptyAcrSession(),
