@@ -52,7 +52,7 @@ const TutoratOnlyView = () => (
       <img src="/logo-sau.png" alt="Urgences Mulhouse" draggable={false} />
       <p className="tutorat-only-kicker">Tutorat démo dédié</p>
       <h1 id="tutorat-only-title">Tutorat SAU Mulhouse</h1>
-      <p>Ton profil ouvre directement le compagnon de tutorat démo ESI/AS.</p>
+      <p>Ton profil ouvre directement le compagnon de tutorat démo AS / étudiant AS.</p>
       <a className="tutorat-only-btn" href={TUTORAT_URL}>
         Ouvrir le tutorat ↗
       </a>
