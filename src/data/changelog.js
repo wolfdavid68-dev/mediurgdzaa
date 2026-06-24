@@ -1,11 +1,58 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v111";
+export const APP_VERSION = "v112";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v112",
+    date: "2026-06-24",
+    titre: "Bilan ACR complet + contrôles d'urgence modernisés",
+    changes: [
+      {
+        type: "feat",
+        text: "Nouveau dossier numérique de prise en charge ACR accessible depuis le chrono : recueil structuré demande de renfort, RCP, première analyse, VVP/pronostic, cycles de réanimation, analyse 5H/5T, RACS, devenir et commentaires.",
+      },
+      {
+        type: "feat",
+        text: "Le bouton « Bilan » remplace l'ancien résumé séparé : le même écran sert à saisir le dossier ACR, sauvegarder localement, copier une transmission, exporter le JSON, imprimer en PDF et partager une image du bilan quand le navigateur le permet.",
+      },
+      {
+        type: "fix",
+        text: "Le bilan ACR est anonymisé par défaut : aucune saisie de nom, IPP ou date de naissance ; seules les informations utiles au bilan clinique (âge, sexe, horaires, rythmes, gestes, médicaments, RACS, devenir) sont conservées.",
+      },
+      {
+        type: "feat",
+        text: "Refonte mobile-first du bilan ACR pour coller à la vue terrain : fond nuit, contours rouges, sections numérotées 1 à 8, tableau de cycles compact, actions regroupées en bas et impression/PDF focalisée sur le dossier ouvert.",
+      },
+      {
+        type: "chore",
+        text: "Ajout de lucide-react et remplacement des petites icônes texte du bilan ACR par des SVG cohérents (cœur/ECG, chrono, coche de section, chevrons, sauvegarde, PDF, partage, copie, téléchargement, reset).",
+      },
+      {
+        type: "feat",
+        text: "Kit ISR enrichi : choix multi-sélection pour la technique d'intubation, taille de sonde IOT et repère de commissure intégrés à la checklist.",
+      },
+      {
+        type: "chore",
+        text: "Prévisualisation interne des nouvelles cartes de préparation médicament : les ajustements Ventoline/Célestène restent en preview et ne sont pas encore annoncés comme une fonctionnalité finalisée.",
+      },
+      {
+        type: "fix",
+        text: "Incompatibilités : tri alphabétique des médicaments pour une lecture plus rapide dans la matrice.",
+      },
+      {
+        type: "fix",
+        text: "Notes de version : correction CSS de la modale v111 qui pouvait s'afficher comme un bloc brut sans espacements ni hiérarchie visuelle.",
+      },
+      {
+        type: "chore",
+        text: "Analyse ECG IA : validation stricte de la réponse serveur avec Zod avant renvoi au client, pour éviter les formats incomplets ou incohérents.",
+      },
+    ],
+  },
   {
     version: "v111",
     date: "2026-06-16",
