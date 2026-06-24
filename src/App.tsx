@@ -47,6 +47,10 @@ const SERVICES = ["Tout", "SMUR", "SAU"];
 const ALL_PAGES = ["medicaments", "protocoles", "echelles"];
 const MEDICAMENTS_ONLY_PAGES = ["medicaments"];
 
+const openTutorat = () => {
+  window.location.assign(TUTORAT_URL);
+};
+
 const TutoratOnlyView = () => (
   <main className="main-content main-content-tutorat-only">
     <section className="tutorat-only" aria-labelledby="tutorat-only-title">
@@ -54,9 +58,9 @@ const TutoratOnlyView = () => (
       <p className="tutorat-only-kicker">Tutorat démo dédié</p>
       <h1 id="tutorat-only-title">Tutorat SAU Mulhouse</h1>
       <p>Ton profil ouvre directement le compagnon de tutorat démo AS / étudiant AS.</p>
-      <a className="tutorat-only-btn" href={TUTORAT_URL}>
+      <button type="button" className="tutorat-only-btn" onClick={openTutorat}>
         Ouvrir le tutorat ↗
-      </a>
+      </button>
     </section>
   </main>
 );

@@ -123,6 +123,7 @@ export default defineConfig({
           "Livret pharmacologique hors ligne pour médecins urgentistes, ambulanciers et paramédicaux. Accès rapide à 73+ médicaments d'urgence avec indications, contre-indications, posologies et conduite.",
         start_url: "/",
         scope: "/",
+        scope_extensions: [{ type: "origin", origin: "https://tutorat-sau-mulhouse.vercel.app" }],
         display: "standalone",
         orientation: "portrait-primary",
         theme_color: "#FF3B30",

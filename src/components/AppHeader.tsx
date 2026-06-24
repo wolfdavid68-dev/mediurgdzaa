@@ -6,11 +6,16 @@ import { TUTORAT_URL } from "../lib/tutorat";
 // Navigation dans le même onglet (symétrique au retour Tutorat → MediURG
 // qui utilise aussi window.location.href). Pas de token JWT pour l'instant :
 // le Tutorat tombe en mode démo côté useAuth.
+const openTutorat = () => {
+  window.location.assign(TUTORAT_URL);
+};
+
 const TutoratLink = () => (
-  <a
-    href={TUTORAT_URL}
+  <button
+    type="button"
     className="tutorat-pill"
     title="Ouvrir le Compagnon ESI/AS — Tutorat SAU Mulhouse"
+    onClick={openTutorat}
   >
     <svg
       viewBox="0 0 24 24"
@@ -30,7 +35,7 @@ const TutoratLink = () => (
     <span aria-hidden="true" className="tutorat-pill-arrow">
       ↗
     </span>
-  </a>
+  </button>
 );
 
 type AppHeaderProps = {
