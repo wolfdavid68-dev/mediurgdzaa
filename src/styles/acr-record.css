@@ -636,6 +636,10 @@
     background: color-mix(in oklab, var(--bg-elevated) 78%, transparent);
   }
 
+  .acr-record-section-body > .acr-record-events-card {
+    margin-top: 10px;
+  }
+
   .acr-record-events-card h4 {
     margin: 0 0 9px;
     color: var(--text);
@@ -2059,7 +2063,7 @@
     margin-left: 302px;
   }
 
-  .acr-record-events-card {
+  .acr-record-sections > .acr-record-events-card {
     order: 9;
     flex: 0 0 calc(100% - 302px);
     margin-left: 302px;
@@ -2134,73 +2138,68 @@
 
 @media screen and (min-width: 1240px) {
   .acr-record-content {
-    display: grid;
-    grid-template-columns: minmax(260px, 310px) minmax(510px, 1fr) minmax(300px, 340px);
-    grid-auto-flow: row;
-    align-items: start;
-    gap: 12px;
+    display: block;
   }
 
   .acr-record-sections {
-    display: contents;
-  }
-
-  .acr-record-section:nth-child(1),
-  .acr-record-section:nth-child(2),
-  .acr-record-section:nth-child(3),
-  .acr-record-section:nth-child(4),
-  .acr-record-section:nth-child(5),
-  .acr-record-section:nth-child(6),
-  .acr-record-section:nth-child(7),
-  .acr-record-section:nth-child(8) {
-    flex: initial;
-    margin-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .acr-record-section:nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
+    order: 1;
+    flex: 0 0 310px;
+    margin-left: 0;
   }
 
   .acr-record-section:nth-child(2) {
-    grid-column: 1;
-    grid-row: 2;
+    order: 2;
+    flex: 1 1 calc(100% - 322px);
+    margin-left: 0;
   }
 
   .acr-record-section:nth-child(3) {
-    grid-column: 2;
-    grid-row: 1;
+    order: 4;
+    flex: 1 1 calc(100% - 322px);
+    margin-left: 0;
   }
 
   .acr-record-section:nth-child(4) {
-    grid-column: 1;
-    grid-row: 3;
+    order: 3;
+    flex: 0 0 310px;
+    margin-left: 0;
   }
 
   .acr-record-section:nth-child(5) {
-    grid-column: 2;
-    grid-row: 2;
+    order: 5;
+    flex: 0 0 calc(100% - 322px);
+    margin-left: 322px;
   }
 
   .acr-record-section:nth-child(6) {
-    grid-column: 2;
-    grid-row: 3;
+    order: 6;
+    flex: 0 0 calc(100% - 322px);
+    margin-left: 322px;
   }
 
   .acr-record-section:nth-child(7) {
-    grid-column: 3;
-    grid-row: 1 / span 2;
+    order: 7;
+    flex: 0 0 calc(100% - 322px);
+    margin-left: 322px;
   }
 
   .acr-record-section:nth-child(8) {
-    grid-column: 3;
-    grid-row: 3;
+    order: 8;
+    flex: 0 0 calc(100% - 322px);
+    margin-left: 322px;
   }
 
-  .acr-record-events-card {
-    grid-column: 2 / span 2;
-    grid-row: 4;
-    margin-left: 0;
+  .acr-record-sections > .acr-record-events-card {
+    order: 9;
+    flex: 0 0 calc(100% - 322px);
+    margin-left: 322px;
   }
 }
 

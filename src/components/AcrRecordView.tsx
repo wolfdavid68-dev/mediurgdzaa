@@ -760,6 +760,23 @@ const AcrRecordView = ({
                     </table>
                   </div>
                 )}
+                {timelineEvents.length > 0 && (
+                  <section
+                    className="acr-record-events-card"
+                    aria-label="Horaires RCP et traitements"
+                  >
+                    <h4>Horaires RCP / traitements</h4>
+                    <ul className="acr-record-events">
+                      {timelineEvents.map((event) => (
+                        <li key={event.id}>
+                          <strong>{formatWallTime(event.at)}</strong>
+                          <span>T+{formatAcrElapsed(event.t)}</span>
+                          <em>{event.label}</em>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
               </div>
             </section>
 
@@ -993,21 +1010,6 @@ const AcrRecordView = ({
                 />
               </label>
             </Section>
-
-            {timelineEvents.length > 0 && (
-              <section className="acr-record-events-card" aria-label="Horaires RCP et traitements">
-                <h4>Horaires RCP / traitements</h4>
-                <ul className="acr-record-events">
-                  {timelineEvents.map((event) => (
-                    <li key={event.id}>
-                      <strong>{formatWallTime(event.at)}</strong>
-                      <span>T+{formatAcrElapsed(event.t)}</span>
-                      <em>{event.label}</em>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
           </div>
         </div>
 
@@ -1047,7 +1049,7 @@ const AcrRecordView = ({
                   type="button"
                   onClick={onShareImage}
                   disabled={exporting}
-                  title="Partager l'image du dossier (menu Android : WhatsApp, Drive, Photos…)"
+                  aria-label="Partager l'image du dossier"
                 >
                   <Share2 size={16} strokeWidth={2.4} aria-hidden="true" />
                   {exporting
