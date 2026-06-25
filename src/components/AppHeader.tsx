@@ -1,20 +1,18 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { useLongPress } from "../lib/useLongPress";
-import { TUTORAT_URL } from "../lib/tutorat";
+import { openTutoratWithCurrentSession } from "../lib/tutorat";
 
-// Pastille « Tutorat ↗ » : accès main vers le compagnon Tutorat démo.
-// Navigation dans le même onglet (symétrique au retour Tutorat → MediURG
-// qui utilise aussi window.location.href). Pas de token JWT pour l'instant :
-// le Tutorat tombe en mode démo côté useAuth.
+// Pastille « Tutorat ↗ » : navigation via la session MediURG courante.
+// MediURG génère un token serveur puis ouvre le compagnon Tutorat.
 const openTutorat = () => {
-  window.location.assign(TUTORAT_URL);
+  void openTutoratWithCurrentSession();
 };
 
 const TutoratLink = () => (
   <button
     type="button"
     className="tutorat-pill"
-    title="Ouvrir le Compagnon ESI/AS — Tutorat SAU Mulhouse"
+    title="Ouvrir le Compagnon ESI/AS avec mon login MediURG"
     onClick={openTutorat}
   >
     <svg

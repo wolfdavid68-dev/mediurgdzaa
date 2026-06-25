@@ -135,11 +135,15 @@ WEB_PUSH_PRIVATE_KEY=<privateKey VAPID>
 WEB_PUSH_SUBJECT=mailto:<email-contact-admin>
 SUPABASE_SERVICE_ROLE_KEY=<clé service_role Supabase>
 APP_PUBLIC_URL=https://<domaine-mediurg>
+JWT_SECRET=<même clé que le projet Tutorat>
+VITE_TUTORAT_URL=https://<domaine-tutorat>
 ```
 
 La clé publique `VITE_WEB_PUSH_PUBLIC_KEY` est normale côté navigateur : elle
 sert à créer l'abonnement push. La clé privée VAPID et la `service_role`
-restent côté serveur Vercel uniquement. La route `/api/notify-access-request`
+restent côté serveur Vercel uniquement. `JWT_SECRET` reste aussi serveur
+uniquement et sert à signer le token envoyé au compagnon Tutorat après le login
+MediURG. La route `/api/notify-access-request`
 valide via la session Supabase du demandeur que son propre profil existe bien
 en `status='pending'`, puis lit côté serveur les abonnements des admins actifs.
 La notification envoyée est générique : pas de nom, matricule, service, email

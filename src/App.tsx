@@ -37,7 +37,7 @@ import { getPreviewAccessMode } from "./lib/access";
 import { isMedicalFunction } from "./lib/auth";
 import { isPreview } from "./lib/featureFlags";
 import { useAuthProfile } from "./lib/authProfile";
-import { TUTORAT_URL } from "./lib/tutorat";
+import { openTutoratWithCurrentSession, shouldOpenTutoratFromLogin } from "./lib/tutorat";
 import { filterDrugs as searchDrugs, getRecentDrugs as readRecentDrugs } from "./lib/drugSearch";
 import { safeGetItem, safeGetJson, safeSetItem, safeSetJson } from "./lib/safeStorage";
 import { STORAGE_KEYS } from "./lib/storageKeys";
@@ -48,16 +48,16 @@ const ALL_PAGES = ["medicaments", "protocoles", "echelles"];
 const MEDICAMENTS_ONLY_PAGES = ["medicaments"];
 
 const openTutorat = () => {
-  window.location.assign(TUTORAT_URL);
+  void openTutoratWithCurrentSession();
 };
 
 const TutoratOnlyView = () => (
   <main className="main-content main-content-tutorat-only">
     <section className="tutorat-only" aria-labelledby="tutorat-only-title">
       <img src="/logo-sau.png" alt="Urgences Mulhouse" draggable={false} />
-      <p className="tutorat-only-kicker">Tutorat démo dédié</p>
+      <p className="tutorat-only-kicker">Tutorat dédié</p>
       <h1 id="tutorat-only-title">Tutorat SAU Mulhouse</h1>
-      <p>Ton profil ouvre directement le compagnon de tutorat démo AS / étudiant AS.</p>
+      <p>Ton profil MediURG ouvre directement le compagnon de tutorat AS / étudiant AS.</p>
       <button type="button" className="tutorat-only-btn" onClick={openTutorat}>
         Ouvrir le tutorat ↗
       </button>
@@ -141,6 +141,11 @@ const App = () => {
 
   const [showCharter, acceptCharter] = useCharterFlow();
   const [showAnnounce, dismissAnnounce] = useAnnounceFlow();
+
+  useEffect(() => {
+    if (!authProfile || !shouldOpenTutoratFromLogin()) return;
+    void openTutoratWithCurrentSession();
+  }, [authProfile]);
 
   useEffect(() => {
     if (accessMode === "full") return;
