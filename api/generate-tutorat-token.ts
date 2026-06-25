@@ -17,13 +17,17 @@ type ProfileRow = {
   id: string;
   mediurg_user_id?: string | null;
   email?: string | null;
+  name?: string | null;
   prenom?: string | null;
   nom?: string | null;
   fonction?: string | null;
   role?: string | null;
+  is_admin?: boolean | number | string | null;
+  note?: string | null;
 };
 
-const PROFILE_COLUMNS = "id, mediurg_user_id, email, prenom, nom, fonction, role, status";
+const PROFILE_COLUMNS =
+  "id, mediurg_user_id, email, name, prenom, nom, fonction, role, is_admin, note, status";
 const TOKEN_TTL_SECONDS = 5 * 60;
 
 function getHeader(req: VercelReq, name: string): string | undefined {
@@ -63,7 +67,22 @@ function signHs256Jwt(payload: Record<string, unknown>, secret: string): string 
   return `${header}.${body}.${signature}`;
 }
 
-function buildTutoratPayload(profile: ProfileRow): Record<string, unknown> {
+function buildSignedTutoratProfile(profile: ProfileRow): Record<string, unknown> {
+  return {
+    id: profile.id,
+    mediurg_user_id: profile.mediurg_user_id || undefined,
+    email: profile.email || undefined,
+    name: profile.name || undefined,
+    prenom: profile.prenom || undefined,
+    nom: profile.nom || undefined,
+    fonction: profile.fonction || undefined,
+    role: profile.role || undefined,
+    is_admin: profile.is_admin ?? undefined,
+    note: profile.note || undefined,
+  };
+}
+
+export function buildTutoratPayload(profile: ProfileRow): Record<string, unknown> {
   const now = Math.floor(Date.now() / 1000);
   return {
     userId: profile.mediurg_user_id || profile.id,
@@ -72,6 +91,7 @@ function buildTutoratPayload(profile: ProfileRow): Record<string, unknown> {
     email: profile.email || undefined,
     fonction: profile.fonction || undefined,
     role: profile.role || undefined,
+    profile: buildSignedTutoratProfile(profile),
     exp: now + TOKEN_TTL_SECONDS,
     iat: now,
   };
