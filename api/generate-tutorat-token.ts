@@ -24,10 +24,10 @@ type ProfileRow = {
   role?: string | null;
   is_admin?: boolean | number | string | null;
   note?: string | null;
+  status?: string | null;
 };
 
-const PROFILE_COLUMNS =
-  "id, mediurg_user_id, email, name, prenom, nom, fonction, role, is_admin, note, status";
+export const PROFILE_COLUMNS = "*";
 const TOKEN_TTL_SECONDS = 5 * 60;
 
 function getHeader(req: VercelReq, name: string): string | undefined {

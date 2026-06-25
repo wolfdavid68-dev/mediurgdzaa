@@ -1,7 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { buildTutoratPayload } from "../../api/generate-tutorat-token";
+import { PROFILE_COLUMNS, buildTutoratPayload } from "../../api/generate-tutorat-token";
 
 describe("generate tutorat token payload", () => {
+  test("lit le profil MediURG sans dependance a des colonnes optionnelles", () => {
+    expect(PROFILE_COLUMNS).toBe("*");
+  });
+
   test("embarque le profil MediURG serveur dans le JWT signe", () => {
     const payload = buildTutoratPayload({
       id: "profile-1",
