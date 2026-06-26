@@ -66,6 +66,10 @@ type DrugPrepRecipe = {
   mode?: string;
   population?: "adulte" | "enfant";
   tag?: string;
+  solvant?: string;
+  duree?: string;
+  stabilite?: string;
+  conc_finale?: string;
   prelever?: string;
   completer?: string;
   concentration?: string;
@@ -81,6 +85,8 @@ type DrugPrepRecipe = {
     label?: string;
     below_or_equal: string;
     above: string;
+    strict_below?: boolean;
+    source?: "phase" | "dose_input";
   };
   hide_final?: boolean;
   hide_phase_volume?: boolean;
@@ -113,6 +119,8 @@ type DrugPrepRecipe = {
   kcl_ivl?: boolean;
   kcl_pediatric?: boolean;
   clottafact_pediatric?: boolean;
+  amiklin_adult?: boolean;
+  amoxicilline_meningee_pump?: boolean;
   dose_input_label?: string;
   dose_input_unit?: string;
   dose_input_default?: number;
@@ -138,6 +146,7 @@ type DrugPrep = {
   dose_kg?: number;
   dose_max_kg?: number;
   display_below_kg?: number;
+  hide_poso_when_prepared?: boolean;
   duree?: string;
   stabilite?: string;
   debit?: string;

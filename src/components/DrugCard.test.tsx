@@ -420,6 +420,163 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Oméprazole", () => {
+    test("intègre la posologie enfant dans la préparation sans bloc posologie doublon", async () => {
+      const omeprazole = DRUGS.find((drug) => drug.nom === "OMÉPRAZOLE")!;
+
+      render(<DrugCard drug={omeprazole} patientWeight="20" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("OMÉPRAZOLE").closest("button")!);
+
+      expect(await screen.findByText("IVL enfant")).toBeInTheDocument();
+      expect(screen.getByText("Dose à préparer")).toBeInTheDocument();
+      expect(screen.getByText("20 mg")).toBeInTheDocument();
+      expect(screen.getByText(/Dose enfant : 1 mg\/kg IV \/12h/)).toBeInTheDocument();
+      expect(screen.queryByText("Pédiatrique")).not.toBeInTheDocument();
+      expect(screen.queryByText(/1 mg\/kg IV \/12h \(max 40 mg\/dose\)/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe("SoluMedrol", () => {
+    test("adapte la dilution à la dose saisie", async () => {
+      const solumedrol = DRUGS.find((drug) => drug.nom === "SOLUMEDROL")!;
+
+      render(<DrugCard drug={solumedrol} patientWeight="50" />);
+      fireEvent.click(screen.getByText("SOLUMEDROL").closest("button")!);
+
+      const input = await screen.findByLabelText("Dose à préparer");
+      expect(input).toHaveAttribute("placeholder", "120");
+      expect(
+        screen.getByText("IVD : reconstituer avec 2 mL EPPI puis diluer qsp 10 mL NaCl 0,9%")
+      ).toBeInTheDocument();
+
+      fireEvent.change(input, { target: { value: "125" } });
+
+      expect(screen.getByText("IVL : dans 100 mL NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.queryByText(/IVL \(dose > 120 mg\)/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Zophren", () => {
+    test("affiche la plage adulte 4-8 mg sans calcul pondéral", async () => {
+      const zophren = DRUGS.find((drug) => drug.nom === "ZOPHREN")!;
+
+      render(<DrugCard drug={zophren} patientWeight="80" />);
+      fireEvent.click(screen.getByText("ZOPHREN").closest("button")!);
+
+      expect(await screen.findByText("IVD adulte")).toBeInTheDocument();
+      expect(screen.getByText("4-8 mg")).toBeInTheDocument();
+      expect(screen.getByText("4-8 mg = 2-4 mL")).toBeInTheDocument();
+    });
+  });
+
+  describe("Amiklin", () => {
+    test("sépare les préparations adulte et pédiatrique", async () => {
+      const amiklin = DRUGS.find((drug) => drug.nom === "AMIKLIN")!;
+
+      const { unmount } = render(
+        <DrugCard drug={amiklin} patientWeight="80" prepPopulation="adulte" />
+      );
+      fireEvent.click(screen.getByText("AMIKLIN").closest("button")!);
+
+      expect(await screen.findByText("IVL adulte")).toBeInTheDocument();
+      expect(screen.getByText("à 500 mL avec G5%")).toBeInTheDocument();
+      expect(
+        screen.getByText("1600 mg : 1 flacon 1 g + 1 flacon 500 mg + 100 mg (1 mL) d'appoint")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("2400 mg : 2 flacons 1 g + 400 mg (4 mL) d'appoint")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("1 x 1 g + 2 x 500 mg à 2 x 1 g + 1 x 500 mg — garder le reste")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Dose < 1500 mg → 250 mL G5%")).not.toBeInTheDocument();
+      expect(screen.queryByText("Dose > 1500 mg → 500 mL G5%")).not.toBeInTheDocument();
+      expect(screen.queryByText(/PÉDIATRIE : dilution NaCl 0,9% ou G5%/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/6\.4-9\.6 mL du produit/)).not.toBeInTheDocument();
+
+      unmount();
+
+      render(<DrugCard drug={amiklin} patientWeight="20" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("AMIKLIN").closest("button")!);
+
+      expect(await screen.findByText("IVL enfant")).toBeInTheDocument();
+      expect(screen.getByText("NaCl 0,9% ou G5% — concentration max 5 mg/mL")).toBeInTheDocument();
+      expect(screen.queryByText(/ADULTE — dose/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Amoxicilline", () => {
+    test("affiche la dose méningée sur pompe selon la dose journalière", async () => {
+      const amoxicilline = DRUGS.find((drug) => drug.nom === "AMOXICILLINE")!;
+
+      const { unmount } = render(<DrugCard drug={amoxicilline} patientWeight="80" />);
+      fireEvent.click(screen.getByText("AMOXICILLINE").closest("button")!);
+
+      fireEvent.click(await screen.findByRole("button", { name: /Dose méningée pompe/i }));
+
+      expect(screen.queryByText("Dilution : NaCl 0,9%")).not.toBeInTheDocument();
+      expect(screen.queryByText("1 g dans 100 mL")).not.toBeInTheDocument();
+      expect(screen.queryByText("Perfusion sur 20-30 min")).not.toBeInTheDocument();
+      expect(screen.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "12");
+      expect(screen.getByText("12 g/j")).toBeInTheDocument();
+      expect(screen.getByText("5 g/250 mL")).toBeInTheDocument();
+      expect(screen.getByText("25 mL/h")).toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText("Dose/j"), { target: { value: "8" } });
+
+      expect(screen.getByText("8 g/j")).toBeInTheDocument();
+      expect(screen.getByText("2 g/100 mL")).toBeInTheDocument();
+      expect(screen.getByText("17 mL/h")).toBeInTheDocument();
+
+      unmount();
+
+      render(<DrugCard drug={amoxicilline} patientWeight="20" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("AMOXICILLINE").closest("button")!);
+
+      expect(await screen.findByText("IVL enfant")).toBeInTheDocument();
+      expect(screen.getByText("1000-4000 mg")).toBeInTheDocument();
+      expect(screen.getByText("dans NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.queryByText("IVL standard")).not.toBeInTheDocument();
+      expect(screen.queryByText("Dose méningée pompe")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Préparations legacy preview", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("reprend l'ancienne préparation dans le bloc v2 sans répéter l'étape principale", async () => {
+      const augmentin = DRUGS.find((drug) => drug.nom === "AUGMENTIN")!;
+
+      render(<DrugCard drug={augmentin} patientWeight="80" />);
+      fireEvent.click(screen.getByText("AUGMENTIN").closest("button")!);
+
+      expect(await screen.findByLabelText("Préparation v2")).toBeInTheDocument();
+      expect(
+        screen.getAllByText(/Flacon poudre IV 1 g amoxicilline\/200 mg clavulanate/)
+      ).toHaveLength(1);
+      expect(screen.getByText(/1-2 g dans 100 mL NaCl 0,9% STRICT/)).toBeInTheDocument();
+    });
+
+    test("masque en posologie les lignes déjà reprises dans la préparation", async () => {
+      const primperan = DRUGS.find((drug) => drug.nom === "PRIMPERAN")!;
+
+      render(<DrugCard drug={primperan} patientWeight="50" />);
+      fireEvent.click(screen.getByText("PRIMPERAN").closest("button")!);
+
+      expect(await screen.findByLabelText("Préparation v2")).toBeInTheDocument();
+      expect(screen.getByText("10 mg IV lente /8h")).toBeInTheDocument();
+      expect(screen.getAllByText("Peut se diluer qsp 10 mL NaCl 0,9%")).toHaveLength(1);
+    });
+  });
+
   describe("Atropine preview", () => {
     beforeEach(() => {
       sessionStorage.clear();

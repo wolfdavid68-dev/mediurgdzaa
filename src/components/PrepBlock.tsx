@@ -147,13 +147,34 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   };
   const renderRecipeDoseBasedDilution = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     if (!recipe.dose_based_dilution) return null;
-    const phase = getRecipePhaseRows(recipe)[0];
-    if (!phase || phase.dose === null) return null;
-    const { threshold, below_or_equal, above, label = "Diluer" } = recipe.dose_based_dilution;
+    const {
+      threshold,
+      below_or_equal,
+      above,
+      label = "Diluer",
+      strict_below,
+      source,
+    } = recipe.dose_based_dilution;
+    const inputDose =
+      source === "dose_input" ||
+      (!recipe.phase_doses?.length && recipe.dose_input_default !== undefined)
+        ? getRecipeDoseInputValue(recipe)
+        : null;
+    const phase = inputDose === null ? getRecipePhaseRows(recipe)[0] : null;
+    const dose = inputDose ?? phase?.dose ?? null;
+    const doseMax = inputDose === null ? (phase?.doseMax ?? dose) : dose;
+    if (dose === null || doseMax === null) return null;
+    const isBelowThreshold = (value: number) =>
+      strict_below ? value < threshold : value <= threshold;
+    const belowLabel = strict_below ? `< ${threshold} mg` : `≤ ${threshold} mg`;
+    const aboveLabel = strict_below ? `≥ ${threshold} mg` : `> ${threshold} mg`;
     const dilution =
-      phase.doseMax !== null && phase.dose <= threshold && phase.doseMax > threshold
-        ? `${below_or_equal} si ≤ ${threshold} mg / ${above} si > ${threshold} mg`
-        : (phase.doseMax ?? phase.dose) > threshold
+      phase?.doseMax !== null &&
+      inputDose === null &&
+      isBelowThreshold(dose) &&
+      !isBelowThreshold(doseMax)
+        ? `${below_or_equal} si ${belowLabel} / ${above} si ${aboveLabel}`
+        : !isBelowThreshold(doseMax)
           ? above
           : below_or_equal;
     const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
@@ -197,7 +218,10 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       </label>
     ) : null;
   const renderRecipeDoseInput = (recipe: PrepRecipe) =>
-    recipe.kcl_ivl || recipe.kcl_pediatric ? (
+    recipe.kcl_ivl ||
+    recipe.kcl_pediatric ||
+    recipe.dose_input_default !== undefined ||
+    recipe.dose_input_label ? (
       <label className="prep-inline-input">
         <span>{recipe.dose_input_label || "Dose"}</span>
         <input
@@ -306,6 +330,106 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           <span className={`prep-calc-val ${highlightClass}`}>
             {flacons} flacon{flacons > 1 ? "s" : ""} de 1,5 g
           </span>
+        </div>
+      </>
+    );
+  };
+  const renderAmiklinAdultRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    if (!recipe.amiklin_adult || !validKg) return null;
+    const phase = getRecipePhaseRows(recipe)[0];
+    if (!phase || phase.dose === null) return null;
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    const doseMin = phase.dose;
+    const doseMax = phase.doseMax ?? phase.dose;
+    const concMgMl = 100;
+    const formatPlan = (dose: number) => {
+      const flacon1g = Math.floor(dose / 1000);
+      const remainderAfter1g = dose - flacon1g * 1000;
+      const flacon500 = Math.floor(remainderAfter1g / 500);
+      const appointMg = +(remainderAfter1g - flacon500 * 500).toFixed(1);
+      const appointMl = +(appointMg / concMgMl).toFixed(1);
+      const parts = [
+        flacon1g > 0 ? `${flacon1g} flacon${flacon1g > 1 ? "s" : ""} 1 g` : null,
+        flacon500 > 0 ? `${flacon500} flacon 500 mg` : null,
+        appointMg > 0
+          ? `${formatDoseNumber(appointMg)} mg (${formatDoseNumber(appointMl)} mL) d'appoint`
+          : null,
+      ].filter(Boolean);
+      const opened = [
+        flacon1g > 0 ? `${flacon1g} x 1 g` : null,
+        flacon500 + (appointMg > 0 ? 1 : 0) > 0
+          ? `${flacon500 + (appointMg > 0 ? 1 : 0)} x 500 mg`
+          : null,
+      ].filter(Boolean);
+      return {
+        dose,
+        plan: parts.join(" + "),
+        opened: opened.join(" + "),
+      };
+    };
+    const lowPlan = formatPlan(doseMin);
+    const highPlan = doseMax !== doseMin ? formatPlan(doseMax) : null;
+
+    return (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Dose basse</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {formatDoseNumber(lowPlan.dose)} mg : {lowPlan.plan}
+          </span>
+        </div>
+        {highPlan && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Dose haute</span>
+            <span className={`prep-calc-val ${highlightClass}`}>
+              {formatDoseNumber(highPlan.dose)} mg : {highPlan.plan}
+            </span>
+          </div>
+        )}
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">À ouvrir</span>
+          <span className="prep-calc-val">
+            {highPlan
+              ? `${lowPlan.opened} à ${highPlan.opened} — garder le reste`
+              : `${lowPlan.opened} — garder le reste`}
+          </span>
+        </div>
+      </>
+    );
+  };
+  const renderAmoxicillineMeningeeRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    if (!recipe.amoxicilline_meningee_pump) return null;
+    const requestedDose = getRecipeDoseInputValue(recipe);
+    if (!requestedDose) return null;
+    const table = [
+      { dose: 6, prep: "2 g/100 mL", rate: 12 },
+      { dose: 8, prep: "2 g/100 mL", rate: 17 },
+      { dose: 10, prep: "5 g/250 mL", rate: 21 },
+      { dose: 12, prep: "5 g/250 mL", rate: 25 },
+      { dose: 14, prep: "5 g/250 mL", rate: 29 },
+      { dose: 16, prep: "5 g/250 mL", rate: 33 },
+      { dose: 18, prep: "5 g/250 mL", rate: 37 },
+    ];
+    const current =
+      table.find((row) => row.dose === requestedDose) ||
+      table.reduce((closest, row) =>
+        Math.abs(row.dose - requestedDose) < Math.abs(closest.dose - requestedDose) ? row : closest
+      );
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+
+    return (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Dose/j</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{current.dose} g/j</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Préparation</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{current.prep}</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Débit pompe</span>
+          <span className={`prep-calc-val ${highlightClass}`}>{current.rate} mL/h</span>
         </div>
       </>
     );
@@ -560,6 +684,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         {renderKclIvlRows(recipe, "classic")}
         {renderKclPediatricRows(recipe, "classic")}
         {renderClottafactPediatricRows(recipe, "classic")}
+        {renderAmiklinAdultRows(recipe, "classic")}
+        {renderAmoxicillineMeningeeRows(recipe, "classic")}
         {recipe.prelever && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Prélever</span>
@@ -622,6 +748,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         {renderKclIvlRows(recipe, "v2")}
         {renderKclPediatricRows(recipe, "v2")}
         {renderClottafactPediatricRows(recipe, "v2")}
+        {renderAmiklinAdultRows(recipe, "v2")}
+        {renderAmoxicillineMeningeeRows(recipe, "v2")}
         {recipe.prelever && (
           <div className="prep-calc-row">
             <span className="prep-calc-step">Prélever</span>
@@ -1053,18 +1181,38 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   const prepCalcBlock = pediatricPrepOnly ? null : renderPrepCalc();
   const prepCalcV2Block = pediatricPrepOnly ? null : renderPrepCalcV2();
   const activeRecipe = visiblePreparations[activeRecipeIndex];
-  const visibleEtapes = pediatricPrepOnly
+  const firstStaticStep = prep.etapes?.[0];
+  const staticLegacyUsesFirstStep = Boolean(
+    previewMode &&
+    !prep.preparations?.length &&
+    !prep.fixed_dilution &&
+    prep.dose_threshold === undefined &&
+    !prep.sufenta_table &&
+    !prep.phases?.length &&
+    !prep.dose_kg &&
+    !prep.table &&
+    firstStaticStep &&
+    !firstStaticStep.toLowerCase().startsWith("débit")
+  );
+  const rawVisibleEtapes = pediatricPrepOnly
     ? []
     : activeRecipe?.use_table_row && getPrepTableCurrentSteps()
       ? getPrepTableCurrentSteps()
       : activeRecipe && Object.hasOwn(activeRecipe, "etapes")
         ? activeRecipe.etapes
         : prep.etapes;
+  const visibleEtapes = staticLegacyUsesFirstStep
+    ? rawVisibleEtapes?.filter((_, index) => index !== 0)
+    : rawVisibleEtapes;
   const visibleNotes = pediatricPrepOnly
     ? []
     : activeRecipe && Object.hasOwn(activeRecipe, "notes")
       ? activeRecipe.notes
       : prep.notes;
+  const displaySolvant = activeRecipe?.solvant || prep.solvant;
+  const displayDuree = activeRecipe?.duree || prep.duree;
+  const displayStabilite = activeRecipe?.stabilite || prep.stabilite;
+  const displayConc = activeRecipe?.conc_finale || prep.conc_finale;
   const pedTableResult = prep.pedTable ? calcPedTable(prep, weight) : null;
   const pedImDoseMg = validKg ? Math.min(kg * 0.01, 0.5) : null;
   const pedImVolumeMl = pedImDoseMg !== null ? +pedImDoseMg.toFixed(2) : null;
@@ -1449,7 +1597,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   if (previewMode) {
     const tags = pediatricPrepOnly
       ? ["Pédiatrique"]
-      : [prep.solvant, prep.conc_finale, prep.duree, prep.stabilite, prep.debit].filter(Boolean);
+      : [displaySolvant, displayConc, displayDuree, displayStabilite, prep.debit].filter(Boolean);
 
     return (
       <section className="prep-v2" aria-label="Préparation v2">
@@ -1537,18 +1685,16 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       <div className="prep-header">
         <PrepIcon />
         <span>Préparation</span>
-        <span className="prep-solvant-tag">{prep.solvant}</span>
+        {displaySolvant && <span className="prep-solvant-tag">{displaySolvant}</span>}
       </div>
       {!pediatricPrepOnly && (
         <div className="prep-meta-row">
-          {prep.duree && <span className="prep-meta-chip">{prep.duree}</span>}
-          {prep.stabilite && (
-            <span className="prep-meta-chip prep-chip-stab">{prep.stabilite}</span>
+          {displayDuree && <span className="prep-meta-chip">{displayDuree}</span>}
+          {displayStabilite && (
+            <span className="prep-meta-chip prep-chip-stab">{displayStabilite}</span>
           )}
           {prep.debit && <span className="prep-meta-chip prep-chip-debit">{prep.debit}</span>}
-          {prep.conc_finale && (
-            <span className="prep-meta-chip prep-chip-conc">{prep.conc_finale}</span>
-          )}
+          {displayConc && <span className="prep-meta-chip prep-chip-conc">{displayConc}</span>}
         </div>
       )}
 

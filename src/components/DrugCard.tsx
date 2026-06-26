@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { calcDose, ciSeverity } from "../lib/calc";
 import type { ProtocolRef } from "../lib/crossref";
+import { isPreview } from "../lib/featureFlags";
 import type { Drug } from "../types/data";
 import DrugNote from "./DrugNote";
 import PrepBlock from "./PrepBlock";
@@ -38,6 +39,69 @@ const MonitoringWaveIcon = () => (
     <path d="M1 8h6l3-6 5 11 4-8h5l2-3 3 6h4" />
   </svg>
 );
+
+const normalizePrepDuplicateText = (value: string | undefined | null) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[→⇒]/g, " ")
+    .replace(/[—–-]/g, " ")
+    .replace(/[,;:()=]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const collectPrepDuplicateTexts = (prep: Drug["prep"]): string[] => {
+  if (!prep) return [];
+  const out: string[] = [];
+  const push = (value: unknown) => {
+    if (typeof value === "string" && value.trim()) out.push(value);
+  };
+
+  [
+    prep.solvant,
+    prep.conc_finale,
+    prep.duree,
+    prep.stabilite,
+    prep.debit,
+    prep.prelever_label,
+    prep.fd_prelever,
+    prep.calc_titre,
+    ...(prep.etapes || []),
+    ...(prep.notes || []),
+  ].forEach(push);
+
+  prep.preparations?.forEach((recipe) => {
+    [
+      recipe.titre,
+      recipe.tag,
+      recipe.prelever,
+      recipe.completer,
+      recipe.concentration,
+      recipe.rate_label,
+      recipe.rate_value,
+      recipe.note,
+      ...(recipe.etapes || []),
+      ...(recipe.notes || []),
+    ].forEach(push);
+    recipe.rows?.forEach((row) => push(`${row.label} ${row.value}`));
+    recipe.phase_doses?.forEach((phase) => push(phase.label));
+  });
+
+  return out.map(normalizePrepDuplicateText).filter((text) => text.length >= 18);
+};
+
+const isPosoDuplicateOfPrep = (line: string, prepTexts: string[]) => {
+  const normalized = normalizePrepDuplicateText(line);
+  if (normalized.length < 18 || /^voies? /.test(normalized)) return false;
+  return prepTexts.some((prepText) => {
+    if (prepText === normalized) return true;
+    return (
+      Math.min(prepText.length, normalized.length) >= 24 &&
+      (prepText.includes(normalized) || normalized.includes(prepText))
+    );
+  });
+};
 
 type DrugCardProps = {
   drug: Drug;
@@ -170,6 +234,8 @@ const DrugCard = ({
     const validKg = kgNum > 0 && kgNum <= 300;
     const hasAdult = !!(drug.poso?.a && drug.poso.a.length);
     const hasPed = !!(drug.poso?.p && drug.poso.p.length);
+    const hidePosologyGrid = Boolean(drug.prep?.hide_poso_when_prepared);
+    const prepDuplicateTexts = isPreview() ? collectPrepDuplicateTexts(drug.prep) : [];
     let showAdult = true;
     let showPed = true;
     let posoHint = "";
@@ -192,9 +258,12 @@ const DrugCard = ({
     }
     const single = showAdult !== showPed;
 
-    const renderPosoLines = (lines: string[] | undefined) =>
-      lines && lines.length ? (
-        lines.map((p: string, i: number) => {
+    const renderPosoLines = (lines: string[] | undefined) => {
+      const visibleLines = (lines || []).filter(
+        (line) => !isPosoDuplicateOfPrep(line, prepDuplicateTexts)
+      );
+      return visibleLines.length ? (
+        visibleLines.map((p: string, i: number) => {
           const res = calcDose(p, weight);
           return (
             <div key={i} className="poso-item">
@@ -211,26 +280,33 @@ const DrugCard = ({
           );
         })
       ) : (
-        <span className="na">Non renseigné</span>
+        <span className="na">
+          {lines?.length ? "Voir préparation ci-dessous" : "Non renseigné"}
+        </span>
       );
+    };
 
     return (
       <>
-        {posoHint && <div className="poso-filter-hint">{posoHint}</div>}
-        <div className={`poso-grid ${single ? "poso-grid-single" : ""}`}>
-          {showAdult && (
-            <div className="poso-box">
-              <div className="poso-title">Adulte</div>
-              {renderPosoLines(drug.poso.a)}
+        {!hidePosologyGrid && (
+          <>
+            {posoHint && <div className="poso-filter-hint">{posoHint}</div>}
+            <div className={`poso-grid ${single ? "poso-grid-single" : ""}`}>
+              {showAdult && (
+                <div className="poso-box">
+                  <div className="poso-title">Adulte</div>
+                  {renderPosoLines(drug.poso.a)}
+                </div>
+              )}
+              {showPed && (
+                <div className="poso-box">
+                  <div className="poso-title">Pédiatrique</div>
+                  {renderPosoLines(drug.poso.p)}
+                </div>
+              )}
             </div>
-          )}
-          {showPed && (
-            <div className="poso-box">
-              <div className="poso-title">Pédiatrique</div>
-              {renderPosoLines(drug.poso.p)}
-            </div>
-          )}
-        </div>
+          </>
+        )}
 
         <PrepBlock drug={drug} weight={weight} prepPopulation={prepPopulation} />
         <PseBlock drug={drug} weight={weight} />
