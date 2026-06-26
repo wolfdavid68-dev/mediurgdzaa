@@ -1,18 +1,18 @@
 # Rapport données cliniques MediURG
 
-Généré le 2026-05-31 pour v110.
+Généré le 2026-06-26 pour v113.
 
 ## Synthèse
 
 | Domaine | Volume |
 | --- | ---: |
 | Médicaments | 81 |
-| Médicaments avec préparation | 72 |
+| Médicaments avec préparation | 73 |
 | Entrées PSE | 19 |
 | Protocoles | 14 |
 | Kits de préparation | 8 |
 | Entrées incompatibilités | 61 |
-| Items de check-list kit | 42 |
+| Items de check-list kit | 44 |
 
 ## Répartition médicaments
 
@@ -59,8 +59,8 @@ Généré le 2026-05-31 pour v110.
 
 | Kit | Drogues | Matériel | Check-list |
 | --- | ---: | ---: | ---: |
-| Kit ISR (Intubation Séquence Rapide) | 6 | 8 | 42 |
-| Kit ACR (Arrêt Cardio-Respiratoire) | 5 | 6 | 0 |
+| Kit ISR (Intubation Séquence Rapide) | 6 | 8 | 44 |
+| Kit ACR (Arrêt Cardio-Respiratoire) | 4 | 6 | 0 |
 | Kit PA (Pression Artérielle invasive) | 2 | 22 | 0 |
 | Kit Drain Thoracique | 3 | 26 | 0 |
 | Kit KTC (Cathéter Veineux Central) | 3 | 27 | 0 |

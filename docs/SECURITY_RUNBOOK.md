@@ -62,6 +62,9 @@ publication, voir [`PROCEDURE_RELEASE.md`](./PROCEDURE_RELEASE.md).
 Vérifié en production le 26 mai 2026 via le SQL Editor Supabase.
 Revue locale du code `main` le 29 mai 2026 après ajout du MFA admin, du journal consultable et des
 RPC admin atomiques.
+Contrôle local sécurité relancé le 26 juin 2026 : `npm run verify:security` OK
+sur headers Vercel/CSP, variables `VITE_` sensibles, fichiers `.env`, `public/`
+et `build/`.
 
 - `public.profiles` : RLS active (`rowsecurity = true`).
 - `public.admin_audit_events` : RLS active (`rowsecurity = true`) si le journal admin a été
