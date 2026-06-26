@@ -421,6 +421,14 @@ describe("DrugCard", () => {
   });
 
   describe("Oméprazole", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
     test("intègre la posologie enfant dans la préparation sans bloc posologie doublon", async () => {
       const omeprazole = DRUGS.find((drug) => drug.nom === "OMÉPRAZOLE")!;
 
@@ -437,6 +445,14 @@ describe("DrugCard", () => {
   });
 
   describe("SoluMedrol", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
     test("adapte la dilution à la dose saisie", async () => {
       const solumedrol = DRUGS.find((drug) => drug.nom === "SOLUMEDROL")!;
 
@@ -457,6 +473,14 @@ describe("DrugCard", () => {
   });
 
   describe("Zophren", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
     test("affiche la plage adulte 4-8 mg sans calcul pondéral", async () => {
       const zophren = DRUGS.find((drug) => drug.nom === "ZOPHREN")!;
 
@@ -470,6 +494,14 @@ describe("DrugCard", () => {
   });
 
   describe("Amiklin", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
     test("sépare les préparations adulte et pédiatrique", async () => {
       const amiklin = DRUGS.find((drug) => drug.nom === "AMIKLIN")!;
 
@@ -506,6 +538,14 @@ describe("DrugCard", () => {
   });
 
   describe("Amoxicilline", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
     test("affiche la dose méningée sur pompe selon la dose journalière", async () => {
       const amoxicilline = DRUGS.find((drug) => drug.nom === "AMOXICILLINE")!;
 
@@ -627,10 +667,10 @@ describe("DrugCard", () => {
         "true"
       );
       expect(screen.getByText("40 mg = 4 mL")).toBeInTheDocument();
-      expect(screen.getByText("Entretien PSE : 50 µg/kg/min")).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: /PSE entretien/i }));
 
+      expect(screen.getByText("Entretien PSE : 50 µg/kg/min")).toBeInTheDocument();
       expect(screen.getAllByText("4000 µg/min").length).toBeGreaterThan(0);
       expect(screen.getAllByText("24 mL/h").length).toBeGreaterThan(0);
       expect(screen.queryByText("4000 mg/min")).not.toBeInTheDocument();

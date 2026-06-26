@@ -113,6 +113,7 @@ type DrugPrepRecipe = {
   note?: string;
   etapes?: string[];
   notes?: string[];
+  duplicate_posology?: string[];
   empty?: boolean;
   sufenta_table?: boolean;
   sufenta_intranasal?: boolean;
@@ -152,6 +153,7 @@ type DrugPrep = {
   debit?: string;
   etapes?: string[];
   notes?: string[];
+  duplicate_posology?: string[];
   pedTable?: PedTable;
   table?: DrugPrepTable;
   preparations?: DrugPrepRecipe[];

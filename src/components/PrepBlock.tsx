@@ -54,7 +54,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     let active = true;
     import("../data/drugs.preview")
       .then(({ DRUGS_PREVIEW }) => {
-        if (active) setPreviewPrepByDrugId(DRUGS_PREVIEW as PreviewPrepByDrugId);
+        if (active) setPreviewPrepByDrugId(DRUGS_PREVIEW as unknown as PreviewPrepByDrugId);
       })
       .catch(() => {
         if (active) setPreviewPrepByDrugId({});

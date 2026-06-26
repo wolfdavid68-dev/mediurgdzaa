@@ -69,6 +69,7 @@ const collectPrepDuplicateTexts = (prep: Drug["prep"]): string[] => {
     prep.calc_titre,
     ...(prep.etapes || []),
     ...(prep.notes || []),
+    ...(prep.duplicate_posology || []),
   ].forEach(push);
 
   prep.preparations?.forEach((recipe) => {
@@ -83,17 +84,22 @@ const collectPrepDuplicateTexts = (prep: Drug["prep"]): string[] => {
       recipe.note,
       ...(recipe.etapes || []),
       ...(recipe.notes || []),
+      ...(recipe.duplicate_posology || []),
     ].forEach(push);
     recipe.rows?.forEach((row) => push(`${row.label} ${row.value}`));
     recipe.phase_doses?.forEach((phase) => push(phase.label));
+    if (recipe.dose_based_dilution) {
+      push(recipe.dose_based_dilution.below_or_equal);
+      push(recipe.dose_based_dilution.above);
+    }
   });
 
-  return out.map(normalizePrepDuplicateText).filter((text) => text.length >= 18);
+  return out.map(normalizePrepDuplicateText).filter((text) => text.length >= 12);
 };
 
 const isPosoDuplicateOfPrep = (line: string, prepTexts: string[]) => {
   const normalized = normalizePrepDuplicateText(line);
-  if (normalized.length < 18 || /^voies? /.test(normalized)) return false;
+  if (normalized.length < 12 || /^voies? /.test(normalized)) return false;
   return prepTexts.some((prepText) => {
     if (prepText === normalized) return true;
     return (
@@ -127,6 +133,8 @@ const DrugCard = ({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState(false);
+  const previewMode = isPreview();
+  const [previewPrep, setPreviewPrep] = useState<Drug["prep"] | null>(null);
   // Poids partagé : vient du bandeau global (App.tsx → PatientWeightBanner) via
   // le prop. Plus d'input local dans la fiche (évite le doublon avec le bandeau).
   const weight = patientWeight;
@@ -143,6 +151,30 @@ const DrugCard = ({
   // Médicaments du chunk Protocoles tant que la fiche reste repliée.
   const canOpenProtocol = Boolean(onProtocolOpen);
   const [relatedProtocols, setRelatedProtocols] = useState<ProtocolRef[]>([]);
+  useEffect(() => {
+    if (!previewMode) {
+      setPreviewPrep(null);
+      return;
+    }
+
+    let active = true;
+    import("../data/drugs.preview")
+      .then(({ DRUGS_PREVIEW }) => {
+        const previewByDrugId = DRUGS_PREVIEW as unknown as Partial<
+          Record<number, { prep?: Partial<NonNullable<Drug["prep"]>> }>
+        >;
+        const override = previewByDrugId[drug.id]?.prep;
+        if (active) setPreviewPrep(override ? { ...drug.prep, ...override } : null);
+      })
+      .catch(() => {
+        if (active) setPreviewPrep(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [previewMode, drug.id, drug.prep]);
+
   useEffect(() => {
     if (!open || !canOpenProtocol) {
       setRelatedProtocols([]);
@@ -234,8 +266,9 @@ const DrugCard = ({
     const validKg = kgNum > 0 && kgNum <= 300;
     const hasAdult = !!(drug.poso?.a && drug.poso.a.length);
     const hasPed = !!(drug.poso?.p && drug.poso.p.length);
-    const hidePosologyGrid = Boolean(drug.prep?.hide_poso_when_prepared);
-    const prepDuplicateTexts = isPreview() ? collectPrepDuplicateTexts(drug.prep) : [];
+    const effectivePrep = previewMode ? previewPrep || drug.prep : drug.prep;
+    const hidePosologyGrid = Boolean(effectivePrep?.hide_poso_when_prepared);
+    const prepDuplicateTexts = previewMode ? collectPrepDuplicateTexts(effectivePrep) : [];
     let showAdult = true;
     let showPed = true;
     let posoHint = "";
