@@ -209,6 +209,207 @@ export const PREP_KITS = [
     ],
   },
   {
+    id: "sedation-procedurale",
+    nom: "Kit Kétofol (Sédation Procédurale)",
+    cat: "Gestes urgences",
+    couleur: "#7C3AED",
+    icon: "🧘",
+    desc: "Procédure Kétofol pour sédation procédurale aux urgences : kétamine puis propofol titrés, patient scopé avec capnographie, matériel de ventilation et d'aspiration immédiatement disponible.",
+    materiel: [
+      "Box de SAUV ou zone tiède avec accès immédiat au chariot d'urgence",
+      "Médecin urgentiste sénior + IDE formée à la SAUV",
+      "2 voies veineuses périphériques de bon calibre si possible (18G-20G minimum)",
+      "Scope : FC, PA, SpO₂, FR et capnographie EtCO₂",
+      "O₂ haute concentration + lunettes / MHC disponibles",
+      "Aspiration fonctionnelle + sonde Yankauer",
+      "BAVU complet raccordé à l'O₂ + masques adaptés",
+      "Canules de Guedel et matériel de libération des voies aériennes",
+      "Disponibilité à proximité immédiate du matériel d'intubation et de ventilation difficile",
+      "Soluté de remplissage + pousse-seringue / seringues étiquetées",
+      "Propofol et Kétamine préparés en seringues distinctes, étiquetées",
+      "Disponibilité à proximité immédiate du matériel de ventilation et d'intubation",
+      "Fiche de surveillance per-procédure et post-acte",
+    ],
+    drogues: [
+      {
+        drugId: 4,
+        nom: "Kétamine",
+        role: "Kétofol — composant analgésique dissociatif",
+        dose: "0,5 mg/kg IVL, puis titration selon objectif",
+        prep: "Préparer une seringue dédiée à 10 mg/mL (ex. 100 mg qsp 10 mL NaCl 0,9%)",
+        note: "Administrer avant le propofol. Surveiller hypersécrétion, HTA et réactions d'émergence.",
+      },
+      {
+        drugId: 1,
+        nom: "Propofol (Diprivan)",
+        role: "Kétofol — composant hypnotique titrable",
+        dose: "1 mg/kg IVL après la kétamine, puis bolus de 0,5-1 mg/kg si besoin",
+        prep: "Ampoule 200 mg/20 mL (10 mg/mL) — préparer une seringue dédiée, administrer en IV lente titrée",
+        note: "Risque d'hypotension et d'apnée : capnographie et matériel de ventilation obligatoires.",
+      },
+    ],
+    sequence: [
+      "Identifier le patient, le geste et l'objectif : procédure Kétofol pour acte court douloureux ou anxiogène.",
+      "Installer en box de SAUV ou zone tiède avec renfort disponible.",
+      "Vérifier personnel : médecin sénior et IDE formée à la SAUV présents.",
+      "Poser au moins une VVP de bon calibre, idéalement deux si risque hémodynamique.",
+      "Relever poids exact ou estimé, constantes initiales et score de sédation de départ.",
+      "Informer le patient : bénéfices, risques, modalités de surveillance et recueil du consentement selon contexte.",
+      "Rechercher contre-indications, terrain à risque et interactions médicamenteuses.",
+      "Vérifier la disponibilité à proximité immédiate de l'aspiration, de l'oxygène, du BAVU, des canules, du matériel d'intubation et du remplissage.",
+      "Pré-oxygéner si risque de désaturation ou sédation profonde attendue.",
+      "Préparer deux seringues distinctes : Kétamine 10 mg/mL et Propofol 10 mg/mL, toutes deux étiquetées.",
+      "Administrer la kétamine puis le propofol en IV lente titrée selon l'objectif de sédation.",
+      "Prévoir des bolus de réserve de propofol si la sédation est insuffisante et si les paramètres respiratoires/hémodynamiques le permettent.",
+      "Réaliser l'acte uniquement quand le score cible et les paramètres hémodynamiques/respiratoires sont acceptables.",
+      "Tracer thérapeutiques, doses, scores, événements indésirables et gestion.",
+      "Surveiller au moins 1 h après la fin de l'acte, jusqu'à RASS 0 ou Ramsay 2 et stabilité clinique.",
+    ],
+    notes: [
+      "Kétofol = Kétamine puis Propofol titrés ; le mélange dans une même seringue n'est pas nécessaire.",
+      "Ne jamais débuter sans disponibilité à proximité immédiate du matériel de ventilation, d'aspiration et de gestion des voies aériennes.",
+      "Éviter d'ajouter benzodiazépine ou morphinique hors indication formalisée : risque de dépression respiratoire cumulée.",
+      "Adapter les doses chez le sujet âgé, fragile, hypovolémique, insuffisant respiratoire ou hémodynamiquement instable.",
+      "La fiche papier locale et la prescription médicale restent la référence médico-légale.",
+    ],
+    checklist: [
+      {
+        titre: "Identification & indication",
+        items: [
+          { type: "text", label: "Sédation procédurale pour", placeholder: "Geste prévu" },
+          { type: "text", label: "Poids exact ou estimé", unit: "kg" },
+          {
+            type: "check",
+            label: "Patient transféré en box de SAUV ou zone tiède",
+          },
+          {
+            type: "check",
+            label: "Indication de sédation procédurale validée par le médecin",
+          },
+        ],
+      },
+      {
+        titre: "Équipe & voies veineuses",
+        items: [
+          { type: "check", label: "Médecin urgentiste sénior présent" },
+          { type: "check", label: "IDE formée à la SAUV présente" },
+          {
+            type: "choice",
+            label: "Voies veineuses périphériques de bon calibre",
+            options: ["1", "2"],
+          },
+          { type: "check", label: "VVP fonctionnelle vérifiée avant injection" },
+        ],
+      },
+      {
+        titre: "Surveillance initiale",
+        items: [
+          { type: "check", label: "Scope continu FC et PA" },
+          { type: "check", label: "SpO₂, FR et capnographie EtCO₂ en place" },
+          { type: "text", label: "FC initiale", unit: "bpm" },
+          { type: "text", label: "PA initiale", unit: "mmHg" },
+          { type: "text", label: "SpO₂ initiale", unit: "%" },
+          { type: "text", label: "FR initiale", unit: "/min" },
+          { type: "text", label: "EtCO₂ initial", unit: "mmHg" },
+        ],
+      },
+      {
+        titre: "Information & contre-indications",
+        items: [
+          { type: "check", label: "Bénéfices expliqués au patient" },
+          { type: "check", label: "Risques expliqués au patient" },
+          {
+            type: "check",
+            label: "Absence de contre-indication aux médicaments choisis",
+          },
+          {
+            type: "text",
+            label: "Contre-indication / allergie / traitement à risque",
+            placeholder: "Préciser si présent",
+          },
+        ],
+      },
+      {
+        titre: "Matériel de complications",
+        items: [
+          {
+            type: "check",
+            label: "Disponibilité à proximité immédiate : haricots et antiémétique",
+          },
+          {
+            type: "check",
+            label: "Disponibilité à proximité immédiate : Guedel, BAVU, IOT",
+          },
+          {
+            type: "check",
+            label: "Disponibilité à proximité immédiate : remplissage",
+          },
+          { type: "check", label: "Aspiration immédiatement fonctionnelle" },
+          {
+            type: "check",
+            label: "Disponibilité à proximité immédiate : matériel d'intubation",
+          },
+        ],
+      },
+      {
+        titre: "Pré-oxygénation & procédure Kétofol",
+        items: [
+          {
+            type: "check",
+            label: "Pré-oxygénation réalisée si risque de désaturation ou sédation profonde",
+          },
+          {
+            type: "multicheck",
+            label: "Critères de choix thérapeutique",
+            options: ["Besoins", "Histoire clinique", "Antécédents"],
+          },
+          {
+            type: "select",
+            label: "Procédure",
+            options: ["Kétofol : Kétamine puis Propofol"],
+          },
+          { type: "text", label: "Dose Kétamine", unit: "mg" },
+          { type: "text", label: "Dose Propofol", unit: "mg" },
+          { type: "text", label: "Bolus de réserve Propofol", unit: "mg" },
+        ],
+      },
+      {
+        titre: "Objectif de sédation",
+        items: [
+          {
+            type: "choice",
+            label: "Repères rapides des scores de sédation",
+            options: ["RASS -3", "RASS -4", "Ramsay 4", "Ramsay 5"],
+            hint: "RASS -3 : éveil bref à la voix · RASS -4 : réponse à la stimulation physique · Ramsay 4 : réponse rapide au bruit/toucher · Ramsay 5 : réponse lente.",
+          },
+          { type: "text", label: "Score au moment de l'acte" },
+          {
+            type: "check",
+            label: "Bolus supplémentaire prévu uniquement si paramètres hémodynamiques et respiratoires le permettent",
+          },
+          { type: "text", label: "Thérapeutique et posologie de bolus supplémentaire" },
+        ],
+      },
+      {
+        titre: "Acte & surveillance post-acte",
+        items: [
+          {
+            type: "check",
+            label: "Acte réalisé seulement après score cible atteint et surveillance active",
+          },
+          { type: "text", label: "Événement indésirable" },
+          { type: "text", label: "Gestion / traitement réalisé" },
+          {
+            type: "check",
+            label: "Surveillance scopée maintenue au moins 1 h après la fin de l'acte",
+          },
+          { type: "text", label: "Score au transfert / RAD" },
+          { type: "check", label: "Retour à RASS 0 ou Ramsay 2 avant transfert / RAD" },
+        ],
+      },
+    ],
+  },
+  {
     id: "acr",
     nom: "Kit ACR (Arrêt Cardio-Respiratoire)",
     cat: "Urgences vitales",

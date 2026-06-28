@@ -69,6 +69,200 @@ type Props = {
   drogues?: Drogue[];
 };
 
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const buildSedationProcedurePrintDoc = (values: Values): string => {
+  const now = new Date().toLocaleString("fr-FR");
+  const value = (key: string) => {
+    const v = values[key];
+    return typeof v === "string" && v.trim() ? v.trim() : "";
+  };
+  const checked = (key: string) => values[key] === true;
+  const yesNo = (isYes: boolean) =>
+    `<span class="yn">Oui <span class="box">${isYes ? "✓" : ""}</span> Non <span class="box"></span></span>`;
+  const field = (text: string, fallback = "") =>
+    `<span class="field">${esc(text || fallback)}${text ? "" : "&nbsp;"}</span>`;
+  const multiYes = (...keys: string[]) => keys.every((key) => checked(key));
+  const anyYes = (...keys: string[]) => keys.some((key) => checked(key));
+
+  const procedure = value("5-2") || "Kétofol : Kétamine puis Propofol";
+  const ketamineDose = value("5-3");
+  const propofolDose = value("5-4");
+  const propofolReserve = value("5-5");
+
+  return (
+    `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Checklist Kétofol aux urgences</title>
+<style>
+  @page { size: A4 portrait; margin: 8mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: #111; font-family: Arial, Helvetica, sans-serif; font-size: 10px; line-height: 1.22; background: #f2f2f2; }
+  .sheet { width: 194mm; min-height: 281mm; margin: 0 auto; padding: 0; display: flex; flex-direction: column; background: #fff; }
+  .doc-header { display: grid; grid-template-columns: 1fr 58mm; gap: 0; border: 1.2px solid #111; border-bottom: 0; }
+  .top-left { padding: 4mm 5mm 3.5mm; }
+  .ref { font-size: 7.5px; color: #333; margin: 0 0 2.5mm; white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
+  h1 { font-size: 19px; line-height: 1.05; margin: 0; font-weight: 700; }
+  .subtitle { margin-top: 2mm; font-size: 9px; color: #333; }
+  .patient-wrap { border-left: 1.2px solid #111; padding: 3mm; }
+  .patient { height: 25mm; border: 1.4px solid #111; display: flex; align-items: flex-start; justify-content: center; padding-top: 3mm; font-size: 9px; font-weight: 700; background: #fff; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.8px; line-height: 1.14; border: 1.2px solid #111; }
+  td, th { border: 0.8px solid #333; padding: 2.5px 4px; vertical-align: middle; }
+  .left { width: 30%; text-align: left; font-weight: 700; background: #f0f0f0; }
+  .mid { width: 34%; text-align: left; }
+  .right { width: 36%; text-align: left; }
+  .head { background: #dcdcdc; font-weight: 700; text-align: center; border-top: 1.2px solid #111; border-bottom: 1.2px solid #111; }
+  .sub { display: block; border-top: 1px solid #777; margin-top: 2px; padding-top: 2px; }
+  .small { font-size: 8px; }
+  .italic { font-style: italic; }
+  .yn { white-space: nowrap; float: right; margin-left: 4px; }
+  .box { display: inline-flex; width: 9px; height: 9px; border: 1px solid #111; align-items: center; justify-content: center; font-size: 8px; line-height: 1; margin: 0 2px; vertical-align: -1px; }
+  .field { display: inline-block; min-width: 20mm; border-bottom: 1px solid #111; padding: 0 2px 1px; min-height: 9px; }
+  .wide { min-width: 44mm; }
+  .line { display: flex; justify-content: space-between; gap: 3mm; margin: 1px 0; }
+  .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-top: 5mm; font-size: 9.5px; }
+  .sign { min-height: 23mm; border: 1.1px solid #111; padding: 3mm; }
+  .sign-title { margin: -3mm -3mm 3mm; padding: 1.5mm 3mm; font-weight: 700; background: #eeeeee; border-bottom: 1px solid #111; }
+  .sign-line { display: grid; grid-template-columns: 18mm 1fr; gap: 3mm; align-items: end; margin-top: 4mm; }
+  .sign-fill { border-bottom: 1px solid #111; height: 5mm; }
+  .opposable { margin-top: auto; padding-top: 4mm; text-align: center; font-size: 8px; font-style: italic; font-weight: 700; }
+  @media screen { body { padding: 10mm 0; } .sheet { box-shadow: 0 0 0 1px #d0d0d0, 0 8px 28px rgba(0,0,0,.18); } }
+  @media print { body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; } .sheet { width: 100%; min-height: auto; box-shadow: none; } }
+</style></head><body><main class="sheet">
+  <div class="doc-header">
+    <div class="top-left">
+      <div class="ref">MediURG · Sédation procédurale · Édité le ${esc(now)}</div>
+      <h1>Checklist Kétofol aux urgences</h1>
+      <div class="subtitle">Kétamine puis Propofol · Surveillance scopée et capnographie · Document de traçabilité terrain</div>
+    </div>
+    <div class="patient-wrap">
+      <div class="patient">Étiquette du patient</div>
+    </div>
+  </div>
+  <table aria-label="Checklist Kétofol aux urgences">
+    <tr>
+      <td class="head" colspan="2">Identification d'un patient nécessitant une sédation procédurale</td>
+      <td class="head">Procédure Kétofol pour : ${field(value("0-0"), "")}</td>
+    </tr>
+    <tr>
+      <td class="left">Transfert en box de SAUV ou de zone tiède</td>
+      <td class="mid"></td>
+      <td class="right">${yesNo(checked("0-2"))}</td>
+    </tr>
+    <tr>
+      <td class="left">Personnel nécessaire</td>
+      <td class="mid">1 médecin urgentiste sénior<br />+ 1 IDE formée à la SAUV</td>
+      <td class="right">${yesNo(multiYes("1-0", "1-1"))}</td>
+    </tr>
+    <tr>
+      <td class="left">Mise en place d'une ou deux VVP de bon calibre</td>
+      <td class="mid">18G – 20G minimum</td>
+      <td class="right">Nombre : ${field(value("1-2"), "1 ou 2")} ${yesNo(checked("1-3"))}</td>
+    </tr>
+    <tr>
+      <td class="left">Surveillance scopée obligatoire</td>
+      <td class="mid">FC et PA<br />SpO₂, FR et capnographie</td>
+      <td class="right">
+        <strong>Paramètres initiaux :</strong><br />
+        <span class="line">FC ${field(value("2-2"))} bpm <span>PA ${field(value("2-3"))} mmHg</span></span>
+        <span class="line">SpO₂ ${field(value("2-4"))} % <span>FR ${field(value("2-5"))} /min</span></span>
+        EtCO₂ ${field(value("2-6"))} mmHg ${yesNo(multiYes("2-0", "2-1"))}
+      </td>
+    </tr>
+    <tr>
+      <td class="left">Poids exact du patient</td>
+      <td class="mid">Objectif : posologies adaptées</td>
+      <td class="right">Poids : ${field(value("0-1"))} kg</td>
+    </tr>
+    <tr>
+      <td class="left">Explication au patient de la prise en charge</td>
+      <td class="mid">Bénéfice(s)<br />Risque(s)</td>
+      <td class="right">${yesNo(multiYes("3-0", "3-1"))}</td>
+    </tr>
+    <tr>
+      <td class="left">Absence de contre-indication(s) au(x) médicament(s) choisi(s)</td>
+      <td class="mid">Allergie, traitement à risque ou terrain particulier</td>
+      <td class="right">${yesNo(checked("3-2"))}<br />${field(value("3-3"), " ")}</td>
+    </tr>
+    <tr>
+      <td class="left" rowspan="4">Disponibilité à proximité immédiate du matériel nécessaire à la gestion des principales complications</td>
+      <td class="mid">Vomissements : haricots, antiémétique, aspiration</td>
+      <td class="right">${yesNo(checked("4-0"))}</td>
+    </tr>
+    <tr>
+      <td class="mid">Voies aériennes supérieures : Guedel, BAVU, IOT</td>
+      <td class="right">${yesNo(checked("4-1"))}</td>
+    </tr>
+    <tr>
+      <td class="mid">Mauvaise tolérance hémodynamique : remplissage</td>
+      <td class="right">${yesNo(checked("4-2"))}</td>
+    </tr>
+    <tr>
+      <td class="mid">Aspiration fonctionnelle et matériel d'intubation disponibles</td>
+      <td class="right">${yesNo(multiYes("4-3", "4-4"))}</td>
+    </tr>
+    <tr>
+      <td class="left">Pré-oxygénation du patient</td>
+      <td class="mid">Permet d'éviter la désaturation en cas d'apnée</td>
+      <td class="right">${yesNo(checked("5-0"))}</td>
+    </tr>
+    <tr>
+      <td class="left">Choix de la thérapeutique médicamenteuse souhaitée</td>
+      <td class="mid">Besoins ?<br />Histoire clinique ?<br />Antécédents ?</td>
+      <td class="right">
+        <strong>Thérapeutique(s) administrée(s) :</strong><br />
+        ${field(procedure, "Kétofol : Kétamine puis Propofol")}<br />
+        Kétamine : ${field(ketamineDose)} mg &nbsp; Propofol : ${field(propofolDose)} mg<br />
+        Réserve Propofol : ${field(propofolReserve)} mg
+        <span class="sub small">Critères : ${esc(value("5-1") || " ")}</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="left" rowspan="2">Administration du sédatif pour obtention d'une sédation suffisante</td>
+      <td class="mid">Objectif score de RASS -3 ou -4<br />et/ou score de Ramsay 4 ou 5</td>
+      <td class="right">Score au moment de l'acte : ${field(value("6-1"))}<br />Objectif : ${field(value("6-0"))}</td>
+    </tr>
+    <tr>
+      <td class="mid italic">Si besoin pour arriver à cet objectif : bolus supplémentaire si les paramètres hémodynamiques et respiratoires le permettent</td>
+      <td class="right">${yesNo(checked("6-2"))}<br />Thérapeutique et posologie : ${field(value("6-3"), " ")}</td>
+    </tr>
+    <tr>
+      <td class="left">Réalisation de l'acte nécessitant la sédation procédurale</td>
+      <td class="mid"></td>
+      <td class="right">${yesNo(checked("7-0"))}</td>
+    </tr>
+    <tr>
+      <td class="left">Gestion des complications</td>
+      <td class="mid">Doivent toutes être connues et maîtrisées par le médecin qui les utilise.</td>
+      <td class="right">
+        Événement(s) indésirable(s) : ${yesNo(Boolean(value("7-1")))}<br />
+        ${field(value("7-1"), " ")}<br />
+        Gestion : ${field(value("7-2"), " ")}
+      </td>
+    </tr>
+    <tr>
+      <td class="left">Surveillance scopée pendant 1h minimum après la fin de l'acte jusqu'à score de RASS 0 et/ou score de Ramsay 2</td>
+      <td class="mid"></td>
+      <td class="right">${yesNo(anyYes("7-3", "7-5"))}<br />Score au moment du transfert/RAD : ${field(value("7-4"))}</td>
+    </tr>
+  </table>
+  <div class="footer">
+    <div class="sign">
+      <div class="sign-title">Médecin</div>
+      <div class="sign-line"><span>Nom</span><span class="sign-fill"></span></div>
+      <div class="sign-line"><span>Signature</span><span class="sign-fill"></span></div>
+    </div>
+    <div class="sign">
+      <div class="sign-title">IDE SA</div>
+      <div class="sign-line"><span>Nom</span><span class="sign-fill"></span></div>
+      <div class="sign-line"><span>Signature</span><span class="sign-fill"></span></div>
+    </div>
+  </div>
+  <div class="opposable">SEULE LA VERSION ÉLECTRONIQUE EST OPPOSABLE</div>
+</main><script>window.onload=function(){window.print();}</scr` + `ipt></body></html>`
+  );
+};
+
 const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
   const sectionIdPrefix = useId();
   // Options d'un menu déroulant : soit explicites (`options`), soit dérivées
@@ -185,7 +379,6 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   };
 
   const onPrint = () => {
-    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const now = new Date().toLocaleString("fr-FR");
     let body = `<h1>${esc(titre)}</h1><p class="date">Édité le ${esc(now)}</p>`;
     checklist.forEach((section, si) => {
@@ -204,7 +397,9 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
     body += `<p class="foot">Édité depuis MediURG — outil d'aide, ne remplace pas la prescription. La prescription officielle prévaut.</p>`;
 
     const doc =
-      `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
+      kitId === "sedation-procedurale"
+        ? buildSedationProcedurePrintDoc(values)
+        : `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${esc(titre)}</title>
 <style>
@@ -221,7 +416,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   .foot { margin-top: 20px; font-size: 10px; color: #777; font-style: italic; border-top: 1px solid #ccc; padding-top: 8px; }
   @media print { body { margin: 12mm; } }
 </style></head><body>${body}<script>window.onload=function(){window.print();}</scr` +
-      `ipt></body></html>`;
+          `ipt></body></html>`;
 
     const w = window.open("", "_blank");
     if (!w) return;
@@ -453,6 +648,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                             couleur={couleur}
                           />
                         )}
+                        {item.hint && <p className="kit-checklist-hint">{item.hint}</p>}
                       </li>
                     );
                   }

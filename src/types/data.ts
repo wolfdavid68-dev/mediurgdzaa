@@ -310,6 +310,7 @@ export type ChecklistItem =
       type: "choice";
       label: string;
       options: string[];
+      hint?: string;
       scale?: "mallampati" | "cormack";
     }
   | { type: "multicheck"; label: string; options: string[] }

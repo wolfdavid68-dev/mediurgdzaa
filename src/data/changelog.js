@@ -13,6 +13,10 @@ export const CHANGELOG = [
     changes: [
       {
         type: "feat",
+        text: "Nouveau kit « Kétofol » dans Protocoles → Kits : procédure kétamine puis propofol, matériel de surveillance, séquence de prise en charge et impression A4 inspirée de la fiche papier locale.",
+      },
+      {
+        type: "feat",
         text: "Tutorat démo SAU Mulhouse passé en accès main : la pastille « Tutorat » est visible hors preview pour les profils à accès complet, et les profils Aide-soignant / Étudiant AS ouvrent directement le compagnon tutorat dédié.",
       },
       {
