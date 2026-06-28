@@ -184,6 +184,11 @@ export const PREP_KITS = [
           { type: "text", label: "PA / PAM", unit: "mmHg" },
           { type: "text", label: "SpO₂", unit: "%" },
           { type: "text", label: "FR", unit: "/min" },
+          {
+            type: "choice",
+            label: "Décision finale",
+            options: ["No go : reporter / optimiser", "Go ISR : intubation validée"],
+          },
         ],
       },
       {

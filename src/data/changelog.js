@@ -17,6 +17,10 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
+        text: "Kit ISR : impression A4 paysage retravaillée à partir de la check-list d'intubation locale, avec décision Go/No go saisie dans le questionnaire et reprise automatiquement sur la fiche imprimée.",
+      },
+      {
+        type: "feat",
         text: "Tutorat démo SAU Mulhouse passé en accès main : la pastille « Tutorat » est visible hors preview pour les profils à accès complet, et les profils Aide-soignant / Étudiant AS ouvrent directement le compagnon tutorat dédié.",
       },
       {

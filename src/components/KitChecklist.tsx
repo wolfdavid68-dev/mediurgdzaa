@@ -263,6 +263,230 @@ const buildSedationProcedurePrintDoc = (values: Values): string => {
   );
 };
 
+const buildIsrPrintDoc = (values: Values): string => {
+  const now = new Date().toLocaleString("fr-FR");
+  const value = (key: string) => {
+    const v = values[key];
+    return typeof v === "string" && v.trim() ? v.trim() : "";
+  };
+  const checked = (key: string) => values[key] === true;
+  const hasChoice = (key: string, option: string) =>
+    value(key)
+      .split(",")
+      .map((v) => v.trim())
+      .includes(option);
+  const box = (active = false) => `<span class="box">${active ? "✓" : ""}</span>`;
+  const yn = (active: boolean) => `<span class="yn">NON ${box(false)} OUI ${box(active)}</span>`;
+  const line = (text = "", wide = false) =>
+    `<span class="${wide ? "line wide" : "line"}">${esc(text)}${text ? "" : "&nbsp;"}</span>`;
+  const option = (label: string, active = false) => `${box(active)} ${esc(label)}`;
+  const row = (label: string, content: string) =>
+    `<div class="row"><span class="label">${esc(label)}</span><span>${content}</span></div>`;
+  const finalDecision = value("5-6");
+  const isNoGo = finalDecision.startsWith("No go");
+  const isGo = finalDecision.startsWith("Go ISR");
+
+  return (
+    `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Check-list intubation</title>
+<style>
+  @page { size: A4 landscape; margin: 5mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: #111; font-family: Arial, Helvetica, sans-serif; font-size: 7.4px; line-height: 1.1; background: #ececec; }
+  .sheet { width: 287mm; margin: 0 auto; padding: 2.5mm; background: #fff; border: 1.2px solid #111; }
+  .header { display: grid; grid-template-columns: 1fr 70mm 1.08fr; gap: 3mm; align-items: stretch; border-bottom: 1.2px solid #111; padding: 0 0 2mm; }
+  .titleblock { align-self: center; text-align: center; border-left: 1px solid #111; border-right: 1px solid #111; padding: 1.5mm 3mm; }
+  .kicker { font-size: 6.8px; text-transform: uppercase; letter-spacing: .12em; color: #555; font-weight: 700; }
+  h1 { margin: .8mm 0 .4mm; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+  .subhead { font-size: 7.2px; color: #333; }
+  .identity { display: grid; gap: 1.3mm; font-size: 7.8px; }
+  .identity .line { min-width: 30mm; }
+  .patient { border: 1.2px solid #111; display: flex; align-items: flex-start; justify-content: center; padding-top: 2.4mm; font-weight: 700; min-height: 23mm; background: #fafafa; }
+  .grid { display: table; width: 100%; table-layout: fixed; border-spacing: 2.5mm 0; margin: 2.5mm -2.5mm 0; }
+  .col { display: table-cell; width: 33.333%; vertical-align: top; padding: 0 0 0 0; }
+  .panel { border: 1px solid #222; border-radius: 1mm; overflow: hidden; break-inside: avoid; }
+  .col .panel + .panel { margin-top: 1.7mm; }
+  .title { position: relative; background: #444; color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding: 1.35mm 5mm 1.35mm 2mm; font-size: 7.8px; }
+  .title::after { content: ""; position: absolute; right: -1px; top: 0; border-top: 4.8mm solid transparent; border-bottom: 4.8mm solid transparent; border-left: 4.8mm solid #444; transform: translateX(100%); }
+  .body { padding: 1.5mm 1.9mm; display: grid; gap: .8mm; }
+  .row { display: grid; grid-template-columns: minmax(24mm, 1fr) auto; gap: 1.4mm; align-items: baseline; min-height: 2.8mm; }
+  .row.stack { display: block; }
+  .label { font-weight: 600; }
+  .muted { color: #333; font-style: italic; }
+  .box { display: inline-flex; width: 2.8mm; height: 2.8mm; border: 1px solid #111; align-items: center; justify-content: center; font-size: 7px; line-height: 1; margin: 0 .6mm; vertical-align: -0.45mm; }
+  .yn { white-space: nowrap; font-weight: 600; }
+  .line { display: inline-block; min-width: 18mm; border-bottom: 1px dotted #222; min-height: 2.7mm; padding: 0 .8mm; }
+  .wide { min-width: 38mm; }
+  .two { display: grid; grid-template-columns: 1fr 36mm; gap: 2mm; }
+  .checks { display: flex; flex-wrap: wrap; gap: .8mm 1.6mm; }
+  .vent { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1mm; }
+  .comment-lines span { display: block; border-bottom: 1px solid #222; height: 4.2mm; }
+  .decision { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; padding-top: .8mm; }
+  .decision-choice { border: 1px solid #111; padding: 1.3mm 1.6mm; min-height: 11mm; display: grid; grid-template-columns: 4mm 1fr; gap: 1.4mm; align-items: start; background: #fafafa; }
+  .decision-choice strong { display: block; font-size: 8px; text-transform: uppercase; letter-spacing: .04em; }
+  .decision-choice span { display: block; margin-top: .7mm; color: #333; }
+  .decision-note { margin-top: 1.2mm; padding-top: 1mm; border-top: 1px solid #aaa; font-weight: 600; }
+  .trace { display: block; }
+  .footer { padding-top: 1.6mm; text-align: center; font-size: 6.6px; font-style: italic; font-weight: 700; }
+  @media screen { body { padding: 6mm 0; } .sheet { box-shadow: 0 0 0 1px #c8c8c8, 0 8px 26px rgba(0,0,0,.18); } }
+  @media print { body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; } .sheet { width: 100%; box-shadow: none; page-break-inside: avoid; } .panel { break-inside: avoid; page-break-inside: avoid; } }
+</style></head><body><main class="sheet">
+  <header class="header">
+    <div class="identity">
+      <div><strong>Médecin leader (resp. SAUV) :</strong> ${line("", true)}</div>
+      <div><strong>Opérateur :</strong> ${line("", true)}</div>
+      <div><strong>Aide opérateur / observateur :</strong> ${line("", true)}</div>
+      <div><strong>Indication :</strong> ${line("", true)}</div>
+      <div class="muted">MediURG · ISR · Édité le ${esc(now)}</div>
+    </div>
+    <div class="titleblock">
+      <div class="kicker">Séquence rapide</div>
+      <h1>Check-list intubation</h1>
+      <div class="subhead">Évaluation · Préparation · Induction · Post-intubation</div>
+    </div>
+    <div class="two">
+      <div class="identity">
+        <div><strong>IPA / IDE leader :</strong> ${line("", true)}</div>
+        <div><strong>IDE matériel :</strong> ${line("", true)}</div>
+        <div><strong>IDE thérapeutiques :</strong> ${line("", true)}</div>
+      </div>
+      <div class="patient">Étiquette patient</div>
+    </div>
+  </header>
+  <section class="grid">
+    <div class="col">
+      <section class="panel">
+        <div class="title">Évaluation initiale</div>
+        <div class="body">
+          ${row("Les critères d'intubation sont réunis ?", yn(checked("0-0")))}
+          ${row("Absence de contre-indication à la Célocurine ?", yn(checked("0-1")))}
+          <div class="muted">(allergie, hyperkaliémie, brûlure, insuffisance rénale)</div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="title">Critères prédictifs de complications</div>
+        <div class="body">
+          <div class="row stack"><span class="label">Score de Mallampati :</span>
+            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Classe ${o}`, value("1-0") === o)).join(" ")}</div>
+          </div>
+          <div class="row stack"><span class="label">Score de Cormack :</span>
+            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Grade ${o}`, value("1-1") === o)).join(" ")}</div>
+          </div>
+          ${row("Risque d'inhalation ?", yn(Boolean(value("1-2"))))}
+          <div class="checks">${option("Dernier repas < 6h", value("1-2") === "Repas < 6h")} ${option("Dernier repas > 6h", value("1-2") === "Repas > 6h")}</div>
+          ${row("Allergie connue :", line(value("1-3"), true))}
+        </div>
+      </section>
+      <section class="panel">
+        <div class="title">Préparation du patient & matériel</div>
+        <div class="body">
+          ${row("Position du patient adaptée ?", yn(checked("2-0")))}
+          ${row("Patient pré-oxygéné ?", yn(checked("2-1")))}
+          <div class="checks">${["Optiflow", "MHC", "VNI"].map((o) => option(o, value("2-2") === o)).join(" ")}</div>
+          ${row("Monitoré : ECG, SpO₂, EtCO₂, FR ?", yn(checked("2-3")))}
+          ${row("2 VVP de bon calibre fonctionnelles ?", yn(checked("2-4")))}
+          ${row("Aspiration + sonde branchée ?", yn(checked("2-5")))}
+          ${row("BAVU complet raccordé à l'O₂ ?", yn(checked("2-6")))}
+          ${row("Sonde IOT :", line(value("2-7")))}
+          ${row("Sonde lubrifiée, mandrin, ballonnet testé ?", yn(checked("2-8")))}
+          ${row("Respirateur complet et réglé ?", yn(checked("2-9")))}
+          <div class="vent">
+            <span>FiO₂ : ${line(value("2-10"))}</span>
+            <span>VT : ${line(value("2-11"))}</span>
+            <span>FR : ${line(value("2-12"))}</span>
+            <span>PEP : ${line(value("2-13"))}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="col">
+      <section class="panel">
+        <div class="title">Technique d'intubation</div>
+        <div class="body">
+          <div class="row stack"><span class="label">Technique prévue en première intention :</span>
+            <div class="checks">
+              ${option("Vidéolaryngoscope", hasChoice("3-0", "Vidéolaryngoscope"))}
+              ${option("Mandrin semi-rigide", hasChoice("3-0", "Mandrin semi-rigide"))}
+              ${option("Laryngoscopie directe", hasChoice("3-0", "Laryngoscopie directe"))}
+            </div>
+          </div>
+          <div class="row stack"><span class="label">Matériel d'intubation difficile à proximité :</span>
+            <div class="checks">${option("Kit de crico", checked("3-1"))} ${option("Cook/Eichmann", checked("3-1"))} ${option("Supraglottique", checked("3-1"))} ${option("Fibroscope", checked("3-1"))}</div>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="title">Thérapeutiques</div>
+        <div class="body">
+          ${row("Hypnotique envisagé :", line(value("4-0"), true))}
+          ${row("Dose d'hypnotique :", `${line(value("4-1"))} mg`)}
+          ${row("Curare envisagé :", line(value("4-2"), true))}
+          ${row("Dose de curare :", `${line(value("4-3"))} mg`)}
+          ${row("Sédation au PSE préparée ?", yn(checked("4-4")))}
+          ${row("Support vasopresseur préparé ?", yn(checked("4-5")))}
+        </div>
+      </section>
+      <section class="panel">
+        <div class="title">Contrôle ultime & décision</div>
+        <div class="body">
+          ${row("Déroulé et alternatives expliqués à l'équipe ?", yn(checked("5-0")))}
+          ${row("2e opérateur expérimenté à proximité ?", yn(checked("5-1")))}
+          <div class="vent">
+            <span>FC : ${line(value("5-2"))}</span>
+            <span>PA/PAM : ${line(value("5-3"))}</span>
+            <span>SpO₂ : ${line(value("5-4"))}</span>
+            <span>FR : ${line(value("5-5"))}</span>
+          </div>
+          <div class="decision">
+            <div class="decision-choice">${box(isNoGo)}<div><strong>No go</strong><span>Reporter / optimiser</span></div></div>
+            <div class="decision-choice">${box(isGo)}<div><strong>Go ISR</strong><span>Intubation validée</span></div></div>
+          </div>
+          <div class="decision-note">Décision finale : ${line(finalDecision, true)}</div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="title">Commentaire(s)</div>
+        <div class="body comment-lines"><span></span><span></span><span></span><span></span></div>
+      </section>
+    </div>
+    <div class="col">
+      <section class="panel">
+        <div class="title">Post-intubation</div>
+        <div class="body">
+          ${row("Sonde d'intubation fixée ?", yn(checked("6-0")))}
+          ${row("Position à la commissure des lèvres :", `${line(value("6-1"))} cm`)}
+          ${row("Valeur de la capnographie :", `${line(value("6-2"))} mmHg`)}
+          ${row("Pression du ballonnet contrôlée ?", yn(checked("6-3")))}
+          ${row("Respirateur adéquat ?", yn(checked("6-4")))}
+          ${row("Radiographie pulmonaire effectuée ?", yn(checked("6-5")))}
+          <div class="checks">${option("KTC", value("6-6") === "KTC")} ${option("KTA", value("6-6") === "KTA")} ${option("Aucun", value("6-6") === "Aucun")}</div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="title">Soins IDE</div>
+        <div class="body">
+          ${row("Yeux fermés + gel ophtalmique appliqué ?", yn(checked("7-0")))}
+          ${row("Sonde gastrique en place ?", yn(checked("7-1")))}
+          ${row("Sonde urinaire en place ?", yn(checked("7-2")))}
+        </div>
+      </section>
+      <section class="panel">
+        <div class="title">Traçabilité</div>
+        <div class="body trace">
+          <div>Date et heure de l'intubation : ${line()} à ${line()} H</div>
+          <div style="margin-top:2mm">Médecin : ${line("", true)}</div>
+          <div style="margin-top:2mm">IDE : ${line("", true)}</div>
+          <div style="margin-top:2mm">Signature : ${line("", true)}</div>
+        </div>
+      </section>
+    </div>
+  </section>
+  <div class="footer">SEULE LA VERSION ÉLECTRONIQUE EST OPPOSABLE</div>
+</main><script>window.onload=function(){window.print();}</scr` + `ipt></body></html>`
+  );
+};
+
 const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
   const sectionIdPrefix = useId();
   // Options d'un menu déroulant : soit explicites (`options`), soit dérivées
@@ -397,9 +621,11 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
     body += `<p class="foot">Édité depuis MediURG — outil d'aide, ne remplace pas la prescription. La prescription officielle prévaut.</p>`;
 
     const doc =
-      kitId === "sedation-procedurale"
-        ? buildSedationProcedurePrintDoc(values)
-        : `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
+      kitId === "isr"
+        ? buildIsrPrintDoc(values)
+        : kitId === "sedation-procedurale"
+          ? buildSedationProcedurePrintDoc(values)
+          : `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${esc(titre)}</title>
 <style>
@@ -416,7 +642,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   .foot { margin-top: 20px; font-size: 10px; color: #777; font-style: italic; border-top: 1px solid #ccc; padding-top: 8px; }
   @media print { body { margin: 12mm; } }
 </style></head><body>${body}<script>window.onload=function(){window.print();}</scr` +
-          `ipt></body></html>`;
+            `ipt></body></html>`;
 
     const w = window.open("", "_blank");
     if (!w) return;
