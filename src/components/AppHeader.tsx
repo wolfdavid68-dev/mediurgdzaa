@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { logout } from "../lib/auth";
+import { useAuthProfile } from "../lib/authProfile";
 import type { useLongPress } from "../lib/useLongPress";
 import { openTutoratWithCurrentSession } from "../lib/tutorat";
 
@@ -79,10 +81,12 @@ const AppHeader = ({
   showTutorat = true,
   children,
 }: AppHeaderProps) => {
+  const authProfile = useAuthProfile();
   // Menu kebab : regroupe thème / police / sauvegarde notes derrière un seul
   // bouton 48 px (au lieu de 3 boutons serrés). Le badge ONLINE/OFFLINE reste
   // visible en permanence à côté.
   const [menuOpen, setMenuOpen] = useState(false);
+  const [logoutBusy, setLogoutBusy] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -104,6 +108,13 @@ const AppHeader = ({
   const handle = (action: () => void) => () => {
     action();
     setMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    setLogoutBusy(true);
+    setMenuOpen(false);
+    await logout();
+    setLogoutBusy(false);
   };
 
   return (
@@ -199,6 +210,31 @@ const AppHeader = ({
                   </span>
                   <span>Sauvegarder mes notes</span>
                 </button>
+                {authProfile && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="header-menu-item header-menu-item-danger"
+                    onClick={handleLogout}
+                    disabled={logoutBusy}
+                  >
+                    <span className="header-menu-ic" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                    </span>
+                    <span>{logoutBusy ? "Déconnexion..." : "Se déconnecter"}</span>
+                  </button>
+                )}
               </div>
             )}
           </div>

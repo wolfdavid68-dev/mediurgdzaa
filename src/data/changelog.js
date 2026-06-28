@@ -25,6 +25,10 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
+        text: "Menu du haut : ajout d'un bouton « Se déconnecter » dans les réglages « ... », pratique sur un ordinateur partagé ou un poste de service.",
+      },
+      {
+        type: "feat",
         text: "Bilan ACR desktop agrandi et réorganisé : conteneur plus large, RCP déplacée dans la colonne gauche, sections moins étirées et meilleure utilisation de la largeur écran.",
       },
       {
