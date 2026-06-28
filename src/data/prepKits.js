@@ -88,6 +88,30 @@ export const PREP_KITS = [
     ],
     checklist: [
       {
+        titre: "Équipe & indication",
+        items: [
+          {
+            type: "text",
+            label: "Médecin leader (resp. SAUV)",
+            placeholder: "Nom du médecin leader",
+          },
+          { type: "text", label: "Opérateur", placeholder: "Nom de l'opérateur" },
+          {
+            type: "text",
+            label: "Aide opérateur / observateur",
+            placeholder: "Nom de l'aide / observateur",
+          },
+          { type: "text", label: "IPA / IDE leader", placeholder: "Nom de l'IPA / IDE leader" },
+          { type: "text", label: "IDE matériel", placeholder: "Nom de l'IDE matériel" },
+          {
+            type: "text",
+            label: "IDE thérapeutiques",
+            placeholder: "Nom de l'IDE thérapeutiques",
+          },
+          { type: "text", label: "Indication", placeholder: "Motif d'intubation" },
+        ],
+      },
+      {
         titre: "Évaluation initiale",
         items: [
           { type: "check", label: "Critères d'intubation réunis" },
@@ -291,6 +315,12 @@ export const PREP_KITS = [
             type: "check",
             label: "Indication de sédation procédurale validée par le médecin",
           },
+          {
+            type: "text",
+            label: "Médecin urgentiste sénior",
+            placeholder: "Nom du médecin",
+          },
+          { type: "text", label: "IDE SA", placeholder: "Nom de l'IDE" },
         ],
       },
       {

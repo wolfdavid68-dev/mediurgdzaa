@@ -180,12 +180,12 @@ export const buildSedationProcedurePrintDoc = (values: PrintValues): string => {
   <div class="footer">
     <div class="sign">
       <div class="sign-title">Médecin</div>
-      <div class="sign-line"><span>Nom</span><span class="sign-fill"></span></div>
+      <div class="sign-line"><span>Nom</span><span class="sign-fill">${esc(value("0-4"))}</span></div>
       <div class="sign-line"><span>Signature</span><span class="sign-fill"></span></div>
     </div>
     <div class="sign">
       <div class="sign-title">IDE SA</div>
-      <div class="sign-line"><span>Nom</span><span class="sign-fill"></span></div>
+      <div class="sign-line"><span>Nom</span><span class="sign-fill">${esc(value("0-5"))}</span></div>
       <div class="sign-line"><span>Signature</span><span class="sign-fill"></span></div>
     </div>
   </div>
@@ -213,7 +213,7 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
   const option = (label: string, active = false) => `${box(active)} ${esc(label)}`;
   const row = (label: string, content: string) =>
     `<div class="row"><span class="label">${esc(label)}</span><span>${content}</span></div>`;
-  const finalDecision = value("5-6");
+  const finalDecision = value("6-6");
   const isNoGo = finalDecision.startsWith("No go");
   const isGo = finalDecision.startsWith("Go ISR");
 
@@ -265,10 +265,10 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
 </style></head><body><main class="sheet">
   <header class="header">
     <div class="identity">
-      <div><strong>Médecin leader (resp. SAUV) :</strong> ${line("", true)}</div>
-      <div><strong>Opérateur :</strong> ${line("", true)}</div>
-      <div><strong>Aide opérateur / observateur :</strong> ${line("", true)}</div>
-      <div><strong>Indication :</strong> ${line("", true)}</div>
+      <div><strong>Médecin leader (resp. SAUV) :</strong> ${line(value("0-0"), true)}</div>
+      <div><strong>Opérateur :</strong> ${line(value("0-1"), true)}</div>
+      <div><strong>Aide opérateur / observateur :</strong> ${line(value("0-2"), true)}</div>
+      <div><strong>Indication :</strong> ${line(value("0-6"), true)}</div>
       <div class="muted">MediURG · ISR · Édité le ${esc(now)}</div>
     </div>
     <div class="titleblock">
@@ -278,9 +278,9 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
     </div>
     <div class="two">
       <div class="identity">
-        <div><strong>IPA / IDE leader :</strong> ${line("", true)}</div>
-        <div><strong>IDE matériel :</strong> ${line("", true)}</div>
-        <div><strong>IDE thérapeutiques :</strong> ${line("", true)}</div>
+        <div><strong>IPA / IDE leader :</strong> ${line(value("0-3"), true)}</div>
+        <div><strong>IDE matériel :</strong> ${line(value("0-4"), true)}</div>
+        <div><strong>IDE thérapeutiques :</strong> ${line(value("0-5"), true)}</div>
       </div>
       <div class="patient">Étiquette patient</div>
     </div>
@@ -290,8 +290,8 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
       <section class="panel">
         <div class="title">Évaluation initiale</div>
         <div class="body">
-          ${row("Les critères d'intubation sont réunis ?", yn(checked("0-0")))}
-          ${row("Absence de contre-indication à la Célocurine ?", yn(checked("0-1")))}
+          ${row("Les critères d'intubation sont réunis ?", yn(checked("1-0")))}
+          ${row("Absence de contre-indication à la Célocurine ?", yn(checked("1-1")))}
           <div class="muted">(allergie, hyperkaliémie, brûlure, insuffisance rénale)</div>
         </div>
       </section>
@@ -299,34 +299,34 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
         <div class="title">Critères prédictifs de complications</div>
         <div class="body">
           <div class="row stack"><span class="label">Score de Mallampati :</span>
-            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Classe ${o}`, value("1-0") === o)).join(" ")}</div>
+            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Classe ${o}`, value("2-0") === o)).join(" ")}</div>
           </div>
           <div class="row stack"><span class="label">Score de Cormack :</span>
-            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Grade ${o}`, value("1-1") === o)).join(" ")}</div>
+            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Grade ${o}`, value("2-1") === o)).join(" ")}</div>
           </div>
-          ${row("Risque d'inhalation ?", yn(Boolean(value("1-2"))))}
-          <div class="checks">${option("Dernier repas < 6h", value("1-2") === "Repas < 6h")} ${option("Dernier repas > 6h", value("1-2") === "Repas > 6h")}</div>
-          ${row("Allergie connue :", line(value("1-3"), true))}
+          ${row("Risque d'inhalation ?", yn(Boolean(value("2-2"))))}
+          <div class="checks">${option("Dernier repas < 6h", value("2-2") === "Repas < 6h")} ${option("Dernier repas > 6h", value("2-2") === "Repas > 6h")}</div>
+          ${row("Allergie connue :", line(value("2-3"), true))}
         </div>
       </section>
       <section class="panel">
         <div class="title">Préparation du patient & matériel</div>
         <div class="body">
-          ${row("Position du patient adaptée ?", yn(checked("2-0")))}
-          ${row("Patient pré-oxygéné ?", yn(checked("2-1")))}
-          <div class="checks">${["Optiflow", "MHC", "VNI"].map((o) => option(o, value("2-2") === o)).join(" ")}</div>
-          ${row("Monitoré : ECG, SpO₂, EtCO₂, FR ?", yn(checked("2-3")))}
-          ${row("2 VVP de bon calibre fonctionnelles ?", yn(checked("2-4")))}
-          ${row("Aspiration + sonde branchée ?", yn(checked("2-5")))}
-          ${row("BAVU complet raccordé à l'O₂ ?", yn(checked("2-6")))}
-          ${row("Sonde IOT :", line(value("2-7")))}
-          ${row("Sonde lubrifiée, mandrin, ballonnet testé ?", yn(checked("2-8")))}
-          ${row("Respirateur complet et réglé ?", yn(checked("2-9")))}
+          ${row("Position du patient adaptée ?", yn(checked("3-0")))}
+          ${row("Patient pré-oxygéné ?", yn(checked("3-1")))}
+          <div class="checks">${["Optiflow", "MHC", "VNI"].map((o) => option(o, value("3-2") === o)).join(" ")}</div>
+          ${row("Monitoré : ECG, SpO₂, EtCO₂, FR ?", yn(checked("3-3")))}
+          ${row("2 VVP de bon calibre fonctionnelles ?", yn(checked("3-4")))}
+          ${row("Aspiration + sonde branchée ?", yn(checked("3-5")))}
+          ${row("BAVU complet raccordé à l'O₂ ?", yn(checked("3-6")))}
+          ${row("Sonde IOT :", line(value("3-7")))}
+          ${row("Sonde lubrifiée, mandrin, ballonnet testé ?", yn(checked("3-8")))}
+          ${row("Respirateur complet et réglé ?", yn(checked("3-9")))}
           <div class="vent">
-            <span>FiO₂ : ${line(value("2-10"))}</span>
-            <span>VT : ${line(value("2-11"))}</span>
-            <span>FR : ${line(value("2-12"))}</span>
-            <span>PEP : ${line(value("2-13"))}</span>
+            <span>FiO₂ : ${line(value("3-10"))}</span>
+            <span>VT : ${line(value("3-11"))}</span>
+            <span>FR : ${line(value("3-12"))}</span>
+            <span>PEP : ${line(value("3-13"))}</span>
           </div>
         </div>
       </section>
@@ -337,37 +337,37 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
         <div class="body">
           <div class="row stack"><span class="label">Technique prévue en première intention :</span>
             <div class="checks">
-              ${option("Vidéolaryngoscope", hasChoice("3-0", "Vidéolaryngoscope"))}
-              ${option("Mandrin semi-rigide", hasChoice("3-0", "Mandrin semi-rigide"))}
-              ${option("Laryngoscopie directe", hasChoice("3-0", "Laryngoscopie directe"))}
+              ${option("Vidéolaryngoscope", hasChoice("4-0", "Vidéolaryngoscope"))}
+              ${option("Mandrin semi-rigide", hasChoice("4-0", "Mandrin semi-rigide"))}
+              ${option("Laryngoscopie directe", hasChoice("4-0", "Laryngoscopie directe"))}
             </div>
           </div>
           <div class="row stack"><span class="label">Matériel d'intubation difficile à proximité :</span>
-            <div class="checks">${option("Kit de crico", checked("3-1"))} ${option("Cook/Eichmann", checked("3-1"))} ${option("Supraglottique", checked("3-1"))} ${option("Fibroscope", checked("3-1"))}</div>
+            <div class="checks">${option("Kit de crico", checked("4-1"))} ${option("Cook/Eichmann", checked("4-1"))} ${option("Supraglottique", checked("4-1"))} ${option("Fibroscope", checked("4-1"))}</div>
           </div>
         </div>
       </section>
       <section class="panel">
         <div class="title">Thérapeutiques</div>
         <div class="body">
-          ${row("Hypnotique envisagé :", line(value("4-0"), true))}
-          ${row("Dose d'hypnotique :", `${line(value("4-1"))} mg`)}
-          ${row("Curare envisagé :", line(value("4-2"), true))}
-          ${row("Dose de curare :", `${line(value("4-3"))} mg`)}
-          ${row("Sédation au PSE préparée ?", yn(checked("4-4")))}
-          ${row("Support vasopresseur préparé ?", yn(checked("4-5")))}
+          ${row("Hypnotique envisagé :", line(value("5-0"), true))}
+          ${row("Dose d'hypnotique :", `${line(value("5-1"))} mg`)}
+          ${row("Curare envisagé :", line(value("5-2"), true))}
+          ${row("Dose de curare :", `${line(value("5-3"))} mg`)}
+          ${row("Sédation au PSE préparée ?", yn(checked("5-4")))}
+          ${row("Support vasopresseur préparé ?", yn(checked("5-5")))}
         </div>
       </section>
       <section class="panel">
         <div class="title">Contrôle ultime & décision</div>
         <div class="body">
-          ${row("Déroulé et alternatives expliqués à l'équipe ?", yn(checked("5-0")))}
-          ${row("2e opérateur expérimenté à proximité ?", yn(checked("5-1")))}
+          ${row("Déroulé et alternatives expliqués à l'équipe ?", yn(checked("6-0")))}
+          ${row("2e opérateur expérimenté à proximité ?", yn(checked("6-1")))}
           <div class="vent">
-            <span>FC : ${line(value("5-2"))}</span>
-            <span>PA/PAM : ${line(value("5-3"))}</span>
-            <span>SpO₂ : ${line(value("5-4"))}</span>
-            <span>FR : ${line(value("5-5"))}</span>
+            <span>FC : ${line(value("6-2"))}</span>
+            <span>PA/PAM : ${line(value("6-3"))}</span>
+            <span>SpO₂ : ${line(value("6-4"))}</span>
+            <span>FR : ${line(value("6-5"))}</span>
           </div>
           <div class="decision">
             <div class="decision-choice">${box(isNoGo)}<div><strong>No go</strong><span>Reporter / optimiser</span></div></div>
@@ -385,29 +385,29 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
       <section class="panel">
         <div class="title">Post-intubation</div>
         <div class="body">
-          ${row("Sonde d'intubation fixée ?", yn(checked("6-0")))}
-          ${row("Position à la commissure des lèvres :", `${line(value("6-1"))} cm`)}
-          ${row("Valeur de la capnographie :", `${line(value("6-2"))} mmHg`)}
-          ${row("Pression du ballonnet contrôlée ?", yn(checked("6-3")))}
-          ${row("Respirateur adéquat ?", yn(checked("6-4")))}
-          ${row("Radiographie pulmonaire effectuée ?", yn(checked("6-5")))}
-          <div class="checks">${option("KTC", value("6-6") === "KTC")} ${option("KTA", value("6-6") === "KTA")} ${option("Aucun", value("6-6") === "Aucun")}</div>
+          ${row("Sonde d'intubation fixée ?", yn(checked("7-0")))}
+          ${row("Position à la commissure des lèvres :", `${line(value("7-1"))} cm`)}
+          ${row("Valeur de la capnographie :", `${line(value("7-2"))} mmHg`)}
+          ${row("Pression du ballonnet contrôlée ?", yn(checked("7-3")))}
+          ${row("Respirateur adéquat ?", yn(checked("7-4")))}
+          ${row("Radiographie pulmonaire effectuée ?", yn(checked("7-5")))}
+          <div class="checks">${option("KTC", value("7-6") === "KTC")} ${option("KTA", value("7-6") === "KTA")} ${option("Aucun", value("7-6") === "Aucun")}</div>
         </div>
       </section>
       <section class="panel">
         <div class="title">Soins IDE</div>
         <div class="body">
-          ${row("Yeux fermés + gel ophtalmique appliqué ?", yn(checked("7-0")))}
-          ${row("Sonde gastrique en place ?", yn(checked("7-1")))}
-          ${row("Sonde urinaire en place ?", yn(checked("7-2")))}
+          ${row("Yeux fermés + gel ophtalmique appliqué ?", yn(checked("8-0")))}
+          ${row("Sonde gastrique en place ?", yn(checked("8-1")))}
+          ${row("Sonde urinaire en place ?", yn(checked("8-2")))}
         </div>
       </section>
       <section class="panel">
         <div class="title">Traçabilité</div>
         <div class="body trace">
           <div>Date et heure de l'intubation : ${line()} à ${line()} H</div>
-          <div style="margin-top:2mm">Médecin : ${line("", true)}</div>
-          <div style="margin-top:2mm">IDE : ${line("", true)}</div>
+          <div style="margin-top:2mm">Médecin : ${line(value("0-0"), true)}</div>
+          <div style="margin-top:2mm">IDE : ${line(value("0-3"), true)}</div>
           <div style="margin-top:2mm">Signature : ${line("", true)}</div>
         </div>
       </section>

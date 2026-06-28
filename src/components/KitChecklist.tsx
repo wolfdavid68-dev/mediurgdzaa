@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import KitScaleIllustration from "./KitScaleIllustration";
+import { useAuthProfile } from "../lib/authProfile";
 import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
 import { storageKey } from "../lib/storageKeys";
 import type { ChecklistItem, ChecklistSection } from "../types/data";
@@ -71,8 +72,36 @@ type Props = {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+const normalizeRole = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const isMedicalRole = (fonction: string): boolean =>
+  /\b(medecin|interne|pharmacien|pharmacienne)\b/.test(normalizeRole(fonction));
+
+const isIdeRole = (fonction: string): boolean =>
+  normalizeRole(fonction) === "ide" || /\binfirmier\b|\binfirmiere\b/.test(normalizeRole(fonction));
+
+const getProfileAutofillKey = (kitId: string, fonction: string): string | null => {
+  if (kitId === "isr") {
+    if (isMedicalRole(fonction)) return "0-0";
+    if (isIdeRole(fonction)) return "0-3";
+    return "0-1";
+  }
+  if (kitId === "sedation-procedurale") {
+    if (isMedicalRole(fonction)) return "0-4";
+    if (isIdeRole(fonction)) return "0-5";
+  }
+  return null;
+};
+
 const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
   const sectionIdPrefix = useId();
+  const authProfile = useAuthProfile();
   // Options d'un menu déroulant : soit explicites (`options`), soit dérivées
   // des drogues du kit dont le rôle contient le mot-clé `from` (ex : tous les
   // « Hypnotique … » / « Curare … » du kit). Sufentanil (« Morphinique ») est
@@ -100,6 +129,23 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   // dernier champ, la section deviendrait complète et se replierait en plein
   // milieu de la frappe (l'input disparaîtrait). Le repli se fait au blur.
   const focusedSection = useRef<number | null>(null);
+  const profileAutofillDone = useRef(false);
+
+  useEffect(() => {
+    if (!authProfile || profileAutofillDone.current) return;
+    const connectedName = `${authProfile.prenom} ${authProfile.nom}`.trim();
+    if (!connectedName) return;
+
+    const targetKey = getProfileAutofillKey(kitId, authProfile.fonction);
+    if (!targetKey) return;
+
+    profileAutofillDone.current = true;
+    setValues((prev) => {
+      const current = prev[targetKey];
+      if (typeof current === "string" && current.trim()) return prev;
+      return { ...prev, [targetKey]: connectedName };
+    });
+  }, [authProfile, kitId]);
 
   useEffect(() => {
     safeSetJson(storageKey.kitChecklist(kitId), { ts: Date.now(), values });

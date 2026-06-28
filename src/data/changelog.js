@@ -21,6 +21,10 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
+        text: "Kits ISR et Kétofol : ajout des champs équipe / indication dans la check-list. Le nom de la personne connectée est prérempli selon sa fonction, puis reste modifiable à la main avant impression.",
+      },
+      {
+        type: "feat",
         text: "Tutorat démo SAU Mulhouse passé en accès main : la pastille « Tutorat » est visible hors preview pour les profils à accès complet, et les profils Aide-soignant / Étudiant AS ouvrent directement le compagnon tutorat dédié.",
       },
       {
