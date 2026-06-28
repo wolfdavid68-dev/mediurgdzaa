@@ -1,3 +1,4 @@
+import { UsersRound } from "lucide-react";
 import ModalDialog from "./ModalDialog";
 import { STORAGE_KEYS } from "../lib/storageKeys";
 
@@ -25,34 +26,31 @@ const AnnounceModal = ({ open, onClose }: Props) => {
             <img src="/logo-sau.png" alt="" draggable={false} />
           </div>
           <div className="announce-icon">
-            <svg
-              viewBox="0 0 24 24"
-              width="30"
-              height="30"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+            <UsersRound aria-hidden="true" size={28} strokeWidth={2} />
           </div>
         </div>
-        <h2 id="announce-title" className="announce-title">
-          Tutorat démo ouvert <span className="announce-tag">nouveau</span>
-        </h2>
-        <p className="announce-text">
-          Le compagnon de tutorat SAU Mulhouse passe en accès main. Il sert de support de
-          démonstration pour accompagner les ESI/EAS dans les repères du service.
-        </p>
-        <div className="announce-points" aria-label="Points clés du tutorat démo">
-          <span>Parcours d'accueil</span>
-          <span>Repères terrain</span>
-          <span>Accès ESI/EAS</span>
+        <div className="announce-copy">
+          <h2 id="announce-title" className="announce-title">
+            Tutorat démo ouvert <span className="announce-tag">nouveau</span>
+          </h2>
+          <p className="announce-where">
+            <span className="announce-where-icon" aria-hidden="true">
+              <UsersRound size={16} strokeWidth={2.2} />
+            </span>
+            <span>
+              Disponible via la pastille <strong>Tutorat</strong> dans l'en-tête.
+            </span>
+          </p>
+          <p className="announce-text">
+            Le compagnon de tutorat SAU Mulhouse passe en accès main. Il sert de support de
+            démonstration pour accompagner les ESI/EAS dans les repères du service.
+          </p>
+          <div className="announce-points" aria-label="Points clés du tutorat démo">
+            <span>Parcours d'accueil</span>
+            <span>Repères terrain</span>
+            <span>Accès ESI/EAS</span>
+          </div>
         </div>
-        <p className="announce-where">Disponible via la pastille Tutorat dans l'en-tête.</p>
         <button type="button" className="announce-btn" onClick={onClose} autoFocus>
           Découvrir plus tard
         </button>
