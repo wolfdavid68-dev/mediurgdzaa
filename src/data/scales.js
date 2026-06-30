@@ -261,4 +261,83 @@ export const SCALES = [
       return { severity: "Sevrage sévère (> 14)", color: "#dc2626" };
     },
   },
+
+  {
+    id: "wallace",
+    nom: "Règle des 9 de Wallace (surface brûlée)",
+    icon: "🔥",
+    description:
+      "Estimation rapide de la surface cutanée brûlée (SCB) chez l'adulte. Indiquez l'atteinte de chaque région, le total s'exprime en % de surface corporelle. Repère d'appoint : la paume + doigts du patient ≈ 1 %. Une SCB ≥ 20 % impose un remplissage vasculaire (formule de Parkland) et oriente vers un centre de brûlés. Chez l'enfant, préférer la table de Lund-Browder (tête proportionnellement plus grande, membres inférieurs plus petits).",
+    type: "sum",
+    items: [
+      {
+        label: "Tête et cou (9 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 4.5, label: "≈ moitié (4,5 %)" },
+          { score: 9, label: "Totale (9 %)" },
+        ],
+      },
+      {
+        label: "Membre supérieur droit (9 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 4.5, label: "≈ moitié (4,5 %)" },
+          { score: 9, label: "Totale (9 %)" },
+        ],
+      },
+      {
+        label: "Membre supérieur gauche (9 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 4.5, label: "≈ moitié (4,5 %)" },
+          { score: 9, label: "Totale (9 %)" },
+        ],
+      },
+      {
+        label: "Tronc antérieur — thorax + abdomen (18 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 18, label: "Total (18 %)" },
+        ],
+      },
+      {
+        label: "Tronc postérieur — dos (18 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 18, label: "Total (18 %)" },
+        ],
+      },
+      {
+        label: "Membre inférieur droit (18 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 18, label: "Total (18 %)" },
+        ],
+      },
+      {
+        label: "Membre inférieur gauche (18 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 18, label: "Total (18 %)" },
+        ],
+      },
+      {
+        label: "Périnée / organes génitaux (1 %)",
+        options: [
+          { score: 0, label: "Indemne" },
+          { score: 1, label: "Atteint (1 %)" },
+        ],
+      },
+    ],
+    interpret: (total) => {
+      if (total < 10) return { severity: "Brûlure localisée (< 10 %)", color: "#16a34a" };
+      if (total < 20) return { severity: "Brûlure étendue (10-19 %)", color: "#f97316" };
+      return { severity: "Brûlure grave (≥ 20 %) — remplissage", color: "#dc2626" };
+    },
+  },
 ];
