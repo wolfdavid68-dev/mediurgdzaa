@@ -34,7 +34,7 @@ const CHUNK_GZIP_LIMITS_KB = {
   medicaments: 22,
   "protocoles-pisu": 24,
   "protocoles-incompat": 28,
-  "protocoles-kits": 24,
+  "protocoles-kits": 25,
   "protocoles-ecg": 22,
   protocoles: 10,
   echelles: 8,

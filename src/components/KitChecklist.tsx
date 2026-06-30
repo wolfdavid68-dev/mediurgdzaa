@@ -80,24 +80,26 @@ const normalizeRole = (value: string): string =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-const isMedicalRole = (fonction: string): boolean =>
-  /\b(medecin|interne|pharmacien|pharmacienne)\b/.test(normalizeRole(fonction));
-
-const isIdeRole = (fonction: string): boolean =>
-  normalizeRole(fonction) === "ide" || /\binfirmier\b|\binfirmiere\b/.test(normalizeRole(fonction));
-
 const getProfileAutofillKey = (kitId: string, fonction: string): string | null => {
+  const role = normalizeRole(fonction);
+  const medical = /\b(medecin|interne|pharmacien|pharmacienne)\b/.test(role);
+  const ide = role === "ide" || /\binfirmier\b|\binfirmiere\b/.test(role);
   if (kitId === "isr") {
-    if (isMedicalRole(fonction)) return "0-0";
-    if (isIdeRole(fonction)) return "0-3";
+    if (medical) return "0-0";
+    if (ide) return "0-3";
     return "0-1";
   }
   if (kitId === "sedation-procedurale") {
-    if (isMedicalRole(fonction)) return "0-4";
-    if (isIdeRole(fonction)) return "0-5";
+    if (medical) return "0-4";
+    if (ide) return "0-5";
   }
   return null;
 };
+
+const getDateTimeAutofillKey = (kitId: string): string | null =>
+  kitId === "isr" ? "0-7" : kitId === "sedation-procedurale" ? "0-6" : null;
+
+const twoDigits = (value: number): string => String(value).padStart(2, "0");
 
 const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
   const sectionIdPrefix = useId();
@@ -130,6 +132,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   // milieu de la frappe (l'input disparaîtrait). Le repli se fait au blur.
   const focusedSection = useRef<number | null>(null);
   const profileAutofillDone = useRef(false);
+  const dateTimeAutofillDone = useRef(false);
 
   useEffect(() => {
     if (!authProfile || profileAutofillDone.current) return;
@@ -146,6 +149,22 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
       return { ...prev, [targetKey]: connectedName };
     });
   }, [authProfile, kitId]);
+
+  useEffect(() => {
+    if (dateTimeAutofillDone.current) return;
+    const key = getDateTimeAutofillKey(kitId);
+    if (!key) return;
+
+    dateTimeAutofillDone.current = true;
+    const now = new Date();
+    const value = `${twoDigits(now.getDate())}/${twoDigits(now.getMonth() + 1)}/${now.getFullYear()} ${twoDigits(now.getHours())}:${twoDigits(now.getMinutes())}`;
+
+    setValues((prev) => {
+      const current = prev[key];
+      if (typeof current === "string" && current.trim()) return prev;
+      return { ...prev, [key]: value };
+    });
+  }, [kitId]);
 
   useEffect(() => {
     safeSetJson(storageKey.kitChecklist(kitId), { ts: Date.now(), values });
