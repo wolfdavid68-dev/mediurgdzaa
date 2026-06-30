@@ -1594,8 +1594,10 @@
     .acr-record-sections {
       height: auto;
       overflow: visible;
-      background: #fff !important;
-      color: #111 !important;
+      background: var(--bg) !important;
+      color: var(--text) !important;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
     }
 
     .acr-record-toolbar,
@@ -1615,9 +1617,9 @@
       break-inside: avoid;
       box-shadow: none;
       margin: 0 0 10px;
-      border-color: #999 !important;
-      background: #fff !important;
-      color: #111 !important;
+      border-color: var(--border) !important;
+      background: var(--card) !important;
+      color: var(--text) !important;
     }
   }
 }
@@ -2201,6 +2203,292 @@
     flex: 0 0 calc(100% - 322px);
     margin-left: 322px;
   }
+}
+
+/* Le dossier ACR doit suivre le thème choisi par l'utilisateur, y compris
+   quand il est rendu dans le top layer <dialog> ou cloné pour l'export PNG. */
+[data-theme="light"] .acr-record-dialog,
+.acr-record-dialog[data-acr-theme="light"] {
+  border-color: #c8d1e1;
+  background: #e8edf5;
+  box-shadow:
+    0 28px 90px rgb(15 23 42 / 0.24),
+    0 0 0 1px rgb(15 23 42 / 0.06);
+}
+
+[data-theme="light"] .acr-record-modal,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-modal,
+.acr-record-content[data-acr-theme="light"] {
+  --acr-red: #d42b2b;
+  --acr-red-soft: rgb(212 43 43 / 0.12);
+  --acr-red-line: rgb(212 43 43 / 0.34);
+  --acr-panel: #ffffff;
+  --acr-panel-2: #f8fafc;
+  --acr-field: #ffffff;
+  --acr-line: #c8d1e1;
+  --acr-muted: #64748b;
+  --acr-soft: #334155;
+  --acr-green: #1a9440;
+  --acr-blue: #0a7ae0;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4fb 42%, #e8edf5 100%);
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-header,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-header {
+  border-bottom-color: #c8d1e1;
+  background: #f8fafc;
+}
+
+[data-theme="light"] .acr-record-header h3,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-header h3 {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-subtitle,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-subtitle,
+[data-theme="light"] .acr-record-desktop-status,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-status,
+[data-theme="light"] .acr-record-desktop-status small,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-status small {
+  color: #64748b;
+}
+
+[data-theme="light"] .acr-record-brand,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-brand {
+  background: rgb(212 43 43 / 0.08);
+  color: #d42b2b;
+  box-shadow:
+    0 0 0 5px rgb(212 43 43 / 0.08),
+    inset 0 0 0 1px rgb(255 255 255 / 0.85);
+}
+
+[data-theme="light"] .acr-record-close,
+[data-theme="light"] .acr-record-header-action,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-close,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-header-action {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-content,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-content,
+.acr-record-content[data-acr-theme="light"] {
+  background: #e8edf5;
+}
+
+[data-theme="light"] .acr-record-desktop-strip,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-strip {
+  border-bottom-color: #c8d1e1;
+  background: #e8f2ff;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-desktop-strip strong,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-strip strong {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-timecard,
+[data-theme="light"] .acr-record-patient-card,
+[data-theme="light"] .acr-record-section,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-timecard,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section,
+.acr-record-content[data-acr-theme="light"] .acr-record-timecard,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card,
+.acr-record-content[data-acr-theme="light"] .acr-record-section {
+  border-color: #c8d1e1;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  color: #111827;
+  box-shadow: 0 10px 28px rgb(15 23 42 / 0.1);
+}
+
+[data-theme="light"] .acr-record-timecard,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-timecard,
+.acr-record-content[data-acr-theme="light"] .acr-record-timecard {
+  border-color: rgb(212 43 43 / 0.34);
+  background: linear-gradient(180deg, rgb(212 43 43 / 0.08), transparent 64%), #ffffff;
+}
+
+[data-theme="light"] .acr-record-patient-card > strong,
+[data-theme="light"] .acr-record-section-head h4,
+[data-theme="light"] .acr-record-events-card h4,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card > strong,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-head h4,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-events-card h4,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card > strong,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-head h4,
+.acr-record-content[data-acr-theme="light"] .acr-record-events-card h4 {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-timecard > span,
+[data-theme="light"] .acr-record-patient-card > span,
+[data-theme="light"] .acr-record-field > span,
+[data-theme="light"] .acr-record-textarea > span,
+[data-theme="light"] .acr-record-causes > div > strong,
+[data-theme="light"] .acr-record-chip-label,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-timecard > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-field > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-textarea > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-causes > div > strong,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-chip-label,
+.acr-record-content[data-acr-theme="light"] .acr-record-timecard > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-field > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-textarea > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-causes > div > strong,
+.acr-record-content[data-acr-theme="light"] .acr-record-chip-label {
+  color: #64748b;
+}
+
+[data-theme="light"] .acr-record-patient-card > em,
+[data-theme="light"] .acr-record-section-subtitle,
+[data-theme="light"] .acr-record-input-wrap em,
+[data-theme="light"] .acr-cycle-input em,
+[data-theme="light"] .acr-cycle-num span,
+[data-theme="light"] .acr-cycle-num em,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card > em,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-subtitle,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-input-wrap em,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-input em,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-num span,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-num em,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card > em,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-subtitle,
+.acr-record-content[data-acr-theme="light"] .acr-record-input-wrap em,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-input em,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-num span,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-num em {
+  color: #64748b;
+}
+
+[data-theme="light"] .acr-record-section-head,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-head,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-head {
+  border-bottom-color: #d7deea;
+  background: #f8fafc;
+}
+
+[data-theme="light"] .acr-record-section-body,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-body,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-body {
+  background: #ffffff;
+}
+
+[data-theme="light"] .acr-record-patient-input-wrap,
+[data-theme="light"] .acr-record-input-wrap,
+[data-theme="light"] .acr-record-textarea textarea,
+[data-theme="light"] .acr-cycle-input input,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-input-wrap,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-input-wrap,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-textarea textarea,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-input input,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-input-wrap,
+.acr-record-content[data-acr-theme="light"] .acr-record-input-wrap,
+.acr-record-content[data-acr-theme="light"] .acr-record-textarea textarea,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-input input {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-patient-input-wrap input,
+[data-theme="light"] .acr-record-input-wrap input,
+[data-theme="light"] .acr-record-textarea textarea,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-input-wrap input,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-input-wrap input,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-textarea textarea,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-input-wrap input,
+.acr-record-content[data-acr-theme="light"] .acr-record-input-wrap input,
+.acr-record-content[data-acr-theme="light"] .acr-record-textarea textarea {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-chip,
+[data-theme="light"] .acr-record-check,
+[data-theme="light"] .acr-record-actions-menu button,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-chip,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-check,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-actions-menu button,
+.acr-record-content[data-acr-theme="light"] .acr-record-chip,
+.acr-record-content[data-acr-theme="light"] .acr-record-check {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-chip-active,
+[data-theme="light"] .acr-record-check-on,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-chip-active,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-check-on,
+.acr-record-content[data-acr-theme="light"] .acr-record-chip-active,
+.acr-record-content[data-acr-theme="light"] .acr-record-check-on {
+  border-color: rgb(212 43 43 / 0.48);
+  background: linear-gradient(180deg, #e33b47, #c52632);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgb(212 43 43 / 0.18);
+}
+
+[data-theme="light"] .acr-record-causes > div,
+[data-theme="light"] .acr-record-events-card,
+[data-theme="light"] .acr-record-empty,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-causes > div,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-events-card,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-empty,
+.acr-record-content[data-acr-theme="light"] .acr-record-causes > div,
+.acr-record-content[data-acr-theme="light"] .acr-record-events-card,
+.acr-record-content[data-acr-theme="light"] .acr-record-empty {
+  border-color: #c8d1e1;
+  background: #f8fafc;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-cycle-table tr,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-cycle-table tr,
+.acr-record-content[data-acr-theme="light"] .acr-record-cycle-table tr {
+  border-color: #c8d1e1;
+  background: #ffffff;
+}
+
+[data-theme="light"] .acr-record-cycle-table td,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-cycle-table td,
+.acr-record-content[data-acr-theme="light"] .acr-record-cycle-table td {
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-cycle-table td + td,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-cycle-table td + td,
+.acr-record-content[data-acr-theme="light"] .acr-record-cycle-table td + td {
+  border-left-color: #d7deea;
+}
+
+[data-theme="light"] .acr-record-toolbar,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-toolbar {
+  border-top-color: #c8d1e1;
+  background: #f8fafc;
+}
+
+[data-theme="light"] .acr-record-toolbar-outline,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-toolbar-outline {
+  color: #d42b2b !important;
+}
+
+[data-theme="light"] .acr-record-toolbar-action,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-toolbar-action {
+  border-color: rgb(10 122 224 / 0.42) !important;
+  background: rgb(10 122 224 / 0.08) !important;
+  color: #0a64b7 !important;
+}
+
+[data-theme="light"] .acr-record-actions-menu,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-actions-menu {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  box-shadow: 0 20px 42px rgb(15 23 42 / 0.16);
 }
 
 @media (max-width: 980px) {

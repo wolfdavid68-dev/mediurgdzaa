@@ -50,6 +50,8 @@ type AcrRecordViewProps = {
   cycle: number;
 };
 
+type ThemePreference = "dark" | "light";
+
 type FieldProps = {
   label: string;
   value?: string | number;
@@ -71,6 +73,9 @@ const TIMELINE_EVENT_TYPES = new Set(["start", "choc", "adre", "amio", "rosc"]);
 
 const readStoredRecord = () =>
   coerceAcrSession(safeGetJson<unknown>(STORAGE_KEYS.acrSession, createEmptyAcrSession()));
+
+const readThemePreference = (): ThemePreference =>
+  document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
 
 const Field = ({ label, value, type = "text", placeholder, suffix, onChange }: FieldProps) => (
   <label className="acr-record-field">
@@ -260,6 +265,7 @@ const AcrRecordView = ({
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<null | "shared" | "downloaded" | "error">(null);
   const [showActions, setShowActions] = useState(false);
+  const [themePreference, setThemePreference] = useState<ThemePreference>(readThemePreference);
   const captureRef = useRef<HTMLDivElement>(null);
   const timelineEvents = getTimelineEvents(record);
 
@@ -270,6 +276,16 @@ const AcrRecordView = ({
   useEffect(() => {
     safeSetJson(STORAGE_KEYS.acrSession, record);
   }, [record]);
+
+  useEffect(() => {
+    setThemePreference(readThemePreference());
+    const observer = new MutationObserver(() => setThemePreference(readThemePreference()));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const updateRecord = (mutator: (prev: AcrFullSession) => AcrFullSession) => {
     setRecord((prev) => mutator(prev));
@@ -342,13 +358,15 @@ const AcrRecordView = ({
   const generatePng = async () => {
     const node = captureRef.current;
     if (!node) return null;
+    node.setAttribute("data-acr-theme", themePreference);
     node.querySelectorAll("input").forEach((input) => input.setAttribute("value", input.value));
     node.querySelectorAll("textarea").forEach((area) => {
       area.textContent = area.value;
     });
     const { toPng } = await import("html-to-image");
     const bg =
-      getComputedStyle(document.documentElement).getPropertyValue("--card").trim() || "#161620";
+      getComputedStyle(node).backgroundColor ||
+      getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
     const dataUrl = await toPng(node, { backgroundColor: bg, pixelRatio: 2, cacheBust: true });
     const stamp = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "_").slice(0, 19);
     return { dataUrl, filename: `dossier-acr_${stamp}.png` };
@@ -399,6 +417,7 @@ const AcrRecordView = ({
       onClose={onClose}
       className="acr-record-dialog"
       aria-labelledby="acr-record-title"
+      data-acr-theme={themePreference}
     >
       <div className="acr-record-modal">
         <header className="acr-record-header">
@@ -447,7 +466,7 @@ const AcrRecordView = ({
           </strong>
         </div>
 
-        <div className="acr-record-content" ref={captureRef}>
+        <div className="acr-record-content" ref={captureRef} data-acr-theme={themePreference}>
           {/* Cartes supérieures : chrono + patient anonyme */}
           <div className="acr-record-topcards">
             <div className="acr-record-timecard">
