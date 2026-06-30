@@ -1,5 +1,5 @@
 import type { Profile } from "./auth";
-import { isAsFunction, isMedicalFunction } from "./auth";
+import { isAsFunction, isIfsiCadreFunction, isMedicalFunction } from "./auth";
 
 export type PreviewAccessMode = "full" | "medicaments" | "tutorat";
 
@@ -24,7 +24,9 @@ export const getPreviewAccessMode = (
   if (!profile) return "full";
 
   const fonction = profile.fonction;
-  if (isAsFunction(fonction) || isAsStudentFunction(fonction)) return "tutorat";
+  if (isAsFunction(fonction) || isAsStudentFunction(fonction) || isIfsiCadreFunction(fonction)) {
+    return "tutorat";
+  }
   if (!preview) return "full";
   if (isMedicalFunction(fonction)) return "medicaments";
   return "full";

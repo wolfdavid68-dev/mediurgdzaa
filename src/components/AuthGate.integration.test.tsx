@@ -293,6 +293,24 @@ describe("AuthGate — garantie offline (auth activée)", () => {
     expect(screen.queryByText("ADMIN_CONSOLE")).not.toBeInTheDocument();
   });
 
+  test("geste admin ignoré pour un cadre IFSI sans role admin", async () => {
+    h.getCurrentSession.mockResolvedValue({ user: { id: "u1" } });
+    h.fetchProfile.mockResolvedValue({
+      ok: true,
+      data: { ...activeProfile, fonction: "Cadre IFSI" },
+    });
+
+    render(
+      <AuthGate>
+        <div>CONTENU_APP</div>
+      </AuthGate>
+    );
+
+    await waitFor(() => expect(screen.getByText("CONTENU_APP")).toBeInTheDocument());
+    act(() => window.dispatchEvent(new Event("mediurg:open-admin")));
+    expect(screen.queryByText("ADMIN_CONSOLE")).not.toBeInTheDocument();
+  });
+
   test("geste admin ouvre la console uniquement pour un profil autorisé", async () => {
     h.getCurrentSession.mockResolvedValue({ user: { id: "admin-1" } });
     h.fetchProfile.mockResolvedValue({

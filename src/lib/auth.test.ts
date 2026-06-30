@@ -4,6 +4,7 @@ import {
   isAsFunction,
   isCadreFunction,
   isIdeFunction,
+  isIfsiCadreFunction,
   isMedicalFunction,
   isNetworkError,
   isStudentFunction,
@@ -108,12 +109,19 @@ describe("fonction profile helpers", () => {
     expect(isStudentFunction("Étudiant infirmier")).toBe(true);
     expect(isStudentFunction("Étudiant AS")).toBe(true);
     expect(isCadreFunction("Cadre de santé")).toBe(true);
+    expect(isIfsiCadreFunction("Cadre IFSI")).toBe(true);
   });
 
   test("l'acces admin reste possible par role admin ou fonction cadre", () => {
     expect(hasAdminAccess({ role: "admin", fonction: "Infirmier" })).toBe(true);
     expect(hasAdminAccess({ role: "user", fonction: "Cadre de santé" })).toBe(true);
     expect(hasAdminAccess({ role: "user", fonction: "Infirmier" })).toBe(false);
+  });
+
+  test("un cadre IFSI n'a pas l'acces admin MediURG par sa fonction seule", () => {
+    expect(isCadreFunction("Cadre IFSI")).toBe(true);
+    expect(hasAdminAccess({ role: "user", fonction: "Cadre IFSI" })).toBe(false);
+    expect(hasAdminAccess({ role: "admin", fonction: "Cadre IFSI" })).toBe(true);
   });
 });
 

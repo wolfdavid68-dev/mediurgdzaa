@@ -121,8 +121,14 @@ export const isCadreFunction = (fonction: string): boolean => {
   return /\bcadre\b/.test(normalized);
 };
 
+export const isIfsiCadreFunction = (fonction: string): boolean => {
+  const normalized = normalizeFunctionLabel(fonction);
+  return /\bcadre\b/.test(normalized) && /\bifsi\b/.test(normalized);
+};
+
 export const hasAdminAccess = (profile: Pick<Profile, "role" | "fonction">): boolean =>
-  profile.role === "admin" || isCadreFunction(profile.fonction);
+  profile.role === "admin" ||
+  (isCadreFunction(profile.fonction) && !isIfsiCadreFunction(profile.fonction));
 
 // Whitelist optionnelle : emails admins externes au domaine @ghrmsa.fr.
 // Renseigner VITE_ADMIN_EMAILS dans .env.local (séparés par virgules) pour

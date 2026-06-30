@@ -57,7 +57,7 @@ const TutoratOnlyView = () => (
       <img src="/logo-sau.png" alt="Urgences Mulhouse" draggable={false} />
       <p className="tutorat-only-kicker">Tutorat dédié</p>
       <h1 id="tutorat-only-title">Tutorat SAU Mulhouse</h1>
-      <p>Ton profil MediURG ouvre directement le compagnon de tutorat AS / étudiant AS.</p>
+      <p>Ton profil MediURG ouvre directement le compagnon de tutorat AS / IFSI.</p>
       <button type="button" className="tutorat-only-btn" onClick={openTutorat}>
         Ouvrir le tutorat ↗
       </button>

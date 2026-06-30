@@ -11,6 +11,7 @@ export const FONCTIONS = [
   "Étudiant infirmier",
   "Étudiant AS",
   "Cadre de santé",
+  "Cadre IFSI",
 ] as const;
 
 export const SERVICES = ["SAU", "SMUR", "UHCD"] as const;

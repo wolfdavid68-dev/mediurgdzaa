@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import type { Profile } from "../../lib/auth";
+import { hasAdminAccess, type Profile } from "../../lib/auth";
 import { cacheProfile, getCachedProfile, getLastCachedProfile } from "../../lib/profileCache";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
@@ -85,17 +85,6 @@ const onAuthStateChange = (
     unsubscribe?.();
   };
 };
-
-const normalizeFunctionLabel = (value: string): string =>
-  value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-
-const hasAdminAccess = (profile: Pick<Profile, "role" | "fonction">): boolean =>
-  profile.role === "admin" || /\bcadre\b/.test(normalizeFunctionLabel(profile.fonction));
 
 // Détecte une erreur de retour Supabase dans le hash, e.g. lien recovery
 // expiré : `#error=access_denied&error_code=otp_expired&error_description=...`.
