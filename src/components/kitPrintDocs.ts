@@ -250,213 +250,240 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
       .map((v) => v.trim())
       .includes(option);
   const box = (active = false) => `<span class="box">${active ? "✓" : ""}</span>`;
-  const yn = (active: boolean) => `<span class="yn">NON ${box(false)} OUI ${box(active)}</span>`;
-  const line = (text = "", wide = false) =>
-    `<span class="${wide ? "line wide" : "line"}">${esc(text)}${text ? "" : "&nbsp;"}</span>`;
-  const option = (label: string, active = false) => `${box(active)} ${esc(label)}`;
+  const yn = (active: boolean) => `NON ${box(false)} OUI ${box(active)}`;
+  const line = (text = "", width = "") =>
+    `<span class="write-line ${width}">${esc(text)}${text ? "" : "&nbsp;"}</span>`;
+  const traceLine = (text = "") => `<span class="line">${esc(text)}${text ? "" : "&nbsp;"}</span>`;
+  const option = (label: string, active = false) =>
+    `<span class="option">${box(active)} ${esc(label)}</span>`;
   const row = (label: string, content: string) =>
-    `<div class="row"><span class="label">${esc(label)}</span><span>${content}</span></div>`;
+    `<div class="row"><div class="question">${esc(label)}</div><div class="checks">${content}</div></div>`;
+  const fieldRow = (icon: string, label: string, content: string) =>
+    `<div class="field-row"><div class="icon">${icon}</div><div class="label">${esc(label)}</div><div>${content}</div></div>`;
   const finalDecision = value("6-6");
   const isNoGo = finalDecision.startsWith("No go");
   const isGo = finalDecision.startsWith("Go ISR");
+  const printedAt = value("0-7") || now;
 
   return (
     `<!doctype html><html lang="fr"><head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Check-list intubation</title>
 <style>
-  @page { size: A4 landscape; margin: 5mm; }
+  :root {
+    --navy: #06264f;
+    --navy-2: #083a6b;
+    --teal: #008894;
+    --teal-dark: #006d78;
+    --line: #7f96a8;
+    --light: #f5f9fb;
+    --text: #111827;
+    --muted: #4b5563;
+  }
+  @page { size: A4 landscape; margin: 6mm; }
   * { box-sizing: border-box; }
-  body { margin: 0; color: #111; font-family: Arial, Helvetica, sans-serif; font-size: 7.4px; line-height: 1.1; background: #ececec; }
-  .sheet { width: 287mm; margin: 0 auto; padding: 2.5mm; background: #fff; border: 1.2px solid #111; }
-  .header { display: grid; grid-template-columns: 1fr 70mm 1.08fr; gap: 3mm; align-items: stretch; border-bottom: 1.2px solid #111; padding: 0 0 2mm; }
-  .titleblock { align-self: center; text-align: center; border-left: 1px solid #111; border-right: 1px solid #111; padding: 1.5mm 3mm; }
-  .kicker { font-size: 6.8px; text-transform: uppercase; letter-spacing: .12em; color: #555; font-weight: 700; }
-  h1 { margin: .8mm 0 .4mm; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
-  .subhead { font-size: 7.2px; color: #333; }
-  .identity { display: grid; gap: 1.3mm; font-size: 7.8px; }
-  .identity .line { min-width: 30mm; }
-  .patient { border: 1.2px solid #111; display: flex; align-items: flex-start; justify-content: center; padding-top: 2.4mm; font-weight: 700; min-height: 23mm; background: #fafafa; }
-  .grid { display: table; width: 100%; table-layout: fixed; border-spacing: 2.5mm 0; margin: 2.5mm -2.5mm 0; }
-  .col { display: table-cell; width: 33.333%; vertical-align: top; padding: 0 0 0 0; }
-  .panel { border: 1px solid #222; border-radius: 1mm; overflow: hidden; break-inside: avoid; }
-  .col .panel + .panel { margin-top: 1.7mm; }
-  .title { position: relative; background: #444; color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding: 1.35mm 5mm 1.35mm 2mm; font-size: 7.8px; }
-  .title::after { content: ""; position: absolute; right: -1px; top: 0; border-top: 4.8mm solid transparent; border-bottom: 4.8mm solid transparent; border-left: 4.8mm solid #444; transform: translateX(100%); }
-  .body { padding: 1.5mm 1.9mm; display: grid; gap: .8mm; }
-  .row { display: grid; grid-template-columns: minmax(24mm, 1fr) auto; gap: 1.4mm; align-items: baseline; min-height: 2.8mm; }
-  .row.stack { display: block; }
-  .label { font-weight: 600; }
-  .muted { color: #333; font-style: italic; }
-  .box { display: inline-flex; width: 2.8mm; height: 2.8mm; border: 1px solid #111; align-items: center; justify-content: center; font-size: 7px; line-height: 1; margin: 0 .6mm; vertical-align: -0.45mm; }
-  .yn { white-space: nowrap; font-weight: 600; }
-  .line { display: inline-block; min-width: 18mm; border-bottom: 1px dotted #222; min-height: 2.7mm; padding: 0 .8mm; }
-  .wide { min-width: 38mm; }
-  .two { display: grid; grid-template-columns: 1fr 36mm; gap: 2mm; }
-  .checks { display: flex; flex-wrap: wrap; gap: .8mm 1.6mm; }
-  .vent { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1mm; }
-  .comment-lines span { display: block; border-bottom: 1px solid #222; height: 4.2mm; }
-  .decision { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; padding-top: .8mm; }
-  .decision-choice { border: 1px solid #111; padding: 1.3mm 1.6mm; min-height: 11mm; display: grid; grid-template-columns: 4mm 1fr; gap: 1.4mm; align-items: start; background: #fafafa; }
-  .decision-choice strong { display: block; font-size: 8px; text-transform: uppercase; letter-spacing: .04em; }
-  .decision-choice span { display: block; margin-top: .7mm; color: #333; }
-  .decision-note { margin-top: 1.2mm; padding-top: 1mm; border-top: 1px solid #aaa; font-weight: 600; }
-  .trace { display: block; }
-  .footer { padding-top: 1.6mm; text-align: center; font-size: 6.6px; font-style: italic; font-weight: 700; }
-  @media screen { body { padding: 6mm 0; } .sheet { box-shadow: 0 0 0 1px #c8c8c8, 0 8px 26px rgba(0,0,0,.18); } }
-  @media print { body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; } .sheet { width: 100%; box-shadow: none; page-break-inside: avoid; } .panel { break-inside: avoid; page-break-inside: avoid; } }
-</style></head><body><main class="sheet">
-  <header class="header">
+  body { margin: 0; background: #e5e7eb; color: var(--text); font-family: Arial, Helvetica, sans-serif; }
+  .page { width: 297mm; min-height: 210mm; margin: 0 auto; padding: 6mm; background: #fff; }
+  .document { min-height: 198mm; border: 1.4px solid var(--navy); border-radius: 4px; padding: 4mm; display: flex; flex-direction: column; gap: 3.4mm; }
+  .top { display: grid; grid-template-columns: 1.15fr 1.35fr 1.25fr 45mm; gap: 5mm; align-items: stretch; border-bottom: 1.4px solid var(--line); padding-bottom: 3mm; }
+  .identity, .staff { display: flex; flex-direction: column; gap: 2.3mm; font-size: 8pt; line-height: 1.2; }
+  .field-row { display: grid; grid-template-columns: 7mm auto 1fr; gap: 1.5mm; align-items: end; min-height: 5mm; }
+  .icon { color: var(--teal); font-weight: 900; text-align: center; font-size: 11pt; line-height: 1; }
+  .label { font-weight: 700; color: var(--navy); white-space: nowrap; }
+  .line { display: block; border-bottom: 1px solid #111; min-height: 4mm; padding: 0 .8mm; font-size: 7pt; white-space: nowrap; }
+  .operator-name { font-weight: 800; color: var(--navy); border-bottom: 1px solid transparent; min-height: 4mm; }
+  .small-meta { margin-top: 1mm; color: var(--muted); font-style: italic; font-size: 7.3pt; }
+  .title-block { border-left: 1.2px solid var(--navy); border-right: 1.2px solid var(--navy); text-align: center; padding: 2mm 4mm 1mm; display: flex; flex-direction: column; justify-content: center; }
+  .overline { color: var(--teal-dark); letter-spacing: 2px; font-size: 11pt; font-weight: 900; margin-bottom: 1mm; }
+  h1 { margin: 0; color: var(--navy); font-size: 28pt; line-height: 1; letter-spacing: .5px; font-weight: 900; }
+  .subtitle { margin-top: 2mm; color: #374151; font-size: 10pt; letter-spacing: .2px; }
+  .ecg { width: 58mm; margin: 2mm auto 0; color: var(--teal); font-weight: 900; border-top: 1.4px solid var(--teal); position: relative; height: 4mm; }
+  .ecg::after { content: "⌁"; position: absolute; left: 50%; top: -4.5mm; transform: translateX(-50%); font-size: 18pt; background: #fff; padding: 0 2mm; line-height: 1; }
+  .patient-box { border: 1.4px solid var(--teal); border-radius: 4px; text-align: center; color: var(--teal-dark); font-weight: 800; font-size: 10pt; padding: 4mm 2mm; min-height: 31mm; }
+  .main-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3.4mm; flex: 1; }
+  .column { display: flex; flex-direction: column; gap: 3mm; }
+  .card { border: 1.2px solid var(--line); border-radius: 4px; overflow: hidden; background: #fff; }
+  .card-title { background: linear-gradient(90deg, var(--navy), var(--navy-2)); color: #fff; font-weight: 900; font-size: 10.2pt; padding: 2mm 2.6mm; display: flex; align-items: center; gap: 2mm; text-transform: uppercase; letter-spacing: .2px; }
+  .card-title .title-icon { color: #8df5ff; font-size: 13pt; line-height: 1; }
+  .card-body { padding: 2.5mm 3mm; font-size: 7.8pt; line-height: 1.25; }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 2mm; align-items: center; margin-bottom: 1.7mm; }
+  .row:last-child { margin-bottom: 0; }
+  .question { font-weight: 700; color: var(--navy); }
+  .checks { display: flex; align-items: center; gap: 1.2mm; white-space: nowrap; font-weight: 800; color: #111827; font-size: 7.4pt; }
+  .box { display: inline-flex; width: 3.2mm; height: 3.2mm; border: 1px solid #111; background: #fff; vertical-align: middle; align-items: center; justify-content: center; font-size: 7pt; line-height: 1; }
+  .hint { color: var(--muted); font-style: italic; font-size: 7.2pt; margin-top: -.7mm; }
+  .option-line { display: flex; align-items: center; gap: 2.2mm; flex-wrap: wrap; margin: 1.3mm 0 2mm; }
+  .option { display: inline-flex; align-items: center; gap: 1mm; white-space: nowrap; }
+  .write-line { display: inline-block; border-bottom: 1px solid #111; min-width: 25mm; min-height: 3.6mm; vertical-align: baseline; padding: 0 .8mm; }
+  .write-line.sm { min-width: 17mm; }
+  .write-line.md { min-width: 32mm; }
+  .write-line.lg { min-width: 52mm; }
+  .write-line.xl { min-width: 70mm; }
+  .field-inline { display: flex; align-items: end; gap: 1.4mm; flex-wrap: nowrap; margin-bottom: 1.5mm; }
+  .field-inline strong { color: var(--navy); }
+  .vent-row, .param-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; margin: 2mm 0; color: var(--muted); }
+  .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin: 2mm 0; }
+  .decision { border: 1.4px solid var(--teal); border-radius: 3px; min-height: 16mm; padding: 3mm; display: grid; grid-template-columns: auto 1fr; gap: 2mm; align-items: center; }
+  .decision-title { color: var(--teal-dark); font-size: 14pt; font-weight: 900; line-height: 1; }
+  .decision-sub { color: var(--muted); font-size: 7.2pt; margin-top: 1mm; }
+  .comment-lines { display: flex; flex-direction: column; gap: 3.4mm; padding-top: 1mm; }
+  .comment-line { border-bottom: 1px solid #111; height: 2.5mm; }
+  .trace-lines { display: flex; flex-direction: column; gap: 5mm; padding: 2mm 0; }
+  .trace-row { display: grid; grid-template-columns: auto 1fr; gap: 2mm; align-items: end; }
+  .footer { text-align: center; font-size: 7pt; font-weight: 800; font-style: italic; color: #374151; margin-top: auto; }
+  @media print {
+    body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { width: auto; min-height: auto; margin: 0; padding: 0; }
+    .document { min-height: auto; page-break-inside: avoid; }
+    .card { break-inside: avoid; page-break-inside: avoid; }
+  }
+</style></head><body><main class="page"><section class="document">
+  <header class="top">
     <div class="identity">
-      <div><strong>Médecin leader (resp. SAUV) :</strong> ${line(value("0-0"), true)}</div>
-      <div><strong>Opérateur :</strong> ${line(value("0-1"), true)}</div>
-      <div><strong>Aide opérateur / observateur :</strong> ${line(value("0-2"), true)}</div>
-      <div><strong>Indication :</strong> ${line(value("0-6"), true)}</div>
-      <div class="muted">MediURG · ISR · Édité le ${esc(now)}</div>
+      ${fieldRow("⚕", "Médecin leader (resp. SAUV) :", traceLine(value("0-0")))}
+      ${fieldRow("●", "Opérateur :", `<div class="operator-name">${esc(value("0-1"))}</div>`)}
+      ${fieldRow("👥", "Aide opérateur / observateur :", traceLine(value("0-2")))}
+      ${fieldRow("▣", "Indication :", traceLine(value("0-6")))}
+      <div class="small-meta">MEDIURG · ISR · Édité le ${esc(printedAt)}</div>
     </div>
-    <div class="titleblock">
-      <div class="kicker">Séquence rapide</div>
-      <h1>Check-list intubation</h1>
-      <div class="subhead">Évaluation · Préparation · Induction · Post-intubation</div>
+    <div class="title-block">
+      <div class="overline">SÉQUENCE RAPIDE</div>
+      <h1>CHECK-LIST INTUBATION</h1>
+      <div class="subtitle">Évaluation · Préparation · Induction · Post-intubation</div>
+      <div class="ecg"></div>
     </div>
-    <div class="two">
-      <div class="identity">
-        <div><strong>IPA / IDE leader :</strong> ${line(value("0-3"), true)}</div>
-        <div><strong>IDE matériel :</strong> ${line(value("0-4"), true)}</div>
-        <div><strong>IDE thérapeutiques :</strong> ${line(value("0-5"), true)}</div>
-      </div>
-      <div class="patient">Étiquette patient</div>
+    <div class="staff">
+      ${fieldRow("⚕", "IPA / IDE leader :", traceLine(value("0-3")))}
+      ${fieldRow("▤", "IDE matériel :", traceLine(value("0-4")))}
+      ${fieldRow("💉", "IDE thérapeutiques :", traceLine(value("0-5")))}
     </div>
+    <div class="patient-box">Étiquette patient</div>
   </header>
-  <section class="grid">
-    <div class="col">
-      <section class="panel">
-        <div class="title">Évaluation initiale</div>
-        <div class="body">
+  <section class="main-grid">
+    <div class="column">
+      <section class="card">
+        <div class="card-title"><span class="title-icon">⌕</span>Évaluation initiale</div>
+        <div class="card-body">
           ${row("Les critères d'intubation sont réunis ?", yn(checked("1-0")))}
-          ${row("Absence de contre-indication à la Célocurine ?", yn(checked("1-1")))}
-          <div class="muted">(allergie, hyperkaliémie, brûlure, insuffisance rénale)</div>
+          ${row("Absence de contre-indication à la CAI/curare ?", yn(checked("1-1")))}
+          <div class="hint">(allergie, hyperkaliémie, brûlure, insuffisance rénale)</div>
         </div>
       </section>
-      <section class="panel">
-        <div class="title">Critères prédictifs de complications</div>
-        <div class="body">
-          <div class="row stack"><span class="label">Score de Mallampati :</span>
-            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Classe ${o}`, value("2-0") === o)).join(" ")}</div>
-          </div>
-          <div class="row stack"><span class="label">Score de Cormack :</span>
-            <div class="checks">${["I", "II", "III", "IV"].map((o) => option(`Grade ${o}`, value("2-1") === o)).join(" ")}</div>
-          </div>
+      <section class="card">
+        <div class="card-title"><span class="title-icon">⚠</span>Critères prédictifs de complications</div>
+        <div class="card-body">
+          <div class="question">Score de Mallampati :</div>
+          <div class="option-line">${["I", "II", "III", "IV"].map((o) => option(`Classe ${o}`, value("2-0") === o)).join("")}</div>
+          <div class="question">Score de Cormack :</div>
+          <div class="option-line">${["I", "II", "III", "IV"].map((o) => option(`Grade ${o}`, value("2-1") === o)).join("")}</div>
           ${row("Risque d'inhalation ?", yn(Boolean(value("2-2"))))}
-          <div class="checks">${option("Dernier repas < 6h", value("2-2") === "Repas < 6h")} ${option("Dernier repas > 6h", value("2-2") === "Repas > 6h")}</div>
-          ${row("Allergie connue :", line(value("2-3"), true))}
+          <div class="option-line">${option("Dernier repas < 6 h", value("2-2") === "Repas < 6h")}${option("Dernier repas > 6 h", value("2-2") === "Repas > 6h")}</div>
+          <div class="field-inline"><strong>Allergie connue :</strong>${line(value("2-3"), "xl")}</div>
         </div>
       </section>
-      <section class="panel">
-        <div class="title">Préparation du patient & matériel</div>
-        <div class="body">
+      <section class="card">
+        <div class="card-title"><span class="title-icon">♁</span>Préparation du patient & matériel</div>
+        <div class="card-body">
           ${row("Position du patient adaptée ?", yn(checked("3-0")))}
           ${row("Patient pré-oxygéné ?", yn(checked("3-1")))}
-          <div class="checks">${["Optiflow", "MHC", "VNI"].map((o) => option(o, value("3-2") === o)).join(" ")}</div>
+          <div class="option-line">${["Optiflow", "MHC", "VNI"].map((o) => option(o, value("3-2") === o)).join("")}</div>
           ${row("Monitoré : ECG, SpO₂, EtCO₂, FR ?", yn(checked("3-3")))}
           ${row("2 VVP de bon calibre fonctionnelles ?", yn(checked("3-4")))}
           ${row("Aspiration + sonde branchée ?", yn(checked("3-5")))}
           ${row("BAVU complet raccordé à l'O₂ ?", yn(checked("3-6")))}
-          ${row("Sonde IOT :", line(value("3-7")))}
+          <div class="field-inline"><strong>Sonde IOT :</strong>${line(value("3-7"), "xl")}</div>
           ${row("Sonde lubrifiée, mandrin, ballonnet testé ?", yn(checked("3-8")))}
           ${row("Respirateur complet et réglé ?", yn(checked("3-9")))}
-          <div class="vent">
-            <span>FiO₂ : ${line(value("3-10"))}</span>
-            <span>VT : ${line(value("3-11"))}</span>
-            <span>FR : ${line(value("3-12"))}</span>
-            <span>PEP : ${line(value("3-13"))}</span>
+          <div class="vent-row">
+            <div>FiO₂ : ${line(value("3-10"), "sm")}</div>
+            <div>VT : ${line(value("3-11"), "sm")}</div>
+            <div>FR : ${line(value("3-12"), "sm")}</div>
+            <div>PEP : ${line(value("3-13"), "sm")}</div>
           </div>
         </div>
       </section>
     </div>
-    <div class="col">
-      <section class="panel">
-        <div class="title">Technique d'intubation</div>
-        <div class="body">
-          <div class="row stack"><span class="label">Technique prévue en première intention :</span>
-            <div class="checks">
-              ${option("Vidéolaryngoscope", hasChoice("4-0", "Vidéolaryngoscope"))}
-              ${option("Mandrin semi-rigide", hasChoice("4-0", "Mandrin semi-rigide"))}
-              ${option("Laryngoscopie directe", hasChoice("4-0", "Laryngoscopie directe"))}
-            </div>
+    <div class="column">
+      <section class="card">
+        <div class="card-title"><span class="title-icon">⌁</span>Technique d'intubation</div>
+        <div class="card-body">
+          <div class="question">Technique prévue en première intention :</div>
+          <div class="option-line">
+            ${option("Vidéolaryngoscope", hasChoice("4-0", "Vidéolaryngoscope"))}
+            ${option("Mandrin semi-rigide", hasChoice("4-0", "Mandrin semi-rigide"))}
+            ${option("Laryngoscopie directe", hasChoice("4-0", "Laryngoscopie directe"))}
           </div>
-          <div class="row stack"><span class="label">Matériel d'intubation difficile à proximité :</span>
-            <div class="checks">${option("Kit de crico", checked("4-1"))} ${option("Cook/Eichmann", checked("4-1"))} ${option("Supraglottique", checked("4-1"))} ${option("Fibroscope", checked("4-1"))}</div>
-          </div>
+          <div class="question">Matériel d'intubation difficile à proximité :</div>
+          <div class="option-line">${option("Kit de crico", checked("4-1"))}${option("Cook / Éschmann", checked("4-1"))}${option("Supraglottique", checked("4-1"))}${option("Fibroscope", checked("4-1"))}</div>
         </div>
       </section>
-      <section class="panel">
-        <div class="title">Thérapeutiques</div>
-        <div class="body">
-          ${row("Hypnotique envisagé :", line(value("5-0"), true))}
-          ${row("Dose d'hypnotique :", `${line(value("5-1"))} mg`)}
-          ${row("Curare envisagé :", line(value("5-2"), true))}
-          ${row("Dose de curare :", `${line(value("5-3"))} mg`)}
+      <section class="card">
+        <div class="card-title"><span class="title-icon">💉</span>Thérapeutiques</div>
+        <div class="card-body">
+          <div class="field-inline"><strong>Hypnotique envisagé :</strong>${line(value("5-0"), "xl")}</div>
+          <div class="field-inline"><strong>Dose d'hypnotique :</strong>${line(value("5-1"), "xl")}<span>mg</span></div>
+          <div class="field-inline"><strong>Curare envisagé :</strong>${line(value("5-2"), "xl")}</div>
+          <div class="field-inline"><strong>Dose de curare :</strong>${line(value("5-3"), "xl")}<span>mg</span></div>
           ${row("Sédation au PSE préparée ?", yn(checked("5-4")))}
           ${row("Support vasopresseur préparé ?", yn(checked("5-5")))}
         </div>
       </section>
-      <section class="panel">
-        <div class="title">Contrôle ultime & décision</div>
-        <div class="body">
+      <section class="card">
+        <div class="card-title"><span class="title-icon">✓</span>Contrôle ultime & décision</div>
+        <div class="card-body">
           ${row("Déroulé et alternatives expliqués à l'équipe ?", yn(checked("6-0")))}
           ${row("2e opérateur expérimenté à proximité ?", yn(checked("6-1")))}
-          <div class="vent">
-            <span>FC : ${line(value("6-2"))}</span>
-            <span>PA/PAM : ${line(value("6-3"))}</span>
-            <span>SpO₂ : ${line(value("6-4"))}</span>
-            <span>FR : ${line(value("6-5"))}</span>
+          <div class="param-row">
+            <div>FC : ${line(value("6-2"), "sm")}</div>
+            <div>PA/PAM : ${line(value("6-3"), "sm")}</div>
+            <div>SpO₂ : ${line(value("6-4"), "sm")}</div>
+            <div>FR : ${line(value("6-5"), "sm")}</div>
           </div>
-          <div class="decision">
-            <div class="decision-choice">${box(isNoGo)}<div><strong>No go</strong><span>Reporter / optimiser</span></div></div>
-            <div class="decision-choice">${box(isGo)}<div><strong>Go ISR</strong><span>Intubation validée</span></div></div>
+          <div class="decision-grid">
+            <div class="decision">${box(isNoGo)}<div><div class="decision-title">NO GO</div><div class="decision-sub">Reporter / optimiser</div></div></div>
+            <div class="decision">${box(isGo)}<div><div class="decision-title">GO ISR</div><div class="decision-sub">Intubation validée</div></div></div>
           </div>
-          <div class="decision-note">Décision finale : ${line(finalDecision, true)}</div>
+          <div class="field-inline"><strong>Décision finale :</strong>${line(finalDecision, "xl")}</div>
         </div>
       </section>
-      <section class="panel">
-        <div class="title">Commentaire(s)</div>
-        <div class="body comment-lines"><span></span><span></span><span></span><span></span></div>
+      <section class="card">
+        <div class="card-title"><span class="title-icon">○</span>Commentaire(s)</div>
+        <div class="card-body comment-lines"><div class="comment-line"></div><div class="comment-line"></div><div class="comment-line"></div><div class="comment-line"></div><div class="comment-line"></div></div>
       </section>
     </div>
-    <div class="col">
-      <section class="panel">
-        <div class="title">Post-intubation</div>
-        <div class="body">
+    <div class="column">
+      <section class="card">
+        <div class="card-title"><span class="title-icon">🫁</span>Post-intubation</div>
+        <div class="card-body">
           ${row("Sonde d'intubation fixée ?", yn(checked("7-0")))}
-          ${row("Position à la commissure des lèvres :", `${line(value("7-1"))} cm`)}
-          ${row("Valeur de la capnographie :", `${line(value("7-2"))} mmHg`)}
+          <div class="field-inline"><strong>Position à la commissure des lèvres :</strong>${line(value("7-1"), "md")}<span>cm</span></div>
+          <div class="field-inline"><strong>Valeur de la capnographie :</strong>${line(value("7-2"), "md")}<span>mmHg</span></div>
           ${row("Pression du ballonnet contrôlée ?", yn(checked("7-3")))}
           ${row("Respirateur adéquat ?", yn(checked("7-4")))}
           ${row("Radiographie pulmonaire effectuée ?", yn(checked("7-5")))}
-          <div class="checks">${option("KTC", value("7-6") === "KTC")} ${option("KTA", value("7-6") === "KTA")} ${option("Aucun", value("7-6") === "Aucun")}</div>
+          <div class="option-line">${option("RTC", value("7-6") === "KTC")}${option("RTA", value("7-6") === "KTA")}${option("Aucun", value("7-6") === "Aucun")}</div>
         </div>
       </section>
-      <section class="panel">
-        <div class="title">Soins IDE</div>
-        <div class="body">
+      <section class="card">
+        <div class="card-title"><span class="title-icon">✚</span>Soins IDE</div>
+        <div class="card-body">
           ${row("Yeux fermés + gel ophtalmique appliqué ?", yn(checked("8-0")))}
           ${row("Sonde gastrique en place ?", yn(checked("8-1")))}
-          ${row("Sonde urinaire en place ?", yn(checked("8-2")))}
+          ${row("Bande urinaire en place ?", yn(checked("8-2")))}
         </div>
       </section>
-      <section class="panel">
-        <div class="title">Traçabilité</div>
-        <div class="body trace">
-          <div>Date et heure de l'intubation : ${line(value("0-7"), true)}</div>
-          <div style="margin-top:2mm">Médecin : ${line(value("0-0"), true)}</div>
-          <div style="margin-top:2mm">IDE : ${line(value("0-3"), true)}</div>
-          <div style="margin-top:2mm">Signature : ${line("", true)}</div>
+      <section class="card">
+        <div class="card-title"><span class="title-icon">▣</span>Traçabilité</div>
+        <div class="card-body trace-lines">
+          <div class="field-inline"><strong>Date et heure de l'intubation :</strong>${line(value("0-7"), "md")}</div>
+          <div class="trace-row"><strong>Médecin :</strong>${traceLine(value("0-0"))}</div>
+          <div class="trace-row"><strong>IDE :</strong>${traceLine(value("0-3"))}</div>
+          <div class="trace-row"><strong>Signature :</strong>${traceLine("")}</div>
         </div>
       </section>
     </div>
   </section>
-  <div class="footer">SEULE LA VERSION ÉLECTRONIQUE EST OPPOSABLE</div>
-</main><script>window.onload=function(){window.print();}</scr` + `ipt></body></html>`
+  <footer class="footer">SEULE LA VERSION ÉLECTRONIQUE EST OPPOSABLE</footer>
+</section></main><script>window.onload=function(){window.print();}</scr` + `ipt></body></html>`
   );
 };
