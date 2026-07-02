@@ -13,6 +13,10 @@ export const CHANGELOG = [
     changes: [
       {
         type: "feat",
+        text: "Échelles : ajout de la règle des 9 de Wallace avec mannequin antérieur/postérieur interactif, calcul SCB adulte, seuil d'alerte à 20 % et estimation Parkland.",
+      },
+      {
+        type: "feat",
         text: "Nouveau kit « Kétofol » dans Protocoles → Kits : procédure kétamine puis propofol, matériel de surveillance, séquence de prise en charge et impression A4 inspirée de la fiche papier locale.",
       },
       {

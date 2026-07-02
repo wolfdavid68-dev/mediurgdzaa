@@ -95,6 +95,37 @@ const pickScale: ClinicalScale = {
   }),
 };
 
+const wallaceScale: ClinicalScale = {
+  id: "wallace",
+  nom: "Règle des 9 de Wallace",
+  icon: "🔥",
+  description: "SCB adulte.",
+  type: "sum",
+  items: [
+    {
+      label: "Tête et cou (9 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 4.5, label: "Une face (4,5 %)" },
+        { score: 9, label: "Totale (9 %)" },
+      ],
+    },
+    {
+      label: "Tronc antérieur (18 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 9, label: "Thorax ou abdomen (9 %)" },
+        { score: 18, label: "Total (18 %)" },
+      ],
+    },
+  ],
+  interpret: (total: number) => {
+    if (total < 10) return { severity: "Brûlure localisée", color: "#16a34a" };
+    if (total < 20) return { severity: "Brûlure étendue", color: "#f97316" };
+    return { severity: "Brûlure grave", color: "#dc2626" };
+  },
+};
+
 describe("ScaleCard — sum (Glasgow-like)", () => {
   test("rendu fermé : nom, description, score —", () => {
     render(<ScaleCard scale={sumScale} />);
@@ -210,5 +241,29 @@ describe("ScaleCard — single-pick (RASS-like)", () => {
     fireEvent.click(screen.getByText("Calme"));
     fireEvent.click(screen.getByText("Réinitialiser"));
     expect(getTotalText()).toBe("—");
+  });
+});
+
+describe("ScaleCard — Wallace", () => {
+  test("affiche un total immédiat en pourcentage et calcule Parkland", () => {
+    render(<ScaleCard scale={wallaceScale} />);
+    fireEvent.click(screen.getByText("Règle des 9 de Wallace"));
+
+    expect(getTotalText()).toBe("0 %");
+    fireEvent.click(screen.getByRole("button", { name: "Totale (9 %)" }));
+    expect(getTotalText()).toBe("9 %");
+
+    fireEvent.change(screen.getByLabelText("Poids (kg)"), { target: { value: "70" } });
+    expect(screen.getByText(/2\s520 mL de Ringer lactate \/ 24 h/)).toBeInTheDocument();
+  });
+
+  test("alerte dès 20 % ou plus", () => {
+    render(<ScaleCard scale={wallaceScale} />);
+    fireEvent.click(screen.getByText("Règle des 9 de Wallace"));
+    fireEvent.click(screen.getByRole("button", { name: "Totale (9 %)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Total (18 %)" }));
+
+    expect(getTotalText()).toBe("27 %");
+    expect(screen.getByText(/SCB ≥ 20 %/)).toBeInTheDocument();
   });
 });

@@ -267,14 +267,14 @@ export const SCALES = [
     nom: "Règle des 9 de Wallace (surface brûlée)",
     icon: "🔥",
     description:
-      "Estimation rapide de la surface cutanée brûlée (SCB) chez l'adulte. Indiquez l'atteinte de chaque région, le total s'exprime en % de surface corporelle. Repère d'appoint : la paume + doigts du patient ≈ 1 %. Une SCB ≥ 20 % impose un remplissage vasculaire (formule de Parkland) et oriente vers un centre de brûlés. Chez l'enfant, préférer la table de Lund-Browder (tête proportionnellement plus grande, membres inférieurs plus petits).",
+      "Estimation rapide de la surface cutanée brûlée (SCB) chez l'adulte. Ne comptabiliser que les brûlures du 2e degré et plus. Repère d'appoint : la paume + doigts du patient ≈ 1 %. Une SCB ≥ 20 % déclenche habituellement remplissage, réchauffement, analgésie et avis centre de brûlés. Chez l'enfant, préférer la table de Lund-Browder.",
     type: "sum",
     items: [
       {
         label: "Tête et cou (9 %)",
         options: [
           { score: 0, label: "Indemne" },
-          { score: 4.5, label: "≈ moitié (4,5 %)" },
+          { score: 4.5, label: "Une face (4,5 %)" },
           { score: 9, label: "Totale (9 %)" },
         ],
       },
@@ -282,7 +282,7 @@ export const SCALES = [
         label: "Membre supérieur droit (9 %)",
         options: [
           { score: 0, label: "Indemne" },
-          { score: 4.5, label: "≈ moitié (4,5 %)" },
+          { score: 4.5, label: "Une face (4,5 %)" },
           { score: 9, label: "Totale (9 %)" },
         ],
       },
@@ -290,23 +290,23 @@ export const SCALES = [
         label: "Membre supérieur gauche (9 %)",
         options: [
           { score: 0, label: "Indemne" },
-          { score: 4.5, label: "≈ moitié (4,5 %)" },
+          { score: 4.5, label: "Une face (4,5 %)" },
           { score: 9, label: "Totale (9 %)" },
         ],
       },
       {
-        label: "Tronc antérieur — thorax + abdomen (18 %)",
+        label: "Tronc antérieur (18 %)",
         options: [
           { score: 0, label: "Indemne" },
-          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 9, label: "Thorax ou abdomen (9 %)" },
           { score: 18, label: "Total (18 %)" },
         ],
       },
       {
-        label: "Tronc postérieur — dos (18 %)",
+        label: "Tronc postérieur (18 %)",
         options: [
           { score: 0, label: "Indemne" },
-          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 9, label: "Haut ou bas du dos (9 %)" },
           { score: 18, label: "Total (18 %)" },
         ],
       },
@@ -314,7 +314,7 @@ export const SCALES = [
         label: "Membre inférieur droit (18 %)",
         options: [
           { score: 0, label: "Indemne" },
-          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 9, label: "Une face (9 %)" },
           { score: 18, label: "Total (18 %)" },
         ],
       },
@@ -322,7 +322,7 @@ export const SCALES = [
         label: "Membre inférieur gauche (18 %)",
         options: [
           { score: 0, label: "Indemne" },
-          { score: 9, label: "≈ moitié (9 %)" },
+          { score: 9, label: "Une face (9 %)" },
           { score: 18, label: "Total (18 %)" },
         ],
       },
