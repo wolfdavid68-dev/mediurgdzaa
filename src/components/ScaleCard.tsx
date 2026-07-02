@@ -34,6 +34,9 @@ const WALLACE_REGION_INDEX = {
 
 type WallaceRegionId = keyof typeof WALLACE_REGION_INDEX;
 type WallaceView = "front" | "back";
+type WallaceProfileKey = "adulte" | "enfant5ans" | "bebe";
+
+const WALLACE_REGION_IDS = Object.keys(WALLACE_REGION_INDEX) as WallaceRegionId[];
 
 const WALLACE_REGION_LABEL: Record<WallaceRegionId, string> = {
   tete: "Tête et cou",
@@ -57,6 +60,63 @@ const WALLACE_REGION_COLOR: Record<WallaceRegionId, string> = {
   per: "wallace-dot-per",
 };
 
+const LUND_BROWDER_PROFILES: Record<
+  WallaceProfileKey,
+  {
+    label: string;
+    summary: string;
+    alertThreshold: number;
+    values: {
+      head: number;
+      arm: number;
+      trunkFront: number;
+      trunkBack: number;
+      leg: number;
+      perineum: number;
+    };
+  }
+> = {
+  adulte: {
+    label: "Adulte",
+    summary: "Wallace adulte",
+    alertThreshold: 20,
+    values: {
+      head: 9,
+      arm: 9,
+      trunkFront: 18,
+      trunkBack: 18,
+      leg: 18,
+      perineum: 1,
+    },
+  },
+  enfant5ans: {
+    label: "Enfant 5 ans",
+    summary: "Lund-Browder 5 ans",
+    alertThreshold: 10,
+    values: {
+      head: 13,
+      arm: 9,
+      trunkFront: 18,
+      trunkBack: 18,
+      leg: 15.5,
+      perineum: 1,
+    },
+  },
+  bebe: {
+    label: "Bébé",
+    summary: "Lund-Browder nourrisson",
+    alertThreshold: 10,
+    values: {
+      head: 19,
+      arm: 9,
+      trunkFront: 18,
+      trunkBack: 18,
+      leg: 13.5,
+      perineum: 1,
+    },
+  },
+};
+
 const ScaleCard = ({ scale }: ScaleCardProps) => {
   const [open, setOpen] = useState(false);
   const [sumSelections, setSumSelections] = useState<Record<number, number>>({});
@@ -64,15 +124,47 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
   const [pickedScore, setPickedScore] = useState<number | null>(null);
   const [wallaceWeight, setWallaceWeight] = useState("");
   const [wallaceView, setWallaceView] = useState<WallaceView>("front");
+  const [wallaceProfile, setWallaceProfile] = useState<WallaceProfileKey>("adulte");
 
   const isSum = scale.type === "sum";
   const isWallace = isSum && scale.id === "wallace";
+  const wallaceCurrentProfile = LUND_BROWDER_PROFILES[wallaceProfile];
+
+  const wallaceRegionIdFromIndex = (index: number) => WALLACE_REGION_IDS[index] ?? null;
+  const wallaceRegionBasePercent = (regionId: WallaceRegionId) => {
+    const { values } = wallaceCurrentProfile;
+    if (regionId === "tete") return values.head;
+    if (regionId === "msd" || regionId === "msg") return values.arm;
+    if (regionId === "tra") return values.trunkFront;
+    if (regionId === "trp") return values.trunkBack;
+    if (regionId === "mid" || regionId === "mig") return values.leg;
+    return values.perineum;
+  };
+  const wallaceStepOptions = (regionId: WallaceRegionId) =>
+    regionId === "per" ? [0, 2] : [0, 1, 2];
+  const wallaceStepScore = (index: number, step: number) => {
+    const regionId = wallaceRegionIdFromIndex(index);
+    if (!regionId || step <= 0) return 0;
+    const regionPercent = wallaceRegionBasePercent(regionId);
+    return step >= 2 ? regionPercent : regionPercent / 2;
+  };
+  const interpretWallace = (value: number) => {
+    if (wallaceProfile === "adulte") return scale.interpret(value);
+    if (value < 5) return { severity: "Brûlure localisée enfant (< 5 %)", color: "#16a34a" };
+    if (value < 10) return { severity: "Brûlure étendue enfant (5-9 %)", color: "#f97316" };
+    return { severity: "Brûlure grave enfant (≥ 10 %) — avis spécialisé", color: "#dc2626" };
+  };
 
   // Total : null tant qu'aucune réponse en mode "pick" (allAnswered=false).
-  // En mode "sum", on commence à 0 et l'interprétation attend allAnswered.
-  const total: number | null = isSum
-    ? Object.values(sumSelections).reduce((acc, v) => acc + (v as number), 0)
-    : pickedScore;
+  // En mode Wallace, sumSelections stocke un état 0/1/2, recalculé selon le profil.
+  const total: number | null = isWallace
+    ? Object.entries(sumSelections).reduce(
+        (acc, [index, step]) => acc + wallaceStepScore(Number(index), step as number),
+        0
+      )
+    : isSum
+      ? Object.values(sumSelections).reduce((acc, v) => acc + (v as number), 0)
+      : pickedScore;
 
   const allAnswered = isSum
     ? isWallace || scale.items.every((_, i) => typeof sumSelections[i] === "number")
@@ -81,7 +173,11 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
   // total est garanti non-null quand allAnswered=true (allAnswered le vérifie).
   // Le ?? 0 est défensif : strictNullChecks ne peut pas inférer ce lien.
   const totalSafe = total ?? 0;
-  const interp = allAnswered ? scale.interpret(totalSafe) : null;
+  const interp = allAnswered
+    ? isWallace
+      ? interpretWallace(totalSafe)
+      : scale.interpret(totalSafe)
+    : null;
 
   const reset = () => {
     setSumSelections({});
@@ -107,42 +203,49 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
       : null;
   const cycleWallaceRegion = (index: number) => {
     if (!isWallace) return;
-    const item = scale.items[index];
-    if (!item?.options || item.options.length === 0) return;
-    const currentScore = sumSelections[index] ?? 0;
-    const currentIndex = item.options.findIndex((option) => option.score === currentScore);
-    const next = item.options[(currentIndex + 1) % item.options.length] ?? item.options[0];
-    setSumSelections({ ...sumSelections, [index]: next.score });
+    const regionId = wallaceRegionIdFromIndex(index);
+    if (!regionId) return;
+    const steps = wallaceStepOptions(regionId);
+    const currentStep = sumSelections[index] ?? 0;
+    const currentIndex = steps.indexOf(currentStep);
+    const next = steps[(currentIndex + 1) % steps.length] ?? 0;
+    setSumSelections({ ...sumSelections, [index]: next });
   };
   const wallaceRegionClass = (index: number) => {
-    const score = sumSelections[index] ?? 0;
-    if (score <= 0) return "wallace-zone";
-    const maxScore = scale.type === "sum" ? (scale.items[index]?.options?.at(-1)?.score ?? 0) : 0;
-    return `wallace-zone ${score >= maxScore ? "wallace-zone-total" : "wallace-zone-partial"}`;
+    const step = wallaceRegionStep(index);
+    if (step <= 0) return "wallace-zone";
+    return `wallace-zone ${step >= 2 ? "wallace-zone-total" : "wallace-zone-partial"}`;
   };
   const wallaceRegionStep = (index: number) => {
-    const item = scale.type === "sum" ? scale.items[index] : null;
-    const score = sumSelections[index] ?? 0;
-    if (!item?.options || score <= 0) return 0;
-    const maxScore = item.options.at(-1)?.score ?? 0;
-    return score >= maxScore ? 2 : 1;
+    const step = sumSelections[index] ?? 0;
+    if (step <= 0) return 0;
+    return step >= 2 ? 2 : 1;
   };
   const wallaceRegionScoreLabel = (index: number) => {
     const step = wallaceRegionStep(index);
-    const score = sumSelections[index] ?? 0;
+    const score = wallaceStepScore(index, step);
     if (step === 0) return "0 %";
     return `${formatWallacePercent(score)} · ${step === 2 ? "total" : "1/2"}`;
   };
-  const wallaceOptionLabel = (item: ScaleItem, optionIndex: number) => {
-    const optionCount = item.options?.length ?? 0;
-    if (optionIndex === 0) return "Indemne";
-    if (optionCount === 2) return "Atteint";
-    if (optionIndex === optionCount - 1) return "Total";
+  const wallaceOptionLabel = (regionId: WallaceRegionId, step: number) => {
+    if (step === 0) return "Indemne";
+    if (regionId === "per") return "Atteint";
+    if (step >= 2) return "Total";
     return "≈ moitié";
+  };
+  const wallaceOptionFullLabel = (regionId: WallaceRegionId, step: number) => {
+    if (step === 0) return "Indemne";
+    const score = wallaceStepScore(WALLACE_REGION_INDEX[regionId], step);
+    const formatted = formatWallacePercent(score);
+    if (regionId === "per") return `Atteint (${formatted})`;
+    if (step >= 2) return `${regionId === "tete" ? "Totale" : "Total"} (${formatted})`;
+    if (regionId === "tra") return `Thorax ou abdomen (${formatted})`;
+    if (regionId === "trp") return `Haut ou bas du dos (${formatted})`;
+    return `Une face (${formatted})`;
   };
   const wallaceRegionProps = (regionId: WallaceRegionId) => {
     const index = WALLACE_REGION_INDEX[regionId];
-    const score = sumSelections[index] ?? 0;
+    const score = wallaceStepScore(index, wallaceRegionStep(index));
     return {
       role: "button",
       tabIndex: 0,
@@ -323,6 +426,21 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
                       Postérieure
                     </button>
                   </div>
+                  <div className="wallace-mode-tabs" aria-label="Profil patient">
+                    {(Object.keys(LUND_BROWDER_PROFILES) as WallaceProfileKey[]).map(
+                      (profileKey) => (
+                        <button
+                          key={profileKey}
+                          type="button"
+                          className={wallaceProfile === profileKey ? "wallace-mode-active" : ""}
+                          aria-pressed={wallaceProfile === profileKey}
+                          onClick={() => setWallaceProfile(profileKey)}
+                        >
+                          {LUND_BROWDER_PROFILES[profileKey].label}
+                        </button>
+                      )
+                    )}
+                  </div>
                   <span className="wallace-figure-hint">
                     Cliquer une zone : moitié · total · indemne
                   </span>
@@ -341,85 +459,6 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
                     Région en totalité
                   </span>
                 </div>
-              </div>
-
-              <aside className="wallace-side" aria-label="Résultats Wallace">
-                <div className="wallace-summary" aria-live="polite">
-                  <span className="wallace-summary-label">Surface brûlée totale (SCB)</span>
-                  <strong>{formatWallacePercent(totalSafe)}</strong>
-                  <span className="wallace-summary-sub">
-                    Surface cutanée brûlée estimée — adulte
-                  </span>
-                  <span
-                    className="scale-badge"
-                    style={{ background: scale.interpret(totalSafe).color }}
-                  >
-                    {scale.interpret(totalSafe).severity}
-                  </span>
-                </div>
-
-                <section className="wallace-detail" aria-label="Détail par région">
-                  <h3>Détail par région</h3>
-                  <div className="wallace-rows">
-                    {scale.items.map((item, i) => {
-                      const currentScore = sumSelections[i] ?? 0;
-                      const regionId = (
-                        Object.keys(WALLACE_REGION_INDEX) as WallaceRegionId[]
-                      ).find((key) => WALLACE_REGION_INDEX[key] === i);
-                      const step = wallaceRegionStep(i);
-                      return (
-                        <div key={item.label} className="wallace-row">
-                          <span className="wallace-row-name">
-                            {regionId && (
-                              <i
-                                className={`wallace-region-dot ${WALLACE_REGION_COLOR[regionId]}`}
-                                aria-hidden="true"
-                              />
-                            )}
-                            {WALLACE_REGION_LABEL[regionId ?? "tete"] ?? item.label}
-                          </span>
-                          <span className={`wallace-row-pct wallace-row-pct-${step}`}>
-                            {wallaceRegionScoreLabel(i)}
-                          </span>
-                          <span className="wallace-row-segment">
-                            {item.options?.map((opt, optionIndex) => {
-                              const selected = currentScore === opt.score;
-                              return (
-                                <button
-                                  key={`${item.label}-${opt.score}-${opt.label}`}
-                                  type="button"
-                                  className={selected ? `wallace-seg-active-${step}` : ""}
-                                  aria-label={opt.label}
-                                  title={opt.label}
-                                  onClick={() =>
-                                    setSumSelections({ ...sumSelections, [i]: opt.score })
-                                  }
-                                >
-                                  {wallaceOptionLabel(item, optionIndex)}
-                                </button>
-                              );
-                            })}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="wallace-total-row">
-                    <span>Total</span>
-                    <strong>{formatWallacePercent(totalSafe)}</strong>
-                  </div>
-                </section>
-
-                {totalSafe >= 20 && (
-                  <div className="wallace-alert" role="status">
-                    <strong>Conduite à tenir urgente</strong>
-                    <b>SCB ≥ 20 % → remplissage / centre spécialisé</b>
-                    <span>
-                      Remplissage guidé (formule de Parkland) et avis spécialisé précoce. Réévaluer,
-                      analgésie, réchauffement, surveillance rapprochée.
-                    </span>
-                  </div>
-                )}
 
                 <div className="wallace-parkland">
                   <h3>Formule de Parkland (RL — 24 h)</h3>
@@ -448,11 +487,88 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
                         ).toLocaleString("fr-FR")} mL sur 16 h.`}
                   </p>
                 </div>
+              </div>
+
+              <aside className="wallace-side" aria-label="Résultats Wallace">
+                <div className="wallace-summary" aria-live="polite">
+                  <span className="wallace-summary-label">Surface brûlée totale (SCB)</span>
+                  <strong>{formatWallacePercent(totalSafe)}</strong>
+                  <span className="wallace-summary-sub">
+                    {wallaceCurrentProfile.summary} — surface cutanée brûlée estimée
+                  </span>
+                  <span className="scale-badge" style={{ background: interp?.color }}>
+                    {interp?.severity}
+                  </span>
+                </div>
+
+                <section className="wallace-detail" aria-label="Détail par région">
+                  <h3>Détail par région</h3>
+                  <div className="wallace-rows">
+                    {scale.items.map((item, i) => {
+                      const currentStep = sumSelections[i] ?? 0;
+                      const regionId = wallaceRegionIdFromIndex(i);
+                      const step = wallaceRegionStep(i);
+                      if (!regionId) return null;
+                      return (
+                        <div key={item.label} className="wallace-row">
+                          <span className="wallace-row-name">
+                            <i
+                              className={`wallace-region-dot ${WALLACE_REGION_COLOR[regionId]}`}
+                              aria-hidden="true"
+                            />
+                            {WALLACE_REGION_LABEL[regionId] ?? item.label}
+                          </span>
+                          <span className={`wallace-row-pct wallace-row-pct-${step}`}>
+                            {wallaceRegionScoreLabel(i)}
+                          </span>
+                          <span className="wallace-row-segment">
+                            {wallaceStepOptions(regionId).map((optionStep) => {
+                              const selected = currentStep === optionStep;
+                              const fullLabel = wallaceOptionFullLabel(regionId, optionStep);
+                              return (
+                                <button
+                                  key={`${item.label}-${optionStep}`}
+                                  type="button"
+                                  className={selected ? `wallace-seg-active-${step}` : ""}
+                                  aria-label={fullLabel}
+                                  title={fullLabel}
+                                  onClick={() =>
+                                    setSumSelections({ ...sumSelections, [i]: optionStep })
+                                  }
+                                >
+                                  {wallaceOptionLabel(regionId, optionStep)}
+                                </button>
+                              );
+                            })}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="wallace-total-row">
+                    <span>Total</span>
+                    <strong>{formatWallacePercent(totalSafe)}</strong>
+                  </div>
+                </section>
+
+                {totalSafe >= wallaceCurrentProfile.alertThreshold && (
+                  <div className="wallace-alert" role="status">
+                    <strong>Conduite à tenir urgente</strong>
+                    <b>
+                      SCB ≥ {wallaceCurrentProfile.alertThreshold} % → remplissage / centre
+                      spécialisé
+                    </b>
+                    <span>
+                      Remplissage guidé (formule de Parkland) et avis spécialisé précoce. Réévaluer,
+                      analgésie, réchauffement, surveillance rapprochée.
+                    </span>
+                  </div>
+                )}
 
                 <div className="wallace-note">
-                  Règle de Wallace valable chez l'adulte. Chez l'enfant, préférer la table de
-                  Lund-Browder. Seules les brûlures du 2e degré et plus sont comptabilisées dans la
-                  SCB.
+                  Mode adulte : règle des 9 de Wallace. Modes enfant : estimation Lund-Browder
+                  simplifiée selon l'âge. Seules les brûlures du 2e degré et plus sont
+                  comptabilisées dans la SCB.
                 </div>
               </aside>
             </div>

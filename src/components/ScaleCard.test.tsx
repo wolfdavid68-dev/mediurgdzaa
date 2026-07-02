@@ -111,11 +111,58 @@ const wallaceScale: ClinicalScale = {
       ],
     },
     {
+      label: "Membre supérieur droit (9 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 4.5, label: "Une face (4,5 %)" },
+        { score: 9, label: "Totale (9 %)" },
+      ],
+    },
+    {
+      label: "Membre supérieur gauche (9 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 4.5, label: "Une face (4,5 %)" },
+        { score: 9, label: "Totale (9 %)" },
+      ],
+    },
+    {
       label: "Tronc antérieur (18 %)",
       options: [
         { score: 0, label: "Indemne" },
         { score: 9, label: "Thorax ou abdomen (9 %)" },
         { score: 18, label: "Total (18 %)" },
+      ],
+    },
+    {
+      label: "Tronc postérieur (18 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 9, label: "Haut ou bas du dos (9 %)" },
+        { score: 18, label: "Total (18 %)" },
+      ],
+    },
+    {
+      label: "Membre inférieur droit (18 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 9, label: "Une face (9 %)" },
+        { score: 18, label: "Total (18 %)" },
+      ],
+    },
+    {
+      label: "Membre inférieur gauche (18 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 9, label: "Une face (9 %)" },
+        { score: 18, label: "Total (18 %)" },
+      ],
+    },
+    {
+      label: "Périnée / organes génitaux (1 %)",
+      options: [
+        { score: 0, label: "Indemne" },
+        { score: 1, label: "Atteint (1 %)" },
       ],
     },
   ],
@@ -261,9 +308,27 @@ describe("ScaleCard — Wallace", () => {
     render(<ScaleCard scale={wallaceScale} />);
     fireEvent.click(screen.getByText("Règle des 9 de Wallace"));
     fireEvent.click(screen.getByRole("button", { name: "Totale (9 %)" }));
-    fireEvent.click(screen.getByRole("button", { name: "Total (18 %)" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Total (18 %)" })[0]);
 
     expect(getTotalText()).toBe("27 %");
     expect(screen.getByText(/SCB ≥ 20 %/)).toBeInTheDocument();
+  });
+
+  test("changer l'âge recalcule les pourcentages sans resélectionner les zones", () => {
+    render(<ScaleCard scale={wallaceScale} />);
+    fireEvent.click(screen.getByText("Règle des 9 de Wallace"));
+    fireEvent.click(screen.getByRole("button", { name: "Totale (9 %)" }));
+
+    expect(getTotalText()).toBe("9 %");
+    expect(screen.getByRole("button", { name: "Totale (9 %)" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Enfant 5 ans" }));
+    expect(getTotalText()).toBe("13 %");
+    expect(screen.getByRole("button", { name: "Totale (13 %)" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Bébé" }));
+    expect(getTotalText()).toBe("19 %");
+    expect(screen.getByRole("button", { name: "Totale (19 %)" })).toBeInTheDocument();
+    expect(screen.getByText(/SCB ≥ 10 %/)).toBeInTheDocument();
   });
 });

@@ -267,7 +267,7 @@ export const SCALES = [
     nom: "Règle des 9 de Wallace (surface brûlée)",
     icon: "🔥",
     description:
-      "Estimation rapide de la surface cutanée brûlée (SCB) chez l'adulte. Ne comptabiliser que les brûlures du 2e degré et plus. Repère d'appoint : la paume + doigts du patient ≈ 1 %. Une SCB ≥ 20 % déclenche habituellement remplissage, réchauffement, analgésie et avis centre de brûlés. Chez l'enfant, préférer la table de Lund-Browder.",
+      "Estimation rapide de la surface cutanée brûlée (SCB). Choisir simplement l'âge : adulte = règle de Wallace ; enfant 5 ans et bébé = coefficients pédiatriques de Lund-Browder. Ne comptabiliser que les brûlures du 2e degré et plus. Repère d'appoint : la paume + doigts du patient ≈ 1 %.",
     type: "sum",
     items: [
       {

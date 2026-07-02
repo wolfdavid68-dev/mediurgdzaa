@@ -17,6 +17,10 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
+        text: "Wallace : ajout d'un choix d'âge adulte / enfant 5 ans / bébé. Les pourcentages, libellés et scores sont recalculés automatiquement, avec coefficients pédiatriques de Lund-Browder pour l'enfant.",
+      },
+      {
+        type: "feat",
         text: "Nouveau kit « Kétofol » dans Protocoles → Kits : procédure kétamine puis propofol, matériel de surveillance, séquence de prise en charge et impression A4 inspirée de la fiche papier locale.",
       },
       {
