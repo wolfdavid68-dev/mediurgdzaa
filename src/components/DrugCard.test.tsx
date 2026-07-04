@@ -730,10 +730,11 @@ describe("DrugCard", () => {
       // Dose méningée calculée sur le poids : 200-300 mg/kg/j → 80 kg = 16-24 g
       expect(screen.getByText("16-24 g")).toBeInTheDocument();
 
-      // Valeurs Claforan (seringue 48 mL, débits 6-9,3 mL/h) — cf. PDF p.16
-      expect(screen.getByText("2 g/48 mL → 6 mL/h")).toBeInTheDocument();
-      expect(screen.getByText("3 g/48 mL → 9,3 mL/h")).toBeInTheDocument();
-      expect(screen.getByText("6 g/250 mL → 8 mL/h")).toBeInTheDocument();
+      // Valeurs Claforan gardées dans les étapes à droite, pas en lignes du bloc de préparation.
+      expect(screen.getByText("6 g/j : 2 g/48 mL → 6 mL/h")).toBeInTheDocument();
+      expect(screen.getByText("14 g/j : 3 g/48 mL → 9,3 mL/h")).toBeInTheDocument();
+      expect(screen.getByText("24 g/j : 6 g/250 mL → 8 mL/h")).toBeInTheDocument();
+      expect(screen.queryByText("2 g/48 mL → 6 mL/h")).not.toBeInTheDocument();
 
       // PAS les valeurs de l'amoxicilline (2 g/100 mL, 5 g/250 mL @ 33 mL/h)
       expect(screen.queryByText("5 g/250 mL")).not.toBeInTheDocument();

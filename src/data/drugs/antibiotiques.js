@@ -355,8 +355,8 @@ export const DRUGS_ANTIBIOTIQUES = [
       conc_finale: "≤ 8 mg/mL",
       conc_produit: 40,
       unite: "mg",
-      dose_kg: 3,
-      dose_max_kg: 7,
+      dose_kg: 5,
+      dose_max_kg: 8,
       duree: "30 min (PSE)",
       stabilite: "Stable 24h à 25°C",
       etapes: [
