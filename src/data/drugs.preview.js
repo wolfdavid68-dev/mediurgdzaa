@@ -1436,10 +1436,12 @@ export const DRUGS_PREVIEW = {
           titre: "Dose méningée PSE",
           mode: "pse",
           population: "adulte",
-          tag: "6-24 g/j",
+          tag: "200-300 mg/kg/j",
           solvant: "NaCl 0,9%",
           duree: "PSE continu",
           stabilite: "Stable 24h à 25°C",
+          phase_doses: [{ label: "Dose méningée/j", dose_kg: 0.2, dose_max_kg: 0.3, unit: "g" }],
+          hide_phase_volume: true,
           rows: [
             { label: "6 g/j", value: "2 g/48 mL → 6 mL/h", highlight: true },
             { label: "12 g/j", value: "3 g/48 mL → 8 mL/h", highlight: true },
@@ -1451,7 +1453,8 @@ export const DRUGS_PREVIEW = {
           ],
           hide_final: true,
           etapes: [
-            "Dose méningée en PSE (seringue 48 mL sauf 24 g/j)",
+            "Dose méningée : 200-300 mg/kg/j (dose/j calculée ci-dessus selon le poids)",
+            "Choisir la ligne g/j la plus proche pour la dilution et le débit",
             "6 g/j : 2 g/48 mL à 6 mL/h",
             "12 g/j : 3 g/48 mL à 8 mL/h",
             "14 g/j : 3 g/48 mL à 9,3 mL/h",

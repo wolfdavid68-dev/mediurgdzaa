@@ -727,6 +727,9 @@ describe("DrugCard", () => {
 
       fireEvent.click(await screen.findByRole("button", { name: /Dose méningée PSE/i }));
 
+      // Dose méningée calculée sur le poids : 200-300 mg/kg/j → 80 kg = 16-24 g
+      expect(screen.getByText("16-24 g")).toBeInTheDocument();
+
       // Valeurs Claforan (seringue 48 mL, débits 6-9,3 mL/h) — cf. PDF p.16
       expect(screen.getByText("2 g/48 mL → 6 mL/h")).toBeInTheDocument();
       expect(screen.getByText("3 g/48 mL → 9,3 mL/h")).toBeInTheDocument();
