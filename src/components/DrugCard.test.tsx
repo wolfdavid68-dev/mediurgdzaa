@@ -649,9 +649,7 @@ describe("DrugCard", () => {
       expect(
         screen.getByText("2400 mg : 2 flacons 1 g + 400 mg (4 mL) d'appoint")
       ).toBeInTheDocument();
-      expect(
-        screen.getByText("1 x 1 g + 2 x 500 mg à 2 x 1 g + 1 x 500 mg — garder le reste")
-      ).toBeInTheDocument();
+      expect(screen.queryByText(/À ouvrir/)).not.toBeInTheDocument();
       expect(screen.queryByText("Dose < 1500 mg → 250 mL G5%")).not.toBeInTheDocument();
       expect(screen.queryByText("Dose > 1500 mg → 500 mL G5%")).not.toBeInTheDocument();
       expect(screen.queryByText(/PÉDIATRIE : dilution NaCl 0,9% ou G5%/)).not.toBeInTheDocument();
@@ -709,6 +707,35 @@ describe("DrugCard", () => {
       expect(screen.getByText("dans NaCl 0,9%")).toBeInTheDocument();
       expect(screen.queryByText("IVL standard")).not.toBeInTheDocument();
       expect(screen.queryByText("Dose méningée pompe")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Claforan", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche la dose méningée sur pompe comme l'amoxicilline", async () => {
+      const claforan = DRUGS.find((drug) => drug.nom === "CLAFORAN")!;
+
+      render(<DrugCard drug={claforan} patientWeight="80" prepPopulation="adulte" />);
+      fireEvent.click(screen.getByText("CLAFORAN").closest("button")!);
+
+      fireEvent.click(await screen.findByRole("button", { name: /Dose méningée pompe/i }));
+
+      expect(screen.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "16");
+      expect(screen.getByText("16 g/j")).toBeInTheDocument();
+      expect(screen.getByText("5 g/250 mL")).toBeInTheDocument();
+      expect(screen.getByText("33 mL/h")).toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText("Dose/j"), { target: { value: "24" } });
+
+      expect(screen.getByText("24 g/j")).toBeInTheDocument();
+      expect(screen.getByText("50 mL/h")).toBeInTheDocument();
     });
   });
 

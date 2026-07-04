@@ -386,14 +386,6 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
             </span>
           </div>
         )}
-        <div className="prep-calc-row">
-          <span className="prep-calc-step">À ouvrir</span>
-          <span className="prep-calc-val">
-            {highPlan
-              ? `${lowPlan.opened} à ${highPlan.opened} — garder le reste`
-              : `${lowPlan.opened} — garder le reste`}
-          </span>
-        </div>
       </>
     );
   };
@@ -409,6 +401,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       { dose: 14, prep: "5 g/250 mL", rate: 29 },
       { dose: 16, prep: "5 g/250 mL", rate: 33 },
       { dose: 18, prep: "5 g/250 mL", rate: 37 },
+      { dose: 20, prep: "5 g/250 mL", rate: 42 },
+      { dose: 22, prep: "5 g/250 mL", rate: 46 },
+      { dose: 24, prep: "5 g/250 mL", rate: 50 },
     ];
     const current =
       table.find((row) => row.dose === requestedDose) ||
