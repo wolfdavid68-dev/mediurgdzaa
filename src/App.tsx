@@ -460,7 +460,7 @@ const App = () => {
                 favorites={favorites}
                 showFavoritesOnly={showFavoritesOnly}
                 patientWeight={patientWeight}
-                prepPopulation={prepPopulation}
+                prepPopulation={previewMode ? prepPopulation : null}
                 onToggleFavorite={toggleFavorite}
                 onOpen={addToHistory}
                 onOpenChange={handleDrugOpenChange}

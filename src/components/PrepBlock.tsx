@@ -1421,37 +1421,42 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   ) : null;
   const pediatricPrepBlock =
     activePedPrep === "pse" ? pedPseBlock : activePedPrep === "im" ? pedImBlock : pedTableBlock;
-  const pediatricModeSwitch = pediatricPrepOnly ? (
-    <div className="prep-mode-switch" role="group" aria-label="Choix de préparation pédiatrique">
-      <button
-        type="button"
-        className={`prep-mode-option prep-recipe-ped${activePedPrep === "ivd" ? " is-active" : ""}`}
-        aria-pressed={activePedPrep === "ivd"}
-        onClick={() => setActivePedPrep("ivd")}
-      >
-        <span>IVD ACR</span>
-        <small>10 mL</small>
-      </button>
-      <button
-        type="button"
-        className={`prep-mode-option prep-recipe-ped-im${activePedPrep === "im" ? " is-active" : ""}`}
-        aria-pressed={activePedPrep === "im"}
-        onClick={() => setActivePedPrep("im")}
-      >
-        <span>IM anaphylaxie</span>
-        <small>1 mg/mL pur</small>
-      </button>
-      <button
-        type="button"
-        className={`prep-mode-option prep-recipe-pse${activePedPrep === "pse" ? " is-active" : ""}`}
-        aria-pressed={activePedPrep === "pse"}
-        onClick={() => setActivePedPrep("pse")}
-      >
-        <span>PSE</span>
-        <small>0,2 mg/mL</small>
-      </button>
-    </div>
-  ) : null;
+  // Le switch IVD ACR / IM / PSE et les blocs pedIm/pedPse sont du contenu
+  // spécifique ADRÉNALINE codé en dur → réservé à drug.id === 13. Les autres
+  // drogues à pedTable (ex. Nalbuphine) restent sur activePedPrep "ivd" et
+  // rendent leur pedTable générique via pedTableBlock.
+  const pediatricModeSwitch =
+    pediatricPrepOnly && drug.id === 13 ? (
+      <div className="prep-mode-switch" role="group" aria-label="Choix de préparation pédiatrique">
+        <button
+          type="button"
+          className={`prep-mode-option prep-recipe-ped${activePedPrep === "ivd" ? " is-active" : ""}`}
+          aria-pressed={activePedPrep === "ivd"}
+          onClick={() => setActivePedPrep("ivd")}
+        >
+          <span>IVD ACR</span>
+          <small>10 mL</small>
+        </button>
+        <button
+          type="button"
+          className={`prep-mode-option prep-recipe-ped-im${activePedPrep === "im" ? " is-active" : ""}`}
+          aria-pressed={activePedPrep === "im"}
+          onClick={() => setActivePedPrep("im")}
+        >
+          <span>IM anaphylaxie</span>
+          <small>1 mg/mL pur</small>
+        </button>
+        <button
+          type="button"
+          className={`prep-mode-option prep-recipe-pse${activePedPrep === "pse" ? " is-active" : ""}`}
+          aria-pressed={activePedPrep === "pse"}
+          onClick={() => setActivePedPrep("pse")}
+        >
+          <span>PSE</span>
+          <small>0,2 mg/mL</small>
+        </button>
+      </div>
+    ) : null;
   const prepTableCurrentRow =
     prep.table && validKg ? prep.table.rows.find((row) => row.poids === kg) : null;
   const prepTableBlock = prep.table ? (

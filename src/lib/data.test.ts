@@ -3,6 +3,7 @@
 // et la liste DRUG_PATTERNS de ProtocolCard.tsx.
 
 import { DRUGS } from "../data/drugs";
+import { DRUGS_PREVIEW } from "../data/drugs.preview";
 import { PSE } from "../data/pse";
 import { INCOMPATIBILITIES } from "../data/incompatibilities";
 import { PROTOCOLS } from "../data/protocols";
@@ -511,5 +512,41 @@ describe("Plausibilité — toutes les chaînes poso /kg sont parsables", () => 
       });
     });
     expect(unparsable).toEqual([]);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// DRUGS_PREVIEW — invariant anti-écran-vide (séparation adulte/enfant)
+// ════════════════════════════════════════════════════════════════
+describe("DRUGS_PREVIEW — recettes visibles par population", () => {
+  // PrepBlock retourne null si toutes les recettes portent un `population` et
+  // qu'aucune ne matche la population active (sauf pedTable qui couvre l'enfant
+  // via le rendu pédiatrique dédié). Cet invariant protège chaque override
+  // preview : ≥ 1 recette visible pour adulte ET pour enfant, après fusion.
+  const drugById = new Map(DRUGS.map((d) => [d.id, d]));
+  const previewEntries = Object.entries(
+    DRUGS_PREVIEW as Record<string, { prep?: { preparations?: Array<{ population?: string }> } }>
+  );
+
+  test("chaque override avec preparations a ≥1 recette adulte ET enfant", () => {
+    const violations: string[] = [];
+    previewEntries.forEach(([idStr, entry]) => {
+      const id = Number(idStr);
+      const drug = drugById.get(id) as DrugForIntegrity | undefined;
+      const merged = { ...drug?.prep, ...entry.prep } as {
+        preparations?: Array<{ population?: string }>;
+        pedTable?: unknown;
+      };
+      const recipes = merged.preparations;
+      if (!recipes?.length) return; // pas de recettes → fallback, hors invariant
+      (["adulte", "enfant"] as const).forEach((pop) => {
+        if (pop === "enfant" && merged.pedTable) return; // pedTable couvre l'enfant
+        const visible = recipes.filter((r) => !r.population || r.population === pop);
+        if (visible.length === 0) {
+          violations.push(`${id} ${drug?.nom ?? "?"} : aucune recette "${pop}"`);
+        }
+      });
+    });
+    expect(violations).toEqual([]);
   });
 });

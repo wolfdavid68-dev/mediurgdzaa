@@ -154,7 +154,7 @@ export const DRUGS_ANTIBIOTIQUES = [
       etapes: [
         "Flacon poudre 1 g — reconstituer avec 10 mL eau PPI",
         "Diluer qsp 100 mL NaCl 0,9% — perfusion 20-30 min",
-        "Dose méningée : 300 mg/kg/j en 6 injections IV",
+        "Dose méningée : 200 mg/kg/j en 6 injections IV",
       ],
       notes: ["Dose méningée très élevée (jusqu'à 24 g/j adulte) — vérifier la prescription"],
     },

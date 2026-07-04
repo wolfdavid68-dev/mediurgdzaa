@@ -258,10 +258,13 @@ const DrugCard = ({
   };
 
   const renderPosoTab = () => {
-    // Filtrage des colonnes posologie selon le poids saisi :
-    //  < 30 kg → pédiatrique · > 70 kg → adulte · 30–70 kg (inclus) ou pas de
-    //  poids → les deux. Repli : si la colonne pertinente n'est pas renseignée
-    //  pour ce médicament, on affiche l'autre (mieux que « Non renseigné »).
+    // Filtrage des colonnes posologie :
+    //  1. En preview, le toggle Adulte/Enfant (prop `prepPopulation`, non-null
+    //     seulement quand l'utilisateur l'a actionné) PRIME : « Enfant » masque
+    //     l'adulte et inversement, avec repli sur l'autre colonne si la
+    //     population demandée n'est pas renseignée.
+    //  2. Sinon, filtrage par poids : < 30 kg → pédiatrique · > 70 kg → adulte ·
+    //     30–70 kg (inclus) ou pas de poids → les deux. Même logique de repli.
     const kgNum = parseFloat(weight);
     const validKg = kgNum > 0 && kgNum <= 300;
     const hasAdult = !!(drug.poso?.a && drug.poso.a.length);
@@ -272,7 +275,23 @@ const DrugCard = ({
     let showAdult = true;
     let showPed = true;
     let posoHint = "";
-    if (validKg && kgNum < 30) {
+    if (prepPopulation === "enfant") {
+      if (hasPed) {
+        showAdult = false;
+        posoHint = "Mode enfant — posologie pédiatrique";
+      } else {
+        showPed = false;
+        posoHint = "Pas de posologie pédiatrique — posologie adulte affichée";
+      }
+    } else if (prepPopulation === "adulte") {
+      if (hasAdult) {
+        showPed = false;
+        posoHint = "Mode adulte — posologie adulte";
+      } else {
+        showAdult = false;
+        posoHint = "Pas de posologie adulte — posologie pédiatrique affichée";
+      }
+    } else if (validKg && kgNum < 30) {
       if (hasPed) {
         showAdult = false;
         posoHint = "Poids < 30 kg — posologie pédiatrique";

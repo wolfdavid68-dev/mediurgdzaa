@@ -92,7 +92,7 @@ type DrugPrepRecipe = {
   hide_phase_volume?: boolean;
   phase_doses?: Array<{
     label: string;
-    unit?: "mg" | "mg/h" | "UI" | "UI/h" | "µg/min" | "gouttes";
+    unit?: "mg" | "mg/h" | "g" | "UI" | "UI/h" | "µg/min" | "gouttes";
     duree?: string;
     dose_kg?: number;
     dose_max_kg?: number;

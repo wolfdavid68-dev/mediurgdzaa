@@ -285,6 +285,137 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Grille posologie — séparation Adulte/Enfant (toggle preview)", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    const posoTitles = (container: HTMLElement) =>
+      Array.from(container.querySelectorAll(".poso-title")).map((el) => el.textContent);
+
+    test("toggle Enfant masque la colonne Adulte même à un poids adulte (40 kg)", () => {
+      const diprivan = DRUGS.find((drug) => drug.nom === "DIPRIVAN")!;
+      const { container } = render(
+        <DrugCard drug={diprivan} patientWeight="40" prepPopulation="enfant" />
+      );
+      fireEvent.click(screen.getByText("DIPRIVAN").closest("button")!);
+
+      const titles = posoTitles(container);
+      expect(titles).toContain("Pédiatrique");
+      expect(titles).not.toContain("Adulte");
+    });
+
+    test("toggle Adulte masque la colonne Pédiatrique même à un poids pédiatrique (20 kg)", () => {
+      const diprivan = DRUGS.find((drug) => drug.nom === "DIPRIVAN")!;
+      const { container } = render(
+        <DrugCard drug={diprivan} patientWeight="20" prepPopulation="adulte" />
+      );
+      fireEvent.click(screen.getByText("DIPRIVAN").closest("button")!);
+
+      const titles = posoTitles(container);
+      expect(titles).toContain("Adulte");
+      expect(titles).not.toContain("Pédiatrique");
+    });
+
+    test("sans toggle, le filtrage par poids reste actif (40 kg → les deux colonnes)", () => {
+      const diprivan = DRUGS.find((drug) => drug.nom === "DIPRIVAN")!;
+      const { container } = render(<DrugCard drug={diprivan} patientWeight="40" />);
+      fireEvent.click(screen.getByText("DIPRIVAN").closest("button")!);
+
+      const titles = posoTitles(container);
+      expect(titles).toContain("Adulte");
+      expect(titles).toContain("Pédiatrique");
+    });
+  });
+
+  describe("Conversions v2 dose_kg (Lot 2)", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("Célocurine enfant : recette ISR enfant (1,5-2 mg/kg), pas la recette adulte", async () => {
+      const celo = DRUGS.find((drug) => drug.nom === "CÉLOCURINE")!;
+      render(<DrugCard drug={celo} patientWeight="20" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("CÉLOCURINE").closest("button")!);
+
+      expect(await screen.findByText("ISR enfant")).toBeInTheDocument();
+      expect(screen.queryByText("ISR adulte")).not.toBeInTheDocument();
+      expect(screen.getByText(/30-40 mg/)).toBeInTheDocument();
+    });
+
+    test("Bridion enfant : dose pédiatrique 4-16 mg/kg (80-320 mg à 20 kg), pas la dose CICO adulte", async () => {
+      const bridion = DRUGS.find((drug) => drug.nom === "BRIDION")!;
+      render(<DrugCard drug={bridion} patientWeight="20" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("BRIDION").closest("button")!);
+
+      expect(await screen.findByText("Décurarisation enfant")).toBeInTheDocument();
+      expect(screen.queryByText("CICO adulte")).not.toBeInTheDocument();
+      expect(screen.getByText(/80-320 mg/)).toBeInTheDocument();
+    });
+
+    test("Dobutamine preview : recette PSE affichée sans boîte fixed_dilution en double", async () => {
+      const dobu = DRUGS.find((drug) => drug.nom === "DOBUTAMINE")!;
+      render(<DrugCard drug={dobu} patientWeight="70" />);
+      fireEvent.click(screen.getByText("DOBUTAMINE").closest("button")!);
+
+      expect(await screen.findByText("1 flacon 250 mg/25 mL (10 mg/mL)")).toBeInTheDocument();
+      // Le prélèvement ne doit apparaître qu'une fois (pas de double rendu recette + boîte fixe)
+      expect(screen.getAllByText("1 flacon 250 mg/25 mL (10 mg/mL)")).toHaveLength(1);
+    });
+  });
+
+  describe("Conversions v2 etapes-seules + cas particuliers (Lots 3-4)", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("Primperan enfant : recette vide « Non recommandé < 18 ans »", async () => {
+      const primperan = DRUGS.find((drug) => drug.nom === "PRIMPERAN")!;
+      render(<DrugCard drug={primperan} patientWeight="20" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("PRIMPERAN").closest("button")!);
+
+      expect(await screen.findByText("Enfant")).toBeInTheDocument();
+      expect(screen.getAllByText(/Non recommandé < 18 ans/).length).toBeGreaterThan(0);
+      expect(screen.queryByText("IVL adulte")).not.toBeInTheDocument();
+    });
+
+    test("Nalbuphine enfant : pedTable pédiatrique, PAS les boutons adrénaline (bug corrigé)", async () => {
+      const nalbuphine = DRUGS.find((drug) => drug.nom === "NALBUPHINE")!;
+      render(<DrugCard drug={nalbuphine} patientWeight="20" prepPopulation="enfant" />);
+      fireEvent.click(screen.getByText("NALBUPHINE").closest("button")!);
+
+      expect(await screen.findByText("Préparation pédiatrique")).toBeInTheDocument();
+      expect(screen.queryByText("IM anaphylaxie")).not.toBeInTheDocument();
+      expect(screen.queryByText("IVD ACR")).not.toBeInTheDocument();
+    });
+
+    test('Mannitol adulte : calcul en g → mL (unit "g"), 70 kg → 17,5-70 g', async () => {
+      const mannitol = DRUGS.find((drug) => drug.nom === "MANNITOL 20%")!;
+      render(<DrugCard drug={mannitol} patientWeight="70" prepPopulation="adulte" />);
+      fireEvent.click(screen.getByText("MANNITOL 20%").closest("button")!);
+
+      expect(await screen.findByText(/17,5-70 g/)).toBeInTheDocument();
+    });
+  });
+
   describe("Éphédrine preview", () => {
     beforeEach(() => {
       sessionStorage.clear();
@@ -846,16 +977,18 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("structure aussi les anciennes préparations sans calcul dédié", async () => {
+    test("structure l'ancienne préparation Rivotril en recette v2 (IVD adulte)", async () => {
       const rivotril = DRUGS.find((drug) => drug.nom === "RIVOTRIL")!;
 
       render(<DrugCard drug={rivotril} patientWeight="" />);
       fireEvent.click(screen.getByText("RIVOTRIL").closest("button")!);
 
-      expect(await screen.findByText("Préparer")).toBeInTheDocument();
-      expect(screen.getAllByText("Ampoule 1 mg/1 mL").length).toBeGreaterThan(0);
-      expect(screen.getByText("Final")).toBeInTheDocument();
-      expect(screen.getAllByText("1 mg/mL").length).toBeGreaterThan(0);
+      expect(await screen.findByLabelText("Préparation v2")).toBeInTheDocument();
+      expect(screen.getByText("IVD adulte")).toBeInTheDocument();
+      expect(screen.getByText("1-2 mg IV lente sur 2 min")).toBeInTheDocument();
+      expect(
+        screen.getAllByText("Ampoule 1 mg/1 mL — à reconstituer avec son solvant").length
+      ).toBeGreaterThan(0);
     });
   });
 

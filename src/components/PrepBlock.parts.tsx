@@ -124,12 +124,11 @@ export const computeRecipePhaseRows = (
     const unit = phase.unit || "mg";
     const roundedDose = +dose.toFixed(1);
     const roundedDoseMax = doseMax !== null ? +doseMax.toFixed(1) : null;
+    const hasVolumeUnit = unit === "mg" || unit === "mg/h" || unit === "g";
     const volume =
-      (unit === "mg" || unit === "mg/h") && prep.conc_produit
-        ? +(dose / prep.conc_produit).toFixed(1)
-        : null;
+      hasVolumeUnit && prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
     const volumeMax =
-      (unit === "mg" || unit === "mg/h") && prep.conc_produit && doseMax !== null
+      hasVolumeUnit && prep.conc_produit && doseMax !== null
         ? +(doseMax / prep.conc_produit).toFixed(1)
         : null;
     const durationHours = getDurationHours(phase.duree);
