@@ -719,23 +719,22 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la dose méningée sur pompe comme l'amoxicilline", async () => {
+    test("affiche la table méningée PSE propre au Claforan (valeurs PDF, pas l'amoxicilline)", async () => {
       const claforan = DRUGS.find((drug) => drug.nom === "CLAFORAN")!;
 
       render(<DrugCard drug={claforan} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("CLAFORAN").closest("button")!);
 
-      fireEvent.click(await screen.findByRole("button", { name: /Dose méningée pompe/i }));
+      fireEvent.click(await screen.findByRole("button", { name: /Dose méningée PSE/i }));
 
-      expect(screen.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "16");
-      expect(screen.getByText("16 g/j")).toBeInTheDocument();
-      expect(screen.getByText("5 g/250 mL")).toBeInTheDocument();
-      expect(screen.getByText("33 mL/h")).toBeInTheDocument();
+      // Valeurs Claforan (seringue 48 mL, débits 6-9,3 mL/h) — cf. PDF p.16
+      expect(screen.getByText("2 g/48 mL → 6 mL/h")).toBeInTheDocument();
+      expect(screen.getByText("3 g/48 mL → 9,3 mL/h")).toBeInTheDocument();
+      expect(screen.getByText("6 g/250 mL → 8 mL/h")).toBeInTheDocument();
 
-      fireEvent.change(screen.getByLabelText("Dose/j"), { target: { value: "24" } });
-
-      expect(screen.getByText("24 g/j")).toBeInTheDocument();
-      expect(screen.getByText("50 mL/h")).toBeInTheDocument();
+      // PAS les valeurs de l'amoxicilline (2 g/100 mL, 5 g/250 mL @ 33 mL/h)
+      expect(screen.queryByText("5 g/250 mL")).not.toBeInTheDocument();
+      expect(screen.queryByText("33 mL/h")).not.toBeInTheDocument();
     });
   });
 
