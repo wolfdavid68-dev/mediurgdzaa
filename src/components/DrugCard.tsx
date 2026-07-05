@@ -259,10 +259,10 @@ const DrugCard = ({
 
   const renderPosoTab = () => {
     // Filtrage des colonnes posologie :
-    //  1. En preview, le toggle Adulte/Enfant (prop `prepPopulation`, non-null
-    //     seulement quand l'utilisateur l'a actionné) PRIME : « Enfant » masque
-    //     l'adulte et inversement, avec repli sur l'autre colonne si la
-    //     population demandée n'est pas renseignée.
+    //  1. Le toggle Adulte/Enfant (prop `prepPopulation`, non-null seulement
+    //     quand l'utilisateur l'a actionné) PRIME : « Enfant » masque l'adulte
+    //     et inversement, avec repli sur l'autre colonne si la population
+    //     demandée n'est pas renseignée.
     //  2. Sinon, filtrage par poids : < 30 kg → pédiatrique · > 70 kg → adulte ·
     //     30–70 kg (inclus) ou pas de poids → les deux. Même logique de repli.
     const kgNum = parseFloat(weight);

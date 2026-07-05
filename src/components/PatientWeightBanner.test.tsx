@@ -35,4 +35,20 @@ describe("PatientWeightBanner", () => {
     fireEvent.click(clear);
     expect(onChange).toHaveBeenCalledWith("");
   });
+
+  test("affiche le choix Adulte/Enfant dès qu'un poids valide est saisi", () => {
+    const onPopulationChange = vi.fn();
+    render(
+      <PatientWeightBanner
+        weight="80"
+        onChange={() => {}}
+        population={null}
+        onPopulationChange={onPopulationChange}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Adulte" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Enfant" }));
+    expect(onPopulationChange).toHaveBeenCalledWith("enfant");
+  });
 });

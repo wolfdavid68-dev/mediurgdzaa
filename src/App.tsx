@@ -397,8 +397,8 @@ const App = () => {
                 <PatientWeightBanner
                   weight={patientWeight}
                   onChange={setPatientWeight}
-                  population={previewMode ? prepPopulation : null}
-                  onPopulationChange={previewMode ? setPrepPopulation : undefined}
+                  population={prepPopulation}
+                  onPopulationChange={setPrepPopulation}
                 />
               </div>
             )}
@@ -460,7 +460,7 @@ const App = () => {
                 favorites={favorites}
                 showFavoritesOnly={showFavoritesOnly}
                 patientWeight={patientWeight}
-                prepPopulation={previewMode ? prepPopulation : null}
+                prepPopulation={prepPopulation}
                 onToggleFavorite={toggleFavorite}
                 onOpen={addToHistory}
                 onOpenChange={handleDrugOpenChange}
