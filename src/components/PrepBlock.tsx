@@ -47,6 +47,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   const [dosePrepInput, setDosePrepInput] = useState("");
   const [thresholdInput, setThresholdInput] = useState("");
   const previewMode = isPreview();
+  // Le layout Préparation v2 est public sur main ; previewMode ne pilote plus
+  // que le chargement des données preview, pas la forme visuelle du bloc.
+  const prepV2Mode = true;
   const [previewPrepByDrugId, setPreviewPrepByDrugId] = useState<PreviewPrepByDrugId | null>(null);
 
   useEffect(() => {
@@ -1921,7 +1924,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     return null;
   }
 
-  if (previewMode) {
+  if (prepV2Mode) {
     const tags = pediatricPrepOnly
       ? ["Pédiatrique"]
       : [displaySolvant, displayConc, displayDuree, displayStabilite, prep.debit].filter(Boolean);

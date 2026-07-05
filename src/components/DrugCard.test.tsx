@@ -300,7 +300,7 @@ describe("DrugCard", () => {
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
       expect(screen.getByText("20 mL d'adrénaline")).toBeInTheDocument();
-      expect(screen.getByText("42 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("à 42 mL dans la seringue")).toBeInTheDocument();
       expect(screen.getByText("Débit PSE")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 0,1 µg/kg/min")).toBeInTheDocument();
       expect(screen.queryByText("Débit réglé")).not.toBeInTheDocument();
@@ -517,7 +517,7 @@ describe("DrugCard", () => {
       expect(screen.getAllByText("Pour 70 kg").length).toBeGreaterThan(0);
       expect(screen.getByText("IVSE poids")).toBeInTheDocument();
       expect(screen.getByText("10 mL de noradrénaline")).toBeInTheDocument();
-      expect(screen.getByText("48 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("à 48 mL dans la seringue")).toBeInTheDocument();
       expect(
         screen.getByText("1 mL/h de solution = 0,1 µg/kg/min de Noradrénaline")
       ).toBeInTheDocument();
@@ -559,7 +559,7 @@ describe("DrugCard", () => {
       fireEvent.click(screen.getByText("DOBUTAMINE").closest("button")!);
 
       expect(screen.getByText("20 mL de Dobutrex")).toBeInTheDocument();
-      expect(screen.getByText("60 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("à 60 mL dans la seringue")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 1 µg/kg/min")).toBeInTheDocument();
     });
 
@@ -570,7 +570,7 @@ describe("DrugCard", () => {
       fireEvent.click(screen.getByText("ISUPREL").closest("button")!);
 
       expect(screen.getByText("10 mL d'Isuprel")).toBeInTheDocument();
-      expect(screen.getByText("48 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("à 48 mL dans la seringue")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 0,01 µg/kg/min")).toBeInTheDocument();
     });
   });
@@ -1230,7 +1230,7 @@ describe("DrugCard", () => {
       );
       expect(screen.getAllByText("Pour 85 kg").length).toBeGreaterThan(0);
       expect(screen.getByText("5 mL d'ampoule pure")).toBeInTheDocument();
-      expect(screen.getByText("29 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("à 29 mL dans la seringue")).toBeInTheDocument();
       expect(
         screen.getByText("1 mL/h de solution = 0,1 µg/kg/h de Sufentanil")
       ).toBeInTheDocument();
@@ -1245,7 +1245,7 @@ describe("DrugCard", () => {
       expect(screen.getByText("12,75 µg = 0,26 mL")).toBeInTheDocument();
       expect(screen.getByText("Demi-dose de rappel : 0,15 µg/kg")).toBeInTheDocument();
       expect(screen.queryByText("5 mL d'ampoule pure")).not.toBeInTheDocument();
-      expect(screen.queryByText("29 mL dans la seringue")).not.toBeInTheDocument();
+      expect(screen.queryByText("à 29 mL dans la seringue")).not.toBeInTheDocument();
     });
   });
 
