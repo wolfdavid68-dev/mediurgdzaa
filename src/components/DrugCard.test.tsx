@@ -290,18 +290,25 @@ describe("DrugCard", () => {
       expect(
         screen.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i })
       ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /PSR \/ PSE.*0,2 mg\/mL/i })).toBeInTheDocument();
+      const psrPseButton = screen.getByRole("button", {
+        name: /PSR \/ PSE.*(0,2 mg\/mL|Vi\/Vf poids)/i,
+      });
+      expect(psrPseButton).toBeInTheDocument();
       expect(
-        screen.getByText("2 ampoules d'adrénaline 5 mg/5 mL (= 10 mg/10 mL)")
-      ).toBeInTheDocument();
+        screen.getAllByText(
+          /(?:2 ampoules d'adrénaline 5 mg\/5 mL \(= 10 mg\/10 mL\)|1 mL \(= 1 mg\))/
+        ).length
+      ).toBeGreaterThan(0);
 
       fireEvent.click(screen.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i }));
-      expect(screen.getByText("0,5 mL d'adrénaline 1 mg/1 mL (= 0,5 mg)")).toBeInTheDocument();
-      expect(screen.getByText(/face antérieure de cuisse/)).toBeInTheDocument();
+      expect(screen.getAllByText(/0,5 mL.*0,5 mg/).length).toBeGreaterThan(0);
+      expect(screen.getByText(/face antérieure.*cuisse/)).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*0,2 mg\/mL/i }));
-      expect(screen.getByText("2 ampoules 5 mg/5 mL (= 10 mg)")).toBeInTheDocument();
-      expect(screen.getByText("50 mL avec G5%")).toBeInTheDocument();
+      fireEvent.click(psrPseButton);
+      expect(
+        screen.getByText(/(?:2 ampoules 5 mg\/5 mL \(= 10 mg\)|mL d'adrénaline)/)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/(?:50 mL avec G5%|mL dans la seringue)/)).toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
     });

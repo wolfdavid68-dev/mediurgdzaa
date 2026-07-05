@@ -16,7 +16,7 @@ export const DRUGS_CATECHOLAMINES = [
     monitoring: ["Scope"],
     couleur: "#7C3AED",
     icon: "⚡",
-    desc: "Médicament de l'arrêt cardiaque et du choc anaphylactique. Action vasopressive, puissant inotrope/chronotrope/dromotrope positif, vasoconstriction, bronchodilatation. À administrer TOUJOURS au plus proche du patient.",
+    desc: "Arrêt cardiaque, choc anaphylactique.",
     indic: [
       "Arrêt cardio-respiratoire (ACR) — 1ère ligne",
       "Choc anaphylactique — 1ère ligne",
@@ -51,83 +51,44 @@ export const DRUGS_CATECHOLAMINES = [
       ],
     },
     prep: {
-      solvant: "G5%",
-      volume_final: null,
-      conc_finale: "1 mL/h = 0,1 µg/kg/min",
-      conc_produit: 1,
-      unite: "mg",
-      duree: "Continu IVSE",
-      stabilite: "24h à 25°C",
-      adrenaline_table: true,
-      etapes: [
-        "ACR : ampoule 1 mg/mL utilisée pure — prélever 1 mL (= 1 mg)",
-        "Anaphylaxie : 0,5 mg IM pur — utiliser ampoule 1 mg/mL",
-        "PSE choc : prélever Vi mL d'adrénaline et diluer dans NaCl 0,9% ou G5% jusqu'à Vf mL dans la seringue",
-        "1 mL/h de solution = 0,1 µg/kg/min d'Adrénaline",
-      ],
-      notes: [
-        "Administrer toujours au plus proche du patient",
-        "IVSE : débit constant — pas de bolus sur cette voie",
-        "À l'abri de la lumière",
-      ],
       preparations: [
         {
           titre: "ACR",
           mode: "ivd",
           population: "adulte",
           tag: "1 mg IV/IO",
-          prelever: "1 mL d'adrénaline 1 mg/mL (= 1 mg)",
-          concentration: "1 mg/mL pur",
+          prelever: "1 mL (= 1 mg)",
           rows: [
             {
               label: "Injecter",
-              value: "1 mg IV/IO toutes les 3-5 min",
+              value: "IV/IO toutes les 3-5 min",
               highlight: true,
             },
             {
               label: "Rincer",
-              value: "flush NaCl 0,9% après injection",
+              value: "flush NaCl 0,9%",
             },
           ],
           hide_final: true,
-          etapes: [
-            "Ampoule 1 mg/1 mL (1 mg/mL)",
-            "ACR adulte : prélever 1 mL (= 1 mg)",
-            "Injecter IV/IO toutes les 3-5 min selon algorithme ACR",
-          ],
-          notes: [
-            "Aucune contre-indication en ACR",
-            "Administrer au plus proche du patient et rincer après injection",
-          ],
         },
         {
           titre: "Choc anaphylactique",
           mode: "im",
           population: "adulte",
           tag: "0,5 mg IM",
-          prelever: "0,5 mL d'adrénaline 1 mg/mL (= 0,5 mg)",
-          concentration: "1 mg/mL pur",
+          prelever: "0,5 mL (= 0,5 mg)",
           rows: [
             {
               label: "Injecter",
-              value: "IM face antérieure de cuisse",
+              value: "IM face antérieure cuisse",
               highlight: true,
             },
             {
               label: "Répéter",
-              value: "selon réponse clinique",
+              value: "selon clinique",
             },
           ],
           hide_final: true,
-          etapes: [
-            "Ampoule 1 mg/1 mL (1 mg/mL)",
-            "Prélever 0,5 mL (= 0,5 mg)",
-            "Injecter IM face antérieure de cuisse",
-          ],
-          notes: [
-            "Traitement de 1ère ligne du choc anaphylactique",
-            "Surveillance cardiaque rapprochée",
-          ],
         },
         {
           titre: "PSR / PSE",
@@ -135,16 +96,6 @@ export const DRUGS_CATECHOLAMINES = [
           population: "adulte",
           tag: "Vi/Vf poids",
           adrenaline_table: true,
-          etapes: [
-            "PSE choc : prélever Vi mL d'adrénaline",
-            "Diluer dans NaCl 0,9% ou G5% jusqu'à Vf mL dans la seringue",
-            "1 mL/h de solution = 0,1 µg/kg/min d'Adrénaline",
-          ],
-          notes: [
-            "IVSE : débit constant — pas de bolus sur cette voie",
-            "Voie centrale proximale idéale en PSE",
-            "Administrer toujours au plus proche du patient",
-          ],
         },
       ],
       pedTable: {
