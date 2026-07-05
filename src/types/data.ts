@@ -115,13 +115,18 @@ type DrugPrepRecipe = {
   notes?: string[];
   duplicate_posology?: string[];
   empty?: boolean;
+  adrenaline_table?: boolean;
+  dobutamine_table?: boolean;
+  isuprel_table?: boolean;
   sufenta_table?: boolean;
+  norad_table?: boolean;
   sufenta_intranasal?: boolean;
   kcl_ivl?: boolean;
   kcl_pediatric?: boolean;
   clottafact_pediatric?: boolean;
   amiklin_adult?: boolean;
   amoxicilline_meningee_pump?: boolean;
+  claforan_meningee_pump?: boolean;
   dose_input_label?: string;
   dose_input_unit?: string;
   dose_input_default?: number;
@@ -172,6 +177,11 @@ type DrugPrep = {
   dose_threshold_result_unit?: string;
   // sufenta_table : table Vi/Vf pédiatrique par poids
   sufenta_table?: boolean;
+  // norad_table : table Vi/Vf noradrénaline par poids
+  norad_table?: boolean;
+  adrenaline_table?: boolean;
+  dobutamine_table?: boolean;
+  isuprel_table?: boolean;
   // fixed_dilution (preview) : recette unique non poids-dépendante
   fixed_dilution?: boolean;
   calc_titre?: string;

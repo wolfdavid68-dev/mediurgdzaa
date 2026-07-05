@@ -253,6 +253,55 @@ export function calcPrepSufentaTable(weightKg: string | number | null | undefine
   return { kg, vi, vf };
 }
 
+// ── Préparation : table Noradrénaline (Vi/Vf par poids) ───────
+// Règle : 1 mL/h = 0,1 µg/kg/min ; ampoule 2 mg/mL ; Vf = round(2000 × Vi / (6 × kg))
+export function calcPrepNoradTable(weightKg: string | number | null | undefined) {
+  if (!isValidWeight(weightKg)) return null;
+  const kg = parseFloat(String(weightKg));
+  let vi;
+  if (kg < 42) vi = 2.5;
+  else if (kg < 64) vi = 5;
+  else vi = 10;
+  const vf = Math.round((2000 * vi) / (6 * kg));
+  return { kg, vi, vf };
+}
+
+// ── Préparation : table Adrénaline (Vi/Vf par poids) ──────────
+// Règle : 1 mL/h = 0,1 µg/kg/min ; ampoule 1 mg/mL ; Vf = round(1000 × Vi / (6 × kg))
+export function calcPrepAdrenalineTable(weightKg: string | number | null | undefined) {
+  if (!isValidWeight(weightKg)) return null;
+  const kg = parseFloat(String(weightKg));
+  let vi;
+  if (kg < 42) vi = 5;
+  else if (kg < 64) vi = 10;
+  else vi = 20;
+  const vf = Math.round((1000 * vi) / (6 * kg));
+  return { kg, vi, vf };
+}
+
+// ── Préparation : table Dobutamine (Vi/Vf par poids) ──────────
+// Règle : 1 mL/h = 1 µg/kg/min ; Dobutrex 12,5 mg/mL ; Vf = round(12500 × Vi / (60 × kg))
+export function calcPrepDobutamineTable(weightKg: string | number | null | undefined) {
+  if (!isValidWeight(weightKg)) return null;
+  const kg = parseFloat(String(weightKg));
+  const vi = kg < 58 ? 10 : 20;
+  const vf = Math.round((12500 * vi) / (60 * kg));
+  return { kg, vi, vf };
+}
+
+// ── Préparation : table Isuprel (Vi/Vf par poids) ─────────────
+// Règle : 1 mL/h = 0,01 µg/kg/min ; ampoule 0,2 mg/mL ; Vf = round(200 × Vi / (0,6 × kg))
+export function calcPrepIsuprelTable(weightKg: string | number | null | undefined) {
+  if (!isValidWeight(weightKg)) return null;
+  const kg = parseFloat(String(weightKg));
+  let vi;
+  if (kg < 42) vi = 2.5;
+  else if (kg < 64) vi = 5;
+  else vi = 10;
+  const vf = Math.round((200 * vi) / (0.6 * kg));
+  return { kg, vi, vf };
+}
+
 // ── Préparation : phases successives (Hidonac) ────────────────
 export function calcPrepSufentaIntranasal(weightKg: string | number | null | undefined) {
   if (!isValidWeight(weightKg)) return null;

@@ -25,10 +25,10 @@ export const PSE = {
     steps: [1, 2, 3, 5, 10, 15, 20, 30, 40, 50],
   },
   // ── CATÉCHOLAMINES ────────────────────────────────────────
-  13: { // Adrénaline — 2 amp 5 mg/5 mL qsp 50 mL G5% → 200 µg/mL
-    conc: 200, unite: "µg/kg/min", min: 0.05, max: 1,
-    hideBlock: true,
-    steps: [0.1, 0.2, 0.3, 0.5, 1],
+  13: { // Adrénaline — dilution Vi/Vf par poids : 1 mL/h = 0,1 µg/kg/min
+    conc: 1, unite: "µg/kg/min", min: 0.125, max: 2, factor: 10,
+    tag: "Dilution poids · 1 mL/h = 0,1 µg/kg/min",
+    steps: [0.125, 0.2, 0.3, 0.5, 1, 2],
     referenceTables: [
       {
         title: "PSE adulte",
@@ -44,19 +44,19 @@ export const PSE = {
       },
     ],
   },
-  17: { // Noradrénaline — 2 amp 8 mg/4 mL qsp 48 mL G5% → 333 µg/mL
-    conc: 333, unite: "µg/kg/min", min: 0.05, max: 2,
-    hideBlock: true,
-    steps: [0.1, 0.2, 0.3, 0.5, 1],
+  17: { // Noradrénaline — dilution Vi/Vf par poids : 1 mL/h = 0,1 µg/kg/min
+    conc: 1, unite: "µg/kg/min", min: 0.25, max: 2, factor: 10,
+    tag: "Dilution poids · 1 mL/h = 0,1 µg/kg/min",
+    steps: [0.25, 0.5, 1, 1.5, 2],
   },
-  15: { // Dobutamine — 1 flacon 250 mg qsp 50 mL → 5 000 µg/mL
-    conc: 5000, unite: "µg/kg/min", min: 2, max: 20,
-    hideBlock: true,
-    steps: [5, 10, 15, 20],
+  15: { // Dobutamine — dilution Vi/Vf par poids : 1 mL/h = 1 µg/kg/min
+    conc: 1, unite: "µg/kg/min", min: 2.5, max: 20, factor: 1,
+    tag: "Dilution poids · 1 mL/h = 1 µg/kg/min",
+    steps: [2.5, 5, 10, 15, 20],
   },
-  16: { // Isuprel — 5 amp 0,2 mg qsp 50 mL G5% → 20 µg/mL
-    conc: 20, unite: "µg/kg/min", min: 0.01, max: 0.1,
-    hideBlock: true,
+  16: { // Isuprel — dilution Vi/Vf par poids : 1 mL/h = 0,01 µg/kg/min
+    conc: 1, unite: "µg/kg/min", min: 0.01, max: 0.1, factor: 100,
+    tag: "Dilution poids · 1 mL/h = 0,01 µg/kg/min",
     steps: [0.02, 0.05, 0.08, 0.1],
   },
 
@@ -77,8 +77,7 @@ export const PSE = {
   // ── MORPHINIQUES ─────────────────────────────────────────
   5: { // Sufentanil — table de dilution adaptée au poids : 1 mL/h = 0,1 µg/kg/h ⇒ mL/h = dose × 10
     conc: 1, unite: "µg/kg/h", min: 0.2, max: 2, factor: 10,
-    tag: "1 mL/h = 0,1 µg/kg/h · 250 µg/50 mL",
-    hideBlock: true,
+    tag: "Dilution poids · 1 mL/h = 0,1 µg/kg/h",
     steps: [0.2, 0.5, 1, 1.5, 2],
   },
   6: { // Morphine — 10 mg qsp 10 mL NaCl → 1 mg/mL

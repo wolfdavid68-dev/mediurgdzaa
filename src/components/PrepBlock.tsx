@@ -2,6 +2,10 @@ import { Fragment, useEffect, useState } from "react";
 import {
   calcPrepThreshold,
   calcPrepSufentaTable,
+  calcPrepNoradTable,
+  calcPrepAdrenalineTable,
+  calcPrepDobutamineTable,
+  calcPrepIsuprelTable,
   calcPrepSufentaIntranasal,
   calcPrepPhases,
   calcPrepDoseKg,
@@ -390,21 +394,30 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
   };
   const renderAmoxicillineMeningeeRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
-    if (!recipe.amoxicilline_meningee_pump) return null;
+    if (!recipe.amoxicilline_meningee_pump && !recipe.claforan_meningee_pump) return null;
     const requestedDose = getRecipeDoseInputValue(recipe);
     if (!requestedDose) return null;
-    const table = [
-      { dose: 6, prep: "2 g/100 mL", rate: 12 },
-      { dose: 8, prep: "2 g/100 mL", rate: 17 },
-      { dose: 10, prep: "5 g/250 mL", rate: 21 },
-      { dose: 12, prep: "5 g/250 mL", rate: 25 },
-      { dose: 14, prep: "5 g/250 mL", rate: 29 },
-      { dose: 16, prep: "5 g/250 mL", rate: 33 },
-      { dose: 18, prep: "5 g/250 mL", rate: 37 },
-      { dose: 20, prep: "5 g/250 mL", rate: 42 },
-      { dose: 22, prep: "5 g/250 mL", rate: 46 },
-      { dose: 24, prep: "5 g/250 mL", rate: 50 },
-    ];
+    const table = recipe.claforan_meningee_pump
+      ? [
+          { dose: 6, prep: "2 g/48 mL", rate: 6 },
+          { dose: 12, prep: "3 g/48 mL", rate: 8 },
+          { dose: 14, prep: "3 g/48 mL", rate: 9.3 },
+          { dose: 16, prep: "4 g/48 mL", rate: 8 },
+          { dose: 20, prep: "5 g/48 mL", rate: 8 },
+          { dose: 24, prep: "6 g/250 mL", rate: 8 },
+        ]
+      : [
+          { dose: 6, prep: "2 g/100 mL", rate: 12 },
+          { dose: 8, prep: "2 g/100 mL", rate: 17 },
+          { dose: 10, prep: "5 g/250 mL", rate: 21 },
+          { dose: 12, prep: "5 g/250 mL", rate: 25 },
+          { dose: 14, prep: "5 g/250 mL", rate: 29 },
+          { dose: 16, prep: "5 g/250 mL", rate: 33 },
+          { dose: 18, prep: "5 g/250 mL", rate: 37 },
+          { dose: 20, prep: "5 g/250 mL", rate: 42 },
+          { dose: 22, prep: "5 g/250 mL", rate: 46 },
+          { dose: 24, prep: "5 g/250 mL", rate: 50 },
+        ];
     const current =
       table.find((row) => row.dose === requestedDose) ||
       table.reduce((closest, row) =>
@@ -424,7 +437,9 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         </div>
         <div className="prep-calc-row">
           <span className="prep-calc-step">Débit pompe</span>
-          <span className={`prep-calc-val ${highlightClass}`}>{current.rate} mL/h</span>
+          <span className={`prep-calc-val ${highlightClass}`}>
+            {formatDoseNumber(current.rate)} mL/h
+          </span>
         </div>
       </>
     );
@@ -623,6 +638,148 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
   };
 
+  const renderRecipeNoradTable = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const r = calcPrepNoradTable(weight);
+    if (!r) return null;
+    if (variant === "v2") {
+      return (
+        <div className={`prep-calc${recipeModeClass(recipe)}`}>
+          <div className="prep-calc-header">
+            <span>Pour {r.kg} kg</span>
+            <span>{recipe.tag || "IVSE poids"}</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Prélever</span>
+            <span className="prep-calc-val prep-highlight">{r.vi} mL de noradrénaline</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Diluer</span>
+            <span className="prep-calc-val">à {r.vf} mL dans la seringue</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Débit</span>
+            <span className="prep-calc-val">2,5 à 20 mL/h (= 0,25 à 2 µg/kg/min)</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`prep-calc-box${recipeModeClass(recipe)}`}>
+        <div className="prep-calc-header">
+          <PrepIcon /> Pour {r.kg} kg
+          {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Vi (prélever)</span>
+          <span className="prep-calc-val prep-calc-highlight">{r.vi} mL de noradrénaline</span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Vf (diluer à)</span>
+          <span
+            className="prep-calc-val prep-calc-highlight"
+            style={{ color: "#60a5fa", fontWeight: 800 }}
+          >
+            {r.vf} mL dans la seringue
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Débit IVSE</span>
+          <span className="prep-calc-val">2,5 à 20 mL/h (= 0,25 à 2 µg/kg/min)</span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderRecipeAdrenalineTable = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const r = calcPrepAdrenalineTable(weight);
+    if (!r) return null;
+    return renderRecipeViVfTable(recipe, variant, r, "mL d'adrénaline", "IVSE poids", {
+      classic: "1,25 à 20 mL/h (= 0,125 à 2 µg/kg/min)",
+      v2: "1,25 à 20 mL/h (= 0,125 à 2 µg/kg/min)",
+    });
+  };
+
+  const renderRecipeDobutamineTable = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const r = calcPrepDobutamineTable(weight);
+    if (!r) return null;
+    return renderRecipeViVfTable(recipe, variant, r, "mL de Dobutrex", "IVSE poids", {
+      classic: "2,5 à 20 mL/h (= 2,5 à 20 µg/kg/min)",
+      v2: "2,5 à 20 mL/h (= 2,5 à 20 µg/kg/min)",
+    });
+  };
+
+  const renderRecipeIsuprelTable = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const r = calcPrepIsuprelTable(weight);
+    if (!r) return null;
+    return renderRecipeViVfTable(recipe, variant, r, "mL d'Isuprel", "IVSE poids", {
+      classic: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
+      v2: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
+    });
+  };
+
+  function renderRecipeViVfTable(
+    recipe: PrepRecipe,
+    variant: "classic" | "v2",
+    r: { kg: number; vi: number; vf: number },
+    productLabel: string,
+    defaultTag: string,
+    debit: { classic: string; v2: string }
+  ) {
+    if (variant === "v2") {
+      return (
+        <div className={`prep-calc${recipeModeClass(recipe)}`}>
+          <div className="prep-calc-header">
+            <span>Pour {r.kg} kg</span>
+            <span>{recipe.tag || defaultTag}</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Prélever</span>
+            <span className="prep-calc-val prep-highlight">
+              {r.vi} {productLabel}
+            </span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Diluer</span>
+            <span className="prep-calc-val">à {r.vf} mL dans la seringue</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Débit</span>
+            <span className="prep-calc-val">{debit.v2}</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`prep-calc-box${recipeModeClass(recipe)}`}>
+        <div className="prep-calc-header">
+          <PrepIcon /> Pour {r.kg} kg
+          {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Vi (prélever)</span>
+          <span className="prep-calc-val prep-calc-highlight">
+            {r.vi} {productLabel}
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Vf (diluer à)</span>
+          <span
+            className="prep-calc-val prep-calc-highlight"
+            style={{ color: "#60a5fa", fontWeight: 800 }}
+          >
+            {r.vf} mL dans la seringue
+          </span>
+        </div>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Débit IVSE</span>
+          <span className="prep-calc-val">{debit.classic}</span>
+        </div>
+      </div>
+    );
+  }
+
   const renderRecipeSufentaIntranasal = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     const r = calcPrepSufentaIntranasal(weight);
     if (!r) return null;
@@ -664,8 +821,16 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   const renderRecipeCalcBox = (recipe: PrepRecipe) =>
     recipe.empty ? (
       renderRecipeEmpty(recipe)
+    ) : recipe.adrenaline_table ? (
+      renderRecipeAdrenalineTable(recipe, "classic")
+    ) : recipe.dobutamine_table ? (
+      renderRecipeDobutamineTable(recipe, "classic")
+    ) : recipe.isuprel_table ? (
+      renderRecipeIsuprelTable(recipe, "classic")
     ) : recipe.sufenta_table ? (
       renderRecipeSufentaTable(recipe, "classic")
+    ) : recipe.norad_table ? (
+      renderRecipeNoradTable(recipe, "classic")
     ) : recipe.sufenta_intranasal ? (
       renderRecipeSufentaIntranasal(recipe, "classic")
     ) : (
@@ -728,8 +893,16 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
   const renderRecipeCalc = (recipe: PrepRecipe) =>
     recipe.empty ? (
       renderRecipeEmpty(recipe)
+    ) : recipe.adrenaline_table ? (
+      renderRecipeAdrenalineTable(recipe, "v2")
+    ) : recipe.dobutamine_table ? (
+      renderRecipeDobutamineTable(recipe, "v2")
+    ) : recipe.isuprel_table ? (
+      renderRecipeIsuprelTable(recipe, "v2")
     ) : recipe.sufenta_table ? (
       renderRecipeSufentaTable(recipe, "v2")
+    ) : recipe.norad_table ? (
+      renderRecipeNoradTable(recipe, "v2")
     ) : recipe.sufenta_intranasal ? (
       renderRecipeSufentaIntranasal(recipe, "v2")
     ) : (
@@ -861,6 +1034,54 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       );
     }
 
+    if (prep.adrenaline_table) {
+      const r = calcPrepAdrenalineTable(weight);
+      if (!r) return null;
+      return renderRecipeViVfTable(
+        { titre: "PSE", tag: "IVSE poids" },
+        "classic",
+        r,
+        "mL d'adrénaline",
+        "IVSE poids",
+        {
+          classic: "1,25 à 20 mL/h (= 0,125 à 2 µg/kg/min)",
+          v2: "1,25 à 20 mL/h (= 0,125 à 2 µg/kg/min)",
+        }
+      );
+    }
+
+    if (prep.dobutamine_table) {
+      const r = calcPrepDobutamineTable(weight);
+      if (!r) return null;
+      return renderRecipeViVfTable(
+        { titre: "PSE", tag: "IVSE poids" },
+        "classic",
+        r,
+        "mL de Dobutrex",
+        "IVSE poids",
+        {
+          classic: "2,5 à 20 mL/h (= 2,5 à 20 µg/kg/min)",
+          v2: "2,5 à 20 mL/h (= 2,5 à 20 µg/kg/min)",
+        }
+      );
+    }
+
+    if (prep.isuprel_table) {
+      const r = calcPrepIsuprelTable(weight);
+      if (!r) return null;
+      return renderRecipeViVfTable(
+        { titre: "PSE", tag: "IVSE poids" },
+        "classic",
+        r,
+        "mL d'Isuprel",
+        "IVSE poids",
+        {
+          classic: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
+          v2: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
+        }
+      );
+    }
+
     if (prep.sufenta_table) {
       const r = calcPrepSufentaTable(weight);
       if (!r) return null;
@@ -885,6 +1106,35 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           <div className="prep-calc-row">
             <span className="prep-calc-step">Débit IVSE</span>
             <span className="prep-calc-val">2 à 20 mL/h (= 0,2 à 2 µg/kg/h)</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (prep.norad_table) {
+      const r = calcPrepNoradTable(weight);
+      if (!r) return null;
+      return (
+        <div className="prep-calc-box">
+          <div className="prep-calc-header">
+            <PrepIcon /> Pour {r.kg} kg
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Vi (prélever)</span>
+            <span className="prep-calc-val prep-calc-highlight">{r.vi} mL de noradrénaline</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Vf (diluer à)</span>
+            <span
+              className="prep-calc-val prep-calc-highlight"
+              style={{ color: "#60a5fa", fontWeight: 800 }}
+            >
+              {r.vf} mL dans la seringue
+            </span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Débit IVSE</span>
+            <span className="prep-calc-val">2,5 à 20 mL/h (= 0,25 à 2 µg/kg/min)</span>
           </div>
         </div>
       );
@@ -1068,6 +1318,54 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       );
     }
 
+    if (prep.adrenaline_table) {
+      const r = calcPrepAdrenalineTable(weight);
+      if (!r) return null;
+      return renderRecipeViVfTable(
+        { titre: "PSE", tag: "IVSE poids" },
+        "v2",
+        r,
+        "mL d'adrénaline",
+        "IVSE poids",
+        {
+          classic: "1,25 à 20 mL/h (= 0,125 à 2 µg/kg/min)",
+          v2: "1,25 à 20 mL/h (= 0,125 à 2 µg/kg/min)",
+        }
+      );
+    }
+
+    if (prep.dobutamine_table) {
+      const r = calcPrepDobutamineTable(weight);
+      if (!r) return null;
+      return renderRecipeViVfTable(
+        { titre: "PSE", tag: "IVSE poids" },
+        "v2",
+        r,
+        "mL de Dobutrex",
+        "IVSE poids",
+        {
+          classic: "2,5 à 20 mL/h (= 2,5 à 20 µg/kg/min)",
+          v2: "2,5 à 20 mL/h (= 2,5 à 20 µg/kg/min)",
+        }
+      );
+    }
+
+    if (prep.isuprel_table) {
+      const r = calcPrepIsuprelTable(weight);
+      if (!r) return null;
+      return renderRecipeViVfTable(
+        { titre: "PSE", tag: "IVSE poids" },
+        "v2",
+        r,
+        "mL d'Isuprel",
+        "IVSE poids",
+        {
+          classic: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
+          v2: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
+        }
+      );
+    }
+
     if (prep.sufenta_table) {
       const r = calcPrepSufentaTable(weight);
       if (!r) return null;
@@ -1088,6 +1386,31 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           <div className="prep-calc-row">
             <span className="prep-calc-step">Débit</span>
             <span className="prep-calc-val">2 à 20 mL/h (= 0,2 à 2 µg/kg/h)</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (prep.norad_table) {
+      const r = calcPrepNoradTable(weight);
+      if (!r) return null;
+      return (
+        <div className="prep-calc">
+          <div className="prep-calc-header">
+            <span>Pour {r.kg} kg</span>
+            <span>IVSE poids</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Prélever</span>
+            <span className="prep-calc-val prep-highlight">{r.vi} mL de noradrénaline</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Diluer</span>
+            <span className="prep-calc-val">à {r.vf} mL dans la seringue</span>
+          </div>
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Débit</span>
+            <span className="prep-calc-val">2,5 à 20 mL/h (= 0,25 à 2 µg/kg/min)</span>
           </div>
         </div>
       );
@@ -1182,7 +1505,11 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     !prep.preparations?.length &&
     !prep.fixed_dilution &&
     prep.dose_threshold === undefined &&
+    !prep.adrenaline_table &&
+    !prep.dobutamine_table &&
+    !prep.isuprel_table &&
     !prep.sufenta_table &&
+    !prep.norad_table &&
     !prep.phases?.length &&
     !prep.dose_kg &&
     !prep.table &&

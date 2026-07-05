@@ -285,13 +285,13 @@ describe("DrugCard", () => {
     });
   });
 
-  describe("Débit PSE preview uniquement", () => {
+  describe("Débits PSE main et preview", () => {
     afterEach(() => {
       sessionStorage.clear();
       window.history.pushState({}, "", "/");
     });
 
-    test("masque les nouveaux débits PSE hors author=preview", () => {
+    test("garde la table Vi/Vf Adrénaline sur main hors author=preview", () => {
       sessionStorage.clear();
       window.history.pushState({}, "", "/");
       const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
@@ -299,7 +299,10 @@ describe("DrugCard", () => {
       render(<DrugCard drug={adrenaline} patientWeight="80" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(screen.queryByText("Débit PSE")).not.toBeInTheDocument();
+      expect(screen.getByText("20 mL d'adrénaline")).toBeInTheDocument();
+      expect(screen.getByText("42 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("Débit PSE")).toBeInTheDocument();
+      expect(screen.getByText("Dilution poids · 1 mL/h = 0,1 µg/kg/min")).toBeInTheDocument();
       expect(screen.queryByText("Débit réglé")).not.toBeInTheDocument();
     });
 
@@ -312,7 +315,7 @@ describe("DrugCard", () => {
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
       expect(await screen.findByText("Débit PSE")).toBeInTheDocument();
-      expect(screen.getByText("Débit réglé")).toBeInTheDocument();
+      expect(await screen.findByText("Débit réglé")).toBeInTheDocument();
     });
   });
 
@@ -494,6 +497,63 @@ describe("DrugCard", () => {
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.getByText("Pédia : 0,05-2 µg/kg/min IVSE")).toBeInTheDocument();
       expect(screen.queryByText("Repères dose → débit — enfant")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Noradrénaline main", () => {
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("affiche la préparation Vi/Vf et le débit PSE pondéral hors author=preview", () => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+      const noradrenaline = DRUGS.find((drug) => drug.nom === "NORADRÉNALINE")!;
+
+      render(<DrugCard drug={noradrenaline} patientWeight="70" />);
+      fireEvent.click(screen.getByText("NORADRÉNALINE").closest("button")!);
+
+      expect(screen.getAllByText("Pour 70 kg").length).toBeGreaterThan(0);
+      expect(screen.getByText("IVSE poids")).toBeInTheDocument();
+      expect(screen.getByText("10 mL de noradrénaline")).toBeInTheDocument();
+      expect(screen.getByText("48 mL dans la seringue")).toBeInTheDocument();
+      expect(
+        screen.getByText("1 mL/h de solution = 0,1 µg/kg/min de Noradrénaline")
+      ).toBeInTheDocument();
+      expect(screen.getByText("Débit PSE")).toBeInTheDocument();
+      expect(screen.getByText("Pour 70 kg — adulte")).toBeInTheDocument();
+      expect(screen.getByText("Dilution poids · 1 mL/h = 0,1 µg/kg/min")).toBeInTheDocument();
+      expect(screen.queryByText("1.26")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Tables Vi/Vf main", () => {
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("Dobutamine garde la table poids de main", () => {
+      const dobutamine = DRUGS.find((drug) => drug.nom === "DOBUTAMINE")!;
+
+      render(<DrugCard drug={dobutamine} patientWeight="70" />);
+      fireEvent.click(screen.getByText("DOBUTAMINE").closest("button")!);
+
+      expect(screen.getByText("20 mL de Dobutrex")).toBeInTheDocument();
+      expect(screen.getByText("60 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("Dilution poids · 1 mL/h = 1 µg/kg/min")).toBeInTheDocument();
+    });
+
+    test("Isuprel garde la table poids de main", () => {
+      const isuprel = DRUGS.find((drug) => drug.nom === "ISUPREL")!;
+
+      render(<DrugCard drug={isuprel} patientWeight="70" />);
+      fireEvent.click(screen.getByText("ISUPREL").closest("button")!);
+
+      expect(screen.getByText("10 mL d'Isuprel")).toBeInTheDocument();
+      expect(screen.getByText("48 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("Dilution poids · 1 mL/h = 0,01 µg/kg/min")).toBeInTheDocument();
     });
   });
 
@@ -750,7 +810,7 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la table méningée PSE propre au Claforan (valeurs PDF, pas l'amoxicilline)", async () => {
+    test("affiche la dose méningée PSE Claforan comme l'amoxicilline, avec sa table propre", async () => {
       const claforan = DRUGS.find((drug) => drug.nom === "CLAFORAN")!;
 
       render(<DrugCard drug={claforan} patientWeight="80" prepPopulation="adulte" />);
@@ -758,18 +818,52 @@ describe("DrugCard", () => {
 
       fireEvent.click(await screen.findByRole("button", { name: /Dose méningée PSE/i }));
 
-      // Dose méningée calculée sur le poids : 200-300 mg/kg/j → 80 kg = 16-24 g
-      expect(screen.getByText("16-24 g")).toBeInTheDocument();
+      expect(screen.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "16");
+      expect(
+        screen.getByText((_, element) => element?.textContent === "16 g/j")
+      ).toBeInTheDocument();
+      expect(screen.getByText("4 g/48 mL")).toBeInTheDocument();
+      expect(screen.getByText("8 mL/h")).toBeInTheDocument();
 
-      // Valeurs Claforan gardées dans les étapes à droite, pas en lignes du bloc de préparation.
-      expect(screen.getByText("6 g/j : 2 g/48 mL → 6 mL/h")).toBeInTheDocument();
-      expect(screen.getByText("14 g/j : 3 g/48 mL → 9,3 mL/h")).toBeInTheDocument();
-      expect(screen.getByText("24 g/j : 6 g/250 mL → 8 mL/h")).toBeInTheDocument();
-      expect(screen.queryByText("2 g/48 mL → 6 mL/h")).not.toBeInTheDocument();
+      fireEvent.change(screen.getByLabelText("Dose/j"), { target: { value: "14" } });
+
+      expect(
+        screen.getByText((_, element) => element?.textContent === "14 g/j")
+      ).toBeInTheDocument();
+      expect(screen.getByText("3 g/48 mL")).toBeInTheDocument();
+      expect(screen.getByText("9,3 mL/h")).toBeInTheDocument();
 
       // PAS les valeurs de l'amoxicilline (2 g/100 mL, 5 g/250 mL @ 33 mL/h)
+      expect(screen.queryByText("2 g/100 mL")).not.toBeInTheDocument();
       expect(screen.queryByText("5 g/250 mL")).not.toBeInTheDocument();
       expect(screen.queryByText("33 mL/h")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Vancomycine", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
+    test("sépare la charge et l'entretien adulte en deux recettes preview", async () => {
+      const vancomycine = DRUGS.find((drug) => drug.nom === "VANCOMYCINE")!;
+
+      render(<DrugCard drug={vancomycine} patientWeight="80" prepPopulation="adulte" />);
+      fireEvent.click(screen.getByText("VANCOMYCINE").closest("button")!);
+
+      expect(await screen.findByRole("button", { name: /Charge adulte/i })).toBeInTheDocument();
+      expect(screen.getByText("2000-2400 mg")).toBeInTheDocument();
+      expect(screen.getByText("2-3h")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /Entretien adulte/i }));
+
+      expect(screen.getByText("1200-1600 mg")).toBeInTheDocument();
+      expect(screen.getByText("/8-12h (cible AUC)")).toBeInTheDocument();
+      expect(screen.getByText("60 min minimum")).toBeInTheDocument();
     });
   });
 
@@ -1080,23 +1174,25 @@ describe("DrugCard", () => {
 
   describe("Préparation SUFENTANIL", () => {
     test("affiche la préparation PSE et la préparation intranasale dose-poids", () => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
       const sufentanil = DRUGS.find((drug) => drug.nom === "SUFENTANIL")!;
 
       render(<DrugCard drug={sufentanil} patientWeight="85" />);
       fireEvent.click(screen.getByText("SUFENTANIL").closest("button")!);
 
-      expect(screen.getByRole("button", { name: /PSE.*5 µg\/mL/i })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: /PSE.*IVSE poids/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-      expect(screen.getByText("1 ampoule entière 250 µg/5 mL (= 250 µg)")).toBeInTheDocument();
-      expect(screen.getByText("50 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(screen.getAllByText("Pour 85 kg").length).toBeGreaterThan(0);
+      expect(screen.getByText("5 mL d'ampoule pure")).toBeInTheDocument();
+      expect(screen.getByText("29 mL dans la seringue")).toBeInTheDocument();
       expect(
-        screen.getByText("Diluer 1 ampoule entière (250 µg / 5 mL) qsp 50 mL NaCl 0,9% → 5 µg/mL")
+        screen.getByText("1 mL/h de solution = 0,1 µg/kg/h de Sufentanil")
       ).toBeInTheDocument();
-      expect(
-        screen.getByText("Débit IVSE (mL/h) = dose (µg/kg/h) × poids ÷ 5")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Débit PSE")).toBeInTheDocument();
+      expect(screen.getByText("Dilution poids · 1 mL/h = 0,1 µg/kg/h")).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: /Intranasal.*0,3 µg\/kg/i }));
 
@@ -1105,10 +1201,8 @@ describe("DrugCard", () => {
       expect(screen.getByText("0,21 mL")).toBeInTheDocument();
       expect(screen.getByText("12,75 µg = 0,26 mL")).toBeInTheDocument();
       expect(screen.getByText("Demi-dose de rappel : 0,15 µg/kg")).toBeInTheDocument();
-      expect(
-        screen.queryByText("1 ampoule entière 250 µg/5 mL (= 250 µg)")
-      ).not.toBeInTheDocument();
-      expect(screen.queryByText(/Diluer 1 ampoule entière/)).not.toBeInTheDocument();
+      expect(screen.queryByText("5 mL d'ampoule pure")).not.toBeInTheDocument();
+      expect(screen.queryByText("29 mL dans la seringue")).not.toBeInTheDocument();
     });
   });
 

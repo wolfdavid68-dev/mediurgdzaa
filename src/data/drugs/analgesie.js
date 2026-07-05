@@ -36,27 +36,26 @@ export const DRUGS_ANALGESIE = [
     },
     prep: {
       solvant: "NaCl 0,9%",
-      conc_finale: "5 µg/mL",
+      conc_finale: "1 mL/h = 0,1 µg/kg/h",
       duree: "IVSE 0,2 à 2 µg/kg/h",
       stabilite: "24h à 25°C",
       preparations: [
         {
           titre: "PSE",
           mode: "pse",
-          tag: "5 µg/mL",
-          prelever: "1 ampoule entière 250 µg/5 mL (= 250 µg)",
-          completer: "50 mL avec NaCl 0,9%",
-          concentration: "5 µg/mL",
+          tag: "IVSE poids",
+          sufenta_table: true,
           etapes: [
             "Ampoule 250 µg/5 mL (50 µg/mL)",
-            "Diluer 1 ampoule entière (250 µg / 5 mL) qsp 50 mL NaCl 0,9% → 5 µg/mL",
-            "Débit IVSE (mL/h) = dose (µg/kg/h) × poids ÷ 5",
-            "Posologie : 0,2 à 2 µg/kg/h",
+            "Prélever Vi mL d'ampoule pure et diluer dans NaCl 0,9% ou G5% jusqu'à Vf mL dans la seringue",
+            "1 mL/h de solution = 0,1 µg/kg/h de Sufentanil",
+            "Posologie IVSE : 0,2 à 2 µg/kg/h (= débit 2 à 20 mL/h)",
           ],
           notes: [
             "Stupéfiant : tracer dans le cahier — ne pas jeter les ampoules",
             "Dépression respiratoire dose-dépendante",
             "Antidote : Naloxone",
+            "Vi/Vf calculés selon la table de dilution par poids",
           ],
         },
         {

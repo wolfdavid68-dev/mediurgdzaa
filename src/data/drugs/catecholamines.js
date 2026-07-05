@@ -40,7 +40,7 @@ export const DRUGS_CATECHOLAMINES = [
       a: [
         "ACR — IVD PUR : 1 mg IV/IO toutes les 3-5 min (prélever 2 ampoules)",
         "Anaphylaxie — IM PUR : 0,5 mg face ant. cuisse",
-        "Choc — PSE : 2 ampoules qsp 50 mL G5% (soit 0,2 mg/mL)",
+        "Choc — PSE : dilution Vi/Vf par poids (1 mL/h = 0,1 µg/kg/min)",
         "Voie centrale proximale idéale en PSE",
         "Surveillance cardiaque rapprochée + état cutané",
       ],
@@ -52,16 +52,18 @@ export const DRUGS_CATECHOLAMINES = [
     },
     prep: {
       solvant: "G5%",
-      volume_final: 50,
-      conc_finale: "0,2 mg/mL",
+      volume_final: null,
+      conc_finale: "1 mL/h = 0,1 µg/kg/min",
       conc_produit: 1,
       unite: "mg",
       duree: "Continu IVSE",
       stabilite: "24h à 25°C",
+      adrenaline_table: true,
       etapes: [
         "ACR : ampoule 1 mg/mL utilisée pure — prélever 1 mL (= 1 mg)",
         "Anaphylaxie : 0,5 mg IM pur — utiliser ampoule 1 mg/mL",
-        "PSE choc : 2 ampoules 5 mg/5 mL qsp 50 mL G5% → 0,2 mg/mL",
+        "PSE choc : prélever Vi mL d'adrénaline et diluer dans NaCl 0,9% ou G5% jusqu'à Vf mL dans la seringue",
+        "1 mL/h de solution = 0,1 µg/kg/min d'Adrénaline",
       ],
       notes: [
         "Administrer toujours au plus proche du patient",
@@ -171,8 +173,8 @@ export const DRUGS_CATECHOLAMINES = [
     cond: ["Flacon 250 mg/20 mL (12,5 mg/mL)"],
     poso: {
       a: [
-        "PSE : 1 flacon 250 mg qsp 50 mL (soit 5 mg/mL)",
-        "Débit : 2-20 µg/kg/min",
+        "PSE : dilution Vi/Vf par poids (1 mL/h = 1 µg/kg/min)",
+        "Débit : 2,5-20 µg/kg/min",
         "Voie centrale proximale préférable",
         "Pas de bolus sur cette voie — débit constant",
         "Surveillance cardiaque constante",
@@ -181,16 +183,18 @@ export const DRUGS_CATECHOLAMINES = [
     },
     prep: {
       solvant: "G5% ou NaCl 0,9%",
-      volume_final: 50,
-      conc_finale: "5 mg/mL",
+      volume_final: null,
+      conc_finale: "1 mL/h = 1 µg/kg/min",
       conc_produit: 12.5,
       unite: "mg",
       duree: "Continu IVSE",
       stabilite: "Stable 6h à 25°C",
+      dobutamine_table: true,
       etapes: [
         "Flacon 250 mg/20 mL (12,5 mg/mL)",
-        "PSE : 1 flacon 250 mg qsp 50 mL → 5 mg/mL",
-        "Débit IVSE selon µg/kg/min cible",
+        "Prélever Vi mL de Dobutrex et diluer dans NaCl 0,9% ou G5% jusqu'à Vf mL dans la seringue",
+        "1 mL/h de solution = 1 µg/kg/min de Dobutamine",
+        "Posologie IVSE : 2,5 à 20 µg/kg/min (= débit 2,5 à 20 mL/h)",
       ],
       notes: [
         "Surveillance cardiaque continue",
@@ -230,7 +234,7 @@ export const DRUGS_CATECHOLAMINES = [
     cond: ["Ampoule 0,2 mg/1 mL"],
     poso: {
       a: [
-        "PSE : 5 ampoules qsp 50 mL (soit 0,02 mg/mL)",
+        "PSE : dilution Vi/Vf par poids (1 mL/h = 0,01 µg/kg/min)",
         "Débit titré selon FC cible",
         "Tubulure OPAQUE obligatoire (photosensible)",
         "Voies : VVP ou VVC",
@@ -239,15 +243,17 @@ export const DRUGS_CATECHOLAMINES = [
     },
     prep: {
       solvant: "G5%",
-      volume_final: 50,
-      conc_finale: "0,02 mg/mL = 20 µg/mL",
+      volume_final: null,
+      conc_finale: "1 mL/h = 0,01 µg/kg/min",
       conc_produit: 0.2,
       unite: "mg",
       duree: "Continu IVSE",
       stabilite: "Stable 6h — à l'abri de la lumière",
+      isuprel_table: true,
       etapes: [
         "Ampoule 0,2 mg/1 mL (0,2 mg/mL)",
-        "PSE : 5 ampoules qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL",
+        "Prélever Vi mL d'Isuprel et diluer dans G5% jusqu'à Vf mL dans la seringue",
+        "1 mL/h de solution = 0,01 µg/kg/min d'Isuprel",
       ],
       notes: ["À l'abri de la lumière — tubulure opaque", "Ne se conserve plus au réfrigérateur"],
     },
@@ -290,18 +296,40 @@ export const DRUGS_CATECHOLAMINES = [
     },
     prep: {
       solvant: "G5%",
-      volume_final: 48,
-      conc_finale: "0,33 mg/mL",
+      volume_final: null,
+      conc_finale: "1 mL/h = 0,1 µg/kg/min",
       conc_produit: 2,
       unite: "mg",
       duree: "Continu IVSE sur voie dédiée",
       stabilite: "Stable 12h à 25°C à l'abri de la lumière",
+      preparations: [
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "IVSE poids",
+          norad_table: true,
+          etapes: [
+            "Ampoule 8 mg/4 mL (2 mg/mL)",
+            "Prélever Vi mL de noradrénaline et diluer dans G5% jusqu'à Vf mL dans la seringue",
+            "1 mL/h de solution = 0,1 µg/kg/min de Noradrénaline",
+            "Posologie IVSE : 0,25 à 2 µg/kg/min (= débit 2,5 à 20 mL/h)",
+          ],
+          notes: [
+            "Vi/Vf calculés selon la table de dilution par poids",
+            "Voie dédiée — VVC conseillée mais pas obligatoire",
+            "Pas de bolus sur cette voie — débit constant",
+            "À l'abri de la lumière — tubulure opaque",
+          ],
+        },
+      ],
       etapes: [
         "Ampoule 8 mg/4 mL (2 mg/mL)",
-        "PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL",
+        "Prélever Vi mL de noradrénaline et diluer dans G5% jusqu'à Vf mL dans la seringue",
+        "1 mL/h de solution = 0,1 µg/kg/min de Noradrénaline",
         "Démarrer à 0,1-0,2 µg/kg/min, titrer selon PAM cible",
       ],
       notes: [
+        "Vi/Vf calculés selon la table de dilution par poids",
         "Voie dédiée — VVC conseillée mais pas obligatoire",
         "Pas de bolus sur cette voie — débit constant",
         "À l'abri de la lumière — tubulure opaque",

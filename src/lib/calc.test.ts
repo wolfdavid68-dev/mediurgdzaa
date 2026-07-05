@@ -6,6 +6,10 @@ import {
   calcDoseFromRate,
   calcPrepThreshold,
   calcPrepSufentaTable,
+  calcPrepNoradTable,
+  calcPrepAdrenalineTable,
+  calcPrepDobutamineTable,
+  calcPrepIsuprelTable,
   calcPrepSufentaIntranasal,
   calcPrepPhases,
   calcPrepDoseKg,
@@ -464,6 +468,45 @@ describe("calcPrepSufentaTable", () => {
   test("poids invalide → null", () => {
     expect(calcPrepSufentaTable(0)).toBeNull();
     expect(calcPrepSufentaTable(400)).toBeNull();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// calcPrepNoradTable — Vi/Vf par tranche de poids
+// ════════════════════════════════════════════════════════════════
+describe("calcPrepNoradTable", () => {
+  test("enfant 20 kg → Vi=2,5 mL, Vf=42 mL", () => {
+    expect(calcPrepNoradTable(20)).toEqual({ kg: 20, vi: 2.5, vf: 42 });
+  });
+
+  test("ado 50 kg → Vi=5 mL, Vf=33 mL", () => {
+    expect(calcPrepNoradTable(50)).toEqual({ kg: 50, vi: 5, vf: 33 });
+  });
+
+  test("adulte 70 kg → Vi=10 mL, Vf=48 mL", () => {
+    expect(calcPrepNoradTable(70)).toEqual({ kg: 70, vi: 10, vf: 48 });
+  });
+
+  test("poids invalide → null", () => {
+    expect(calcPrepNoradTable(0)).toBeNull();
+    expect(calcPrepNoradTable(400)).toBeNull();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// Tables Vi/Vf catécholamines main
+// ════════════════════════════════════════════════════════════════
+describe("tables Vi/Vf catécholamines", () => {
+  test("Adrénaline 70 kg → Vi=20 mL, Vf=48 mL", () => {
+    expect(calcPrepAdrenalineTable(70)).toEqual({ kg: 70, vi: 20, vf: 48 });
+  });
+
+  test("Dobutamine 70 kg → Vi=20 mL, Vf=60 mL", () => {
+    expect(calcPrepDobutamineTable(70)).toEqual({ kg: 70, vi: 20, vf: 60 });
+  });
+
+  test("Isuprel 70 kg → Vi=10 mL, Vf=48 mL", () => {
+    expect(calcPrepIsuprelTable(70)).toEqual({ kg: 70, vi: 10, vf: 48 });
   });
 });
 
