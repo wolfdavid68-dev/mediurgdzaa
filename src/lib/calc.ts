@@ -302,6 +302,25 @@ export function calcPrepIsuprelTable(weightKg: string | number | null | undefine
   return { kg, vi, vf };
 }
 
+// ── Préparation : Octaplex selon INR ──────────────────────────
+// AVK : INR 2-3,9 → 25 UI/kg ; INR 4-6 → 35 UI/kg ; INR > 6 → 50 UI/kg max 3000 UI.
+// Volume estimé sur la reconstitution usuelle 25 UI/mL.
+export function calcPrepOctaplexInr(
+  weightKg: string | number | null | undefined,
+  inrValue: string | number | null | undefined
+) {
+  if (!isValidWeight(weightKg)) return null;
+  const inr = parseFloat(String(inrValue).replace(",", "."));
+  if (!Number.isFinite(inr) || inr < 2) return null;
+  const kg = parseFloat(String(weightKg));
+  const uiKg = inr < 4 ? 25 : inr <= 6 ? 35 : 50;
+  const rawTotalUi = uiKg * kg;
+  const capped = uiKg === 50 && rawTotalUi > 3000;
+  const totalUi = capped ? 3000 : Math.round(rawTotalUi);
+  const volumeMl = +(totalUi / 25).toFixed(1);
+  return { kg, inr, uiKg, totalUi, volumeMl, capped };
+}
+
 // ── Préparation : phases successives (Hidonac) ────────────────
 export function calcPrepSufentaIntranasal(weightKg: string | number | null | undefined) {
   if (!isValidWeight(weightKg)) return null;

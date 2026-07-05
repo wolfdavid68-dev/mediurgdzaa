@@ -120,6 +120,7 @@ type DrugPrepRecipe = {
   isuprel_table?: boolean;
   sufenta_table?: boolean;
   norad_table?: boolean;
+  octaplex_inr?: boolean;
   sufenta_intranasal?: boolean;
   kcl_ivl?: boolean;
   kcl_pediatric?: boolean;

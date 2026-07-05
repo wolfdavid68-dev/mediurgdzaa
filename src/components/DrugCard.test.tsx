@@ -1249,6 +1249,29 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Préparation OCTAPLEX", () => {
+    test("calcule la dose automatiquement à partir de l'INR", () => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+      const octaplex = DRUGS.find((drug) => drug.nom === "OCTAPLEX")!;
+
+      render(<DrugCard drug={octaplex} patientWeight="80" />);
+      fireEvent.click(screen.getByText("OCTAPLEX").closest("button")!);
+
+      expect(screen.getByLabelText("INR")).toHaveAttribute("placeholder", "4");
+      expect(screen.getByText("35 UI/kg")).toBeInTheDocument();
+      expect(screen.getAllByText("2800 UI").length).toBeGreaterThan(0);
+      expect(screen.getByText("112 mL à 25 UI/mL")).toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText("INR"), { target: { value: "7" } });
+
+      expect(screen.getByText("50 UI/kg")).toBeInTheDocument();
+      expect(screen.getByText("3000 UI (max 3000 UI)")).toBeInTheDocument();
+      expect(screen.getByText("120 mL à 25 UI/mL")).toBeInTheDocument();
+      expect(screen.getByText("Vitamine K1 10 mg IV si AVK")).toBeInTheDocument();
+    });
+  });
+
   describe("Préparation KÉTAMINE", () => {
     test("bascule visuellement entre bolus/sédation et PSE sans calcul de bolus", () => {
       const ketamine = DRUGS.find((drug) => drug.nom === "KÉTAMINE")!;

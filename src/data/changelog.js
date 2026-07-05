@@ -19,6 +19,10 @@ export const CHANGELOG = [
         type: "fix",
         text: "Les nouveaux débits PSE en cours de validation restent isolés en mode preview : ils ne remplacent pas les débits de main tant qu'ils ne sont pas explicitement validés.",
       },
+      {
+        type: "feat",
+        text: "Octaplex : ajout d'une entrée INR dans la préparation, avec calcul automatique de la dose AVK en UI/kg, de la dose totale et du volume reconstitué estimé.",
+      },
     ],
   },
   {

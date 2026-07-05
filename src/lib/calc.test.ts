@@ -10,6 +10,7 @@ import {
   calcPrepAdrenalineTable,
   calcPrepDobutamineTable,
   calcPrepIsuprelTable,
+  calcPrepOctaplexInr,
   calcPrepSufentaIntranasal,
   calcPrepPhases,
   calcPrepDoseKg,
@@ -507,6 +508,49 @@ describe("tables Vi/Vf catécholamines", () => {
 
   test("Isuprel 70 kg → Vi=10 mL, Vf=48 mL", () => {
     expect(calcPrepIsuprelTable(70)).toEqual({ kg: 70, vi: 10, vf: 48 });
+  });
+});
+
+// ════════════════════════════════════════════════════════════════
+// calcPrepOctaplexInr — dose automatique selon INR
+// ════════════════════════════════════════════════════════════════
+describe("calcPrepOctaplexInr", () => {
+  test("INR 3 à 80 kg → 25 UI/kg = 2000 UI = 80 mL", () => {
+    expect(calcPrepOctaplexInr(80, 3)).toEqual({
+      kg: 80,
+      inr: 3,
+      uiKg: 25,
+      totalUi: 2000,
+      volumeMl: 80,
+      capped: false,
+    });
+  });
+
+  test("INR 5 à 80 kg → 35 UI/kg = 2800 UI = 112 mL", () => {
+    expect(calcPrepOctaplexInr(80, 5)).toEqual({
+      kg: 80,
+      inr: 5,
+      uiKg: 35,
+      totalUi: 2800,
+      volumeMl: 112,
+      capped: false,
+    });
+  });
+
+  test("INR 7 à 80 kg → 50 UI/kg plafonné à 3000 UI", () => {
+    expect(calcPrepOctaplexInr(80, 7)).toEqual({
+      kg: 80,
+      inr: 7,
+      uiKg: 50,
+      totalUi: 3000,
+      volumeMl: 120,
+      capped: true,
+    });
+  });
+
+  test("INR < 2 ou poids invalide → null", () => {
+    expect(calcPrepOctaplexInr(80, 1.8)).toBeNull();
+    expect(calcPrepOctaplexInr("", 5)).toBeNull();
   });
 });
 

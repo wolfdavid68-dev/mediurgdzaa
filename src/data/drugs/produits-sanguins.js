@@ -198,6 +198,30 @@ export const DRUGS_PRODUITS_SANGUINS = [
       volume_final: null,
       conc_finale: "Selon flacon reconstitué",
       duree: "PSE 0,12 mL/kg/min · max 8 mL/min",
+      preparations: [
+        {
+          titre: "AVK selon INR",
+          mode: "pse",
+          tag: "INR → UI/kg",
+          octaplex_inr: true,
+          dose_input_label: "INR",
+          dose_input_unit: "",
+          dose_input_default: 4,
+          dose_input_min: 2,
+          dose_input_step: 0.1,
+          etapes: [
+            "Saisir l'INR pour choisir automatiquement la dose : 25 / 35 / 50 UI/kg",
+            "Reconstituer la poudre avec le solvant fourni",
+            "Administrer en PSE — voir le bloc Débit PSE",
+            "Si AVK : associer Vitamine K1 10 mg IV",
+          ],
+          notes: [
+            "INR 2-3,9 : 25 UI/kg ; INR 4-6 : 35 UI/kg ; INR > 6 : 50 UI/kg (max 3000 UI)",
+            "Volume estimé sur 25 UI/mL après reconstitution",
+            "Traçabilité obligatoire — documents à envoyer à la pharmacie",
+          ],
+        },
+      ],
       etapes: [
         "Flacon lyophilisé + solvant fourni",
         "Reconstituer la poudre avec le solvant",

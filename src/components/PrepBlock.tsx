@@ -6,6 +6,7 @@ import {
   calcPrepAdrenalineTable,
   calcPrepDobutamineTable,
   calcPrepIsuprelTable,
+  calcPrepOctaplexInr,
   calcPrepSufentaIntranasal,
   calcPrepPhases,
   calcPrepDoseKg,
@@ -224,11 +225,12 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
         <span>{recipe.effective_input_unit || "mL"}</span>
       </label>
     ) : null;
-  const renderRecipeDoseInput = (recipe: PrepRecipe) =>
-    recipe.kcl_ivl ||
-    recipe.kcl_pediatric ||
-    recipe.dose_input_default !== undefined ||
-    recipe.dose_input_label ? (
+  const renderRecipeDoseInput = (recipe: PrepRecipe) => {
+    const unit = recipe.dose_input_unit ?? "g";
+    return recipe.kcl_ivl ||
+      recipe.kcl_pediatric ||
+      recipe.dose_input_default !== undefined ||
+      recipe.dose_input_label ? (
       <label className="prep-inline-input">
         <span>{recipe.dose_input_label || "Dose"}</span>
         <input
@@ -241,9 +243,10 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
           value={dosePrepInput}
           onChange={(event) => setDosePrepInput(event.target.value)}
         />
-        <span>{recipe.dose_input_unit || "g"}</span>
+        {unit && <span>{unit}</span>}
       </label>
     ) : null;
+  };
   const renderKclIvlRows = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     if (!recipe.kcl_ivl) return null;
     const dose = getRecipeDoseInputValue(recipe);
@@ -783,6 +786,52 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
   }
 
+  const renderRecipeOctaplexInr = (recipe: PrepRecipe, variant: "classic" | "v2") => {
+    const result = calcPrepOctaplexInr(weight, dosePrepInput || recipe.dose_input_default);
+    const boxClass = variant === "v2" ? "prep-calc" : "prep-calc-box";
+    const highlightClass = variant === "v2" ? "prep-highlight" : "prep-calc-highlight";
+    const headerTitle = recipe.titre || "AVK selon INR";
+    return (
+      <div className={`${boxClass}${recipeModeClass(recipe)}`}>
+        <div className="prep-calc-header">
+          {variant === "classic" && <PrepIcon />}
+          <span>{headerTitle}</span>
+          {renderRecipeDoseInput(recipe)}
+          {recipe.tag && <span>{recipe.tag}</span>}
+        </div>
+        {!validKg && <div className="prep-empty-text">Saisir le poids pour calculer la dose.</div>}
+        {validKg && !result && (
+          <div className="prep-empty-text">Saisir un INR ≥ 2 pour calculer la dose AVK.</div>
+        )}
+        {result && (
+          <>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Dose</span>
+              <span className={`prep-calc-val ${highlightClass}`}>{result.uiKg} UI/kg</span>
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Total</span>
+              <span className={`prep-calc-val ${highlightClass}`}>
+                {formatDoseNumber(result.totalUi)} UI
+                {result.capped ? " (max 3000 UI)" : ""}
+              </span>
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Volume estimé</span>
+              <span className="prep-calc-val">
+                {formatDoseNumber(result.volumeMl)} mL à 25 UI/mL
+              </span>
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Associer</span>
+              <span className="prep-calc-val">Vitamine K1 10 mg IV si AVK</span>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   const renderRecipeSufentaIntranasal = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     const r = calcPrepSufentaIntranasal(weight);
     if (!r) return null;
@@ -834,6 +883,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       renderRecipeSufentaTable(recipe, "classic")
     ) : recipe.norad_table ? (
       renderRecipeNoradTable(recipe, "classic")
+    ) : recipe.octaplex_inr ? (
+      renderRecipeOctaplexInr(recipe, "classic")
     ) : recipe.sufenta_intranasal ? (
       renderRecipeSufentaIntranasal(recipe, "classic")
     ) : (
@@ -906,6 +957,8 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
       renderRecipeSufentaTable(recipe, "v2")
     ) : recipe.norad_table ? (
       renderRecipeNoradTable(recipe, "v2")
+    ) : recipe.octaplex_inr ? (
+      renderRecipeOctaplexInr(recipe, "v2")
     ) : recipe.sufenta_intranasal ? (
       renderRecipeSufentaIntranasal(recipe, "v2")
     ) : (
