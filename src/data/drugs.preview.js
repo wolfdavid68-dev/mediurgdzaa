@@ -2247,23 +2247,67 @@ export const DRUGS_PREVIEW = {
   // PRODUITS SANGUINS
   72: {
     prep: {
+      conc_produit: 0.2,
+      unite: "g",
+      conc_finale: "Albumine 20% = 0,2 g/mL",
       preparations: [
         {
-          titre: "IVL adulte",
+          titre: "PBS J1",
           mode: "ivl",
           population: "adulte",
-          tag: "flacon prêt",
+          tag: "1,5 g/kg",
+          phase_doses: [{ label: "Dose J1", dose_kg: 1.5, unit: "g" }],
+          hide_final: true,
           rows: [
-            { label: "PBS", value: "1,5 g/kg albumine 20% J1, puis 1 g/kg J3", highlight: true },
+            { label: "Produit", value: "Albumine 20%", highlight: true },
+            { label: "Appel d'air", value: "obligatoire (flacon en verre)" },
+          ],
+          etapes: [
+            "PBS J1 : 1,5 g/kg d'albumine 20%",
+            "Albumine 20% = 20 g/100 mL = 0,2 g/mL",
+            "Appel d'air obligatoire (flacon en verre)",
+          ],
+          notes: [
+            "Médicament dérivé du sang : traçabilité obligatoire",
+            "Surveiller surcharge volémique",
+          ],
+        },
+        {
+          titre: "PBS J3",
+          mode: "ivl",
+          population: "adulte",
+          tag: "1 g/kg",
+          phase_doses: [{ label: "Dose J3", dose_kg: 1, unit: "g" }],
+          hide_final: true,
+          rows: [
+            { label: "Produit", value: "Albumine 20%", highlight: true },
+            { label: "Appel d'air", value: "obligatoire (flacon en verre)" },
+          ],
+          etapes: [
+            "PBS J3 : 1 g/kg d'albumine 20%",
+            "Albumine 20% = 20 g/100 mL = 0,2 g/mL",
+            "Appel d'air obligatoire (flacon en verre)",
+          ],
+          notes: [
+            "Médicament dérivé du sang : traçabilité obligatoire",
+            "Surveiller surcharge volémique",
+          ],
+        },
+        {
+          titre: "Cirrhotique",
+          mode: "ivl",
+          population: "adulte",
+          tag: "1 g/kg/j",
+          phase_doses: [{ label: "Dose/j", dose_kg: 1, unit: "g" }],
+          hide_final: true,
+          rows: [
             { label: "Cirrhotique", value: "1 g/kg/j albumine 20%", highlight: true },
             { label: "Appel d'air", value: "obligatoire (flacon en verre)" },
           ],
-          hide_final: true,
           etapes: [
-            "Flacon prêt à l'emploi (4% 250 mL ou 20% 50/100 mL)",
-            "Appel d'air obligatoire (flacon en verre)",
-            "PBS : 1,5 g/kg albumine 20% J1, puis 1 g/kg J3",
             "Cirrhotique : 1 g/kg/j albumine 20%",
+            "Albumine 20% = 20 g/100 mL = 0,2 g/mL",
+            "Appel d'air obligatoire (flacon en verre)",
           ],
           notes: [
             "Médicament dérivé du sang : traçabilité obligatoire",

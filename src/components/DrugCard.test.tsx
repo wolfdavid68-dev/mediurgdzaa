@@ -534,6 +534,24 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
+    test.each([
+      ["ADRÉNALINE", "80", "20 mL d'adrénaline"],
+      ["DOBUTAMINE", "70", "20 mL de Dobutrex"],
+      ["ISUPREL", "70", "10 mL d'Isuprel"],
+      ["NORADRÉNALINE", "70", "10 mL de noradrénaline"],
+      ["SUFENTANIL", "85", "5 mL d'ampoule pure"],
+    ])("%s affiche la Préparation v2 sur main avec sa table Vi/Vf", (name, weight, expected) => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+      const drug = DRUGS.find((item) => item.nom === name)!;
+
+      render(<DrugCard drug={drug} patientWeight={weight} />);
+      fireEvent.click(screen.getByText(name).closest("button")!);
+
+      expect(screen.getByRole("region", { name: "Préparation v2" })).toBeInTheDocument();
+      expect(screen.getByText(expected)).toBeInTheDocument();
+    });
+
     test("Dobutamine garde la table poids de main", () => {
       const dobutamine = DRUGS.find((drug) => drug.nom === "DOBUTAMINE")!;
 
@@ -864,6 +882,31 @@ describe("DrugCard", () => {
       expect(screen.getByText("1200-1600 mg")).toBeInTheDocument();
       expect(screen.getByText("/8-12h (cible AUC)")).toBeInTheDocument();
       expect(screen.getByText("60 min minimum")).toBeInTheDocument();
+    });
+  });
+
+  describe("Vialebex", () => {
+    beforeEach(() => {
+      window.history.pushState({}, "", "/?author=preview");
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, "", "/");
+    });
+
+    test("calcule et sépare PBS J1 et J3 en albumine 20%", async () => {
+      const vialebex = DRUGS.find((drug) => drug.nom === "VIALEBEX / ALBUMINE HUMAINE")!;
+
+      render(<DrugCard drug={vialebex} patientWeight="80" prepPopulation="adulte" />);
+      fireEvent.click(screen.getByText("VIALEBEX / ALBUMINE HUMAINE").closest("button")!);
+
+      expect(await screen.findByRole("button", { name: /PBS J1/i })).toBeInTheDocument();
+      expect(screen.getByText("120 g = 600 mL")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /PBS J3/i }));
+
+      expect(screen.getByText("80 g = 400 mL")).toBeInTheDocument();
+      expect(screen.getByText("PBS J3 : 1 g/kg d'albumine 20%")).toBeInTheDocument();
     });
   });
 
