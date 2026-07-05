@@ -1481,21 +1481,21 @@ export const DRUGS_PREVIEW = {
     prep: {
       preparations: [
         {
-          titre: "IVL adulte",
+          titre: "Utilisation courante adulte",
           mode: "ivl",
           population: "adulte",
-          tag: "30 min",
+          tag: "1-2 g/j",
           prelever: "1 à 2 g",
-          completer: "100 mL avec NaCl 0,9% ou G5%",
+          completer: "à 100 mL avec NaCl 0,9% ou G5%",
           rows: [
-            { label: "Perfuser", value: "en 30 min", highlight: true },
-            { label: "Dose méningée", value: "2 g /12h" },
+            { label: "Perfuser", value: "30 min", highlight: true },
+            { label: "Voies", value: "VVP ou VVC" },
           ],
           hide_final: true,
           etapes: [
             "Flacon poudre 1 g ou 2 g — reconstituer puis diluer dans 100 mL NaCl/G5%",
+            "Utilisation courante : 1-2 g/j en 1 injection",
             "Perfusion 30 min",
-            "Dose méningée : 2 g /12h",
           ],
           notes: [
             "NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation",
@@ -1503,20 +1503,61 @@ export const DRUGS_PREVIEW = {
           ],
         },
         {
-          titre: "Enfant",
+          titre: "Dose méningée adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "2 g /12h",
+          prelever: "2 g",
+          completer: "à 100 mL avec NaCl 0,9% ou G5%",
+          rows: [
+            { label: "Dose", value: "2 g /12h (4 g/j)", highlight: true },
+            { label: "Perfuser", value: "30 min" },
+            { label: "Voies", value: "VVP ou VVC" },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 2 g — reconstituer puis diluer dans 100 mL NaCl/G5%",
+            "Dose méningée adulte : 2 g /12h",
+            "Perfusion 30 min",
+          ],
+          notes: [
+            "Dose méningée adulte séparée de l'utilisation courante",
+            "NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation",
+            "Stable seulement 3h après reconstitution",
+          ],
+        },
+        {
+          titre: "Utilisation courante enfant",
           mode: "ped",
           population: "enfant",
-          tag: "selon indication",
-          phase_doses: [
-            { label: "Méningite — dose/j", dose_kg: 100, max: 4000, unit: "mg" },
-            { label: "Inf. courantes — dose/j", dose_kg: 50, dose_max_kg: 75, unit: "mg" },
-          ],
+          tag: "50-75 mg/kg/j",
+          phase_doses: [{ label: "Dose/j", dose_kg: 50, dose_max_kg: 75, unit: "mg" }],
           hide_phase_volume: true,
-          rows: [{ label: "Perfuser", value: "en 30 min", highlight: true }],
+          rows: [
+            { label: "Fractionner", value: "selon prescription" },
+            { label: "Perfuser", value: "30 min", highlight: true },
+          ],
+          hide_final: true,
+          etapes: [
+            "Infections courantes : 50-75 mg/kg/j",
+            "Diluer dans 100 mL NaCl 0,9% ou G5% — perfusion 30 min",
+          ],
+          notes: ["NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation"],
+        },
+        {
+          titre: "Dose méningée enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "100 mg/kg/j max 4 g/j",
+          phase_doses: [{ label: "Dose/j", dose_kg: 100, max: 4000, unit: "mg" }],
+          hide_phase_volume: true,
+          rows: [
+            { label: "Fractionner", value: "1-2 injections/j" },
+            { label: "Perfuser", value: "30 min", highlight: true },
+          ],
           hide_final: true,
           etapes: [
             "Méningite : 100 mg/kg/j en 1-2 injections (max 4 g/j)",
-            "Infections courantes : 50-75 mg/kg/j",
             "Diluer dans 100 mL NaCl 0,9% ou G5% — perfusion 30 min",
           ],
           notes: ["NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation"],
