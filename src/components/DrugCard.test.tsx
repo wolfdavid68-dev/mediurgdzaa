@@ -496,6 +496,16 @@ describe("DrugCard", () => {
       expect(screen.getByText("Pour 20 kg — enfant")).toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.getByText("Pédia : 0,05-2 µg/kg/min IVSE")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP"
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP"
+        )
+      ).toBeInTheDocument();
       expect(screen.queryByText("Repères dose → débit — enfant")).not.toBeInTheDocument();
     });
   });
@@ -521,6 +531,19 @@ describe("DrugCard", () => {
       expect(
         screen.getByText("1 mL/h de solution = 0,1 µg/kg/min de Noradrénaline")
       ).toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP"
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP"
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("PSE : 2 ampoules qsp 48 mL (soit 0,33 mg/mL) — VVC conseillée")
+      ).not.toBeInTheDocument();
       expect(screen.getByText("Débit PSE")).toBeInTheDocument();
       expect(screen.getByText("Pour 70 kg — adulte")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 0,1 µg/kg/min")).toBeInTheDocument();

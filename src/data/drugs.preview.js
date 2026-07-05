@@ -146,6 +146,8 @@ export const DRUGS_PREVIEW = {
           completer: "48 mL avec G5%",
           concentration: "0,33 mg/mL",
           etapes: [
+            "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP",
+            "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP",
             "Ampoule 8 mg/4 mL (2 mg/mL)",
             "PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL",
             "Adulte : démarrer à 0,1-0,2 µg/kg/min, titrer selon PAM cible",
@@ -164,6 +166,8 @@ export const DRUGS_PREVIEW = {
           completer: "48 mL avec G5%",
           concentration: "0,33 mg/mL",
           etapes: [
+            "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP",
+            "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP",
             "Ampoule 8 mg/4 mL (2 mg/mL)",
             "PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL",
             "Pédia : 0,05-2 µg/kg/min IVSE",
@@ -176,6 +180,8 @@ export const DRUGS_PREVIEW = {
       ],
       volume_final: 48,
       etapes: [
+        "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP",
+        "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP",
         "Ampoule 8 mg/4 mL (2 mg/mL)",
         "PSE : 2 ampoules (16 mg) qsp 48 mL G5% → 0,33 mg/mL",
         "Démarrer à 0,1-0,2 µg/kg/min, titrer selon PAM cible",

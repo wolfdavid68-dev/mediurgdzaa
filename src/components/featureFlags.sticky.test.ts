@@ -1,9 +1,8 @@
 import { isAuthEnabled, isPreview, isPsePreview } from "../lib/featureFlags";
 
-// Régression : l'override ?author=preview doit rester actif même quand
-// l'app réécrit l'URL et fait sauter le query param. Depuis l'ouverture
-// officielle du login, cet override ne pilote plus l'auth : il ne garde
-// que les features internes (PSE/drugs preview, etc.).
+// Régression : le mode preview interne doit rester strictement explicite.
+// Seul `?author=preview` dans l'URL courante active les surcharges
+// drugs.preview.js / pse.preview.js. Sans ce paramètre visible : main.
 
 const store = new Map<string, string>();
 beforeEach(() => {
@@ -24,7 +23,7 @@ describe("isAuthEnabled — activation officielle", () => {
   });
 });
 
-describe("isPreview — preview collant", () => {
+describe("isPreview — preview explicite", () => {
   test("sans ?author=preview → false", () => {
     expect(isPreview()).toBe(false);
   });
@@ -35,18 +34,17 @@ describe("isPreview — preview collant", () => {
     expect(store.get("mediurg-preview-author")).toBeUndefined();
   });
 
-  test("?author=preview dans l'URL → true (et mémorisé)", () => {
+  test("?author=preview dans l'URL → true sans mémorisation", () => {
     window.history.replaceState(null, "", "/?author=preview");
     expect(isPreview()).toBe(true);
-    expect(store.get("mediurg-preview-author")).toBe("1");
+    expect(store.get("mediurg-preview-author")).toBeUndefined();
   });
 
-  test("param perdu APRÈS coup → reste true (sticky session)", () => {
+  test("param perdu après coup → redevient false", () => {
     window.history.replaceState(null, "", "/?author=preview");
     expect(isPreview()).toBe(true);
-    // L'app réécrit l'URL sans le param (popstate/pushState)…
     window.history.replaceState(null, "", "/");
-    expect(isPreview()).toBe(true); // ← avant le fix : false
+    expect(isPreview()).toBe(false);
   });
 
   test("nouvelle session (sessionStorage vide) + pas de param → false", () => {
@@ -58,7 +56,7 @@ describe("isPreview — preview collant", () => {
   test("?author=preview → true", () => {
     window.history.replaceState(null, "", "/?author=preview");
     expect(isPreview()).toBe(true);
-    expect(store.get("mediurg-preview-author")).toBe("1");
+    expect(store.get("mediurg-preview-author")).toBeUndefined();
   });
 
   test("?preview=preview seul ne déclenche plus la preview interne", () => {
@@ -82,11 +80,11 @@ describe("isPsePreview — preview unifiée (?author=preview)", () => {
     expect(isPsePreview()).toBe(true);
   });
 
-  test("sticky : param perdu après coup → PSE preview reste active", () => {
+  test("param perdu après coup → PSE preview se désactive", () => {
     window.history.replaceState(null, "", "/?author=preview");
     expect(isPsePreview()).toBe(true);
     window.history.replaceState(null, "", "/");
-    expect(isPsePreview()).toBe(true);
+    expect(isPsePreview()).toBe(false);
   });
 
   test("?pse=preview seul ne fait RIEN (param unifié = author)", () => {

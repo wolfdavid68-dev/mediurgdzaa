@@ -285,9 +285,6 @@ export const DRUGS_CATECHOLAMINES = [
     cond: ["Ampoule 8 mg/4 mL (2 mg/mL)"],
     poso: {
       a: [
-        "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP",
-        "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP",
-        "PSE : 2 ampoules qsp 48 mL (soit 0,33 mg/mL) — VVC conseillée",
         "Sur VVP : maximum 0,5 γ/kg/min (conversion à effectuer)",
         "Titrer selon PAM cible ≥ 65 mmHg",
         "Pas de bolus — débit constant",

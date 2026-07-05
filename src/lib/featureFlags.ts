@@ -1,6 +1,3 @@
-import { safeGetSessionItem, safeSetSessionItem } from "./safeStorage";
-import { storageKey } from "./storageKeys";
-
 // Feature flags — interrupteurs pour activer / désactiver des features
 // pas encore prêtes pour la prod sans avoir à supprimer le code.
 //
@@ -20,26 +17,16 @@ const URL_PARAM_OVERRIDE: Record<string, string[]> = {
   AUTH_ENABLED: ["author"],
 };
 
-// Override de session « collant » : dès que `?author=preview` est vu une
-// fois, on le mémorise en sessionStorage. Sinon l'override serait perdu
-// au premier popstate/pushState de l'app (App.tsx réécrit l'URL et fait
-// sauter le query param) → les features preview disparaîtraient au cours
-// de la navigation. Sticky pour toute la session d'onglet ; fermer l'onglet
-// « sort » du mode preview. N'affecte jamais la prod publique.
+// Override explicite : le mode preview n'est actif que si l'URL courante
+// contient `?author=preview`. Pas de mémorisation en session : sans paramètre
+// visible, l'utilisateur est en main.
 const isPreviewing = (flagName: string): boolean => {
   if (typeof window === "undefined") return false;
   const params = URL_PARAM_OVERRIDE[flagName];
   if (!params || params.length === 0) return false;
-  // Clé sticky canonique = 1ᵉʳ alias (indépendante de l'alias tapé).
-  const stickyKey = storageKey.preview(params[0]);
   try {
     const search = new URLSearchParams(window.location.search);
-    const inUrl = params.some((p) => search.get(p) === "preview");
-    if (inUrl) {
-      safeSetSessionItem(stickyKey, "1");
-      return true;
-    }
-    return safeGetSessionItem(stickyKey) === "1";
+    return params.some((p) => search.get(p) === "preview");
   } catch {
     return false;
   }
@@ -77,9 +64,8 @@ export const isAuthEnabled = (): boolean =>
 // vivent dans src/data/pse.preview.js (overlay fusionné par-dessus PSE
 // uniquement quand ce mode est actif).
 //
-// Activé par la preview unifiée : `?author=preview` (sticky pour la
-// session d'onglet). Public (flag false, pas de ?author=preview) :
-// PSE strictement inchangé.
+// Activé par la preview unifiée : `?author=preview`. Public (flag false,
+// pas de ?author=preview) : PSE strictement inchangé.
 //
 // Promotion en prod d'un protocole validé : déplacer son entrée de
 // pse.preview.js vers pse.js, puis commit/push (le flag reste false).
@@ -88,8 +74,6 @@ const PSE_PREVIEW = false;
 
 export const isPsePreview = (): boolean => PSE_PREVIEW || isPreviewing("AUTH_ENABLED");
 
-// Preview unifiée générique : true dès qu'on est en mode preview
-// (?author=preview, collant). Pour les features preview
-// qui ne sont pas pilotées par un flag de prod dédié. Public hors preview
-// → toujours false.
+// Preview unifiée générique : true uniquement avec `?author=preview`.
+// Public hors preview → toujours false.
 export const isPreview = (): boolean => isPreviewing("AUTH_ENABLED");
