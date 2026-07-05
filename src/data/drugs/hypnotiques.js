@@ -68,6 +68,69 @@ export const DRUGS_HYPNOTIQUES = [
         "Surveillance capno pendant sédation procédurale",
         "Apnée par myorelaxation : subluxation mandibulaire en 1ère intention",
       ],
+      preparations: [
+        {
+          titre: "Induction",
+          mode: "bolus",
+          population: "adulte",
+          tag: "PUR",
+          prelever: "Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure",
+          concentration: "10 mg/mL",
+          phase_doses: [
+            {
+              label: "Induction",
+              dose_kg: 1,
+              dose_max_kg: 2.5,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Sédation procédurale",
+              value: "0,5-1 mg/kg IV en titration",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure",
+            "Induction : 1–2,5 mg/kg IV titration lente",
+            "Sédation procédurale : 0,5–1 mg/kg IV en titration — surveillance capno",
+          ],
+          notes: [
+            "Attention : 2 concentrations (10 mg/mL et 20 mg/mL)",
+            "Apnée par myorelaxation : subluxation mandibulaire en 1ère intention",
+          ],
+        },
+        {
+          titre: "Induction enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "PUR",
+          prelever: "Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure",
+          concentration: "10 mg/mL",
+          phase_doses: [
+            {
+              label: "Induction",
+              dose_kg: 2.5,
+              dose_max_kg: 3.5,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Sédation procédurale",
+              value: "1 mg/kg IV",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure",
+            "Induction enfant : 2,5–3,5 mg/kg IV",
+            "Sédation procédurale enfant : 1 mg/kg IV",
+          ],
+          notes: ["Surveillance capno pendant sédation procédurale"],
+        },
+      ],
     },
   },
   {
@@ -121,6 +184,36 @@ export const DRUGS_HYPNOTIQUES = [
         "Sujet âgé : 0,2 mg/kg",
       ],
       notes: ["Surveiller myoclonies, hypotension et insuffisance surrénale transitoire"],
+      preparations: [
+        {
+          titre: "ISR",
+          mode: "bolus",
+          tag: "PUR",
+          prelever: "Ampoule 20 mg/10 mL (2 mg/mL) — administrer pur",
+          concentration: "2 mg/mL",
+          phase_doses: [
+            {
+              label: "ISR",
+              dose_kg: 0.3,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Sujet âgé",
+              value: "0,2 mg/kg",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 20 mg/10 mL (2 mg/mL)",
+            "Administrer pur",
+            "ISR : 0,3 mg/kg IV en 30-60 sec",
+            "Sujet âgé : 0,2 mg/kg",
+          ],
+          notes: ["Surveiller myoclonies, hypotension et insuffisance surrénale transitoire"],
+        },
+      ],
     },
   },
   {
@@ -184,6 +277,81 @@ export const DRUGS_HYPNOTIQUES = [
       notes: [
         "Dépression respiratoire dose-dépendante — avoir matériel IOT à portée",
         "Antagoniste : Flumazénil",
+      ],
+      preparations: [
+        {
+          titre: "Bolus titré",
+          mode: "bolus",
+          population: "adulte",
+          tag: "1 mg/mL pur",
+          prelever: "Ampoule 5 mg/5 mL (1 mg/mL) — utiliser pure",
+          concentration: "1 mg/mL",
+          rows: [
+            {
+              label: "Sédation",
+              value: "titration par bolus de 1-3 mg",
+              highlight: true,
+            },
+            {
+              label: "EME",
+              value: "10 mg IM ou IN (5 mg par narine)",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Bolus titrés : ampoule 5 mg/5 mL (1 mg/mL) utilisée pure — pas de préparation",
+            "EME : 10 mg IM ou IN : 5 mg dans chaque narine",
+          ],
+          notes: [
+            "Dépression respiratoire dose-dépendante — avoir matériel IOT à portée",
+            "Antagoniste : Flumazénil",
+          ],
+        },
+        {
+          titre: "PSE",
+          mode: "pse",
+          population: "adulte",
+          tag: "1 mg/mL",
+          prelever: "1 ampoule 50 mg/10 mL",
+          completer: "50 mL avec NaCl 0,9%",
+          concentration: "1 mg/mL",
+          etapes: [
+            "Ampoule 50 mg/10 mL (5 mg/mL)",
+            "PSE : ampoule 50 mg/10 mL qsp 50 mL NaCl 0,9% → 1 mg/mL",
+            "Débit 0,02-0,2 mg/kg/h — voir bloc « Débit PSE »",
+          ],
+          notes: ["Dépression respiratoire dose-dépendante — avoir matériel IOT à portée"],
+        },
+        {
+          titre: "Enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "IM / IN / IV",
+          prelever: "Ampoule 5 mg/5 mL (1 mg/mL)",
+          concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "EME (IM)",
+              dose_kg: 0.2,
+              max: 10,
+              unit: "mg",
+              suffix: " IM",
+            },
+            {
+              label: "Sédation (IV)",
+              dose_kg: 0.05,
+              dose_max_kg: 0.1,
+              max: 6,
+              unit: "mg",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "EME : 0,2 mg/kg IM (max 10 mg) ou 0,3 mg/kg IN",
+            "Sédation : 0,05-0,1 mg/kg IV (max 6 mg)",
+          ],
+          notes: ["Dépression respiratoire dose-dépendante — avoir matériel IOT à portée"],
+        },
       ],
     },
   },

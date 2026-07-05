@@ -103,6 +103,65 @@ export const DRUGS_ELECTROLYTES = [
         "Ne pas mélanger avec bicarbonates (précipitation)",
         "Surveillance scope : bradycardie si injection trop rapide",
       ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "10 min",
+          prelever: "1 ampoule 1 g/10 mL (10%)",
+          completer: "50 ou 100 mL avec NaCl 0,9%",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "sur 10 min sous scope",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 1 g/10 mL à 10%",
+            "Reconstituer dans 50 mL ou 100 mL NaCl 0,9%",
+            "Perfuser en 10 min IV lent sous scope",
+          ],
+          notes: [
+            "Ne pas mélanger avec bicarbonates (précipitation)",
+            "Surveillance scope : bradycardie si injection trop rapide",
+          ],
+        },
+        {
+          titre: "IVL enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "100 mg/kg",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 100,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          completer: "50 ou 100 mL avec NaCl 0,9%",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "IV lente sous scope",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 1 g/10 mL à 10%",
+            "Enfant : 100 mg/kg IV lente",
+            "Diluer dans NaCl 0,9% — perfusion lente sous scope",
+          ],
+          notes: [
+            "Ne pas mélanger avec bicarbonates (précipitation)",
+            "Surveillance scope : bradycardie si injection trop rapide",
+          ],
+        },
+      ],
     },
   },
   {

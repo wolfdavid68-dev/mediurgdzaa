@@ -165,12 +165,16 @@ describe("DrugCard", () => {
       render(<DrugCard drug={hypnovel} patientWeight="80" />);
       fireEvent.click(screen.getByText("HYPNOVEL").closest("button")!);
 
-      expect(screen.getByText("Seringue PSE")).toBeInTheDocument();
-      expect(screen.getByText("1 ampoule 50 mg/10 mL")).toBeInTheDocument();
-      expect(screen.getByText(/PSE : ampoule 50 mg\/10 mL qsp 50 mL/)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Bolus titré 1 mg\/mL pur/ })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
       expect(
         screen.getByText(/Bolus titrés : ampoule 5 mg\/5 mL.*pas de préparation/)
       ).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: /PSE 1 mg\/mL/ }));
+      expect(screen.getByText("1 ampoule 50 mg/10 mL")).toBeInTheDocument();
+      expect(screen.getByText(/PSE : ampoule 50 mg\/10 mL qsp 50 mL/)).toBeInTheDocument();
       expect(screen.queryByText("8 mL du produit")).not.toBeInTheDocument();
       expect(screen.queryByText("1.6 mL du produit")).not.toBeInTheDocument();
     });

@@ -59,6 +59,29 @@ export const DRUGS_CARDIOLOGIE = [
         "Dose min 0,1 mg (risque bradycardie paradoxale si < 0,1 mg)",
         "Max 3 mg en bradycardie — doses illimitées dans intox organophosphorés",
       ],
+      preparations: [
+        {
+          titre: "IVD pur",
+          mode: "bolus",
+          tag: "0,5 mg/mL",
+          prelever: "2 ampoules",
+          phase_doses: [
+            {
+              label: "Disponible",
+              dose_fixed: 1,
+            },
+          ],
+          etapes: [
+            "Ampoule 0,5 mg/1 mL — administrer pure",
+            "Bradycardie : 0,5-1 mg IV, répéter toutes les 3-5 min (max 3 mg)",
+            "Organophosphorés : 0,5-2 mg IV, répéter toutes les 5-10 min",
+          ],
+          notes: [
+            "Dose min 0,1 mg (risque bradycardie paradoxale si < 0,1 mg)",
+            "Max 3 mg en bradycardie — doses illimitées dans intoxication aux organophosphorés",
+          ],
+        },
+      ],
     },
   },
   {
@@ -105,7 +128,7 @@ export const DRUGS_CARDIOLOGIE = [
       conc_produit: 10,
       unite: "mg",
       dose_kg: 0.5,
-      duree: "Charge sur 1 min puis PSE",
+      duree: "Charge puis PSE",
       etapes: [
         "Ampoule 100 mg/10 mL (10 mg/mL)",
         "Administrer pur sur VVP de gros calibre",
@@ -113,6 +136,49 @@ export const DRUGS_CARDIOLOGIE = [
         "PSE : 50 µg/kg/min",
       ],
       notes: ["Surveillance hémodynamique", "Surveiller bradycardie, hypotension et bronchospasme"],
+      stabilite: "Utiliser immédiatement",
+      preparations: [
+        {
+          titre: "Charge 1 min",
+          mode: "bolus",
+          tag: "0,5 mg/kg",
+          prelever: "Ampoule 100 mg/10 mL (10 mg/mL)",
+          phase_doses: [
+            {
+              label: "Dose de charge",
+              dose_kg: 0.5,
+            },
+          ],
+          etapes: [
+            "Dose de charge : 0,5 mg/kg sur 1 min",
+            "Administrer pur sur VVP de gros calibre",
+          ],
+          notes: [
+            "Surveillance hémodynamique",
+            "Surveiller bradycardie, hypotension et bronchospasme",
+          ],
+        },
+        {
+          titre: "PSE entretien",
+          mode: "pse",
+          tag: "50 µg/kg/min",
+          prelever: "Ampoule 100 mg/10 mL (10 mg/mL) pure",
+          concentration: "10 mg/mL",
+          hide_final: true,
+          phase_doses: [
+            {
+              label: "PSE",
+              dose_kg: 50,
+              unit: "µg/min",
+            },
+          ],
+          etapes: [
+            "Entretien PSE : 50 µg/kg/min",
+            "Débit (mL/h) = dose (µg/kg/min) × poids × 60 ÷ 10 000",
+          ],
+          notes: ["Sur VVP de gros calibre", "Surveillance hémodynamique continue"],
+        },
+      ],
     },
   },
   {
@@ -161,11 +227,11 @@ export const DRUGS_CARDIOLOGIE = [
     prep: {
       solvant: "G5% STRICT",
       volume_final: 20,
-      conc_finale: "15 mg/mL (ACR)",
+      conc_finale: "ACR pur / charge G5% / PSE G5%",
       conc_produit: 50,
       unite: "mg",
       dose_kg: 5,
-      duree: "20-60 min (charge) / continu IVSE",
+      duree: "Selon indication",
       stabilite: "Utiliser immédiatement",
       etapes: [
         "ACR 3e CEE : 300 mg PUR (2 ampoules de 150 mg/3 mL) — bolus IV",
@@ -201,6 +267,70 @@ export const DRUGS_CARDIOLOGIE = [
           },
         ],
       },
+      preparations: [
+        {
+          titre: "ACR",
+          mode: "bolus",
+          tag: "bolus pur",
+          prelever: "Ampoule 150 mg/3 mL (50 mg/mL)",
+          phase_doses: [
+            {
+              label: "3e CEE",
+              dose_fixed: 300,
+            },
+            {
+              label: "5e CEE",
+              dose_fixed: 150,
+            },
+          ],
+          etapes: [
+            "ACR 3e CEE : 300 mg pur",
+            "ACR 5e CEE : 150 mg pur",
+            "Injecter en bolus IV",
+            "Ne pas diluer dans NaCl 0,9%",
+          ],
+          notes: ["G5% STRICT si dilution nécessaire", "Changer les tubulures à chaque seringue"],
+        },
+        {
+          titre: "IVL dose de charge",
+          mode: "bolus",
+          tag: "5 mg/kg",
+          prelever: "Ampoule 150 mg/3 mL (50 mg/mL)",
+          completer: "G5% STRICT sur 30 min",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 5,
+              max: 300,
+            },
+          ],
+          etapes: [
+            "IVL : dose de charge 5 mg/kg dans G5% STRICT",
+            "Administrer sur 30 min",
+            "Pas de NaCl 0,9%",
+            "Changer les tubulures à chaque seringue",
+          ],
+          notes: ["G5% STRICT — incompatible NaCl 0,9%", "Surveillance scope et tensionnelle"],
+        },
+        {
+          titre: "PSE entretien",
+          mode: "pse",
+          tag: "600 mg/48 mL",
+          prelever: "4 ampoules 150 mg/3 mL (= 600 mg/12 mL)",
+          completer: "à 48 mL avec G5%",
+          concentration: "12,5 mg/mL",
+          etapes: [
+            "PSE entretien : max 600 mg/48 mL G5%",
+            "VVC recommandée pour PSE",
+            "Changer les tubulures à chaque seringue",
+          ],
+          notes: [
+            "G5% STRICT — incompatible NaCl 0,9%",
+            "Phlébite sur VVP — VVC recommandée pour PSE",
+            "Surveillance scope et tensionnelle",
+          ],
+        },
+      ],
     },
   },
   {
@@ -257,6 +387,27 @@ export const DRUGS_CARDIOLOGIE = [
       notes: [
         "Marge thérapeutique étroite",
         "Surveiller bradycardie, blocs AV et signes de toxicité",
+      ],
+      stabilite: "Utiliser immédiatement",
+      preparations: [
+        {
+          titre: "IVL",
+          mode: "bolus",
+          tag: "5 µg/mL",
+          prelever: "1 ampoule 0,5 mg/2 mL",
+          completer: "mini-flac 100 mL NaCl 0,9%",
+          concentration: "0,5 mg/100 mL = 5 µg/mL",
+          hide_final: true,
+          etapes: [
+            "Ampoule 0,5 mg/2 mL",
+            "Diluer 1 ampoule dans un mini-flac de 100 mL NaCl 0,9%",
+            "ECG obligatoire avant injection",
+          ],
+          notes: [
+            "Marge thérapeutique étroite",
+            "Surveiller bradycardie, blocs AV et signes de toxicité",
+          ],
+        },
       ],
     },
   },
@@ -411,7 +562,7 @@ export const DRUGS_CARDIOLOGIE = [
     prep: {
       solvant: "Solvant fourni",
       volume_final: 50,
-      conc_finale: "50 mg/50 mL = 1 mg/mL",
+      conc_finale: "1 mg/mL",
       conc_produit: 1,
       unite: "mg",
       duree: "PSE pour administration directe",
@@ -421,11 +572,103 @@ export const DRUGS_CARDIOLOGIE = [
         "Flacon 50 mg poudre + solvant 50 mL",
         "Reconstituer avec le solvant fourni",
         "Administration directe en PSE selon indication",
-        "IDM : 15 mg bolus IV, puis 0,75 mg/kg /30 min, puis 0,5 mg/kg /60 min",
-        "EP massive : 10 mg IVL sur 1-2 min, puis 90 mg IV sur 2h",
-        "AVC : 0,9 mg/kg IV dont 10% en bolus",
       ],
       notes: ["Surveillance hémodynamique", "Surveiller tout signe hémorragique"],
+      stabilite: "Stable 8h à 25°C",
+      preparations: [
+        {
+          titre: "IDM",
+          mode: "pse",
+          tag: "bolus puis 30 + 60 min",
+          prelever: "Flacon reconstitué 50 mg/50 mL (= 1 mg/mL)",
+          concentration: "1 mg/mL",
+          hide_final: true,
+          hide_phase_volume: true,
+          phase_doses: [
+            {
+              label: "Bolus IV",
+              dose_fixed: 15,
+            },
+            {
+              label: "PSE 30 min",
+              dose_kg: 0.75,
+              duree: "30 min",
+            },
+            {
+              label: "PSE 60 min",
+              dose_kg: 0.5,
+              duree: "60 min",
+            },
+          ],
+          etapes: [
+            "IDM : 15 mg bolus IV",
+            "Puis 0,75 mg/kg sur 30 min",
+            "Puis 0,5 mg/kg sur 60 min",
+          ],
+          notes: [
+            "Administration directe en PSE après reconstitution",
+            "Surveiller tout signe hémorragique",
+          ],
+        },
+        {
+          titre: "EP massive",
+          mode: "pse",
+          tag: "10 mg puis 90 mg/2h",
+          prelever: "Flacon reconstitué 50 mg/50 mL (= 1 mg/mL)",
+          concentration: "1 mg/mL",
+          hide_final: true,
+          hide_phase_volume: true,
+          phase_doses: [
+            {
+              label: "IVL",
+              dose_fixed: 10,
+              duree: "1-2 min",
+            },
+            {
+              label: "PSE",
+              dose_fixed: 90,
+              duree: "2 h",
+            },
+          ],
+          etapes: ["EP massive : 10 mg IVL sur 1-2 min", "Puis 90 mg IV sur 2 h"],
+          notes: [
+            "Prévoir 2 flacons si dose totale 100 mg",
+            "Surveillance hémodynamique rapprochée",
+          ],
+        },
+        {
+          titre: "AVC",
+          mode: "pse",
+          tag: "0,9 mg/kg",
+          prelever: "Flacon reconstitué 50 mg/50 mL (= 1 mg/mL)",
+          concentration: "1 mg/mL",
+          hide_final: true,
+          hide_phase_volume: true,
+          phase_doses: [
+            {
+              label: "Dose totale",
+              dose_kg: 0.9,
+              max: 90,
+            },
+            {
+              label: "Bolus 10%",
+              dose_kg: 0.09,
+              max: 9,
+            },
+            {
+              label: "PSE 90%",
+              dose_kg: 0.81,
+              max: 81,
+              duree: "60 min",
+            },
+          ],
+          etapes: ["AVC : 0,9 mg/kg IV (max 90 mg)", "10% en bolus", "90% restant sur 60 min"],
+          notes: [
+            "Indication AVC uniquement si patient éligible",
+            "Surveiller tout signe hémorragique",
+          ],
+        },
+      ],
     },
   },
   {
@@ -474,16 +717,62 @@ export const DRUGS_CARDIOLOGIE = [
       conc_produit: 5,
       unite: "mg",
       duree: "Bolus IV unique < 10 sec",
-      stabilite: "Utiliser immédiatement après reconstitution",
+      stabilite: "Utiliser immediatement apres reconstitution",
       etapes: [
-        "Lyophilisat + seringue-solvant 10 000 UI (50 mg) avec 10 mL EPPI fourni",
-        "Adapter la dose au POIDS : < 60 kg → 30 mg ; 60-70 kg → 35 mg ; > 90 kg → 50 mg",
-        "Injection IV bolus unique strict — ne pas perfuser",
+        "Reconstituer le lyophilisat 10 000 UI (50 mg) avec les 10 mL EPPI fournis",
+        "Prelever le volume calcule selon le poids",
+        "Injection IV bolus unique strict < 10 sec - ne pas perfuser",
       ],
       notes: [
-        "BOLUS UNIQUE — dose adaptée au poids (tableau ci-dessus)",
+        "BOLUS UNIQUE - dose adaptee au poids",
         "Ne pas secouer le flacon lors de la reconstitution",
-        "Associer systématiquement anticoagulation (HNF)",
+        "Ne pas melanger avec G5% dans la meme ligne",
+        "Associer systematiquement anticoagulation (HNF)",
+      ],
+      preparations: [
+        {
+          titre: "Bolus IV",
+          mode: "bolus",
+          tag: "dose poids",
+          prelever: "Flacon reconstitue 50 mg/10 mL",
+          concentration: "5 mg/mL",
+          weight_bands: [
+            {
+              lt: 60,
+              dose: 30,
+            },
+            {
+              gte: 60,
+              lt: 70,
+              dose: 35,
+            },
+            {
+              gte: 70,
+              lt: 80,
+              dose: 40,
+            },
+            {
+              gte: 80,
+              lt: 90,
+              dose: 45,
+            },
+            {
+              gte: 90,
+              dose: 50,
+            },
+          ],
+          etapes: [
+            "Reconstituer le lyophilisat 10 000 UI (50 mg) avec les 10 mL EPPI fournis",
+            "Prelever le volume calcule selon le poids",
+            "Injection IV bolus unique strict < 10 sec - ne pas perfuser",
+          ],
+          notes: [
+            "BOLUS UNIQUE - dose adaptee au poids",
+            "Ne pas secouer le flacon lors de la reconstitution",
+            "Ne pas melanger avec G5% dans la meme ligne",
+            "Associer systematiquement anticoagulation (HNF)",
+          ],
+        },
       ],
     },
   },
@@ -525,7 +814,7 @@ export const DRUGS_CARDIOLOGIE = [
     prep: {
       solvant: "Pur (NaCl 0,9% si dilution)",
       volume_final: null,
-      conc_finale: "1 mg/mL (pur)",
+      conc_finale: "1 mg/mL",
       conc_produit: 1,
       unite: "mg",
       duree: "Bolus puis IVSE",
@@ -538,6 +827,47 @@ export const DRUGS_CARDIOLOGIE = [
       notes: [
         "Conserver l'ampoule dans son emballage (photosensible)",
         "Titrer par paliers — ne pas dépasser baisse PA > 25% en 1h",
+      ],
+      preparations: [
+        {
+          titre: "Bolus",
+          mode: "bolus",
+          tag: "pur 1 mg/mL",
+          prelever: "1 ampoule 10 mg/10 mL",
+          phase_doses: [
+            {
+              label: "Bolus initial",
+              dose_fixed: 1,
+            },
+          ],
+          etapes: [
+            "Bolus initial : 1 mg IV (= 1 mL)",
+            "Administrer pur (1 mg/mL)",
+            "Surveillance hémodynamique rapprochée",
+          ],
+          notes: [
+            "Conserver l'ampoule dans son emballage (photosensible)",
+            "Titrer par paliers — ne pas dépasser baisse PA > 25% en 1h",
+          ],
+        },
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "1-15 mg/h",
+          prelever: "1 ampoule 10 mg/10 mL",
+          concentration: "1 mg/mL",
+          rate_label: "Débit usuel",
+          rate_value: "1-15 mg/h = 1-15 mL/h",
+          etapes: [
+            "PSE : administrer PUR (1 mg/mL)",
+            "Débit usuel : 1-15 mg/h selon TA cible",
+            "Soit 1-15 mL/h avec ampoule pure",
+          ],
+          notes: [
+            "Conserver l'ampoule dans son emballage (photosensible)",
+            "Titrer par paliers — ne pas dépasser baisse PA > 25% en 1h",
+          ],
+        },
       ],
     },
   },
@@ -587,6 +917,24 @@ export const DRUGS_CARDIOLOGIE = [
         "Surveillance hémodynamique",
         "Conserver l'ampoule dans son emballage à l'abri de la lumière",
       ],
+      preparations: [
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "5 mg/mL",
+          prelever: "Ampoule 25 mg/5 mL",
+          concentration: "5 mg/mL",
+          etapes: [
+            "PSE : administrer PUR",
+            "Dose usuelle : 5-30 mg/h selon TA cible",
+            "Débit : 1-6 mL/h avec ampoule pure à 5 mg/mL",
+          ],
+          notes: [
+            "Conserver l'ampoule dans son emballage à l'abri de la lumière",
+            "Surveillance hémodynamique",
+          ],
+        },
+      ],
     },
   },
   {
@@ -631,6 +979,31 @@ export const DRUGS_CARDIOLOGIE = [
         "Injecter lentement en 2 à 3 min sous surveillance hémodynamique",
       ],
       notes: ["Surveillance hémodynamique"],
+      stabilite: "Utiliser immédiatement",
+      preparations: [
+        {
+          titre: "IVL",
+          mode: "bolus",
+          tag: "0,5 mg/mL",
+          prelever: "1 ampoule 5 mg/2 mL",
+          completer: "à 10 mL avec NaCl 0,9%",
+          concentration: "0,5 mg/mL",
+          phase_doses: [
+            {
+              label: "Injecter",
+              dose_kg: 0.075,
+              dose_max_kg: 0.15,
+              max: 10,
+            },
+          ],
+          etapes: [
+            "Diluer 1 ampoule qsp 10 mL NaCl 0,9%",
+            "Injecter lentement en 2 à 3 min",
+            "Surveillance hémodynamique",
+          ],
+          notes: ["Non recommandé < 15 ans", "Surveillance hémodynamique"],
+        },
+      ],
     },
   },
   {
@@ -673,11 +1046,11 @@ export const DRUGS_CARDIOLOGIE = [
     prep: {
       solvant: "Pur (NaCl 0,9% si dilution)",
       volume_final: null,
-      conc_finale: "1 mg/mL (pur)",
+      conc_finale: "1 mg/mL",
       conc_produit: 1,
       unite: "mg",
-      duree: "Continu IVSE",
-      stabilite: "Utiliser immédiatement",
+      duree: "Bolus puis IVSE",
+      stabilite: "Utiliser immediatement",
       etapes: [
         "Ampoule 10 mg/10 mL (1 mg/mL) — utiliser pure en IVSE",
         "Débuter à 1-2 mg/h = 1-2 mL/h",
@@ -686,6 +1059,43 @@ export const DRUGS_CARDIOLOGIE = [
       notes: [
         "CI absolue si inhibiteurs PDE5 < 48h (effondrement PA MORTEL)",
         "Surveiller PA en continu",
+      ],
+      preparations: [
+        {
+          titre: "Bolus",
+          mode: "bolus",
+          tag: "pur 1 mg/mL",
+          prelever: "Ampoule 10 mg/10 mL",
+          concentration: "1 mg/mL",
+          hide_final: true,
+          etapes: [
+            "IVD en bolus : administrer PUR",
+            "Utiliser l'ampoule pure a 1 mg/mL",
+            "Titrer selon PA cible",
+          ],
+          notes: [
+            "CI absolue si inhibiteurs PDE5 < 48h (effondrement PA mortel)",
+            "Surveiller PA en continu",
+          ],
+        },
+        {
+          titre: "PSE",
+          mode: "pse",
+          tag: "1-10 mg/h",
+          prelever: "Ampoule 10 mg/10 mL",
+          concentration: "1 mg/mL",
+          rate_label: "Débit usuel",
+          rate_value: "1-10 mg/h = 1-10 mL/h",
+          etapes: [
+            "PSE : administrer PUR (1 mg/mL)",
+            "Debit usuel : 1-10 mg/h selon PA cible",
+            "Soit 1-10 mL/h avec ampoule pure",
+          ],
+          notes: [
+            "CI absolue si inhibiteurs PDE5 < 48h (effondrement PA mortel)",
+            "Surveiller PA en continu",
+          ],
+        },
       ],
     },
   },

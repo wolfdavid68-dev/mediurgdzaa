@@ -126,6 +126,50 @@ export const DRUGS_ANTIDOTES = [
         "Pédiatrie : 4-16 mg/kg IV selon profondeur du bloc",
       ],
       notes: ["Surveiller anaphylaxie, bradycardie et recurarisation si dose insuffisante"],
+      preparations: [
+        {
+          titre: "CICO adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "100 mg/mL pur",
+          prelever: "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL) — pur",
+          concentration: "100 mg/mL",
+          phase_doses: [
+            {
+              label: "Urgence CICO",
+              dose_kg: 16,
+              unit: "mg",
+            },
+          ],
+          etapes: [
+            "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL)",
+            "Administrer pur en IVD",
+            "Urgence CICO : 16 mg/kg",
+          ],
+          notes: ["Surveiller anaphylaxie, bradycardie et recurarisation si dose insuffisante"],
+        },
+        {
+          titre: "Décurarisation enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "100 mg/mL pur",
+          prelever: "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL) — pur",
+          concentration: "100 mg/mL",
+          phase_doses: [
+            {
+              label: "Selon bloc",
+              dose_kg: 4,
+              dose_max_kg: 16,
+              unit: "mg",
+            },
+          ],
+          etapes: [
+            "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL)",
+            "Pédiatrie : 4-16 mg/kg IV selon profondeur du bloc",
+          ],
+          notes: ["Surveiller anaphylaxie, bradycardie et recurarisation si dose insuffisante"],
+        },
+      ],
     },
   },
   {
@@ -243,6 +287,62 @@ export const DRUGS_ANTIDOTES = [
         "Reconstitution obligatoire extemporanée — ne pas préparer à l'avance",
         "Nausées/vomissements fréquents",
         "Conserver au réfrigérateur (boîte déchocage)",
+      ],
+      preparations: [
+        {
+          titre: "PSE adulte",
+          mode: "pse",
+          population: "adulte",
+          tag: "1-5 mg/h",
+          prelever: "Nombre d'ampoules pour 4h (1 mg lyophilisé chacune)",
+          completer: "24 mL avec G5%",
+          rows: [
+            {
+              label: "Débit usuel",
+              value: "1 à 5 mg/h (4 à 20 ampoules/seringue)",
+              highlight: true,
+            },
+            {
+              label: "Hypoglycémie",
+              value: "1 mg SC ou IM",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon 1 mg poudre + seringue solvant 1 mL EPPI — reconstituer extemporanément",
+            "Intox bêtabloquants : bolus 1-5 mg IV lent",
+            "PSE : ampoules qsp 24 mL G5% (1-5 mg/h)",
+          ],
+          notes: [
+            "Reconstitution obligatoire extemporanée — ne pas préparer à l'avance",
+            "Conserver au réfrigérateur (boîte déchocage)",
+          ],
+        },
+        {
+          titre: "Hypoglycémie enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "SC / IM",
+          rows: [
+            {
+              label: "< 25 kg",
+              value: "0,5 mg SC/IM",
+              highlight: true,
+            },
+            {
+              label: "≥ 25 kg",
+              value: "1 mg SC/IM",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon 1 mg poudre — reconstituer avec le solvant fourni",
+            "< 25 kg : 0,5 mg SC/IM",
+            "≥ 25 kg : 1 mg SC/IM",
+          ],
+          notes: ["Reconstitution obligatoire extemporanée — ne pas préparer à l'avance"],
+        },
       ],
     },
   },

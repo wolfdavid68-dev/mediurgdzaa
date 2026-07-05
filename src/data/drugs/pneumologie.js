@@ -190,6 +190,66 @@ export const DRUGS_PNEUMOLOGIE = [
         "À renouveler 1 fois en l'absence d'amélioration",
         "Surveiller tachycardie et hypokaliémie",
       ],
+      preparations: [
+        {
+          titre: "Nébulisation adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "5 mg",
+          prelever: "1 ampoule 5 mg/2 mL",
+          completer: "qsp 5 mL avec NaCl 0,9% + Ipratropium 0,5 mg",
+          rows: [
+            {
+              label: "Administrer",
+              value: "nébulisé sous O₂ 6 L/min",
+              highlight: true,
+            },
+            {
+              label: "Renouveler",
+              value: "1 fois si pas d'amélioration",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 5 mg/2 mL solution pour nébulisation",
+            "Associer Ipratropium 0,5 mg — compléter qsp 5 mL avec NaCl 0,9%",
+            "Nébuliser sous O₂ 6 L/min",
+          ],
+          notes: [
+            "À renouveler 1 fois en l'absence d'amélioration",
+            "Surveiller tachycardie et hypokaliémie",
+          ],
+        },
+        {
+          titre: "Nébulisation enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "selon âge",
+          rows: [
+            {
+              label: "< 6 ans",
+              value: "2,5 mg + Ipratropium 0,25 mg",
+              highlight: true,
+            },
+            {
+              label: "≥ 6 ans",
+              value: "5 mg + Ipratropium 0,5 mg",
+              highlight: true,
+            },
+            {
+              label: "Administrer",
+              value: "nébulisé sous O₂ 6 L/min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "< 6 ans : 2,5 mg en nébulisation + Ipratropium 0,25 mg",
+            "≥ 6 ans : 5 mg en nébulisation + Ipratropium 0,5 mg",
+            "Nébuliser sous O₂ 6 L/min",
+          ],
+          notes: ["À renouveler selon l'âge si pas d'amélioration"],
+        },
+      ],
     },
   },
   {
@@ -244,6 +304,62 @@ export const DRUGS_PNEUMOLOGIE = [
         "Nébuliser sous O₂ 6 L/min",
       ],
       notes: ["Voie nébulisation à privilégier", "Protéger les yeux si risque de contact oculaire"],
+      preparations: [
+        {
+          titre: "Nébulisation adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "0,5 mg",
+          prelever: "1 ampoule 0,5 mg/2 mL",
+          completer: "qsp 5 mL avec NaCl 0,9% + Terbutaline 5 mg",
+          rows: [
+            {
+              label: "Administrer",
+              value: "nébulisé sous O₂ 6 L/min",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 0,5 mg/2 mL solution pour nébulisation",
+            "Associer Terbutaline 5 mg — compléter qsp 5 mL avec NaCl 0,9%",
+            "Nébuliser sous O₂ 6 L/min",
+          ],
+          notes: [
+            "Voie nébulisation à privilégier",
+            "Protéger les yeux si risque de contact oculaire",
+          ],
+        },
+        {
+          titre: "Nébulisation enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "selon âge",
+          rows: [
+            {
+              label: "< 6 ans",
+              value: "0,25 mg en nébulisation",
+              highlight: true,
+            },
+            {
+              label: "≥ 6 ans",
+              value: "0,5 mg en nébulisation",
+              highlight: true,
+            },
+            {
+              label: "Administrer",
+              value: "nébulisé sous O₂ 6 L/min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "< 6 ans : 0,25 mg en nébulisation",
+            "≥ 6 ans : 0,5 mg en nébulisation",
+            "Nébuliser sous O₂ 6 L/min",
+          ],
+          notes: ["Protéger les yeux si risque de contact oculaire"],
+        },
+      ],
     },
   },
 ];

@@ -47,13 +47,13 @@ export const DRUGS_ANTIBIOTIQUES = [
       unite: "mg",
       dose_kg: 20,
       dose_max_kg: 30,
-      duree: "30 min (adulte) / 30–60 min (pédiatrie)",
+      duree: "30 min (adulte) / 30-60 min (pédiatrie)",
       stabilite: "Stable 24h à 25°C",
       etapes: [
         "Flacon 500 mg ou 1 g",
         "ADULTE — dose < 1500 mg : diluer dans 250 mL G5%",
         "ADULTE — dose > 1500 mg : diluer dans 500 mL G5%",
-        "PÉDIATRIE : dilution NaCl 0,9% ou G5% — conc max 5 mg/mL, mini-perf 30–60 min",
+        "PÉDIATRIE : dilution NaCl 0,9% ou G5% — conc max 5 mg/mL, mini-perf 30-60 min",
         "Perfusion IV en 30 min (adulte)",
       ],
       notes: [
@@ -61,6 +61,86 @@ export const DRUGS_ANTIBIOTIQUES = [
         "Pic sérique > 64 mg/L (efficacité) — résiduelle < 2,5 mg/L (sécurité)",
         "Deux concentrations différentes : vérifier le flacon",
         "Dose unique journalière en monoprise",
+      ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "20-30 mg/kg",
+          solvant: "G5%",
+          conc_finale: "Variable selon dose",
+          duree: "30 min",
+          stabilite: "Stable 24h à 25°C",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 20,
+              dose_max_kg: 30,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          amiklin_adult: true,
+          dose_based_dilution: {
+            threshold: 1500,
+            label: "Compléter",
+            below_or_equal: "à 250 mL avec G5%",
+            above: "à 500 mL avec G5%",
+          },
+          rows: [
+            {
+              label: "Perfuser",
+              value: "30 min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon 500 mg ou 1 g",
+            "Adulte : dose < 1500 mg → diluer dans 250 mL G5%",
+            "Adulte : dose > 1500 mg → diluer dans 500 mL G5%",
+            "Utiliser les flacons 1 g et 500 mg : flacons pleins puis appoint à la seringue de 5 mL jusqu'à la dose finale",
+            "Perfuser en 30 min",
+          ],
+        },
+        {
+          titre: "IVL enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "15-20 mg/kg",
+          solvant: "NaCl 0,9% ou G5%",
+          conc_finale: "≤ 5 mg/mL",
+          duree: "30-60 min",
+          stabilite: "Stable 24h à 25°C",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 15,
+              dose_max_kg: 20,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          completer: "NaCl 0,9% ou G5% — concentration max 5 mg/mL",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "mini-perfusion 30-60 min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon 500 mg ou 1 g",
+            "Pédiatrie : dilution NaCl 0,9% ou G5%",
+            "Respecter une concentration max 5 mg/mL",
+            "Perfuser en mini-perfusion sur 30-60 min",
+          ],
+        },
+      ],
+      duplicate_posology: [
+        "Dose < 1500 mg → 250 mL G5%",
+        "Dose > 1500 mg → 500 mL G5%",
+        "PÉDIATRIE : dilution NaCl 0,9% ou G5% — conc max 5 mg/mL, mini-perf 30-60 min",
       ],
     },
   },
@@ -109,6 +189,63 @@ export const DRUGS_ANTIBIOTIQUES = [
         "NaCl 0,9% UNIQUEMENT — incompatible G5%",
         "Ne pas dépasser 1h de perfusion (problème de stabilité)",
       ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "30-60 min (max 1h)",
+          prelever: "1 à 2 g (amoxicilline)",
+          completer: "100 mL avec NaCl 0,9% STRICT",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "30-60 min — NE PAS DÉPASSER 1h",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre IV 1 g amoxicilline/200 mg clavulanate",
+            "1-2 g dans 100 mL NaCl 0,9% STRICT — perfusion 30-60 min",
+          ],
+          notes: [
+            "NaCl 0,9% UNIQUEMENT — incompatible G5%",
+            "Ne pas dépasser 1h de perfusion (problème de stabilité)",
+          ],
+        },
+        {
+          titre: "Dose/j enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "30 mg/kg/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 30,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Fractionner",
+              value: "3 injections IV/j",
+              highlight: true,
+            },
+            {
+              label: "Diluer",
+              value: "NaCl 0,9% STRICT",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Enfant : 30 mg/kg/j en 3 injections IV",
+            "Diluer dans NaCl 0,9% STRICT — perfusion 30-60 min",
+          ],
+          notes: ["NaCl 0,9% UNIQUEMENT — incompatible G5%"],
+        },
+      ],
     },
   },
   {
@@ -154,9 +291,102 @@ export const DRUGS_ANTIBIOTIQUES = [
       etapes: [
         "Flacon poudre 1 g — reconstituer avec 10 mL eau PPI",
         "Diluer qsp 100 mL NaCl 0,9% — perfusion 20-30 min",
-        "Dose méningée : 200 mg/kg/j en 6 injections IV",
+        "Dose méningée : 300 mg/kg/j en 6 injections IV",
       ],
       notes: ["Dose méningée très élevée (jusqu'à 24 g/j adulte) — vérifier la prescription"],
+      preparations: [
+        {
+          titre: "IVL standard",
+          mode: "bolus",
+          population: "adulte",
+          tag: "1 g/100 mL",
+          solvant: "NaCl 0,9%",
+          conc_finale: "10 mg/mL",
+          duree: "20-30 min",
+          stabilite: "Stable 8h à 25°C",
+          prelever: "1 g",
+          completer: "100 mL avec NaCl 0,9%",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "20-30 min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 1 g — reconstituer avec 10 mL eau PPI",
+            "Diluer qsp 100 mL NaCl 0,9%",
+            "Perfuser sur 20-30 min",
+          ],
+        },
+        {
+          titre: "Dose méningée pompe",
+          mode: "pse",
+          population: "adulte",
+          tag: "6-18 g/j",
+          solvant: "NaCl 0,9%",
+          conc_finale: "20 mg/mL",
+          duree: "Pompe continue",
+          stabilite: "Stable 8h à 25°C",
+          dose_input_label: "Dose/j",
+          dose_input_unit: "g/j",
+          dose_input_default: 12,
+          dose_input_min: 6,
+          dose_input_max: 18,
+          dose_input_step: 2,
+          amoxicilline_meningee_pump: true,
+          hide_final: true,
+          etapes: [
+            "Dose méningée sur pompe",
+            "6 g/j : 2 g/100 mL à 12 mL/h",
+            "8 g/j : 2 g/100 mL à 17 mL/h",
+            "10-18 g/j : 5 g/250 mL selon débit affiché",
+          ],
+          notes: ["Vérifier la prescription et la stabilité locale avant préparation"],
+        },
+        {
+          titre: "IVL enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "50-200 mg/kg/j",
+          solvant: "NaCl 0,9%",
+          conc_finale: "selon prescription",
+          duree: "20-30 min",
+          stabilite: "Stable 8h à 25°C",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 50,
+              dose_max_kg: 200,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Diluer",
+              value: "dans NaCl 0,9%",
+            },
+            {
+              label: "Perfuser",
+              value: "20-30 min",
+            },
+            {
+              label: "Fractionner",
+              value: "selon prescription",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Calculer la dose pédiatrique : 50-200 mg/kg/j selon indication",
+            "Préparer uniquement la dose prescrite",
+            "Diluer dans NaCl 0,9%",
+            "Perfuser sur 20-30 min",
+          ],
+          notes: ["Dose quotidienne à fractionner selon indication et prescription"],
+        },
+      ],
+      duplicate_posology: ["Dilution : NaCl 0,9%", "1 g dans 100 mL", "Perfusion sur 20-30 min"],
     },
   },
   {
@@ -214,6 +444,91 @@ export const DRUGS_ANTIBIOTIQUES = [
         "Hydratation obligatoire pour prévenir la cristallurie rénale",
         "Neurotoxicité si insuffisance rénale — adapter la dose",
       ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "≥ 1h STRICT",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 10,
+              dose_max_kg: 15,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          dose_based_dilution: {
+            threshold: 500,
+            label: "Diluer",
+            source: "phase",
+            below_or_equal: "dans 100 mL NaCl 0,9%",
+            above: "dans 250 mL NaCl 0,9%",
+          },
+          rows: [
+            {
+              label: "Reconstituer",
+              value: "250 mg avec 10 mL EPPI ou NaCl 0,9%",
+            },
+            {
+              label: "Perfuser",
+              value: "≥ 1h STRICTEMENT (cristallurie si rapide)",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 250 mg — reconstituer avec 10 mL EPPI ou NaCl 0,9%",
+            "Dose : 10-15 mg/kg /8h",
+            "≤ 500 mg → 100 mL / > 500 mg → 250 mL NaCl 0,9%",
+            "Perfuser en ≥ 1h STRICTEMENT",
+          ],
+          notes: [
+            "PASSER SEUL — incompatible avec la plupart des médicaments",
+            "Hydratation obligatoire pour prévenir la cristallurie rénale",
+          ],
+        },
+        {
+          titre: "IVL enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "10-20 mg/kg /8h",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 10,
+              dose_max_kg: 20,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          dose_based_dilution: {
+            threshold: 500,
+            label: "Diluer",
+            source: "phase",
+            below_or_equal: "dans 100 mL NaCl 0,9%",
+            above: "dans 250 mL NaCl 0,9%",
+          },
+          rows: [
+            {
+              label: "Perfuser",
+              value: "≥ 1h STRICTEMENT",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Encéphalite : 10-20 mg/kg /8h",
+            "Reconstituer 250 mg avec 10 mL EPPI ou NaCl 0,9%",
+            "Perfuser en ≥ 1h STRICTEMENT",
+          ],
+          notes: [
+            "PASSER SEUL — incompatible avec la plupart des médicaments",
+            "Neurotoxicité si insuffisance rénale — adapter la dose",
+          ],
+        },
+      ],
     },
   },
   {
@@ -263,6 +578,104 @@ export const DRUGS_ANTIBIOTIQUES = [
         "Dose méningée : 200-300 mg/kg/j en 4-6 injections",
       ],
       notes: ["Attention : risque d'arythmie si administration rapide sur cathéter central"],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "20-30 min",
+          rows: [
+            {
+              label: "1 g",
+              value: "→ 50 mL NaCl 0,9%",
+              highlight: true,
+            },
+            {
+              label: "2 g",
+              value: "→ 100 mL NaCl 0,9%",
+              highlight: true,
+            },
+            {
+              label: "Perfuser",
+              value: "20-30 min",
+            },
+            {
+              label: "Dose méningée",
+              value: "200-300 mg/kg/j en 4-6 injections",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 1 g ou 2 g",
+            "1 g dans 50 mL / 2 g dans 100 mL NaCl 0,9% — perfusion 20-30 min",
+            "Dose méningée : 200-300 mg/kg/j en 4-6 injections",
+          ],
+          notes: ["Attention : risque d'arythmie si administration rapide sur cathéter central"],
+        },
+        {
+          titre: "Dose méningée PSE",
+          mode: "pse",
+          population: "adulte",
+          tag: "200-300 mg/kg/j",
+          solvant: "NaCl 0,9%",
+          duree: "PSE continu",
+          stabilite: "Stable 24h à 25°C",
+          dose_input_label: "Dose/j",
+          dose_input_unit: "g/j",
+          dose_input_default: 16,
+          dose_input_min: 6,
+          dose_input_max: 24,
+          dose_input_step: 2,
+          claforan_meningee_pump: true,
+          hide_final: true,
+          etapes: [
+            "Dose méningée : 200-300 mg/kg/j en 4-6 injections",
+            "Choisir la ligne g/j la plus proche pour la dilution et le débit",
+            "6 g/j : 2 g/48 mL → 6 mL/h",
+            "12 g/j : 3 g/48 mL → 8 mL/h",
+            "14 g/j : 3 g/48 mL → 9,3 mL/h",
+            "16 g/j : 4 g/48 mL → 8 mL/h",
+            "20 g/j : 5 g/48 mL → 8 mL/h",
+            "24 g/j : 6 g/250 mL → 8 mL/h",
+          ],
+          notes: ["Vérifier la prescription et la stabilité locale avant préparation"],
+        },
+        {
+          titre: "Dose/j enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "50-300 mg/kg/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 50,
+              dose_max_kg: 300,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Diluer",
+              value: "dans NaCl 0,9%",
+            },
+            {
+              label: "Perfuser",
+              value: "20-30 min",
+            },
+            {
+              label: "Fractionner",
+              value: "4-6 injections/j",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Dose pédiatrique : 50-300 mg/kg/j selon indication",
+            "Diluer dans NaCl 0,9% — perfusion 20-30 min",
+          ],
+          notes: ["Attention : risque d'arythmie si administration rapide sur cathéter central"],
+        },
+      ],
     },
   },
   {
@@ -317,6 +730,135 @@ export const DRUGS_ANTIBIOTIQUES = [
         "NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation",
         "Stable seulement 3h après reconstitution",
       ],
+      preparations: [
+        {
+          titre: "Utilisation courante adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "1-2 g/j",
+          prelever: "1 à 2 g",
+          completer: "à 100 mL avec NaCl 0,9% ou G5%",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "30 min",
+              highlight: true,
+            },
+            {
+              label: "Voies",
+              value: "VVP ou VVC",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 1 g ou 2 g — reconstituer puis diluer dans 100 mL NaCl/G5%",
+            "Utilisation courante : 1-2 g/j en 1 injection",
+            "Perfusion 30 min",
+          ],
+          notes: [
+            "NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation",
+            "Stable seulement 3h après reconstitution",
+          ],
+        },
+        {
+          titre: "Dose méningée adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "2 g /12h",
+          prelever: "2 g",
+          completer: "à 100 mL avec NaCl 0,9% ou G5%",
+          rows: [
+            {
+              label: "Dose",
+              value: "2 g /12h (4 g/j)",
+              highlight: true,
+            },
+            {
+              label: "Perfuser",
+              value: "30 min",
+            },
+            {
+              label: "Voies",
+              value: "VVP ou VVC",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 2 g — reconstituer puis diluer dans 100 mL NaCl/G5%",
+            "Dose méningée adulte : 2 g /12h",
+            "Perfusion 30 min",
+          ],
+          notes: [
+            "Dose méningée adulte séparée de l'utilisation courante",
+            "NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation",
+            "Stable seulement 3h après reconstitution",
+          ],
+        },
+        {
+          titre: "Utilisation courante enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "50-75 mg/kg/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 50,
+              dose_max_kg: 75,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Fractionner",
+              value: "selon prescription",
+            },
+            {
+              label: "Perfuser",
+              value: "30 min",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Infections courantes : 50-75 mg/kg/j",
+            "Diluer dans 100 mL NaCl 0,9% ou G5% — perfusion 30 min",
+          ],
+          notes: ["NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation"],
+        },
+        {
+          titre: "Dose méningée enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "100 mg/kg/j max 4 g/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 100,
+              max: 4000,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Fractionner",
+              value: "1-2 injections/j",
+            },
+            {
+              label: "Perfuser",
+              value: "30 min",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Méningite : 100 mg/kg/j en 1-2 injections (max 4 g/j)",
+            "Diluer dans 100 mL NaCl 0,9% ou G5% — perfusion 30 min",
+          ],
+          notes: ["NE PAS PASSER avec une perfusion calcium IV (même ligne) — précipitation"],
+        },
+      ],
     },
   },
   {
@@ -368,6 +910,82 @@ export const DRUGS_ANTIBIOTIQUES = [
         "Néphrotoxique et ototoxique — surveillance créatinine",
         "Pic sérique > 10 mg/L (efficacité) — résiduelle non détectable (sécurité)",
       ],
+      preparations: [
+        {
+          titre: "Dose/j adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "dose unique/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 5,
+              dose_max_kg: 8,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          dose_based_dilution: {
+            threshold: 500,
+            label: "Diluer",
+            source: "phase",
+            below_or_equal: "dans 50 mL NaCl 0,9% ou G5%",
+            above: "dans 100 mL (Cmax 10 mg/mL)",
+          },
+          rows: [
+            {
+              label: "Perfuser",
+              value: "en 30 min",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon 40 mg, 80 mg ou 160 mg",
+            "Dose : 5-8 mg/kg/j IV (dose unique)",
+            "≤ 500 mg → 50 mL / > 500 mg → 100 mL — perfusion 30 min",
+          ],
+          notes: [
+            "Néphrotoxique et ototoxique — surveillance créatinine",
+            "Pic sérique > 10 mg/L (efficacité) — résiduelle non détectable (sécurité)",
+          ],
+        },
+        {
+          titre: "Dose/j enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "dose unique/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 4,
+              dose_max_kg: 7,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          dose_based_dilution: {
+            threshold: 500,
+            label: "Diluer",
+            source: "phase",
+            below_or_equal: "dans 50 mL NaCl 0,9% ou G5%",
+            above: "dans 100 mL (Cmax 10 mg/mL)",
+          },
+          rows: [
+            {
+              label: "Perfuser",
+              value: "en 30 min",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Dose enfant : 4-7 mg/kg/j IV (dose unique)",
+            "Diluer selon dose — perfusion 30 min",
+          ],
+          notes: ["Néphrotoxique et ototoxique — surveillance créatinine"],
+        },
+      ],
     },
   },
   {
@@ -411,6 +1029,47 @@ export const DRUGS_ANTIBIOTIQUES = [
       notes: [
         "Allongement QTc — ECG si facteur de risque",
         "Tendinopathie et rupture tendineuse — arrêter au moindre signe",
+      ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "flacon prêt",
+          rows: [
+            {
+              label: "250 mg/50 mL",
+              value: "→ perfusion 30 min",
+              highlight: true,
+            },
+            {
+              label: "500 mg/100 mL",
+              value: "→ perfusion 60 min",
+              highlight: true,
+            },
+            {
+              label: "Dose",
+              value: "500 mg /24h ou /12h selon indication",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon prêt 250 mg/50 mL ou 500 mg/100 mL — ne pas diluer davantage",
+            "Perfusion 30 min (250 mg) ou 60 min (500 mg)",
+            "Ne pas mélanger avec d'autres médicaments",
+          ],
+          notes: [
+            "Allongement QTc — ECG si facteur de risque",
+            "Tendinopathie et rupture tendineuse — arrêter au moindre signe",
+          ],
+        },
+        {
+          titre: "Enfant",
+          population: "enfant",
+          empty: true,
+          tag: "—",
+          note: "Non recommandé < 18 ans (tendinopathie)",
+        },
       ],
     },
   },
@@ -459,6 +1118,60 @@ export const DRUGS_ANTIBIOTIQUES = [
       notes: [
         "Réaction antabuse si alcool — prévenir le patient",
         "Goût métallique : informer le patient (normal)",
+      ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "500 mg /8h",
+          rows: [
+            {
+              label: "Flacon prêt",
+              value: "500 mg/100 mL",
+              highlight: true,
+            },
+            {
+              label: "Perfuser",
+              value: "30-60 min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon prêt 500 mg/100 mL — ne pas diluer davantage",
+            "Perfusion 30 min",
+            "Dose : 500 mg /8h — à l'abri de la lumière",
+          ],
+          notes: [
+            "Réaction antabuse si alcool — prévenir le patient",
+            "Goût métallique : informer le patient (normal)",
+          ],
+        },
+        {
+          titre: "Dose enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "7,5 mg/kg /8h",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 7.5,
+              max: 500,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Rythme",
+              value: "/8h (max 500 mg/dose)",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: ["Enfant : 7,5 mg/kg IV /8h (max 500 mg/dose)", "Flacon prêt 500 mg/100 mL"],
+          notes: ["Réaction antabuse si alcool — prévenir le patient"],
+        },
       ],
     },
   },
@@ -510,6 +1223,60 @@ export const DRUGS_ANTIBIOTIQUES = [
         "Hypokaliémie possible (apport sodé) — surveiller ionogramme",
         "Incompatibilités nombreuses — rincer la ligne avant/après",
       ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "4 g /6-8h",
+          prelever: "Flacon 4 g pip/500 mg tazo — dissoudre avec 20 mL EPPI",
+          completer: "100 mL avec NaCl 0,9%",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "30-60 min (4h prolongée si Pseudomonas)",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 4 g pip/500 mg tazo",
+            "Reconstituer avec 20 mL EPPI puis diluer dans 100 mL NaCl 0,9%",
+            "Perfusion 30-60 min (ou perfusion prolongée 4h si Pseudomonas)",
+          ],
+          notes: [
+            "Hypokaliémie possible (apport sodé) — surveiller ionogramme",
+            "Incompatibilités nombreuses — rincer la ligne avant/après",
+          ],
+        },
+        {
+          titre: "Dose/j enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "100 mg/kg/j (pip)",
+          phase_doses: [
+            {
+              label: "Dose/j pip",
+              dose_kg: 100,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Fractionner",
+              value: "3-4 injections/j",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Enfant : 100 mg/kg/j de pipéracilline en 3-4 injections",
+            "Reconstituer puis diluer dans NaCl 0,9%",
+          ],
+          notes: ["Incompatibilités nombreuses — rincer la ligne avant/après"],
+        },
+      ],
     },
   },
   {
@@ -556,6 +1323,66 @@ export const DRUGS_ANTIBIOTIQUES = [
         "Perfusion 60 min — NE PAS UTILISER NaCl 0,9%",
       ],
       notes: ["G5% STRICT — incompatible NaCl 0,9%", "Utilisation immédiate après reconstitution"],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "60 min",
+          rows: [
+            {
+              label: "1,5 MUI",
+              value: "→ 100 mL G5% STRICT",
+              highlight: true,
+            },
+            {
+              label: "3 MUI",
+              value: "→ 250 mL G5% STRICT",
+              highlight: true,
+            },
+            {
+              label: "Perfuser",
+              value: "60 min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 1,5 MUI ou 3 MUI",
+            "Reconstituer puis diluer dans 100 mL (1,5 MUI) ou 250 mL (3 MUI) G5% STRICT",
+            "Perfusion 60 min — NE PAS UTILISER NaCl 0,9%",
+          ],
+          notes: [
+            "G5% STRICT — incompatible NaCl 0,9%",
+            "Utilisation immédiate après reconstitution",
+          ],
+        },
+        {
+          titre: "Dose/j enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "150 000 UI/kg/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 150000,
+              unit: "UI",
+            },
+          ],
+          rows: [
+            {
+              label: "Fractionner",
+              value: "2-3 injections/j",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Enfant : 150 000 UI/kg/j en 2-3 injections",
+            "Diluer dans G5% STRICT — perfusion 60 min",
+          ],
+          notes: ["G5% STRICT — incompatible NaCl 0,9%"],
+        },
+      ],
     },
   },
   {
@@ -616,6 +1443,124 @@ export const DRUGS_ANTIBIOTIQUES = [
         "Injecter lentement — Red Man Syndrome si trop rapide",
         "VVC conseillée si doses élevées (pH acide — veinotoxique)",
         "Monitorage TDM obligatoire : résiduelle 15-25 mg/L",
+      ],
+      preparations: [
+        {
+          titre: "Charge adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "≥ 2h",
+          phase_doses: [
+            {
+              label: "Charge",
+              dose_kg: 25,
+              dose_max_kg: 30,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "500 mg",
+              value: "→ 100 mL",
+              highlight: true,
+            },
+            {
+              label: "1 g",
+              value: "→ 250 mL (100 mL sur KTC)",
+              highlight: true,
+            },
+            {
+              label: "Perfuser",
+              value: "2-3h",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 500 mg ou 1 g",
+            "Charge : 25-30 mg/kg IV sur 2-3h",
+            "500 mg → 100 mL / 1 g → 250 mL NaCl 0,9% ou G5% (100 mL sur KTC)",
+          ],
+          notes: [
+            "Injecter lentement — Red Man Syndrome si trop rapide",
+            "Monitorage TDM obligatoire : résiduelle 15-25 mg/L",
+          ],
+        },
+        {
+          titre: "Entretien adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "15-20 mg/kg /8-12h",
+          phase_doses: [
+            {
+              label: "Entretien",
+              dose_kg: 15,
+              dose_max_kg: 20,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Rythme",
+              value: "/8-12h (cible AUC)",
+              highlight: true,
+            },
+            {
+              label: "500 mg",
+              value: "→ 100 mL",
+              highlight: true,
+            },
+            {
+              label: "1 g",
+              value: "→ 250 mL (100 mL sur KTC)",
+              highlight: true,
+            },
+            {
+              label: "Perfuser",
+              value: "60 min minimum",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon poudre 500 mg ou 1 g",
+            "Entretien : 15-20 mg/kg /8-12h (cible AUC)",
+            "500 mg → 100 mL / 1 g → 250 mL NaCl 0,9% ou G5% (100 mL sur KTC)",
+          ],
+          notes: [
+            "Adapter au TDM / AUC selon protocole local",
+            "Injecter lentement — Red Man Syndrome si trop rapide",
+            "Monitorage TDM obligatoire : résiduelle 15-25 mg/L",
+          ],
+        },
+        {
+          titre: "Enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "15 mg/kg /6h",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 15,
+              unit: "mg",
+            },
+          ],
+          hide_phase_volume: true,
+          rows: [
+            {
+              label: "Perfuser",
+              value: "sur 60 min",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Dose enfant : 15 mg/kg /6h IV sur 60 min",
+            "Diluer selon dose (500 mg → 100 mL, 1 g → 250 mL)",
+          ],
+          notes: ["Injecter lentement — Red Man Syndrome si trop rapide"],
+        },
       ],
     },
   },

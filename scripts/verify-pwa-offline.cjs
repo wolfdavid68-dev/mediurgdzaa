@@ -41,7 +41,8 @@ const CHUNK_GZIP_LIMITS_KB = {
   // Données internes lazy-loadées uniquement en `?author=preview`, mais
   // précachées pour rester disponibles hors ligne pendant les validations.
   "data-preview": 12,
-  "data-medic": 37,
+  // Données médicaments publiques avec les préparations v2 validées.
+  "data-medic": 42,
   "export-image": 8,
 };
 

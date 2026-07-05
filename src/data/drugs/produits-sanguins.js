@@ -144,7 +144,7 @@ export const DRUGS_PRODUITS_SANGUINS = [
     prep: {
       solvant: "Prêt à l'emploi",
       volume_final: null,
-      conc_finale: "4% ou 20%",
+      conc_finale: "Albumine 20% = 0,2 g/mL",
       duree: "IVL selon indication",
       etapes: [
         "Flacon prêt à l'emploi",
@@ -155,6 +155,136 @@ export const DRUGS_PRODUITS_SANGUINS = [
       notes: [
         "Médicament dérivé du sang : traçabilité obligatoire",
         "Surveiller surcharge volémique",
+      ],
+      conc_produit: 0.2,
+      unite: "g",
+      preparations: [
+        {
+          titre: "PBS J1",
+          mode: "ivl",
+          population: "adulte",
+          tag: "1,5 g/kg",
+          phase_doses: [
+            {
+              label: "Dose J1",
+              dose_kg: 1.5,
+              unit: "g",
+            },
+          ],
+          hide_final: true,
+          rows: [
+            {
+              label: "Produit",
+              value: "Albumine 20%",
+              highlight: true,
+            },
+            {
+              label: "Appel d'air",
+              value: "obligatoire (flacon en verre)",
+            },
+          ],
+          etapes: [
+            "PBS J1 : 1,5 g/kg d'albumine 20%",
+            "Albumine 20% = 20 g/100 mL = 0,2 g/mL",
+            "Appel d'air obligatoire (flacon en verre)",
+          ],
+          notes: [
+            "Médicament dérivé du sang : traçabilité obligatoire",
+            "Surveiller surcharge volémique",
+          ],
+        },
+        {
+          titre: "PBS J3",
+          mode: "ivl",
+          population: "adulte",
+          tag: "1 g/kg",
+          phase_doses: [
+            {
+              label: "Dose J3",
+              dose_kg: 1,
+              unit: "g",
+            },
+          ],
+          hide_final: true,
+          rows: [
+            {
+              label: "Produit",
+              value: "Albumine 20%",
+              highlight: true,
+            },
+            {
+              label: "Appel d'air",
+              value: "obligatoire (flacon en verre)",
+            },
+          ],
+          etapes: [
+            "PBS J3 : 1 g/kg d'albumine 20%",
+            "Albumine 20% = 20 g/100 mL = 0,2 g/mL",
+            "Appel d'air obligatoire (flacon en verre)",
+          ],
+          notes: [
+            "Médicament dérivé du sang : traçabilité obligatoire",
+            "Surveiller surcharge volémique",
+          ],
+        },
+        {
+          titre: "Cirrhotique",
+          mode: "ivl",
+          population: "adulte",
+          tag: "1 g/kg/j",
+          phase_doses: [
+            {
+              label: "Dose/j",
+              dose_kg: 1,
+              unit: "g",
+            },
+          ],
+          hide_final: true,
+          rows: [
+            {
+              label: "Cirrhotique",
+              value: "1 g/kg/j albumine 20%",
+              highlight: true,
+            },
+            {
+              label: "Appel d'air",
+              value: "obligatoire (flacon en verre)",
+            },
+          ],
+          etapes: [
+            "Cirrhotique : 1 g/kg/j albumine 20%",
+            "Albumine 20% = 20 g/100 mL = 0,2 g/mL",
+            "Appel d'air obligatoire (flacon en verre)",
+          ],
+          notes: [
+            "Médicament dérivé du sang : traçabilité obligatoire",
+            "Surveiller surcharge volémique",
+          ],
+        },
+        {
+          titre: "Enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "0,5-1 g/kg",
+          rows: [
+            {
+              label: "Dose",
+              value: "0,5-1 g/kg IV selon indication",
+              highlight: true,
+            },
+            {
+              label: "Appel d'air",
+              value: "obligatoire (flacon en verre)",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon prêt à l'emploi",
+            "Enfant : 0,5-1 g/kg IV selon indication",
+            "Appel d'air obligatoire (flacon en verre)",
+          ],
+          notes: ["Médicament dérivé du sang : traçabilité obligatoire"],
+        },
       ],
     },
   },

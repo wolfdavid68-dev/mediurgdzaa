@@ -189,6 +189,59 @@ export const DRUGS_NEUROLOGIE = [
         "Ne pas administrer sans reconstitution par son solvant",
         "Surveiller dépression respiratoire",
       ],
+      preparations: [
+        {
+          titre: "IVD adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "1-2 mg",
+          prelever: "Ampoule 1 mg/1 mL — à reconstituer avec son solvant",
+          rows: [
+            {
+              label: "Injecter",
+              value: "1-2 mg IV lente sur 2 min",
+              highlight: true,
+            },
+            {
+              label: "Voie",
+              value: "IM possible selon indication",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 1 mg/1 mL",
+            "Reconstituer avec le solvant fourni",
+            "Adulte : 1-2 mg IV lente sur 2 min",
+          ],
+          notes: [
+            "Ne pas administrer sans reconstitution par son solvant",
+            "Surveiller dépression respiratoire",
+          ],
+        },
+        {
+          titre: "IVD enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "0,05-0,1 mg/kg max 1 mg",
+          prelever: "Ampoule 1 mg/1 mL — à reconstituer avec son solvant",
+          concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "Injecter",
+              dose_kg: 0.05,
+              dose_max_kg: 0.1,
+              max: 1,
+              unit: "mg",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 1 mg/1 mL — reconstituer avec le solvant fourni",
+            "Enfant : 0,05-0,1 mg/kg IV lente (max 1 mg/dose)",
+          ],
+          notes: ["Surveiller dépression respiratoire"],
+        },
+      ],
     },
   },
   {

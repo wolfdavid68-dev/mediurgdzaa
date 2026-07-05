@@ -105,7 +105,7 @@ export const DRUGS_METABOLIQUE = [
       p: ["1-2 mg/kg IV (max 60-120 mg)"],
     },
     prep: {
-      solvant: "NaCl 0,9% ou G5%",
+      solvant: "NaCl 0,9%",
       volume_final: 100,
       conc_finale: "Variable",
       conc_produit: null,
@@ -115,12 +115,49 @@ export const DRUGS_METABOLIQUE = [
       stabilite: "Stable 24h à 25°C",
       etapes: [
         "Flacon poudre 40 mg, 120 mg, 500 mg ou 1 g — reconstituer avec le solvant fourni",
-        "Diluer dans 100 mL NaCl 0,9% ou G5%",
+        "≤ 120 mg : reconstituer avec 2 mL EPPI, diluer qsp 10 mL NaCl 0,9%",
+        "> 120 mg : diluer dans 100 mL NaCl 0,9%",
         "Perfusion 20-30 min",
       ],
       notes: [
         "Hyperglycémie — surveillance glycémique",
         "Risque infection opportuniste en cas de cure prolongée",
+      ],
+      preparations: [
+        {
+          titre: "IV",
+          mode: "bolus",
+          tag: "dose saisie",
+          dose_input_label: "Dose à préparer",
+          dose_input_unit: "mg",
+          dose_input_default: 120,
+          dose_input_min: 1,
+          dose_input_step: 1,
+          dose_based_dilution: {
+            threshold: 120,
+            label: "Diluer",
+            source: "dose_input",
+            below_or_equal: "IVD : reconstituer avec 2 mL EPPI puis diluer qsp 10 mL NaCl 0,9%",
+            above: "IVL : dans 100 mL NaCl 0,9%",
+          },
+          rows: [
+            {
+              label: "Perfuser",
+              value: "20-30 min",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Reconstituer le flacon avec le solvant fourni",
+            "≤ 120 mg : reconstituer avec 2 mL EPPI, diluer qsp 10 mL NaCl 0,9%",
+            "> 120 mg : diluer dans 100 mL NaCl 0,9%",
+            "Perfuser sur 20-30 min",
+          ],
+        },
+      ],
+      duplicate_posology: [
+        "IVD (dose ≤ 120 mg) : reconstituer avec 2 mL EPPI, dilué qsp 10 mL NaCl 0,9%",
+        "IVL (dose > 120 mg) : 100 mL NaCl 0,9%",
       ],
     },
   },
@@ -166,6 +203,64 @@ export const DRUGS_METABOLIQUE = [
         "Veinotoxique : bien rincer après injection",
         "Hyperglycémie rebond : contrôle à 15-30 min",
         "Extravasation : nécrose tissulaire — s'assurer de l'accès veineux",
+      ],
+      preparations: [
+        {
+          titre: "IVD adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "PUR",
+          prelever: "1 à 2 ampoules 3 g/10 mL (= 3-6 g)",
+          rows: [
+            {
+              label: "Administrer",
+              value: "pur en bolus IV lent",
+              highlight: true,
+            },
+            {
+              label: "Contrôle",
+              value: "glycémie à 15 min",
+            },
+            {
+              label: "Rincer",
+              value: "après injection (veinotoxique)",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 10 mL à 30% = 3 g glucose",
+            "Adulte : prélever 1–2 ampoules (10–20 mL) et administrer pur",
+            "Contrôler glycémie à 15 min — bien rincer après injection",
+          ],
+          notes: [
+            "Veinotoxique : bien rincer après injection",
+            "Extravasation : nécrose tissulaire — s'assurer de l'accès veineux",
+          ],
+        },
+        {
+          titre: "Enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "0,3-0,5 g/kg",
+          rows: [
+            {
+              label: "Dose",
+              value: "0,3-0,5 g/kg IV (G10% ou G30% dilué)",
+              highlight: true,
+            },
+            {
+              label: "Nourrisson",
+              value: "G10% 2-5 mL/kg",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Enfant : 0,3-0,5 g/kg IV (G10% ou G30% dilué)",
+            "Nourrisson : G10% 2-5 mL/kg",
+            "Enfant : diluer à G10% (1 vol G30% + 2 vol eau PPI)",
+          ],
+          notes: ["Veinotoxique : bien rincer après injection"],
+        },
       ],
     },
   },
@@ -215,6 +310,110 @@ export const DRUGS_METABOLIQUE = [
         "Stabilité 12h MAXIMUM — changer toutes les 12h",
         "Malaise vagal et hypotension possible",
       ],
+      hide_poso_when_prepared: true,
+      preparations: [
+        {
+          titre: "Bolus IVL",
+          mode: "bolus",
+          population: "adulte",
+          tag: "20-30 min",
+          prelever: "1-2 flacons 40 mg",
+          completer: "dans 100 mL NaCl 0,9%",
+          rows: [
+            {
+              label: "Dose",
+              value: "40-80 mg",
+              highlight: true,
+            },
+            {
+              label: "Perfuser",
+              value: "20-30 min",
+            },
+            {
+              label: "Final",
+              value: "0,4-0,8 mg/mL",
+            },
+          ],
+          etapes: [
+            "Reconstituer le flacon poudre 40 mg",
+            "Bolus : 40-80 mg dans 100 mL NaCl 0,9%",
+            "Perfuser sur 20-30 min",
+          ],
+        },
+        {
+          titre: "PSE entretien",
+          mode: "pse",
+          population: "adulte",
+          tag: "5 mL/h",
+          prelever: "2 flacons 40 mg (= 80 mg)",
+          completer: "à 48 mL avec NaCl 0,9%",
+          rows: [
+            {
+              label: "Débit",
+              value: "5 mL/h",
+              highlight: true,
+            },
+            {
+              label: "Dose",
+              value: "8 mg/h = 200 mg/24h",
+              highlight: true,
+            },
+            {
+              label: "Final",
+              value: "1,67 mg/mL",
+            },
+          ],
+          etapes: [
+            "PSE : 80 mg/48 mL NaCl 0,9%",
+            "Débit : 5 mL/h (= 8 mg/h)",
+            "Changer toutes les 12h maximum",
+          ],
+        },
+        {
+          titre: "IVL enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "1 mg/kg /12h",
+          hide_phase_volume: true,
+          phase_doses: [
+            {
+              label: "Dose à préparer",
+              dose_kg: 1,
+              unit: "mg",
+              max: 40,
+            },
+          ],
+          rows: [
+            {
+              label: "Prélever",
+              value: "uniquement la dose calculée ci-dessus",
+              highlight: true,
+            },
+            {
+              label: "Diluer",
+              value: "dans 100 mL NaCl 0,9%",
+            },
+            {
+              label: "Rythme",
+              value: "toutes les 12h",
+            },
+            {
+              label: "Perfuser",
+              value: "20-30 min",
+            },
+            {
+              label: "Max",
+              value: "40 mg/dose",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Dose enfant : 1 mg/kg IV /12h, max 40 mg/dose",
+            "Prélever uniquement la dose calculée",
+            "Diluer la dose calculée dans 100 mL NaCl 0,9%",
+          ],
+        },
+      ],
     },
   },
   {
@@ -262,6 +461,30 @@ export const DRUGS_METABOLIQUE = [
         "Renouveler /8h si besoin",
       ],
       notes: ["Non recommandé < 18 ans", "Surveiller syndrome extrapyramidal et somnolence"],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "10 mg /8h",
+          prelever: "1 ampoule 10 mg/2 mL — administrer pur",
+          hide_final: true,
+          etapes: [
+            "Ampoule 10 mg/2 mL",
+            "Administrer pur en IV lente",
+            "Peut se diluer qsp 10 mL NaCl 0,9%",
+            "10 mg IV lente /8h",
+          ],
+          notes: ["Surveiller syndrome extrapyramidal et somnolence"],
+        },
+        {
+          titre: "Enfant",
+          population: "enfant",
+          empty: true,
+          tag: "—",
+          note: "Non recommandé < 18 ans",
+        },
+      ],
     },
   },
   {
@@ -303,6 +526,58 @@ export const DRUGS_METABOLIQUE = [
         "Pédiatrie : 0,1 mg/kg IV (max 4 mg)",
       ],
       notes: ["Surveiller allongement QT, surtout sujet âgé"],
+      preparations: [
+        {
+          titre: "IVD adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "4-8 mg",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_fixed: 4,
+              dose_max_fixed: 8,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Voie",
+              value: "administrer pur",
+            },
+          ],
+          etapes: [
+            "Ampoule 4 mg/2 mL ou 8 mg/4 mL (2 mg/mL)",
+            "Adulte : 4-8 mg IV /8h",
+            "Administrer pur",
+          ],
+        },
+        {
+          titre: "IVD enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "0,1 mg/kg max 4 mg",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 0.1,
+              max: 4,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Voie",
+              value: "administrer pur",
+            },
+          ],
+          etapes: [
+            "Ampoule 4 mg/2 mL ou 8 mg/4 mL (2 mg/mL)",
+            "Pédiatrie : 0,1 mg/kg IV (max 4 mg)",
+            "Administrer pur",
+          ],
+        },
+      ],
     },
   },
 ];

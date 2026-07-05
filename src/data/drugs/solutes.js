@@ -158,6 +158,71 @@ export const DRUGS_SOLUTES = [
         "Surveiller diurèse, osmolalité et fonction rénale",
         "Éviter si osmolalité > 320 mosmol/kg",
       ],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "PUR 0,2 g/mL",
+          prelever: "Flacon mannitol 20% (0,2 g/mL) — administrer pur",
+          concentration: "0,2 g/mL",
+          phase_doses: [
+            {
+              label: "HTIC",
+              dose_kg: 0.25,
+              dose_max_kg: 1,
+              unit: "g",
+            },
+          ],
+          rows: [
+            {
+              label: "Perfuser",
+              value: "sur 20-30 min",
+              highlight: true,
+            },
+            {
+              label: "Engagement",
+              value: "1 g/kg IV rapide",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Flacon de mannitol 20% = 0,2 g/mL — administrer pur par voie IV",
+            "HTIC : 0,25-1 g/kg sur 20-30 min",
+            "Engagement cérébral : 1 g/kg IV rapide",
+          ],
+          notes: [
+            "Surveiller diurèse, osmolalité et fonction rénale",
+            "Éviter si osmolalité > 320 mosmol/kg",
+          ],
+        },
+        {
+          titre: "IVL enfant",
+          mode: "ped",
+          population: "enfant",
+          tag: "0,5-1 g/kg",
+          prelever: "Flacon mannitol 20% (0,2 g/mL) — administrer pur",
+          concentration: "0,2 g/mL",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_kg: 0.5,
+              dose_max_kg: 1,
+              unit: "g",
+            },
+          ],
+          rows: [
+            {
+              label: "Perfuser",
+              value: "sur 20-30 min",
+              highlight: true,
+            },
+          ],
+          hide_final: true,
+          etapes: ["Flacon de mannitol 20% = 0,2 g/mL", "Enfant : 0,5-1 g/kg IV sur 20-30 min"],
+          notes: ["Surveiller diurèse, osmolalité et fonction rénale"],
+        },
+      ],
     },
   },
 ];

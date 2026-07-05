@@ -63,6 +63,62 @@ export const DRUGS_CURARES = [
         "CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie",
         "Risque choc anaphylactique — avoir adrénaline à portée",
       ],
+      preparations: [
+        {
+          titre: "ISR adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "10 mg/mL",
+          prelever: "2 mL d'ampoule 100 mg/2 mL (50 mg/mL)",
+          completer: "10 mL avec NaCl 0,9%",
+          concentration: "10 mg/mL",
+          phase_doses: [
+            {
+              label: "ISR",
+              dose_kg: 1,
+              unit: "mg",
+            },
+          ],
+          etapes: [
+            "Ampoule 100 mg/2 mL (50 mg/mL)",
+            "Diluer : 2 mL d'ampoule qsp 10 mL NaCl 0,9% → 10 mg/mL",
+            "Posologie : 1 mg/kg IV bolus strict",
+          ],
+          notes: [
+            "CI absolue : hyperkaliémie, brûlures > J3, para/tétraplégie",
+            "Risque choc anaphylactique — avoir adrénaline à portée",
+          ],
+        },
+        {
+          titre: "ISR enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "10 mg/mL",
+          prelever: "2 mL d'ampoule 100 mg/2 mL (50 mg/mL)",
+          completer: "10 mL avec NaCl 0,9%",
+          concentration: "10 mg/mL",
+          phase_doses: [
+            {
+              label: "ISR",
+              dose_kg: 1.5,
+              dose_max_kg: 2,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Laryngospasme",
+              value: "4 mg/kg IM (ampoule pure 50 mg/mL)",
+            },
+          ],
+          etapes: [
+            "Ampoule 100 mg/2 mL (50 mg/mL)",
+            "ISR : 1,5-2 mg/kg IV (dilué à 10 mg/mL)",
+            "Laryngospasme : 4 mg/kg IM (produit pur)",
+          ],
+          notes: ["Risque choc anaphylactique — avoir adrénaline à portée"],
+        },
+      ],
     },
   },
   {
@@ -116,6 +172,37 @@ export const DRUGS_CURARES = [
         "TOUJOURS avoir Sugammadex disponible avant injection",
         "Conserver au réfrigérateur — ne pas secouer",
       ],
+      preparations: [
+        {
+          titre: "ISR",
+          mode: "bolus",
+          tag: "10 mg/mL pur",
+          prelever: "Ampoule 50 mg/5 mL (10 mg/mL) — administrer pure",
+          concentration: "10 mg/mL",
+          phase_doses: [
+            {
+              label: "ISR",
+              dose_kg: 1.2,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Standard",
+              value: "0,6 mg/kg IV",
+            },
+          ],
+          etapes: [
+            "Ampoule 50 mg/5 mL (10 mg/mL) — administrer pure",
+            "ISR : 1,2 mg/kg IV bolus strict",
+            "Standard : 0,6 mg/kg IV",
+          ],
+          notes: [
+            "TOUJOURS avoir Sugammadex disponible avant injection",
+            "Conserver au réfrigérateur — ne pas secouer",
+          ],
+        },
+      ],
     },
   },
   {
@@ -157,6 +244,55 @@ export const DRUGS_CURARES = [
       notes: [
         "Pas d'hyperkaliémie",
         "Indication ≠ Célocurine : entretien de curarisation, pas l'ISR",
+      ],
+      preparations: [
+        {
+          titre: "Bolus adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "1 mg/mL",
+          prelever: "10 mL d'ampoule 20 mg/10 mL (2 mg/mL)",
+          completer: "20 mL avec NaCl 0,9%",
+          concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "Bolus initial",
+              dose_kg: 0.15,
+              unit: "mg",
+            },
+          ],
+          etapes: [
+            "Ampoule 20 mg/10 mL (2 mg/mL)",
+            "Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL",
+            "Bolus initial : 0,15 mg/kg IV",
+          ],
+          notes: [
+            "Pas d'hyperkaliémie",
+            "Indication ≠ Célocurine : entretien de curarisation, pas l'ISR",
+          ],
+        },
+        {
+          titre: "Bolus enfant",
+          mode: "bolus",
+          population: "enfant",
+          tag: "1 mg/mL",
+          prelever: "10 mL d'ampoule 20 mg/10 mL (2 mg/mL)",
+          completer: "20 mL avec NaCl 0,9%",
+          concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "Bolus",
+              dose_kg: 0.1,
+              unit: "mg",
+            },
+          ],
+          etapes: [
+            "Ampoule 20 mg/10 mL (2 mg/mL)",
+            "Diluer : 10 mL d'ampoule qsp 20 mL NaCl 0,9% → 1 mg/mL",
+            "Bolus enfant : 0,1 mg/kg IV",
+          ],
+          notes: ["Pas d'hyperkaliémie"],
+        },
       ],
     },
   },

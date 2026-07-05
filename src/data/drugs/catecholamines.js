@@ -140,6 +140,25 @@ export const DRUGS_CATECHOLAMINES = [
         "Injecter 1-2 mL par bolus selon PA cible",
       ],
       notes: ["Effet épuisable après 30 mg (tachyphylaxie)", "Passer au plus proche du patient"],
+      preparations: [
+        {
+          titre: "Bolus titré",
+          mode: "bolus",
+          tag: "3 mg/mL",
+          prelever: "1 ampoule 30 mg/1 mL",
+          completer: "10 mL avec NaCl 0,9%",
+          concentration: "3 mg/mL",
+          etapes: [
+            "Ampoule 30 mg/1 mL (30 mg/mL)",
+            "Diluer : 1 ampoule qsp 10 mL NaCl 0,9% → 3 mg/mL",
+            "Injecter 1-2 mL par bolus selon PA cible",
+          ],
+          notes: [
+            "Effet épuisable après 30 mg (tachyphylaxie)",
+            "Passer au plus proche du patient",
+          ],
+        },
+      ],
     },
   },
   {

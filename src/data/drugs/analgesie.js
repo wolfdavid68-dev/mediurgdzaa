@@ -228,6 +228,42 @@ export const DRUGS_ANALGESIE = [
         "Répéter /4-6h si besoin (max 120 mg/j)",
       ],
       notes: ["Privilégier G5% si possible", "Surveiller tachycardie, HTA, nausées"],
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "ivl",
+          population: "adulte",
+          tag: "15-20 min",
+          prelever: "1 ampoule 20 mg/2 mL (10 mg/mL)",
+          completer: "100 mL avec G5% (privilégié) ou NaCl 0,9%",
+          rows: [
+            {
+              label: "Perfuser",
+              value: "sur 15-20 min",
+              highlight: true,
+            },
+            {
+              label: "Répéter",
+              value: "/4-6h (max 120 mg/j)",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 20 mg/2 mL (10 mg/mL)",
+            "Diluer 1 ampoule dans 100 mL G5% ou NaCl 0,9%",
+            "Perfuser sur 15-20 min",
+            "Répéter /4-6h si besoin (max 120 mg/j)",
+          ],
+          notes: ["Privilégier G5% si possible", "Surveiller tachycardie, HTA, nausées"],
+        },
+        {
+          titre: "Enfant",
+          population: "enfant",
+          empty: true,
+          tag: "—",
+          note: "Non recommandé < 15 ans",
+        },
+      ],
     },
   },
   {
@@ -277,7 +313,7 @@ export const DRUGS_ANALGESIE = [
       solvant: "NaCl 0,9%",
       volume_final: 20,
       conc_finale: "1 mg/mL",
-      conc_produit: 10,
+      conc_produit: 1,
       unite: "mg",
       dose_kg: 0.2,
       duree: "IVL sur 2-3 min, répéter /4-6h",
@@ -310,6 +346,46 @@ export const DRUGS_ANALGESIE = [
           },
         ],
       },
+      preparations: [
+        {
+          titre: "IVL adulte",
+          mode: "bolus",
+          population: "adulte",
+          tag: "0,2 mg/kg",
+          prelever: "1 ampoule 20 mg/2 mL",
+          completer: "20 mL avec NaCl 0,9%",
+          concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "Injecter",
+              dose_kg: 0.2,
+              unit: "mg",
+            },
+          ],
+          rows: [
+            {
+              label: "Durée",
+              value: "IVL sur 2-3 min",
+              highlight: true,
+            },
+            {
+              label: "Répéter",
+              value: "/4-6h si besoin (max 160 mg/j)",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 20 mg/2 mL (10 mg/mL)",
+            "Dilution : 1 ampoule 20 mg qsp 20 mL NaCl 0,9% → 1 mg/mL",
+            "Injecter 0,2 mg/kg IVL sur 2-3 min",
+          ],
+          notes: [
+            "NON stupéfiant (liste I) — pas de cahier des stups",
+            "Effet plafond : ne pas associer à un agoniste µ pur (antagonisme)",
+            "Antagoniste : Naloxone",
+          ],
+        },
+      ],
     },
   },
   {
