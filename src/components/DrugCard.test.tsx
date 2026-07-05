@@ -257,13 +257,13 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la table PSE enfant et la préparation ACR enfant IVD pour un poids pédiatrique", () => {
+    test("affiche la table PSE enfant et la préparation ACR enfant IVD pour un poids pédiatrique", async () => {
       const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
 
       render(<DrugCard drug={adrenaline} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(screen.getByText("Pour 20 kg — enfant")).toBeInTheDocument();
+      expect(await screen.findByText("Pour 20 kg — enfant")).toBeInTheDocument();
       expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
 
@@ -273,15 +273,46 @@ describe("DrugCard", () => {
       expect(screen.getByText("1 mL IVD toutes les 4 min")).toBeInTheDocument();
     });
 
-    test("affiche uniquement la table PSE adulte pour un poids adulte", () => {
+    test("affiche uniquement la table PSE adulte pour un poids adulte", async () => {
       const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
 
       render(<DrugCard drug={adrenaline} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(screen.getByText("Pour 80 kg — adulte")).toBeInTheDocument();
+      expect(await screen.findByText("Pour 80 kg — adulte")).toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Débit PSE preview uniquement", () => {
+    afterEach(() => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+    });
+
+    test("masque les nouveaux débits PSE hors author=preview", () => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/");
+      const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
+
+      render(<DrugCard drug={adrenaline} patientWeight="80" />);
+      fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
+
+      expect(screen.queryByText("Débit PSE")).not.toBeInTheDocument();
+      expect(screen.queryByText("Débit réglé")).not.toBeInTheDocument();
+    });
+
+    test("affiche les nouveaux débits PSE avec author=preview", async () => {
+      sessionStorage.clear();
+      window.history.pushState({}, "", "/?author=preview");
+      const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
+
+      render(<DrugCard drug={adrenaline} patientWeight="80" />);
+      fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
+
+      expect(await screen.findByText("Débit PSE")).toBeInTheDocument();
+      expect(screen.getByText("Débit réglé")).toBeInTheDocument();
     });
   });
 
