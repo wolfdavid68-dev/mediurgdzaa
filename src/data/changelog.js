@@ -1,11 +1,26 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v113";
+export const APP_VERSION = "v114";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v114",
+    date: "2026-07-05",
+    titre: "Préparations v2 sur main",
+    changes: [
+      {
+        type: "feat",
+        text: "Médicaments : l'affichage Préparation v2 est maintenant actif sur main pour toutes les fiches, avec les tables Vi/Vf validées pour Adrénaline, Dobutamine, Isuprel, Noradrénaline et Sufentanil.",
+      },
+      {
+        type: "fix",
+        text: "Les nouveaux débits PSE en cours de validation restent isolés en mode preview : ils ne remplacent pas les débits de main tant qu'ils ne sont pas explicitement validés.",
+      },
+    ],
+  },
   {
     version: "v113",
     date: "2026-06-24",
