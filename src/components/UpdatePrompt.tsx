@@ -64,16 +64,19 @@ const UpdatePrompt = () => {
     return () => clearTimeout(id);
   }, [offlineReady, setOfflineReady]);
 
+  const refreshApp = () => {
+    void updateServiceWorker(true);
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 2500);
+  };
+
   // Le toast de mise à jour (actionnable) est prioritaire sur l'info offline.
   if (needRefresh && !closed) {
     return (
       <div className="update-prompt" role="status" aria-live="polite">
         <span className="update-prompt-text">Nouvelle version disponible</span>
-        <button
-          type="button"
-          className="update-prompt-action"
-          onClick={() => updateServiceWorker(true)}
-        >
+        <button type="button" className="update-prompt-action" onClick={refreshApp}>
           Mettre à jour
         </button>
         <button
