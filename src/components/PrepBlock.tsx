@@ -1549,9 +1549,7 @@ const PrepBlock = ({ drug, weight, produitFinal, prepPopulation }: PrepBlockProp
     );
   };
 
-  const pediatricPrepOnly = Boolean(
-    previewMode && prep.pedTable && validKg && activePopulation === "enfant"
-  );
+  const pediatricPrepOnly = Boolean(prep.pedTable && validKg && activePopulation === "enfant");
   const prepCalcBlock = pediatricPrepOnly ? null : renderPrepCalc();
   const prepCalcV2Block = pediatricPrepOnly ? null : renderPrepCalcV2();
   const activeRecipe = visiblePreparations[activeRecipeIndex];

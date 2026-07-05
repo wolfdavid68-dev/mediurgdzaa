@@ -16,9 +16,9 @@ export const DRUGS_PREVIEW = {
       stabilite: "24h à 25°C",
       preparations: [
         {
-          titre: "IVD ACR",
+          titre: "ACR",
           mode: "bolus",
-          tag: "1 mg/mL pur",
+          tag: "1 mg IV/IO",
           prelever: "2 ampoules d'adrénaline 5 mg/5 mL (= 10 mg/10 mL)",
           concentration: "1 mg/mL",
           etapes: [
@@ -32,9 +32,9 @@ export const DRUGS_PREVIEW = {
           ],
         },
         {
-          titre: "IM anaphylaxie",
+          titre: "Choc anaphylactique",
           mode: "im",
-          tag: "1 mg/mL pur",
+          tag: "0,5 mg IM",
           prelever: "0,5 mL d'adrénaline 1 mg/1 mL (= 0,5 mg)",
           concentration: "1 mg/mL",
           etapes: [
@@ -49,7 +49,7 @@ export const DRUGS_PREVIEW = {
           ],
         },
         {
-          titre: "PSE",
+          titre: "PSR / PSE",
           mode: "pse",
           tag: "0,2 mg/mL",
           prelever: "2 ampoules 5 mg/5 mL (= 10 mg)",

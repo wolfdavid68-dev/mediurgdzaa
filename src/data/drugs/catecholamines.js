@@ -70,6 +70,83 @@ export const DRUGS_CATECHOLAMINES = [
         "IVSE : débit constant — pas de bolus sur cette voie",
         "À l'abri de la lumière",
       ],
+      preparations: [
+        {
+          titre: "ACR",
+          mode: "ivd",
+          population: "adulte",
+          tag: "1 mg IV/IO",
+          prelever: "1 mL d'adrénaline 1 mg/mL (= 1 mg)",
+          concentration: "1 mg/mL pur",
+          rows: [
+            {
+              label: "Injecter",
+              value: "1 mg IV/IO toutes les 3-5 min",
+              highlight: true,
+            },
+            {
+              label: "Rincer",
+              value: "flush NaCl 0,9% après injection",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 1 mg/1 mL (1 mg/mL)",
+            "ACR adulte : prélever 1 mL (= 1 mg)",
+            "Injecter IV/IO toutes les 3-5 min selon algorithme ACR",
+          ],
+          notes: [
+            "Aucune contre-indication en ACR",
+            "Administrer au plus proche du patient et rincer après injection",
+          ],
+        },
+        {
+          titre: "Choc anaphylactique",
+          mode: "im",
+          population: "adulte",
+          tag: "0,5 mg IM",
+          prelever: "0,5 mL d'adrénaline 1 mg/mL (= 0,5 mg)",
+          concentration: "1 mg/mL pur",
+          rows: [
+            {
+              label: "Injecter",
+              value: "IM face antérieure de cuisse",
+              highlight: true,
+            },
+            {
+              label: "Répéter",
+              value: "selon réponse clinique",
+            },
+          ],
+          hide_final: true,
+          etapes: [
+            "Ampoule 1 mg/1 mL (1 mg/mL)",
+            "Prélever 0,5 mL (= 0,5 mg)",
+            "Injecter IM face antérieure de cuisse",
+          ],
+          notes: [
+            "Traitement de 1ère ligne du choc anaphylactique",
+            "Surveillance cardiaque rapprochée",
+          ],
+        },
+        {
+          titre: "PSR / PSE",
+          mode: "pse",
+          population: "adulte",
+          tag: "Vi/Vf poids",
+          adrenaline_table: true,
+          etapes: [
+            "PSE choc : prélever Vi mL d'adrénaline",
+            "Diluer dans NaCl 0,9% ou G5% jusqu'à Vf mL dans la seringue",
+            "1 mL/h de solution = 0,1 µg/kg/min d'Adrénaline",
+          ],
+          notes: [
+            "IVSE : débit constant — pas de bolus sur cette voie",
+            "Voie centrale proximale idéale en PSE",
+            "Administrer toujours au plus proche du patient",
+          ],
+        },
+      ],
       pedTable: {
         titre: "Table de dilution pédiatrique — Adrénaline (ampoule 5 mg/5 mL)",
         description:

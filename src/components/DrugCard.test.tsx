@@ -277,13 +277,31 @@ describe("DrugCard", () => {
       expect(screen.getByText("1 mL IVD toutes les 4 min")).toBeInTheDocument();
     });
 
-    test("affiche uniquement la table PSE adulte pour un poids adulte", async () => {
+    test("sépare les cartes adulte ACR, choc anaphylactique et PSR/PSE", async () => {
       const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
 
       render(<DrugCard drug={adrenaline} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(await screen.findByText("Pour 80 kg — adulte")).toBeInTheDocument();
+      expect(await screen.findByRole("button", { name: /ACR.*1 mg IV\/IO/i })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(
+        screen.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /PSR \/ PSE.*0,2 mg\/mL/i })).toBeInTheDocument();
+      expect(
+        screen.getByText("2 ampoules d'adrénaline 5 mg/5 mL (= 10 mg/10 mL)")
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i }));
+      expect(screen.getByText("0,5 mL d'adrénaline 1 mg/1 mL (= 0,5 mg)")).toBeInTheDocument();
+      expect(screen.getByText(/face antérieure de cuisse/)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*0,2 mg\/mL/i }));
+      expect(screen.getByText("2 ampoules 5 mg/5 mL (= 10 mg)")).toBeInTheDocument();
+      expect(screen.getByText("50 mL avec G5%")).toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
     });
@@ -303,6 +321,7 @@ describe("DrugCard", () => {
       render(<DrugCard drug={adrenaline} patientWeight="80" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
+      fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*Vi\/Vf poids/i }));
       expect(screen.getByText("20 mL d'adrénaline")).toBeInTheDocument();
       expect(screen.getByText("à 42 mL dans la seringue")).toBeInTheDocument();
       expect(screen.getByText("Débit PSE")).toBeInTheDocument();
@@ -576,6 +595,9 @@ describe("DrugCard", () => {
       fireEvent.click(screen.getByText(name).closest("button")!);
 
       expect(screen.getByRole("region", { name: "Préparation v2" })).toBeInTheDocument();
+      if (name === "ADRÉNALINE") {
+        fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*Vi\/Vf poids/i }));
+      }
       expect(screen.getByText(expected)).toBeInTheDocument();
     });
 
