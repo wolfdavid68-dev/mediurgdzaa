@@ -7,6 +7,7 @@ import AcrTimer from "./AcrTimer";
 // donc absence ne casse pas les tests, mais on les fournit en no-op pour éviter
 // du bruit dans la console.
 beforeEach(() => {
+  localStorage.clear();
   vi.stubGlobal(
     "AudioContext",
     class {
@@ -38,10 +39,12 @@ afterEach(() => {
 // métronome MCE" / "Arrêter le métronome MCE".
 const MAIN_START = /^▶ /;
 const MAIN_PAUSE = /^⏸ /;
+const NEW_SESSION = "Nouvelle session";
 
 describe("AcrTimer", () => {
   test("rend l'état initial : chrono à 00:00, bouton « Démarrer », cycle 1", () => {
     render(<AcrTimer onOpenDrug={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: NEW_SESSION }));
     expect(screen.getByRole("button", { name: MAIN_START })).toBeInTheDocument();
     // Le chrono d'affichage commence à 00:00 — il y a plusieurs 00:00 sur la
     // page (elapsed, cycle countdown). On vérifie juste qu'il en existe au moins un.
@@ -52,6 +55,7 @@ describe("AcrTimer", () => {
   test("clic « Démarrer » bascule le bouton en « Pause »", async () => {
     const user = userEvent.setup();
     render(<AcrTimer onOpenDrug={() => {}} />);
+    await user.click(screen.getByRole("button", { name: NEW_SESSION }));
     await user.click(screen.getByRole("button", { name: MAIN_START }));
     expect(screen.getByRole("button", { name: MAIN_PAUSE })).toBeInTheDocument();
   });
@@ -62,6 +66,7 @@ describe("AcrTimer", () => {
     // events est connu pour interagir mal. fireEvent.click suffit ici.
     vi.useFakeTimers();
     render(<AcrTimer onOpenDrug={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: NEW_SESSION }));
     fireEvent.click(screen.getByRole("button", { name: MAIN_START }));
     // Le tick s'appuie sur Date.now() ; advanceTimersByTime fait avancer
     // setInterval, et le tick lit le nouveau Date.now() mocké automatiquement.

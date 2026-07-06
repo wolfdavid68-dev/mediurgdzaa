@@ -20,7 +20,6 @@ import {
   ACR_H_CAUSES,
   ACR_RHYTHMS,
   ACR_T_CAUSES,
-  coerceAcrSession,
   createEmptyAcrSession,
   formatAcrElapsed,
   formatWallTime,
@@ -33,10 +32,11 @@ import {
   type AcrTimerHistoryEntry,
   type AcrVoie,
 } from "../lib/acrSession";
-import { safeGetJson, safeSetJson } from "../lib/safeStorage";
-import { STORAGE_KEYS } from "../lib/storageKeys";
+import { readSession, writeSession } from "../lib/acrSessionStore";
+import { enqueueSyncItem } from "../lib/deviceSync";
 
 type AcrRecordViewProps = {
+  sessionId: string;
   open: boolean;
   onClose: () => void;
   pediatric: boolean;
@@ -71,8 +71,17 @@ const DESTINATIONS: AcrDevenir[] = ["Décès", "Transfert réa", "Retour domicil
 const VOIES: AcrVoie[] = ["Périphérique", "Centrale", "IO"];
 const TIMELINE_EVENT_TYPES = new Set(["start", "choc", "adre", "amio", "rosc"]);
 
-const readStoredRecord = () =>
-  coerceAcrSession(safeGetJson<unknown>(STORAGE_KEYS.acrSession, createEmptyAcrSession()));
+const readStoredRecord = (sessionId: string) =>
+  readSession(sessionId) ?? { ...createEmptyAcrSession(), id: sessionId };
+
+const syncAcrRecord = (record: AcrFullSession) => {
+  enqueueSyncItem({
+    kind: "acr-session",
+    item_id: record.id,
+    payload: record,
+    updated_at: record.updatedAt,
+  });
+};
 
 const readThemePreference = (): ThemePreference =>
   document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
@@ -241,6 +250,7 @@ const buildRecordText = (record: AcrFullSession): string => {
 };
 
 const AcrRecordView = ({
+  sessionId,
   open,
   onClose,
   pediatric,
@@ -258,7 +268,7 @@ const AcrRecordView = ({
     [pediatric, protocol, elapsed, shocks, adres, amios, history, events, cycle]
   );
   const [record, setRecord] = useState(() =>
-    mergeTimerSnapshotIntoSession(readStoredRecord(), snapshot)
+    mergeTimerSnapshotIntoSession(readStoredRecord(sessionId), snapshot)
   );
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -270,11 +280,17 @@ const AcrRecordView = ({
   const timelineEvents = getTimelineEvents(record);
 
   useEffect(() => {
-    setRecord((prev) => mergeTimerSnapshotIntoSession(prev, snapshot));
-  }, [snapshot]);
+    setRecord((prev) =>
+      mergeTimerSnapshotIntoSession(
+        prev.id === sessionId ? prev : readStoredRecord(sessionId),
+        snapshot
+      )
+    );
+  }, [sessionId, snapshot]);
 
   useEffect(() => {
-    safeSetJson(STORAGE_KEYS.acrSession, record);
+    writeSession(record);
+    syncAcrRecord(record);
   }, [record]);
 
   useEffect(() => {
@@ -293,7 +309,8 @@ const AcrRecordView = ({
   };
 
   const saveNow = () => {
-    safeSetJson(STORAGE_KEYS.acrSession, record);
+    writeSession(record);
+    syncAcrRecord(record);
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1800);
   };
@@ -321,7 +338,13 @@ const AcrRecordView = ({
       )
     )
       return;
-    setRecord(mergeTimerSnapshotIntoSession(createEmptyAcrSession(), snapshot));
+    const empty = createEmptyAcrSession();
+    setRecord(
+      mergeTimerSnapshotIntoSession(
+        { ...empty, id: sessionId, createdAt: record.createdAt },
+        snapshot
+      )
+    );
     setSaved(false);
   };
 

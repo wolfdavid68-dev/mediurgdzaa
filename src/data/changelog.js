@@ -1,11 +1,38 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v114";
+export const APP_VERSION = "v115";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v115",
+    date: "2026-07-06",
+    titre: "Relais multi-appareils et sessions ACR multiples",
+    changes: [
+      {
+        type: "feat",
+        text: "Compte : ajout de l'action « Déconnecter mes autres appareils » dans le menu du haut. La session courante reste active, les autres appareils sont révoqués dès qu'ils retrouvent le réseau.",
+      },
+      {
+        type: "feat",
+        text: "URGENCE ACR : nouveau point d'entrée avec « Nouvelle session » en premier et reprise des sessions récentes de moins de 48 h. Plusieurs dossiers ACR peuvent coexister localement sans écraser le dossier en cours.",
+      },
+      {
+        type: "feat",
+        text: "Relais multi-appareils : dossiers ACR anonymes et check-lists de kits peuvent être poussés opportunistiquement vers Supabase, puis repris explicitement depuis un autre appareil avec un badge dédié.",
+      },
+      {
+        type: "fix",
+        text: "Check-lists de kits : les coches respectent maintenant le stockage préfixé par utilisateur en mode authentifié, tout en gardant l'expiration courte et le fonctionnement hors-ligne.",
+      },
+      {
+        type: "docs",
+        text: "Ajout du patch SQL `auth-sync-patch.sql` et documentation des limites de révocation, TTL serveur et garanties d'anonymisation des dossiers ACR.",
+      },
+    ],
+  },
   {
     version: "v114",
     date: "2026-07-05",

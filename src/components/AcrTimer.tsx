@@ -30,8 +30,23 @@ import {
 } from "./AcrTimer.parts";
 import { useWakeLock } from "../lib/useWakeLock";
 import { safeSetItem } from "../lib/safeStorage";
+import {
+  createEmptyAcrSession,
+  mergeTimerSnapshotIntoSession,
+  type AcrFullSession,
+} from "../lib/acrSession";
+import {
+  computeAcrRuntime,
+  listSessions,
+  readSession,
+  writeSession,
+  type AcrSessionSummary,
+  type AcrRuntimeState,
+} from "../lib/acrSessionStore";
+import { enqueueSyncItem, mergeAcrSessionCandidates, pullSessions } from "../lib/deviceSync";
 import AcrPrepOverlay from "./AcrPrepOverlay";
 import AcrRecordView from "./AcrRecordView";
+import type { SessionState } from "./AcrTimer.reducer";
 
 type AcrTimerProps = {
   pediatric?: boolean;
@@ -51,6 +66,77 @@ const parseTodayTime = (value: string): number | null => {
 
 const elapsedBetween = (fromTs: number, toTs: number) =>
   Math.max(0, Math.floor((toTs - fromTs) / 1000));
+
+const timerRhythmFromRecord = (rhythm?: string): SessionState["currentRhythm"] => {
+  if (!rhythm) return null;
+  if (/racs|rosc/i.test(rhythm)) return "rosc";
+  if (/fv|tv|choquable/i.test(rhythm)) return "choquable";
+  if (/asystolie|aesp|non/i.test(rhythm)) return "non_choquable";
+  return null;
+};
+
+type AcrSessionEntry = AcrSessionSummary & {
+  source: "local" | "remote";
+  remoteSession?: AcrFullSession;
+};
+
+const lastElapsedOfType = (events: AcrFullSession["events"], type: string): number | null => {
+  const matches = events.filter((event) => event.type === type);
+  return matches.length > 0 ? Math.max(...matches.map((event) => event.t)) : null;
+};
+
+const hydrateTimerState = (record: AcrFullSession, runtime: AcrRuntimeState): SessionState => {
+  const hasRosc = record.events.some((event) => event.type === "rosc");
+  const history = record.cycles.map((item) => ({
+    cycle: item.cycle,
+    t: item.t,
+    rhythm: timerRhythmFromRecord(item.rhythm),
+    actions: item.actions,
+  }));
+  return {
+    running: runtime.running,
+    phase: hasRosc ? "post-rosc" : record.events.length > 0 ? "analyse" : "rcp",
+    cycle: record.stats.cycle,
+    cycleStartedAt: history.at(-1)?.t ?? 0,
+    currentRhythm: hasRosc ? "rosc" : null,
+    pendingActions: [],
+    history,
+    shocks: record.stats.shocks,
+    adres: record.stats.adres,
+    amios: record.stats.amios,
+    lastAdreAt: lastElapsedOfType(record.events, "adre"),
+    events: record.events,
+  };
+};
+
+const formatSessionTime = (ts: number) =>
+  new Date(ts)
+    .toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", hour12: false })
+    .replace(":", " h ");
+
+const formatSessionLabel = (session: AcrSessionSummary) =>
+  `${session.pediatric ? "Enfant" : "Adulte"} · ${session.protocol === "acls" ? "ACLS" : "ERC"} · débutée ${formatSessionTime(session.createdAt)} · ${session.shocks} choc${session.shocks > 1 ? "s" : ""} · cycle ${session.cycle}`;
+
+const summarizeEntry = (session: AcrFullSession, source: "local" | "remote"): AcrSessionEntry => ({
+  id: session.id,
+  createdAt: session.createdAt,
+  updatedAt: session.updatedAt,
+  pediatric: session.pediatric,
+  protocol: session.protocol,
+  shocks: session.stats.shocks,
+  cycle: session.stats.cycle,
+  source,
+  ...(source === "remote" ? { remoteSession: session } : {}),
+});
+
+const enqueueAcrSession = (session: AcrFullSession) => {
+  enqueueSyncItem({
+    kind: "acr-session",
+    item_id: session.id,
+    payload: session,
+    updated_at: session.updatedAt,
+  });
+};
 
 // phase ∈ "rcp" | "analyse" | "actions" | "post-rosc"
 const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerProps) => {
@@ -80,6 +166,10 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     events,
   } = session;
   const { elapsed, elapsedRef, setElapsedSeconds, resetChrono } = useAcrChrono(running);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [recentSessions, setRecentSessions] = useState<AcrSessionEntry[]>(() =>
+    listSessions().map((item) => ({ ...item, source: "local" }))
+  );
   const [showRecord, setShowRecord] = useState(false);
   const [coachMode, setCoachMode] = useState<"full" | "visual" | "silent">(readCoach);
   const audioOn = coachMode !== "silent";
@@ -98,8 +188,76 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
   const [htDetail, setHtDetail] = useState<string | null>(null);
   const htCauses = HT_CAUSES[protocol as keyof typeof HT_CAUSES] || HT_CAUSES.erc;
 
+  const loadRecord = (record: AcrFullSession) => {
+    const runtime = computeAcrRuntime(record);
+    setElapsedSeconds(runtime.elapsed);
+    dispatch({ type: "HYDRATE", state: hydrateTimerState(record, runtime) });
+    setActiveSessionId(record.id);
+    setShowRecord(false);
+    setRecentSessions(listSessions().map((item) => ({ ...item, source: "local" })));
+  };
+
+  const startNewSession = () => {
+    const sessionRecord = {
+      ...createEmptyAcrSession(),
+      pediatric,
+      protocol,
+      updatedAt: Date.now(),
+    };
+    writeSession(sessionRecord);
+    enqueueAcrSession(sessionRecord);
+    loadRecord(sessionRecord);
+  };
+
+  const resumeSession = (sessionId: string) => {
+    const entry = recentSessions.find((item) => item.id === sessionId);
+    const record = entry?.remoteSession ?? readSession(sessionId);
+    if (!record) return;
+    if (entry?.source === "remote") writeSession(record);
+    loadRecord(record);
+  };
+
   useWakeLock(running);
   useAcrMetronome(metroOn, audioOn, metroBpm);
+
+  useEffect(() => {
+    let cancelled = false;
+    const local = listSessions();
+    setRecentSessions(local.map((item) => ({ ...item, source: "local" })));
+    void pullSessions().then((remote) => {
+      if (cancelled) return;
+      const localRecords = listSessions()
+        .map((item) => readSession(item.id))
+        .filter((item): item is AcrFullSession => Boolean(item));
+      const merged = mergeAcrSessionCandidates(localRecords, remote);
+      setRecentSessions(merged.map((item) => summarizeEntry(item.session, item.source)));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!activeSessionId) return;
+    const previous = readSession(activeSessionId) ?? {
+      ...createEmptyAcrSession(),
+      id: activeSessionId,
+    };
+    const nextRecord = mergeTimerSnapshotIntoSession(previous, {
+      pediatric,
+      protocol,
+      elapsed,
+      shocks,
+      adres,
+      amios,
+      history,
+      events,
+      cycle,
+    });
+    writeSession(nextRecord);
+    enqueueAcrSession(nextRecord);
+    setRecentSessions(listSessions().map((item) => ({ ...item, source: "local" })));
+  }, [activeSessionId, pediatric, protocol, elapsed, shocks, adres, amios, history, events, cycle]);
 
   const rcpInCycle = Math.max(0, elapsed - cycleStartedAt);
   const nextAnalyseIn = Math.max(0, CYCLE_ANALYSE_S - rcpInCycle);
@@ -177,6 +335,38 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
   const adreAlert = running && nextAdreIn !== null && nextAdreIn <= 10;
   const showZoom =
     running && inCycleRcp && elapsed > 0 && visualOn && nextAnalyseIn <= 15 && nextAnalyseIn >= 0;
+
+  if (!activeSessionId) {
+    return (
+      <div className="acr-session-entry" role="region" aria-label="Sessions ACR">
+        <button type="button" className="acr-session-new" onClick={startNewSession}>
+          Nouvelle session
+        </button>
+        <section className="acr-session-recent" aria-label="Sessions récentes">
+          <h3>Sessions récentes</h3>
+          {recentSessions.length === 0 ? (
+            <p>Aucune session ACR récente.</p>
+          ) : (
+            <div className="acr-session-list">
+              {recentSessions.map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  className="acr-session-row"
+                  onClick={() => resumeSession(item.id)}
+                >
+                  <span>{formatSessionLabel(item)}</span>
+                  {item.source === "remote" && (
+                    <em className="acr-session-source">depuis un autre appareil</em>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="acr-timer" role="region" aria-label="Chrono RCP">
@@ -347,6 +537,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
 
       {showRecord && (
         <AcrRecordView
+          sessionId={activeSessionId}
           open={showRecord}
           onClose={() => setShowRecord(false)}
           pediatric={pediatric}

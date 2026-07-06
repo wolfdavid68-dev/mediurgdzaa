@@ -10,6 +10,8 @@ export const STORAGE_KEYS = {
   acrProtocol: "mediurg-acr-protocol",
   acrCoach: "mediurg-acr-coach",
   acrSession: "mediurg-acr-session-v1",
+  acrSessionsIndex: "mediurg-acr-sessions-index",
+  syncQueue: "mediurg-sync-queue",
   preloadReloaded: "mediurg-preload-reloaded",
 } as const;
 
@@ -19,6 +21,7 @@ export const STORAGE_PREFIXES = {
   migratedTo: "mediurg-migrated-to-",
   preview: "mediurg-preview-",
   note: "mediurg-note-",
+  acrSessionV2: "mediurg-acr-session-v2-",
   kitCheck: "mediurg-kit-check-",
   kitChecklist: "mediurg-kit-checklist-",
 } as const;
@@ -29,6 +32,7 @@ export const storageKey = {
   migrationDone: (userId: string): string => `${STORAGE_PREFIXES.migratedTo}${userId}`,
   preview: (name: string): string => `${STORAGE_PREFIXES.preview}${name}`,
   note: (drugId: number | string): string => `${STORAGE_PREFIXES.note}${drugId}`,
+  acrSessionV2: (sessionId: string): string => `${STORAGE_PREFIXES.acrSessionV2}${sessionId}`,
   kitCheck: (kitId: string): string => `${STORAGE_PREFIXES.kitCheck}${kitId}`,
   kitChecklist: (kitId: string): string => `${STORAGE_PREFIXES.kitChecklist}${kitId}`,
 };

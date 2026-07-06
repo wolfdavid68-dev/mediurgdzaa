@@ -366,4 +366,10 @@ describe("sessionReducer · RESET", () => {
     const next = sessionReducer(dirty, { type: "RESET" });
     expect(next).toEqual(initialSessionState);
   });
+
+  test("HYDRATE : remplace l'état courant par une session reconstruite", () => {
+    const hydrated = make({ running: true, cycle: 3, shocks: 2 });
+    const next = sessionReducer(initialSessionState, { type: "HYDRATE", state: hydrated });
+    expect(next).toBe(hydrated);
+  });
 });

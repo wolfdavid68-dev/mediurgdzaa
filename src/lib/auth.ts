@@ -307,6 +307,33 @@ export const logout = async (): Promise<void> => {
   }
 };
 
+export const logoutOtherDevices = async (): Promise<AuthResult> => {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    return {
+      ok: false,
+      error: "Connexion requise pour déconnecter les autres appareils",
+      kind: "network",
+    };
+  }
+
+  const supabase = await getSupabaseClient();
+  if (!supabase) return { ok: false, error: "Backend non configuré", kind: "config" };
+
+  try {
+    // scope:"others" révoque les refresh tokens des autres appareils.
+    // Les JWT déjà émis restent valides jusqu'à expiration Supabase.
+    const { error } = await supabase.auth.signOut({ scope: "others" });
+    if (error) return { ok: false, error: humanizeError(error.message) };
+    return { ok: true, data: undefined };
+  } catch (e) {
+    return {
+      ok: false,
+      error: "Connexion requise pour déconnecter les autres appareils",
+      kind: isNetworkError(e) ? "network" : "unknown",
+    };
+  }
+};
+
 // ─── Mot de passe oublié — étape 1 : envoi du mail ──────────
 // On résout matricule → email puis Supabase envoie un lien magique
 // pointant vers `redirectTo`. Au clic, le client Supabase détecte le

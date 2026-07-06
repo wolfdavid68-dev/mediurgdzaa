@@ -136,6 +136,7 @@ export type SessionAction =
       elapsed: number;
       pediatric: boolean;
     }
+  | { type: "HYDRATE"; state: SessionState }
   | { type: "RESET" };
 
 export const sessionReducer = (state: SessionState, action: SessionAction): SessionState => {
@@ -392,6 +393,9 @@ export const sessionReducer = (state: SessionState, action: SessionAction): Sess
 
     case "RESET":
       return initialSessionState;
+
+    case "HYDRATE":
+      return action.state;
 
     default:
       return state;

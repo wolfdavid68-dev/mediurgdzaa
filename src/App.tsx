@@ -37,6 +37,7 @@ import { getPreviewAccessMode } from "./lib/access";
 import { isMedicalFunction } from "./lib/auth";
 import { isPreview } from "./lib/featureFlags";
 import { useAuthProfile } from "./lib/authProfile";
+import { initializeDeviceSync } from "./lib/deviceSync";
 import { openTutoratWithCurrentSession, shouldOpenTutoratFromLogin } from "./lib/tutorat";
 import { filterDrugs as searchDrugs, getRecentDrugs as readRecentDrugs } from "./lib/drugSearch";
 import { safeGetItem, safeGetJson, safeSetItem, safeSetJson } from "./lib/safeStorage";
@@ -146,6 +147,8 @@ const App = () => {
     if (!authProfile || !shouldOpenTutoratFromLogin()) return;
     void openTutoratWithCurrentSession();
   }, [authProfile]);
+
+  useEffect(() => initializeDeviceSync(), []);
 
   useEffect(() => {
     if (accessMode === "full") return;

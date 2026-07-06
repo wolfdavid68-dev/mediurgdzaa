@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { logout } from "../lib/auth";
+import { logout, logoutOtherDevices } from "../lib/auth";
 import { useAuthProfile } from "../lib/authProfile";
 import type { useLongPress } from "../lib/useLongPress";
 import { openTutoratWithCurrentSession } from "../lib/tutorat";
@@ -87,6 +87,9 @@ const AppHeader = ({
   // visible en permanence à côté.
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoutBusy, setLogoutBusy] = useState(false);
+  const [logoutOthersBusy, setLogoutOthersBusy] = useState(false);
+  const [confirmLogoutOthers, setConfirmLogoutOthers] = useState(false);
+  const [logoutOthersMessage, setLogoutOthersMessage] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -108,6 +111,7 @@ const AppHeader = ({
   const handle = (action: () => void) => () => {
     action();
     setMenuOpen(false);
+    setConfirmLogoutOthers(false);
   };
 
   const handleLogout = async () => {
@@ -115,6 +119,19 @@ const AppHeader = ({
     setMenuOpen(false);
     await logout();
     setLogoutBusy(false);
+  };
+
+  const handleLogoutOtherDevices = async () => {
+    if (!confirmLogoutOthers) {
+      setConfirmLogoutOthers(true);
+      setLogoutOthersMessage(null);
+      return;
+    }
+    setLogoutOthersBusy(true);
+    const result = await logoutOtherDevices();
+    setLogoutOthersBusy(false);
+    setConfirmLogoutOthers(false);
+    setLogoutOthersMessage(result.ok ? "Autres appareils déconnectés" : result.error);
   };
 
   return (
@@ -211,29 +228,69 @@ const AppHeader = ({
                   <span>Sauvegarder mes notes</span>
                 </button>
                 {authProfile && (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="header-menu-item header-menu-item-danger"
-                    onClick={handleLogout}
-                    disabled={logoutBusy}
-                  >
-                    <span className="header-menu-ic" aria-hidden="true">
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
+                  <>
+                    {isOnline && (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="header-menu-item"
+                        onClick={handleLogoutOtherDevices}
+                        disabled={logoutOthersBusy}
                       >
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                      </svg>
-                    </span>
-                    <span>{logoutBusy ? "Déconnexion..." : "Se déconnecter"}</span>
-                  </button>
+                        <span className="header-menu-ic" aria-hidden="true">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                            <path d="M8 9l8 6" />
+                            <path d="M16 9l-8 6" />
+                          </svg>
+                        </span>
+                        <span>
+                          {logoutOthersBusy
+                            ? "Déconnexion..."
+                            : confirmLogoutOthers
+                              ? "Confirmer ?"
+                              : "Déconnecter mes autres appareils"}
+                        </span>
+                      </button>
+                    )}
+                    {logoutOthersMessage && (
+                      <p className="header-menu-message" role="status">
+                        {logoutOthersMessage}
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="header-menu-item header-menu-item-danger"
+                      onClick={handleLogout}
+                      disabled={logoutBusy}
+                    >
+                      <span className="header-menu-ic" aria-hidden="true">
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                      </span>
+                      <span>{logoutBusy ? "Déconnexion..." : "Se déconnecter"}</span>
+                    </button>
+                  </>
                 )}
               </div>
             )}

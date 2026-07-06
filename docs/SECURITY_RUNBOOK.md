@@ -219,6 +219,8 @@ MediURG stocke volontairement certaines données sur l'appareil pour l'usage off
 | Favoris/historique | `mediurg-favorites`, `mediurg-history` | jusqu'au reset navigateur | faible à modérée         | ne contient pas de patient                      |
 | Notes médicament   | `mediurg-note-{drugId}`                | jusqu'au reset navigateur | potentiellement sensible | ne jamais saisir de données patient nominatives |
 | Checklists kit     | `mediurg-kit-check-*`                  | expiration env. 3 h       | potentiellement clinique | ne pas saisir d'identité patient                |
+| Sessions ACR       | `mediurg-acr-session-v2-*`             | expiration env. 48 h      | clinique anonyme         | âge/sexe seuls, aucun nom/IPP                   |
+| File sync          | `mediurg-sync-queue`                   | jusqu'au flush réseau     | clinique anonyme         | push opportuniste, jamais bloquant              |
 | Poids patient      | `mediurg-patient-weight`               | expiration env. 3 h       | donnée de soin isolée    | expiration courte obligatoire                   |
 | Profil auth caché  | `mediurg-profile-cache-v1`             | jusqu'au logout/reset     | donnée personnelle agent | sert uniquement au fallback offline             |
 | Session Supabase   | `sb-*-auth-token`                      | selon config Supabase     | secret utilisateur       | logout purge localement                         |
@@ -226,6 +228,11 @@ MediURG stocke volontairement certaines données sur l'appareil pour l'usage off
 Les captures offline générées par les tests utilisent uniquement un profil factice local. Ne pas
 modifier ces scripts pour injecter un compte réel, une note utilisateur, un IPP ou une donnée
 patient.
+
+Le relais Supabase utilise `public.sync_items` avec RLS owner-only :
+`acr-session` expire à 48 h, `kit-check` à 3 h. Les dossiers ACR sont passés
+par `coerceAcrSession` avant envoi pour retirer toute donnée nominative
+accidentelle ; le serveur ne stocke ni nom, ni prénom, ni IPP.
 
 Tests de non-régression à conserver pour l'auth offline :
 

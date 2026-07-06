@@ -1,7 +1,8 @@
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { DRUGS } from "../data/drugs";
-import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
-import { storageKey } from "../lib/storageKeys";
+import { enqueueSyncItem, pullKitChecks, type KitCheckPayload } from "../lib/deviceSync";
+import { useAuthProfile } from "../lib/authProfile";
+import { readUserItem, removeUserItem, writeUserItem } from "../lib/userStorage";
 import type { Drug, PrepKit } from "../types/data";
 import KitChecklist from "./KitChecklist";
 import KtcLinePlanner from "./KtcLinePlanner";
@@ -12,14 +13,27 @@ type StoredKitChecks = { ts?: number; items?: Record<number, boolean> };
 
 const CHECKLIST_KIT_IDS = ["drain-thoracique", "pa", "ktc"];
 
-const loadChecked = (kitId: string): Record<number, boolean> => {
-  const parsed = safeGetJson<StoredKitChecks | null>(storageKey.kitCheck(kitId), null);
+const kitCheckKey = (kitId: string) => `kit-check-${kitId}`;
+
+const readKitCheck = (userId: string | null, kitId: string): StoredKitChecks | null => {
+  const raw = readUserItem(userId, kitCheckKey(kitId));
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as StoredKitChecks;
+  } catch {
+    removeUserItem(userId, kitCheckKey(kitId));
+    return null;
+  }
+};
+
+const loadChecked = (userId: string | null, kitId: string): Record<number, boolean> => {
+  const parsed = readKitCheck(userId, kitId);
   if (!parsed || typeof parsed.ts !== "number" || !parsed.items) {
-    safeRemoveItem(storageKey.kitCheck(kitId));
+    removeUserItem(userId, kitCheckKey(kitId));
     return {};
   }
   if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
-    safeRemoveItem(storageKey.kitCheck(kitId));
+    removeUserItem(userId, kitCheckKey(kitId));
     return {};
   }
   return parsed.items;
@@ -36,12 +50,15 @@ const isSectionLabel = (m: string) => {
 };
 
 const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
+  const authProfile = useAuthProfile();
+  const userId = authProfile?.id ?? null;
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("drogues");
   const [schemaZoom, setSchemaZoom] = useState(false);
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>(() =>
-    loadChecked(kit.id)
+    loadChecked(userId, kit.id)
   );
+  const [remoteKitCheck, setRemoteKitCheck] = useState<KitCheckPayload | null>(null);
 
   const showSchema = !!kit.schema;
   const showKtcLines = kit.id === "ktc";
@@ -52,9 +69,39 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
 
   useEffect(() => {
+    setCheckedItems(loadChecked(userId, kit.id));
+    setRemoteKitCheck(null);
+  }, [kit.id, userId]);
+
+  useEffect(() => {
     if (!isChecklist) return;
-    safeSetJson(storageKey.kitCheck(kit.id), { ts: Date.now(), items: checkedItems });
-  }, [checkedItems, isChecklist, kit.id]);
+    let cancelled = false;
+    void pullKitChecks().then((items) => {
+      if (cancelled) return;
+      const remote = items.find((item) => item.kitId === kit.id);
+      if (!remote?.payload || typeof remote.payload.ts !== "number" || !remote.payload.items) {
+        return;
+      }
+      if (Date.now() - remote.payload.ts > CHECK_MAX_AGE_MS) return;
+      const local = readKitCheck(userId, kit.id);
+      if (!local?.ts || remote.payload.ts > local.ts) setRemoteKitCheck(remote.payload);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isChecklist, kit.id, userId]);
+
+  useEffect(() => {
+    if (!isChecklist) return;
+    const payload = { ts: Date.now(), items: checkedItems };
+    writeUserItem(userId, kitCheckKey(kit.id), JSON.stringify(payload));
+    enqueueSyncItem({
+      kind: "kit-check",
+      item_id: kit.id,
+      payload,
+      updated_at: payload.ts,
+    });
+  }, [checkedItems, isChecklist, kit.id, userId]);
 
   return (
     <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
@@ -167,6 +214,11 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
                 setCheckedItems={setCheckedItems}
                 checkedCount={checkedCount}
                 checkableCount={checkableCount}
+                remoteKitCheck={remoteKitCheck}
+                onUseRemoteKitCheck={() => {
+                  setCheckedItems(remoteKitCheck?.items ?? {});
+                  setRemoteKitCheck(null);
+                }}
               />
             )}
             {activeTab === "checklist" && kit.checklist && kit.checklist.length > 0 && (
@@ -296,18 +348,27 @@ const MaterialChecklist = ({
   setCheckedItems,
   checkedCount,
   checkableCount,
+  remoteKitCheck,
+  onUseRemoteKitCheck,
 }: {
   kit: PrepKit;
   checkedItems: Record<number, boolean>;
   setCheckedItems: Dispatch<SetStateAction<Record<number, boolean>>>;
   checkedCount: number;
   checkableCount: number;
+  remoteKitCheck: KitCheckPayload | null;
+  onUseRemoteKitCheck: () => void;
 }) => (
   <div className="materiel-checklist">
     <div className="materiel-checklist-head">
       <span className="materiel-progress">
         {checkedCount}/{checkableCount} coché{checkedCount > 1 ? "s" : ""}
       </span>
+      {remoteKitCheck && (
+        <button type="button" className="materiel-reset-btn" onClick={onUseRemoteKitCheck}>
+          Reprendre autre appareil
+        </button>
+      )}
       <button
         type="button"
         className="materiel-reset-btn"

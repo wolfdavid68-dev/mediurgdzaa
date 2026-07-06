@@ -1,3 +1,19 @@
+const { mockSignOut, mockSupabase } = vi.hoisted(() => {
+  const signOut = vi.fn();
+  return {
+    mockSignOut: signOut,
+    mockSupabase: {
+      auth: {
+        signOut,
+      },
+    },
+  };
+});
+
+vi.mock("./supabase", () => ({
+  getSupabase: () => mockSupabase,
+}));
+
 import {
   EMAIL_DOMAIN,
   hasAdminAccess,
@@ -12,9 +28,14 @@ import {
   isValidEmailForFunction,
   isValidMatricule,
   isValidPassword,
+  logoutOtherDevices,
   MATRICULE_REGEX,
   passwordStrength,
 } from "./auth";
+
+const setNavigatorOnline = (online: boolean) => {
+  vi.stubGlobal("navigator", { onLine: online });
+};
 
 describe("isNetworkError", () => {
   test("messages réseau → true", () => {
@@ -30,6 +51,51 @@ describe("isNetworkError", () => {
     expect(isNetworkError({ message: "permission denied" })).toBe(false);
     expect(isNetworkError(null)).toBe(false);
     expect(isNetworkError(undefined)).toBe(false);
+  });
+});
+
+describe("logoutOtherDevices", () => {
+  beforeEach(() => {
+    mockSignOut.mockReset();
+    setNavigatorOnline(true);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test("refuse hors-ligne sans appel réseau", async () => {
+    setNavigatorOnline(false);
+
+    const result = await logoutOtherDevices();
+
+    expect(result).toEqual({
+      ok: false,
+      error: "Connexion requise pour déconnecter les autres appareils",
+      kind: "network",
+    });
+    expect(mockSignOut).not.toHaveBeenCalled();
+  });
+
+  test("révoque les autres appareils en conservant la session courante", async () => {
+    mockSignOut.mockResolvedValueOnce({ error: null });
+
+    const result = await logoutOtherDevices();
+
+    expect(result).toEqual({ ok: true, data: undefined });
+    expect(mockSignOut).toHaveBeenCalledWith({ scope: "others" });
+  });
+
+  test("retourne un message d'erreur si Supabase échoue", async () => {
+    mockSignOut.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    const result = await logoutOtherDevices();
+
+    expect(result).toEqual({
+      ok: false,
+      error: "Connexion requise pour déconnecter les autres appareils",
+      kind: "network",
+    });
   });
 });
 

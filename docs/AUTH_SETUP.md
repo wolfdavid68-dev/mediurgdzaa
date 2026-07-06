@@ -38,6 +38,14 @@ et exécuter. Cela crée :
 - Table `access_request_notifications` : déduplication durable des notifications
   de demande d'accès
 
+Appliquer ensuite [`docs/auth-sync-patch.sql`](./auth-sync-patch.sql) pour
+activer le relais éphémère multi-appareils :
+
+- Table `sync_items` : dossiers ACR anonymes et check-lists de kits, owner-only
+  via RLS ;
+- RPC `upsert_sync_item` et `list_sync_items` : écriture/lecture avec purge TTL
+  opportuniste (48 h pour ACR, 3 h pour kits).
+
 Si le schéma existe déjà et que seule la protection MFA admin doit être ajoutée, utiliser le patch
 ciblé [`docs/auth-admin-mfa-patch.sql`](./auth-admin-mfa-patch.sql) au lieu de relancer tout le
 fichier `auth-schema.sql`.
@@ -253,6 +261,7 @@ accessible **sans réseau**. L'auth ne doit jamais le verrouiller.
 | `fetchProfile` échoue `notfound`/`config`/en ligne | → écran login (légitime, ré-auth/config possible)                |
 | Session expirée + offline (refresh impossible)     | → `getLastCachedProfile()` (appareil appairé → on garde l'accès) |
 | Déconnexion explicite                              | `logout()` purge le cache → mur login au prochain lancement      |
+| Déconnecter les autres appareils                   | Réseau requis ; les autres refresh tokens sont révoqués          |
 
 **Contrainte refresh-token à cadrer côté Supabase.** Le JWT expire
 (~1 h) ; son refresh exige le réseau. Le **refresh token** a sa propre
@@ -261,6 +270,18 @@ hors-ligne plus longtemps que cette durée, la session est invalidée :
 le fallback `getLastCachedProfile()` prend alors le relais tant que le
 profil caché existe. Pour un usage SMUR (jours offline), augmenter le
 refresh-token TTL Supabase reste recommandé en complément.
+
+**Déconnexion des autres appareils.** Le menu MediURG appelle
+`supabase.auth.signOut({ scope: "others" })` : la session courante reste
+active, les autres refresh tokens sont révoqués. Les JWT déjà émis sur ces
+postes restent valides jusqu'à expiration ; régler la durée de vie JWT à
+10–15 min dans Supabase → Auth → Sessions si l'établissement veut une éviction
+plus rapide. Un appareil hors-ligne ne sera éjecté qu'à son retour en ligne.
+
+**Relais multi-appareils.** Les dossiers ACR et check-lists de kits restent
+d'abord en localStorage. Quand une session Supabase active existe, une file
+locale (`mediurg-sync-queue`) pousse les changements vers `sync_items` sans
+bloquer l'UI ; en mode anonyme ou hors réseau, tout continue en local pur.
 
 **Risque accepté — falsification du cache.** Le profil en localStorage
 (`mediurg-profile-cache-v1`) est éditable côté client : un utilisateur

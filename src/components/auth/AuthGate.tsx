@@ -1,7 +1,12 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { hasAdminAccess, type Profile } from "../../lib/auth";
-import { cacheProfile, getCachedProfile, getLastCachedProfile } from "../../lib/profileCache";
+import {
+  cacheProfile,
+  clearCachedProfile,
+  getCachedProfile,
+  getLastCachedProfile,
+} from "../../lib/profileCache";
 import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
@@ -173,8 +178,11 @@ const AuthGate = ({ children }: Props) => {
         if (!user) {
           // SIGNED_OUT : déco explicite (logout() a purgé le cache →
           // getLastCachedProfile null → login) OU échec de refresh token
-          // hors-ligne (le cache survit → on garde l'accès offline).
+          // hors-ligne (le cache survit → on garde l'accès offline). En ligne,
+          // un SIGNED_OUT peut aussi venir d'une révocation distante : on purge
+          // explicitement le cache pour protéger les postes partagés.
           const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+          if (!offline) clearCachedProfile();
           setProfile(offline ? getLastCachedProfile() : null);
           setShowAdmin(false);
           return;
