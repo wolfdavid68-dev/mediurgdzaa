@@ -37,16 +37,23 @@ import {
 } from "../lib/acrSession";
 import {
   computeAcrRuntime,
+  deleteSession,
   listSessions,
   readSession,
   writeSession,
   type AcrSessionSummary,
   type AcrRuntimeState,
 } from "../lib/acrSessionStore";
-import { enqueueSyncItem, mergeAcrSessionCandidates, pullSessions } from "../lib/deviceSync";
+import {
+  enqueueSyncDelete,
+  enqueueSyncItem,
+  mergeAcrSessionCandidates,
+  pullSessions,
+} from "../lib/deviceSync";
 import {
   acrLiveSignature,
   connectAcrLive,
+  publishAcrLiveDelete,
   publishAcrLiveSession,
   type AcrLiveStatus,
 } from "../lib/acrLiveSync";
@@ -224,6 +231,24 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     loadRecord(record);
   };
 
+  // Suppression manuelle : locale + pierre tombale serveur (rejouée au
+  // retour réseau) + annonce live pour nettoyer les listes des autres
+  // appareils. Pas besoin d'attendre la purge automatique de 48 h.
+  const removeSession = (sessionId: string) => {
+    const entry = recentSessions.find((item) => item.id === sessionId);
+    const label = entry ? formatSessionLabel(entry) : "cette session";
+    if (
+      !window.confirm(
+        `Supprimer définitivement la session « ${label} » ?\nElle sera retirée de cet appareil et de votre compte.`
+      )
+    )
+      return;
+    deleteSession(sessionId);
+    enqueueSyncDelete("acr-session", sessionId);
+    publishAcrLiveDelete(sessionId);
+    setRecentSessions((prev) => prev.filter((item) => item.id !== sessionId));
+  };
+
   useWakeLock(running);
   useAcrMetronome(metroOn, audioOn, metroBpm);
 
@@ -290,11 +315,22 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     setRecentSessions(listSessions().map((item) => ({ ...item, source: "local" })));
   };
 
+  // Suppression annoncée par un autre appareil : on nettoie la liste et la
+  // copie locale. Si c'est la session ACTIVE ici, on ne coupe pas l'écran en
+  // pleine utilisation — sa prochaine écriture la re-poussera de toute façon.
+  const onLiveDeleteRef = useRef<(sessionId: string) => void>(() => {});
+  onLiveDeleteRef.current = (sessionId) => {
+    if (activeSessionId === sessionId) return;
+    deleteSession(sessionId);
+    setRecentSessions((prev) => prev.filter((item) => item.id !== sessionId));
+  };
+
   useEffect(
     () =>
       connectAcrLive({
         onStatus: setLiveStatus,
         onSession: (remote) => onLiveSessionRef.current(remote),
+        onDelete: (sessionId) => onLiveDeleteRef.current(sessionId),
       }),
     []
   );
@@ -420,17 +456,27 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
           ) : (
             <div className="acr-session-list">
               {recentSessions.map((item) => (
-                <button
-                  type="button"
-                  key={item.id}
-                  className="acr-session-row"
-                  onClick={() => resumeSession(item.id)}
-                >
-                  <span>{formatSessionLabel(item)}</span>
-                  {item.source === "remote" && (
-                    <em className="acr-session-source">depuis un autre appareil</em>
-                  )}
-                </button>
+                <div key={item.id} className="acr-session-row">
+                  <button
+                    type="button"
+                    className="acr-session-resume"
+                    onClick={() => resumeSession(item.id)}
+                  >
+                    <span>{formatSessionLabel(item)}</span>
+                    {item.source === "remote" && (
+                      <em className="acr-session-source">depuis un autre appareil</em>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="acr-session-delete"
+                    onClick={() => removeSession(item.id)}
+                    aria-label={`Supprimer la session ${formatSessionLabel(item)}`}
+                    title="Supprimer cette session (appareil + compte)"
+                  >
+                    🗑
+                  </button>
+                </div>
               ))}
             </div>
           )}

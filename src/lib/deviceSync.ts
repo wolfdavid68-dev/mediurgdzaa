@@ -11,6 +11,9 @@ export type SyncQueueItem = {
   item_id: string;
   payload: unknown;
   updated_at: number;
+  // "delete" = pierre tombale : suppression distante différée, rejouée au
+  // retour réseau comme les upserts. Absent/"upsert" = comportement historique.
+  op?: "upsert" | "delete";
 };
 
 export type PulledAcrSession = {
@@ -48,7 +51,8 @@ const readQueue = (): SyncQueueItem[] =>
       Boolean(item) &&
       (item.kind === "acr-session" || item.kind === "kit-check") &&
       typeof item.item_id === "string" &&
-      typeof item.updated_at === "number"
+      typeof item.updated_at === "number" &&
+      (item.op === undefined || item.op === "upsert" || item.op === "delete")
   );
 
 const writeQueue = (items: SyncQueueItem[]) => {
@@ -56,7 +60,7 @@ const writeQueue = (items: SyncQueueItem[]) => {
 };
 
 const sanitizeItem = (item: SyncQueueItem): SyncQueueItem => {
-  if (item.kind !== "acr-session") return item;
+  if (item.op === "delete" || item.kind !== "acr-session") return item;
   const session = coerceAcrSession(item.payload);
   return {
     ...item,
@@ -91,6 +95,37 @@ export const enqueueSyncItem = (item: SyncQueueItem): void => {
   void flushSyncQueue();
 };
 
+// Suppression distante différée. La pierre tombale remplace tout upsert en
+// attente pour le même item (inutile de pousser un état qu'on supprime) et
+// sera rejouée au retour réseau — sans elle, une session supprimée
+// localement « ressusciterait » au prochain pull.
+export const enqueueSyncDelete = (kind: SyncKind, itemId: string): void => {
+  if (!isAuthEnabled()) return;
+  const tombstone: SyncQueueItem = {
+    kind,
+    item_id: itemId,
+    payload: null,
+    updated_at: Date.now(),
+    op: "delete",
+  };
+  const next = [
+    tombstone,
+    ...readQueue().filter((queued) => queued.kind !== kind || queued.item_id !== itemId),
+  ];
+  writeQueue(next);
+  void flushSyncQueue();
+};
+
+// IDs avec une suppression en attente — les pulls les écartent pour que la
+// session ne réapparaisse pas dans la liste tant que la tombale n'est pas
+// passée côté serveur.
+const pendingDeleteIds = (kind: SyncKind): Set<string> =>
+  new Set(
+    readQueue()
+      .filter((item) => item.op === "delete" && item.kind === kind)
+      .map((item) => item.item_id)
+  );
+
 export const flushSyncQueue = async (): Promise<void> => {
   const supabase = getSupabase();
   const userId = await currentUserId();
@@ -99,6 +134,17 @@ export const flushSyncQueue = async (): Promise<void> => {
   const remaining: SyncQueueItem[] = [];
   for (const item of readQueue().map(sanitizeItem)) {
     try {
+      if (item.op === "delete") {
+        // Suppression directe sur la table : la policy RLS
+        // sync_items_self_delete limite déjà aux lignes de l'utilisateur.
+        const { error } = await supabase
+          .from("sync_items")
+          .delete()
+          .eq("kind", item.kind)
+          .eq("item_id", item.item_id);
+        if (error) remaining.push(item);
+        continue;
+      }
       const { error } = await supabase.rpc("upsert_sync_item", {
         p_kind: item.kind,
         p_item_id: item.item_id,
@@ -131,15 +177,20 @@ export const pullSessions = async (): Promise<PulledAcrSession[]> => {
       p_kind: "acr-session",
     });
     if (error || !Array.isArray(data)) return [];
-    return (data as SyncRow[]).map((row) => {
-      const session = coerceAcrSession(row.payload);
-      return {
-        session,
-        updatedAt:
-          typeof row.updated_at === "number" ? row.updated_at : new Date(row.updated_at).getTime(),
-        source: "remote",
-      };
-    });
+    const deleted = pendingDeleteIds("acr-session");
+    return (data as SyncRow[])
+      .filter((row) => !deleted.has(row.item_id))
+      .map((row) => {
+        const session = coerceAcrSession(row.payload);
+        return {
+          session,
+          updatedAt:
+            typeof row.updated_at === "number"
+              ? row.updated_at
+              : new Date(row.updated_at).getTime(),
+          source: "remote",
+        };
+      });
   } catch {
     return [];
   }

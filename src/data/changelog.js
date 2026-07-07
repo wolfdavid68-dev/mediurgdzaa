@@ -20,6 +20,10 @@ export const CHANGELOG = [
         text: "URGENCE ACR : une session démarrée sur un autre appareil apparaît en direct dans la liste des sessions récentes, sans recharger. Hors-ligne ou déconnecté, rien ne change : le chrono reste 100 % local et le relais asynchrone existant reprend le flambeau au retour du réseau.",
       },
       {
+        type: "feat",
+        text: "URGENCE ACR : chaque session récente peut être supprimée manuellement (corbeille + confirmation), sans attendre la purge automatique de 48 h. La suppression retire la session de l'appareil, du compte (rejouée au retour réseau si besoin) et des listes des autres appareils en direct.",
+      },
+      {
         type: "fix",
         text: "URGENCE ACR : la liste des sessions récentes fusionne désormais le relais serveur avec l'état affiché au lieu de le remplacer — une session reçue en direct pendant le chargement n'est plus écartée.",
       },

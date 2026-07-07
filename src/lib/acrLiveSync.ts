@@ -31,10 +31,12 @@ export type AcrLiveStatus = "off" | "connecting" | "connected";
 
 type AcrLiveHandlers = {
   onSession: (session: AcrFullSession) => void;
+  onDelete?: (sessionId: string) => void;
   onStatus?: (status: AcrLiveStatus) => void;
 };
 
 const LIVE_EVENT = "acr-session";
+const LIVE_DELETE_EVENT = "acr-delete";
 
 // Identifiant de CET appareil/onglet — sert uniquement à ignorer l'écho de
 // nos propres broadcasts (`self: false` couvre la même connexion, pas deux
@@ -111,6 +113,12 @@ export const connectAcrLive = (handlers: AcrLiveHandlers): (() => void) => {
         if (!payload || payload.deviceId === DEVICE_ID || !payload.session) return;
         handlers.onSession(coerceAcrSession(payload.session));
       });
+      channel.on("broadcast", { event: LIVE_DELETE_EVENT }, (message) => {
+        const payload = (message as { payload?: { deviceId?: string; sessionId?: unknown } })
+          .payload;
+        if (!payload || payload.deviceId === DEVICE_ID) return;
+        if (typeof payload.sessionId === "string") handlers.onDelete?.(payload.sessionId);
+      });
       channel.subscribe((status) => {
         if (cancelled) return;
         handlers.onStatus?.(status === "SUBSCRIBED" ? "connected" : "connecting");
@@ -143,6 +151,21 @@ export const publishAcrLiveSession = (session: AcrFullSession): void => {
       type: "broadcast",
       event: LIVE_EVENT,
       payload: { deviceId: DEVICE_ID, session },
+    });
+  } catch {}
+};
+
+// Annonce la suppression d'une session aux autres appareils, pour que leur
+// liste de sessions récentes se nettoie en direct. Même filet de sécurité :
+// la pierre tombale de deviceSync fait foi côté serveur.
+export const publishAcrLiveDelete = (sessionId: string): void => {
+  const channel = activeChannel;
+  if (!channel) return;
+  try {
+    void channel.send({
+      type: "broadcast",
+      event: LIVE_DELETE_EVENT,
+      payload: { deviceId: DEVICE_ID, sessionId },
     });
   } catch {}
 };

@@ -2,8 +2,13 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createEmptyAcrSession, type AcrFullSession } from "../lib/acrSession";
 import { writeSession } from "../lib/acrSessionStore";
-import { connectAcrLive, publishAcrLiveSession, type AcrLiveStatus } from "../lib/acrLiveSync";
-import { pullSessions } from "../lib/deviceSync";
+import {
+  connectAcrLive,
+  publishAcrLiveDelete,
+  publishAcrLiveSession,
+  type AcrLiveStatus,
+} from "../lib/acrLiveSync";
+import { enqueueSyncDelete, pullSessions } from "../lib/deviceSync";
 import { storageKey } from "../lib/storageKeys";
 import AcrTimer from "./AcrTimer";
 
@@ -12,6 +17,7 @@ vi.mock("../lib/deviceSync", async () => {
   return {
     ...actual,
     enqueueSyncItem: vi.fn(),
+    enqueueSyncDelete: vi.fn(),
     pullSessions: vi.fn(),
   };
 });
@@ -22,6 +28,7 @@ vi.mock("../lib/acrLiveSync", async () => {
     ...actual,
     connectAcrLive: vi.fn(() => () => {}),
     publishAcrLiveSession: vi.fn(),
+    publishAcrLiveDelete: vi.fn(),
   };
 });
 
@@ -32,6 +39,7 @@ const liveHandlers = () => {
   expect(calls.length).toBeGreaterThan(0);
   return calls[calls.length - 1][0] as {
     onSession: (session: AcrFullSession) => void;
+    onDelete?: (sessionId: string) => void;
     onStatus?: (status: AcrLiveStatus) => void;
   };
 };
@@ -82,7 +90,7 @@ describe("AcrTimer · relais multi-appareils", () => {
     expect(await screen.findByText("depuis un autre appareil")).toBeInTheDocument();
     expect(localStorage.getItem(storageKey.acrSessionV2(remote.id))).toBeNull();
 
-    await user.click(screen.getByRole("button", { name: /Adulte · ERC/ }));
+    await user.click(screen.getByRole("button", { name: /^Adulte · ERC/ }));
 
     expect(localStorage.getItem(storageKey.acrSessionV2(remote.id))).not.toBeNull();
     expect(screen.getByRole("button", { name: /^▶ / })).toBeInTheDocument();
@@ -118,7 +126,7 @@ describe("AcrTimer · synchro live multi-appareils", () => {
     writeSession(local);
 
     render(<AcrTimer onOpenDrug={() => {}} />);
-    await user.click(screen.getByRole("button", { name: /Adulte · ERC/ }));
+    await user.click(screen.getByRole("button", { name: /^Adulte · ERC/ }));
     expect(screen.getByText(/Cycle 1/)).toBeInTheDocument();
     // La reprise publie l'état courant vers les autres appareils.
     expect(publishAcrLiveSession).toHaveBeenCalled();
@@ -144,5 +152,60 @@ describe("AcrTimer · synchro live multi-appareils", () => {
     // L'application d'une session distante ne déclenche pas de re-broadcast
     // (anti-écho) : aucune publication supplémentaire.
     expect(vi.mocked(publishAcrLiveSession).mock.calls.length).toBe(publishCount);
+  });
+});
+
+describe("AcrTimer · suppression manuelle des sessions", () => {
+  test("supprimer efface localement, enfile la tombale serveur et prévient les autres appareils", async () => {
+    vi.mocked(pullSessions).mockResolvedValue([]);
+    const confirmMock = vi.fn().mockReturnValue(true);
+    vi.stubGlobal("confirm", confirmMock);
+    const user = userEvent.setup();
+    const local = {
+      ...createEmptyAcrSession(),
+      id: "acr-delete-me",
+      createdAt: Date.now() - 120_000,
+      updatedAt: Date.now() - 60_000,
+    };
+    writeSession(local);
+
+    render(<AcrTimer onOpenDrug={() => {}} />);
+    expect(screen.getByRole("button", { name: /^Adulte · ERC/ })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Supprimer la session/ }));
+
+    expect(confirmMock).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /^Adulte · ERC/ })).not.toBeInTheDocument();
+    expect(localStorage.getItem(storageKey.acrSessionV2(local.id))).toBeNull();
+    expect(enqueueSyncDelete).toHaveBeenCalledWith("acr-session", local.id);
+    expect(publishAcrLiveDelete).toHaveBeenCalledWith(local.id);
+  });
+
+  test("annuler la confirmation ne supprime rien", async () => {
+    vi.mocked(pullSessions).mockResolvedValue([]);
+    vi.stubGlobal("confirm", vi.fn().mockReturnValue(false));
+    const user = userEvent.setup();
+    const local = { ...createEmptyAcrSession(), id: "acr-keep-me" };
+    writeSession(local);
+
+    render(<AcrTimer onOpenDrug={() => {}} />);
+    await user.click(screen.getByRole("button", { name: /^Supprimer la session/ }));
+
+    expect(screen.getByRole("button", { name: /^Adulte · ERC/ })).toBeInTheDocument();
+    expect(localStorage.getItem(storageKey.acrSessionV2(local.id))).not.toBeNull();
+  });
+
+  test("une suppression annoncée par un autre appareil retire la session de la liste", async () => {
+    vi.mocked(pullSessions).mockResolvedValue([]);
+    const local = { ...createEmptyAcrSession(), id: "acr-remote-delete" };
+    writeSession(local);
+
+    render(<AcrTimer onOpenDrug={() => {}} />);
+    expect(screen.getByRole("button", { name: /^Adulte · ERC/ })).toBeInTheDocument();
+
+    act(() => liveHandlers().onDelete?.("acr-remote-delete"));
+
+    expect(screen.queryByRole("button", { name: /^Adulte · ERC/ })).not.toBeInTheDocument();
+    expect(localStorage.getItem(storageKey.acrSessionV2(local.id))).toBeNull();
   });
 });
