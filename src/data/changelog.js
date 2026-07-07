@@ -1,11 +1,30 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v115";
+export const APP_VERSION = "v116";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v116",
+    date: "2026-07-07",
+    titre: "Synchronisation ACR en temps réel",
+    changes: [
+      {
+        type: "feat",
+        text: "URGENCE ACR : la session active se synchronise en direct entre les appareils du même compte (canal Supabase Realtime). Chocs, adrénaline, cycles et événements saisis sur un téléphone apparaissent immédiatement sur les autres écrans ouverts, avec un badge « Live » quand le canal est joint.",
+      },
+      {
+        type: "feat",
+        text: "URGENCE ACR : une session démarrée sur un autre appareil apparaît en direct dans la liste des sessions récentes, sans recharger. Hors-ligne ou déconnecté, rien ne change : le chrono reste 100 % local et le relais asynchrone existant reprend le flambeau au retour du réseau.",
+      },
+      {
+        type: "fix",
+        text: "URGENCE ACR : la liste des sessions récentes fusionne désormais le relais serveur avec l'état affiché au lieu de le remplacer — une session reçue en direct pendant le chargement n'est plus écartée.",
+      },
+    ],
+  },
   {
     version: "v115",
     date: "2026-07-06",

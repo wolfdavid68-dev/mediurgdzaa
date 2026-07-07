@@ -120,6 +120,18 @@
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
   animation: acr-pulse 1.4s ease-in-out infinite;
 }
+/* Badge « Live » — visible quand le canal Realtime multi-appareils est joint */
+.acr-live-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--success);
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  white-space: nowrap;
+}
 @keyframes acr-pulse {
   0%,
   100% {

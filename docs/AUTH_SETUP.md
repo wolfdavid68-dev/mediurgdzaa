@@ -283,6 +283,16 @@ d'abord en localStorage. Quand une session Supabase active existe, une file
 locale (`mediurg-sync-queue`) pousse les changements vers `sync_items` sans
 bloquer l'UI ; en mode anonyme ou hors réseau, tout continue en local pur.
 
+**Synchro ACR temps réel.** En plus du relais asynchrone, la session ACR
+active est diffusée en direct via un canal Supabase Realtime broadcast
+(`acr-live-{userId}`, cf. `src/lib/acrLiveSync.ts`). Aucun SQL requis : le
+broadcast ne touche pas la base, `sync_items` reste la persistance de
+référence. Le payload est le dossier ACR anonyme (jamais de donnée
+nominative, garanti par `coerceAcrSession`) et le topic contient l'UUID
+utilisateur, non devinable. Durcissement possible si besoin : passer le
+canal en `private: true` avec des policies RLS sur `realtime.messages`.
+Hors-ligne ou non authentifié, la connexion est un no-op silencieux.
+
 **Risque accepté — falsification du cache.** Le profil en localStorage
 (`mediurg-profile-cache-v1`) est éditable côté client : un utilisateur
 averti peut forcer `role:"admin"` ou `status:"active"` pour _voir_ la

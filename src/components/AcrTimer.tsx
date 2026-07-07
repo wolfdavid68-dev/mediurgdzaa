@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import {
   BPM_OPTIONS,
   COACH_ICON,
@@ -44,6 +44,12 @@ import {
   type AcrRuntimeState,
 } from "../lib/acrSessionStore";
 import { enqueueSyncItem, mergeAcrSessionCandidates, pullSessions } from "../lib/deviceSync";
+import {
+  acrLiveSignature,
+  connectAcrLive,
+  publishAcrLiveSession,
+  type AcrLiveStatus,
+} from "../lib/acrLiveSync";
 import AcrPrepOverlay from "./AcrPrepOverlay";
 import AcrRecordView from "./AcrRecordView";
 import type { SessionState } from "./AcrTimer.reducer";
@@ -171,6 +177,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     listSessions().map((item) => ({ ...item, source: "local" }))
   );
   const [showRecord, setShowRecord] = useState(false);
+  const [liveStatus, setLiveStatus] = useState<AcrLiveStatus>("off");
   const [coachMode, setCoachMode] = useState<"full" | "visual" | "silent">(readCoach);
   const audioOn = coachMode !== "silent";
   const visualOn = coachMode !== "silent";
@@ -230,12 +237,67 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         .map((item) => readSession(item.id))
         .filter((item): item is AcrFullSession => Boolean(item));
       const merged = mergeAcrSessionCandidates(localRecords, remote);
-      setRecentSessions(merged.map((item) => summarizeEntry(item.session, item.source)));
+      // Fusion avec l'état affiché (et non remplacement) : une session reçue
+      // en broadcast live entre le mount et la résolution du pull serait
+      // sinon écrasée par une liste qui ne la contient pas encore.
+      setRecentSessions((prev) => {
+        const byId = new Map(
+          merged.map((item) => [item.session.id, summarizeEntry(item.session, item.source)])
+        );
+        for (const entry of prev) {
+          const incoming = byId.get(entry.id);
+          if (!incoming || incoming.updatedAt < entry.updatedAt) byId.set(entry.id, entry);
+        }
+        return [...byId.values()].sort((a, b) => b.updatedAt - a.updatedAt);
+      });
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  // ── Synchro live multi-appareils ──────────────────────────────────────────
+  // lastLiveSigRef : signature du dernier état publié OU appliqué. Empêche
+  //  1. de re-diffuser une session reçue d'un autre appareil (boucle écho),
+  //  2. de diffuser à chaque tick du chrono (la signature ignore elapsed).
+  const lastLiveSigRef = useRef("");
+  // Le callback de réception lit l'état courant via ref (même pattern que
+  // onAdvanceRef dans useAcrAutoAdvance) : l'effet de connexion ne monte le
+  // canal qu'une fois, sans se réabonner à chaque render.
+  const onLiveSessionRef = useRef<(remote: AcrFullSession) => void>(() => {});
+  onLiveSessionRef.current = (remote) => {
+    if (!activeSessionId) {
+      // Écran de sélection : la session distante apparaît / se met à jour en direct.
+      setRecentSessions((prev) => {
+        const entry = summarizeEntry(remote, "remote");
+        const others = prev.filter((item) => item.id !== remote.id);
+        const existing = prev.find((item) => item.id === remote.id);
+        if (existing && existing.updatedAt >= remote.updatedAt) return prev;
+        return [...others, entry].sort((a, b) => b.updatedAt - a.updatedAt);
+      });
+      return;
+    }
+    if (remote.id !== activeSessionId) return;
+    const signature = acrLiveSignature(remote);
+    if (signature === lastLiveSigRef.current) return;
+    const local = readSession(activeSessionId);
+    if (local && local.updatedAt >= remote.updatedAt) return;
+    lastLiveSigRef.current = signature;
+    const stored = writeSession(remote);
+    const runtime = computeAcrRuntime(stored);
+    setElapsedSeconds(runtime.elapsed);
+    dispatch({ type: "HYDRATE", state: hydrateTimerState(stored, runtime) });
+    setRecentSessions(listSessions().map((item) => ({ ...item, source: "local" })));
+  };
+
+  useEffect(
+    () =>
+      connectAcrLive({
+        onStatus: setLiveStatus,
+        onSession: (remote) => onLiveSessionRef.current(remote),
+      }),
+    []
+  );
 
   useEffect(() => {
     if (!activeSessionId) return;
@@ -256,6 +318,15 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     });
     writeSession(nextRecord);
     enqueueAcrSession(nextRecord);
+    // Diffusion live : uniquement quand le CONTENU clinique change (la
+    // signature ignore elapsed/updatedAt), sinon on émettrait un broadcast
+    // par seconde de chrono. Si la signature vient d'être posée par la
+    // réception d'une session distante, on ne re-diffuse pas (anti-écho).
+    const signature = acrLiveSignature(nextRecord);
+    if (signature !== lastLiveSigRef.current) {
+      lastLiveSigRef.current = signature;
+      publishAcrLiveSession(nextRecord);
+    }
     setRecentSessions(listSessions().map((item) => ({ ...item, source: "local" })));
   }, [activeSessionId, pediatric, protocol, elapsed, shocks, adres, amios, history, events, cycle]);
 
@@ -374,6 +445,14 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
         <div className="acr-timer-title">
           <span className="acr-timer-pulse" aria-hidden="true" />
           Chrono RCP · Cycle {cycle}
+          {liveStatus === "connected" && (
+            <span
+              className="acr-live-badge"
+              title="Session synchronisée en direct avec vos autres appareils connectés"
+            >
+              ⇄ Live
+            </span>
+          )}
         </div>
         <div className="acr-timer-elapsed">{fmt(elapsed)}</div>
         <button
