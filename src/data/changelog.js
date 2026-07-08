@@ -1,11 +1,22 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v115";
+export const APP_VERSION = "v116";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v116",
+    date: "2026-07-08",
+    titre: "Schéma transfuseur massif",
+    changes: [
+      {
+        type: "feat",
+        text: "Kit Réchauffeur-Accélérateur : ajout d'un onglet « Schéma » avec le guide visuel de mise en marche du transfuseur massif / réchauffeur de perfusion FluidO AirGuard System, zoomable et disponible hors-ligne.",
+      },
+    ],
+  },
   {
     version: "v115",
     date: "2026-07-06",

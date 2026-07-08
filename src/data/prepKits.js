@@ -1125,5 +1125,55 @@ export const PREP_KITS = [
       "Traçabilité OBLIGATOIRE de tous les PSL (étiquettes dans le dossier transfusionnel)",
       "Prévenir l'hyperkaliémie de transfusion (CGR vieillis > 14 j) : surveillance ECG continue",
     ],
+    // Guide visuel FluidO AirGuard System utilisé comme aide au montage.
+    // L'image EST la source de vérité ; la légende reprend les zones
+    // opérationnelles pour lecture rapide. Image zoomable côté UI.
+    schema: {
+      img: "/rechauffeur-accelerateur-schema.webp",
+      alt: "Schéma de mise en marche du transfuseur massif FluidO AirGuard System",
+      source: "MediURG — Guide de mise en marche du FluidO AirGuard System",
+      intro:
+        "Aide visuelle pour mettre en marche le transfuseur massif / réchauffeur de perfusion FluidO AirGuard System. Toucher l'image pour l'agrandir. Toujours suivre la notice fabricant, la prescription médicale et le protocole local.",
+      legende: [
+        {
+          titre: "Démarrage en 6 étapes",
+          items: [
+            "Installer l'appareil sur la potence et vérifier la stabilité",
+            "Brancher l'alimentation et vérifier le bloc batterie",
+            "Mettre les 3 allumeurs en position I",
+            "Laisser l'auto-test se terminer et vérifier l'absence d'alarme",
+            "Mettre en place les consommables et les poches selon la notice fabricant",
+            "Amorcer la ligne, purger l'air, régler les paramètres prescrits puis démarrer",
+          ],
+        },
+        {
+          titre: "Allumeurs à contrôler",
+          items: [
+            "Gauche : module supérieur gauche / chauffe-poche",
+            "Centre : unité de contrôle",
+            "Droite : module de pompe / chauffe-poche droit",
+            "Les 3 allumeurs doivent être sur I pour mettre le système sous tension",
+          ],
+        },
+        {
+          titre: "Repères machine",
+          items: [
+            "Modules supérieurs de réchauffement / pression des poches",
+            "Unité de contrôle : écran et commandes",
+            "Module de pompe / perfusion côté droit avec chauffe-poche intégré",
+            "Bloc batterie / alimentation, potence et base roulante à 5 branches",
+          ],
+        },
+        {
+          titre: "Points de contrôle",
+          items: [
+            "Prescription et protocole local vérifiés",
+            "Compatibilité des consommables confirmée",
+            "Purge correcte et absence d'air",
+            "Température, débit et alarmes contrôlés",
+          ],
+        },
+      ],
+    },
   },
 ];
