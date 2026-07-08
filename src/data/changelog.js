@@ -1,15 +1,15 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v116";
+export const APP_VERSION = "v115";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
   {
-    version: "v116",
-    date: "2026-07-07",
-    titre: "Synchronisation ACR en temps réel",
+    version: "v115",
+    date: "2026-07-06",
+    titre: "Synchronisation ACR multi-appareils",
     changes: [
       {
         type: "feat",
@@ -17,23 +17,12 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
-        text: "URGENCE ACR : une session démarrée sur un autre appareil apparaît en direct dans la liste des sessions récentes, sans recharger. Hors-ligne ou déconnecté, rien ne change : le chrono reste 100 % local et le relais asynchrone existant reprend le flambeau au retour du réseau.",
+        text: "URGENCE ACR : une session démarrée sur un autre appareil apparaît en direct dans la liste des sessions récentes, sans recharger. Hors-ligne ou déconnecté, rien ne change : le chrono reste 100 % local et le relais asynchrone reprend le flambeau au retour du réseau.",
       },
       {
         type: "feat",
         text: "URGENCE ACR : chaque session récente peut être supprimée manuellement (corbeille + confirmation), sans attendre la purge automatique de 48 h. La suppression retire la session de l'appareil, du compte (rejouée au retour réseau si besoin) et des listes des autres appareils en direct.",
       },
-      {
-        type: "fix",
-        text: "URGENCE ACR : la liste des sessions récentes fusionne désormais le relais serveur avec l'état affiché au lieu de le remplacer — une session reçue en direct pendant le chargement n'est plus écartée.",
-      },
-    ],
-  },
-  {
-    version: "v115",
-    date: "2026-07-06",
-    titre: "Relais multi-appareils et sessions ACR multiples",
-    changes: [
       {
         type: "feat",
         text: "Compte : ajout de l'action « Déconnecter mes autres appareils » dans le menu du haut. La session courante reste active, les autres appareils sont révoqués dès qu'ils retrouvent le réseau.",
@@ -48,11 +37,15 @@ export const CHANGELOG = [
       },
       {
         type: "fix",
+        text: "URGENCE ACR : la liste des sessions récentes fusionne le relais serveur avec l'état affiché au lieu de le remplacer — une session reçue en direct pendant le chargement n'est plus écartée.",
+      },
+      {
+        type: "fix",
         text: "Check-lists de kits : les coches respectent maintenant le stockage préfixé par utilisateur en mode authentifié, tout en gardant l'expiration courte et le fonctionnement hors-ligne.",
       },
       {
         type: "docs",
-        text: "Ajout du patch SQL `auth-sync-patch.sql` et documentation des limites de révocation, TTL serveur et garanties d'anonymisation des dossiers ACR.",
+        text: "Ajout du patch SQL `auth-sync-patch.sql` et documentation des limites de révocation, TTL serveur, garanties d'anonymisation des dossiers ACR et du canal Realtime `acr-live`.",
       },
     ],
   },
