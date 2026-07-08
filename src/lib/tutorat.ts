@@ -27,6 +27,27 @@ export function buildTutoratTokenUrl(token: string, rawTutoratUrl = TUTORAT_URL)
   return url.toString();
 }
 
+export function buildTutoratFallbackUrl(rawTutoratUrl = TUTORAT_URL): string {
+  const baseOrigin =
+    typeof window === "undefined" ? "http://localhost:3000" : window.location.origin;
+  return new URL(rawTutoratUrl, baseOrigin).toString();
+}
+
+// Pastille header : tente le SSO par token ; si la session MediURG manque ou
+// que /api/generate-tutorat-token échoue, on ouvre quand même Tutorat sans
+// token — il gère ce cas (mode démo ouvert, ou renvoi vers le login MediURG
+// avec ?open=tutorat). Avant, l'échec était silencieux : clic sans effet,
+// l'utilisateur restait sur MediURG sans comprendre.
+export async function openTutorat(): Promise<void> {
+  let opened = false;
+  try {
+    opened = await openTutoratWithCurrentSession();
+  } catch {
+    opened = false;
+  }
+  if (!opened) window.location.assign(buildTutoratFallbackUrl());
+}
+
 export async function openTutoratWithCurrentSession(): Promise<boolean> {
   const { getCurrentSession } = await import("./auth");
   const session = await getCurrentSession();

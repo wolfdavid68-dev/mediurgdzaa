@@ -2,12 +2,13 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { logout, logoutOtherDevices } from "../lib/auth";
 import { useAuthProfile } from "../lib/authProfile";
 import type { useLongPress } from "../lib/useLongPress";
-import { openTutoratWithCurrentSession } from "../lib/tutorat";
+import { openTutorat as openTutoratWithFallback } from "../lib/tutorat";
 
 // Pastille « Tutorat ↗ » : navigation via la session MediURG courante.
-// MediURG génère un token serveur puis ouvre le compagnon Tutorat.
+// MediURG génère un token serveur puis ouvre le compagnon Tutorat ; sans
+// session (ou API en échec), ouverture directe de /tutorat/ sans token.
 const openTutorat = () => {
-  void openTutoratWithCurrentSession();
+  void openTutoratWithFallback();
 };
 
 const TutoratLink = () => (

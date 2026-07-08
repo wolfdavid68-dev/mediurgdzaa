@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  buildTutoratFallbackUrl,
   buildTutoratLoginRequestUrl,
   buildTutoratTokenUrl,
   shouldOpenTutoratFromLogin,
@@ -24,6 +25,13 @@ describe("tutorat bridge", () => {
     );
     expect(buildTutoratTokenUrl("jwt-demo", "/tutorat/")).toBe(
       "http://localhost:3000/tutorat/?token=jwt-demo"
+    );
+  });
+
+  test("construit l'URL de repli sans token quand le SSO echoue", () => {
+    expect(buildTutoratFallbackUrl()).toBe("http://localhost:3000/tutorat/");
+    expect(buildTutoratFallbackUrl("https://tutorat.example/app")).toBe(
+      "https://tutorat.example/app"
     );
   });
 });
