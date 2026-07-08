@@ -24,6 +24,9 @@ rejoue pas le raccourci.
 | `/?med=CORDARONE` | Ouvre Médicaments avec la recherche préremplie ; si le résultat est **sans ambiguïté**, la fiche s'ouvre déployée |
 | `/?med=42` | Idem par id de médicament (toujours sans ambiguïté → fiche déployée) |
 | `/?poids=80` ou `/?poids=12,5` | Prérègle le **poids patient** (borné à 300 kg, virgule ou point acceptés ; expire au bout de 3 h comme une saisie manuelle) |
+| `/?compat=noradrenaline,lasilix` | **Vérification de compatibilité IV entre 2 médicaments** : ouvre Incompatibilités en vue Comparer avec le verdict (✕ incompatible / ✓ compatible / pH). Un seul nom → fiche du médicament avec toutes ses relations. Les noms commerciaux et DCI sont acceptés |
+| `/?protocole=pisu5` ou `/?protocole=hemorragie` | Ouvre le **protocole PISU déployé** (par code `pisu5`, par id, ou par mot du titre s'il est sans ambiguïté — sinon la liste PISU s'affiche) |
+| `/?echelle=glasgow` | Ouvre la page Échelles avec l'**échelle déployée** (`glasgow`, `rass`, `ramsay`, `cushman`, `wallace`, ou un mot du nom) |
 
 Les paramètres se combinent :
 
@@ -31,6 +34,9 @@ Les paramètres se combinent :
 https://<domaine>/?med=CORDARONE&poids=80
 https://<domaine>/?kit=ktc
 https://<domaine>/?kit=drain-thoracique&onglet=materiel   ← « check-list du drain thoracique »
+https://<domaine>/?compat=noradrenaline,propofol          ← « noradré et propo, compatible ? »
+https://<domaine>/?protocole=anaphylactique
+https://<domaine>/?echelle=glasgow
 https://<domaine>/?mode=acr&poids=25
 ```
 

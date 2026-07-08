@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { tokenizeProtocolText } from "../lib/protocolText";
 import type { Protocol } from "../types/data";
 
@@ -88,17 +88,20 @@ const renderText = (text: string, onDrugSearch: (name: string) => void) => {
 
 type ProtocolCardProps = {
   protocol: Protocol;
+  autoOpen?: boolean;
+  onAutoOpen?: () => void;
   onDrugSearch: (name: string) => void;
 };
 
 type ProtocolSection = Protocol["sections"][number];
 type ProtocolItem = ProtocolSection["items"][number];
 
-const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
+const ProtocolCard = ({ protocol: p, autoOpen, onAutoOpen, onDrugSearch }: ProtocolCardProps) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<number | null>(null);
   // "shared" / "copied" / null — feedback transitoire après clic partage.
   const [shareState, setShareState] = useState<"shared" | "copied" | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -106,6 +109,16 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
       setActiveTab(idx >= 0 ? idx : 0);
     }
   }, [open, p.sections]);
+
+  // Ouverture pilotée par deep link (?protocole=… — cf. lib/deepLink.ts) :
+  // déploie le protocole une seule fois, le fait défiler en tête d'écran (la
+  // liste PISU n'est pas filtrée), puis signale la consommation à App.
+  useEffect(() => {
+    if (!autoOpen) return;
+    setOpen(true);
+    onAutoOpen?.();
+    cardRef.current?.scrollIntoView({ block: "start" });
+  }, [autoOpen, onAutoOpen]);
 
   // Web Share API : permet d'envoyer un protocole à un collègue via WhatsApp,
   // SMS, ou n'importe quelle target système (Android iOS Chrome Safari). Sur
@@ -148,7 +161,7 @@ const ProtocolCard = ({ protocol: p, onDrugSearch }: ProtocolCardProps) => {
     sec?.type === "rythme_non_choquable";
 
   return (
-    <div className={`protocol-card ${open ? "protocol-card-open" : ""}`}>
+    <div ref={cardRef} className={`protocol-card ${open ? "protocol-card-open" : ""}`}>
       <button className="protocol-header" onClick={() => setOpen(!open)}>
         <div className="protocol-color-bar" style={{ background: p.couleur }} />
         <div className="protocol-main">

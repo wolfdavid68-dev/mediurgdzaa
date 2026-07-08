@@ -33,7 +33,7 @@ export type IncompatIndexOptions = {
   searchAliases?: Record<string, string[]>;
 };
 
-const normalizeIncompatSearch = (value: string) =>
+export const normalizeIncompatSearch = (value: string) =>
   normalize(value)
     .replace(/®/g, "")
     .replace(/[^a-z0-9]+/g, " ")

@@ -8,7 +8,12 @@ import type { ClinicalScale } from "../types/data";
 // chacune son propre calculateur interactif. Lazy-loadée depuis App.tsx :
 // les données scales.js (~6 kB) ne pèsent dans le bundle que si l'utilisateur
 // ouvre cette tab.
-const EchellesPage = () => {
+type EchellesPageProps = {
+  autoOpenScaleId?: string | null;
+  onAutoOpenScale?: () => void;
+};
+
+const EchellesPage = ({ autoOpenScaleId, onAutoOpenScale }: EchellesPageProps = {}) => {
   const scales = SCALES as ClinicalScale[];
   return (
     <div className="echelles-page">
@@ -19,7 +24,11 @@ const EchellesPage = () => {
       <div className="echelles-list">
         {scales.map((scale) => (
           <ErrorBoundary key={scale.id} FallbackComponent={CardErrorFallback}>
-            <ScaleCard scale={scale} />
+            <ScaleCard
+              scale={scale}
+              autoOpen={autoOpenScaleId != null && autoOpenScaleId === scale.id}
+              onAutoOpen={onAutoOpenScale}
+            />
           </ErrorBoundary>
         ))}
       </div>

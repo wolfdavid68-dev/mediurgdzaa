@@ -23,6 +23,11 @@ type ProtocolesPageProps = {
   autoOpenKitId?: string | null;
   autoOpenKitTab?: string | null;
   onAutoOpenKit?: () => void;
+  autoOpenProtocolId?: number | null;
+  onAutoOpenProtocol?: () => void;
+  incompatPair?: [string, string] | null;
+  incompatFocus?: string | null;
+  onIncompatConsumed?: () => void;
   onDrugSearch: (name: string) => void;
 };
 
@@ -32,6 +37,11 @@ const ProtocolesPage = ({
   autoOpenKitId,
   autoOpenKitTab,
   onAutoOpenKit,
+  autoOpenProtocolId,
+  onAutoOpenProtocol,
+  incompatPair,
+  incompatFocus,
+  onIncompatConsumed,
   onDrugSearch,
 }: ProtocolesPageProps) => {
   const [protoFilter, setProtoFilter] = useState("Tout");
@@ -79,7 +89,13 @@ const ProtocolesPage = ({
         </button>
       </div>
 
-      {protoCategory === "incompatibilites" && <IncompatibilityList />}
+      {protoCategory === "incompatibilites" && (
+        <IncompatibilityList
+          initialPair={incompatPair}
+          initialFocus={incompatFocus}
+          onInitialConsumed={onIncompatConsumed}
+        />
+      )}
 
       {protoCategory === "ecg" && (
         <>
@@ -123,7 +139,12 @@ const ProtocolesPage = ({
           <div className="protocol-list">
             {filteredProtocols.map((p) => (
               <ErrorBoundary key={p.id} FallbackComponent={CardErrorFallback}>
-                <ProtocolCard protocol={p} onDrugSearch={onDrugSearch} />
+                <ProtocolCard
+                  protocol={p}
+                  autoOpen={autoOpenProtocolId != null && autoOpenProtocolId === p.id}
+                  onAutoOpen={onAutoOpenProtocol}
+                  onDrugSearch={onDrugSearch}
+                />
               </ErrorBoundary>
             ))}
           </div>

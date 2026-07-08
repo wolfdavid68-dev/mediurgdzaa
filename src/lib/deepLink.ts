@@ -1,7 +1,11 @@
 import { DRUGS } from "../data/drugs";
 import { PREP_KITS } from "../data/prepKits";
+import { PROTOCOLS } from "../data/protocols";
+import { SCALES } from "../data/scales";
 import { filterDrugs } from "./drugSearch";
-import type { Drug } from "../types/data";
+import { resolveIncompatDrugName } from "./incompatCatalog";
+import { normalize } from "./normalize";
+import type { ClinicalScale, Drug, Protocol } from "../types/data";
 
 // Résolution des liens profonds (query params) au lancement de l'app.
 // Utilisés par les raccourcis manifest (long-press icône Android), les
@@ -22,6 +26,16 @@ import type { Drug } from "../types/data";
 //                              résultat unique), la fiche s'ouvre déployée
 //   ?poids=<kg>              — prérègle le poids patient (virgule ou point,
 //                              borné à ]0 ; 300] kg)
+//   ?compat=<a>,<b>          — vérification de compatibilité IV entre deux
+//                              médicaments : ouvre Incompatibilités en vue
+//                              Comparer avec le verdict affiché (ex:
+//                              ?compat=noradrenaline,lasilix). Un seul nom →
+//                              vue Fiche focalisée. Accès complet requis.
+//   ?protocole=<code|texte>  — ouvre le protocole PISU déployé (ex:
+//                              ?protocole=pisu5 ou ?protocole=hemorragie) ;
+//                              texte ambigu → liste PISU. Accès complet requis.
+//   ?echelle=<id|nom>        — ouvre Échelles avec l'échelle déployée (ex:
+//                              ?echelle=glasgow). Accès complet requis.
 // Chaque paramètre appliqué est retiré de l'URL (cleanedSearch) pour qu'un
 // refresh ne rejoue pas le raccourci ; un paramètre en attente d'accès
 // complet reste en place et sera rejoué quand l'accès sera accordé.
@@ -36,6 +50,10 @@ export type DeepLinkResult = {
   autoOpenDrugId?: number;
   autoOpenKitId?: string;
   autoOpenKitTab?: string;
+  autoOpenProtocolId?: number;
+  autoOpenScaleId?: string;
+  incompatPair?: [string, string];
+  incompatFocus?: string;
   patientWeight?: string;
   /** Query string restante après consommation (sans "?", "" si tout consommé). */
   cleanedSearch: string;
@@ -88,6 +106,32 @@ const findDrugForParam = (raw: string): { search: string; drug?: Drug; unique: b
     favorites: new Set<number>(),
   });
   return { search: trimmed, drug: matches[0], unique: matches.length === 1 };
+};
+
+// « pisu 5 », « PISU5 », « pisu-5 » → même clé compacte que le code officiel.
+const compactCode = (value: string) => normalize(value).replace(/[^a-z0-9]+/g, "");
+
+const findProtocolForParam = (raw: string): Protocol | undefined => {
+  const trimmed = raw.trim();
+  if (/^\d+$/.test(trimmed)) return PROTOCOLS.find((p) => p.id === Number(trimmed));
+  const compact = compactCode(trimmed);
+  if (!compact) return undefined;
+  const byCode = PROTOCOLS.find((p) => compactCode(p.code) === compact);
+  if (byCode) return byCode;
+  const q = normalize(trimmed);
+  const matches = PROTOCOLS.filter((p) => normalize(`${p.code} ${p.titre}`).includes(q));
+  return matches.length === 1 ? matches[0] : undefined;
+};
+
+const findScaleForParam = (raw: string): ClinicalScale | undefined => {
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  const scales = SCALES as ClinicalScale[];
+  const q = normalize(trimmed);
+  const byId = scales.find((s) => normalize(s.id) === q);
+  if (byId) return byId;
+  const matches = scales.filter((s) => normalize(s.nom).includes(q));
+  return matches.length === 1 ? matches[0] : undefined;
 };
 
 export const resolveDeepLink = (
@@ -158,6 +202,49 @@ export const resolveDeepLink = (
     }
     if (params.has("onglet")) consume("onglet");
     consume("kit");
+  }
+
+  // Vérification de compatibilité IV (ex: ?compat=noradrenaline,lasilix).
+  // Deux noms résolus → vue Comparer avec le verdict ; un seul → vue Fiche ;
+  // aucun → on ouvre quand même l'onglet Incompatibilités.
+  const compatParam = params.get("compat");
+  if (hasFullAppAccess && compatParam !== null) {
+    const resolved = compatParam
+      .split(",")
+      .map((token) => token.trim())
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(resolveIncompatDrugName)
+      .filter((name): name is string => Boolean(name));
+    result.page = "protocoles";
+    result.protoCategory = "incompatibilites";
+    if (resolved.length === 2 && resolved[0] !== resolved[1]) {
+      result.incompatPair = [resolved[0], resolved[1]];
+    } else if (resolved.length >= 1) {
+      result.incompatFocus = resolved[0];
+    }
+    consume("compat");
+  }
+
+  // Protocole PISU (ex: ?protocole=pisu5 ou ?protocole=hemorragie). Texte
+  // ambigu (« detresse respiratoire » = Adulte + Enfant) → liste PISU sans
+  // auto-ouverture, jamais un protocole choisi arbitrairement.
+  const protocoleParam = params.get("protocole");
+  if (hasFullAppAccess && protocoleParam !== null) {
+    const protocol = findProtocolForParam(protocoleParam);
+    result.page = "protocoles";
+    result.protoCategory = "PISU";
+    if (protocol) result.autoOpenProtocolId = protocol.id;
+    consume("protocole");
+  }
+
+  // Échelle clinique (ex: ?echelle=glasgow, ?echelle=rass).
+  const echelleParam = params.get("echelle");
+  if (hasFullAppAccess && echelleParam !== null) {
+    const scale = findScaleForParam(echelleParam);
+    result.page = "echelles";
+    if (scale) result.autoOpenScaleId = scale.id;
+    consume("echelle");
   }
 
   const mode = params.get("mode");

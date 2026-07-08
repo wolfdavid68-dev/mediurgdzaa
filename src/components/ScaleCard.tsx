@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { ClinicalScale, ScaleItem } from "../types/data";
 
 // Affiche une échelle clinique interactive (Glasgow, RASS, Cushman...).
@@ -16,7 +16,11 @@ import type { ClinicalScale, ScaleItem } from "../types/data";
 // alors choisir d'abord un variant (ex: tranche d'âge pour la PA dans Cushman),
 // puis l'option dans le barème de ce variant.
 
-type ScaleCardProps = { scale: ClinicalScale };
+type ScaleCardProps = {
+  scale: ClinicalScale;
+  autoOpen?: boolean;
+  onAutoOpen?: () => void;
+};
 
 const formatWallacePercent = (value: number) =>
   `${Number.isInteger(value) ? value.toString() : value.toFixed(1).replace(".", ",")} %`;
@@ -117,8 +121,19 @@ const LUND_BROWDER_PROFILES: Record<
   },
 };
 
-const ScaleCard = ({ scale }: ScaleCardProps) => {
+const ScaleCard = ({ scale, autoOpen, onAutoOpen }: ScaleCardProps) => {
   const [open, setOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
+  // Ouverture pilotée par deep link (?echelle=… — cf. lib/deepLink.ts) :
+  // déploie l'échelle une seule fois, la fait défiler en tête d'écran, puis
+  // signale la consommation à App.
+  useEffect(() => {
+    if (!autoOpen) return;
+    setOpen(true);
+    onAutoOpen?.();
+    cardRef.current?.scrollIntoView({ block: "start" });
+  }, [autoOpen, onAutoOpen]);
   const [sumSelections, setSumSelections] = useState<Record<number, number>>({});
   const [variantSelections, setVariantSelections] = useState<Record<number, string>>({});
   const [pickedScore, setPickedScore] = useState<number | null>(null);
@@ -362,7 +377,7 @@ const ScaleCard = ({ scale }: ScaleCardProps) => {
   };
 
   return (
-    <div className={`scale-card ${open ? "scale-card-open" : ""}`}>
+    <div ref={cardRef} className={`scale-card ${open ? "scale-card-open" : ""}`}>
       <button
         type="button"
         className="scale-header"

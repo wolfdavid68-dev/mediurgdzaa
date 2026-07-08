@@ -131,10 +131,20 @@ const App = () => {
   const [autoOpenDrugId, setAutoOpenDrugId] = useState<number | null>(null);
   const [autoOpenKitId, setAutoOpenKitId] = useState<string | null>(null);
   const [autoOpenKitTab, setAutoOpenKitTab] = useState<string | null>(null);
+  const [autoOpenProtocolId, setAutoOpenProtocolId] = useState<number | null>(null);
+  const [autoOpenScaleId, setAutoOpenScaleId] = useState<string | null>(null);
+  const [incompatPair, setIncompatPair] = useState<[string, string] | null>(null);
+  const [incompatFocus, setIncompatFocus] = useState<string | null>(null);
   const consumeAutoOpenDrug = useCallback(() => setAutoOpenDrugId(null), []);
   const consumeAutoOpenKit = useCallback(() => {
     setAutoOpenKitId(null);
     setAutoOpenKitTab(null);
+  }, []);
+  const consumeAutoOpenProtocol = useCallback(() => setAutoOpenProtocolId(null), []);
+  const consumeAutoOpenScale = useCallback(() => setAutoOpenScaleId(null), []);
+  const consumeIncompatTarget = useCallback(() => {
+    setIncompatPair(null);
+    setIncompatFocus(null);
   }, []);
 
   // Poids patient partagé entre toutes les fiches (poso, prep, PSE). Persisté
@@ -201,6 +211,10 @@ const App = () => {
     if (link.autoOpenDrugId !== undefined) setAutoOpenDrugId(link.autoOpenDrugId);
     if (link.autoOpenKitId !== undefined) setAutoOpenKitId(link.autoOpenKitId);
     if (link.autoOpenKitTab !== undefined) setAutoOpenKitTab(link.autoOpenKitTab);
+    if (link.autoOpenProtocolId !== undefined) setAutoOpenProtocolId(link.autoOpenProtocolId);
+    if (link.autoOpenScaleId !== undefined) setAutoOpenScaleId(link.autoOpenScaleId);
+    if (link.incompatPair !== undefined) setIncompatPair(link.incompatPair);
+    if (link.incompatFocus !== undefined) setIncompatFocus(link.incompatFocus);
     if (link.patientWeight !== undefined) setPatientWeight(link.patientWeight);
     try {
       window.history.replaceState(
@@ -485,6 +499,11 @@ const App = () => {
                 autoOpenKitId={autoOpenKitId}
                 autoOpenKitTab={autoOpenKitTab}
                 onAutoOpenKit={consumeAutoOpenKit}
+                autoOpenProtocolId={autoOpenProtocolId}
+                onAutoOpenProtocol={consumeAutoOpenProtocol}
+                incompatPair={incompatPair}
+                incompatFocus={incompatFocus}
+                onIncompatConsumed={consumeIncompatTarget}
                 onDrugSearch={(name: string) => {
                   navigateTo("medicaments");
                   setSearch(name);
@@ -492,7 +511,12 @@ const App = () => {
               />
             )}
 
-            {hasFullAppAccess && page === "echelles" && <EchellesPage />}
+            {hasFullAppAccess && page === "echelles" && (
+              <EchellesPage
+                autoOpenScaleId={autoOpenScaleId}
+                onAutoOpenScale={consumeAutoOpenScale}
+              />
+            )}
           </main>
 
           <BottomNav
