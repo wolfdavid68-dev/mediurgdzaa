@@ -20,12 +20,16 @@ import EcgReader from "../components/EcgReader";
 type ProtocolesPageProps = {
   protoCategory: string;
   changeProtoCategory: (cat: string) => void;
+  autoOpenKitId?: string | null;
+  onAutoOpenKit?: () => void;
   onDrugSearch: (name: string) => void;
 };
 
 const ProtocolesPage = ({
   protoCategory,
   changeProtoCategory,
+  autoOpenKitId,
+  onAutoOpenKit,
   onDrugSearch,
 }: ProtocolesPageProps) => {
   const [protoFilter, setProtoFilter] = useState("Tout");
@@ -90,7 +94,12 @@ const ProtocolesPage = ({
       {protoCategory === "kits" && (
         <div className="protocol-list">
           {PREP_KITS.map((k) => (
-            <PrepKitCard key={k.id} kit={k} />
+            <PrepKitCard
+              key={k.id}
+              kit={k}
+              autoOpen={autoOpenKitId != null && autoOpenKitId === k.id}
+              onAutoOpen={onAutoOpenKit}
+            />
           ))}
         </div>
       )}

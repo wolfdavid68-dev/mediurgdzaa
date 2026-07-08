@@ -1,4 +1,11 @@
-import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { DRUGS } from "../data/drugs";
 import { enqueueSyncItem, pullKitChecks, type KitCheckPayload } from "../lib/deviceSync";
 import { useAuthProfile } from "../lib/authProfile";
@@ -49,10 +56,17 @@ const isSectionLabel = (m: string) => {
   return t.startsWith("—") && t.endsWith("—");
 };
 
-const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
+type PrepKitCardProps = {
+  kit: PrepKit;
+  autoOpen?: boolean;
+  onAutoOpen?: () => void;
+};
+
+const PrepKitCard = ({ kit, autoOpen, onAutoOpen }: PrepKitCardProps) => {
   const authProfile = useAuthProfile();
   const userId = authProfile?.id ?? null;
   const [open, setOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement | null>(null);
   const [activeTab, setActiveTab] = useState("drogues");
   const [schemaZoom, setSchemaZoom] = useState(false);
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>(() =>
@@ -103,8 +117,19 @@ const PrepKitCard = ({ kit }: { kit: PrepKit }) => {
     });
   }, [checkedItems, isChecklist, kit.id, userId]);
 
+  // Ouverture pilotée par deep link (?kit=… — cf. lib/deepLink.ts) : déploie
+  // le kit une seule fois, le fait défiler en tête d'écran (la liste des kits
+  // n'est pas filtrée, la carte cible peut être hors viewport), puis signale
+  // la consommation à App.
+  useEffect(() => {
+    if (!autoOpen) return;
+    setOpen(true);
+    onAutoOpen?.();
+    cardRef.current?.scrollIntoView({ block: "start" });
+  }, [autoOpen, onAutoOpen]);
+
   return (
-    <div className={`drug-card ${open ? "drug-card-open" : ""}`}>
+    <div ref={cardRef} className={`drug-card ${open ? "drug-card-open" : ""}`}>
       <button className="drug-header" onClick={() => setOpen(!open)}>
         <div className="drug-color-bar" style={{ background: kit.couleur }} />
         <div className="drug-main">

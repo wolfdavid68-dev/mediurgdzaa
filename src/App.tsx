@@ -40,6 +40,7 @@ import { useAuthProfile } from "./lib/authProfile";
 import { initializeDeviceSync } from "./lib/deviceSync";
 import { openTutoratWithCurrentSession, shouldOpenTutoratFromLogin } from "./lib/tutorat";
 import { filterDrugs as searchDrugs, getRecentDrugs as readRecentDrugs } from "./lib/drugSearch";
+import { resolveDeepLink } from "./lib/deepLink";
 import { safeGetItem, safeGetJson, safeSetItem, safeSetJson } from "./lib/safeStorage";
 import { STORAGE_KEYS } from "./lib/storageKeys";
 
@@ -123,6 +124,15 @@ const App = () => {
   }, []);
   const anyDrugOpen = openDrugs.size > 0;
 
+  // Auto-ouverture one-shot pilotée par deep link (?med=…, ?kit=…). L'id reste
+  // posé jusqu'à ce que la carte cible signale l'ouverture (onAutoOpen), puis
+  // il est remis à null pour que l'utilisateur reprenne la main (fermer la
+  // fiche, chercher autre chose) sans que le lien se rejoue.
+  const [autoOpenDrugId, setAutoOpenDrugId] = useState<number | null>(null);
+  const [autoOpenKitId, setAutoOpenKitId] = useState<string | null>(null);
+  const consumeAutoOpenDrug = useCallback(() => setAutoOpenDrugId(null), []);
+  const consumeAutoOpenKit = useCallback(() => setAutoOpenKitId(null), []);
+
   // Poids patient partagé entre toutes les fiches (poso, prep, PSE). Persisté
   // en localStorage avec auto-expiration 3 h — cf. usePatientWeight.
   // Tant qu'au moins une fiche est déployée, on tient un wake lock écran
@@ -170,41 +180,31 @@ const App = () => {
     };
   }, []);
 
-  // Lecture des query params au mount pour les raccourcis manifest (long-press
-  // de l'icône Android). ?mode=acr ouvre direct la modale URGENCE, ?page +
-  // ?tab basculent sur Protocoles + sous-onglet. Une fois appliqué, on nettoie
-  // l'URL via replaceState pour éviter qu'un refresh reproduise le raccourci.
+  // Lecture des query params au mount — raccourcis manifest (long-press de
+  // l'icône Android), raccourcis Siri / routines Assistant et liens externes.
+  // Paramètres supportés et règles de consommation : voir lib/deepLink.ts
+  // (?mode=acr, ?page, ?tab, ?kit=ktc, ?med=<nom|id>, ?poids=<kg>). Une fois
+  // appliqués, les params consommés sont retirés de l'URL via replaceState
+  // pour éviter qu'un refresh reproduise le raccourci ; ceux qui attendent
+  // l'accès complet restent en place et sont rejoués quand l'accès arrive.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get("mode");
-    const pageParam = params.get("page");
-    const tab = params.get("tab");
-    let dirty = false;
-    if (hasFullAppAccess && mode === "acr") {
-      setShowAcr(true);
-      dirty = true;
-    }
-    if (hasFullAppAccess && pageParam === "protocoles") {
-      setPage("protocoles");
-      dirty = true;
-    }
-    if (hasFullAppAccess && pageParam === "echelles") {
-      setPage("echelles");
-      dirty = true;
-    }
-    if (
-      hasFullAppAccess &&
-      (tab === "incompatibilites" || tab === "kits" || tab === "PISU" || tab === "ecg")
-    ) {
-      setProtoCategory(tab);
-      dirty = true;
-    }
-    if (dirty) {
-      try {
-        window.history.replaceState(window.history.state, "", window.location.pathname);
-      } catch {}
-    }
-  }, [hasFullAppAccess]);
+    const link = resolveDeepLink(window.location.search, hasFullAppAccess);
+    if (!link.dirty) return;
+    if (link.showAcr) setShowAcr(true);
+    if (link.page) setPage(link.page);
+    if (link.protoCategory) setProtoCategory(link.protoCategory);
+    if (link.search !== undefined) setSearch(link.search);
+    if (link.autoOpenDrugId !== undefined) setAutoOpenDrugId(link.autoOpenDrugId);
+    if (link.autoOpenKitId !== undefined) setAutoOpenKitId(link.autoOpenKitId);
+    if (link.patientWeight !== undefined) setPatientWeight(link.patientWeight);
+    try {
+      window.history.replaceState(
+        window.history.state,
+        "",
+        window.location.pathname + (link.cleanedSearch ? `?${link.cleanedSearch}` : "")
+      );
+    } catch {}
+  }, [hasFullAppAccess, setPatientWeight]);
 
   const toggleFavorite = (id: number) => {
     setFavorites((prev: Set<number>) => {
@@ -464,6 +464,8 @@ const App = () => {
                 showFavoritesOnly={showFavoritesOnly}
                 patientWeight={patientWeight}
                 prepPopulation={prepPopulation}
+                autoOpenDrugId={autoOpenDrugId}
+                onAutoOpenDrug={consumeAutoOpenDrug}
                 onToggleFavorite={toggleFavorite}
                 onOpen={addToHistory}
                 onOpenChange={handleDrugOpenChange}
@@ -475,6 +477,8 @@ const App = () => {
               <ProtocolesPage
                 protoCategory={protoCategory}
                 changeProtoCategory={changeProtoCategory}
+                autoOpenKitId={autoOpenKitId}
+                onAutoOpenKit={consumeAutoOpenKit}
                 onDrugSearch={(name: string) => {
                   navigateTo("medicaments");
                   setSearch(name);

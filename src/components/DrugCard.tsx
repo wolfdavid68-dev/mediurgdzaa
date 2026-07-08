@@ -114,6 +114,8 @@ type DrugCardProps = {
   isFavorite?: boolean;
   patientWeight?: string;
   prepPopulation?: "adulte" | "enfant" | null;
+  autoOpen?: boolean;
+  onAutoOpen?: () => void;
   onToggleFavorite?: (id: number) => void;
   onOpen?: (id: number) => void;
   onOpenChange?: (key: string, open: boolean) => void;
@@ -125,6 +127,8 @@ const DrugCard = ({
   isFavorite,
   patientWeight = "",
   prepPopulation,
+  autoOpen,
+  onAutoOpen,
   onToggleFavorite,
   onOpen,
   onOpenChange,
@@ -243,6 +247,15 @@ const DrugCard = ({
     onOpenChange?.(instanceId, open);
     return () => onOpenChange?.(instanceId, false);
   }, [open, instanceId, onOpenChange]);
+
+  // Ouverture pilotée par deep link (?med=… — cf. lib/deepLink.ts) : déploie
+  // la fiche puis signale la consommation à App (one-shot — l'utilisateur
+  // garde ensuite la main pour refermer sans que le lien se rejoue).
+  useEffect(() => {
+    if (!autoOpen) return;
+    setOpen(true);
+    onAutoOpen?.();
+  }, [autoOpen, onAutoOpen]);
 
   const toggleTab = (key: string) => setActiveTab(activeTab === key ? null : key);
 
