@@ -107,6 +107,52 @@ describe("resolveDeepLink", () => {
     });
   });
 
+  describe("?kit + ?onglet", () => {
+    test("onglet toujours disponible → appliqué", () => {
+      const r = resolveDeepLink("?kit=drain-thoracique&onglet=materiel", true);
+      expect(r.autoOpenKitId).toBe("drain-thoracique");
+      expect(r.autoOpenKitTab).toBe("materiel");
+      expect(r.cleanedSearch).toBe("");
+    });
+
+    test("alias « rearmement » → onglet materiel", () => {
+      const r = resolveDeepLink("?kit=drain-thoracique&onglet=rearmement", true);
+      expect(r.autoOpenKitTab).toBe("materiel");
+    });
+
+    test("onglet lignes réservé au kit ktc", () => {
+      expect(resolveDeepLink("?kit=ktc&onglet=lignes", true).autoOpenKitTab).toBe("lignes");
+      const r = resolveDeepLink("?kit=drain-thoracique&onglet=lignes", true);
+      expect(r.autoOpenKitTab).toBeUndefined();
+      expect(r.autoOpenKitId).toBe("drain-thoracique");
+    });
+
+    test("onglet schema seulement si le kit a un schéma", () => {
+      const withSchema = PREP_KITS.filter((k) => k.schema).map((k) => k.id);
+      const withoutSchema = PREP_KITS.filter((k) => !k.schema).map((k) => k.id);
+      for (const id of withSchema) {
+        expect(resolveDeepLink(`?kit=${id}&onglet=schema`, true).autoOpenKitTab).toBe("schema");
+      }
+      for (const id of withoutSchema) {
+        expect(resolveDeepLink(`?kit=${id}&onglet=schema`, true).autoOpenKitTab).toBeUndefined();
+      }
+    });
+
+    test("onglet inconnu → ignoré mais consommé", () => {
+      const r = resolveDeepLink("?kit=ktc&onglet=inexistant", true);
+      expect(r.autoOpenKitId).toBe("ktc");
+      expect(r.autoOpenKitTab).toBeUndefined();
+      expect(r.cleanedSearch).toBe("");
+    });
+
+    test("onglet sans kit → conservé tel quel", () => {
+      const r = resolveDeepLink("?onglet=materiel", true);
+      expect(r.autoOpenKitTab).toBeUndefined();
+      expect(r.dirty).toBe(false);
+      expect(r.cleanedSearch).toBe("onglet=materiel");
+    });
+  });
+
   describe("?med", () => {
     test("id numérique exact → recherche préremplie + fiche déployée", () => {
       const drug = DRUGS[0];

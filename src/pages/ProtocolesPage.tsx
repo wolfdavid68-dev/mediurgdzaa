@@ -21,6 +21,7 @@ type ProtocolesPageProps = {
   protoCategory: string;
   changeProtoCategory: (cat: string) => void;
   autoOpenKitId?: string | null;
+  autoOpenKitTab?: string | null;
   onAutoOpenKit?: () => void;
   onDrugSearch: (name: string) => void;
 };
@@ -29,6 +30,7 @@ const ProtocolesPage = ({
   protoCategory,
   changeProtoCategory,
   autoOpenKitId,
+  autoOpenKitTab,
   onAutoOpenKit,
   onDrugSearch,
 }: ProtocolesPageProps) => {
@@ -98,6 +100,7 @@ const ProtocolesPage = ({
               key={k.id}
               kit={k}
               autoOpen={autoOpenKitId != null && autoOpenKitId === k.id}
+              autoOpenTab={autoOpenKitTab}
               onAutoOpen={onAutoOpenKit}
             />
           ))}

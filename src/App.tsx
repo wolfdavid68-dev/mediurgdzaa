@@ -130,8 +130,12 @@ const App = () => {
   // fiche, chercher autre chose) sans que le lien se rejoue.
   const [autoOpenDrugId, setAutoOpenDrugId] = useState<number | null>(null);
   const [autoOpenKitId, setAutoOpenKitId] = useState<string | null>(null);
+  const [autoOpenKitTab, setAutoOpenKitTab] = useState<string | null>(null);
   const consumeAutoOpenDrug = useCallback(() => setAutoOpenDrugId(null), []);
-  const consumeAutoOpenKit = useCallback(() => setAutoOpenKitId(null), []);
+  const consumeAutoOpenKit = useCallback(() => {
+    setAutoOpenKitId(null);
+    setAutoOpenKitTab(null);
+  }, []);
 
   // Poids patient partagé entre toutes les fiches (poso, prep, PSE). Persisté
   // en localStorage avec auto-expiration 3 h — cf. usePatientWeight.
@@ -196,6 +200,7 @@ const App = () => {
     if (link.search !== undefined) setSearch(link.search);
     if (link.autoOpenDrugId !== undefined) setAutoOpenDrugId(link.autoOpenDrugId);
     if (link.autoOpenKitId !== undefined) setAutoOpenKitId(link.autoOpenKitId);
+    if (link.autoOpenKitTab !== undefined) setAutoOpenKitTab(link.autoOpenKitTab);
     if (link.patientWeight !== undefined) setPatientWeight(link.patientWeight);
     try {
       window.history.replaceState(
@@ -478,6 +483,7 @@ const App = () => {
                 protoCategory={protoCategory}
                 changeProtoCategory={changeProtoCategory}
                 autoOpenKitId={autoOpenKitId}
+                autoOpenKitTab={autoOpenKitTab}
                 onAutoOpenKit={consumeAutoOpenKit}
                 onDrugSearch={(name: string) => {
                   navigateTo("medicaments");

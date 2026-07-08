@@ -13,6 +13,10 @@ import type { Drug } from "../types/data";
 //   ?tab=PISU|incompatibilites|ecg|kits    — sous-onglet Protocoles (idem)
 //   ?kit=<id>                — ouvre Protocoles → Kits avec le kit déployé
 //                              (ex: ?kit=ktc ; accès complet requis)
+//   ?onglet=<tab>            — onglet du kit à afficher (avec ?kit uniquement) :
+//                              drogues|materiel|checklist|schema|lignes|
+//                              sequence|notes, alias « rearmement » → materiel.
+//                              Ignoré si l'onglet n'existe pas pour ce kit.
 //   ?med=<id ou nom>         — préremplit la recherche Médicaments ; si le
 //                              résultat est sans ambiguïté (id exact ou
 //                              résultat unique), la fiche s'ouvre déployée
@@ -31,6 +35,7 @@ export type DeepLinkResult = {
   search?: string;
   autoOpenDrugId?: number;
   autoOpenKitId?: string;
+  autoOpenKitTab?: string;
   patientWeight?: string;
   /** Query string restante après consommation (sans "?", "" si tout consommé). */
   cleanedSearch: string;
@@ -39,6 +44,34 @@ export type DeepLinkResult = {
 };
 
 const PROTO_TABS: ProtoTab[] = ["PISU", "incompatibilites", "ecg", "kits"];
+
+// Alias vocaux → clé d'onglet réelle de PrepKitCard (le libellé affiché
+// « Réarmement » correspond à l'onglet interne "materiel" des kits cochables).
+const KIT_TAB_ALIASES: Record<string, string> = {
+  rearmement: "materiel",
+  "check-list": "checklist",
+};
+
+// Un onglet n'est proposé par PrepKitCard que si le kit a les données
+// correspondantes — mêmes conditions que le rendu des <Tab> dans la carte.
+const kitTabAvailable = (kit: (typeof PREP_KITS)[number], tab: string): boolean => {
+  switch (tab) {
+    case "drogues":
+    case "materiel":
+    case "sequence":
+      return true;
+    case "checklist":
+      return Array.isArray(kit.checklist) && kit.checklist.length > 0;
+    case "schema":
+      return Boolean(kit.schema);
+    case "lignes":
+      return kit.id === "ktc";
+    case "notes":
+      return Boolean(kit.notes && kit.notes.length > 0);
+    default:
+      return false;
+  }
+};
 
 const findDrugForParam = (raw: string): { search: string; drug?: Drug; unique: boolean } => {
   const trimmed = raw.trim();
@@ -107,6 +140,8 @@ export const resolveDeepLink = (
   }
 
   // Kit de préparation (ex: ?kit=ktc) — implique Protocoles → onglet Kits.
+  // ?onglet cible l'onglet interne du kit (ex: ?kit=drain-thoracique&onglet=materiel
+  // pour la check-list de réarmement) ; ignoré s'il n'existe pas pour ce kit.
   const kitParam = params.get("kit");
   if (hasFullAppAccess && kitParam !== null) {
     const kit = PREP_KITS.find((k) => k.id === kitParam.trim().toLowerCase());
@@ -114,7 +149,14 @@ export const resolveDeepLink = (
       result.page = "protocoles";
       result.protoCategory = "kits";
       result.autoOpenKitId = kit.id;
+      const ongletRaw = params.get("onglet");
+      if (ongletRaw !== null) {
+        const normalized = ongletRaw.trim().toLowerCase();
+        const onglet = KIT_TAB_ALIASES[normalized] ?? normalized;
+        if (kitTabAvailable(kit, onglet)) result.autoOpenKitTab = onglet;
+      }
     }
+    if (params.has("onglet")) consume("onglet");
     consume("kit");
   }
 

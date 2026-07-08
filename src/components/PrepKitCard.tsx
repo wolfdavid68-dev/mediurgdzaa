@@ -59,10 +59,11 @@ const isSectionLabel = (m: string) => {
 type PrepKitCardProps = {
   kit: PrepKit;
   autoOpen?: boolean;
+  autoOpenTab?: string | null;
   onAutoOpen?: () => void;
 };
 
-const PrepKitCard = ({ kit, autoOpen, onAutoOpen }: PrepKitCardProps) => {
+const PrepKitCard = ({ kit, autoOpen, autoOpenTab, onAutoOpen }: PrepKitCardProps) => {
   const authProfile = useAuthProfile();
   const userId = authProfile?.id ?? null;
   const [open, setOpen] = useState(false);
@@ -117,16 +118,18 @@ const PrepKitCard = ({ kit, autoOpen, onAutoOpen }: PrepKitCardProps) => {
     });
   }, [checkedItems, isChecklist, kit.id, userId]);
 
-  // Ouverture pilotée par deep link (?kit=… — cf. lib/deepLink.ts) : déploie
-  // le kit une seule fois, le fait défiler en tête d'écran (la liste des kits
-  // n'est pas filtrée, la carte cible peut être hors viewport), puis signale
-  // la consommation à App.
+  // Ouverture pilotée par deep link (?kit=…&onglet=… — cf. lib/deepLink.ts) :
+  // déploie le kit une seule fois sur l'onglet demandé (déjà validé pour ce
+  // kit par resolveDeepLink), le fait défiler en tête d'écran (la liste des
+  // kits n'est pas filtrée, la carte cible peut être hors viewport), puis
+  // signale la consommation à App.
   useEffect(() => {
     if (!autoOpen) return;
     setOpen(true);
+    if (autoOpenTab) setActiveTab(autoOpenTab);
     onAutoOpen?.();
     cardRef.current?.scrollIntoView({ block: "start" });
-  }, [autoOpen, onAutoOpen]);
+  }, [autoOpen, autoOpenTab, onAutoOpen]);
 
   return (
     <div ref={cardRef} className={`drug-card ${open ? "drug-card-open" : ""}`}>

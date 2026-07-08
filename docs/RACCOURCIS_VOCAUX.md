@@ -20,6 +20,7 @@ rejoue pas le raccourci.
 | `/?page=medicaments` \| `protocoles` \| `echelles` | Ouvre la page demandée |
 | `/?page=protocoles&tab=PISU` \| `incompatibilites` \| `ecg` \| `kits` | Ouvre Protocoles sur le sous-onglet |
 | `/?kit=ktc` | Ouvre Protocoles → Kits avec le **kit déployé** et amené à l'écran (ids : voir `PREP_KITS` dans `src/data/prepKits.js`, ex. `ktc`, `isr`, `pa`, `drain-thoracique`) |
+| `/?kit=drain-thoracique&onglet=materiel` | Idem, ouvert directement sur l'**onglet demandé** — `materiel` (alias `rearmement`, la check-list cochable), `checklist`, `schema`, `lignes` (KTC), `sequence`, `notes`. Un onglet inexistant pour ce kit est ignoré |
 | `/?med=CORDARONE` | Ouvre Médicaments avec la recherche préremplie ; si le résultat est **sans ambiguïté**, la fiche s'ouvre déployée |
 | `/?med=42` | Idem par id de médicament (toujours sans ambiguïté → fiche déployée) |
 | `/?poids=80` ou `/?poids=12,5` | Prérègle le **poids patient** (borné à 300 kg, virgule ou point acceptés ; expire au bout de 3 h comme une saisie manuelle) |
@@ -29,6 +30,7 @@ Les paramètres se combinent :
 ```
 https://<domaine>/?med=CORDARONE&poids=80
 https://<domaine>/?kit=ktc
+https://<domaine>/?kit=drain-thoracique&onglet=materiel   ← « check-list du drain thoracique »
 https://<domaine>/?mode=acr&poids=25
 ```
 
