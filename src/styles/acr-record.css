@@ -866,20 +866,11 @@
      dossier clinique compact et barre d'actions basse.
      ─────────────────────────────────────────────── */
   .acr-record-dialog {
-    width: min(720px, 100vw);
-    max-width: min(720px, 100vw);
-    height: min(1280px, 100dvh);
-    max-height: 100dvh;
-    border: 0;
-    border-radius: 0;
-    background: #070b13;
-    box-shadow: 0 30px 110px rgb(0 0 0 / 0.72);
-  }
-
-  .acr-record-modal {
     --acr-red: #f04455;
-    --acr-red-soft: rgb(240 68 85 / 0.2);
-    --acr-red-line: rgb(240 68 85 / 0.58);
+    --acr-red-soft: rgb(240 68 85 / 0.16);
+    --acr-red-line: rgb(240 68 85 / 0.46);
+    --acr-bg: #080d16;
+    --acr-bg-deep: #070b13;
     --acr-panel: #101722;
     --acr-panel-2: #0d131d;
     --acr-field: #111925;
@@ -888,7 +879,37 @@
     --acr-soft: #c5cad5;
     --acr-green: #55b987;
     --acr-blue: #5aa7ff;
-    background: linear-gradient(180deg, rgb(13 18 29 / 0.94), #080d16 38%, #070b13), #080d16;
+    --acr-shadow-card: 0 8px 18px rgb(0 0 0 / 0.22);
+    --acr-shadow-dialog: 0 24px 70px rgb(0 0 0 / 0.58);
+    width: min(720px, 100vw);
+    max-width: min(720px, 100vw);
+    height: min(1280px, 100dvh);
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    background: var(--acr-bg-deep);
+    box-shadow: var(--acr-shadow-dialog);
+  }
+
+  .acr-record-modal {
+    --acr-red: #f04455;
+    --acr-red-soft: rgb(240 68 85 / 0.16);
+    --acr-red-line: rgb(240 68 85 / 0.46);
+    --acr-bg: #080d16;
+    --acr-bg-deep: #070b13;
+    --acr-panel: #101722;
+    --acr-panel-2: #0d131d;
+    --acr-field: #111925;
+    --acr-line: #222b3a;
+    --acr-muted: #8d98aa;
+    --acr-soft: #c5cad5;
+    --acr-green: #55b987;
+    --acr-blue: #5aa7ff;
+    --acr-shadow-card: 0 8px 18px rgb(0 0 0 / 0.22);
+    --acr-shadow-dialog: 0 24px 70px rgb(0 0 0 / 0.58);
+    background:
+      linear-gradient(180deg, rgb(13 18 29 / 0.94), var(--acr-bg) 38%, var(--acr-bg-deep)),
+      var(--acr-bg);
     color: #eef2f8;
     font-size: 13px;
     line-height: 1.25;
@@ -900,7 +921,7 @@
     min-height: 70px;
     padding: max(12px, var(--safe-top)) 20px 12px;
     border-bottom: 1px solid var(--acr-line);
-    background: #090e18;
+    background: color-mix(in oklab, var(--acr-bg) 88%, black);
   }
 
   .acr-record-brand {
@@ -908,14 +929,12 @@
     height: 46px;
     border: 2px solid var(--acr-red);
     border-radius: 50%;
-    background: rgb(240 68 85 / 0.08);
+    background: var(--acr-red-soft);
     color: var(--acr-red);
     font-family: var(--mono);
     font-size: 12px;
     letter-spacing: 0;
-    box-shadow:
-      0 0 0 5px rgb(240 68 85 / 0.06),
-      inset 0 0 0 1px rgb(255 255 255 / 0.04);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
   }
 
   .acr-record-kicker {
@@ -946,11 +965,11 @@
 
   .acr-record-close,
   .acr-record-header-action {
-    width: 42px;
-    height: 42px;
-    border: 1px solid #283142;
+    width: 44px;
+    height: 44px;
+    border: 1px solid color-mix(in oklab, var(--acr-line) 86%, white);
     border-radius: 50%;
-    background: #0e1520;
+    background: var(--acr-panel-2);
     color: #d4d9e3;
     display: inline-flex;
     align-items: center;
@@ -972,7 +991,7 @@
 
   .acr-record-content {
     padding: 8px 20px 14px;
-    background: #080d16;
+    background: var(--acr-bg);
   }
 
   .acr-record-topcards {
@@ -986,8 +1005,8 @@
   .acr-record-section {
     border: 1px solid var(--acr-line);
     border-radius: 10px;
-    background: linear-gradient(180deg, #111824, #0d131d);
-    box-shadow: 0 10px 28px rgb(0 0 0 / 0.28);
+    background: linear-gradient(180deg, var(--acr-panel), var(--acr-panel-2));
+    box-shadow: var(--acr-shadow-card);
   }
 
   .acr-record-timecard {
@@ -995,7 +1014,7 @@
     min-height: 104px;
     padding: 17px 18px 14px 74px;
     border-color: var(--acr-red-line);
-    background: linear-gradient(180deg, rgb(240 68 85 / 0.08), transparent 62%), #11131f;
+    background: linear-gradient(180deg, var(--acr-red-soft), transparent 62%), #11131f;
   }
 
   .acr-record-timecard::before {
@@ -1069,9 +1088,9 @@
   .acr-record-input-wrap,
   .acr-record-textarea textarea,
   .acr-cycle-input input {
-    border-color: #263040;
+    border-color: color-mix(in oklab, var(--acr-line) 90%, white);
     border-radius: 6px;
-    background: #101722;
+    background: var(--acr-field);
   }
 
   .acr-record-patient-input-wrap {
@@ -1097,8 +1116,8 @@
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     gap: 10px;
     padding: 10px 12px;
-    border-bottom: 1px solid #202838;
-    background: #101722;
+    border-bottom: 1px solid var(--acr-line);
+    background: var(--acr-panel);
   }
 
   .acr-record-section-index {
@@ -1212,10 +1231,11 @@
   .acr-record-actions-menu button {
     border-color: #253044;
     border-radius: 6px;
-    background: #101722;
+    background: var(--acr-panel);
     color: #aab2c1;
     font-size: 12px;
     font-weight: 800;
+    min-width: 44px;
     min-height: 32px;
     padding: 7px 11px;
   }
@@ -1225,7 +1245,63 @@
     border-color: var(--acr-red-line);
     background: linear-gradient(180deg, #e53749, #bb2232);
     color: #fff;
-    box-shadow: 0 0 18px rgb(240 68 85 / 0.22);
+    box-shadow: 0 8px 16px rgb(240 68 85 / 0.16);
+  }
+
+  .acr-record-section-head,
+  .acr-record-chip,
+  .acr-record-check,
+  .acr-record-header-action,
+  .acr-record-close,
+  .acr-record-toolbar button,
+  .acr-record-actions-menu button,
+  .acr-record-input-wrap,
+  .acr-record-textarea textarea,
+  .acr-cycle-input input {
+    transition:
+      background 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease,
+      box-shadow 0.16s ease,
+      transform 0.16s ease;
+  }
+
+  .acr-record-section-head:hover,
+  .acr-record-chip:hover,
+  .acr-record-check:hover,
+  .acr-record-header-action:hover,
+  .acr-record-close:hover,
+  .acr-record-actions-menu button:hover {
+    border-color: color-mix(in oklab, var(--acr-blue) 48%, var(--acr-line));
+    background: color-mix(in oklab, var(--acr-panel) 86%, white);
+    color: #f4f7fb;
+  }
+
+  .acr-record-chip:active,
+  .acr-record-check:active,
+  .acr-record-toolbar button:active,
+  .acr-record-actions-menu button:active,
+  .acr-record-header-action:active,
+  .acr-record-close:active {
+    transform: translateY(1px);
+  }
+
+  .acr-record-input-wrap:focus-within,
+  .acr-record-textarea textarea:focus-visible,
+  .acr-cycle-input input:focus-visible {
+    border-color: var(--acr-blue);
+    box-shadow: 0 0 0 3px rgb(90 167 255 / 0.18);
+  }
+
+  .acr-record-modal :where(button, input, textarea):focus-visible {
+    outline: 2px solid var(--acr-blue);
+    outline-offset: 2px;
+  }
+
+  .acr-record-modal button:disabled {
+    cursor: wait;
+    opacity: 0.62;
+    transform: none;
   }
 
   .acr-record-check {
@@ -1350,8 +1426,8 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.96fr) minmax(0, 1.22fr);
     gap: 20px;
     padding: 14px 20px calc(14px + var(--safe-bottom));
-    border-top: 1px solid #222b3a;
-    background: #090e18;
+    border-top: 1px solid var(--acr-line);
+    background: color-mix(in oklab, var(--acr-bg) 88%, black);
   }
 
   .acr-record-toolbar button {
@@ -1365,7 +1441,7 @@
     border-color: rgb(255 255 255 / 0.1) !important;
     background: linear-gradient(180deg, #e03a49, #b91e2d) !important;
     color: #fff !important;
-    box-shadow: 0 12px 24px rgb(240 68 85 / 0.24);
+    box-shadow: 0 8px 18px rgb(240 68 85 / 0.2);
   }
 
   .acr-record-toolbar-outline {
@@ -1386,6 +1462,18 @@
     color: #79b8ff !important;
   }
 
+  .acr-record-toolbar-primary:hover {
+    background: linear-gradient(180deg, #ec4958, #c72434) !important;
+  }
+
+  .acr-record-toolbar-outline:hover {
+    background: rgb(240 68 85 / 0.1) !important;
+  }
+
+  .acr-record-toolbar-action:hover {
+    background: rgb(90 167 255 / 0.14) !important;
+  }
+
   .acr-record-toolbar-action::after {
     content: none;
     margin-left: 9px;
@@ -1401,10 +1489,10 @@
     display: grid;
     gap: 7px;
     padding: 9px;
-    border: 1px solid #263044;
+    border: 1px solid color-mix(in oklab, var(--acr-line) 90%, white);
     border-radius: 10px;
-    background: #101722;
-    box-shadow: 0 20px 42px rgb(0 0 0 / 0.45);
+    background: var(--acr-panel);
+    box-shadow: 0 16px 34px rgb(0 0 0 / 0.38);
   }
 
   .acr-record-actions-menu button {
@@ -1453,8 +1541,8 @@
 
     .acr-record-close,
     .acr-record-header-action {
-      width: 38px;
-      height: 38px;
+      width: 44px;
+      height: 44px;
     }
 
     .acr-record-topcards {
@@ -1565,61 +1653,13 @@
     }
   }
 
-  /* ── Print / PDF ──────────────────────────────── */
+  /* Print / PDF : la feuille dédiée vit hors @layer, en fin de fichier.
+     Seule exception ici : les couleurs posées en !important dans ce layer
+     gagneraient sinon sur la feuille d'impression (cascade des importants). */
   @media print {
-    body:has(.acr-record-dialog[open]) * {
-      visibility: hidden !important;
-    }
-
-    body:has(.acr-record-dialog[open]) .acr-record-dialog,
-    body:has(.acr-record-dialog[open]) .acr-record-dialog * {
-      visibility: visible !important;
-    }
-
-    .acr-record-dialog[open] {
-      position: absolute;
-      inset: 0;
-      width: 100% !important;
-      max-width: none !important;
-      height: auto !important;
-      max-height: none !important;
-      border: 0;
-      border-radius: 0;
-      box-shadow: none;
-      overflow: visible;
-    }
-
-    .acr-record-modal,
-    .acr-record-content,
-    .acr-record-sections {
-      height: auto;
-      overflow: visible;
-      background: var(--bg) !important;
-      color: var(--text) !important;
-      print-color-adjust: exact;
-      -webkit-print-color-adjust: exact;
-    }
-
-    .acr-record-toolbar,
-    .acr-record-close,
-    [data-export-ignore="true"] {
-      display: none !important;
-    }
-
-    .acr-record-sections {
-      display: block;
-      padding: 0;
-    }
-
-    .acr-record-section,
-    .acr-record-timecard,
-    .acr-record-patient-card {
-      break-inside: avoid;
-      box-shadow: none;
-      margin: 0 0 10px;
-      border-color: var(--border) !important;
-      background: var(--card) !important;
-      color: var(--text) !important;
+    .acr-cycle-choc {
+      color: #111 !important;
+      font-size: 9px !important;
     }
   }
 }
@@ -1707,10 +1747,6 @@
 
 .acr-record-patient-card > strong {
   margin-top: 4px;
-}
-
-.acr-record-patient-inline {
-  display: none;
 }
 
 .acr-record-patient-inline small {
@@ -1819,24 +1855,44 @@
   white-space: nowrap;
 }
 
-.acr-record-section-body > .acr-record-check:has(+ .acr-record-causes) {
-  display: none;
-}
-
-.acr-record-wake-signs {
-  display: none;
-}
-
-.acr-record-racs-obtained {
-  display: none;
-}
-
-.acr-record-wake-signs + .acr-record-check-grid {
-  display: none;
-}
-
 .acr-record-causes + .acr-record-check-grid {
   display: none;
+}
+
+.acr-record-wake-precision {
+  margin-top: 8px;
+}
+
+/* Sections repliables : l'en-tête est un vrai <button>. */
+.acr-record-section-head {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--acr-line);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.acr-record-section-chevron {
+  transition: transform 0.18s ease;
+}
+
+.acr-record-section:not(.acr-record-section-collapsed) .acr-record-section-chevron {
+  transform: rotate(180deg);
+}
+
+.acr-record-section-collapsed .acr-record-section-head {
+  border-bottom-color: transparent;
+}
+
+.acr-record-section-collapsed .acr-record-section-body {
+  display: none;
+}
+
+/* L'export PNG doit capturer le dossier complet, sections repliées incluses. */
+.acr-record-content[data-acr-export="1"] .acr-record-section-body {
+  display: block !important;
 }
 
 .acr-record-cycle-table {
@@ -1887,24 +1943,24 @@
     height: min(920px, calc(100dvh - 24px));
     max-height: calc(100dvh - 24px);
     margin: auto;
-    border: 1px solid #263044;
-    border-radius: 22px;
-    background: #080d16;
+    border: 1px solid var(--acr-line);
+    border-radius: 16px;
+    background: var(--acr-bg);
     box-shadow:
-      0 32px 90px rgb(0 0 0 / 0.62),
+      0 24px 64px rgb(0 0 0 / 0.56),
       0 0 0 1px rgb(255 255 255 / 0.03);
   }
 
   .acr-record-modal {
     border-radius: inherit;
-    background: #080d16;
+    background: var(--acr-bg);
   }
 
   .acr-record-header {
     grid-template-columns: auto minmax(260px, 1fr) auto auto auto;
     min-height: 76px;
     padding: max(14px, var(--safe-top)) 24px 14px;
-    border-bottom-color: #253044;
+    border-bottom-color: var(--acr-line);
   }
 
   .acr-record-brand {
@@ -1950,8 +2006,8 @@
     gap: 18px;
     min-height: 34px;
     padding: 0 24px;
-    border-bottom: 1px solid #253044;
-    background: #073456;
+    border-bottom: 1px solid var(--acr-line);
+    background: color-mix(in oklab, var(--acr-blue) 26%, var(--acr-bg));
     color: #dbe8f6;
     font-size: 12px;
     font-weight: 760;
@@ -1977,7 +2033,7 @@
   .acr-record-timecard,
   .acr-record-patient-card {
     min-height: 118px;
-    box-shadow: 0 14px 34px rgb(0 0 0 / 0.3);
+    box-shadow: var(--acr-shadow-card);
   }
 
   .acr-record-timecard {
@@ -2010,65 +2066,35 @@
     margin-top: 12px;
   }
 
+  /* Grille dense : sections appariées 1|2, 3|4 et 7|8, le reste en pleine
+     largeur. Pas de flex + order + margin : pas de trous entre les cartes. */
   .acr-record-sections {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
   }
 
   .acr-record-section {
     border-radius: 12px;
+    grid-column: 1 / -1;
   }
 
-  .acr-record-section:nth-child(1) {
-    order: 1;
-    flex: 0 0 290px;
-  }
-
-  .acr-record-section:nth-child(2) {
-    order: 2;
-    flex: 1 1 calc(100% - 302px);
-  }
-
-  .acr-record-section:nth-child(3) {
-    order: 4;
-    flex: 1 1 calc(100% - 302px);
-  }
-
-  .acr-record-section:nth-child(4) {
-    order: 3;
-    flex: 0 0 290px;
-  }
-
-  .acr-record-section:nth-child(5) {
-    order: 5;
-    flex: 0 0 calc(100% - 302px);
-    margin-left: 302px;
-  }
-
-  .acr-record-section:nth-child(6) {
-    order: 6;
-    flex: 0 0 calc(100% - 302px);
-    margin-left: 302px;
-  }
-
+  .acr-record-section:nth-child(1),
+  .acr-record-section:nth-child(3),
   .acr-record-section:nth-child(7) {
-    order: 7;
-    flex: 0 0 calc(100% - 302px);
-    margin-left: 302px;
+    grid-column: 1;
   }
 
+  .acr-record-section:nth-child(2),
+  .acr-record-section:nth-child(4),
   .acr-record-section:nth-child(8) {
-    order: 8;
-    flex: 0 0 calc(100% - 302px);
-    margin-left: 302px;
+    grid-column: 2;
   }
 
-  .acr-record-sections > .acr-record-events-card {
-    order: 9;
-    flex: 0 0 calc(100% - 302px);
-    margin-left: 302px;
+  /* Étiquette collée à son champ : l'input ne s'étire plus sur toute la carte. */
+  .acr-record-compact-fields .acr-record-field {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 230px);
   }
 
   .acr-record-section-head {
@@ -2082,35 +2108,20 @@
 
   .acr-record-analyse-row,
   .acr-record-vvp-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .acr-record-section:nth-child(3) .acr-record-analyse-row {
-    grid-template-columns: minmax(230px, 0.5fr) minmax(0, 1fr);
+    grid-template-columns: minmax(200px, 0.55fr) minmax(0, 1fr);
+    gap: 10px;
   }
 
   .acr-record-fields-three {
-    grid-template-columns: 1fr;
-  }
-
-  .acr-record-section:nth-child(1) .acr-record-fields-two {
-    grid-template-columns: 1fr;
-  }
-
-  .acr-record-section:nth-child(4) .acr-record-fields-three {
-    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .acr-record-chip {
     white-space: nowrap;
   }
 
-  .acr-record-causes .acr-record-chip-group {
-    grid-template-columns: 1fr;
-  }
-
   .acr-record-causes .acr-record-chip {
+    min-width: 44px;
     min-height: 30px;
     font-size: 11.5px;
   }
@@ -2138,81 +2149,29 @@
   }
 }
 
-@media screen and (min-width: 1240px) {
-  .acr-record-content {
-    display: block;
-  }
-
-  .acr-record-sections {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .acr-record-section:nth-child(1) {
-    order: 1;
-    flex: 0 0 310px;
-    margin-left: 0;
-  }
-
-  .acr-record-section:nth-child(2) {
-    order: 2;
-    flex: 1 1 calc(100% - 322px);
-    margin-left: 0;
-  }
-
-  .acr-record-section:nth-child(3) {
-    order: 4;
-    flex: 1 1 calc(100% - 322px);
-    margin-left: 0;
-  }
-
-  .acr-record-section:nth-child(4) {
-    order: 3;
-    flex: 0 0 310px;
-    margin-left: 0;
-  }
-
-  .acr-record-section:nth-child(5) {
-    order: 5;
-    flex: 0 0 calc(100% - 322px);
-    margin-left: 322px;
-  }
-
-  .acr-record-section:nth-child(6) {
-    order: 6;
-    flex: 0 0 calc(100% - 322px);
-    margin-left: 322px;
-  }
-
-  .acr-record-section:nth-child(7) {
-    order: 7;
-    flex: 0 0 calc(100% - 322px);
-    margin-left: 322px;
-  }
-
-  .acr-record-section:nth-child(8) {
-    order: 8;
-    flex: 0 0 calc(100% - 322px);
-    margin-left: 322px;
-  }
-
-  .acr-record-sections > .acr-record-events-card {
-    order: 9;
-    flex: 0 0 calc(100% - 322px);
-    margin-left: 322px;
-  }
-}
-
 /* Le dossier ACR doit suivre le thème choisi par l'utilisateur, y compris
    quand il est rendu dans le top layer <dialog> ou cloné pour l'export PNG. */
 [data-theme="light"] .acr-record-dialog,
 .acr-record-dialog[data-acr-theme="light"] {
+  --acr-red: #d42b2b;
+  --acr-red-soft: rgb(212 43 43 / 0.1);
+  --acr-red-line: rgb(212 43 43 / 0.34);
+  --acr-bg: #e8edf5;
+  --acr-bg-deep: #dfe7f2;
+  --acr-panel: #ffffff;
+  --acr-panel-2: #f8fafc;
+  --acr-field: #ffffff;
+  --acr-line: #c8d1e1;
+  --acr-muted: #64748b;
+  --acr-soft: #334155;
+  --acr-green: #1a9440;
+  --acr-blue: #0a7ae0;
+  --acr-shadow-card: 0 6px 16px rgb(15 23 42 / 0.08);
+  --acr-shadow-dialog: 0 22px 64px rgb(15 23 42 / 0.22);
   border-color: #c8d1e1;
   background: #e8edf5;
   box-shadow:
-    0 28px 90px rgb(15 23 42 / 0.24),
+    var(--acr-shadow-dialog),
     0 0 0 1px rgb(15 23 42 / 0.06);
 }
 
@@ -2230,6 +2189,8 @@
   --acr-soft: #334155;
   --acr-green: #1a9440;
   --acr-blue: #0a7ae0;
+  --acr-shadow-card: 0 6px 16px rgb(15 23 42 / 0.08);
+  --acr-shadow-dialog: 0 22px 64px rgb(15 23 42 / 0.22);
   background: linear-gradient(180deg, #f8fafc 0%, #eef4fb 42%, #e8edf5 100%);
   color: #111827;
 }
@@ -2302,7 +2263,7 @@
   border-color: #c8d1e1;
   background: linear-gradient(180deg, #ffffff, #f8fafc);
   color: #111827;
-  box-shadow: 0 10px 28px rgb(15 23 42 / 0.1);
+  box-shadow: var(--acr-shadow-card);
 }
 
 [data-theme="light"] .acr-record-timecard,
@@ -2430,7 +2391,7 @@
   border-color: rgb(212 43 43 / 0.48);
   background: linear-gradient(180deg, #e33b47, #c52632);
   color: #ffffff;
-  box-shadow: 0 10px 22px rgb(212 43 43 / 0.18);
+  box-shadow: 0 8px 18px rgb(212 43 43 / 0.16);
 }
 
 [data-theme="light"] .acr-record-causes > div,
@@ -2488,7 +2449,7 @@
 .acr-record-dialog[data-acr-theme="light"] .acr-record-actions-menu {
   border-color: #c8d1e1;
   background: #ffffff;
-  box-shadow: 0 20px 42px rgb(15 23 42 / 0.16);
+  box-shadow: 0 14px 30px rgb(15 23 42 / 0.14);
 }
 
 @media (max-width: 980px) {
@@ -2540,5 +2501,550 @@
 
   .acr-record-toolbar button {
     padding: 8px;
+  }
+}
+
+/* ── Impression / Export PDF ─────────────────────────────────────────
+   Rendu « formulaire papier » : A4 paysage à taille fixe, deux colonnes,
+   pensé pour l'impression NOIR ET BLANC du service — bandeaux fléchés
+   noirs, sélections en case cochée pleine (❑ → ■), lignes d'écriture,
+   tableau de cycles quadrillé. Aucune dépendance au thème écran. */
+@page {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  /* Jamais de fond sombre autour du formulaire, même avec l'option
+     « graphiques d'arrière-plan » cochée dans la boîte d'impression. */
+  html:has(.acr-record-dialog[open]),
+  body:has(.acr-record-dialog[open]) {
+    background: #fff !important;
+  }
+
+  body:has(.acr-record-dialog[open]) * {
+    visibility: hidden !important;
+  }
+
+  body:has(.acr-record-dialog[open]) .acr-record-dialog,
+  body:has(.acr-record-dialog[open]) .acr-record-dialog * {
+    visibility: visible !important;
+  }
+
+  .acr-record-dialog[open] {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .acr-record-modal,
+  .acr-record-content {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .acr-record-toolbar,
+  .acr-record-close,
+  .acr-record-header-action,
+  .acr-record-brand,
+  .acr-record-desktop-strip,
+  .acr-record-desktop-status,
+  .acr-record-actions-menu,
+  .acr-record-time-icon,
+  .acr-record-section-status,
+  .acr-record-section-chevron,
+  [data-export-ignore="true"] {
+    display: none !important;
+  }
+
+  /* ── En-tête façon formulaire ── */
+  .acr-record-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    padding: 0 0 5px !important;
+    border: 0 !important;
+    border-bottom: 2px solid #111 !important;
+    background: #fff !important;
+  }
+
+  .acr-record-header h3 {
+    color: #111 !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-subtitle {
+    justify-content: center !important;
+    margin-top: 2px !important;
+    color: #333 !important;
+    font-size: 9.5px !important;
+  }
+
+  .acr-record-subtitle span + span::before {
+    color: #333 !important;
+  }
+
+  /* ── Cartes hautes : chrono encadré + patient en « étiquette » ── */
+  .acr-record-topcards {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5mm !important;
+    margin: 6px 0 7px !important;
+  }
+
+  .acr-record-timecard,
+  .acr-record-patient-card {
+    min-height: 0 !important;
+    padding: 5px 9px !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+  }
+
+  .acr-record-timecard {
+    border: 1px solid #333 !important;
+  }
+
+  /* Zone patient anonyme : cadre pointillé type « étiquette » */
+  .acr-record-patient-card {
+    border: 1.2px dashed #444 !important;
+  }
+
+  .acr-record-timecard > span,
+  .acr-record-patient-card > span {
+    color: #111 !important;
+    font-size: 7.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-timecard strong {
+    margin-top: 1px !important;
+    color: #111 !important;
+    font-size: 17px !important;
+  }
+
+  .acr-record-timecard small,
+  .acr-record-patient-card > em,
+  .acr-record-patient-card > small {
+    margin-top: 1px !important;
+    color: #444 !important;
+    font-size: 8.5px !important;
+  }
+
+  .acr-record-patient-card > strong {
+    color: #111 !important;
+    font-size: 11px !important;
+  }
+
+  .acr-record-patient-inline {
+    display: flex !important;
+    margin: 3px 0 1px !important;
+  }
+
+  .acr-record-patient-inline small {
+    color: #444 !important;
+  }
+
+  /* ── Deux colonnes, comme le formulaire papier ── */
+  .acr-record-sections {
+    display: block !important;
+    column-count: 2;
+    column-gap: 7mm;
+  }
+
+  /* Section sans cadre : le bandeau fléché structure la page */
+  .acr-record-section {
+    display: block !important;
+    break-inside: avoid;
+    margin: 0 0 8px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  /* Le suivi de la réanimation peut s'étendre (cycles nombreux) */
+  .acr-record-section:nth-child(5) {
+    break-inside: auto;
+  }
+
+  /* Bandeau fléché noir, texte blanc — identique au formulaire papier */
+  .acr-record-section-head {
+    min-height: 0 !important;
+    padding: 3px 18px 3px 8px !important;
+    border: 0 !important;
+    background: #111 !important;
+    color: #fff !important;
+    cursor: default !important;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+
+  .acr-record-section-head h4 {
+    color: #fff !important;
+    font-size: 10px !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-section-subtitle {
+    margin-top: 0 !important;
+    color: #ddd !important;
+    font-size: 7.5px !important;
+  }
+
+  .acr-record-section-index {
+    width: 14px !important;
+    height: 14px !important;
+    border: 1.3px solid #fff !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 9px !important;
+  }
+
+  /* Tout imprimer, même les sections repliées à l'écran */
+  .acr-record-section-body {
+    display: block !important;
+    padding: 5px 2px 0 !important;
+    background: #fff !important;
+  }
+
+  /* ── Champs : ligne d'écriture comme sur papier ── */
+  .acr-record-field > span,
+  .acr-record-textarea > span,
+  .acr-record-chip-label,
+  .acr-record-causes > div > strong {
+    color: #111 !important;
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+  }
+
+  .acr-record-fields {
+    gap: 4px !important;
+  }
+
+  /* Chaque champ sur sa ligne : étiquette à gauche, valeur soulignée à droite */
+  .acr-record-fields-two,
+  .acr-record-fields-three {
+    grid-template-columns: 1fr !important;
+  }
+
+  .acr-record-compact-fields .acr-record-field,
+  .acr-record-field {
+    grid-template-columns: minmax(0, 1fr) 150px !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .acr-record-input-wrap,
+  .acr-record-patient-input-wrap {
+    min-height: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px dotted #333 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  .acr-record-input-wrap input,
+  .acr-record-patient-input-wrap input {
+    padding: 1px 3px !important;
+    color: #111 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+  }
+
+  .acr-record-input-wrap em,
+  .acr-record-patient-input-wrap em {
+    color: #444 !important;
+    font-size: 8px !important;
+  }
+
+  .acr-record-textarea textarea {
+    min-height: 46px !important;
+    border: 1px solid #444 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 10px !important;
+    resize: none !important;
+  }
+
+  .acr-record-analyse-row,
+  .acr-record-vvp-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 4px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* ── Chips = cases à cocher du formulaire (❑ libellé / ■ coché) ── */
+  .acr-record-chip {
+    min-height: 0 !important;
+    padding: 1px 2px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    white-space: normal !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+
+  .acr-record-chip::before {
+    content: "";
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border: 1.2px solid #111;
+    background: #fff;
+  }
+
+  .acr-record-chip-active {
+    background: transparent !important;
+    color: #111 !important;
+    font-weight: 900 !important;
+  }
+
+  .acr-record-chip-active::before {
+    background: #111;
+  }
+
+  .acr-record-chip-group {
+    gap: 2px 10px !important;
+    margin-top: 3px !important;
+  }
+
+  /* ── Cases à cocher ── */
+  .acr-record-check {
+    min-height: 0 !important;
+    padding: 1px 2px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+
+  .acr-record-check span {
+    width: 9px !important;
+    height: 9px !important;
+    border: 1.2px solid #111 !important;
+    border-radius: 0 !important;
+  }
+
+  .acr-record-check span svg {
+    width: 7px !important;
+    height: 7px !important;
+  }
+
+  .acr-record-check-on {
+    color: #111 !important;
+    font-weight: 900 !important;
+  }
+
+  .acr-record-check-on span {
+    background: #111 !important;
+    color: #fff !important;
+  }
+
+  .acr-record-check-grid {
+    gap: 2px !important;
+  }
+
+  /* ── 5H / 5T : encadrés comme sur le formulaire ── */
+  .acr-record-causes {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    margin-top: 5px !important;
+  }
+
+  .acr-record-causes > div {
+    border: 1px solid #444 !important;
+    border-radius: 0 !important;
+    padding: 4px 6px !important;
+    background: #f2f2f2 !important;
+  }
+
+  .acr-record-causes .acr-record-chip-group {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1px !important;
+    margin-top: 2px !important;
+  }
+
+  .acr-record-causes .acr-record-chip {
+    min-height: 0 !important;
+    font-size: 8.5px !important;
+  }
+
+  /* ── Stats + tableau de cycles : vrai tableau quadrillé ── */
+  .acr-record-stats {
+    display: flex !important;
+    margin: 0 0 4px !important;
+  }
+
+  .acr-record-stats span {
+    border: 1px solid #666 !important;
+    border-radius: 0 !important;
+    padding: 0 5px !important;
+    background: #f2f2f2 !important;
+    color: #111 !important;
+    font-size: 8px !important;
+  }
+
+  .acr-record-stats strong {
+    color: #111 !important;
+  }
+
+  .acr-record-cycle-table-wrap {
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  .acr-record-cycle-table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    font-size: 8.5px !important;
+  }
+
+  .acr-record-cycle-table thead {
+    display: table-header-group !important;
+  }
+
+  .acr-record-cycle-table tbody {
+    display: table-row-group !important;
+  }
+
+  .acr-record-cycle-table tr {
+    display: table-row !important;
+    break-inside: avoid;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+  }
+
+  .acr-record-cycle-table th {
+    display: table-cell !important;
+    border: 1px solid #444 !important;
+    padding: 2px 5px !important;
+    background: #111 !important;
+    color: #fff !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-cycle-table td {
+    display: table-cell !important;
+    border: 1px solid #888 !important;
+    padding: 2px 5px !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 9px !important;
+  }
+
+  .acr-cycle-num strong {
+    color: #111 !important;
+    font-size: 9.5px !important;
+    font-weight: 900 !important;
+  }
+
+  .acr-cycle-num span,
+  .acr-cycle-num em,
+  .acr-cycle-comment,
+  .acr-cycle-input em {
+    color: #444 !important;
+    font-size: 8px !important;
+  }
+
+  .acr-cycle-input input {
+    min-height: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px dotted #333 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-size: 9px !important;
+    padding: 1px 2px !important;
+  }
+
+  .acr-record-empty {
+    border: 1px dashed #888 !important;
+    border-radius: 0 !important;
+    padding: 5px !important;
+    background: #fff !important;
+    color: #444 !important;
+  }
+
+  /* ── Événements horodatés : liste compacte sur deux colonnes ── */
+  .acr-record-events-card {
+    border: 1px solid #666 !important;
+    border-radius: 0 !important;
+    margin-top: 5px !important;
+    padding: 4px 7px !important;
+    background: #fff !important;
+  }
+
+  .acr-record-events-card h4 {
+    margin-bottom: 3px !important;
+    color: #111 !important;
+    font-size: 8.5px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .acr-record-events {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1px 14px !important;
+  }
+
+  .acr-record-events li {
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+    color: #444 !important;
+    font-size: 8.5px !important;
+  }
+
+  .acr-record-events strong,
+  .acr-record-events em {
+    color: #111 !important;
+  }
+
+  .acr-record-wake-precision {
+    margin-top: 3px !important;
   }
 }

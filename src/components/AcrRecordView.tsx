@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Check as CheckIcon,
   CheckCircle2,
@@ -106,37 +106,52 @@ const Field = ({ label, value, type = "text", placeholder, suffix, onChange }: F
 const Section = ({
   title,
   subtitle,
+  showStatus = true,
   children,
 }: {
   title: string;
   subtitle?: string;
+  showStatus?: boolean;
   children: ReactNode;
 }) => {
+  const [open, setOpen] = useState(true);
+  const panelId = useId();
   const match = /^(\d+)\.\s*(.*)$/.exec(title);
   const index = match?.[1];
   const cleanTitle = match?.[2] ?? title;
   return (
-    <section className="acr-record-section">
-      <header className="acr-record-section-head">
+    <section className={`acr-record-section ${open ? "" : "acr-record-section-collapsed"}`}>
+      <button
+        type="button"
+        className="acr-record-section-head"
+        aria-expanded={open}
+        aria-controls={panelId}
+        aria-label={`${open ? "Replier" : "Déplier"} ${cleanTitle}`}
+        onClick={() => setOpen((value) => !value)}
+      >
         {index && <span className="acr-record-section-index">{index}</span>}
         <div className="acr-record-section-head-text">
           <h4>{cleanTitle}</h4>
           {subtitle && <p className="acr-record-section-subtitle">{subtitle}</p>}
         </div>
-        <CheckCircle2
-          className="acr-record-section-status"
-          size={20}
-          strokeWidth={2.7}
-          aria-hidden="true"
-        />
+        {showStatus && (
+          <CheckCircle2
+            className="acr-record-section-status"
+            size={20}
+            strokeWidth={2.7}
+            aria-hidden="true"
+          />
+        )}
         <ChevronDown
           className="acr-record-section-chevron"
           size={20}
           strokeWidth={2.4}
           aria-hidden="true"
         />
-      </header>
-      <div className="acr-record-section-body">{children}</div>
+      </button>
+      <div id={panelId} className="acr-record-section-body">
+        {children}
+      </div>
     </section>
   );
 };
@@ -153,6 +168,7 @@ const Chip = ({
   <button
     type="button"
     className={`acr-record-chip ${active ? "acr-record-chip-active" : ""}`}
+    aria-pressed={active}
     onClick={onClick}
   >
     {children}
@@ -173,6 +189,7 @@ const CheckOption = ({
   <button
     type="button"
     className={`acr-record-check ${checked ? "acr-record-check-on" : ""} ${className ?? ""}`}
+    aria-pressed={checked}
     onClick={onChange}
   >
     <span aria-hidden="true">{checked && <CheckIcon size={14} strokeWidth={3} />}</span>
@@ -382,17 +399,23 @@ const AcrRecordView = ({
     const node = captureRef.current;
     if (!node) return null;
     node.setAttribute("data-acr-theme", themePreference);
+    // Déplie toutes les sections le temps de la capture (dossier complet).
+    node.setAttribute("data-acr-export", "1");
     node.querySelectorAll("input").forEach((input) => input.setAttribute("value", input.value));
     node.querySelectorAll("textarea").forEach((area) => {
       area.textContent = area.value;
     });
-    const { toPng } = await import("html-to-image");
-    const bg =
-      getComputedStyle(node).backgroundColor ||
-      getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
-    const dataUrl = await toPng(node, { backgroundColor: bg, pixelRatio: 2, cacheBust: true });
-    const stamp = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "_").slice(0, 19);
-    return { dataUrl, filename: `dossier-acr_${stamp}.png` };
+    try {
+      const { toPng } = await import("html-to-image");
+      const bg =
+        getComputedStyle(node).backgroundColor ||
+        getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+      const dataUrl = await toPng(node, { backgroundColor: bg, pixelRatio: 2, cacheBust: true });
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "_").slice(0, 19);
+      return { dataUrl, filename: `dossier-acr_${stamp}.png` };
+    } finally {
+      node.removeAttribute("data-acr-export");
+    }
   };
 
   // Partage natif (Android share sheet) avec repli téléchargement direct.
@@ -465,6 +488,7 @@ const AcrRecordView = ({
             onClick={() => setShowActions((value) => !value)}
             aria-label="Actions rapides du dossier ACR"
             aria-expanded={showActions}
+            aria-controls="acr-record-actions-menu"
           >
             <MoreHorizontal size={22} strokeWidth={2.5} aria-hidden="true" />
           </button>
@@ -703,124 +727,104 @@ const AcrRecordView = ({
             </Section>
 
             {/* 5. Suivi de la réanimation — tableau de cycles */}
-            <section className="acr-record-section">
-              <header className="acr-record-section-head">
-                <span className="acr-record-section-index">5</span>
-                <div className="acr-record-section-head-text">
-                  <h4>Suivi de la réanimation</h4>
-                </div>
-                <ChevronDown
-                  className="acr-record-section-chevron"
-                  size={20}
-                  strokeWidth={2.4}
-                  aria-hidden="true"
-                />
-              </header>
-              <div className="acr-record-section-body">
-                <div className="acr-record-stats">
-                  <span>
-                    <strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}
-                  </span>
-                  <span>
-                    <strong>{adres}</strong> adré
-                  </span>
-                  <span>
-                    <strong>{amios}</strong> amio
-                  </span>
-                  <span>
-                    <strong>{history.length}</strong> cycle{history.length > 1 ? "s" : ""}
-                  </span>
-                </div>
-                {record.cycles.length === 0 ? (
-                  <div className="acr-record-empty">
-                    Aucun cycle clos pour l'instant. Les cycles du chrono apparaîtront ici
-                    automatiquement.
-                  </div>
-                ) : (
-                  <div
-                    className="acr-record-cycle-table-wrap"
-                    role="region"
-                    aria-label="Cycles ACR"
-                  >
-                    <table className="acr-record-cycle-table">
-                      <thead>
-                        <tr>
-                          <th>Cycle</th>
-                          <th>Rythme</th>
-                          <th>Choc</th>
-                          <th>Médicaments</th>
-                          <th>Voie aérienne</th>
-                          <th>Capno</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {record.cycles.map((item) => (
-                          <tr key={item.cycle}>
-                            <td className="acr-cycle-num">
-                              <strong>Cycle {item.cycle}</strong>
-                              <span>T+{formatAcrElapsed(item.t)}</span>
-                              {item.wallTime && <em>{item.wallTime}</em>}
-                            </td>
-                            <td>{item.rhythm || "—"}</td>
-                            <td className={item.choc ? "acr-cycle-choc" : ""}>
-                              {item.choc || "—"}
-                            </td>
-                            <td className="acr-cycle-drugs">
-                              {item.drogues || item.actions.join(" · ") || "—"}
-                              {item.commentaire && (
-                                <em className="acr-cycle-comment">{item.commentaire}</em>
-                              )}
-                            </td>
-                            <td>
-                              <div className="acr-cycle-input">
-                                <input
-                                  value={item.ventilation ?? ""}
-                                  placeholder="IOT, BAVU…"
-                                  onChange={(e) =>
-                                    updateCycle(item.cycle, {
-                                      ventilation: e.currentTarget.value,
-                                    })
-                                  }
-                                />
-                              </div>
-                            </td>
-                            <td>
-                              <div className="acr-cycle-input">
-                                <input
-                                  value={item.capno ?? ""}
-                                  placeholder="—"
-                                  onChange={(e) =>
-                                    updateCycle(item.cycle, { capno: e.currentTarget.value })
-                                  }
-                                />
-                                <em>mmHg</em>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-                {timelineEvents.length > 0 && (
-                  <section
-                    className="acr-record-events-card"
-                    aria-label="Horaires RCP et traitements"
-                  >
-                    <h4>Horaires RCP / traitements</h4>
-                    <ul className="acr-record-events">
-                      {timelineEvents.map((event) => (
-                        <li key={event.id}>
-                          <strong>{formatWallTime(event.at)}</strong>
-                          <span>T+{formatAcrElapsed(event.t)}</span>
-                          <em>{event.label}</em>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                )}
+            <Section title="5. Suivi de la réanimation" showStatus={false}>
+              <div className="acr-record-stats">
+                <span>
+                  <strong>{shocks}</strong> choc{shocks > 1 ? "s" : ""}
+                </span>
+                <span>
+                  <strong>{adres}</strong> adré
+                </span>
+                <span>
+                  <strong>{amios}</strong> amio
+                </span>
+                <span>
+                  <strong>{history.length}</strong> cycle{history.length > 1 ? "s" : ""}
+                </span>
               </div>
-            </section>
+              {record.cycles.length === 0 ? (
+                <div className="acr-record-empty">
+                  Aucun cycle clos pour l'instant. Les cycles du chrono apparaîtront ici
+                  automatiquement.
+                </div>
+              ) : (
+                <div className="acr-record-cycle-table-wrap" role="region" aria-label="Cycles ACR">
+                  <table className="acr-record-cycle-table">
+                    <thead>
+                      <tr>
+                        <th>Cycle</th>
+                        <th>Rythme</th>
+                        <th>Choc</th>
+                        <th>Médicaments</th>
+                        <th>Voie aérienne</th>
+                        <th>Capno</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {record.cycles.map((item) => (
+                        <tr key={item.cycle}>
+                          <td className="acr-cycle-num">
+                            <strong>Cycle {item.cycle}</strong>
+                            <span>T+{formatAcrElapsed(item.t)}</span>
+                            {item.wallTime && <em>{item.wallTime}</em>}
+                          </td>
+                          <td>{item.rhythm || "—"}</td>
+                          <td className={item.choc ? "acr-cycle-choc" : ""}>{item.choc || "—"}</td>
+                          <td className="acr-cycle-drugs">
+                            {item.drogues || item.actions.join(" · ") || "—"}
+                            {item.commentaire && (
+                              <em className="acr-cycle-comment">{item.commentaire}</em>
+                            )}
+                          </td>
+                          <td>
+                            <div className="acr-cycle-input">
+                              <input
+                                value={item.ventilation ?? ""}
+                                placeholder="IOT, BAVU…"
+                                onChange={(e) =>
+                                  updateCycle(item.cycle, {
+                                    ventilation: e.currentTarget.value,
+                                  })
+                                }
+                              />
+                            </div>
+                          </td>
+                          <td>
+                            <div className="acr-cycle-input">
+                              <input
+                                value={item.capno ?? ""}
+                                placeholder="—"
+                                onChange={(e) =>
+                                  updateCycle(item.cycle, { capno: e.currentTarget.value })
+                                }
+                              />
+                              <em>mmHg</em>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {timelineEvents.length > 0 && (
+                <section
+                  className="acr-record-events-card"
+                  aria-label="Horaires RCP et traitements"
+                >
+                  <h4>Horaires RCP / traitements</h4>
+                  <ul className="acr-record-events">
+                    {timelineEvents.map((event) => (
+                      <li key={event.id}>
+                        <strong>{formatWallTime(event.at)}</strong>
+                        <span>T+{formatAcrElapsed(event.t)}</span>
+                        <em>{event.label}</em>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+            </Section>
 
             {/* 6. Analyse du dossier médical */}
             <Section title="6. Analyse du dossier médical">
@@ -983,6 +987,21 @@ const AcrRecordView = ({
                   </Chip>
                 ))}
               </div>
+              {record.racs.signesReveil.includes("Autre") && (
+                <div className="acr-record-fields acr-record-compact-fields acr-record-wake-precision">
+                  <Field
+                    label="Préciser"
+                    value={record.racs.signesReveilAutre}
+                    placeholder="Préciser…"
+                    onChange={(value) =>
+                      updateRecord((prev) => ({
+                        ...prev,
+                        racs: { ...prev.racs, signesReveilAutre: value },
+                      }))
+                    }
+                  />
+                </div>
+              )}
               <div className="acr-record-check-grid">
                 <CheckOption
                   checked={Boolean(record.racs.monitorageComplet)}
@@ -1056,7 +1075,12 @@ const AcrRecordView = ({
         </div>
 
         <footer className="acr-record-toolbar" data-export-ignore="true">
-          <button type="button" className="acr-record-toolbar-primary" onClick={saveNow}>
+          <button
+            type="button"
+            className="acr-record-toolbar-primary"
+            onClick={saveNow}
+            aria-label="Enregistrer le dossier ACR"
+          >
             {saved ? (
               <>
                 <CheckIcon size={17} strokeWidth={3} aria-hidden="true" />
@@ -1069,7 +1093,12 @@ const AcrRecordView = ({
               </>
             )}
           </button>
-          <button type="button" className="acr-record-toolbar-outline" onClick={printPdf}>
+          <button
+            type="button"
+            className="acr-record-toolbar-outline"
+            onClick={printPdf}
+            aria-label="Exporter le dossier ACR en PDF"
+          >
             <FileText size={17} strokeWidth={2.4} aria-hidden="true" />
             Exporter PDF
           </button>
@@ -1078,6 +1107,7 @@ const AcrRecordView = ({
               type="button"
               className="acr-record-toolbar-action"
               onClick={() => setShowActions((value) => !value)}
+              aria-label="Ouvrir les actions rapides du dossier ACR"
               aria-expanded={showActions}
               aria-controls="acr-record-actions-menu"
             >
@@ -1086,7 +1116,12 @@ const AcrRecordView = ({
               <ChevronDown size={15} strokeWidth={2.5} aria-hidden="true" />
             </button>
             {showActions && (
-              <div id="acr-record-actions-menu" className="acr-record-actions-menu">
+              <div
+                id="acr-record-actions-menu"
+                className="acr-record-actions-menu"
+                role="group"
+                aria-label="Actions rapides du dossier ACR"
+              >
                 <button
                   type="button"
                   onClick={onShareImage}
@@ -1104,15 +1139,20 @@ const AcrRecordView = ({
                           ? "Erreur de capture"
                           : "Partager l'image"}
                 </button>
-                <button type="button" onClick={onCopy}>
+                <button type="button" onClick={onCopy} aria-label="Copier le texte de transmission">
                   <ClipboardCopy size={16} strokeWidth={2.4} aria-hidden="true" />
                   {copied ? "Transmission copiée" : "Copier la transmission"}
                 </button>
-                <button type="button" onClick={exportJson}>
+                <button type="button" onClick={exportJson} aria-label="Exporter le dossier en JSON">
                   <Download size={16} strokeWidth={2.4} aria-hidden="true" />
                   Exporter JSON
                 </button>
-                <button type="button" className="acr-record-danger" onClick={resetRecord}>
+                <button
+                  type="button"
+                  className="acr-record-danger"
+                  onClick={resetRecord}
+                  aria-label="Réinitialiser le dossier ACR"
+                >
                   <RotateCcw size={16} strokeWidth={2.4} aria-hidden="true" />
                   Reset dossier
                 </button>

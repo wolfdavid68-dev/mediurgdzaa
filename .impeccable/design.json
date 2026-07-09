@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-09T00:00:00+02:00",
+  "title": "Design System: MediURG",
+  "extensions": {
+    "colorMeta": {
+      "emergency-red": {
+        "role": "primary",
+        "displayName": "Rouge urgence",
+        "canonical": "oklch(67% 0.22 22)",
+        "tonalRamp": [
+          "oklch(18% 0.08 22)",
+          "oklch(28% 0.11 22)",
+          "oklch(40% 0.15 22)",
+          "oklch(52% 0.19 22)",
+          "oklch(67% 0.22 22)",
+          "oklch(76% 0.16 22)",
+          "oklch(86% 0.09 22)",
+          "oklch(95% 0.03 22)"
+        ]
+      },
+      "clinical-blue": {
+        "role": "secondary",
+        "displayName": "Bleu clinique",
+        "canonical": "oklch(70% 0.16 250)",
+        "tonalRamp": [
+          "oklch(17% 0.06 250)",
+          "oklch(28% 0.08 250)",
+          "oklch(40% 0.1 250)",
+          "oklch(54% 0.13 250)",
+          "oklch(70% 0.16 250)",
+          "oklch(79% 0.11 250)",
+          "oklch(88% 0.06 250)",
+          "oklch(96% 0.02 250)"
+        ]
+      },
+      "night-bg": {
+        "role": "neutral",
+        "displayName": "Nuit profonde",
+        "canonical": "#0a0a12",
+        "tonalRamp": [
+          "#050508",
+          "#0a0a12",
+          "#12121c",
+          "#1c1c28",
+          "#2a2a3a",
+          "#3a3a4d",
+          "#9a9ab0",
+          "#e8e8f0"
+        ]
+      },
+      "light-bg": {
+        "role": "neutral",
+        "displayName": "Fond clair froid",
+        "canonical": "#e8edf5",
+        "tonalRamp": [
+          "#111827",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#c8d1e1",
+          "#e8edf5",
+          "#f4f7fb",
+          "#ffffff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Titre clinique",
+        "purpose": "Titres de modales et surfaces majeures, jamais pour du marketing."
+      },
+      "mono": {
+        "displayName": "Valeurs alignées",
+        "purpose": "Chronos, horaires, cycles, posologies et données critiques."
+      }
+    },
+    "shadows": [
+      {
+        "name": "carte-clinique",
+        "value": "0 8px 18px rgb(0 0 0 / 0.22)",
+        "purpose": "Séparation discrète des panneaux critiques en thème sombre."
+      },
+      {
+        "name": "modale-clinique",
+        "value": "0 24px 70px rgb(0 0 0 / 0.58)",
+        "purpose": "Top layer et dossier ACR desktop."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-quick",
+        "value": "160ms ease",
+        "purpose": "Hover, focus, active et changements d'état locaux."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "640px"
+      },
+      {
+        "name": "tablet-dialog",
+        "value": "980px"
+      },
+      {
+        "name": "desktop",
+        "value": "981px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Bouton primaire ACR",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action principale dans une surface critique.",
+      "html": "<button class=\"ds-btn-primary\">Enregistrer</button>",
+      "css": ".ds-btn-primary { min-height: 46px; padding: 8px 12px; border: 1px solid rgb(255 255 255 / 0.1); border-radius: 8px; background: linear-gradient(180deg, #e03a49, #b91e2d); color: #fff; font: 850 14px system-ui, sans-serif; transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease; box-shadow: 0 8px 18px rgb(240 68 85 / 0.2); } .ds-btn-primary:hover { background: linear-gradient(180deg, #ec4958, #c72434); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid #5aa7ff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Bouton secondaire ACR",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Action d'export ou action technique non primaire.",
+      "html": "<button class=\"ds-btn-secondary\">Exporter PDF</button>",
+      "css": ".ds-btn-secondary { min-height: 46px; padding: 8px 12px; border: 1px solid rgb(240 68 85 / 0.46); border-radius: 8px; background: transparent; color: #ff6574; font: 850 14px system-ui, sans-serif; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; } .ds-btn-secondary:hover { background: rgb(240 68 85 / 0.1); } .ds-btn-secondary:active { transform: translateY(1px); } .ds-btn-secondary:focus-visible { outline: 2px solid #5aa7ff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Champ clinique compact",
+      "kind": "input",
+      "refersTo": "input-clinical",
+      "description": "Champ dense pour saisie rapide dans un formulaire clinique.",
+      "html": "<label class=\"ds-field\"><span>Heure RACS</span><input placeholder=\"auto\" /></label>",
+      "css": ".ds-field { display: grid; gap: 6px; color: #8d98aa; font: 800 12px system-ui, sans-serif; } .ds-field input { min-height: 32px; padding: 5px 10px; border: 1px solid #263040; border-radius: 6px; background: #111925; color: #e9edf5; font: 750 14px system-ui, sans-serif; } .ds-field input:focus-visible { outline: 2px solid #5aa7ff; outline-offset: 2px; border-color: #5aa7ff; box-shadow: 0 0 0 3px rgb(90 167 255 / 0.18); }"
+    },
+    {
+      "name": "Chip togglable",
+      "kind": "chip",
+      "refersTo": "chip-toggle",
+      "description": "Choix court, utilisable pour rythme, voie, signes ou filtres.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\">FV</button>",
+      "css": ".ds-chip { min-height: 32px; padding: 7px 11px; border: 1px solid #253044; border-radius: 6px; background: #101722; color: #aab2c1; font: 800 12px system-ui, sans-serif; transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease; } .ds-chip[aria-pressed=\"true\"] { border-color: rgb(240 68 85 / 0.46); background: linear-gradient(180deg, #e53749, #bb2232); color: #fff; box-shadow: 0 8px 16px rgb(240 68 85 / 0.16); } .ds-chip:hover { border-color: #5aa7ff; color: #f4f7fb; } .ds-chip:focus-visible { outline: 2px solid #5aa7ff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Carte clinique",
+      "kind": "card",
+      "refersTo": "card-clinical",
+      "description": "Surface de section ou carte de données en thème sombre.",
+      "html": "<section class=\"ds-card\"><h3>Demande de renfort</h3><p>Remplissage rapide, haute lisibilité, contours nets.</p></section>",
+      "css": ".ds-card { padding: 12px; border: 1px solid #222b3a; border-radius: 10px; background: linear-gradient(180deg, #101722, #0d131d); color: #eef2f8; box-shadow: 0 8px 18px rgb(0 0 0 / 0.22); } .ds-card h3 { margin: 0 0 6px; font: 850 16px/1.2 system-ui, sans-serif; } .ds-card p { margin: 0; color: #8d98aa; font: 500 13px/1.45 system-ui, sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le cockpit clinique sobre",
+    "overview": "MediURG est une interface de travail pour des équipes d'urgence, pas une vitrine. Le design doit donner priorité à la lecture rapide, aux cibles tactiles sûres, aux contrastes élevés et à une densité maîtrisée. L'esthétique acceptable est celle d'un poste de soin fiable : sombre ou claire selon le thème utilisateur, structurée par des surfaces nettes, et animée seulement quand l'état change.",
+    "keyCharacteristics": [
+      "Dense, clinique, lisible au doigt comme au clavier.",
+      "Offline-first : les états doivent rester compréhensibles même sans réseau.",
+      "Accent rare : une couleur forte signale une action ou un état, jamais un décor.",
+      "Formes modérées : rayon 6-12px pour les contrôles, 16px maximum pour les modales desktop."
+    ],
+    "rules": [
+      {
+        "name": "The One Signal Rule",
+        "body": "Une surface ne doit pas mélanger rouge, bleu et vert en décor. Une couleur forte signifie une action ou un état.",
+        "section": "colors"
+      },
+      {
+        "name": "The Contrast First Rule",
+        "body": "Le texte secondaire reste lisible. Les gris trop pâles sur fonds teintés sont interdits.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Hero Type Rule",
+        "body": "L'application n'utilise pas de titres marketing. Un écran clinique doit charger dans la tâche, pas dans un spectacle.",
+        "section": "typography"
+      },
+      {
+        "name": "The Border Before Shadow Rule",
+        "body": "La séparation vient d'abord de la bordure et du contraste tonal. L'ombre sert à hiérarchiser, pas à décorer.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do garder le français pour les libellés, messages et contenus cliniques.",
+      "Do utiliser les variables globales (`--bg`, `--card`, `--text`, `--accent`) ou les variables locales ACR pour toute nouvelle couleur.",
+      "Do conserver des cibles tactiles de 44px minimum pour les actions importantes.",
+      "Do vérifier thème sombre, thème clair, mobile et desktop après une modification de surface clinique.",
+      "Do garder les interactions standard : vrais boutons, vrais champs, focus visible, états disabled explicites."
+    ],
+    "donts": [
+      "Don't utiliser de gradient text, glassmorphism décoratif, rayons de carte supérieurs à 16px, ou ombres larges sur chaque carte.",
+      "Don't créer une grille de cartes marketing ou un hero pour une surface outil.",
+      "Don't diluer le rouge urgence en décoration. Il doit rester un signal clinique ou une action.",
+      "Don't masquer une information critique derrière un hover inaccessible au tactile.",
+      "Don't modifier la densité en rendant les composants plus hauts sans nécessité clinique."
+    ]
+  }
+}
