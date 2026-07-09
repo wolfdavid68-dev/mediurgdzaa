@@ -1,11 +1,34 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v115";
+export const APP_VERSION = "v116";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v116",
+    date: "2026-07-09",
+    titre: "Commandes vocales Siri / Google Assistant",
+    changes: [
+      {
+        type: "feat",
+        text: "L'application s'ouvre à la voix : « Dis Siri, protocole KTC » ou « Hey Google, check-list du drain thoracique » ouvrent MediURG directement au bon endroit, même hors-ligne. Un raccourci Siri ou une routine Google Assistant pointe vers une URL de l'app — mode d'emploi pas-à-pas dans docs/RACCOURCIS_VOCAUX.md.",
+      },
+      {
+        type: "feat",
+        text: "Médicaments : ?med=CORDARONE (ou un id) ouvre la fiche déployée quand le résultat est sans ambiguïté, et ?poids=80 prérègle le poids patient — combinables en une seule phrase vocale (?med=CORDARONE&poids=80).",
+      },
+      {
+        type: "feat",
+        text: "Incompatibilités : ?compat=noradrenaline,lasilix affiche le verdict de compatibilité IV entre deux médicaments (vue Comparer). DCI, noms commerciaux et alias acceptés ; un nom ambigu n'est jamais deviné. Un seul nom ouvre la fiche du médicament avec toutes ses relations.",
+      },
+      {
+        type: "feat",
+        text: "Protocoles, kits et échelles : ?protocole=pisu5 (ou un mot du titre), ?kit=ktc — avec ?onglet=materiel pour viser la check-list de réarmement, le schéma ou les lignes — et ?echelle=glasgow déplient directement la carte demandée et l'amènent à l'écran.",
+      },
+    ],
+  },
   {
     version: "v115",
     date: "2026-07-06",
