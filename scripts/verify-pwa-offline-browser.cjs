@@ -166,6 +166,8 @@ hardTimeout.unref?.();
         "mediurg-profile-cache-v1",
         JSON.stringify({ id: profile.id, profile, at: Date.now() })
       );
+      localStorage.setItem("mediurg-charter-accepted", "1.0|2026-01-01T00:00:00.000Z");
+      localStorage.setItem("mediurg-announce", "ecg-1");
     });
 
     await context.setOffline(true);
