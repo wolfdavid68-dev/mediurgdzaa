@@ -15,6 +15,9 @@ modification. Les commandes et scripts effectifs restent ceux de `package.json`.
   sous `/tutorat/`.
 - `RACCOURCIS_VOCAUX.md` : liens profonds (`?med=`, `?kit=`, `?poids=`,
   `?mode=acr`…) et configuration des raccourcis vocaux Siri / Assistant.
+- `PLAN_RELAIS_SESSIONS.md` : plan d'implémentation (instructions agent IA) —
+  déconnexion des autres appareils, multi-sessions ACR et relais
+  téléphone ↔ ordinateur via Supabase.
 
 ## Auth, sécurité et exploitation
 

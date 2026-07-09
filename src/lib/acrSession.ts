@@ -67,6 +67,7 @@ export type AcrFullSession = {
     obtenu?: boolean;
     heure?: string;
     signesReveil: string[];
+    signesReveilAutre?: string;
     monitorageComplet?: boolean;
     ecg18d?: boolean;
     sedationAmines?: boolean;
