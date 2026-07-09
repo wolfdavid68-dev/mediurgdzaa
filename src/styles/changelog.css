@@ -427,7 +427,7 @@
   color: var(--accent);
 }
 .announce-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
 @media (min-width: 720px) {
@@ -579,7 +579,7 @@
   border-color: var(--border-strong);
 }
 .notes-backup-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 .notes-backup-status {
   font-size: 12px;

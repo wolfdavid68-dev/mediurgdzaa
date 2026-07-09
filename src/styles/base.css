@@ -24,6 +24,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
 }
 
@@ -123,6 +125,51 @@ body {
   transition:
     background 0.2s,
     color 0.2s;
+}
+
+:where(h1, h2, h3, h4, .drug-title-row, .protocol-title-row, .scale-title, .echelles-intro) {
+  text-wrap: balance;
+}
+
+:where(p, li, small, .drug-desc, .protocol-section li, .echelles-intro) {
+  text-wrap: pretty;
+}
+
+:where(
+  .result-count,
+  .proto-category-count,
+  .version-badge-nav,
+  .acr-count,
+  .acr-ht-count,
+  .acr-history-time,
+  .acr-record-timecard strong,
+  .acr-record-stats,
+  .acr-record-cycle-table,
+  .prep-calc-val,
+  .pse-result-value,
+  .pse-reference-table,
+  .pse-table,
+  .scale-header-score,
+  .scale-opt-score,
+  .scale-pick-score,
+  .net-status
+) {
+  font-variant-numeric: tabular-nums;
+}
+
+:where(img) {
+  outline: 1px solid rgb(255 255 255 / 0.1);
+  outline-offset: -1px;
+}
+
+[data-theme="light"] :where(img) {
+  outline-color: rgb(0 0 0 / 0.1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(button, [role="button"]):active:not(:disabled) {
+    scale: 0.96;
+  }
 }
 
 /* touch-action: manipulation — désactive le double-tap-to-zoom d'Android Chrome

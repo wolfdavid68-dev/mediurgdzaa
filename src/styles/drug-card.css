@@ -235,7 +235,10 @@
   cursor: pointer;
   user-select: none;
   margin-left: 4px;
-  transition: all 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.15s;
   flex-shrink: 0;
 }
 
@@ -608,7 +611,11 @@
   border-radius: 20px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.15s;
   flex-shrink: 0;
   min-height: 34px;
 }

@@ -161,7 +161,10 @@
   border: 1px solid oklch(0.3 0.008 280);
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .m-input-wrap:focus-within {
   border-color: oklch(0.6 0.2 25);
@@ -290,7 +293,11 @@ select.m-input {
   font-weight: 600;
   background: oklch(0.24 0.006 280);
   color: oklch(0.97 0.004 90);
-  transition: all 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.15s;
   cursor: pointer;
   min-height: 50px;
 }
@@ -298,7 +305,7 @@ select.m-input {
   opacity: 0.6;
 }
 .m-btn:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 .m-btn-primary {
   background: oklch(0.6 0.2 25);
@@ -595,7 +602,7 @@ select.m-input {
   min-height: 40px;
 }
 .m-admin-act:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 .m-admin-act-danger {
   background: oklch(0.6 0.2 25 / 0.12);
@@ -697,7 +704,11 @@ select.m-input {
   cursor: pointer;
   font: inherit;
   color: oklch(0.97 0.004 90);
-  transition: all 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.15s;
 }
 .m-card:active {
   transform: scale(0.99);

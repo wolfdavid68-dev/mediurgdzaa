@@ -43,7 +43,7 @@
   border-color: var(--info);
 }
 .acr-dose-pill:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 .acr-dose-pill:disabled {
   cursor: default;
