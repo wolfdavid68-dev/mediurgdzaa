@@ -13,6 +13,8 @@ modification. Les commandes et scripts effectifs restent ceux de `package.json`.
   précache Workbox et vérifications PWA.
 - `UNIFICATION_DOMAINE_TUTORAT.md` : fonctionnement du passage MediURG ↔ Tutorat
   sous `/tutorat/`.
+- `RACCOURCIS_VOCAUX.md` : liens profonds (`?med=`, `?kit=`, `?poids=`,
+  `?mode=acr`…) et configuration des raccourcis vocaux Siri / Assistant.
 
 ## Auth, sécurité et exploitation
 

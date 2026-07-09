@@ -20,12 +20,28 @@ import EcgReader from "../components/EcgReader";
 type ProtocolesPageProps = {
   protoCategory: string;
   changeProtoCategory: (cat: string) => void;
+  autoOpenKitId?: string | null;
+  autoOpenKitTab?: string | null;
+  onAutoOpenKit?: () => void;
+  autoOpenProtocolId?: number | null;
+  onAutoOpenProtocol?: () => void;
+  incompatPair?: [string, string] | null;
+  incompatFocus?: string | null;
+  onIncompatConsumed?: () => void;
   onDrugSearch: (name: string) => void;
 };
 
 const ProtocolesPage = ({
   protoCategory,
   changeProtoCategory,
+  autoOpenKitId,
+  autoOpenKitTab,
+  onAutoOpenKit,
+  autoOpenProtocolId,
+  onAutoOpenProtocol,
+  incompatPair,
+  incompatFocus,
+  onIncompatConsumed,
   onDrugSearch,
 }: ProtocolesPageProps) => {
   const [protoFilter, setProtoFilter] = useState("Tout");
@@ -73,7 +89,13 @@ const ProtocolesPage = ({
         </button>
       </div>
 
-      {protoCategory === "incompatibilites" && <IncompatibilityList />}
+      {protoCategory === "incompatibilites" && (
+        <IncompatibilityList
+          initialPair={incompatPair}
+          initialFocus={incompatFocus}
+          onInitialConsumed={onIncompatConsumed}
+        />
+      )}
 
       {protoCategory === "ecg" && (
         <>
@@ -90,7 +112,13 @@ const ProtocolesPage = ({
       {protoCategory === "kits" && (
         <div className="protocol-list">
           {PREP_KITS.map((k) => (
-            <PrepKitCard key={k.id} kit={k} />
+            <PrepKitCard
+              key={k.id}
+              kit={k}
+              autoOpen={autoOpenKitId != null && autoOpenKitId === k.id}
+              autoOpenTab={autoOpenKitTab}
+              onAutoOpen={onAutoOpenKit}
+            />
           ))}
         </div>
       )}
@@ -111,7 +139,12 @@ const ProtocolesPage = ({
           <div className="protocol-list">
             {filteredProtocols.map((p) => (
               <ErrorBoundary key={p.id} FallbackComponent={CardErrorFallback}>
-                <ProtocolCard protocol={p} onDrugSearch={onDrugSearch} />
+                <ProtocolCard
+                  protocol={p}
+                  autoOpen={autoOpenProtocolId != null && autoOpenProtocolId === p.id}
+                  onAutoOpen={onAutoOpenProtocol}
+                  onDrugSearch={onDrugSearch}
+                />
               </ErrorBoundary>
             ))}
           </div>

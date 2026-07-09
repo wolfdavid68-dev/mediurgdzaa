@@ -1,12 +1,10 @@
-import { useMemo, useState } from "react";
-import { INCOMPATIBILITIES } from "../data/incompatibilities";
+import { useEffect, useMemo, useState } from "react";
 import {
-  createIncompatibilityIndex,
   getIncompatDisplayName,
   getIncompatRelation,
   matchesIncompatSearch,
-  type IncompatEntry,
 } from "../lib/incompatibilityIndex";
+import { DRUG_DISPLAY_OVERRIDES, DRUGS_INCOMPAT, INCOMPAT_INDEX } from "../lib/incompatCatalog";
 
 const TYPE_META = {
   incompatible: { label: "Incompatible", short: "✕", color: "#dc2626" },
@@ -15,31 +13,9 @@ const TYPE_META = {
   unknown: { label: "Non renseigné", short: "?", color: "#64748b" },
 };
 
-const DRUG_DISPLAY_OVERRIDES: Record<string, string> = {
-  "Norépinéphrine (Noradrénaline®)": "Noradrénaline",
-};
-
-const DRUG_SEARCH_ALIASES: Record<string, string[]> = {
-  "Norépinéphrine (Noradrénaline®)": [
-    "noradrénaline",
-    "noradrenaline",
-    "norépinéphrine",
-    "norepinephrine",
-  ],
-  "Furosémide (Lasilix®)": ["furosémide", "furosemide", "lasilix", "l'asile", "l asile", "lasile"],
-};
-
 type Selected = { drugA: string; drugB: string; type: string; note: string };
 type ViewMode = "fiche" | "comparaison" | "matrice";
 
-const COLLATOR = new Intl.Collator("fr", { sensitivity: "base" });
-const DRUGS_INCOMPAT = [...(INCOMPATIBILITIES as IncompatEntry[])].sort((a, b) =>
-  COLLATOR.compare(a.drug, b.drug)
-);
-const INCOMPAT_INDEX = createIncompatibilityIndex(DRUGS_INCOMPAT, {
-  displayOverrides: DRUG_DISPLAY_OVERRIDES,
-  searchAliases: DRUG_SEARCH_ALIASES,
-});
 const { incomp: INCOMP, compat: COMPAT } = INCOMPAT_INDEX;
 
 const getDrugDisplayName = (drug: string) => getIncompatDisplayName(drug, DRUG_DISPLAY_OVERRIDES);
@@ -50,7 +26,19 @@ const getRelation = (drugA: string, drugB: string): Selected => {
   return { drugA, drugB, type: relation.type, note: relation.note };
 };
 
-const IncompatibilityList = () => {
+type IncompatibilityListProps = {
+  // Cible initiale posée par deep link (?compat=… — cf. lib/deepLink.ts) :
+  // une paire → vue Comparer préremplie, un seul nom → Fiche focalisée.
+  initialPair?: [string, string] | null;
+  initialFocus?: string | null;
+  onInitialConsumed?: () => void;
+};
+
+const IncompatibilityList = ({
+  initialPair,
+  initialFocus,
+  onInitialConsumed,
+}: IncompatibilityListProps = {}) => {
   const firstDrug = DRUGS_INCOMPAT[0]?.drug || "";
   const secondDrug = DRUGS_INCOMPAT[1]?.drug || firstDrug;
   const [selected, setSelected] = useState<Selected | null>(null);
@@ -60,6 +48,23 @@ const IncompatibilityList = () => {
   const [compareA, setCompareA] = useState(firstDrug);
   const [compareB, setCompareB] = useState(secondDrug);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+  // Application one-shot de la cible deep link, puis consommation côté App
+  // pour que l'utilisateur reprenne la main (changer de vue, de médicaments).
+  useEffect(() => {
+    if (initialPair) {
+      setViewMode("comparaison");
+      setCompareA(initialPair[0]);
+      setCompareB(initialPair[1]);
+    } else if (initialFocus) {
+      setViewMode("fiche");
+      setFocusDrug(initialFocus);
+      setCompareA(initialFocus);
+    } else {
+      return;
+    }
+    onInitialConsumed?.();
+  }, [initialPair, initialFocus, onInitialConsumed]);
 
   const filteredDrugs = useMemo(
     () =>
