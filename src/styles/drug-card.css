@@ -6,9 +6,11 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: var(--surface-shadow);
   transition:
     border 0.15s,
-    background 0.15s;
+    background 0.15s,
+    box-shadow 0.15s;
   /* Container queries : la carte sait s'adapter à la largeur de SON
      conteneur (liste étroite vs détail large), pas à celle du viewport.
      Évite de devoir bricoler des media queries quand on insère DrugCard
@@ -17,10 +19,12 @@
 }
 .drug-card:hover {
   border-color: var(--border-strong);
+  box-shadow: var(--surface-shadow-hover);
 }
 .drug-card-open {
   border-color: var(--border-strong);
   background: var(--bg-elevated);
+  box-shadow: var(--surface-shadow-hover);
 }
 
 [data-theme="light"] .drug-card {
@@ -225,8 +229,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   font-size: 18px;
   color: #94a3b8;
@@ -245,7 +249,7 @@
 .drug-favorite:hover {
   background: rgba(234, 179, 8, 0.15);
   color: #eab308;
-  transform: scale(1.1);
+  transform: translateY(-1px);
 }
 
 .drug-favorite-active {

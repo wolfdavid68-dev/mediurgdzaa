@@ -23,6 +23,7 @@
     0 2px 4px rgba(0, 0, 0, 0.25);
   transition:
     transform 0.12s,
+    scale 0.12s,
     box-shadow 0.15s;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -34,7 +35,7 @@
     0 3px 6px rgba(0, 0, 0, 0.3);
 }
 .urgence-fab:active {
-  transform: scale(0.96);
+  scale: 0.96;
 }
 .urgence-fab-icon {
   font-size: 22px;
@@ -252,8 +253,8 @@
   font-weight: 600;
 }
 .acr-mode-close {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--card);
@@ -307,14 +308,15 @@
   transition:
     background 0.15s,
     border-color 0.15s,
-    transform 0.1s;
+    transform 0.1s,
+    scale 0.12s;
 }
 .acr-mode-pick:hover {
   background: var(--card-hover);
   border-color: #ef4444;
 }
 .acr-mode-pick:active {
-  transform: scale(0.96);
+  scale: 0.96;
 }
 .acr-mode-pick-icon {
   font-size: 38px;
@@ -349,6 +351,7 @@
   align-items: center;
   gap: 2px;
   padding: 10px 8px;
+  min-height: 58px;
   border-radius: 10px;
   border: 2px solid var(--border);
   background: var(--card);
@@ -357,7 +360,8 @@
   transition:
     background 0.15s,
     border-color 0.15s,
-    color 0.15s;
+    color 0.15s,
+    scale 0.12s;
 }
 .acr-mode-protocol-btn:hover {
   background: var(--card-hover);
@@ -367,6 +371,7 @@
   border-color: #ef4444;
   background: rgba(239, 68, 68, 0.08);
   color: var(--text);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.24) inset;
 }
 .acr-mode-protocol-name {
   font-size: 14px;
@@ -416,6 +421,10 @@
   color: var(--text-dim);
   font-size: 12px;
   cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    scale 0.12s;
 }
 .acr-mode-switch:hover {
   color: var(--text);

@@ -36,14 +36,14 @@
   transition:
     background 0.15s,
     border-color 0.15s,
-    transform 0.08s;
+    scale 0.08s;
 }
 .acr-dose-pill:hover:not(:disabled) {
   background: var(--card-hover);
   border-color: var(--info);
 }
 .acr-dose-pill:active:not(:disabled) {
-  transform: scale(0.96);
+  scale: 0.96;
 }
 .acr-dose-pill:disabled {
   cursor: default;

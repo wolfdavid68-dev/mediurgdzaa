@@ -88,6 +88,7 @@ const ProtocolesPage = ({
           onClick={() => changeProtoCategory("ecg")}
         >
           ECG
+          <span className="proto-category-note">Réseau</span>
         </button>
         <button
           type="button"
@@ -114,7 +115,7 @@ const ProtocolesPage = ({
           {/* Lecteur ECG (photo → analyse IA) : visible pour tous. Outil
               d'aide à la décision en test, ne remplace pas l'interprétation
               médicale. Nécessite le réseau (analyse) — cf. OfflineBanner. */}
-          <div style={{ marginBottom: 16 }}>
+          <div className="ecg-reader-shell">
             <EcgReader onDrugSearch={onDrugSearch} />
           </div>
           <EcgDiagnostic />

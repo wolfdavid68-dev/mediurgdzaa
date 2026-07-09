@@ -19,10 +19,15 @@
   font-weight: 900;
   cursor: pointer;
   box-shadow: 0 14px 30px rgba(239, 68, 68, 0.24);
+  transition:
+    background 0.15s,
+    box-shadow 0.15s,
+    scale 0.12s;
 }
 
 .acr-session-new:hover {
   background: #dc2626;
+  box-shadow: 0 16px 34px rgba(239, 68, 68, 0.3);
 }
 
 .acr-session-recent {
@@ -75,6 +80,9 @@
   font-weight: 700;
   text-align: left;
   cursor: pointer;
+  transition:
+    background 0.15s,
+    scale 0.12s;
 }
 
 .acr-session-resume span,
@@ -101,6 +109,10 @@
   color: var(--text-mute);
   font-size: 15px;
   cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    scale 0.12s;
 }
 
 .acr-session-row:hover {
@@ -246,7 +258,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .acr-coach-toggle {
+  .acr-coach-toggle,
+  .acr-timer-pulse {
     animation: none;
   }
 }

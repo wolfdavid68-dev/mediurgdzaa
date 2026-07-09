@@ -20,6 +20,7 @@
   text-align: center;
   gap: 6px;
   padding: 10px 6px;
+  min-height: 44px;
   border-radius: 10px 10px 0 0;
   border: 1px solid transparent;
   border-bottom: none;
@@ -31,7 +32,8 @@
   letter-spacing: 0.02em;
   transition:
     background 0.12s,
-    color 0.12s;
+    color 0.12s,
+    scale 0.12s;
   margin-bottom: -2px;
 }
 @media (min-width: 600px) {
@@ -71,6 +73,21 @@
   font-weight: 800;
 }
 
+.proto-category-note {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--info) 14%, transparent);
+  color: var(--info);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 /* ── FILTRE PROTOCOLES ───────────────────────────────────── */
 .proto-filter-bar {
   display: flex;
@@ -82,6 +99,7 @@
 
 .proto-filter-chip {
   padding: 6px 16px;
+  min-height: 40px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -92,7 +110,8 @@
   transition:
     background 0.12s,
     border-color 0.12s,
-    color 0.12s;
+    color 0.12s,
+    scale 0.12s;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -148,11 +167,20 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-  transition: border-color 0.15s;
+  box-shadow: var(--surface-shadow);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .protocol-card-open {
   border-color: var(--border-strong);
+  box-shadow: var(--surface-shadow-hover);
+}
+
+.ecg-reader-shell {
+  width: min(100%, var(--clinical-content-max));
+  margin: 0 auto 16px;
 }
 
 .protocol-header {

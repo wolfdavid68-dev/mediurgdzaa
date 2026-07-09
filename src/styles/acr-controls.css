@@ -13,6 +13,7 @@
 }
 .acr-btn {
   padding: 11px 12px;
+  min-height: 44px;
   border-radius: 10px;
   border: 1px solid transparent;
   font-size: 14px;
@@ -22,7 +23,8 @@
     background 0.15s,
     border-color 0.15s,
     color 0.15s,
-    opacity 0.15s;
+    opacity 0.15s,
+    scale 0.12s;
 }
 .acr-btn-start {
   background: #ef4444;
