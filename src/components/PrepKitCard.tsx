@@ -335,7 +335,14 @@ const DrugPreparations = ({ kit }: { kit: PrepKit }) => (
       const etapes =
         !d.prep && fromDrug?.etapes && fromDrug.etapes.length > 0 ? fromDrug.etapes : null;
       return (
-        <div key={i} className="prepkit-drug-card" style={{ borderLeftColor: kit.couleur }}>
+        <div
+          key={i}
+          className="prepkit-drug-card"
+          style={{
+            background: `color-mix(in srgb, ${kit.couleur} 7%, var(--card))`,
+            boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${kit.couleur} 38%, transparent)`,
+          }}
+        >
           <div className="prepkit-drug-name">{d.nom}</div>
           <div className="prepkit-drug-role">{d.role}</div>
           <Row label="Dose">{d.dose}</Row>

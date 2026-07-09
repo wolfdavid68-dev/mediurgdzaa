@@ -86,7 +86,7 @@ const MobileRegisterScreen = ({ onGoToLogin }: Props) => {
             aria-valuemin={1}
             aria-valuemax={2}
           >
-            <div className="m-progress-bar" style={{ width: `${(step / 2) * 100}%` }} />
+            <div className="m-progress-bar" style={{ transform: `scaleX(${step / 2})` }} />
           </div>
         )}
 

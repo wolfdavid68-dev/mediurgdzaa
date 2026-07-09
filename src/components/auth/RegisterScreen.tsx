@@ -87,7 +87,10 @@ const RegisterScreen = ({ onGoToLogin }: Props) => {
               aria-valuemin={1}
               aria-valuemax={2}
             >
-              <div className="auth-progress-fill" style={{ width: step === 1 ? "50%" : "100%" }} />
+              <div
+                className="auth-progress-fill"
+                style={{ transform: `scaleX(${step === 1 ? 0.5 : 1})` }}
+              />
             </div>
           )}
 

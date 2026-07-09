@@ -468,7 +468,10 @@ const IncompatibilityList = ({
                 <tr key={rowDrug.drug}>
                   <td
                     className="incompat-row-head"
-                    style={{ borderLeft: `3px solid ${rowDrug.color}` }}
+                    style={{
+                      background: `color-mix(in srgb, ${rowDrug.color} 8%, var(--card))`,
+                      boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${rowDrug.color} 45%, transparent)`,
+                    }}
                   >
                     <span className="incompat-row-name" style={{ color: rowDrug.color }}>
                       {rowDrug.short}

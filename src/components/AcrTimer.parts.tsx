@@ -541,7 +541,9 @@ export const AcrZoomOverlay = ({ nextAnalyseIn, onSkip }: ZoomOverlayProps) => (
       <div className="acr-zoom-bar" aria-hidden="true">
         <div
           className="acr-zoom-bar-fill"
-          style={{ width: `${Math.min(100, ((15 - nextAnalyseIn) / 15) * 100)}%` }}
+          style={{
+            transform: `scaleX(${Math.min(1, Math.max(0, (15 - nextAnalyseIn) / 15))})`,
+          }}
         />
       </div>
     </div>

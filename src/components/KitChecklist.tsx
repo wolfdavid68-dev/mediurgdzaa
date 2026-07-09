@@ -405,7 +405,10 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
       >
         <div
           className="kit-checklist-progressfill"
-          style={{ width: `${pct}%`, background: allDone ? "var(--success)" : couleur }}
+          style={{
+            transform: `scaleX(${pct / 100})`,
+            background: allDone ? "var(--success)" : couleur,
+          }}
         />
       </div>
 

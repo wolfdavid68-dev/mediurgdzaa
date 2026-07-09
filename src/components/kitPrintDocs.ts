@@ -42,7 +42,7 @@ export const buildSedationProcedurePrintDoc = (values: PrintValues): string => {
   }
   @page { size: A4; margin: 8mm; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #e5e7eb; font-family: Arial, Helvetica, sans-serif; color: var(--text); }
+  body { margin: 0; background: #e5e7eb; font-family: system-ui, sans-serif; color: var(--text); }
   .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 8mm; background: #fff; border: 1px solid #d1d5db; }
   .sheet { border: 1.4px solid var(--blue); border-radius: 4px; overflow: hidden; }
   .header { display: grid; grid-template-columns: 1fr 68mm; gap: 7mm; padding: 5mm 5mm 4mm; border-bottom: 1.4px solid var(--blue); }
@@ -282,7 +282,7 @@ export const buildIsrPrintDoc = (values: PrintValues): string => {
   }
   @page { size: A4 landscape; margin: 6mm; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #e5e7eb; color: var(--text); font-family: Arial, Helvetica, sans-serif; }
+  body { margin: 0; background: #e5e7eb; color: var(--text); font-family: system-ui, sans-serif; }
   .page { width: 297mm; min-height: 210mm; margin: 0 auto; padding: 6mm; background: #fff; }
   .document { min-height: 198mm; border: 1.4px solid var(--navy); border-radius: 4px; padding: 4mm; display: flex; flex-direction: column; gap: 3.4mm; }
   .top { display: grid; grid-template-columns: 1.15fr 1.35fr 1.25fr 45mm; gap: 5mm; align-items: stretch; border-bottom: 1.4px solid var(--line); padding-bottom: 3mm; }

@@ -7,7 +7,6 @@
 
 .prepkit-drug-card {
   border: 1px solid var(--border);
-  border-left: 3px solid;
   border-radius: 8px;
   padding: 10px 12px;
   background: var(--card);
@@ -93,9 +92,12 @@
   margin-bottom: 10px;
 }
 .kit-checklist-progressfill {
+  width: 100%;
   height: 100%;
   border-radius: 999px;
-  transition: width 0.25s ease;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.25s ease;
 }
 /* En-tête de section : bouton repliable (titre + chevron + badge) */
 .kit-checklist-sechead {
@@ -512,17 +514,19 @@
   padding: 10px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-left-width: 4px;
   border-radius: 8px;
 }
 .ktc-line-ok {
-  border-left-color: #16a34a;
+  border-color: color-mix(in srgb, var(--success) 46%, var(--border));
+  background: color-mix(in srgb, var(--success) 7%, var(--bg-elevated));
 }
 .ktc-line-watch {
-  border-left-color: #f59e0b;
+  border-color: color-mix(in srgb, var(--warn) 46%, var(--border));
+  background: color-mix(in srgb, var(--warn) 8%, var(--bg-elevated));
 }
 .ktc-line-danger {
-  border-left-color: #dc2626;
+  border-color: color-mix(in srgb, var(--danger) 46%, var(--border));
+  background: color-mix(in srgb, var(--danger) 7%, var(--bg-elevated));
 }
 .ktc-line-head {
   display: flex;

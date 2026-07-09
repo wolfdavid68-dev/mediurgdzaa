@@ -79,7 +79,7 @@
   transform: translateY(0) scale(1);
   transition:
     opacity 0.22s,
-    transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .changelog-dialog:not([open]) {
   display: none;
@@ -384,8 +384,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding-left: 10px;
-  border-left: 3px solid var(--info);
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--info) 38%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--info) 8%, transparent);
   color: var(--text);
   font-size: 13px;
   font-weight: 800;
@@ -587,7 +589,7 @@
   background: var(--card);
   padding: 8px 10px;
   border-radius: 6px;
-  border-left: 3px solid var(--info);
+  border: 1px solid color-mix(in srgb, var(--info) 38%, var(--border));
   animation: panel-expand-in 0.18s ease;
 }
 
