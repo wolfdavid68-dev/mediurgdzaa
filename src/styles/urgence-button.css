@@ -26,7 +26,6 @@
     box-shadow 0.15s;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  animation: urgence-fab-pulse 2.4s ease-in-out infinite;
 }
 .urgence-fab:hover {
   transform: translateY(-1px);
@@ -43,20 +42,6 @@
 }
 .urgence-fab-label {
   white-space: nowrap;
-}
-
-@keyframes urgence-fab-pulse {
-  0%,
-  100% {
-    box-shadow:
-      0 6px 18px rgba(239, 68, 68, 0.45),
-      0 2px 4px rgba(0, 0, 0, 0.25);
-  }
-  50% {
-    box-shadow:
-      0 6px 26px rgba(239, 68, 68, 0.75),
-      0 2px 4px rgba(0, 0, 0, 0.25);
-  }
 }
 
 @media (max-width: 480px) {

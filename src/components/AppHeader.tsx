@@ -159,7 +159,7 @@ const AppHeader = ({
             title={isOnline ? "Connecté au réseau" : "Hors ligne — données en cache"}
           >
             <span className="net-status-dot" aria-hidden="true" />
-            {isOnline ? "Online" : "Offline"}
+            {isOnline ? "En ligne" : "Hors ligne"}
           </span>
           <div className="header-menu" ref={menuRef}>
             <button

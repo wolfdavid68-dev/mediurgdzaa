@@ -76,16 +76,6 @@
 .net-status-offline .net-status-dot {
   background: #dc2626;
   box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
-  animation: net-status-pulse 1.4s ease-in-out infinite;
-}
-@keyframes net-status-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.45;
-  }
 }
 
 /* ── Banner « Version test » ───────────────────────────────
