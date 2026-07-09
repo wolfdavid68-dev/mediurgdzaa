@@ -6,16 +6,27 @@ colors:
   clinical-blue: "#4da6ff"
   success-green: "#4ade80"
   warning-amber: "#ffaa33"
+  online-green: "#16a34a"
+  offline-red: "#dc2626"
+  test-amber-bg: "rgba(234, 179, 8, 0.18)"
+  test-amber-text: "#92400e"
+  tutorat-sage: "#84a370"
   night-bg: "#0a0a12"
   night-surface: "#12121c"
   night-card: "#161620"
   night-border: "#2a2a3a"
+  night-border-strong: "#3a3a4d"
   night-text: "#e8e8f0"
+  night-text-dim: "#9a9ab0"
+  night-text-mute: "#8a8aa0"
   light-bg: "#e8edf5"
   light-surface: "#f8fafc"
   light-card: "#ffffff"
   light-border: "#c8d1e1"
+  light-border-strong: "#94a3b8"
   light-text: "#111827"
+  light-text-dim: "#334155"
+  light-text-mute: "#64748b"
 typography:
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
@@ -44,14 +55,29 @@ typography:
     fontSize: "0.875rem"
     fontWeight: 750
     lineHeight: 1.2
+  micro:
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+    fontSize: "0.625rem"
+    fontWeight: 800
+    lineHeight: 1.15
+  compact:
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 700
+    lineHeight: 1.3
 rounded:
   xs: "3px"
+  focus: "4px"
   sm: "6px"
   md: "8px"
+  control: "10px"
   lg: "12px"
   modal: "16px"
+  sheet: "24px"
+  pill: "999px"
 spacing:
   xs: "4px"
+  chip-gap: "5px"
   sm: "8px"
   md: "12px"
   lg: "16px"
@@ -112,6 +138,7 @@ La palette combine une base nuit très sombre, un thème clair froid, et trois c
 - **Bleu clinique**: focus clavier, information, liens d'état et actions secondaires techniques.
 - **Vert validation**: succès, sauvegarde, statut rempli, confirmation.
 - **Ambre vigilance**: avertissement, mode test, réseau dégradé et états qui demandent attention sans danger immédiat.
+- **Sauge tutorat**: passerelle vers l'application Tutorat, volontairement distincte de l'urgence clinique.
 
 ### Neutral
 
@@ -120,6 +147,12 @@ La palette combine une base nuit très sombre, un thème clair froid, et trois c
 - **Carte nuit**: cartes de médicaments, sections, panneaux ACR.
 - **Fond clair froid**: thème clair, fond d'application et zones de lecture longue.
 - **Carte claire**: composants au repos en thème clair.
+
+### State Colors
+
+- **Online / Offline**: badges réseau compacts, verts/rouges explicites, jamais décoratifs.
+- **Version test / Offline banner**: ambre lisible, utilisé uniquement pour signaler une vigilance applicative.
+- **Tutorat**: sauge stable pour les accès inter-app, afin de ne pas confondre avec les signaux cliniques rouges/bleus/verts.
 
 ### Named Rules
 
@@ -141,6 +174,7 @@ La palette combine une base nuit très sombre, un thème clair froid, et trois c
 - **Title** (850, 15-17px, 1.2): titres de sections, cartes et panneaux cliniques.
 - **Body** (500-750, 13-15px, 1.5): contenu clinique, descriptions, cellules et messages.
 - **Label** (800, 11-12px, 1.2): libellés de champs, badges, filtres et catégories.
+- **Micro / Compact** (700-850, 10-13px, 1.15-1.3): badges réseau, puces de filtres, libellés denses et compteurs.
 - **Mono** (750-900, 12-46px, 1.0-1.2): chronos, cycles, doses, horaires et données qui doivent rester alignées.
 
 ### Named Rules
@@ -166,6 +200,7 @@ MediURG utilise une élévation hybride : bordures et couches tonales d'abord, o
 ### Buttons
 
 - **Shape:** rectangle compact à coins modérés (6-8px), cercle uniquement pour les boutons icônes.
+- **Pill:** réservé aux statuts, badges, pastilles de filtre et liens inter-app courts.
 - **Primary:** rouge urgence, texte blanc, hauteur tactile minimale 44-46px.
 - **Hover / Focus:** hover par changement de fond ou de bordure ; focus visible bleu avec outline 2px.
 - **Secondary / Ghost:** fond transparent ou teinte légère, couleur sémantique conservée.

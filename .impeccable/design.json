@@ -63,6 +63,44 @@
           "#f4f7fb",
           "#ffffff"
         ]
+      },
+      "state-network": {
+        "role": "state",
+        "displayName": "Statuts réseau",
+        "canonical": "#16a34a",
+        "tonalRamp": [
+          "rgba(34, 197, 94, 0.15)",
+          "rgba(34, 197, 94, 0.45)",
+          "#16a34a",
+          "rgba(239, 68, 68, 0.15)",
+          "rgba(239, 68, 68, 0.45)",
+          "#dc2626"
+        ]
+      },
+      "state-warning": {
+        "role": "state",
+        "displayName": "Vigilance application",
+        "canonical": "#ffaa33",
+        "tonalRamp": [
+          "rgba(234, 179, 8, 0.18)",
+          "rgba(234, 179, 8, 0.45)",
+          "#92400e",
+          "#fde68a",
+          "rgba(245, 158, 11, 0.12)",
+          "#b45309"
+        ]
+      },
+      "tutorat-sage": {
+        "role": "interop",
+        "displayName": "Sauge tutorat",
+        "canonical": "#84a370",
+        "tonalRamp": [
+          "rgba(132, 163, 112, 0.14)",
+          "rgba(132, 163, 112, 0.18)",
+          "rgba(132, 163, 112, 0.45)",
+          "#5a7a48",
+          "#84a370"
+        ]
       }
     },
     "typographyMeta": {
@@ -73,6 +111,10 @@
       "mono": {
         "displayName": "Valeurs alignées",
         "purpose": "Chronos, horaires, cycles, posologies et données critiques."
+      },
+      "micro": {
+        "displayName": "Libellés denses",
+        "purpose": "Badges réseau, compteurs, puces de filtres et labels très compacts."
       }
     },
     "shadows": [

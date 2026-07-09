@@ -18,13 +18,15 @@ const BottomNav = ({
   onOpenAcr,
 }: BottomNavProps) => (
   <>
-    <nav className="bottom-nav">
+    <nav className="bottom-nav" aria-label="Navigation principale">
       <div className="bottom-nav-row">
         {allowedPages.includes("medicaments") && (
           <button
+            type="button"
             className={`bottom-tab ${page === "medicaments" ? "bottom-tab-active" : ""}`}
             onClick={() => onNavigate("medicaments")}
             aria-current={page === "medicaments" ? "page" : undefined}
+            aria-label="Médicaments"
           >
             <svg
               viewBox="0 0 24 24"
@@ -41,9 +43,11 @@ const BottomNav = ({
         )}
         {allowedPages.includes("protocoles") && (
           <button
+            type="button"
             className={`bottom-tab ${page === "protocoles" ? "bottom-tab-active" : ""}`}
             onClick={() => onNavigate("protocoles")}
             aria-current={page === "protocoles" ? "page" : undefined}
+            aria-label="Protocoles"
           >
             <svg
               viewBox="0 0 24 24"
@@ -63,9 +67,11 @@ const BottomNav = ({
         )}
         {allowedPages.includes("echelles") && (
           <button
+            type="button"
             className={`bottom-tab ${page === "echelles" ? "bottom-tab-active" : ""}`}
             onClick={() => onNavigate("echelles")}
             aria-current={page === "echelles" ? "page" : undefined}
+            aria-label="Échelles cliniques"
           >
             <svg
               viewBox="0 0 24 24"

@@ -60,8 +60,11 @@ const ProtocolesPage = ({
 
   return (
     <>
-      <div className="proto-category-bar">
+      <div className="proto-category-bar" role="tablist" aria-label="Sections des protocoles">
         <button
+          type="button"
+          role="tab"
+          aria-selected={protoCategory === "PISU"}
           className={`proto-category-tab ${protoCategory === "PISU" ? "proto-category-active" : ""}`}
           onClick={() => changeProtoCategory("PISU")}
         >
@@ -69,18 +72,27 @@ const ProtocolesPage = ({
           <span className="proto-category-count">{filteredProtocols.length}</span>
         </button>
         <button
+          type="button"
+          role="tab"
+          aria-selected={protoCategory === "incompatibilites"}
           className={`proto-category-tab ${protoCategory === "incompatibilites" ? "proto-category-active" : ""}`}
           onClick={() => changeProtoCategory("incompatibilites")}
         >
           Incompat.
         </button>
         <button
+          type="button"
+          role="tab"
+          aria-selected={protoCategory === "ecg"}
           className={`proto-category-tab ${protoCategory === "ecg" ? "proto-category-active" : ""}`}
           onClick={() => changeProtoCategory("ecg")}
         >
           ECG
         </button>
         <button
+          type="button"
+          role="tab"
+          aria-selected={protoCategory === "kits"}
           className={`proto-category-tab ${protoCategory === "kits" ? "proto-category-active" : ""}`}
           onClick={() => changeProtoCategory("kits")}
         >
@@ -125,12 +137,14 @@ const ProtocolesPage = ({
 
       {protoCategory === "PISU" && (
         <>
-          <div className="proto-filter-bar">
+          <div className="proto-filter-bar" aria-label="Filtrer les protocoles PISU">
             {["Tout", "Adulte", "Enfant"].map((f) => (
               <button
                 key={f}
+                type="button"
                 className={`proto-filter-chip ${protoFilter === f ? "proto-filter-active" : ""}`}
                 onClick={() => setProtoFilter(f)}
+                aria-pressed={protoFilter === f}
               >
                 {f}
               </button>

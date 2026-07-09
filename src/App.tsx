@@ -428,10 +428,12 @@ const App = () => {
               <div className="filters">
                 <div className="filter-group">
                   <span className="filter-label">CAT</span>
-                  <div className="filter-chips">
+                  <div className="filter-chips" aria-label="Filtres par catégorie">
                     <button
+                      type="button"
                       className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
                       onClick={() => setShowFavoritesOnly((v) => !v)}
+                      aria-pressed={showFavoritesOnly}
                       title={
                         showFavoritesOnly
                           ? "Désactiver le filtre favoris"
@@ -444,9 +446,11 @@ const App = () => {
                     {CATEGORIES.map((c) => (
                       <button
                         key={c}
+                        type="button"
                         data-cat={c}
                         className={`chip ${cat === c ? "chip-active" : ""}`}
                         onClick={() => setCat(c)}
+                        aria-pressed={cat === c}
                       >
                         {c}
                       </button>
@@ -455,18 +459,22 @@ const App = () => {
                 </div>
                 <div className="filter-group">
                   <span className="filter-label">SVC</span>
-                  <div className="filter-chips">
+                  <div className="filter-chips" aria-label="Filtres par service">
                     {SERVICES.map((s) => (
                       <button
                         key={s}
+                        type="button"
                         className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
                         onClick={() => setSvc(s)}
+                        aria-pressed={svc === s}
                       >
                         {s}
                       </button>
                     ))}
                   </div>
-                  <span className="result-count">{filtered.length} méd.</span>
+                  <span className="result-count" role="status" aria-live="polite">
+                    {filtered.length} méd.
+                  </span>
                 </div>
               </div>
             )}
