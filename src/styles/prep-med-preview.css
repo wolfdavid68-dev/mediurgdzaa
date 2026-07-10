@@ -1,0 +1,859 @@
+/* Prépa Med v2.5 — transcription du workspace de
+   mockups/mediurg-refonte-mobile.html, limitée à ?author=preview. */
+
+.drug-card-preview-v25.drug-card-open .drug-body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--drug-accent) 4%, var(--bg));
+}
+
+.drug-card-preview-v25 .preview-v25-workflow,
+.drug-card-preview-v25 .preview-v25-identity,
+.drug-card-preview-v25 .preview-v25-modes,
+.drug-card-preview-v25 .preview-v25-results,
+.drug-card-preview-v25 .drug-related {
+  grid-column: 1 / -1;
+}
+
+.drug-card-preview-v25 .drug-related {
+  order: 20;
+}
+
+.preview-v25-workflow {
+  display: none;
+}
+
+/* Identité : DCI / surveillance / description. */
+.preview-v25-identity {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(150px, 0.75fr) minmax(0, 2.5fr);
+  min-height: 52px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.preview-v25-identity > div,
+.preview-v25-identity > p {
+  min-width: 0;
+  margin: 0;
+  padding: 9px 14px;
+}
+
+.preview-v25-identity > div + div,
+.preview-v25-identity > p {
+  border-left: 1px solid var(--border);
+}
+
+.preview-v25-identity > div {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.preview-v25-identity strong,
+.preview-v25-section-head > div > span {
+  color: color-mix(in srgb, var(--drug-accent) 78%, var(--text));
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.preview-v25-identity span,
+.preview-v25-identity p {
+  color: var(--text-dim);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.preview-v25-monitoring {
+  justify-self: start;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 42%, var(--border));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--drug-accent) 10%, transparent);
+  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text)) !important;
+  font-weight: 850;
+}
+
+/* Choix de préparation. */
+.preview-v25-modes,
+.preview-v25-results {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.preview-v25-modes > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 74px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: inherit;
+  text-align: left;
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.08);
+}
+
+.preview-v25-modes > button > span:first-child,
+.preview-v25-result-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 28%, var(--border));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--drug-accent) 8%, var(--card));
+  color: var(--drug-accent);
+}
+
+.preview-v25-modes svg,
+.preview-v25-result-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.preview-v25-modes > button > span:nth-child(2),
+.preview-v25-results > div > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.preview-v25-mode-title,
+.preview-v25-mode-detail,
+.preview-v25-results strong,
+.preview-v25-results em {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-v25-mode-title {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.preview-v25-mode-detail,
+.preview-v25-results em {
+  color: var(--text-dim);
+  font-size: 9px;
+  font-style: normal;
+}
+
+.preview-v25-mode-title::before,
+.preview-v25-mode-detail::before,
+.preview-v25-results strong::before,
+.preview-v25-results em::before {
+  content: attr(data-label);
+}
+
+.preview-v25-dose-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-v25-dose-stepper button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--drug-accent) 14%, var(--card));
+  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.preview-v25-dose-stepper output {
+  min-width: 72px;
+  color: color-mix(in srgb, var(--drug-accent) 88%, var(--text));
+  font-family: var(--mono);
+  font-size: 25px;
+  font-weight: 950;
+  line-height: 1;
+  text-align: center;
+}
+
+.preview-v25-dose-stepper output::before {
+  content: attr(data-label);
+}
+
+.preview-v25-modes b {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: white;
+  color: var(--drug-accent);
+}
+
+.preview-v25-modes b svg {
+  width: 18px;
+  height: 18px;
+}
+
+.preview-v25-modes > button.is-active {
+  border-color: color-mix(in srgb, var(--drug-accent) 75%, white);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--drug-accent) 90%, #2563eb),
+    color-mix(in srgb, var(--drug-accent) 72%, #0f3f9e)
+  );
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--drug-accent) 24%, transparent);
+}
+
+.preview-v25-modes > button.is-active strong,
+.preview-v25-modes > button.is-active small {
+  color: white;
+}
+
+.preview-v25-modes > button:focus-visible {
+  outline-color: var(--drug-accent);
+}
+
+/* Résultats : dose / prélèvement / administration. */
+.preview-v25-results > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 104px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.06);
+}
+
+.preview-v25-results small {
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.preview-v25-results strong {
+  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.18;
+}
+
+/* Trois panneaux principaux. */
+.preview-v25-panel {
+  min-width: 0;
+  min-height: 450px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 30%, var(--border));
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.08);
+}
+
+.preview-v25-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 62px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--drug-accent) 10%, var(--card));
+}
+
+.preview-v25-section-head > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.preview-v25-section-head > div > span,
+.preview-v25-section-head strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.preview-v25-section-head strong {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.preview-v25-section-head > span {
+  max-width: 44%;
+  color: var(--text-dim);
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.25;
+  text-align: right;
+}
+
+.preview-v25-section-head svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.preview-v25-prep-context::before {
+  content: attr(data-label);
+}
+
+/* Recette chronologique. */
+.preview-v25-recipe {
+  margin: 0;
+  padding: 0 14px;
+  list-style: none;
+}
+
+.preview-v25-recipe li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(68px, auto);
+  align-items: center;
+  gap: 10px;
+  min-height: 66px;
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-v25-recipe li::before {
+  position: absolute;
+  top: 46px;
+  bottom: -20px;
+  left: 13px;
+  width: 1px;
+  background: color-mix(in srgb, var(--drug-accent) 56%, var(--border));
+  content: "";
+}
+
+.preview-v25-recipe li:last-child::before {
+  display: none;
+}
+
+.preview-v25-recipe li > span:first-child {
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--drug-accent);
+  color: white;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.preview-v25-recipe li > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.preview-v25-recipe li strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.preview-v25-recipe li small {
+  color: var(--text-dim);
+  font-size: 9px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.preview-v25-recipe li b {
+  max-width: 106px;
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 35%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--drug-accent) 8%, var(--card));
+  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  font-family: var(--mono);
+  font-size: 9px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.preview-v25-recipe li strong::before,
+.preview-v25-recipe li small::before,
+.preview-v25-recipe li b::before,
+.preview-v25-recipe-notes span::before {
+  content: attr(data-label);
+}
+
+.preview-v25-recipe-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 14px 14px;
+}
+
+.preview-v25-recipe-notes span {
+  padding: 9px;
+  border-radius: 7px;
+  background: var(--amber-surface, rgb(245 158 11 / 0.12));
+  color: var(--amber-text, #b45309);
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+/* Moteur clinique conservé hors écran : calculs, interactions et tests. */
+.preview-v25-data-engine {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Double contrôle. */
+.preview-v25-control .preview-v25-section-head {
+  min-height: 62px;
+  justify-content: flex-start;
+  padding-bottom: 6px;
+  border-bottom: 0;
+  background: var(--card);
+}
+
+.preview-v25-control-title strong {
+  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  font-size: 16px;
+}
+
+.preview-v25-control-title small {
+  display: block;
+  padding-left: 25px;
+  color: var(--text-dim);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.preview-v25-checks {
+  display: grid;
+  gap: 8px;
+  padding: 0 14px;
+}
+
+.preview-v25-checks button {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 42px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--card) 92%, var(--bg));
+  color: var(--text);
+  text-align: left;
+}
+
+.preview-v25-checks button > span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-dim) 22%, var(--card));
+  color: color-mix(in srgb, var(--text-dim) 68%, var(--text));
+}
+
+.preview-v25-checks button > span svg {
+  width: 12px;
+  height: 12px;
+}
+
+.preview-v25-checks button strong {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.preview-v25-checks button strong::before {
+  content: attr(data-label);
+}
+
+.preview-v25-checks button.is-checked {
+  border-color: rgb(34 197 94 / 0.45);
+  background: rgb(34 197 94 / 0.08);
+}
+
+.preview-v25-checks button.is-checked > span {
+  border-color: #22c55e;
+  background: #22c55e;
+}
+
+.preview-v25-validation {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 10px 14px 0;
+  min-height: 48px;
+  padding: 14px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--drug-accent) 72%, #3b82f6);
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--drug-accent) 20%, transparent);
+  opacity: 1;
+}
+
+.preview-v25-validation.ready {
+  background: #16a34a;
+}
+
+.preview-v25-check-progress {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-dim);
+  font-size: 8px;
+  text-align: center;
+}
+
+.preview-v25-verified {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin: 0 8px;
+  padding: 10px;
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+  background: #bbf7d0;
+  color: #166534;
+}
+
+.preview-v25-verified > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #4ade80;
+  color: #14532d;
+}
+
+.preview-v25-verified > span svg {
+  width: 20px;
+  height: 20px;
+}
+
+.preview-v25-verified > div {
+  display: grid;
+  gap: 3px;
+}
+
+.preview-v25-verified strong {
+  font-size: 11px;
+}
+
+.preview-v25-verified small {
+  font-size: 8px;
+}
+
+.preview-v25-verified button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: white;
+  color: #1e293b;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+/* Référence clinique. */
+.preview-v25-reference .preview-v25-reference-head {
+  min-height: 0;
+  padding: 14px 14px 8px;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.preview-v25-reference-head > div {
+  gap: 5px;
+}
+
+.preview-v25-reference-head strong {
+  color: color-mix(in srgb, var(--drug-accent) 82%, #0758d8);
+  font-size: 16px;
+}
+
+.preview-v25-reference-head small {
+  margin-left: 25px;
+  color: var(--text-dim);
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.preview-v25-reference .tabs-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0 14px 10px;
+  border: 0;
+}
+
+.preview-v25-reference .tab-btn {
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding-inline: 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  box-shadow: 0 2px 5px rgb(28 55 82 / 0.08);
+}
+
+.preview-v25-reference .tab-btn:last-child {
+  grid-column: span 2;
+}
+
+.preview-v25-reference .tab-content {
+  margin: 0 14px 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.preview-v25-reference .poso-filter-hint,
+.preview-v25-reference .poso-note {
+  display: none;
+}
+
+.preview-v25-reference .poso-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.preview-v25-reference .poso-grid.poso-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.preview-v25-reference .poso-box {
+  min-width: 0;
+  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--bg) 28%, var(--card));
+}
+
+.preview-v25-reference .poso-box + .poso-box {
+  border-left: 1px solid var(--border);
+}
+
+.preview-v25-reference .poso-title {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  color: color-mix(in srgb, var(--drug-accent) 76%, var(--text));
+  font-size: 9px;
+}
+
+.preview-v25-reference .poso-item {
+  position: relative;
+  padding: 8px 0 0 13px;
+  border: 0;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 9px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.preview-v25-reference .poso-item::before {
+  position: absolute;
+  top: 12px;
+  left: 1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--drug-accent);
+  content: "";
+}
+
+.preview-v25-reference .calc-result {
+  margin-top: 4px;
+  font-size: 9px;
+}
+
+/* Écrans desktop peu hauts : le workspace complet tient dans une seule vue. */
+@media (min-width: 901px) and (max-height: 900px) {
+  .drug-card-preview-v25.drug-card-open .drug-body {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .preview-v25-identity {
+    min-height: 44px;
+  }
+
+  .preview-v25-identity > div,
+  .preview-v25-identity > p {
+    padding-block: 7px;
+  }
+
+  .preview-v25-modes > button {
+    min-height: 58px;
+    padding: 7px 11px;
+  }
+
+  .preview-v25-modes > button > span:first-child,
+  .preview-v25-result-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .preview-v25-modes svg,
+  .preview-v25-result-icon svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .preview-v25-results > div {
+    min-height: 76px;
+    padding: 8px 11px;
+  }
+
+  .preview-v25-panel {
+    min-height: 360px;
+  }
+
+  .preview-v25-section-head,
+  .preview-v25-control .preview-v25-section-head {
+    min-height: 50px;
+    padding-block: 7px;
+  }
+
+  .preview-v25-recipe li {
+    min-height: 56px;
+  }
+
+  .preview-v25-checks {
+    gap: 5px;
+  }
+
+  .preview-v25-checks button {
+    min-height: 36px;
+    padding-block: 5px;
+  }
+
+  .preview-v25-validation {
+    min-height: 42px;
+    margin-top: 8px;
+    padding-block: 10px;
+  }
+
+  .preview-v25-reference .preview-v25-reference-head {
+    padding-block: 10px 6px;
+  }
+
+  .preview-v25-reference .tab-btn {
+    min-height: 34px;
+  }
+}
+
+@media (max-width: 900px) {
+  .drug-card-preview-v25.drug-card-open .drug-body {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .preview-v25-workflow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+  }
+
+  .preview-v25-workflow button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 48px;
+    padding: 6px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-dim);
+  }
+
+  .preview-v25-workflow button.is-active {
+    background: color-mix(in srgb, var(--drug-accent) 14%, var(--card));
+    color: var(--text);
+  }
+
+  .preview-v25-workflow button > span:first-child {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--drug-accent);
+    color: white;
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  .preview-v25-workflow button > span:last-child {
+    display: grid;
+  }
+
+  .preview-v25-workflow strong {
+    font-size: 10px;
+  }
+
+  .preview-v25-workflow small {
+    display: none;
+  }
+
+  .preview-v25-identity,
+  .preview-v25-modes,
+  .preview-v25-results {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-v25-identity > div + div,
+  .preview-v25-identity > p {
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .preview-v25-panel {
+    display: none;
+    min-height: 0;
+  }
+
+  .preview-workflow-prepare .preview-v25-prepare,
+  .preview-workflow-control .preview-v25-control,
+  .preview-workflow-reference .preview-v25-reference {
+    display: block;
+  }
+}

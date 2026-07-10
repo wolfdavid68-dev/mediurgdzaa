@@ -1,5 +1,18 @@
 import { useState, useEffect, useMemo, useId } from "react";
-import { calcDose, ciSeverity } from "../lib/calc";
+import type { CSSProperties } from "react";
+import {
+  BookOpen,
+  BriefcaseMedical,
+  Check,
+  HeartPulse,
+  ShieldCheck,
+  Syringe,
+  TestTubes,
+  UserRound,
+  UsersRound,
+} from "lucide-react";
+import { calcDebit, calcDose, ciSeverity } from "../lib/calc";
+import { PSE } from "../data/pse";
 import type { ProtocolRef } from "../lib/crossref";
 import { isPreview } from "../lib/featureFlags";
 import type { Drug } from "../types/data";
@@ -137,6 +150,19 @@ const DrugCard = ({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState(false);
+  const [previewWorkflow, setPreviewWorkflow] = useState<"prepare" | "control" | "reference">(
+    "prepare"
+  );
+  const [previewRecipeIndex, setPreviewRecipeIndex] = useState(0);
+  const [previewDose, setPreviewDose] = useState(0.5);
+  const [previewChecks, setPreviewChecks] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
+  const [previewVerifiedAt, setPreviewVerifiedAt] = useState<string | null>(null);
   const previewMode = isPreview();
   const [previewPrep, setPreviewPrep] = useState<Drug["prep"] | null>(null);
   // Poids partagé : vient du bandeau global (App.tsx → PatientWeightBanner) via
@@ -199,6 +225,25 @@ const DrugCard = ({
     };
   }, [open, canOpenProtocol, drug.nom]);
 
+  useEffect(() => {
+    setPreviewRecipeIndex((index) => (index === 0 ? index : 0));
+    setPreviewChecks((checks) =>
+      checks.some(Boolean) ? [false, false, false, false, false] : checks
+    );
+    setPreviewVerifiedAt(null);
+  }, [drug.id, prepPopulation]);
+
+  const resetPreviewVerification = () => {
+    setPreviewChecks([false, false, false, false, false]);
+    setPreviewVerifiedAt(null);
+  };
+
+  const selectPreviewRecipe = (index: number) => {
+    if (index === previewRecipeIndex) return;
+    setPreviewRecipeIndex(index);
+    resetPreviewVerification();
+  };
+
   const monitoringBadges = useMemo(() => {
     const labels = new Set((drug.monitoring || []).map((item) => item.trim()).filter(Boolean));
     const text = [
@@ -230,6 +275,234 @@ const DrugCard = ({
   const monitoringLabel = monitoringBadges.map((badge) => badge.label).join(" + ");
   const monitoringCornerLabel = monitoringBadges.map((badge) => badge.label).join("+");
   const monitoringClass = monitoringBadges[0]?.className || "monitor-custom";
+  const previewWeight = Number.parseFloat(weight);
+  const previewPopulation =
+    prepPopulation || (Number.isFinite(previewWeight) && previewWeight < 30 ? "enfant" : "adulte");
+  const previewPrepData = previewPrep || drug.prep;
+  const previewRecipes = (previewPrepData?.preparations || []).filter(
+    (recipe) => !recipe.population || recipe.population === previewPopulation
+  );
+  const activePreviewRecipe = previewRecipes[previewRecipeIndex] || previewRecipes[0];
+  const previewPopulationPosology =
+    (previewPopulation === "enfant" ? drug.poso?.p : drug.poso?.a) || [];
+  const previewFallbackPosology =
+    previewPopulationPosology[0] || drug.poso?.a?.[0] || drug.poso?.p?.[0] || "Selon prescription";
+  const extractLastVolume = (value?: string) => {
+    if (!value) return null;
+    const ampouleMatch = value.match(
+      /(\d+)\s*ampoules?.*?\d+(?:[,.]\d+)?\s*mg\s*\/\s*(\d+(?:[,.]\d+)?)\s*mL/i
+    );
+    if (ampouleMatch) {
+      const total = Number(ampouleMatch[1]) * Number(ampouleMatch[2].replace(",", "."));
+      return `${String(total).replace(".", ",")} mL`;
+    }
+    const matches = [...value.matchAll(/(\d+(?:[,.]\d+)?)\s*mL/gi)];
+    return matches.length ? `${matches[matches.length - 1][1]} mL` : null;
+  };
+  const productConcentration = previewPrepData?.conc_produit
+    ? `${String(previewPrepData.conc_produit).replace(".", ",")} mg/mL`
+    : activePreviewRecipe?.concentration ||
+      previewPrepData?.conc_finale ||
+      drug.cond?.[0] ||
+      "Produit vérifié";
+  const previewPse = PSE[drug.id];
+  const isPseRecipe =
+    activePreviewRecipe?.mode === "pse" ||
+    /pse|psr/i.test(activePreviewRecipe?.titre || "") ||
+    (!activePreviewRecipe && Boolean(previewPse) && Boolean(previewPrepData));
+  const isAcrRecipe = /acr/i.test(activePreviewRecipe?.titre || "");
+  const previewModeCards = previewRecipes.length
+    ? previewRecipes.slice(0, 3).map((recipe, index) => ({
+        title: recipe.titre || `Préparation ${index + 1}`,
+        detail: recipe.tag || recipe.rate_label || recipe.note || "Protocole actif",
+      }))
+    : [
+        {
+          title: isPseRecipe ? "PSE" : previewPopulation === "enfant" ? "Pédiatrique" : "Adulte",
+          detail:
+            previewPrepData?.conc_finale ||
+            previewPrepData?.duree ||
+            previewFallbackPosology ||
+            "Protocole principal",
+        },
+      ];
+  const previewDoseSteps = (previewPse?.steps || [])
+    .filter((step) => step >= previewPse.min && step <= previewPse.max)
+    .sort((a, b) => a - b);
+  const previewRate = isPseRecipe && previewPse ? calcDebit(previewPse, previewDose, weight) : null;
+  const previewDoseLabel = previewDose.toFixed(2).replace(".", ",");
+  const previewRateLabel = previewRate === null ? "—" : String(previewRate).replace(".", ",");
+  const previewOneMlDose = previewPse?.factor
+    ? String(+(1 / previewPse.factor).toFixed(3)).replace(".", ",")
+    : null;
+  useEffect(() => {
+    const defaultDose = previewDoseSteps.includes(0.5)
+      ? 0.5
+      : previewDoseSteps[0] || previewPse?.min || 0.5;
+    setPreviewDose(defaultDose);
+  }, [drug.id, previewPopulation]); // eslint-disable-line react-hooks/exhaustive-deps
+  const adjustPreviewDose = (direction: -1 | 1) => {
+    if (!previewDoseSteps.length) {
+      setPreviewDose((dose) => Math.max(0.01, +(dose + direction * 0.1).toFixed(2)));
+      return;
+    }
+    const exactIndex = previewDoseSteps.findIndex((step) => step === previewDose);
+    const nearestIndex =
+      exactIndex >= 0
+        ? exactIndex
+        : previewDoseSteps.reduce(
+            (best, step, index) =>
+              Math.abs(step - previewDose) < Math.abs(previewDoseSteps[best] - previewDose)
+                ? index
+                : best,
+            0
+          );
+    const nextIndex = Math.min(previewDoseSteps.length - 1, Math.max(0, nearestIndex + direction));
+    setPreviewDose(previewDoseSteps[nextIndex]);
+  };
+  const rawPreviewSteps = activePreviewRecipe?.etapes || previewPrepData?.etapes || [];
+  const genericPreviewDetails = (
+    rawPreviewSteps.length
+      ? rawPreviewSteps
+      : [
+          activePreviewRecipe?.prelever || previewPrepData?.fd_prelever,
+          activePreviewRecipe?.completer,
+          activePreviewRecipe?.rate_value || previewPrepData?.debit,
+        ]
+  ).filter((step): step is string => Boolean(step));
+  const previewStructuredSteps = isPseRecipe
+    ? [
+        {
+          title: "Identifier l’ampoule",
+          detail: rawPreviewSteps[0] || activePreviewRecipe?.prelever || "Vérifier le produit",
+          result: productConcentration,
+        },
+        {
+          title: `Prélever ${drug.nom.toLocaleLowerCase("fr-FR")}`,
+          detail: activePreviewRecipe?.prelever || rawPreviewSteps[1] || "Selon la prescription",
+          result: extractLastVolume(activePreviewRecipe?.prelever) || "Selon Rx",
+        },
+        {
+          title: `Compléter avec ${activePreviewRecipe?.solvant || previewPrepData?.solvant || "le solvant"}`,
+          detail: activePreviewRecipe?.completer || "Jusqu’au volume final calculé",
+          result: previewPrepData?.volume_final
+            ? `Vf ${previewPrepData.volume_final} mL`
+            : extractLastVolume(activePreviewRecipe?.completer) || "Vf calculé",
+        },
+        {
+          title: "Programmer le PSE",
+          detail: activePreviewRecipe?.rate_label || "Débit selon prescription et poids",
+          result: activePreviewRecipe?.rate_value || "Selon Rx",
+        },
+      ]
+    : isAcrRecipe
+      ? [
+          {
+            title: "Identifier l’ampoule",
+            detail: rawPreviewSteps[0] || "Vérifier le produit et sa concentration",
+            result: productConcentration,
+          },
+          {
+            title: "Prélever",
+            detail: activePreviewRecipe?.prelever || rawPreviewSteps[1] || "Produit pur",
+            result:
+              extractLastVolume(activePreviewRecipe?.prelever) ||
+              activePreviewRecipe?.tag ||
+              "Prêt",
+          },
+          {
+            title: "Injecter",
+            detail: rawPreviewSteps[2] || activePreviewRecipe?.tag || "Selon protocole",
+            result: activePreviewRecipe?.tag || "Administrer",
+          },
+          {
+            title: "Rincer",
+            detail: "Flush NaCl 0,9 % après injection",
+            result: "Puis RCP",
+          },
+        ]
+      : genericPreviewDetails.length
+        ? genericPreviewDetails.map((detail, index) => ({
+            title:
+              index === 0
+                ? "Identifier le produit"
+                : /prélev|prelev/i.test(detail)
+                  ? "Prélever"
+                  : /dilu|compl|qsp/i.test(detail)
+                    ? "Diluer / compléter"
+                    : /inject|administr/i.test(detail)
+                      ? "Administrer"
+                      : /perfus|pse|débit|debit/i.test(detail)
+                        ? "Programmer / perfuser"
+                        : `Étape ${index + 1}`,
+            detail,
+            result:
+              index === 0
+                ? productConcentration
+                : extractLastVolume(detail) || activePreviewRecipe?.rate_value || "Conforme",
+          }))
+        : [
+            {
+              title: "Identifier le produit",
+              detail: drug.cond?.[0] || `${drug.nom} · ${drug.dci}`,
+              result: drug.nom,
+            },
+            {
+              title: "Vérifier la prescription",
+              detail: previewFallbackPosology,
+              result: previewPopulation === "enfant" ? "Enfant" : "Adulte",
+            },
+            {
+              title: "Confirmer l’administration",
+              detail: drug.indic?.[0] || drug.desc,
+              result: "Selon protocole",
+            },
+            {
+              title: "Administrer et surveiller",
+              detail: monitoringLabel
+                ? `Surveillance : ${monitoringLabel}`
+                : "Surveillance clinique selon prescription",
+              result: monitoringLabel || "Surveiller",
+            },
+          ];
+  const previewHasPreparation = Boolean(previewPrepData || activePreviewRecipe);
+  const previewProductSource =
+    rawPreviewSteps[0] ||
+    activePreviewRecipe?.prelever ||
+    previewPrepData?.fd_prelever ||
+    drug.cond?.[0] ||
+    drug.nom;
+  const previewProductKind = /ampoule/i.test(previewProductSource)
+    ? "Ampoule"
+    : /flacon/i.test(previewProductSource)
+      ? "Flacon"
+      : "Produit";
+  const previewAmpoule = (() => {
+    const match = previewProductSource.match(/(?:ampoule|flacon)\s+([^()]+)/i);
+    return match ? match[1].trim() : previewProductSource;
+  })();
+  const previewPrelevement =
+    extractLastVolume(activePreviewRecipe?.prelever || previewPrepData?.fd_prelever) ||
+    previewPrepData?.prelever_label ||
+    "Selon prescription";
+  const previewVolumeFinal = previewPrepData?.volume_final
+    ? `${previewPrepData.volume_final} mL`
+    : extractLastVolume(activePreviewRecipe?.completer) || "Selon prescription";
+  const previewControlLabels = previewHasPreparation
+    ? [
+        `Patient et poids : ${weight ? `${weight} kg` : "à confirmer"}`,
+        `${previewProductKind} : ${previewAmpoule}`,
+        `Volume prélevé : ${previewPrelevement}`,
+        `Volume final : ${previewVolumeFinal}`,
+        "Voie et tubulure identifiées",
+      ]
+    : [
+        `Patient et poids : ${weight ? `${weight} kg` : "à confirmer"}`,
+        `Produit : ${drug.nom}`,
+        "Dose ou volume conforme à la prescription",
+        "Voie et modalités d’administration vérifiées",
+        `Surveillance identifiée${monitoringLabel ? ` : ${monitoringLabel}` : ""}`,
+      ];
 
   // onOpen volontairement exclu des deps : addToHistory est recréé à chaque render
   // parent, ce qui relancerait l'effet et écraserait l'onglet sélectionné par l'utilisateur.
@@ -257,7 +530,8 @@ const DrugCard = ({
     onAutoOpen?.();
   }, [autoOpen, onAutoOpen]);
 
-  const toggleTab = (key: string) => setActiveTab(activeTab === key ? null : key);
+  const toggleTab = (key: string) =>
+    setActiveTab(previewMode ? key : activeTab === key ? null : key);
 
   const renderList = (items: string[] | undefined) => {
     if (!items || items.length === 0) return <span className="na">Non renseigné</span>;
@@ -270,7 +544,7 @@ const DrugCard = ({
     );
   };
 
-  const renderPosoTab = () => {
+  const renderPosoTab = (includePreparation = true, includeNote = true) => {
     // Filtrage des colonnes posologie :
     //  1. Le toggle Adulte/Enfant (prop `prepPopulation`, non-null seulement
     //     quand l'utilisateur l'a actionné) PRIME : « Enfant » masque l'adulte
@@ -373,9 +647,13 @@ const DrugCard = ({
           </>
         )}
 
-        <PrepBlock drug={drug} weight={weight} prepPopulation={prepPopulation} />
-        <PseBlock drug={drug} weight={weight} />
-        <DrugNote drugId={drug.id} onChange={setHasNote} />
+        {includePreparation && (
+          <>
+            <PrepBlock drug={drug} weight={weight} prepPopulation={prepPopulation} />
+            <PseBlock drug={drug} weight={weight} />
+          </>
+        )}
+        {includeNote && <DrugNote drugId={drug.id} onChange={setHasNote} />}
       </>
     );
   };
@@ -415,7 +693,7 @@ const DrugCard = ({
         </div>
       );
     }
-    if (key === "poso") return renderPosoTab();
+    if (key === "poso") return renderPosoTab(!previewMode, !previewMode);
     return null;
   };
 
@@ -423,7 +701,8 @@ const DrugCard = ({
     <div
       className={`drug-card ${open ? "drug-card-open" : ""} ${
         monitoringBadges.length > 0 ? "drug-card-monitored" : ""
-      }`}
+      } ${previewMode ? "drug-card-preview-v25" : ""}`}
+      style={{ "--drug-accent": drug.couleur } as CSSProperties}
     >
       <div className="drug-row">
         <button
@@ -496,20 +775,194 @@ const DrugCard = ({
       </div>
 
       {open && (
-        <div className="drug-body">
-          <div className="drug-meta">
-            <div>
-              <strong>DCI</strong>
-              <span>{drug.dci}</span>
-            </div>
-            {monitoringBadges.length > 0 && (
+        <div className={`drug-body ${previewMode ? `preview-workflow-${previewWorkflow}` : ""}`}>
+          {previewMode && (
+            <>
+              <nav className="preview-v25-workflow" aria-label="Étapes de la fiche médicament">
+                {[
+                  ["prepare", "1", "Préparer", "Recette active"],
+                  ["control", "2", "Contrôler", `${previewChecks.filter(Boolean).length} / 5`],
+                  ["reference", "i", "Référence", "Fiche clinique"],
+                ].map(([key, index, label, detail]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={previewWorkflow === key ? "is-active" : ""}
+                    aria-pressed={previewWorkflow === key}
+                    onClick={() => setPreviewWorkflow(key as typeof previewWorkflow)}
+                  >
+                    <span>{index}</span>
+                    <span>
+                      <strong>{label}</strong>
+                      <small>{detail}</small>
+                    </span>
+                  </button>
+                ))}
+              </nav>
+            </>
+          )}
+          {previewMode ? (
+            <section className="preview-v25-identity" aria-label="Identité clinique">
+              <div>
+                <strong>DCI</strong>
+                <span>{drug.dci}</span>
+              </div>
               <div>
                 <strong>Surveillance</strong>
-                <span>{monitoringBadges.map((badge) => badge.label).join(" · ")}</span>
+                <span className="preview-v25-monitoring">
+                  {monitoringBadges.length
+                    ? monitoringBadges.map((badge) => badge.label).join(" · ")
+                    : "Selon protocole"}
+                </span>
               </div>
-            )}
-          </div>
-          <p className="drug-desc">{drug.desc}</p>
+              <p>{drug.desc}</p>
+            </section>
+          ) : (
+            <>
+              <div className="drug-meta">
+                <div>
+                  <strong>DCI</strong>
+                  <span>{drug.dci}</span>
+                </div>
+                {monitoringBadges.length > 0 && (
+                  <div>
+                    <strong>Surveillance</strong>
+                    <span>{monitoringBadges.map((badge) => badge.label).join(" · ")}</span>
+                  </div>
+                )}
+              </div>
+              <p className="drug-desc">{drug.desc}</p>
+            </>
+          )}
+
+          {previewMode && (
+            <div className="preview-v25-modes" aria-label="Modes de préparation">
+              {previewModeCards.map((mode, index) => (
+                <button
+                  key={`${mode.title}-${index}`}
+                  type="button"
+                  className={index === previewRecipeIndex ? "is-active" : ""}
+                  aria-label={`Choisir le mode visuel ${index + 1}`}
+                  aria-pressed={index === previewRecipeIndex}
+                  onClick={() => selectPreviewRecipe(index)}
+                >
+                  <span>
+                    {index === 0 ? <HeartPulse /> : index === 1 ? <UserRound /> : <TestTubes />}
+                  </span>
+                  <span>
+                    <strong className="preview-v25-mode-title" data-label={mode.title} />
+                    <small className="preview-v25-mode-detail" data-label={mode.detail} />
+                  </span>
+                  {index === previewRecipeIndex && (
+                    <b>
+                      <Check />
+                    </b>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {previewMode && (
+            <div className="preview-v25-results" aria-label="Résultats de préparation">
+              <div>
+                <span className="preview-v25-result-icon">
+                  <Syringe />
+                </span>
+                <span>
+                  <small>
+                    {isPseRecipe && previewPse
+                      ? `Prescription · ${previewPse.unite}`
+                      : "Dose / préparation"}
+                  </small>
+                  {isPseRecipe && previewPse ? (
+                    <div className="preview-v25-dose-stepper">
+                      <button
+                        type="button"
+                        aria-label="Diminuer la prescription"
+                        onClick={() => adjustPreviewDose(-1)}
+                      >
+                        −
+                      </button>
+                      <output data-label={previewDoseLabel} />
+                      <button
+                        type="button"
+                        aria-label="Augmenter la prescription"
+                        onClick={() => adjustPreviewDose(1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
+                    <strong data-label={activePreviewRecipe?.tag || previewFallbackPosology} />
+                  )}
+                  <em
+                    data-label={
+                      isPseRecipe && previewPse
+                        ? `Plage affichée : ${String(previewPse.min).replace(".", ",")} à ${String(previewPse.max).replace(".", ",")}`
+                        : previewPopulation === "enfant"
+                          ? "Population pédiatrique"
+                          : "Population adulte"
+                    }
+                  />
+                </span>
+              </div>
+              <div>
+                <span className="preview-v25-result-icon">
+                  <TestTubes />
+                </span>
+                <span>
+                  <small>
+                    {isPseRecipe && previewPse ? "Débit PSE calculé" : "Volume à prélever"}
+                  </small>
+                  <strong
+                    data-label={
+                      isPseRecipe && previewPse
+                        ? `${previewRateLabel} mL/h`
+                        : activePreviewRecipe?.prelever ||
+                          previewPrepData?.fd_prelever ||
+                          drug.cond?.[0] ||
+                          "Selon prescription"
+                    }
+                  />
+                  <em
+                    data-label={
+                      isPseRecipe && previewPse
+                        ? "Avec la dilution pondérale"
+                        : activePreviewRecipe?.concentration || previewPrepData?.conc_finale || ""
+                    }
+                  />
+                </span>
+              </div>
+              <div>
+                <span className="preview-v25-result-icon">
+                  <BriefcaseMedical />
+                </span>
+                <span>
+                  <small>
+                    {isPseRecipe && previewPse ? "Repère de concentration" : "Administration"}
+                  </small>
+                  <strong
+                    data-label={
+                      isPseRecipe && previewPse
+                        ? "1 mL/h"
+                        : activePreviewRecipe?.rate_value ||
+                          activePreviewRecipe?.duree ||
+                          previewPrepData?.duree ||
+                          "Selon protocole"
+                    }
+                  />
+                  <em
+                    data-label={
+                      isPseRecipe && previewPse && previewOneMlDose
+                        ? `= ${previewOneMlDose} ${previewPse.unite}`
+                        : activePreviewRecipe?.note || previewPrepData?.duree || monitoringLabel
+                    }
+                  />
+                </span>
+              </div>
+            </div>
+          )}
 
           {onProtocolOpen && relatedProtocols.length > 0 && (
             <div className="drug-related">
@@ -533,55 +986,208 @@ const DrugCard = ({
             </div>
           )}
 
-          <div className="tabs-row">
-            {TABS.map((tab) => {
-              const isActive = activeTab === tab.key;
-              const isCi = tab.key === "ci";
-              const ciCount = isCi && drug.ci && drug.ci.length > 0 ? drug.ci.length : 0;
-              return (
-                <button
-                  key={tab.key}
-                  className={`tab-btn tab-${tab.type} ${isActive ? "tab-active" : ""}`}
-                  aria-pressed={isActive}
-                  style={
-                    tab.type === "poso" && isActive
-                      ? {
-                          background: drug.couleur + "25",
-                          borderColor: drug.couleur,
-                          color: drug.couleur,
-                        }
-                      : {}
-                  }
-                  onClick={() => toggleTab(tab.key)}
-                >
-                  {isCi ? (
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="11"
-                      height="11"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      className="tab-ci-icon"
-                    >
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                      <line x1="12" y1="9" x2="12" y2="13" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
-                  ) : (
-                    <span
-                      className={`dot dot-${tab.type}`}
-                      style={tab.type === "poso" ? { background: drug.couleur } : {}}
-                    />
-                  )}
-                  <span className="tab-label">{tab.label}</span>
-                  {ciCount > 0 && <span className="tab-ci-badge">{ciCount}</span>}
-                </button>
-              );
-            })}
-          </div>
+          {previewMode && (
+            <section className="preview-v25-panel preview-v25-prepare">
+              <div className="preview-v25-section-head">
+                <div>
+                  <span>
+                    <ShieldCheck /> Préparation sécurisée
+                  </span>
+                </div>
+                <span
+                  className="preview-v25-prep-context"
+                  data-label={`${activePreviewRecipe?.titre || drug.nom}${weight ? ` · ${weight} kg` : ""}`}
+                />
+              </div>
+              <ol className="preview-v25-recipe">
+                {previewStructuredSteps.map((step, index) => (
+                  <li key={`${step.title}-${step.detail}-${index}`}>
+                    <span>{index + 1}</span>
+                    <span>
+                      <strong data-label={step.title} />
+                      <small data-label={step.detail} />
+                    </span>
+                    <b data-label={step.result} />
+                  </li>
+                ))}
+              </ol>
+              {activePreviewRecipe?.notes?.length ? (
+                <div className="preview-v25-recipe-notes">
+                  {activePreviewRecipe.notes.slice(0, 2).map((note) => (
+                    <span key={note} data-label={note} />
+                  ))}
+                </div>
+              ) : null}
+              <div className="preview-v25-data-engine">
+                <PrepBlock drug={drug} weight={weight} prepPopulation={prepPopulation} />
+                <PseBlock drug={drug} weight={weight} />
+              </div>
+            </section>
+          )}
 
-          {activeTab && <div className="tab-content">{renderContent(activeTab)}</div>}
+          {previewMode && (
+            <section className="preview-v25-panel preview-v25-control">
+              <div className="preview-v25-section-head">
+                <div className="preview-v25-control-title">
+                  <strong>
+                    <UsersRound /> Double contrôle
+                  </strong>
+                  {!previewVerifiedAt && (
+                    <small>
+                      Vérifier les éléments qui conditionnent le calcul avant administration.
+                    </small>
+                  )}
+                </div>
+              </div>
+              {previewVerifiedAt ? (
+                <div className="preview-v25-verified" role="status">
+                  <span>
+                    <Check />
+                  </span>
+                  <div>
+                    <strong>Préparation vérifiée</strong>
+                    <small>5 / 5 contrôles · {previewVerifiedAt}</small>
+                  </div>
+                  <button type="button" onClick={() => setPreviewVerifiedAt(null)}>
+                    Revoir
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="preview-v25-checks">
+                    {previewControlLabels.map((label, index) => (
+                      <button
+                        key={label}
+                        type="button"
+                        aria-label={`Contrôle visuel ${index + 1}`}
+                        className={previewChecks[index] ? "is-checked" : ""}
+                        onClick={() =>
+                          setPreviewChecks((checks) =>
+                            checks.map((checked, checkIndex) =>
+                              checkIndex === index ? !checked : checked
+                            )
+                          )
+                        }
+                      >
+                        <span>
+                          <Check />
+                        </span>
+                        <strong data-label={label} />
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!previewChecks.every(Boolean)}
+                    className={`preview-v25-validation ${previewChecks.every(Boolean) ? "ready" : ""}`}
+                    onClick={() => {
+                      if (!previewChecks.every(Boolean)) return;
+                      setPreviewVerifiedAt(
+                        new Date().toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      );
+                    }}
+                  >
+                    {previewChecks.every(Boolean)
+                      ? "Valider les 5 contrôles"
+                      : "Préparation à vérifier"}
+                  </button>
+                  <span className="preview-v25-check-progress">
+                    {previewChecks.filter(Boolean).length} / 5 contrôles
+                  </span>
+                </>
+              )}
+            </section>
+          )}
+
+          {previewMode && (
+            <section className="preview-v25-panel preview-v25-reference">
+              <div className="preview-v25-section-head preview-v25-reference-head">
+                <div>
+                  <strong>
+                    <BookOpen /> Référence clinique
+                  </strong>
+                  <small>Informations complémentaires, après sécurisation de la préparation.</small>
+                </div>
+              </div>
+              <div className="tabs-row">
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  const isCi = tab.key === "ci";
+                  const ciCount = isCi && drug.ci && drug.ci.length > 0 ? drug.ci.length : 0;
+                  return (
+                    <button
+                      key={tab.key}
+                      className={`tab-btn tab-${tab.type} ${isActive ? "tab-active" : ""}`}
+                      aria-pressed={isActive}
+                      style={
+                        tab.type === "poso" && isActive
+                          ? {
+                              background: drug.couleur + "25",
+                              borderColor: drug.couleur,
+                              color: drug.couleur,
+                            }
+                          : {}
+                      }
+                      onClick={() => toggleTab(tab.key)}
+                    >
+                      {isCi ? (
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="11"
+                          height="11"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          className="tab-ci-icon"
+                        >
+                          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                          <line x1="12" y1="9" x2="12" y2="13" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                      ) : (
+                        <span
+                          className={`dot dot-${tab.type}`}
+                          style={tab.type === "poso" ? { background: drug.couleur } : {}}
+                        />
+                      )}
+                      <span className="tab-label">{tab.label}</span>
+                      {ciCount > 0 && <span className="tab-ci-badge">{ciCount}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {activeTab && <div className="tab-content">{renderContent(activeTab)}</div>}
+            </section>
+          )}
+
+          {!previewMode && (
+            <div className="tabs-row">
+              {TABS.map((tab) => {
+                const isActive = activeTab === tab.key;
+                const isCi = tab.key === "ci";
+                const ciCount = isCi && drug.ci && drug.ci.length > 0 ? drug.ci.length : 0;
+                return (
+                  <button
+                    key={tab.key}
+                    className={`tab-btn tab-${tab.type} ${isActive ? "tab-active" : ""}`}
+                    aria-pressed={isActive}
+                    onClick={() => toggleTab(tab.key)}
+                  >
+                    <span className={`dot dot-${tab.type}`} />
+                    <span className="tab-label">{tab.label}</span>
+                    {ciCount > 0 && <span className="tab-ci-badge">{ciCount}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {activeTab && !previewMode && (
+            <div className="tab-content">{renderContent(activeTab)}</div>
+          )}
         </div>
       )}
     </div>

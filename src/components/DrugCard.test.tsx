@@ -312,6 +312,26 @@ describe("DrugCard", () => {
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
     });
+
+    test("remet le double contrôle à zéro lors d'un changement de protocole", async () => {
+      const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
+
+      render(<DrugCard drug={adrenaline} patientWeight="80" prepPopulation="adulte" />);
+      fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
+
+      await screen.findByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i });
+      screen.getAllByRole("button", { name: /Contrôle visuel/i }).forEach((control) => {
+        fireEvent.click(control);
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Valider les 5 contrôles" }));
+      expect(screen.getByText("Préparation vérifiée")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Choisir le mode visuel 2" }));
+
+      expect(screen.queryByText("Préparation vérifiée")).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Préparation à vérifier" })).toBeDisabled();
+      expect(screen.getByText("0 / 5 contrôles")).toBeInTheDocument();
+    });
   });
 
   describe("Débits PSE main et preview", () => {
@@ -1243,6 +1263,21 @@ describe("DrugCard", () => {
       expect(
         screen.getAllByText("Ampoule 1 mg/1 mL — à reconstituer avec son solvant").length
       ).toBeGreaterThan(0);
+    });
+
+    test("applique le workspace sécurisé aux médicaments sans bloc de préparation", async () => {
+      const cgr = DRUGS.find((drug) => drug.nom === "CGR")!;
+
+      const { container } = render(<DrugCard drug={cgr} patientWeight="70" />);
+      fireEvent.click(screen.getByText("CGR").closest("button")!);
+
+      expect(await screen.findByText("Référence clinique")).toBeInTheDocument();
+      expect(screen.getByText("Double contrôle")).toBeInTheDocument();
+      expect(container.querySelectorAll(".preview-v25-recipe li")).toHaveLength(4);
+      expect(
+        screen.getByRole("button", { name: "Contrôle visuel 3" }).querySelector("strong")
+      ).toHaveAttribute("data-label", "Dose ou volume conforme à la prescription");
+      expect(screen.queryByText("Produit à confirmer")).not.toBeInTheDocument();
     });
   });
 
