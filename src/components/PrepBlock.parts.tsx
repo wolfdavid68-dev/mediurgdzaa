@@ -200,6 +200,115 @@ export const computePrepTableCurrentSteps = (
   ];
 };
 
+// Les calculateurs ci-dessous alimentent à la fois le bloc historique et la
+// surface Prep Med V2.5. Ils restent volontairement purs : la donnée clinique
+// demeure dans `drugs/*.js`, ces helpers ne font que projeter la recette active.
+export const computeKclIvl = (recipe: PrepRecipe, doseInput = "") => {
+  if (!recipe.kcl_ivl) return null;
+  const dose = computeRecipeDoseInputValue(recipe, doseInput);
+  if (!dose) return null;
+  const finalVolume = dose <= 1 ? 250 : dose <= 2 ? 500 : 1000;
+  const doseLabel = formatDoseNumber(dose);
+  const prelever =
+    Number.isInteger(dose) && dose >= 1
+      ? `${doseLabel} ampoule${dose > 1 ? "s" : ""} 1 g/10 mL (= ${doseLabel} g)`
+      : `${formatDoseNumber(dose * 10)} mL de KCl 1 g/10 mL (= ${doseLabel} g)`;
+  return { dose, finalVolume, prelever, maxRate: "1 g/h" };
+};
+
+export const computeKclPediatric = (
+  recipe: PrepRecipe,
+  doseInput: string,
+  kg: number,
+  validKg: boolean
+) => {
+  if (!recipe.kcl_pediatric || !validKg) return null;
+  const targetDose = computeRecipeDoseInputValue(recipe, doseInput);
+  if (!targetDose) return null;
+  const mmol = +(kg * targetDose).toFixed(1);
+  const productMl = +(mmol / 1.34).toFixed(1);
+  const minFinalMl = Math.ceil(mmol * 25);
+  return { kg, targetDose, mmol, productMl, minFinalMl, vvpLimit: "40 mmol/L" };
+};
+
+export const computeClottafactPediatric = (recipe: PrepRecipe, kg: number, validKg: boolean) => {
+  if (!recipe.clottafact_pediatric || !validKg) return null;
+  const doseMg = Math.round(kg * 70);
+  const doseG = +(doseMg / 1000).toFixed(2);
+  const flacons = Math.ceil(doseG / 1.5);
+  return { kg, doseMg, doseG, flacons };
+};
+
+const computeAmiklinContainerPlan = (dose: number) => {
+  const flacon1g = Math.floor(dose / 1000);
+  const remainderAfter1g = dose - flacon1g * 1000;
+  const flacon500 = Math.floor(remainderAfter1g / 500);
+  const appointMg = +(remainderAfter1g - flacon500 * 500).toFixed(1);
+  const appointMl = +(appointMg / 100).toFixed(1);
+  const parts = [
+    flacon1g > 0 ? `${flacon1g} flacon${flacon1g > 1 ? "s" : ""} 1 g` : null,
+    flacon500 > 0 ? `${flacon500} flacon 500 mg` : null,
+    appointMg > 0
+      ? `${formatDoseNumber(appointMg)} mg (${formatDoseNumber(appointMl)} mL) d'appoint`
+      : null,
+  ].filter(Boolean);
+  return { dose, plan: parts.join(" + "), appointMl };
+};
+
+export const computeAmiklinAdult = (
+  recipe: PrepRecipe,
+  prep: DrugPrep,
+  kg: number,
+  validKg: boolean
+) => {
+  if (!recipe.amiklin_adult || !validKg) return null;
+  const phase = computeRecipePhaseRows(recipe, prep, kg, validKg)[0];
+  if (!phase || phase.dose === null) return null;
+  const doseMin = phase.dose;
+  const doseMax = phase.doseMax ?? doseMin;
+  return {
+    kg,
+    low: computeAmiklinContainerPlan(doseMin),
+    high: doseMax !== doseMin ? computeAmiklinContainerPlan(doseMax) : null,
+    finalVolume: doseMin <= 1500 && doseMax > 1500 ? null : doseMax > 1500 ? 500 : 250,
+  };
+};
+
+const AMOXICILLINE_MENINGEE_PUMP = [
+  { dose: 6, prep: "2 g/100 mL", rate: 12 },
+  { dose: 8, prep: "2 g/100 mL", rate: 17 },
+  { dose: 10, prep: "5 g/250 mL", rate: 21 },
+  { dose: 12, prep: "5 g/250 mL", rate: 25 },
+  { dose: 14, prep: "5 g/250 mL", rate: 29 },
+  { dose: 16, prep: "5 g/250 mL", rate: 33 },
+  { dose: 18, prep: "5 g/250 mL", rate: 37 },
+  { dose: 20, prep: "5 g/250 mL", rate: 42 },
+  { dose: 22, prep: "5 g/250 mL", rate: 46 },
+  { dose: 24, prep: "5 g/250 mL", rate: 50 },
+] as const;
+
+const CLAFORAN_MENINGEE_PUMP = [
+  { dose: 6, prep: "2 g/48 mL", rate: 6 },
+  { dose: 12, prep: "3 g/48 mL", rate: 8 },
+  { dose: 14, prep: "3 g/48 mL", rate: 9.3 },
+  { dose: 16, prep: "4 g/48 mL", rate: 8 },
+  { dose: 20, prep: "5 g/48 mL", rate: 8 },
+  { dose: 24, prep: "6 g/250 mL", rate: 8 },
+] as const;
+
+export const computeMeningitisPump = (recipe: PrepRecipe, doseInput = "") => {
+  if (!recipe.amoxicilline_meningee_pump && !recipe.claforan_meningee_pump) return null;
+  const requestedDose = computeRecipeDoseInputValue(recipe, doseInput);
+  if (!requestedDose) return null;
+  const table = recipe.claforan_meningee_pump ? CLAFORAN_MENINGEE_PUMP : AMOXICILLINE_MENINGEE_PUMP;
+  const current =
+    table.find((row) => row.dose === requestedDose) ||
+    table.reduce((closest, row) =>
+      Math.abs(row.dose - requestedDose) < Math.abs(closest.dose - requestedDose) ? row : closest
+    );
+  return { requestedDose, dose: current.dose, prep: current.prep, rate: current.rate };
+};
+
 // Dose seuil (type Anexate) : la saisie « dose efficace » convertie en dose
 // réelle via dose_threshold_input_conc. "" si saisie invalide.
 export const computeThresholdDose = (prep: DrugPrep, thresholdValue: string): number | "" => {

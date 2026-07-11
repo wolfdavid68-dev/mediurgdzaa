@@ -7,8 +7,10 @@ import {
   computeThresholdDose,
   computeThresholdTitle,
   recipeModeClass,
+  resolvePrep,
 } from "./PrepBlock.parts";
 import type { DrugPrep, PrepRecipe } from "./PrepBlock.parts";
+import type { Drug } from "../types/data";
 
 // Tests des helpers de calcul purs extraits de PrepBlock. Verrouille la logique
 // clinique des préparations (dose/kg, caps, bandes de poids, dilution effective)
@@ -17,6 +19,30 @@ import type { DrugPrep, PrepRecipe } from "./PrepBlock.parts";
 // Fabriques de fixtures minimales typées (champs non pertinents omis via cast).
 const recipe = (over: Partial<PrepRecipe>): PrepRecipe => over as PrepRecipe;
 const prep = (over: Partial<DrugPrep>): DrugPrep => over as DrugPrep;
+
+describe("resolvePrep", () => {
+  const drug = {
+    id: 13,
+    prep: {
+      solvant: "NaCl 0,9%",
+      conc_finale: "1 mg/mL",
+      pedTable: { titre: "Pédiatrie", bandes: [] },
+    },
+  } as unknown as Drug;
+
+  test("sans overlay conserve la préparation principale", () => {
+    expect(resolvePrep(drug, null)).toBe(drug.prep);
+  });
+
+  test("fusionne l’overlay sans perdre la table pédiatrique du main", () => {
+    const resolved = resolvePrep(drug, {
+      13: { prep: { solvant: "G5%", conc_finale: "0,2 mg/mL" } },
+    });
+    expect(resolved?.solvant).toBe("G5%");
+    expect(resolved?.conc_finale).toBe("0,2 mg/mL");
+    expect(resolved?.pedTable?.titre).toBe("Pédiatrie");
+  });
+});
 
 describe("recipeModeClass", () => {
   test("préfixe la classe quand un mode est défini", () => {

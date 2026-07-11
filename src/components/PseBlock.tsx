@@ -1,42 +1,20 @@
-import { useEffect, useState } from "react";
-import { PSE } from "../data/pse";
-import { isPsePreview } from "../lib/featureFlags";
+import { useState } from "react";
 import { calcDebit, calcDoseFromRate } from "../lib/calc";
-import { computeEffectivePse, resolvePse } from "./PseBlock.parts";
-import type { Drug, PsePreviewByDrugId } from "../types/data";
+import { computeEffectivePse } from "./PseBlock.parts";
+import type { Drug } from "../types/data";
+import { useResolvedDrugPse } from "./useResolvedPreparation";
 
 // Bloc PSE (pousse-seringue électrique) : input dose cible + calcul mL/h
 // + table des paliers. Gère le mode "extra" (héparine UI/24h en plus).
 type PseBlockProps = { drug: Drug; weight: string };
 
-const PseBlock = ({ drug, weight }: PseBlockProps) => {
+type PseBlockDataProps = PseBlockProps & { includePreviewOverrides?: boolean };
+
+const PseBlock = ({ drug, weight, includePreviewOverrides = true }: PseBlockDataProps) => {
   const [pseTarget, setPseTarget] = useState("");
   const [pseTarget2, setPseTarget2] = useState("");
   const [pseRate, setPseRate] = useState("");
-  const previewMode = isPsePreview();
-  const [previewPseByDrugId, setPreviewPseByDrugId] = useState<PsePreviewByDrugId | null>(null);
-
-  useEffect(() => {
-    if (!previewMode) {
-      setPreviewPseByDrugId(null);
-      return;
-    }
-
-    let active = true;
-    import("../data/pse.preview")
-      .then(({ PSE_PREVIEW }) => {
-        if (active) setPreviewPseByDrugId(PSE_PREVIEW);
-      })
-      .catch(() => {
-        if (active) setPreviewPseByDrugId({});
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [previewMode]);
-
-  const pse = resolvePse(PSE, previewMode ? previewPseByDrugId : null)[drug.id];
+  const { pse } = useResolvedDrugPse(drug.id, includePreviewOverrides);
   if (!pse) return null;
   if (pse.hideBlock) return null;
 

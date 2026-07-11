@@ -28,6 +28,12 @@ describe("resolvePse", () => {
     resolvePse(base, { 2: entry({ conc: 99 }) });
     expect(base[2]?.conc).toBe(20);
   });
+
+  test("une entrée undefined de l’overlay masque explicitement le PSE public", () => {
+    const merged = resolvePse(base, { 2: undefined });
+    expect(merged[1]?.conc).toBe(10);
+    expect(merged[2]).toBeUndefined();
+  });
 });
 
 describe("computeEffectivePse", () => {

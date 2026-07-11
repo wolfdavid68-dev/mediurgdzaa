@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { DRUGS } from "../data/drugs";
 import DrugCard from "./DrugCard";
 
@@ -27,6 +27,19 @@ const mockDrug = {
     p: ["0,5-1 mg/kg IV lente"],
   },
 };
+
+const openMainPreparationEngine = async () => {
+  const summary = await screen.findByText("Calculs et tables détaillés de l’app principale");
+  const details = summary.closest("details");
+
+  if (!details) throw new Error("Le panneau de calcul détaillé est introuvable");
+  fireEvent.click(summary);
+
+  return within(details);
+};
+
+const visiblePreparationModes = () =>
+  within(screen.getByRole("group", { name: "Modes de préparation" }));
 
 describe("DrugCard", () => {
   describe("Rendu fermé", () => {
@@ -267,14 +280,16 @@ describe("DrugCard", () => {
       render(<DrugCard drug={adrenaline} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(await screen.findByText("Pour 20 kg — enfant")).toBeInTheDocument();
-      expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
-      expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
 
-      expect(screen.getAllByText("200 µg").length).toBeGreaterThan(0);
-      expect(screen.getByText("2 mL de produit")).toBeInTheDocument();
-      expect(screen.getByText("8 mL NaCl 0,9%")).toBeInTheDocument();
-      expect(screen.getByText("1 mL IVD toutes les 4 min")).toBeInTheDocument();
+      expect(await engine.findByText("Pour 20 kg — enfant")).toBeInTheDocument();
+      expect(engine.queryByText("PSE enfant")).not.toBeInTheDocument();
+      expect(engine.queryByText("PSE adulte")).not.toBeInTheDocument();
+
+      expect(engine.getAllByText("200 µg").length).toBeGreaterThan(0);
+      expect(engine.getByText("2 mL de produit")).toBeInTheDocument();
+      expect(engine.getByText("8 mL NaCl 0,9%")).toBeInTheDocument();
+      expect(engine.getByText("1 mL IVD toutes les 4 min")).toBeInTheDocument();
     });
 
     test("sépare les cartes adulte ACR, choc anaphylactique et PSR/PSE", async () => {
@@ -283,14 +298,15 @@ describe("DrugCard", () => {
       render(<DrugCard drug={adrenaline} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(await screen.findByRole("button", { name: /ACR.*1 mg IV\/IO/i })).toHaveAttribute(
+      const modes = visiblePreparationModes();
+      expect(await modes.findByRole("button", { name: /ACR.*1 mg IV\/IO/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
       expect(
-        screen.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i })
+        modes.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i })
       ).toBeInTheDocument();
-      const psrPseButton = screen.getByRole("button", {
+      const psrPseButton = modes.getByRole("button", {
         name: /PSR \/ PSE.*(0,2 mg\/mL|Vi\/Vf poids)/i,
       });
       expect(psrPseButton).toBeInTheDocument();
@@ -300,15 +316,23 @@ describe("DrugCard", () => {
         ).length
       ).toBeGreaterThan(0);
 
-      fireEvent.click(screen.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i }));
-      expect(screen.getAllByText(/0,5 mL.*0,5 mg/).length).toBeGreaterThan(0);
-      expect(screen.getByText(/face antérieure.*cuisse/)).toBeInTheDocument();
+      const chocButton = modes.getByRole("button", {
+        name: /Choc anaphylactique.*0,5 mg IM/i,
+      });
+      fireEvent.click(chocButton);
+      expect(chocButton).toHaveAttribute("aria-pressed", "true");
+
+      const engine = await openMainPreparationEngine();
+      fireEvent.click(engine.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i }));
+      expect(engine.getAllByText(/0,5 mL.*0,5 mg/).length).toBeGreaterThan(0);
+      expect(engine.getByText(/face antérieure.*cuisse/)).toBeInTheDocument();
 
       fireEvent.click(psrPseButton);
-      expect(
-        screen.getByText(/(?:2 ampoules 5 mg\/5 mL \(= 10 mg\)|mL d'adrénaline)/)
-      ).toBeInTheDocument();
-      expect(screen.getByText(/(?:50 mL avec G5%|mL dans la seringue)/)).toBeInTheDocument();
+      expect(psrPseButton).toHaveAttribute("aria-pressed", "true");
+
+      fireEvent.click(await engine.findByRole("button", { name: /PSR \/ PSE.*Vi\/Vf poids/i }));
+      expect(engine.getByText("20 mL d'adrénaline")).toBeInTheDocument();
+      expect(engine.getByText("à 42 mL dans la seringue")).toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
     });
@@ -319,14 +343,19 @@ describe("DrugCard", () => {
       render(<DrugCard drug={adrenaline} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      await screen.findByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i });
-      screen.getAllByRole("button", { name: /Contrôle visuel/i }).forEach((control) => {
-        fireEvent.click(control);
-      });
+      const modes = visiblePreparationModes();
+      await modes.findByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i });
+      await modes.findByRole("button", { name: /PSR \/ PSE.*Vi\/Vf poids/i });
+      const controlPanel = screen.getByText("Double contrôle").closest("section")!;
+      within(controlPanel)
+        .getAllByRole("button", { pressed: false })
+        .forEach((control) => {
+          fireEvent.click(control);
+        });
       fireEvent.click(screen.getByRole("button", { name: "Valider les 5 contrôles" }));
       expect(screen.getByText("Préparation vérifiée")).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: "Choisir le mode visuel 2" }));
+      fireEvent.click(modes.getByRole("button", { name: /Choc anaphylactique.*0,5 mg IM/i }));
 
       expect(screen.queryByText("Préparation vérifiée")).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Préparation à vérifier" })).toBeDisabled();
@@ -356,7 +385,7 @@ describe("DrugCard", () => {
       expect(screen.queryByText("Débit réglé")).not.toBeInTheDocument();
     });
 
-    test("affiche les nouveaux débits PSE avec author=preview", async () => {
+    test("garde les débits PSE de l’app principale avec author=preview", async () => {
       sessionStorage.clear();
       window.history.pushState({}, "", "/?author=preview");
       const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
@@ -364,8 +393,12 @@ describe("DrugCard", () => {
       render(<DrugCard drug={adrenaline} patientWeight="80" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      expect(await screen.findByText("Débit PSE")).toBeInTheDocument();
-      expect(await screen.findByText("Débit réglé")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+      expect(await engine.findByText("Débit PSE")).toBeInTheDocument();
+      expect(
+        await engine.findByText("Dilution poids · 1 mL/h = 0,1 µg/kg/min")
+      ).toBeInTheDocument();
+      expect(engine.queryByText("Débit réglé")).not.toBeInTheDocument();
     });
   });
 
@@ -434,9 +467,11 @@ describe("DrugCard", () => {
       render(<DrugCard drug={celo} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("CÉLOCURINE").closest("button")!);
 
-      expect(await screen.findByText("ISR enfant")).toBeInTheDocument();
-      expect(screen.queryByText("ISR adulte")).not.toBeInTheDocument();
-      expect(screen.getByText(/30-40 mg/)).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("ISR enfant")).toBeInTheDocument();
+      expect(engine.queryByText("ISR adulte")).not.toBeInTheDocument();
+      expect(engine.getByText(/30-40 mg/)).toBeInTheDocument();
     });
 
     test("Bridion enfant : dose pédiatrique 4-16 mg/kg (80-320 mg à 20 kg), pas la dose CICO adulte", async () => {
@@ -444,9 +479,11 @@ describe("DrugCard", () => {
       render(<DrugCard drug={bridion} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("BRIDION").closest("button")!);
 
-      expect(await screen.findByText("Décurarisation enfant")).toBeInTheDocument();
-      expect(screen.queryByText("CICO adulte")).not.toBeInTheDocument();
-      expect(screen.getByText(/80-320 mg/)).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("Décurarisation enfant")).toBeInTheDocument();
+      expect(engine.queryByText("CICO adulte")).not.toBeInTheDocument();
+      expect(engine.getByText(/80-320 mg/)).toBeInTheDocument();
     });
 
     test("Dobutamine preview : recette PSE affichée sans boîte fixed_dilution en double", async () => {
@@ -454,9 +491,11 @@ describe("DrugCard", () => {
       render(<DrugCard drug={dobu} patientWeight="70" />);
       fireEvent.click(screen.getByText("DOBUTAMINE").closest("button")!);
 
-      expect(await screen.findByText("1 flacon 250 mg/25 mL (10 mg/mL)")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("Flacon 250 mg/20 mL (12,5 mg/mL)")).toBeInTheDocument();
       // Le prélèvement ne doit apparaître qu'une fois (pas de double rendu recette + boîte fixe)
-      expect(screen.getAllByText("1 flacon 250 mg/25 mL (10 mg/mL)")).toHaveLength(1);
+      expect(engine.getAllByText("Flacon 250 mg/20 mL (12,5 mg/mL)")).toHaveLength(1);
     });
   });
 
@@ -476,9 +515,11 @@ describe("DrugCard", () => {
       render(<DrugCard drug={primperan} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("PRIMPERAN").closest("button")!);
 
-      expect(await screen.findByText("Enfant")).toBeInTheDocument();
-      expect(screen.getAllByText(/Non recommandé < 18 ans/).length).toBeGreaterThan(0);
-      expect(screen.queryByText("IVL adulte")).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("Enfant")).toBeInTheDocument();
+      expect(engine.getAllByText(/Non recommandé < 18 ans/).length).toBeGreaterThan(0);
+      expect(engine.queryByText("IVL adulte")).not.toBeInTheDocument();
     });
 
     test("Nalbuphine enfant : pedTable pédiatrique, PAS les boutons adrénaline (bug corrigé)", async () => {
@@ -496,7 +537,8 @@ describe("DrugCard", () => {
       render(<DrugCard drug={mannitol} patientWeight="70" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("MANNITOL 20%").closest("button")!);
 
-      expect(await screen.findByText(/17,5-70 g/)).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+      expect(await engine.findByText(/17,5-70 g/)).toBeInTheDocument();
     });
   });
 
@@ -517,11 +559,13 @@ describe("DrugCard", () => {
       render(<DrugCard drug={ephedrine} patientWeight="35" />);
       fireEvent.click(screen.getByText("ÉPHÉDRINE").closest("button")!);
 
-      expect(await screen.findByText("1 ampoule 30 mg/1 mL")).toBeInTheDocument();
-      expect(screen.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
-      expect(screen.getAllByText("3 mg/mL").length).toBeGreaterThan(0);
-      expect(screen.queryByText("3.5 mg")).not.toBeInTheDocument();
-      expect(screen.queryByText("0.1 mL du produit")).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("1 ampoule 30 mg/1 mL")).toBeInTheDocument();
+      expect(engine.getByText("10 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(engine.getAllByText("3 mg/mL").length).toBeGreaterThan(0);
+      expect(engine.queryByText("3.5 mg")).not.toBeInTheDocument();
+      expect(engine.queryByText("0.1 mL du produit")).not.toBeInTheDocument();
     });
   });
 
@@ -536,27 +580,19 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la préparation PSE enfant sans cohabitation adulte", async () => {
+    test("affiche la préparation Vi/Vf enfant de l’app principale", async () => {
       const noradrenaline = DRUGS.find((drug) => drug.nom === "NORADRÉNALINE")!;
 
       render(<DrugCard drug={noradrenaline} patientWeight="20" />);
       fireEvent.click(screen.getByText("NORADRÉNALINE").closest("button")!);
 
-      expect(await screen.findByText("PSE enfant")).toBeInTheDocument();
-      expect(screen.getByText("Pour 20 kg — enfant")).toBeInTheDocument();
-      expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
-      expect(screen.getByText("Pédia : 0,05-2 µg/kg/min IVSE")).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP"
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP"
-        )
-      ).toBeInTheDocument();
-      expect(screen.queryByText("Repères dose → débit — enfant")).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("IVSE poids")).toBeInTheDocument();
+      expect(engine.getByText("2.5 mL de noradrénaline")).toBeInTheDocument();
+      expect(engine.getByText("à 42 mL dans la seringue")).toBeInTheDocument();
+      expect(engine.getByText("Pour 20 kg — enfant")).toBeInTheDocument();
+      expect(engine.queryByText("Pour 20 kg — adulte")).not.toBeInTheDocument();
     });
   });
 
@@ -668,25 +704,27 @@ describe("DrugCard", () => {
       render(<DrugCard drug={actilyse} patientWeight="80" />);
       fireEvent.click(screen.getByText("ACTILYSE").closest("button")!);
 
-      expect(await screen.findByText("Bolus IV")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /IDM/i })).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByText("15 mg")).toBeInTheDocument();
-      expect(screen.getAllByText("60 mg").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("120 mL/h").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("40 mg").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("40 mL/h").length).toBeGreaterThan(0);
-      expect(screen.queryByText("Final")).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
 
-      fireEvent.click(screen.getByRole("button", { name: /EP massive/i }));
-      expect(screen.getByText("10 mg")).toBeInTheDocument();
-      expect(screen.getAllByText("90 mg").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("45 mL/h").length).toBeGreaterThan(0);
+      expect(await engine.findByText("Bolus IV")).toBeInTheDocument();
+      expect(engine.getByRole("button", { name: /IDM/i })).toHaveAttribute("aria-pressed", "true");
+      expect(engine.getByText("15 mg")).toBeInTheDocument();
+      expect(engine.getAllByText("60 mg").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("120 mL/h").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("40 mg").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("40 mL/h").length).toBeGreaterThan(0);
+      expect(engine.queryByText("Final")).not.toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /AVC/i }));
-      expect(screen.getAllByText("72 mg").length).toBeGreaterThan(0);
-      expect(screen.getByText("7,2 mg")).toBeInTheDocument();
-      expect(screen.getAllByText("64,8 mg").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("64,8 mL/h").length).toBeGreaterThan(0);
+      fireEvent.click(engine.getByRole("button", { name: /EP massive/i }));
+      expect(engine.getByText("10 mg")).toBeInTheDocument();
+      expect(engine.getAllByText("90 mg").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("45 mL/h").length).toBeGreaterThan(0);
+
+      fireEvent.click(engine.getByRole("button", { name: /AVC/i }));
+      expect(engine.getAllByText("72 mg").length).toBeGreaterThan(0);
+      expect(engine.getByText("7,2 mg")).toBeInTheDocument();
+      expect(engine.getAllByText("64,8 mg").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("64,8 mL/h").length).toBeGreaterThan(0);
     });
   });
 
@@ -707,18 +745,21 @@ describe("DrugCard", () => {
       const { unmount } = render(<DrugCard drug={metalyse} patientWeight="55" />);
       fireEvent.click(screen.getByText("METALYSE").closest("button")!);
 
-      expect(await screen.findByText("30 mg = 6 mL")).toBeInTheDocument();
-      expect(screen.getByText(/Reconstituer le lyophilisat 10 000 UI/)).toBeInTheDocument();
-      expect(screen.getByText("Flacon reconstitue 50 mg/10 mL")).toBeInTheDocument();
-      expect(screen.getByText(/Injection IV bolus unique strict < 10 sec/)).toBeInTheDocument();
-      expect(screen.queryByText(/Adapter la dose au POIDS/)).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("30 mg = 6 mL")).toBeInTheDocument();
+      expect(engine.getByText(/Reconstituer le lyophilisat 10 000 UI/)).toBeInTheDocument();
+      expect(engine.getByText("Flacon reconstitue 50 mg/10 mL")).toBeInTheDocument();
+      expect(engine.getByText(/Injection IV bolus unique strict < 10 sec/)).toBeInTheDocument();
+      expect(engine.queryByText(/Adapter la dose au POIDS/)).not.toBeInTheDocument();
 
       unmount();
 
       render(<DrugCard drug={metalyse} patientWeight="80" />);
       fireEvent.click(screen.getByText("METALYSE").closest("button")!);
 
-      expect(await screen.findByText("45 mg = 9 mL")).toBeInTheDocument();
+      const secondEngine = await openMainPreparationEngine();
+      expect(await secondEngine.findByText("45 mg = 9 mL")).toBeInTheDocument();
     });
   });
 
@@ -751,12 +792,14 @@ describe("DrugCard", () => {
       render(<DrugCard drug={omeprazole} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("OMÉPRAZOLE").closest("button")!);
 
-      expect(await screen.findByText("IVL enfant")).toBeInTheDocument();
-      expect(screen.getByText("Dose à préparer")).toBeInTheDocument();
-      expect(screen.getByText("20 mg")).toBeInTheDocument();
-      expect(screen.getByText(/Dose enfant : 1 mg\/kg IV \/12h/)).toBeInTheDocument();
-      expect(screen.queryByText("Pédiatrique")).not.toBeInTheDocument();
-      expect(screen.queryByText(/1 mg\/kg IV \/12h \(max 40 mg\/dose\)/)).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("IVL enfant")).toBeInTheDocument();
+      expect(engine.getByText("Dose à préparer")).toBeInTheDocument();
+      expect(engine.getByText("20 mg")).toBeInTheDocument();
+      expect(engine.getByText(/Dose enfant : 1 mg\/kg IV \/12h/)).toBeInTheDocument();
+      expect(engine.queryByText("Pédiatrique")).not.toBeInTheDocument();
+      expect(engine.queryByText(/1 mg\/kg IV \/12h \(max 40 mg\/dose\)/)).not.toBeInTheDocument();
     });
   });
 
@@ -775,16 +818,17 @@ describe("DrugCard", () => {
       render(<DrugCard drug={solumedrol} patientWeight="50" />);
       fireEvent.click(screen.getByText("SOLUMEDROL").closest("button")!);
 
-      const input = await screen.findByLabelText("Dose à préparer");
+      const engine = await openMainPreparationEngine();
+      const input = await engine.findByLabelText("Dose à préparer");
       expect(input).toHaveAttribute("placeholder", "120");
       expect(
-        screen.getByText("IVD : reconstituer avec 2 mL EPPI puis diluer qsp 10 mL NaCl 0,9%")
+        engine.getByText("IVD : reconstituer avec 2 mL EPPI puis diluer qsp 10 mL NaCl 0,9%")
       ).toBeInTheDocument();
 
       fireEvent.change(input, { target: { value: "125" } });
 
-      expect(screen.getByText("IVL : dans 100 mL NaCl 0,9%")).toBeInTheDocument();
-      expect(screen.queryByText(/IVL \(dose > 120 mg\)/)).not.toBeInTheDocument();
+      expect(engine.getByText("IVL : dans 100 mL NaCl 0,9%")).toBeInTheDocument();
+      expect(engine.queryByText(/IVL \(dose > 120 mg\)/)).not.toBeInTheDocument();
     });
   });
 
@@ -803,9 +847,11 @@ describe("DrugCard", () => {
       render(<DrugCard drug={zophren} patientWeight="80" />);
       fireEvent.click(screen.getByText("ZOPHREN").closest("button")!);
 
-      expect(await screen.findByText("IVD adulte")).toBeInTheDocument();
-      expect(screen.getByText("4-8 mg")).toBeInTheDocument();
-      expect(screen.getByText("4-8 mg = 2-4 mL")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("IVD adulte")).toBeInTheDocument();
+      expect(engine.getByText("4-8 mg")).toBeInTheDocument();
+      expect(engine.getByText("4-8 mg = 2-4 mL")).toBeInTheDocument();
     });
   });
 
@@ -826,28 +872,36 @@ describe("DrugCard", () => {
       );
       fireEvent.click(screen.getByText("AMIKLIN").closest("button")!);
 
-      expect(await screen.findByText("IVL adulte")).toBeInTheDocument();
-      expect(screen.getByText("à 500 mL avec G5%")).toBeInTheDocument();
+      const adultEngine = await openMainPreparationEngine();
+
+      expect(await adultEngine.findByText("IVL adulte")).toBeInTheDocument();
+      expect(adultEngine.getByText("à 500 mL avec G5%")).toBeInTheDocument();
       expect(
-        screen.getByText("1600 mg : 1 flacon 1 g + 1 flacon 500 mg + 100 mg (1 mL) d'appoint")
+        adultEngine.getByText("1600 mg : 1 flacon 1 g + 1 flacon 500 mg + 100 mg (1 mL) d'appoint")
       ).toBeInTheDocument();
       expect(
-        screen.getByText("2400 mg : 2 flacons 1 g + 400 mg (4 mL) d'appoint")
+        adultEngine.getByText("2400 mg : 2 flacons 1 g + 400 mg (4 mL) d'appoint")
       ).toBeInTheDocument();
-      expect(screen.queryByText(/À ouvrir/)).not.toBeInTheDocument();
-      expect(screen.queryByText("Dose < 1500 mg → 250 mL G5%")).not.toBeInTheDocument();
-      expect(screen.queryByText("Dose > 1500 mg → 500 mL G5%")).not.toBeInTheDocument();
-      expect(screen.queryByText(/PÉDIATRIE : dilution NaCl 0,9% ou G5%/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/6\.4-9\.6 mL du produit/)).not.toBeInTheDocument();
+      expect(adultEngine.queryByText(/À ouvrir/)).not.toBeInTheDocument();
+      expect(adultEngine.queryByText("Dose < 1500 mg → 250 mL G5%")).not.toBeInTheDocument();
+      expect(adultEngine.queryByText("Dose > 1500 mg → 500 mL G5%")).not.toBeInTheDocument();
+      expect(
+        adultEngine.queryByText(/PÉDIATRIE : dilution NaCl 0,9% ou G5%/)
+      ).not.toBeInTheDocument();
+      expect(adultEngine.queryByText(/6\.4-9\.6 mL du produit/)).not.toBeInTheDocument();
 
       unmount();
 
       render(<DrugCard drug={amiklin} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("AMIKLIN").closest("button")!);
 
-      expect(await screen.findByText("IVL enfant")).toBeInTheDocument();
-      expect(screen.getByText("NaCl 0,9% ou G5% — concentration max 5 mg/mL")).toBeInTheDocument();
-      expect(screen.queryByText(/ADULTE — dose/)).not.toBeInTheDocument();
+      const childEngine = await openMainPreparationEngine();
+
+      expect(await childEngine.findByText("IVL enfant")).toBeInTheDocument();
+      expect(
+        childEngine.getByText("NaCl 0,9% ou G5% — concentration max 5 mg/mL")
+      ).toBeInTheDocument();
+      expect(childEngine.queryByText(/ADULTE — dose/)).not.toBeInTheDocument();
     });
   });
 
@@ -866,32 +920,35 @@ describe("DrugCard", () => {
       const { unmount } = render(<DrugCard drug={amoxicilline} patientWeight="80" />);
       fireEvent.click(screen.getByText("AMOXICILLINE").closest("button")!);
 
-      fireEvent.click(await screen.findByRole("button", { name: /Dose méningée pompe/i }));
+      const adultEngine = await openMainPreparationEngine();
+      fireEvent.click(await adultEngine.findByRole("button", { name: /Dose méningée pompe/i }));
 
-      expect(screen.queryByText("Dilution : NaCl 0,9%")).not.toBeInTheDocument();
-      expect(screen.queryByText("1 g dans 100 mL")).not.toBeInTheDocument();
-      expect(screen.queryByText("Perfusion sur 20-30 min")).not.toBeInTheDocument();
-      expect(screen.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "12");
-      expect(screen.getByText("12 g/j")).toBeInTheDocument();
-      expect(screen.getByText("5 g/250 mL")).toBeInTheDocument();
-      expect(screen.getByText("25 mL/h")).toBeInTheDocument();
+      expect(adultEngine.queryByText("Dilution : NaCl 0,9%")).not.toBeInTheDocument();
+      expect(adultEngine.queryByText("1 g dans 100 mL")).not.toBeInTheDocument();
+      expect(adultEngine.queryByText("Perfusion sur 20-30 min")).not.toBeInTheDocument();
+      expect(adultEngine.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "12");
+      expect(adultEngine.getByText("12 g/j")).toBeInTheDocument();
+      expect(adultEngine.getByText("5 g/250 mL")).toBeInTheDocument();
+      expect(adultEngine.getByText("25 mL/h")).toBeInTheDocument();
 
-      fireEvent.change(screen.getByLabelText("Dose/j"), { target: { value: "8" } });
+      fireEvent.change(adultEngine.getByLabelText("Dose/j"), { target: { value: "8" } });
 
-      expect(screen.getByText("8 g/j")).toBeInTheDocument();
-      expect(screen.getByText("2 g/100 mL")).toBeInTheDocument();
-      expect(screen.getByText("17 mL/h")).toBeInTheDocument();
+      expect(adultEngine.getByText("8 g/j")).toBeInTheDocument();
+      expect(adultEngine.getByText("2 g/100 mL")).toBeInTheDocument();
+      expect(adultEngine.getByText("17 mL/h")).toBeInTheDocument();
 
       unmount();
 
       render(<DrugCard drug={amoxicilline} patientWeight="20" prepPopulation="enfant" />);
       fireEvent.click(screen.getByText("AMOXICILLINE").closest("button")!);
 
-      expect(await screen.findByText("IVL enfant")).toBeInTheDocument();
-      expect(screen.getByText("1000-4000 mg")).toBeInTheDocument();
-      expect(screen.getByText("dans NaCl 0,9%")).toBeInTheDocument();
-      expect(screen.queryByText("IVL standard")).not.toBeInTheDocument();
-      expect(screen.queryByText("Dose méningée pompe")).not.toBeInTheDocument();
+      const childEngine = await openMainPreparationEngine();
+
+      expect(await childEngine.findByText("IVL enfant")).toBeInTheDocument();
+      expect(childEngine.getByText("1000-4000 mg")).toBeInTheDocument();
+      expect(childEngine.getByText("dans NaCl 0,9%")).toBeInTheDocument();
+      expect(childEngine.queryByText("IVL standard")).not.toBeInTheDocument();
+      expect(childEngine.queryByText("Dose méningée pompe")).not.toBeInTheDocument();
     });
   });
 
@@ -910,27 +967,28 @@ describe("DrugCard", () => {
       render(<DrugCard drug={claforan} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("CLAFORAN").closest("button")!);
 
-      fireEvent.click(await screen.findByRole("button", { name: /Dose méningée PSE/i }));
+      const engine = await openMainPreparationEngine();
+      fireEvent.click(await engine.findByRole("button", { name: /Dose méningée PSE/i }));
 
-      expect(screen.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "16");
+      expect(engine.getByLabelText("Dose/j")).toHaveAttribute("placeholder", "16");
       expect(
-        screen.getByText((_, element) => element?.textContent === "16 g/j")
+        engine.getByText((_, element) => element?.textContent === "16 g/j")
       ).toBeInTheDocument();
-      expect(screen.getByText("4 g/48 mL")).toBeInTheDocument();
-      expect(screen.getByText("8 mL/h")).toBeInTheDocument();
+      expect(engine.getByText("4 g/48 mL")).toBeInTheDocument();
+      expect(engine.getByText("8 mL/h")).toBeInTheDocument();
 
-      fireEvent.change(screen.getByLabelText("Dose/j"), { target: { value: "14" } });
+      fireEvent.change(engine.getByLabelText("Dose/j"), { target: { value: "14" } });
 
       expect(
-        screen.getByText((_, element) => element?.textContent === "14 g/j")
+        engine.getByText((_, element) => element?.textContent === "14 g/j")
       ).toBeInTheDocument();
-      expect(screen.getByText("3 g/48 mL")).toBeInTheDocument();
-      expect(screen.getByText("9,3 mL/h")).toBeInTheDocument();
+      expect(engine.getByText("3 g/48 mL")).toBeInTheDocument();
+      expect(engine.getByText("9,3 mL/h")).toBeInTheDocument();
 
       // PAS les valeurs de l'amoxicilline (2 g/100 mL, 5 g/250 mL @ 33 mL/h)
-      expect(screen.queryByText("2 g/100 mL")).not.toBeInTheDocument();
-      expect(screen.queryByText("5 g/250 mL")).not.toBeInTheDocument();
-      expect(screen.queryByText("33 mL/h")).not.toBeInTheDocument();
+      expect(engine.queryByText("2 g/100 mL")).not.toBeInTheDocument();
+      expect(engine.queryByText("5 g/250 mL")).not.toBeInTheDocument();
+      expect(engine.queryByText("33 mL/h")).not.toBeInTheDocument();
     });
   });
 
@@ -949,15 +1007,17 @@ describe("DrugCard", () => {
       render(<DrugCard drug={vancomycine} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("VANCOMYCINE").closest("button")!);
 
-      expect(await screen.findByRole("button", { name: /Charge adulte/i })).toBeInTheDocument();
-      expect(screen.getByText("2000-2400 mg")).toBeInTheDocument();
-      expect(screen.getByText("2-3h")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
 
-      fireEvent.click(screen.getByRole("button", { name: /Entretien adulte/i }));
+      expect(await engine.findByRole("button", { name: /Charge adulte/i })).toBeInTheDocument();
+      expect(engine.getByText("2000-2400 mg")).toBeInTheDocument();
+      expect(engine.getByText("2-3h")).toBeInTheDocument();
 
-      expect(screen.getByText("1200-1600 mg")).toBeInTheDocument();
-      expect(screen.getByText("/8-12h (cible AUC)")).toBeInTheDocument();
-      expect(screen.getByText("60 min minimum")).toBeInTheDocument();
+      fireEvent.click(engine.getByRole("button", { name: /Entretien adulte/i }));
+
+      expect(engine.getByText("1200-1600 mg")).toBeInTheDocument();
+      expect(engine.getByText("/8-12h (cible AUC)")).toBeInTheDocument();
+      expect(engine.getByText("60 min minimum")).toBeInTheDocument();
     });
   });
 
@@ -976,13 +1036,15 @@ describe("DrugCard", () => {
       render(<DrugCard drug={vialebex} patientWeight="80" prepPopulation="adulte" />);
       fireEvent.click(screen.getByText("VIALEBEX / ALBUMINE HUMAINE").closest("button")!);
 
-      expect(await screen.findByRole("button", { name: /PBS J1/i })).toBeInTheDocument();
-      expect(screen.getByText("120 g = 600 mL")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
 
-      fireEvent.click(screen.getByRole("button", { name: /PBS J3/i }));
+      expect(await engine.findByRole("button", { name: /PBS J1/i })).toBeInTheDocument();
+      expect(engine.getByText("120 g = 600 mL")).toBeInTheDocument();
 
-      expect(screen.getByText("80 g = 400 mL")).toBeInTheDocument();
-      expect(screen.getByText("PBS J3 : 1 g/kg d'albumine 20%")).toBeInTheDocument();
+      fireEvent.click(engine.getByRole("button", { name: /PBS J3/i }));
+
+      expect(engine.getByText("80 g = 400 mL")).toBeInTheDocument();
+      expect(engine.getByText("PBS J3 : 1 g/kg d'albumine 20%")).toBeInTheDocument();
     });
   });
 
@@ -1003,11 +1065,13 @@ describe("DrugCard", () => {
       render(<DrugCard drug={augmentin} patientWeight="80" />);
       fireEvent.click(screen.getByText("AUGMENTIN").closest("button")!);
 
-      expect(await screen.findByLabelText("Préparation v2")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByLabelText("Préparation v2")).toBeInTheDocument();
       expect(
-        screen.getAllByText(/Flacon poudre IV 1 g amoxicilline\/200 mg clavulanate/)
+        engine.getAllByText(/Flacon poudre IV 1 g amoxicilline\/200 mg clavulanate/)
       ).toHaveLength(1);
-      expect(screen.getByText(/1-2 g dans 100 mL NaCl 0,9% STRICT/)).toBeInTheDocument();
+      expect(engine.getByText(/1-2 g dans 100 mL NaCl 0,9% STRICT/)).toBeInTheDocument();
     });
 
     test("masque en posologie les lignes déjà reprises dans la préparation", async () => {
@@ -1016,9 +1080,11 @@ describe("DrugCard", () => {
       render(<DrugCard drug={primperan} patientWeight="50" />);
       fireEvent.click(screen.getByText("PRIMPERAN").closest("button")!);
 
-      expect(await screen.findByLabelText("Préparation v2")).toBeInTheDocument();
-      expect(screen.getByText("10 mg IV lente /8h")).toBeInTheDocument();
-      expect(screen.getAllByText("Peut se diluer qsp 10 mL NaCl 0,9%")).toHaveLength(1);
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByLabelText("Préparation v2")).toBeInTheDocument();
+      expect(engine.getByText("10 mg IV lente /8h")).toBeInTheDocument();
+      expect(engine.getAllByText("Peut se diluer qsp 10 mL NaCl 0,9%")).toHaveLength(1);
     });
   });
 
@@ -1039,13 +1105,15 @@ describe("DrugCard", () => {
       render(<DrugCard drug={atropine} patientWeight="80" />);
       fireEvent.click(screen.getByText("ATROPINE").closest("button")!);
 
-      expect(await screen.findByText("2 ampoules")).toBeInTheDocument();
-      expect(screen.getByText("1 mg = 2 mL")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("2 ampoules")).toBeInTheDocument();
+      expect(engine.getByText("1 mg = 2 mL")).toBeInTheDocument();
       expect(
-        screen.getByText("Bradycardie : 0,5-1 mg IV, répéter toutes les 3-5 min (max 3 mg)")
+        engine.getByText("Bradycardie : 0,5-1 mg IV, répéter toutes les 3-5 min (max 3 mg)")
       ).toBeInTheDocument();
-      expect(screen.queryByText("1.6 mg")).not.toBeInTheDocument();
-      expect(screen.queryByText("3.2 mL du produit")).not.toBeInTheDocument();
+      expect(engine.queryByText("1.6 mg")).not.toBeInTheDocument();
+      expect(engine.queryByText("3.2 mL du produit")).not.toBeInTheDocument();
     });
   });
 
@@ -1066,19 +1134,21 @@ describe("DrugCard", () => {
       render(<DrugCard drug={brevibloc} patientWeight="80" />);
       fireEvent.click(screen.getByText("BREVIBLOC").closest("button")!);
 
-      expect(await screen.findByText("Dose de charge")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /Charge 1 min/i })).toHaveAttribute(
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("Dose de charge")).toBeInTheDocument();
+      expect(engine.getByRole("button", { name: /Charge 1 min/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-      expect(screen.getByText("40 mg = 4 mL")).toBeInTheDocument();
+      expect(engine.getByText("40 mg = 4 mL")).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /PSE entretien/i }));
+      fireEvent.click(engine.getByRole("button", { name: /PSE entretien/i }));
 
-      expect(screen.getByText("Entretien PSE : 50 µg/kg/min")).toBeInTheDocument();
-      expect(screen.getAllByText("4000 µg/min").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("24 mL/h").length).toBeGreaterThan(0);
-      expect(screen.queryByText("4000 mg/min")).not.toBeInTheDocument();
+      expect(engine.getByText("Entretien PSE : 50 µg/kg/min")).toBeInTheDocument();
+      expect(engine.getAllByText("4000 µg/min").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("24 mL/h").length).toBeGreaterThan(0);
+      expect(engine.queryByText("4000 mg/min")).not.toBeInTheDocument();
     });
   });
 
@@ -1099,20 +1169,22 @@ describe("DrugCard", () => {
       render(<DrugCard drug={cordarone} patientWeight="80" />);
       fireEvent.click(screen.getByText("CORDARONE").closest("button")!);
 
-      expect(await screen.findByText("Ampoule 150 mg/3 mL (50 mg/mL)")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /ACR/i })).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByText("300 mg = 6 mL")).toBeInTheDocument();
-      expect(screen.getByText("150 mg = 3 mL")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
 
-      fireEvent.click(screen.getByRole("button", { name: /IVL dose de charge/i }));
-      expect(screen.getByText("300 mg = 6 mL")).toBeInTheDocument();
-      expect(screen.getByText("G5% STRICT sur 30 min")).toBeInTheDocument();
-      expect(screen.getByText("IVL : dose de charge 5 mg/kg dans G5% STRICT")).toBeInTheDocument();
+      expect(await engine.findByText("Ampoule 150 mg/3 mL (50 mg/mL)")).toBeInTheDocument();
+      expect(engine.getByRole("button", { name: /ACR/i })).toHaveAttribute("aria-pressed", "true");
+      expect(engine.getByText("300 mg = 6 mL")).toBeInTheDocument();
+      expect(engine.getByText("150 mg = 3 mL")).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /PSE entretien/i }));
-      expect(screen.getByText("4 ampoules 150 mg/3 mL (= 600 mg/12 mL)")).toBeInTheDocument();
-      expect(screen.getByText("à 48 mL avec G5%")).toBeInTheDocument();
-      expect(screen.getByText("12,5 mg/mL")).toBeInTheDocument();
+      fireEvent.click(engine.getByRole("button", { name: /IVL dose de charge/i }));
+      expect(engine.getByText("300 mg = 6 mL")).toBeInTheDocument();
+      expect(engine.getByText("G5% STRICT sur 30 min")).toBeInTheDocument();
+      expect(engine.getByText("IVL : dose de charge 5 mg/kg dans G5% STRICT")).toBeInTheDocument();
+
+      fireEvent.click(engine.getByRole("button", { name: /PSE entretien/i }));
+      expect(engine.getByText("4 ampoules 150 mg/3 mL (= 600 mg/12 mL)")).toBeInTheDocument();
+      expect(engine.getByText("à 48 mL avec G5%")).toBeInTheDocument();
+      expect(engine.getByText("12,5 mg/mL")).toBeInTheDocument();
     });
   });
 
@@ -1133,12 +1205,14 @@ describe("DrugCard", () => {
       render(<DrugCard drug={digoxine} patientWeight="80" />);
       fireEvent.click(screen.getByText("DIGOXINE NATIVELLE").closest("button")!);
 
-      expect((await screen.findAllByText("1 ampoule 0,5 mg/2 mL")).length).toBeGreaterThan(0);
-      expect(screen.getByText("mini-flac 100 mL NaCl 0,9%")).toBeInTheDocument();
-      expect(screen.getAllByText("0,5 mg/100 mL = 5 µg/mL").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("ECG obligatoire avant injection").length).toBeGreaterThan(0);
-      expect(screen.getByText("Marge thérapeutique étroite")).toBeInTheDocument();
-      expect(screen.queryByText("Final")).not.toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect((await engine.findAllByText("1 ampoule 0,5 mg/2 mL")).length).toBeGreaterThan(0);
+      expect(engine.getByText("mini-flac 100 mL NaCl 0,9%")).toBeInTheDocument();
+      expect(engine.getAllByText("0,5 mg/100 mL = 5 µg/mL").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("ECG obligatoire avant injection").length).toBeGreaterThan(0);
+      expect(engine.getByText("Marge thérapeutique étroite")).toBeInTheDocument();
+      expect(engine.queryByText("Final")).not.toBeInTheDocument();
     });
   });
 
@@ -1159,13 +1233,15 @@ describe("DrugCard", () => {
       render(<DrugCard drug={eupressyl} patientWeight="80" />);
       fireEvent.click(screen.getByText("EUPRESSYL").closest("button")!);
 
-      expect(await screen.findByText("Ampoule 25 mg/5 mL")).toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: /Bolus pur/i })).not.toBeInTheDocument();
-      expect(screen.getAllByText("PSE : administrer PUR").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("Dose usuelle : 5-30 mg/h selon TA cible").length).toBeGreaterThan(
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("Ampoule 25 mg/5 mL")).toBeInTheDocument();
+      expect(engine.queryByRole("button", { name: /Bolus pur/i })).not.toBeInTheDocument();
+      expect(engine.getAllByText("PSE : administrer PUR").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("Dose usuelle : 5-30 mg/h selon TA cible").length).toBeGreaterThan(
         0
       );
-      expect(screen.getByText("Débit : 1-6 mL/h avec ampoule pure à 5 mg/mL")).toBeInTheDocument();
+      expect(engine.getByText("Débit : 1-6 mL/h avec ampoule pure à 5 mg/mL")).toBeInTheDocument();
       expect(screen.getByText("Voies : VVP ou VVC")).toBeInTheDocument();
     });
   });
@@ -1187,21 +1263,23 @@ describe("DrugCard", () => {
       render(<DrugCard drug={loxen} patientWeight="80" />);
       fireEvent.click(screen.getByText("LOXEN").closest("button")!);
 
-      expect(await screen.findByText("Bolus initial")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("Bolus initial")).toBeInTheDocument();
+      expect(engine.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-      expect(screen.getByText("1 mg = 1 mL")).toBeInTheDocument();
-      expect(screen.getByText("Bolus initial : 1 mg IV (= 1 mL)")).toBeInTheDocument();
-      expect(screen.getByText("1 ampoule 10 mg/10 mL")).toBeInTheDocument();
+      expect(engine.getByText("1 mg = 1 mL")).toBeInTheDocument();
+      expect(engine.getByText("Bolus initial : 1 mg IV (= 1 mL)")).toBeInTheDocument();
+      expect(engine.getByText("1 ampoule 10 mg/10 mL")).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /^PSE/i }));
-      expect(screen.getByText("Débit usuel")).toBeInTheDocument();
-      expect(screen.getByText("1-15 mg/h = 1-15 mL/h")).toBeInTheDocument();
-      expect(screen.getAllByText("PSE : administrer PUR (1 mg/mL)").length).toBeGreaterThan(0);
-      expect(screen.getByText("Soit 1-15 mL/h avec ampoule pure")).toBeInTheDocument();
-      expect(screen.queryByText("Débit PSE")).not.toBeInTheDocument();
+      fireEvent.click(engine.getByRole("button", { name: /^PSE/i }));
+      expect(engine.getByText("Débit usuel")).toBeInTheDocument();
+      expect(engine.getByText("1-15 mg/h = 1-15 mL/h")).toBeInTheDocument();
+      expect(engine.getAllByText("PSE : administrer PUR (1 mg/mL)").length).toBeGreaterThan(0);
+      expect(engine.getByText("Soit 1-15 mL/h avec ampoule pure")).toBeInTheDocument();
+      expect(engine.getByText("Débit PSE")).toBeInTheDocument();
     });
   });
 
@@ -1222,21 +1300,23 @@ describe("DrugCard", () => {
       render(<DrugCard drug={risordan} patientWeight="80" />);
       fireEvent.click(screen.getByText("RISORDAN").closest("button")!);
 
-      expect(await screen.findByText(/IVD en bolus : administrer PUR/)).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText(/IVD en bolus : administrer PUR/)).toBeInTheDocument();
+      expect(engine.getByRole("button", { name: /Bolus/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-      expect(screen.getAllByText("IVD en bolus : administrer PUR").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("Ampoule 10 mg/10 mL").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("IVD en bolus : administrer PUR").length).toBeGreaterThan(0);
+      expect(engine.getAllByText("Ampoule 10 mg/10 mL").length).toBeGreaterThan(0);
 
-      fireEvent.click(screen.getByRole("button", { name: /^PSE/i }));
+      fireEvent.click(engine.getByRole("button", { name: /^PSE/i }));
 
-      expect(screen.getByText("Débit usuel")).toBeInTheDocument();
-      expect(screen.getByText("1-10 mg/h = 1-10 mL/h")).toBeInTheDocument();
-      expect(screen.getAllByText("PSE : administrer PUR (1 mg/mL)").length).toBeGreaterThan(0);
-      expect(screen.getByText("Soit 1-10 mL/h avec ampoule pure")).toBeInTheDocument();
-      expect(screen.queryByText("Débit PSE")).not.toBeInTheDocument();
+      expect(engine.getByText("Débit usuel")).toBeInTheDocument();
+      expect(engine.getByText("1-10 mg/h = 1-10 mL/h")).toBeInTheDocument();
+      expect(engine.getAllByText("PSE : administrer PUR (1 mg/mL)").length).toBeGreaterThan(0);
+      expect(engine.getByText("Soit 1-10 mL/h avec ampoule pure")).toBeInTheDocument();
+      expect(engine.getByText("Débit PSE")).toBeInTheDocument();
     });
   });
 
@@ -1257,11 +1337,13 @@ describe("DrugCard", () => {
       render(<DrugCard drug={rivotril} patientWeight="" />);
       fireEvent.click(screen.getByText("RIVOTRIL").closest("button")!);
 
-      expect(await screen.findByLabelText("Préparation v2")).toBeInTheDocument();
-      expect(screen.getByText("IVD adulte")).toBeInTheDocument();
-      expect(screen.getByText("1-2 mg IV lente sur 2 min")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByLabelText("Préparation v2")).toBeInTheDocument();
+      expect(engine.getByText("IVD adulte")).toBeInTheDocument();
+      expect(engine.getByText("1-2 mg IV lente sur 2 min")).toBeInTheDocument();
       expect(
-        screen.getAllByText("Ampoule 1 mg/1 mL — à reconstituer avec son solvant").length
+        engine.getAllByText("Ampoule 1 mg/1 mL — à reconstituer avec son solvant").length
       ).toBeGreaterThan(0);
     });
 
@@ -1275,8 +1357,11 @@ describe("DrugCard", () => {
       expect(screen.getByText("Double contrôle")).toBeInTheDocument();
       expect(container.querySelectorAll(".preview-v25-recipe li")).toHaveLength(4);
       expect(
-        screen.getByRole("button", { name: "Contrôle visuel 3" }).querySelector("strong")
-      ).toHaveAttribute("data-label", "Dose ou volume conforme à la prescription");
+        screen.getByRole("button", {
+          name: "Dose conforme à la prescription",
+          pressed: false,
+        })
+      ).toBeInTheDocument();
       expect(screen.queryByText("Produit à confirmer")).not.toBeInTheDocument();
     });
   });
@@ -1298,11 +1383,13 @@ describe("DrugCard", () => {
       render(<DrugCard drug={isoptine} patientWeight="50" />);
       fireEvent.click(screen.getByText("ISOPTINE").closest("button")!);
 
-      expect(await screen.findByText("1 ampoule 5 mg/2 mL")).toBeInTheDocument();
-      expect(screen.getByText("à 10 mL avec NaCl 0,9%")).toBeInTheDocument();
-      expect(screen.getByText("Injecter")).toBeInTheDocument();
-      expect(screen.getByText("3,8-7,5 mg = 7,5-15 mL")).toBeInTheDocument();
-      expect(screen.getByText("Injecter lentement en 2 à 3 min")).toBeInTheDocument();
+      const engine = await openMainPreparationEngine();
+
+      expect(await engine.findByText("1 ampoule 5 mg/2 mL")).toBeInTheDocument();
+      expect(engine.getByText("à 10 mL avec NaCl 0,9%")).toBeInTheDocument();
+      expect(engine.getByText("Injecter")).toBeInTheDocument();
+      expect(engine.getByText("3,8-7,5 mg = 7,5-15 mL")).toBeInTheDocument();
+      expect(engine.getByText("Injecter lentement en 2 à 3 min")).toBeInTheDocument();
     });
   });
 

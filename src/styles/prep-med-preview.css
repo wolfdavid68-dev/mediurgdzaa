@@ -1,6 +1,17 @@
 /* Prépa Med v2.5 — transcription du workspace de
    mockups/mediurg-refonte-mobile.html, limitée à ?author=preview. */
 
+.drug-card-preview-v25 {
+  --preview-primary: var(--drug-accent);
+  --preview-v25-readable-accent: color-mix(in srgb, var(--drug-accent) 42%, #102a4c);
+}
+
+[data-theme="light"] .drug-card-preview-v25 {
+  /* Les jaunes, cyan et verts de catégorie restent identifiables sans devenir
+     du texte clair sur fond blanc. */
+  --preview-primary: var(--preview-v25-readable-accent);
+}
+
 .drug-card-preview-v25.drug-card-open .drug-body {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -57,9 +68,9 @@
 
 .preview-v25-identity strong,
 .preview-v25-section-head > div > span {
-  color: color-mix(in srgb, var(--drug-accent) 78%, var(--text));
+  color: var(--preview-primary);
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -68,7 +79,7 @@
 .preview-v25-identity span,
 .preview-v25-identity p {
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.35;
 }
 
@@ -78,7 +89,7 @@
   border: 1px solid color-mix(in srgb, var(--drug-accent) 42%, var(--border));
   border-radius: 4px;
   background: color-mix(in srgb, var(--drug-accent) 10%, transparent);
-  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text)) !important;
+  color: var(--preview-primary) !important;
   font-weight: 850;
 }
 
@@ -86,11 +97,12 @@
 .preview-v25-modes,
 .preview-v25-results {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 
 .preview-v25-modes > button {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -102,6 +114,13 @@
   color: inherit;
   text-align: left;
   box-shadow: 0 2px 7px rgb(0 0 0 / 0.08);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.preview-v25-modes > button > * {
+  position: relative;
+  z-index: 1;
 }
 
 .preview-v25-modes > button > span:first-child,
@@ -114,7 +133,7 @@
   border: 1px solid color-mix(in srgb, var(--drug-accent) 28%, var(--border));
   border-radius: 50%;
   background: color-mix(in srgb, var(--drug-accent) 8%, var(--card));
-  color: var(--drug-accent);
+  color: var(--preview-primary);
 }
 
 .preview-v25-modes svg,
@@ -148,15 +167,8 @@
 .preview-v25-mode-detail,
 .preview-v25-results em {
   color: var(--text-dim);
-  font-size: 9px;
+  font-size: 11px;
   font-style: normal;
-}
-
-.preview-v25-mode-title::before,
-.preview-v25-mode-detail::before,
-.preview-v25-results strong::before,
-.preview-v25-results em::before {
-  content: attr(data-label);
 }
 
 .preview-v25-dose-stepper {
@@ -168,20 +180,25 @@
 .preview-v25-dose-stepper button {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 6px;
   background: color-mix(in srgb, var(--drug-accent) 14%, var(--card));
-  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  color: var(--preview-primary);
   font-size: 18px;
   font-weight: 850;
 }
 
+.preview-v25-dose-stepper button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
 .preview-v25-dose-stepper output {
   min-width: 72px;
-  color: color-mix(in srgb, var(--drug-accent) 88%, var(--text));
+  color: var(--preview-primary);
   font-family: var(--mono);
   font-size: 25px;
   font-weight: 950;
@@ -189,8 +206,28 @@
   text-align: center;
 }
 
-.preview-v25-dose-stepper output::before {
-  content: attr(data-label);
+.preview-v25-age-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  width: min(240px, 100%);
+}
+
+.preview-v25-age-switch button {
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.preview-v25-age-switch button.is-active {
+  border-color: var(--drug-accent);
+  background: color-mix(in srgb, var(--drug-accent) 14%, var(--card));
+  color: var(--preview-primary);
 }
 
 .preview-v25-modes b {
@@ -200,8 +237,9 @@
   height: 30px;
   margin-left: auto;
   border-radius: 50%;
-  background: white;
-  color: var(--drug-accent);
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 56%, var(--border));
+  background: var(--card);
+  color: var(--preview-primary);
 }
 
 .preview-v25-modes b svg {
@@ -210,22 +248,175 @@
 }
 
 .preview-v25-modes > button.is-active {
-  border-color: color-mix(in srgb, var(--drug-accent) 75%, white);
+  border-color: color-mix(in srgb, var(--drug-accent) 82%, #0a2b61);
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--drug-accent) 90%, #2563eb),
-    color-mix(in srgb, var(--drug-accent) 72%, #0f3f9e)
+    color-mix(in srgb, var(--drug-accent) 40%, #0b3978),
+    color-mix(in srgb, var(--drug-accent) 48%, #061d4b)
   );
-  box-shadow: 0 5px 14px color-mix(in srgb, var(--drug-accent) 24%, transparent);
+  color: #fff;
+  box-shadow:
+    0 7px 18px color-mix(in srgb, var(--drug-accent) 28%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    inset 0 0 0 1px rgb(255 255 255 / 0.1);
+}
+
+.preview-v25-modes > button.is-active::before {
+  position: absolute;
+  z-index: 0;
+  inset: -45% -14%;
+  background: linear-gradient(
+    120deg,
+    transparent 0 28%,
+    rgb(255 255 255 / 0.11) 28% 39%,
+    transparent 39% 50%,
+    rgb(255 255 255 / 0.055) 50% 64%,
+    transparent 64% 100%
+  );
+  content: "";
+  pointer-events: none;
 }
 
 .preview-v25-modes > button.is-active strong,
 .preview-v25-modes > button.is-active small {
-  color: white;
+  color: #fff;
+}
+
+.preview-v25-modes > button.is-active small {
+  color: #fff;
+}
+
+.preview-v25-modes > button.is-active > span:first-child,
+.preview-v25-modes > button.is-active b {
+  border-color: rgb(255 255 255 / 0.62);
+  background: rgb(255 255 255 / 0.94);
+  color: color-mix(in srgb, var(--drug-accent) 66%, #083673);
 }
 
 .preview-v25-modes > button:focus-visible {
   outline-color: var(--drug-accent);
+}
+
+[data-theme="dark"] .preview-v25-modes > button.is-active {
+  border-color: color-mix(in srgb, var(--drug-accent) 72%, #9bbcff);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--drug-accent) 40%, #163a7a),
+    color-mix(in srgb, var(--drug-accent) 48%, #071d4b)
+  );
+  box-shadow:
+    0 8px 22px color-mix(in srgb, var(--drug-accent) 22%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+[data-theme="dark"] .preview-v25-modes > button.is-active::before {
+  opacity: 0.78;
+}
+
+/* Contraste sombre local : aucune variable globale de l’application n’est modifiée. */
+[data-theme="dark"] .drug-card-preview-v25 {
+  --preview-primary: color-mix(in srgb, var(--drug-accent) 44%, white);
+  --preview-v25-border: color-mix(in srgb, var(--drug-accent) 22%, #4e5367);
+  --preview-v25-muted: #d8dae5;
+  --preview-v25-subtle: #c0c4d3;
+  --preview-v25-surface: #171821;
+  --preview-v25-surface-raised: #1c1e29;
+}
+
+[data-theme="dark"] .drug-card-preview-v25.drug-card-open .drug-body {
+  background: color-mix(in srgb, var(--drug-accent) 3%, #0d0e15);
+}
+
+[data-theme="dark"] .preview-v25-identity,
+[data-theme="dark"] .preview-v25-modes > button,
+[data-theme="dark"] .preview-v25-results > div,
+[data-theme="dark"] .preview-v25-panel {
+  border-color: var(--preview-v25-border);
+  background: var(--preview-v25-surface);
+}
+
+[data-theme="dark"] .preview-v25-identity span,
+[data-theme="dark"] .preview-v25-identity p,
+[data-theme="dark"] .preview-v25-mode-detail,
+[data-theme="dark"] .preview-v25-results em,
+[data-theme="dark"] .preview-v25-section-head > span,
+[data-theme="dark"] .preview-v25-control-title small,
+[data-theme="dark"] .preview-v25-reference-head small,
+[data-theme="dark"] .preview-v25-reference .poso-item,
+[data-theme="dark"] .preview-v25-check-progress {
+  color: var(--preview-v25-muted);
+}
+
+[data-theme="dark"] .preview-v25-results small,
+[data-theme="dark"] .preview-v25-recipe li small {
+  color: var(--preview-v25-subtle);
+}
+
+[data-theme="dark"] .preview-v25-identity strong,
+[data-theme="dark"] .preview-v25-results strong,
+[data-theme="dark"] .preview-v25-section-head > div > span,
+[data-theme="dark"] .preview-v25-control-title strong,
+[data-theme="dark"] .preview-v25-reference-head strong,
+[data-theme="dark"] .preview-v25-recipe li b {
+  color: var(--preview-primary);
+}
+
+[data-theme="dark"] .preview-v25-section-head,
+[data-theme="dark"] .preview-v25-control .preview-v25-section-head {
+  border-color: var(--preview-v25-border);
+  background: color-mix(in srgb, var(--drug-accent) 8%, var(--preview-v25-surface));
+}
+
+[data-theme="dark"] .preview-v25-control .preview-v25-section-head {
+  background: var(--preview-v25-surface);
+}
+
+[data-theme="dark"] .preview-v25-recipe li,
+[data-theme="dark"] .preview-v25-reference .poso-box + .poso-box {
+  border-color: var(--preview-v25-border);
+}
+
+[data-theme="dark"] .preview-v25-recipe li > span:first-child,
+[data-theme="dark"] .preview-v25-recipe li b {
+  border-color: color-mix(in srgb, var(--drug-accent) 50%, #5e6478);
+  background: color-mix(in srgb, var(--drug-accent) 16%, var(--preview-v25-surface-raised));
+}
+
+[data-theme="dark"] .preview-v25-recipe-notes span {
+  border: 1px solid #76551d;
+  background: #3c2c13;
+  color: #ffd278;
+}
+
+[data-theme="dark"] .preview-v25-checks button,
+[data-theme="dark"] .preview-v25-reference .poso-box {
+  border-color: var(--preview-v25-border);
+  background: var(--preview-v25-surface-raised);
+}
+
+[data-theme="dark"] .preview-v25-checks button strong,
+[data-theme="dark"] .preview-v25-recipe li strong,
+[data-theme="dark"] .preview-v25-section-head strong,
+[data-theme="dark"] .preview-v25-mode-title {
+  color: #f7f8fc;
+}
+
+[data-theme="dark"] .preview-v25-validation {
+  background: #303240;
+  color: #d8dae5;
+}
+
+[data-theme="dark"] .preview-v25-reference .tab-btn:not(.tab-active) {
+  border-color: #414555;
+  background: #1a1c26;
+  color: #e1e3eb;
+}
+
+[data-theme="dark"] .preview-v25-reference .tab-btn.tab-active {
+  border-color: color-mix(in srgb, var(--drug-accent) 56%, #9fb6e4);
+  background: color-mix(in srgb, var(--drug-accent) 20%, #202331);
+  color: #fff;
 }
 
 /* Résultats : dose / prélèvement / administration. */
@@ -243,12 +434,12 @@
 
 .preview-v25-results small {
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
 }
 
 .preview-v25-results strong {
-  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  color: var(--preview-primary);
   font-family: var(--mono);
   font-size: 17px;
   font-weight: 900;
@@ -258,8 +449,9 @@
 /* Trois panneaux principaux. */
 .preview-v25-panel {
   min-width: 0;
-  min-height: 450px;
-  overflow: hidden;
+  min-height: clamp(350px, 42vh, 430px);
+  max-height: none;
+  overflow: visible;
   border: 1px solid color-mix(in srgb, var(--drug-accent) 30%, var(--border));
   border-radius: 12px;
   background: var(--card);
@@ -299,7 +491,7 @@
 .preview-v25-section-head > span {
   max-width: 44%;
   color: var(--text-dim);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 850;
   line-height: 1.25;
   text-align: right;
@@ -309,10 +501,6 @@
   width: 18px;
   height: 18px;
   flex: none;
-}
-
-.preview-v25-prep-context::before {
-  content: attr(data-label);
 }
 
 /* Recette chronologique. */
@@ -353,8 +541,9 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--drug-accent);
-  color: white;
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 60%, var(--border));
+  background: color-mix(in srgb, var(--drug-accent) 15%, var(--card));
+  color: var(--preview-primary);
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 950;
@@ -368,12 +557,12 @@
 
 .preview-v25-recipe li strong {
   color: var(--text);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .preview-v25-recipe li small {
   color: var(--text-dim);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
@@ -384,18 +573,11 @@
   border: 1px solid color-mix(in srgb, var(--drug-accent) 35%, var(--border));
   border-radius: 6px;
   background: color-mix(in srgb, var(--drug-accent) 8%, var(--card));
-  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  color: var(--preview-primary);
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   text-align: right;
   overflow-wrap: anywhere;
-}
-
-.preview-v25-recipe li strong::before,
-.preview-v25-recipe li small::before,
-.preview-v25-recipe li b::before,
-.preview-v25-recipe-notes span::before {
-  content: attr(data-label);
 }
 
 .preview-v25-recipe-notes {
@@ -410,19 +592,9 @@
   border-radius: 7px;
   background: var(--amber-surface, rgb(245 158 11 / 0.12));
   color: var(--amber-text, #b45309);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 850;
   line-height: 1.25;
-}
-
-/* Moteur clinique conservé hors écran : calculs, interactions et tests. */
-.preview-v25-data-engine {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 /* Double contrôle. */
@@ -435,7 +607,7 @@
 }
 
 .preview-v25-control-title strong {
-  color: color-mix(in srgb, var(--drug-accent) 82%, var(--text));
+  color: var(--preview-primary);
   font-size: 16px;
 }
 
@@ -443,7 +615,7 @@
   display: block;
   padding-left: 25px;
   color: var(--text-dim);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.35;
 }
 
@@ -459,7 +631,7 @@
   align-items: center;
   gap: 9px;
   width: 100%;
-  min-height: 42px;
+  min-height: 44px;
   padding: 7px 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -485,22 +657,19 @@
 }
 
 .preview-v25-checks button strong {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
-.preview-v25-checks button strong::before {
-  content: attr(data-label);
-}
-
 .preview-v25-checks button.is-checked {
-  border-color: rgb(34 197 94 / 0.45);
-  background: rgb(34 197 94 / 0.08);
+  border-color: color-mix(in srgb, var(--success, #16a34a) 48%, var(--border));
+  background: color-mix(in srgb, var(--success, #16a34a) 10%, var(--card));
 }
 
 .preview-v25-checks button.is-checked > span {
-  border-color: #22c55e;
-  background: #22c55e;
+  border-color: var(--success, #16a34a);
+  background: var(--success, #16a34a);
+  color: white;
 }
 
 .preview-v25-validation {
@@ -511,25 +680,56 @@
   padding: 14px 10px;
   border: 0;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--drug-accent) 72%, #3b82f6);
-  color: white;
+  background: color-mix(in srgb, var(--text-dim) 16%, var(--card));
+  color: var(--text-dim);
   font-size: 12px;
   font-weight: 900;
   text-align: center;
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--drug-accent) 20%, transparent);
+  box-shadow: none;
+}
+
+.preview-v25-validation.ready:not(:disabled) {
+  background: var(--success, #16a34a);
+  color: white;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--success, #16a34a) 18%, transparent);
+}
+
+.preview-v25-validation:disabled {
+  cursor: not-allowed;
   opacity: 1;
 }
 
-.preview-v25-validation.ready {
-  background: #16a34a;
+.preview-v25-validation.ready:disabled {
+  background: color-mix(in srgb, var(--text-dim) 16%, var(--card));
+  color: var(--text-dim);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .preview-v25-validation.ready:disabled {
+  background: #303240;
+  color: #d8dae5;
 }
 
 .preview-v25-check-progress {
   display: block;
   margin-top: 5px;
   color: var(--text-dim);
-  font-size: 8px;
+  font-size: 10px;
   text-align: center;
+}
+
+.preview-v25-validation-reason {
+  display: block;
+  margin: 6px 14px 0;
+  color: var(--danger, #dc2626);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.3;
+  text-align: center;
+}
+
+[data-theme="dark"] .preview-v25-validation-reason {
+  color: #ff9aa2;
 }
 
 .preview-v25-verified {
@@ -539,10 +739,10 @@
   gap: 10px;
   margin: 0 8px;
   padding: 10px;
-  border: 1px solid #22c55e;
+  border: 1px solid var(--success, #16a34a);
   border-radius: 8px;
-  background: #bbf7d0;
-  color: #166534;
+  background: color-mix(in srgb, var(--success, #16a34a) 14%, var(--card));
+  color: color-mix(in srgb, var(--success, #16a34a) 72%, var(--text));
 }
 
 .preview-v25-verified > span {
@@ -551,8 +751,8 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #4ade80;
-  color: #14532d;
+  background: var(--success, #16a34a);
+  color: white;
 }
 
 .preview-v25-verified > span svg {
@@ -566,25 +766,36 @@
 }
 
 .preview-v25-verified strong {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .preview-v25-verified small {
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .preview-v25-verified button {
-  min-height: 34px;
+  min-height: 44px;
   padding: 0 10px;
   border: 1px solid #94a3b8;
   border-radius: 6px;
   background: white;
   color: #1e293b;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 850;
 }
 
 /* Référence clinique. */
+.preview-v25-reference,
+.preview-v25-reference button,
+.preview-v25-reference .tab-content,
+.preview-v25-reference .item-list,
+.preview-v25-reference .ci-list,
+.preview-v25-reference .cond-list,
+.preview-v25-reference .poso-grid {
+  font-family: var(--font);
+  letter-spacing: normal;
+}
+
 .preview-v25-reference .preview-v25-reference-head {
   min-height: 0;
   padding: 14px 14px 8px;
@@ -597,14 +808,14 @@
 }
 
 .preview-v25-reference-head strong {
-  color: color-mix(in srgb, var(--drug-accent) 82%, #0758d8);
+  color: var(--preview-primary);
   font-size: 16px;
 }
 
 .preview-v25-reference-head small {
   margin-left: 25px;
   color: var(--text-dim);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.3;
 }
 
@@ -621,10 +832,12 @@
   justify-content: flex-start;
   width: 100%;
   min-width: 0;
-  min-height: 38px;
+  min-height: 44px;
   padding-inline: 8px;
   border-radius: 3px;
-  font-size: 9px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 650;
   box-shadow: 0 2px 5px rgb(28 55 82 / 0.08);
 }
 
@@ -638,6 +851,17 @@
   border: 0;
   border-radius: 0;
   background: transparent;
+}
+
+.preview-v25-reference .tab-content > .item-list,
+.preview-v25-reference .tab-content > .ci-list,
+.preview-v25-reference .tab-content > .cond-list,
+.preview-v25-reference .tab-content > .na {
+  margin: 0;
+  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--bg) 28%, var(--card));
 }
 
 .preview-v25-reference .poso-filter-hint,
@@ -669,8 +893,8 @@
 .preview-v25-reference .poso-title {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
-  color: color-mix(in srgb, var(--drug-accent) 76%, var(--text));
-  font-size: 9px;
+  color: var(--preview-primary);
+  font-size: 10px;
 }
 
 .preview-v25-reference .poso-item {
@@ -678,8 +902,8 @@
   padding: 8px 0 0 13px;
   border: 0;
   color: var(--text-dim);
-  font-family: inherit;
-  font-size: 9px;
+  font-family: var(--font);
+  font-size: 12px;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -691,17 +915,67 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--drug-accent);
+  background: var(--preview-primary);
   content: "";
 }
 
 .preview-v25-reference .calc-result {
   margin-top: 4px;
-  font-size: 9px;
+  font-family: var(--font);
+  font-size: 11px;
+}
+
+.preview-v25-reference .item-list {
+  display: grid;
+  gap: 0;
+  list-style: none;
+}
+
+.preview-v25-reference .item-list li,
+.preview-v25-reference .cond-tag {
+  position: relative;
+  padding: 8px 0 0 13px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-dim);
+}
+
+.preview-v25-reference .item-list li::before,
+.preview-v25-reference .cond-tag::before {
+  position: absolute;
+  top: 14px;
+  left: 1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--preview-primary);
+  content: "";
+}
+
+.preview-v25-reference .cond-list {
+  display: grid;
+  gap: 0;
+}
+
+.preview-v25-reference .item-list li,
+.preview-v25-reference .ci-item,
+.preview-v25-reference .cond-tag,
+.preview-v25-reference .na {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 450;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+[data-theme="dark"] .preview-v25-reference .item-list li,
+[data-theme="dark"] .preview-v25-reference .cond-tag {
+  color: var(--preview-v25-muted);
 }
 
 /* Écrans desktop peu hauts : le workspace complet tient dans une seule vue. */
-@media (min-width: 901px) and (max-height: 900px) {
+@media (min-width: 901px) and (max-height: 1050px) {
   .drug-card-preview-v25.drug-card-open .drug-body {
     gap: 6px;
     padding: 8px;
@@ -739,7 +1013,8 @@
   }
 
   .preview-v25-panel {
-    min-height: 360px;
+    min-height: clamp(330px, 39vh, 390px);
+    max-height: none;
   }
 
   .preview-v25-section-head,
@@ -757,12 +1032,12 @@
   }
 
   .preview-v25-checks button {
-    min-height: 36px;
-    padding-block: 5px;
+    min-height: 44px;
+    padding-block: 6px;
   }
 
   .preview-v25-validation {
-    min-height: 42px;
+    min-height: 44px;
     margin-top: 8px;
     padding-block: 10px;
   }
@@ -772,7 +1047,7 @@
   }
 
   .preview-v25-reference .tab-btn {
-    min-height: 34px;
+    min-height: 44px;
   }
 }
 
@@ -816,8 +1091,9 @@
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background: var(--drug-accent);
-    color: white;
+    border: 1px solid color-mix(in srgb, var(--drug-accent) 58%, var(--border));
+    background: color-mix(in srgb, var(--drug-accent) 14%, var(--card));
+    color: var(--preview-primary);
     font-family: var(--mono);
     font-size: 10px;
   }
@@ -856,4 +1132,44 @@
   .preview-workflow-reference .preview-v25-reference {
     display: block;
   }
+}
+
+@media (max-width: 400px) {
+  .preview-v25-reference .tabs-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .preview-v25-reference .tab-btn:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+[data-fontsize="large"] .preview-v25-identity span,
+[data-fontsize="large"] .preview-v25-identity p,
+[data-fontsize="large"] .preview-v25-mode-detail,
+[data-fontsize="large"] .preview-v25-results em,
+[data-fontsize="large"] .preview-v25-recipe li small,
+[data-fontsize="large"] .preview-v25-recipe-notes span,
+[data-fontsize="large"] .preview-v25-checks button strong,
+[data-fontsize="large"] .preview-v25-reference .poso-item,
+[data-fontsize="large"] .preview-v25-reference .item-list li,
+[data-fontsize="large"] .preview-v25-reference .ci-item,
+[data-fontsize="large"] .preview-v25-reference .cond-tag,
+[data-fontsize="large"] .preview-v25-reference .na,
+[data-fontsize="large"] .preview-v25-reference .calc-result {
+  font-size: 13px;
+}
+
+[data-fontsize="large"] .preview-v25-reference .tab-btn,
+[data-fontsize="large"] .preview-v25-reference-head small,
+[data-fontsize="large"] .preview-v25-section-head > span,
+[data-fontsize="large"] .preview-v25-control-title small {
+  font-size: 12px;
+}
+
+[data-fontsize="large"] .preview-v25-mode-title,
+[data-fontsize="large"] .preview-v25-section-head strong,
+[data-fontsize="large"] .preview-v25-control-title strong,
+[data-fontsize="large"] .preview-v25-reference-head strong {
+  font-size: 17px;
 }
