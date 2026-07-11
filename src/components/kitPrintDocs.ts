@@ -40,51 +40,53 @@ export const buildSedationProcedurePrintDoc = (values: PrintValues): string => {
     --text: #111827;
     --muted: #4b5563;
   }
-  @page { size: A4; margin: 8mm; }
+  @page { size: A4 portrait; margin: 8mm; }
   * { box-sizing: border-box; }
   body { margin: 0; background: #e5e7eb; font-family: system-ui, sans-serif; color: var(--text); }
   .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 8mm; background: #fff; border: 1px solid #d1d5db; }
   .sheet { border: 1.4px solid var(--blue); border-radius: 4px; overflow: hidden; }
-  .header { display: grid; grid-template-columns: 1fr 68mm; gap: 7mm; padding: 5mm 5mm 4mm; border-bottom: 1.4px solid var(--blue); }
-  .meta { font-size: 8.2pt; text-transform: uppercase; letter-spacing: .2px; color: var(--muted); margin-bottom: 2mm; }
+  .header { display: grid; grid-template-columns: 1fr 64mm; gap: 5mm; padding: 3mm 4mm 2.5mm; border-bottom: 1.4px solid var(--blue); }
+  .meta { font-size: 7.2pt; text-transform: uppercase; letter-spacing: .2px; color: var(--muted); margin-bottom: 1mm; }
   .meta strong { color: var(--blue); }
-  h1 { margin: 0; color: var(--navy); font-size: 24pt; line-height: 1.1; font-weight: 800; }
-  .subtitle { margin-top: 3mm; font-size: 9.5pt; color: var(--text); }
-  .patient-label { border: 1.4px solid var(--teal); border-radius: 4px; min-height: 27mm; padding: 4mm; text-align: center; color: var(--teal-dark); font-weight: 700; font-size: 11pt; }
+  h1 { margin: 0; color: var(--navy); font-size: 19pt; line-height: 1.05; font-weight: 800; }
+  .subtitle { margin-top: 1.5mm; font-size: 8pt; line-height: 1.15; color: var(--text); }
+  .patient-label { border: 1.4px solid var(--teal); border-radius: 4px; min-height: 22mm; padding: 3mm; text-align: center; color: var(--teal-dark); font-weight: 700; font-size: 9pt; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  .main-table td, .main-table th { border: 1px solid var(--line); padding: 2.2mm 2.5mm; vertical-align: middle; font-size: 8.2pt; line-height: 1.25; }
-  .main-table th { background: linear-gradient(#f8fbfd, #eef6f9); color: var(--blue); font-weight: 800; text-align: center; font-size: 8.5pt; }
+  .main-table td, .main-table th { border: 1px solid var(--line); padding: 1mm 1.6mm; vertical-align: middle; font-size: 7pt; line-height: 1.14; }
+  .main-table th { background: linear-gradient(#f8fbfd, #eef6f9); color: var(--blue); font-weight: 800; text-align: center; font-size: 7.3pt; }
   .item { color: var(--blue); font-weight: 800; }
-  .small { font-size: 7.4pt; line-height: 1.2; }
-  .italic-note { color: var(--teal-dark); font-style: italic; font-weight: 700; font-size: 7.7pt; line-height: 1.25; margin-top: 2mm; }
-  .checkline { display: flex; justify-content: flex-end; align-items: center; gap: 2mm; white-space: nowrap; font-size: 8pt; }
-  .box { display: inline-flex; width: 3.2mm; height: 3.2mm; border: 1px solid #111; vertical-align: middle; margin-left: 1mm; align-items: center; justify-content: center; font-size: 7pt; line-height: 1; }
-  .blank { display: inline-block; border-bottom: 1px solid #111; min-height: 4mm; vertical-align: baseline; padding: 0 1mm; }
+  .small { font-size: 6.5pt; line-height: 1.12; }
+  .italic-note { color: var(--teal-dark); font-style: italic; font-weight: 700; font-size: 6.5pt; line-height: 1.15; margin-top: .8mm; }
+  .checkline { display: flex; justify-content: flex-end; align-items: center; gap: 1mm; white-space: nowrap; font-size: 6.8pt; }
+  .box { display: inline-flex; width: 2.7mm; height: 2.7mm; border: 1px solid #111; vertical-align: middle; margin-left: .7mm; align-items: center; justify-content: center; font-size: 6pt; line-height: 1; }
+  .blank { display: inline-block; border-bottom: 1px solid #111; min-height: 3mm; vertical-align: baseline; padding: 0 .7mm; }
   .w-xs { width: 15mm; }
   .w-sm { width: 24mm; }
   .w-md { width: 36mm; }
   .w-lg { width: 54mm; }
   .w-xl { width: 70mm; }
-  .right-check { float: right; margin-left: 3mm; white-space: nowrap; }
-  .section-title { color: var(--blue); font-weight: 800; margin-bottom: 2mm; }
-  .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm 5mm; margin-top: 2mm; align-items: center; }
+  .right-check { float: right; margin-left: 2mm; white-space: nowrap; }
+  .section-title { color: var(--blue); font-weight: 800; margin-bottom: .8mm; }
+  .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6mm 3mm; margin-top: .8mm; align-items: center; }
   .param-grid div { white-space: nowrap; }
-  .param-grid .checkline { justify-content: flex-start; gap: 1mm; }
-  .dose-grid { display: grid; grid-template-columns: auto 1fr auto 1fr auto; gap: 1.5mm; align-items: end; margin: 1.5mm 0; }
-  .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; padding: 6mm 0 0; }
+  .param-grid .w-sm { width: 18mm; }
+  .param-grid .checkline { justify-content: flex-start; gap: .7mm; }
+  .dose-grid { display: grid; grid-template-columns: auto minmax(12mm, 1fr) auto auto minmax(12mm, 1fr) auto; gap: .8mm; align-items: end; margin: .6mm 0; }
+  .dose-grid .blank { width: 100%; min-width: 0; }
+  .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; padding: 3mm 0 0; }
   .signature-card { border: 1.4px solid var(--blue); border-radius: 4px; overflow: hidden; }
-  .signature-title { background: linear-gradient(90deg, var(--blue), var(--teal)); color: #fff; font-weight: 800; padding: 2.4mm 4mm; font-size: 10.5pt; display: flex; align-items: center; gap: 2.5mm; }
-  .signature-icon { width: 6mm; height: 6mm; border-radius: 50%; background: #fff; color: var(--blue); display: inline-flex; justify-content: center; align-items: center; font-size: 10pt; font-weight: 900; }
-  .signature-body { padding: 5mm 4mm; font-size: 9.5pt; }
-  .signature-row { display: grid; grid-template-columns: 20mm 1fr; align-items: end; gap: 3mm; margin-bottom: 6mm; }
+  .signature-title { background: linear-gradient(90deg, var(--blue), var(--teal)); color: #fff; font-weight: 800; padding: 1.3mm 3mm; font-size: 8.5pt; display: flex; align-items: center; gap: 2mm; }
+  .signature-icon { width: 4.5mm; height: 4.5mm; border-radius: 50%; background: #fff; color: var(--blue); display: inline-flex; justify-content: center; align-items: center; font-size: 8pt; font-weight: 900; }
+  .signature-body { padding: 2.5mm 3mm; font-size: 8pt; }
+  .signature-row { display: grid; grid-template-columns: 17mm 1fr; align-items: end; gap: 2mm; margin-bottom: 3mm; }
   .signature-row:last-child { margin-bottom: 0; }
-  .line { border-bottom: 1px solid #111; min-height: 5mm; padding: 0 2mm 1mm; }
-  .footer-space { padding: 0 4mm 4mm; }
-  .opposable { margin-top: 5mm; text-align: center; font-size: 7pt; font-style: italic; font-weight: 800; color: #10233d; }
+  .line { border-bottom: 1px solid #111; min-height: 4mm; padding: 0 1mm .5mm; }
+  .footer-space { padding: 0 3mm 2mm; break-inside: avoid; }
+  .opposable { margin-top: 2.5mm; text-align: center; font-size: 6.5pt; font-style: italic; font-weight: 800; color: #10233d; }
   @media print {
     body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .page { margin: 0; border: none; width: auto; min-height: auto; padding: 0; }
-    .sheet { page-break-inside: avoid; }
+    .page, .sheet { break-inside: avoid; page-break-inside: avoid; }
   }
 </style></head><body><main class="page">
   <section class="sheet">
@@ -179,7 +181,8 @@ export const buildSedationProcedurePrintDoc = (values: PrintValues): string => {
           <span>Kétamine :</span>
           ${blank(ketamineDose)}
           <span>mg</span>
-          <span>Propofol : ${blank(propofolDose, "w-sm")}</span>
+          <span>Propofol :</span>
+          ${blank(propofolDose)}
           <span>mg</span>
         </div>
         Réserve Propofol : ${blank(propofolReserve, "w-md")} mg<br />
