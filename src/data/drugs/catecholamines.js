@@ -11,7 +11,7 @@ export const DRUGS_CATECHOLAMINES = [
     nom: "ADRÉNALINE",
     commercial: "Adrénaline",
     dci: "Adrénaline tartrate / Épinéphrine",
-    classe: "Catécholamine α/β agoniste — Arrêt cardiaque, choc anaphylactique",
+    classe: "Catécholamine α/β agoniste",
     cat: "Catécholamines",
     svc: ["SMUR", "SAU"],
     monitoring: ["Scope"],
