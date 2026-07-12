@@ -11,6 +11,7 @@ import "../styles/acr-prep.css";
 import "../styles/acr-postrosc.css";
 import "../styles/acr-ht.css";
 import "../styles/acr-record.css";
+import "../styles/acr-record-detail.css";
 import AcrTimer from "./AcrTimer";
 import ModalDialog from "./ModalDialog";
 import TestVersionBanner from "./TestVersionBanner";

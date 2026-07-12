@@ -11,24 +11,17 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { calcDose, ciSeverity } from "../lib/calc";
 import type { ProtocolRef } from "../lib/crossref";
 import { isPreview } from "../lib/featureFlags";
 import type { Drug } from "../types/data";
 import DrugNote from "./DrugNote";
-import PrepBlock from "./PrepBlock";
-import PseBlock from "./PseBlock";
-import {
-  buildPreparationModel,
-  getPreparationPseDefault,
-  type PreparationNumericControl,
-} from "./PreparationModel";
+import { DrugTabContent } from "./DrugCardContent";
+import type { PreparationNumericControl } from "./PreparationModel";
 import { useResolvedDrugPrep, useResolvedDrugPse } from "./useResolvedPreparation";
+import { usePreparationEngine } from "./usePreparationEngine";
 import { PreparationDoseStepper } from "./preparation/PreparationDoseStepper";
 import {
   CLOSED_PREPARATION_MODEL,
-  collectPrepDuplicateTexts,
-  isPosoDuplicateOfPrep,
   MONITORING_BADGES,
   MonitoringWaveIcon,
   prepStepDetail,
@@ -76,11 +69,12 @@ const DrugCard = ({
   // La surface Prépa Med v2.5 est désormais la fiche publique. Le mode preview
   // ne pilote plus que les overlays de données encore expérimentaux (PSE).
   const prepV25Mode = prepV25Enabled || previewMode;
-  const { prep: resolvedPrep, loading: previewPrepLoading } = useResolvedDrugPrep(
-    drug,
-    previewMode
+  const { prep: resolvedPrep, loading: previewPrepLoading } = useResolvedDrugPrep(drug, open);
+  const { pse: resolvedPse, loading: previewPseLoading } = useResolvedDrugPse(
+    drug.id,
+    previewMode,
+    open
   );
-  const { pse: resolvedPse, loading: previewPseLoading } = useResolvedDrugPse(drug.id, previewMode);
   // Poids partagé : vient du bandeau global (App.tsx → PatientWeightBanner) via
   // le prop. Plus d'input local dans la fiche (évite le doublon avec le bandeau).
   const weight = patientWeight;
@@ -157,9 +151,9 @@ const DrugCard = ({
       ...(drug.cond || []),
       ...(drug.poso?.a || []),
       ...(drug.poso?.p || []),
-      drug.prep?.duree,
-      ...(drug.prep?.etapes || []),
-      ...(drug.prep?.notes || []),
+      resolvedPrep?.duree,
+      ...(resolvedPrep?.etapes || []),
+      ...(resolvedPrep?.notes || []),
     ]
       .filter(Boolean)
       .join(" ");
@@ -174,19 +168,22 @@ const DrugCard = ({
       );
       return { label, className: preset?.className || "monitor-custom" };
     });
-  }, [drug]);
+  }, [drug, resolvedPrep]);
   const monitoringLabel = monitoringBadges.map((badge) => badge.label).join(" + ");
   const monitoringCornerLabel = monitoringBadges.map((badge) => badge.label).join("+");
   const monitoringClass = monitoringBadges[0]?.className || "monitor-custom";
   const prepWeight = Number.parseFloat(weight);
   const resolvedPrepPopulation =
     prepPopulation || (Number.isFinite(prepWeight) && prepWeight < 30 ? "enfant" : "adulte");
-  const prepClinicalLoading = previewMode && (previewPrepLoading || previewPseLoading);
-  const prepData = previewMode && previewPrepLoading ? null : resolvedPrep;
+  const prepClinicalLoading = previewPrepLoading || (previewMode && previewPseLoading);
+  const prepData = previewPrepLoading ? null : (resolvedPrep ?? null);
   const pseData = previewMode && previewPseLoading ? null : resolvedPse;
-  const preparationModel =
+  const { engine: preparationEngine, loading: preparationEngineLoading } = usePreparationEngine(
     open && prepV25Mode
-      ? buildPreparationModel({
+  );
+  const preparationModel =
+    open && prepV25Mode && preparationEngine
+      ? preparationEngine.buildPreparationModel({
           drug,
           prep: prepData,
           pse: pseData,
@@ -205,8 +202,17 @@ const DrugCard = ({
     setPrepRecipeIndex((index) => (index < preparationModes.length ? index : 0));
   }, [preparationModes.length]);
   useEffect(() => {
-    setPrepDose(getPreparationPseDefault(resolvedPse, weight, resolvedPrep));
-  }, [drug.id, resolvedPrepPopulation, previewPseLoading, resolvedPrep, resolvedPse, weight]);
+    if (!preparationEngine) return;
+    setPrepDose(preparationEngine.getPreparationPseDefault(resolvedPse, weight, resolvedPrep));
+  }, [
+    drug.id,
+    preparationEngine,
+    resolvedPrepPopulation,
+    previewPseLoading,
+    resolvedPrep,
+    resolvedPse,
+    weight,
+  ]);
   const adjustPrepDose = (direction: -1 | 1) => {
     resetPrepVerification();
     if (!prepDoseSteps.length) {
@@ -283,169 +289,17 @@ const DrugCard = ({
   const toggleTab = (key: string) =>
     setActiveTab(prepV25Mode ? key : activeTab === key ? null : key);
 
-  const renderList = (items: string[] | undefined) => {
-    if (!items || items.length === 0) return <span className="na">Non renseigné</span>;
-    return (
-      <ul className="item-list">
-        {items.map((it: string, i: number) => (
-          <li key={i}>{it}</li>
-        ))}
-      </ul>
-    );
-  };
-
-  const renderPosoTab = (includePreparation = true, includeNote = true) => {
-    // Filtrage des colonnes posologie :
-    //  1. Le toggle Adulte/Enfant (prop `prepPopulation`, non-null seulement
-    //     quand l'utilisateur l'a actionné) PRIME : « Enfant » masque l'adulte
-    //     et inversement, avec repli sur l'autre colonne si la population
-    //     demandée n'est pas renseignée.
-    //  2. Sinon, filtrage par poids : < 30 kg → pédiatrique · > 70 kg → adulte ·
-    //     30–70 kg (inclus) ou pas de poids → les deux. Même logique de repli.
-    const kgNum = parseFloat(weight);
-    const validKg = kgNum > 0 && kgNum <= 300;
-    const hasAdult = !!(drug.poso?.a && drug.poso.a.length);
-    const hasPed = !!(drug.poso?.p && drug.poso.p.length);
-    const effectivePrep = prepV25Mode ? resolvedPrep : drug.prep;
-    const hidePosologyGrid = Boolean(effectivePrep?.hide_poso_when_prepared);
-    const prepDuplicateTexts = prepV25Mode ? collectPrepDuplicateTexts(effectivePrep) : [];
-    let showAdult = true;
-    let showPed = true;
-    let posoHint = "";
-    if (prepPopulation === "enfant") {
-      if (hasPed) {
-        showAdult = false;
-        posoHint = "Mode enfant — posologie pédiatrique";
-      } else {
-        showPed = false;
-        posoHint = "Pas de posologie pédiatrique — posologie adulte affichée";
-      }
-    } else if (prepPopulation === "adulte") {
-      if (hasAdult) {
-        showPed = false;
-        posoHint = "Mode adulte — posologie adulte";
-      } else {
-        showAdult = false;
-        posoHint = "Pas de posologie adulte — posologie pédiatrique affichée";
-      }
-    } else if (validKg && kgNum < 30) {
-      if (hasPed) {
-        showAdult = false;
-        posoHint = "Poids < 30 kg — posologie pédiatrique";
-      } else {
-        showPed = false;
-        posoHint = "Pas de posologie pédiatrique — posologie adulte affichée";
-      }
-    } else if (validKg && kgNum > 70) {
-      if (hasAdult) {
-        showPed = false;
-        posoHint = "Poids > 70 kg — posologie adulte";
-      } else {
-        showAdult = false;
-        posoHint = "Pas de posologie adulte — posologie pédiatrique affichée";
-      }
-    }
-    const single = showAdult !== showPed;
-
-    const renderPosoLines = (lines: string[] | undefined) => {
-      const visibleLines = (lines || []).filter(
-        (line) => !isPosoDuplicateOfPrep(line, prepDuplicateTexts)
-      );
-      return visibleLines.length ? (
-        visibleLines.map((p: string, i: number) => {
-          const res = calcDose(p, weight);
-          return (
-            <div key={i} className="poso-item">
-              {p}
-              {res && (
-                <span
-                  className={`calc-result ${res.validation === "danger" ? "calc-danger" : res.capped ? "calc-over" : "calc-ok"}`}
-                >
-                  {res.value}
-                  {res.validation === "danger" ? " 🚨 vérifier" : res.capped ? " ⚠ max" : ""}
-                </span>
-              )}
-            </div>
-          );
-        })
-      ) : (
-        <span className="na">
-          {lines?.length ? "Voir préparation ci-dessous" : "Non renseigné"}
-        </span>
-      );
-    };
-
-    return (
-      <>
-        {!hidePosologyGrid && (
-          <>
-            {posoHint && <div className="poso-filter-hint">{posoHint}</div>}
-            <div className={`poso-grid ${single ? "poso-grid-single" : ""}`}>
-              {showAdult && (
-                <div className="poso-box">
-                  <div className="poso-title">Adulte</div>
-                  {renderPosoLines(drug.poso.a)}
-                </div>
-              )}
-              {showPed && (
-                <div className="poso-box">
-                  <div className="poso-title">Pédiatrique</div>
-                  {renderPosoLines(drug.poso.p)}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {includePreparation && (
-          <>
-            <PrepBlock drug={drug} weight={weight} prepPopulation={prepPopulation} />
-            <PseBlock drug={drug} weight={weight} />
-          </>
-        )}
-        {includeNote && <DrugNote drugId={drug.id} onChange={setHasNote} />}
-      </>
-    );
-  };
-
-  const renderContent = (key: string) => {
-    if (key === "indic") return renderList(drug.indic);
-    if (key === "ci") {
-      if (!drug.ci || drug.ci.length === 0) return <span className="na">Non renseigné</span>;
-      return (
-        <ul className="ci-list">
-          {drug.ci.map((it: string, i: number) => {
-            const sev = ciSeverity(it);
-            return (
-              <li key={i} className={`ci-item ${sev ? `ci-item-${sev}` : ""}`}>
-                {sev && (
-                  <span className={`ci-badge ci-badge-${sev}`}>
-                    {sev === "abs" ? "Absolue" : sev === "rel" ? "Relative" : "Précaution"}
-                  </span>
-                )}
-                <span className="ci-text">{it}</span>
-              </li>
-            );
-          })}
-        </ul>
-      );
-    }
-    if (key === "ei") return renderList(drug.ei);
-    if (key === "cond") {
-      if (!drug.cond || drug.cond.length === 0) return <span className="na">Non renseigné</span>;
-      return (
-        <div className="cond-list">
-          {drug.cond.map((c: string, i: number) => (
-            <span key={i} className="cond-tag">
-              {c}
-            </span>
-          ))}
-        </div>
-      );
-    }
-    if (key === "poso") return renderPosoTab(!prepV25Mode, !prepV25Mode);
-    return null;
-  };
+  const renderContent = (tabKey: string) => (
+    <DrugTabContent
+      tabKey={tabKey}
+      drug={drug}
+      weight={weight}
+      prepPopulation={prepPopulation}
+      prepV25Mode={prepV25Mode}
+      resolvedPrep={resolvedPrep}
+      onNoteChange={setHasNote}
+    />
+  );
 
   return (
     <div
@@ -585,13 +439,13 @@ const DrugCard = ({
             </>
           )}
 
-          {prepClinicalLoading && (
+          {(prepClinicalLoading || preparationEngineLoading) && (
             <div className="prep-v25-loading" role="status">
               Chargement de la préparation sécurisée…
             </div>
           )}
 
-          {prepV25Mode && !prepClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && !preparationEngineLoading && (
             <div className="prep-v25-modes" role="group" aria-label="Modes de préparation">
               {preparationModes.map((mode, index) => (
                 <button
@@ -625,7 +479,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {prepV25Mode && !prepClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && !preparationEngineLoading && (
             <div
               className="prep-v25-results"
               aria-label="Résultats de préparation"
@@ -713,7 +567,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {prepV25Mode && !prepClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && !preparationEngineLoading && (
             <section
               className="prep-v25-panel prep-v25-prepare"
               aria-labelledby={`${instanceId}-prep-title`}
@@ -770,7 +624,7 @@ const DrugCard = ({
             </section>
           )}
 
-          {prepV25Mode && !prepClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && !preparationEngineLoading && (
             <section
               className="prep-v25-panel prep-v25-control"
               aria-labelledby={`${instanceId}-prep-control-title`}
@@ -858,7 +712,7 @@ const DrugCard = ({
             </section>
           )}
 
-          {prepV25Mode && !prepClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && !preparationEngineLoading && (
             <section className="prep-v25-panel prep-v25-reference">
               <div className="prep-v25-section-head prep-v25-reference-head">
                 <div>

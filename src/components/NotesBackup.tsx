@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { DRUGS } from "../data/drugs";
+import { DRUGS } from "virtual:drugs-lite";
 import { APP_VERSION } from "../data/appVersion";
 import { safeGetItem, safeSetItem } from "../lib/safeStorage";
 import { storageKey } from "../lib/storageKeys";

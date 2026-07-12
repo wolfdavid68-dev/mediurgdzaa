@@ -1,5 +1,5 @@
 import type { Profile } from "./auth";
-import { isAsFunction, isIfsiCadreFunction, isMedicalFunction } from "./auth";
+import { isAsFunction, isIfsiCadreFunction, isMedicalFunction } from "./authPolicy";
 
 export type PreviewAccessMode = "full" | "medicaments" | "tutorat";
 

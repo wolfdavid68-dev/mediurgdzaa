@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { logout, logoutOtherDevices } from "../lib/auth";
 import { useAuthProfile } from "../lib/authProfile";
 import type { useLongPress } from "../lib/useLongPress";
 import { openTutorat as openTutoratWithFallback } from "../lib/tutorat";
@@ -118,6 +117,7 @@ const AppHeader = ({
   const handleLogout = async () => {
     setLogoutBusy(true);
     setMenuOpen(false);
+    const { logout } = await import("../lib/auth");
     await logout();
     setLogoutBusy(false);
   };
@@ -129,6 +129,7 @@ const AppHeader = ({
       return;
     }
     setLogoutOthersBusy(true);
+    const { logoutOtherDevices } = await import("../lib/auth");
     const result = await logoutOtherDevices();
     setLogoutOthersBusy(false);
     setConfirmLogoutOthers(false);

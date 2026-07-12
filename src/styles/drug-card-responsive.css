@@ -1,0 +1,350 @@
+/* ── Mode CLAIR : couleurs plus sombres pour la lisibilité ── */
+[data-theme="light"] .prep-chip-stab {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.35);
+}
+
+[data-theme="light"] .prep-chip-debit {
+  color: #6d28d9;
+  background: rgba(109, 40, 217, 0.08);
+  border-color: rgba(109, 40, 217, 0.3);
+}
+
+[data-theme="light"] .prep-calc-box {
+  background: #eff6ff;
+  border-bottom-color: #bfdbfe;
+  border-top-color: #bfdbfe;
+}
+
+[data-theme="light"] .prep-calc-header {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-inline-input {
+  color: #1e40af;
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+[data-theme="light"] .prep-inline-input input {
+  background: #ffffff;
+  color: #172554;
+  border-color: #93c5fd;
+}
+
+[data-theme="light"] .prep-calc-step {
+  color: #1d4ed8;
+  opacity: 1;
+}
+
+[data-theme="light"] .prep-calc-highlight {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-note-item {
+  color: #92400e;
+}
+
+[data-theme="light"] .prep-note-item svg {
+  stroke: #b45309;
+}
+
+[data-theme="light"] .prep-v2 {
+  border-color: #fca5a5;
+  background: #fff7f7;
+}
+
+[data-theme="light"] .prep-head {
+  background: #fff1f2;
+  border-bottom-color: #fecdd3;
+}
+
+[data-theme="light"] .prep-head-title {
+  color: #991b1b;
+}
+
+[data-theme="light"] .prep-tag,
+[data-theme="light"] .prep-v2 .prep-calc {
+  background: #ffffff;
+  border-color: #fecdd3;
+}
+
+[data-theme="light"] .prep-tag {
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc-header {
+  color: #b91c1c;
+}
+
+[data-theme="light"] .prep-mode-option {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+[data-theme="light"] .prep-mode-option small {
+  color: #64748b;
+}
+
+[data-theme="light"] .prep-mode-option.is-active {
+  background: #fff1f2;
+  border-color: #fb7185;
+  color: #991b1b;
+}
+
+[data-theme="light"] .prep-mode-option.prep-recipe-pse.is-active {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #1e3a8a;
+}
+
+[data-theme="light"] .prep-mode-option.prep-recipe-ped.is-active {
+  background: #ccfbf1;
+  border-color: #2dd4bf;
+  color: #0f766e;
+}
+
+[data-theme="light"] .prep-mode-option.prep-recipe-ped-im.is-active {
+  background: #fef3c7;
+  border-color: #facc15;
+  color: #92400e;
+}
+
+[data-theme="light"] .prep-mode-option.prep-recipe-im.is-active {
+  background: #fef3c7;
+  border-color: #facc15;
+  color: #92400e;
+}
+
+[data-theme="light"] .prep-mode-option.prep-recipe-pse.is-active small {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-calc-box.prep-recipe-im,
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-im {
+  background: #fffbeb;
+  border-color: #facc15;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-im .prep-calc-header,
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-im .prep-highlight {
+  color: #92400e;
+}
+
+[data-theme="light"] .prep-calc-box.prep-recipe-pse,
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-pse {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-ped {
+  background: #f0fdfa;
+  border-color: #5eead4;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-ped .prep-calc-header,
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-ped .prep-highlight {
+  color: #0f766e;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-ped-im {
+  background: #fffbeb;
+  border-color: #facc15;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-ped-im .prep-calc-header,
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-ped-im .prep-highlight {
+  color: #92400e;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-pse .prep-calc-header {
+  color: #1e3a8a;
+}
+
+[data-theme="light"] .prep-v2 .prep-calc.prep-recipe-pse .prep-highlight {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-v2 .prep-highlight {
+  color: #991b1b;
+}
+
+[data-theme="light"] .prep-v2 .prep-inject {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-v2 .prep-phase-title {
+  color: #b91c1c;
+}
+
+[data-theme="light"] .prep-step-num {
+  color: #b91c1c;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+[data-theme="light"] .prep-alert {
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(180, 83, 9, 0.22);
+}
+
+[data-theme="light"] .prep-table-card {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+[data-theme="light"] .prep-table-current {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+[data-theme="light"] .prep-table-current-head {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .prep-table-current-grid > div {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+[data-theme="light"] .prep-table-current-grid strong {
+  color: #1e3a8a;
+}
+
+[data-theme="light"] .prep-table th {
+  background: rgba(37, 99, 235, 0.06);
+}
+
+[data-theme="light"] .prep-table tr.is-current td {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+/* ── Empty state ────────────────────────────────────────── */
+
+.empty {
+  padding: clamp(40px, 8vw, 80px) 20px;
+  text-align: center;
+}
+.empty-icon {
+  font-size: clamp(32px, 5vw, 48px);
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+.empty p {
+  font-size: clamp(14px, 1.5vw, 16px);
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.empty small {
+  font-size: clamp(11px, 1.2vw, 13px);
+  color: var(--text-mute);
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ══════════════════════════════════════════════════════════ */
+
+/* Tablette et desktop — 768px et plus */
+/* Les chips se passent à la ligne au lieu de scroller horizontalement */
+@media (min-width: 768px) {
+  .filter-chips {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+}
+
+@media (max-width: 720px) {
+  .prep-body {
+    grid-template-columns: 1fr;
+  }
+
+  .prep-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .prep-tags {
+    justify-content: flex-start;
+  }
+
+  .prep-v2 .prep-calc-row {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+
+  .prep-table-current-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .prep-body {
+    padding: 10px;
+  }
+
+  .prep-tag {
+    white-space: normal;
+  }
+
+  .prep-table-current-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Très petit écran — moins de 380px (anciens téléphones) */
+@media (max-width: 380px) {
+  .header-inner {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .main-content {
+    padding: 10px;
+    gap: 6px;
+  }
+  .drug-header {
+    padding: 10px 12px;
+    gap: 8px;
+    min-height: 54px;
+  }
+  .drug-title-row {
+    gap: 6px;
+  }
+  .drug-card-monitored .drug-title-row {
+    padding-right: min(78px, 28vw);
+  }
+  /* Sur très petit écran, on réduit un peu la police du nom pour que même le
+     nom le plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne malgré
+     le badge texte. */
+  .drug-name {
+    font-size: 12px;
+  }
+  .drug-subtitle {
+    gap: 4px;
+  }
+  .drug-monitor-corner {
+    max-width: min(78px, 28vw);
+    padding: 4px 5px;
+    font-size: 6.5px;
+  }
+  .monitor-wave {
+    width: 18px;
+    height: 10px;
+  }
+  .logo-text p {
+    font-size: 9px;
+  }
+  .search-bar input {
+    padding: 9px 34px 9px 36px;
+  }
+}
+
+/* Mode paysage téléphone — réduire la hauteur du header */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .header-inner {
+    gap: 8px;
+    padding: 8px 14px;
+  }
+  .logo-text p {
+    display: none;
+  }
+}

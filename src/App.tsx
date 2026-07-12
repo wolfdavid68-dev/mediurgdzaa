@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState, useEffect, useDeferredValue, useCallback } from "react";
-import { DRUGS } from "./data/drugs";
+import { DRUGS } from "virtual:drugs-lite";
 import AppHeader from "./components/AppHeader";
 import BottomNav from "./components/BottomNav";
 import MedicamentsPage from "./pages/MedicamentsPage";
@@ -21,10 +21,9 @@ import { useLongPress } from "./lib/useLongPress";
 import { useWakeLock } from "./lib/useWakeLock";
 import { usePatientWeight } from "./lib/usePatientWeight";
 import { getPreviewAccessMode } from "./lib/access";
-import { isMedicalFunction } from "./lib/auth";
+import { isMedicalFunction } from "./lib/authPolicy";
 import { isPreview } from "./lib/featureFlags";
 import { useAuthProfile } from "./lib/authProfile";
-import { initializeDeviceSync } from "./lib/deviceSync";
 import { openTutoratWithCurrentSession, shouldOpenTutoratFromLogin } from "./lib/tutorat";
 import { filterDrugs as searchDrugs, getRecentDrugs as readRecentDrugs } from "./lib/drugSearch";
 import { resolveDeepLink } from "./lib/deepLink";
@@ -181,7 +180,22 @@ const App = () => {
     void openTutoratWithCurrentSession();
   }, [authProfile]);
 
-  useEffect(() => initializeDeviceSync(), []);
+  useEffect(() => {
+    let active = true;
+    let disposeSync: (() => void) | undefined;
+    // La synchronisation distante n'est pas nécessaire au premier rendu :
+    // on laisse le shell clinique s'afficher, puis on charge Supabase au repos.
+    const timer = window.setTimeout(() => {
+      void import("./lib/deviceSync").then(({ initializeDeviceSync }) => {
+        if (active) disposeSync = initializeDeviceSync();
+      });
+    }, 250);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+      disposeSync?.();
+    };
+  }, []);
 
   useEffect(() => {
     if (accessMode === "full") return;

@@ -10,10 +10,8 @@ import RootErrorFallback from "./components/RootErrorFallback";
 import "./styles/base.css";
 import "./styles/header.css";
 import "./styles/drug-card.css";
-import "./styles/preparation-v25.css";
-import "./styles/pse.css";
+import "./styles/drug-card-responsive.css";
 import "./styles/drug-related.css";
-import "./styles/ktc-light-contrast.css";
 import "./styles/ci-severity.css";
 import "./styles/font-large.css";
 import "./styles/urgence-button.css";
@@ -28,11 +26,9 @@ import "./styles/bottom-nav-safe-area.css";
 // pas de CDN Google Fonts → fonctionne hors-ligne (PWA offline-first).
 import "@fontsource-variable/geist/index.css";
 import "@fontsource-variable/geist-mono/index.css";
-import "./styles/auth.css";
 // Design mobile dédié des écrans d'auth (hero plein écran, tab bar, bottom
 // sheets) — recréation du design_handoff_sau_mulhouse/mobile. Activé sous
 // 600px par useIsMobile() côté AuthGate. Classes préfixées .m-.
-import "./styles/auth-mobile.css";
 import App from "./App";
 import AuthGate from "./components/auth/AuthGate";
 import UpdatePrompt from "./components/UpdatePrompt";

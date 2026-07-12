@@ -7,7 +7,8 @@ import {
   type SetStateAction,
 } from "react";
 import "../styles/kits.css";
-import { DRUGS } from "../data/drugs";
+import "../styles/ktc-light-contrast.css";
+import { DRUG_DETAILS } from "virtual:drug-details";
 import { enqueueSyncItem, pullKitChecks, type KitCheckPayload } from "../lib/deviceSync";
 import { useAuthProfile } from "../lib/authProfile";
 import { readUserItem, removeUserItem, writeUserItem } from "../lib/userStorage";
@@ -15,7 +16,7 @@ import type { Drug, PrepKit } from "../types/data";
 import KitChecklist from "./KitChecklist";
 import KtcLinePlanner from "./KtcLinePlanner";
 
-const DRUG_BY_ID = new Map(DRUGS.map((drug) => [drug.id, drug]));
+const DRUG_BY_ID = new Map(DRUG_DETAILS.map((drug) => [drug.id, drug]));
 const CHECK_MAX_AGE_MS = 3 * 60 * 60 * 1000;
 type StoredKitChecks = { ts?: number; items?: Record<number, boolean> };
 
@@ -47,7 +48,7 @@ const loadChecked = (userId: string | null, kitId: string): Record<number, boole
   return parsed.items;
 };
 
-const buildPrepFromDrug = (drug: Drug | undefined) => {
+const buildPrepFromDrug = (drug: Pick<Drug, "id" | "cond" | "prep"> | undefined) => {
   if (!drug) return null;
   return { cond: drug.cond?.[0] || null, etapes: drug.prep?.etapes || [] };
 };

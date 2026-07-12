@@ -224,6 +224,8 @@ export type Drug = {
   cond?: string[];
   poso: DrugPosology;
   prep?: DrugPrep | null;
+  /** Marqueur interne du catalogue léger : préparation disponible au chargement différé. */
+  _prepDeferred?: boolean;
 };
 
 // ── PSE (pousse-seringue électrique) ───────────────────────

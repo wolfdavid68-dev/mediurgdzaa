@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { DRUGS } from "../data/drugs";
 import DrugCard from "./DrugCard";
 
@@ -169,16 +169,15 @@ describe("DrugCard", () => {
   });
 
   describe("Préparation HYPNOVEL", () => {
-    test("affiche uniquement la préparation PSE, le bolus restant pur", () => {
+    test("affiche uniquement la préparation PSE, le bolus restant pur", async () => {
       const hypnovel = DRUGS.find((drug) => drug.nom === "HYPNOVEL")!;
 
       render(<DrugCard drug={hypnovel} patientWeight="80" />);
       fireEvent.click(screen.getByText("HYPNOVEL").closest("button")!);
 
-      expect(screen.getByRole("button", { name: /Bolus titré 1 mg\/mL pur/ })).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
+      expect(
+        await screen.findByRole("button", { name: /Bolus titré 1 mg\/mL pur/ })
+      ).toHaveAttribute("aria-pressed", "true");
       expect(
         screen.getByText(/Bolus titrés : ampoule 5 mg\/5 mL.*pas de préparation/)
       ).toBeInTheDocument();
@@ -191,12 +190,12 @@ describe("DrugCard", () => {
   });
 
   describe("Préparation ANEXATE", () => {
-    test("affiche le résultat de préparation comme un débit, pas comme une injection", () => {
+    test("affiche le résultat de préparation comme un débit, pas comme une injection", async () => {
       const anexate = DRUGS.find((drug) => drug.nom === "ANEXATE")!;
 
       render(<DrugCard drug={anexate} patientWeight="80" />);
       fireEvent.click(screen.getByText("ANEXATE").closest("button")!);
-      expect(screen.getByText("PSE entretien")).toBeInTheDocument();
+      expect(await screen.findByText("PSE entretien")).toBeInTheDocument();
       fireEvent.change(screen.getByLabelText("Dose efficace"), { target: { value: "12" } });
 
       expect(screen.getByText("Débit")).toBeInTheDocument();
@@ -209,13 +208,13 @@ describe("DrugCard", () => {
   });
 
   describe("Préparation NARCAN", () => {
-    test("sépare la préparation IVD de la préparation PSE", () => {
+    test("sépare la préparation IVD de la préparation PSE", async () => {
       const narcan = DRUGS.find((drug) => drug.nom === "NARCAN")!;
 
       render(<DrugCard drug={narcan} patientWeight="80" />);
       fireEvent.click(screen.getByText("NARCAN").closest("button")!);
 
-      expect(screen.getByRole("button", { name: /IVD.*0,04 mg\/mL/i })).toHaveAttribute(
+      expect(await screen.findByRole("button", { name: /IVD.*0,04 mg\/mL/i })).toHaveAttribute(
         "aria-pressed",
         "true"
       );
@@ -241,11 +240,15 @@ describe("DrugCard", () => {
   });
 
   describe("Préparation CYANOKIT", () => {
-    test("n'affiche pas de préparation adulte, mais l'affiche chez l'enfant", () => {
+    test("n'affiche pas de préparation adulte, mais l'affiche chez l'enfant", async () => {
       const cyanokit = DRUGS.find((drug) => drug.nom === "CYANOKIT")!;
 
       const { unmount } = render(<DrugCard drug={cyanokit} patientWeight="80" />);
       fireEvent.click(screen.getByText("CYANOKIT").closest("button")!);
+
+      await waitFor(() =>
+        expect(screen.queryByText("Chargement de la préparation…")).not.toBeInTheDocument()
+      );
 
       expect(screen.queryByText("Préparation")).not.toBeInTheDocument();
       expect(screen.queryByText(/Flacon lyophilisé 5 g/)).not.toBeInTheDocument();
@@ -255,7 +258,7 @@ describe("DrugCard", () => {
       render(<DrugCard drug={cyanokit} patientWeight="20" />);
       fireEvent.click(screen.getByText("CYANOKIT").closest("button")!);
 
-      expect(screen.getByText("Préparation")).toBeInTheDocument();
+      expect(await screen.findByText("Préparation")).toBeInTheDocument();
       expect(screen.getByText(/Flacon lyophilisé 5 g/)).toBeInTheDocument();
     });
   });

@@ -1,4 +1,4 @@
-import { DRUGS } from "../data/drugs";
+import { DRUGS } from "virtual:drugs-lite";
 import { filterDrugs } from "./drugSearch";
 import { normalize } from "./normalize";
 import type { ClinicalScale, Drug, PrepKit, Protocol } from "../types/data";

@@ -1,5 +1,5 @@
 import { ALIASES } from "../data/aliases";
-import { DRUGS } from "../data/drugs";
+import { DRUGS } from "virtual:drugs-lite";
 import type { Drug } from "../types/data";
 import { fuzzyIncludes } from "./fuzzy";
 import { normalize } from "./normalize";

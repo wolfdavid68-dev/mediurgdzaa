@@ -4,6 +4,35 @@ import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
 import checker from "vite-plugin-checker";
 import { visualizer } from "rollup-plugin-visualizer";
+import { DRUGS as FULL_DRUGS } from "./src/data/drugs.js";
+
+const VIRTUAL_DRUGS_LITE = "virtual:drugs-lite";
+const RESOLVED_VIRTUAL_DRUGS_LITE = `\0${VIRTUAL_DRUGS_LITE}`;
+const VIRTUAL_DRUG_DETAILS = "virtual:drug-details";
+const RESOLVED_VIRTUAL_DRUG_DETAILS = `\0${VIRTUAL_DRUG_DETAILS}`;
+const DRUGS_LITE = FULL_DRUGS.map(({ prep, ...drug }) => ({
+  ...drug,
+  _prepDeferred: Boolean(prep),
+}));
+const DRUG_DETAILS = FULL_DRUGS.map(({ id, cond, prep }) => ({ id, cond, prep }));
+
+const drugsLitePlugin = () => ({
+  name: "mediurg-drugs-lite",
+  resolveId(id: string) {
+    if (id === VIRTUAL_DRUGS_LITE) return RESOLVED_VIRTUAL_DRUGS_LITE;
+    if (id === VIRTUAL_DRUG_DETAILS) return RESOLVED_VIRTUAL_DRUG_DETAILS;
+    return null;
+  },
+  load(id: string) {
+    if (id === RESOLVED_VIRTUAL_DRUGS_LITE) {
+      return `export const DRUGS = ${JSON.stringify(DRUGS_LITE)};`;
+    }
+    if (id === RESOLVED_VIRTUAL_DRUG_DETAILS) {
+      return `export const DRUG_DETAILS = ${JSON.stringify(DRUG_DETAILS)};`;
+    }
+    return null;
+  },
+});
 
 // `defineConfig` de Vite ne connaît pas la clé `test` que Vitest étend. On
 // pourrait passer par `vitest/config`, mais ça crée un conflit de versions
@@ -16,6 +45,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 // à maintenir à la main.
 export default defineConfig(({ command }) => ({
   plugins: [
+    drugsLitePlugin(),
     // vite-plugin-checker : remonte les erreurs tsc + oxlint dans l'overlay
     // Vite en dev (le rond rouge en bas à droite). Plus besoin de garder un
     // terminal séparé sur `npm run typecheck` ou `npm run lint:fast` — les
@@ -220,11 +250,6 @@ export default defineConfig(({ command }) => ({
               priority: 100,
             },
             {
-              name: "vendor-supabase",
-              test: /(@supabase|node_modules[\\/]@supabase|[\\/]src[\\/]lib[\\/]supabase)/,
-              priority: 95,
-            },
-            {
               name: "export-image",
               test: /node_modules[\\/]html-to-image/,
               priority: 93,
@@ -235,34 +260,19 @@ export default defineConfig(({ command }) => ({
               priority: 92,
             },
             {
-              name: "data-pse",
-              test: /[\\/]src[\\/]data[\\/]pse\.js$/,
-              priority: 91,
-            },
-            {
               name: "data-search",
               test: /[\\/]src[\\/]data[\\/]aliases\.js$/,
               priority: 91,
             },
-            { name: "data-medic", test: /[\\/]src[\\/]data[\\/](drugs|pse|aliases)/, priority: 90 },
+            { name: "data-medic", test: /virtual:drugs-lite/, priority: 92 },
             {
-              name: "auth",
-              test: /([\\/]src[\\/]components[\\/]auth[\\/]AuthGate|[\\/]src[\\/]lib[\\/](auth|access|profileCache)|[\\/]src[\\/]styles[\\/]auth)/,
-              priority: 75,
-            },
-            {
-              name: "acr-sync",
-              test: /[\\/]src[\\/]lib[\\/]acr(Session|SessionStore|LiveSync)/,
-              priority: 71,
-            },
-            {
-              name: "medicaments-preparation",
-              test: /([\\/]src[\\/]components[\\/](PreparationModel|PrepBlock|PseBlock)|[\\/]src[\\/]components[\\/]preparation[\\/]|[\\/]src[\\/]styles[\\/]preparation-v25)/,
-              priority: 68,
+              name: "data-drug-details",
+              test: /virtual:drug-details/,
+              priority: 92,
             },
             {
               name: "medicaments",
-              test: /([\\/]src[\\/]pages[\\/]MedicamentsPage|[\\/]src[\\/]components[\\/](Drug|PrepBlock|PseBlock)|[\\/]src[\\/]lib[\\/](calc|drugSearch)|[\\/]src[\\/]styles[\\/](drug|pse))/,
+              test: /([\\/]src[\\/]pages[\\/]MedicamentsPage|[\\/]src[\\/]components[\\/]Drug|[\\/]src[\\/]lib[\\/](calc|drugSearch)|[\\/]src[\\/]styles[\\/]drug-(card|related|responsive))/,
               priority: 60,
             },
           ],

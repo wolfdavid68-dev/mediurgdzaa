@@ -33,13 +33,14 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     window.history.pushState({}, "", "/");
   });
 
-  test("est active dans l’app principale sans paramètre preview", () => {
+  test("est active dans l’app principale sans paramètre preview", async () => {
     window.history.pushState({}, "", "/");
     const { container } = render(
       <DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" prepV25Enabled />
     );
     openDrug("ADRÉNALINE");
 
+    await findPreparationResults();
     expect(container.querySelector(".prep-v25-results")).toBeInTheDocument();
     expect(container.querySelector(".prep-v25-panel")).toBeInTheDocument();
   });

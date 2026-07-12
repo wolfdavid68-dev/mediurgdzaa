@@ -14,23 +14,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Runtime Node 24 explicite pour toutes les JavaScript actions — fait taire
-# l'avertissement de dépréciation Node 20 émis par les artifact-actions, qui
-# déclarent encore node20 dans leur metadata (vérifié : actions/upload-artifact
-# et download-artifact @v4 ET @v5 = node20 ; seule la branche main, non taguée,
-# passe à node24). Le runtime des runners est déjà Node 24 depuis la date de
-# dépréciation (2025-09-19), donc ce flag ne change que l'étiquette/le warning.
-#
-# Choix DÉLIBÉRÉ de garder ce flag plutôt que :
-#  - épingler les actions à @main (code non publié, cible mouvante), ou
-#  - supprimer les artifact-actions (on perdrait les artefacts de diagnostic :
-#    rapports, captures offline).
-# C'est la solution officielle GitHub et la moins invasive. À réévaluer si/quand
-# une version TAGUÉE des artifact-actions cible nativement node24 (alors : bump
-# de version + retrait possible de ce flag).
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
+# Actions officielles épinglées sur leurs versions Node 24 taguées.
 jobs:
   quality:
     name: Qualite code et donnees
@@ -38,10 +22,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
@@ -78,7 +62,7 @@ jobs:
 
       - name: Upload clinical report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: rapport-donnees-cliniques
           path: docs/RAPPORT_DONNEES_CLINIQUES.md
@@ -90,10 +74,10 @@ jobs:
     timeout-minutes: 8
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
@@ -111,10 +95,10 @@ jobs:
     timeout-minutes: 12
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
@@ -138,7 +122,7 @@ jobs:
         run: npm run verify:pwa-offline
 
       - name: Upload build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: build
           path: build
@@ -146,7 +130,7 @@ jobs:
 
       - name: Upload bundle report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: bundle-budget
           path: build/reports
@@ -159,10 +143,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
@@ -171,7 +155,7 @@ jobs:
         run: npm ci
 
       - name: Download build
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: build
           path: build
@@ -196,7 +180,7 @@ jobs:
 
       - name: Upload offline screenshots
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: offline-screenshots
           path: build/offline-screenshots
@@ -204,7 +188,7 @@ jobs:
 
       - name: Upload runtime reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: runtime-reports
           path: build/reports

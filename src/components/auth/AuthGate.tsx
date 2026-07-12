@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { hasAdminAccess, type Profile } from "../../lib/auth";
+import type { Profile } from "../../lib/auth";
+import { hasAdminAccess } from "../../lib/authPolicy";
 import {
   cacheProfile,
   clearCachedProfile,
@@ -11,7 +12,7 @@ import { isAuthEnabled } from "../../lib/featureFlags";
 import { useIsMobile } from "../../lib/useIsMobile";
 import { migrateAnonymousData } from "../../lib/userStorage";
 import { AuthProfileProvider } from "../../lib/authProfile";
-import { DRUGS } from "../../data/drugs";
+import { DRUGS } from "virtual:drugs-lite";
 const ForgotPasswordScreen = lazy(() => import("./ForgotPasswordScreen"));
 const LoginScreen = lazy(() => import("./LoginScreen"));
 const RegisterScreen = lazy(() => import("./RegisterScreen"));
@@ -69,6 +70,15 @@ const authLoading = (
 const withAuthSuspense = (node: ReactNode) => <Suspense fallback={authLoading}>{node}</Suspense>;
 
 const getAuthApi = () => import("../../lib/authGateRuntime");
+
+let authStylesPromise: Promise<unknown> | null = null;
+const loadAuthStyles = () => {
+  authStylesPromise ??= Promise.all([
+    import("../../styles/auth.css"),
+    import("../../styles/auth-mobile.css"),
+  ]);
+  return authStylesPromise;
+};
 
 const getCurrentSession = async () => {
   const { getCurrentSession } = await getAuthApi();
@@ -143,9 +153,24 @@ const AuthGate = ({ children }: Props) => {
   );
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stylesReady, setStylesReady] = useState(!enabled);
   const [showAdmin, setShowAdmin] = useState(false);
   const [recovering, setRecovering] = useState(false);
   const [hashError, setHashError] = useState<string | null>(() => consumeAuthHashError());
+
+  useEffect(() => {
+    if (!enabled) {
+      setStylesReady(true);
+      return;
+    }
+    let active = true;
+    void loadAuthStyles().then(() => {
+      if (active) setStylesReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) {
@@ -229,7 +254,7 @@ const AuthGate = ({ children }: Props) => {
   if (!enabled) return <>{children}</>;
 
   // Loading initial (1 round-trip Supabase getSession)
-  if (loading) {
+  if (loading || !stylesReady) {
     return (
       <div className="auth-stage">
         <div className="auth-loading">

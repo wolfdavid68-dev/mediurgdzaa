@@ -1,0 +1,1384 @@
+/* Hors @layer : le reset global non-layer (`* { margin/padding: 0 }`) gagne
+   sinon sur les espacements du composant. Ces règles portent uniquement le
+   layout visuel du dossier ACR et laissent les règles colorimétriques ci-dessus. */
+.acr-record-header {
+  padding: max(12px, var(--safe-top)) 20px 12px;
+}
+
+.acr-record-brand,
+.acr-record-close,
+.acr-record-header-action,
+.acr-record-time-icon,
+.acr-record-section-index,
+.acr-record-section-status,
+.acr-record-check span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acr-record-title-block,
+.acr-record-section-head-text {
+  min-width: 0;
+}
+
+.acr-record-header h3 {
+  margin: 0;
+}
+
+.acr-record-header-action,
+.acr-record-close {
+  padding: 0;
+}
+
+.acr-record-subtitle {
+  margin-top: 5px;
+}
+
+.acr-record-subtitle span + span::before {
+  margin-right: 10px;
+}
+
+.acr-record-content {
+  padding: 8px 20px 10px;
+}
+
+.acr-record-topcards {
+  margin-bottom: 10px;
+}
+
+.acr-record-timecard {
+  min-height: 104px;
+  padding: 15px 18px 12px 74px;
+}
+
+.acr-record-timecard::before {
+  content: none;
+}
+
+.acr-record-time-icon {
+  position: absolute;
+  left: 20px;
+  top: 33px;
+  width: 38px;
+  height: 38px;
+  color: var(--acr-red);
+}
+
+.acr-record-timecard strong {
+  margin-top: 5px;
+}
+
+.acr-record-timecard small,
+.acr-record-patient-card > em {
+  margin-top: 4px;
+}
+
+.acr-record-patient-card {
+  min-height: 104px;
+  padding: 13px 15px 12px;
+}
+
+.acr-record-patient-card > strong {
+  margin-top: 4px;
+}
+
+.acr-record-patient-inline small {
+  margin-bottom: 3px;
+}
+
+.acr-record-patient-input-wrap input {
+  padding: 5px 8px;
+}
+
+.acr-record-patient-input-wrap em {
+  padding-right: 7px;
+}
+
+.acr-record-section-head {
+  min-height: 38px;
+  padding: 7px 12px;
+}
+
+.acr-record-section-subtitle {
+  margin-top: 1px;
+}
+
+.acr-record-section-body {
+  padding: 7px 12px 8px;
+}
+
+.acr-record-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.acr-record-fields-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.acr-record-fields-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.acr-record-compact-fields .acr-record-field {
+  grid-template-columns: minmax(0, 1fr) minmax(100px, 0.72fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.acr-record-input-wrap input,
+.acr-record-textarea textarea {
+  padding: 5px 10px;
+}
+
+.acr-record-input-wrap em {
+  padding-right: 10px;
+}
+
+.acr-record-analyse-row,
+.acr-record-vvp-row {
+  margin-bottom: 8px;
+}
+
+.acr-record-analyse-row {
+  grid-template-columns: minmax(225px, 0.55fr) minmax(0, 1fr);
+}
+
+.acr-record-vvp-row {
+  grid-template-columns: minmax(225px, 0.55fr) minmax(0, 1fr);
+}
+
+.acr-record-vvp-row + .acr-record-fields {
+  margin-top: 0;
+}
+
+.acr-record-chip-group {
+  margin-top: 8px;
+}
+
+.acr-record-chip,
+.acr-record-check,
+.acr-record-toolbar button,
+.acr-record-actions-menu button {
+  padding: 5px 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.acr-record-causes {
+  margin-top: 10px;
+}
+
+.acr-record-causes > div {
+  padding: 7px;
+}
+
+.acr-record-causes .acr-record-chip-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 7px;
+}
+
+.acr-record-causes .acr-record-chip {
+  min-height: 27px;
+  padding: 4px 8px;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.acr-record-causes + .acr-record-check-grid {
+  display: none;
+}
+
+.acr-record-wake-precision {
+  margin-top: 8px;
+}
+
+/* Sections repliables : l'en-tête est un vrai <button>. */
+.acr-record-section-head {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--acr-line);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.acr-record-section-chevron {
+  transition: transform 0.18s ease;
+}
+
+.acr-record-section:not(.acr-record-section-collapsed) .acr-record-section-chevron {
+  transform: rotate(180deg);
+}
+
+.acr-record-section-collapsed .acr-record-section-head {
+  border-bottom-color: transparent;
+}
+
+.acr-record-section-collapsed .acr-record-section-body {
+  display: none;
+}
+
+/* L'export PNG doit capturer le dossier complet, sections repliées incluses. */
+.acr-record-content[data-acr-export="1"] .acr-record-section-body {
+  display: block !important;
+}
+
+.acr-record-cycle-table {
+  border-spacing: 0 6px;
+}
+
+.acr-record-cycle-table td {
+  padding: 9px 10px;
+}
+
+.acr-cycle-comment {
+  margin-top: 3px;
+}
+
+.acr-cycle-input input {
+  padding: 5px 7px;
+}
+
+.acr-record-empty {
+  padding: 7px 12px;
+}
+
+.acr-record-toolbar {
+  padding: 14px 20px calc(14px + var(--safe-bottom));
+}
+
+.acr-record-toolbar-action::after {
+  content: none;
+}
+
+.acr-record-actions-menu {
+  padding: 9px;
+}
+
+.acr-record-actions-menu button {
+  justify-content: flex-start;
+}
+
+.acr-record-desktop-status,
+.acr-record-desktop-strip {
+  display: none;
+}
+
+@media screen and (min-width: 981px) {
+  .acr-record-dialog {
+    width: min(1600px, calc(100vw - 40px));
+    max-width: min(1600px, calc(100vw - 40px));
+    height: min(920px, calc(100dvh - 24px));
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    border: 1px solid var(--acr-line);
+    border-radius: 16px;
+    background: var(--acr-bg);
+    box-shadow:
+      0 24px 64px rgb(0 0 0 / 0.56),
+      0 0 0 1px rgb(255 255 255 / 0.03);
+  }
+
+  .acr-record-modal {
+    border-radius: inherit;
+    background: var(--acr-bg);
+  }
+
+  .acr-record-header {
+    grid-template-columns: auto minmax(260px, 1fr) auto auto auto;
+    min-height: 76px;
+    padding: max(14px, var(--safe-top)) 24px 14px;
+    border-bottom-color: var(--acr-line);
+  }
+
+  .acr-record-brand {
+    width: 52px;
+    height: 52px;
+  }
+
+  .acr-record-header h3 {
+    font-size: 29px;
+  }
+
+  .acr-record-desktop-status {
+    display: grid;
+    justify-items: start;
+    min-width: 150px;
+    color: #a8b2c4;
+  }
+
+  .acr-record-desktop-status span {
+    color: var(--acr-red);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .acr-record-desktop-status strong {
+    color: var(--acr-red);
+    font-family: var(--mono);
+    font-size: 28px;
+    line-height: 0.95;
+  }
+
+  .acr-record-desktop-status small {
+    color: #a8b2c4;
+    font-size: 11px;
+    font-weight: 750;
+  }
+
+  .acr-record-desktop-strip {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 18px;
+    min-height: 34px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--acr-line);
+    background: color-mix(in oklab, var(--acr-blue) 26%, var(--acr-bg));
+    color: #dbe8f6;
+    font-size: 12px;
+    font-weight: 760;
+    white-space: nowrap;
+  }
+
+  .acr-record-desktop-strip strong {
+    margin-left: auto;
+    color: #ffffff;
+    font-weight: 850;
+  }
+
+  .acr-record-content {
+    display: block;
+    padding: 14px 20px 18px;
+    overflow: auto;
+  }
+
+  .acr-record-topcards {
+    display: none;
+  }
+
+  .acr-record-timecard,
+  .acr-record-patient-card {
+    min-height: 118px;
+    box-shadow: var(--acr-shadow-card);
+  }
+
+  .acr-record-timecard {
+    padding: 20px 16px 16px 76px;
+  }
+
+  .acr-record-time-icon {
+    left: 20px;
+    top: 38px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .acr-record-timecard strong {
+    font-size: 40px;
+  }
+
+  .acr-record-patient-card {
+    padding: 14px;
+  }
+
+  .acr-record-patient-card > strong {
+    font-size: 17px;
+  }
+
+  .acr-record-patient-inline {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  /* Grille dense : sections appariées 1|2, 3|4 et 7|8, le reste en pleine
+     largeur. Pas de flex + order + margin : pas de trous entre les cartes. */
+  .acr-record-sections {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .acr-record-section {
+    border-radius: 12px;
+    grid-column: 1 / -1;
+  }
+
+  .acr-record-section:nth-child(1),
+  .acr-record-section:nth-child(3),
+  .acr-record-section:nth-child(7) {
+    grid-column: 1;
+  }
+
+  .acr-record-section:nth-child(2),
+  .acr-record-section:nth-child(4),
+  .acr-record-section:nth-child(8) {
+    grid-column: 2;
+  }
+
+  /* Étiquette collée à son champ : l'input ne s'étire plus sur toute la carte. */
+  .acr-record-compact-fields .acr-record-field {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 230px);
+  }
+
+  .acr-record-section-head {
+    min-height: 42px;
+    padding: 8px 11px;
+  }
+
+  .acr-record-section-body {
+    padding: 9px 11px 11px;
+  }
+
+  .acr-record-analyse-row,
+  .acr-record-vvp-row {
+    grid-template-columns: minmax(200px, 0.55fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .acr-record-fields-three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .acr-record-chip {
+    white-space: nowrap;
+  }
+
+  .acr-record-causes .acr-record-chip {
+    min-width: 44px;
+    min-height: 30px;
+    font-size: 11.5px;
+  }
+
+  .acr-record-racs-obtained {
+    display: inline-flex;
+  }
+
+  .acr-record-wake-signs {
+    display: flex;
+  }
+
+  .acr-record-wake-signs + .acr-record-check-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-top: 8px;
+  }
+
+  .acr-record-toolbar {
+    grid-template-columns: minmax(180px, 220px) minmax(180px, 220px) minmax(220px, 260px);
+    justify-content: end;
+    gap: 14px;
+    padding: 14px 24px calc(14px + var(--safe-bottom));
+  }
+}
+
+/* Le dossier ACR doit suivre le thème choisi par l'utilisateur, y compris
+   quand il est rendu dans le top layer <dialog> ou cloné pour l'export PNG. */
+[data-theme="light"] .acr-record-dialog,
+.acr-record-dialog[data-acr-theme="light"] {
+  --acr-red: #d42b2b;
+  --acr-red-soft: rgb(212 43 43 / 0.1);
+  --acr-red-line: rgb(212 43 43 / 0.34);
+  --acr-bg: #e8edf5;
+  --acr-bg-deep: #dfe7f2;
+  --acr-panel: #ffffff;
+  --acr-panel-2: #f8fafc;
+  --acr-field: #ffffff;
+  --acr-line: #c8d1e1;
+  --acr-muted: #64748b;
+  --acr-soft: #334155;
+  --acr-green: #1a9440;
+  --acr-blue: #0a7ae0;
+  --acr-shadow-card: 0 6px 16px rgb(15 23 42 / 0.08);
+  --acr-shadow-dialog: 0 22px 64px rgb(15 23 42 / 0.22);
+  border-color: #c8d1e1;
+  background: #e8edf5;
+  box-shadow:
+    var(--acr-shadow-dialog),
+    0 0 0 1px rgb(15 23 42 / 0.06);
+}
+
+[data-theme="light"] .acr-record-modal,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-modal,
+.acr-record-content[data-acr-theme="light"] {
+  --acr-red: #d42b2b;
+  --acr-red-soft: rgb(212 43 43 / 0.12);
+  --acr-red-line: rgb(212 43 43 / 0.34);
+  --acr-panel: #ffffff;
+  --acr-panel-2: #f8fafc;
+  --acr-field: #ffffff;
+  --acr-line: #c8d1e1;
+  --acr-muted: #64748b;
+  --acr-soft: #334155;
+  --acr-green: #1a9440;
+  --acr-blue: #0a7ae0;
+  --acr-shadow-card: 0 6px 16px rgb(15 23 42 / 0.08);
+  --acr-shadow-dialog: 0 22px 64px rgb(15 23 42 / 0.22);
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4fb 42%, #e8edf5 100%);
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-header,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-header {
+  border-bottom-color: #c8d1e1;
+  background: #f8fafc;
+}
+
+[data-theme="light"] .acr-record-header h3,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-header h3 {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-subtitle,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-subtitle,
+[data-theme="light"] .acr-record-desktop-status,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-status,
+[data-theme="light"] .acr-record-desktop-status small,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-status small {
+  color: #64748b;
+}
+
+[data-theme="light"] .acr-record-brand,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-brand {
+  background: rgb(212 43 43 / 0.08);
+  color: #d42b2b;
+  box-shadow:
+    0 0 0 5px rgb(212 43 43 / 0.08),
+    inset 0 0 0 1px rgb(255 255 255 / 0.85);
+}
+
+[data-theme="light"] .acr-record-close,
+[data-theme="light"] .acr-record-header-action,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-close,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-header-action {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-content,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-content,
+.acr-record-content[data-acr-theme="light"] {
+  background: #e8edf5;
+}
+
+[data-theme="light"] .acr-record-desktop-strip,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-strip {
+  border-bottom-color: #c8d1e1;
+  background: #e8f2ff;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-desktop-strip strong,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-desktop-strip strong {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-timecard,
+[data-theme="light"] .acr-record-patient-card,
+[data-theme="light"] .acr-record-section,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-timecard,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section,
+.acr-record-content[data-acr-theme="light"] .acr-record-timecard,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card,
+.acr-record-content[data-acr-theme="light"] .acr-record-section {
+  border-color: #c8d1e1;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  color: #111827;
+  box-shadow: var(--acr-shadow-card);
+}
+
+[data-theme="light"] .acr-record-timecard,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-timecard,
+.acr-record-content[data-acr-theme="light"] .acr-record-timecard {
+  border-color: rgb(212 43 43 / 0.34);
+  background: linear-gradient(180deg, rgb(212 43 43 / 0.08), transparent 64%), #ffffff;
+}
+
+[data-theme="light"] .acr-record-patient-card > strong,
+[data-theme="light"] .acr-record-section-head h4,
+[data-theme="light"] .acr-record-events-card h4,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card > strong,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-head h4,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-events-card h4,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card > strong,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-head h4,
+.acr-record-content[data-acr-theme="light"] .acr-record-events-card h4 {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-timecard > span,
+[data-theme="light"] .acr-record-patient-card > span,
+[data-theme="light"] .acr-record-field > span,
+[data-theme="light"] .acr-record-textarea > span,
+[data-theme="light"] .acr-record-causes > div > strong,
+[data-theme="light"] .acr-record-chip-label,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-timecard > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-field > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-textarea > span,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-causes > div > strong,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-chip-label,
+.acr-record-content[data-acr-theme="light"] .acr-record-timecard > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-field > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-textarea > span,
+.acr-record-content[data-acr-theme="light"] .acr-record-causes > div > strong,
+.acr-record-content[data-acr-theme="light"] .acr-record-chip-label {
+  color: #64748b;
+}
+
+[data-theme="light"] .acr-record-patient-card > em,
+[data-theme="light"] .acr-record-section-subtitle,
+[data-theme="light"] .acr-record-input-wrap em,
+[data-theme="light"] .acr-cycle-input em,
+[data-theme="light"] .acr-cycle-num span,
+[data-theme="light"] .acr-cycle-num em,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-card > em,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-subtitle,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-input-wrap em,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-input em,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-num span,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-num em,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-card > em,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-subtitle,
+.acr-record-content[data-acr-theme="light"] .acr-record-input-wrap em,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-input em,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-num span,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-num em {
+  color: #64748b;
+}
+
+[data-theme="light"] .acr-record-section-head,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-head,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-head {
+  border-bottom-color: #d7deea;
+  background: #f8fafc;
+}
+
+[data-theme="light"] .acr-record-section-body,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-section-body,
+.acr-record-content[data-acr-theme="light"] .acr-record-section-body {
+  background: #ffffff;
+}
+
+[data-theme="light"] .acr-record-patient-input-wrap,
+[data-theme="light"] .acr-record-input-wrap,
+[data-theme="light"] .acr-record-textarea textarea,
+[data-theme="light"] .acr-cycle-input input,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-input-wrap,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-input-wrap,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-textarea textarea,
+.acr-record-dialog[data-acr-theme="light"] .acr-cycle-input input,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-input-wrap,
+.acr-record-content[data-acr-theme="light"] .acr-record-input-wrap,
+.acr-record-content[data-acr-theme="light"] .acr-record-textarea textarea,
+.acr-record-content[data-acr-theme="light"] .acr-cycle-input input {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-patient-input-wrap input,
+[data-theme="light"] .acr-record-input-wrap input,
+[data-theme="light"] .acr-record-textarea textarea,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-patient-input-wrap input,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-input-wrap input,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-textarea textarea,
+.acr-record-content[data-acr-theme="light"] .acr-record-patient-input-wrap input,
+.acr-record-content[data-acr-theme="light"] .acr-record-input-wrap input,
+.acr-record-content[data-acr-theme="light"] .acr-record-textarea textarea {
+  color: #111827;
+}
+
+[data-theme="light"] .acr-record-chip,
+[data-theme="light"] .acr-record-check,
+[data-theme="light"] .acr-record-actions-menu button,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-chip,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-check,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-actions-menu button,
+.acr-record-content[data-acr-theme="light"] .acr-record-chip,
+.acr-record-content[data-acr-theme="light"] .acr-record-check {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-chip-active,
+[data-theme="light"] .acr-record-check-on,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-chip-active,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-check-on,
+.acr-record-content[data-acr-theme="light"] .acr-record-chip-active,
+.acr-record-content[data-acr-theme="light"] .acr-record-check-on {
+  border-color: rgb(212 43 43 / 0.48);
+  background: linear-gradient(180deg, #e33b47, #c52632);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgb(212 43 43 / 0.16);
+}
+
+[data-theme="light"] .acr-record-causes > div,
+[data-theme="light"] .acr-record-events-card,
+[data-theme="light"] .acr-record-empty,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-causes > div,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-events-card,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-empty,
+.acr-record-content[data-acr-theme="light"] .acr-record-causes > div,
+.acr-record-content[data-acr-theme="light"] .acr-record-events-card,
+.acr-record-content[data-acr-theme="light"] .acr-record-empty {
+  border-color: #c8d1e1;
+  background: #f8fafc;
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-cycle-table tr,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-cycle-table tr,
+.acr-record-content[data-acr-theme="light"] .acr-record-cycle-table tr {
+  border-color: #c8d1e1;
+  background: #ffffff;
+}
+
+[data-theme="light"] .acr-record-cycle-table td,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-cycle-table td,
+.acr-record-content[data-acr-theme="light"] .acr-record-cycle-table td {
+  color: #334155;
+}
+
+[data-theme="light"] .acr-record-cycle-table td + td,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-cycle-table td + td,
+.acr-record-content[data-acr-theme="light"] .acr-record-cycle-table td + td {
+  border-left-color: #d7deea;
+}
+
+[data-theme="light"] .acr-record-toolbar,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-toolbar {
+  border-top-color: #c8d1e1;
+  background: #f8fafc;
+}
+
+[data-theme="light"] .acr-record-toolbar-outline,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-toolbar-outline {
+  color: #d42b2b !important;
+}
+
+[data-theme="light"] .acr-record-toolbar-action,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-toolbar-action {
+  border-color: rgb(10 122 224 / 0.42) !important;
+  background: rgb(10 122 224 / 0.08) !important;
+  color: #0a64b7 !important;
+}
+
+[data-theme="light"] .acr-record-actions-menu,
+.acr-record-dialog[data-acr-theme="light"] .acr-record-actions-menu {
+  border-color: #c8d1e1;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgb(15 23 42 / 0.14);
+}
+
+@media (max-width: 980px) {
+  .acr-record-content {
+    padding: 8px 20px 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .acr-record-header {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .acr-record-content {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .acr-record-timecard {
+    padding: 13px 10px 12px 56px;
+  }
+
+  .acr-record-timecard::before {
+    left: 13px;
+    top: 31px;
+  }
+
+  .acr-record-patient-card {
+    padding: 11px 10px;
+  }
+
+  .acr-record-cycle-table td {
+    padding: 8px 9px;
+  }
+
+  .acr-record-fields-two,
+  .acr-record-fields-three,
+  .acr-record-causes,
+  .acr-record-analyse-row,
+  .acr-record-vvp-row {
+    grid-template-columns: 1fr;
+  }
+
+  .acr-record-toolbar {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .acr-record-toolbar button {
+    padding: 8px;
+  }
+}
+
+/* ── Impression / Export PDF ─────────────────────────────────────────
+   Rendu « formulaire papier » : A4 paysage à taille fixe, deux colonnes,
+   pensé pour l'impression NOIR ET BLANC du service — bandeaux fléchés
+   noirs, sélections en case cochée pleine (❑ → ■), lignes d'écriture,
+   tableau de cycles quadrillé. Aucune dépendance au thème écran. */
+@page {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  /* Jamais de fond sombre autour du formulaire, même avec l'option
+     « graphiques d'arrière-plan » cochée dans la boîte d'impression. */
+  html:has(.acr-record-dialog[open]),
+  body:has(.acr-record-dialog[open]) {
+    background: #fff !important;
+  }
+
+  body:has(.acr-record-dialog[open]) * {
+    visibility: hidden !important;
+  }
+
+  body:has(.acr-record-dialog[open]) .acr-record-dialog,
+  body:has(.acr-record-dialog[open]) .acr-record-dialog * {
+    visibility: visible !important;
+  }
+
+  .acr-record-dialog[open] {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .acr-record-modal,
+  .acr-record-content {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .acr-record-toolbar,
+  .acr-record-close,
+  .acr-record-header-action,
+  .acr-record-brand,
+  .acr-record-desktop-strip,
+  .acr-record-desktop-status,
+  .acr-record-actions-menu,
+  .acr-record-time-icon,
+  .acr-record-section-status,
+  .acr-record-section-chevron,
+  [data-export-ignore="true"] {
+    display: none !important;
+  }
+
+  /* ── En-tête façon formulaire ── */
+  .acr-record-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    padding: 0 0 5px !important;
+    border: 0 !important;
+    border-bottom: 2px solid #111 !important;
+    background: #fff !important;
+  }
+
+  .acr-record-header h3 {
+    color: #111 !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-subtitle {
+    justify-content: center !important;
+    margin-top: 2px !important;
+    color: #333 !important;
+    font-size: 9.5px !important;
+  }
+
+  .acr-record-subtitle span + span::before {
+    color: #333 !important;
+  }
+
+  /* ── Cartes hautes : chrono encadré + patient en « étiquette » ── */
+  .acr-record-topcards {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5mm !important;
+    margin: 6px 0 7px !important;
+  }
+
+  .acr-record-timecard,
+  .acr-record-patient-card {
+    min-height: 0 !important;
+    padding: 5px 9px !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
+  }
+
+  .acr-record-timecard {
+    border: 1px solid #333 !important;
+  }
+
+  /* Zone patient anonyme : cadre pointillé type « étiquette » */
+  .acr-record-patient-card {
+    border: 1.2px dashed #444 !important;
+  }
+
+  .acr-record-timecard > span,
+  .acr-record-patient-card > span {
+    color: #111 !important;
+    font-size: 7.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-timecard strong {
+    margin-top: 1px !important;
+    color: #111 !important;
+    font-size: 17px !important;
+  }
+
+  .acr-record-timecard small,
+  .acr-record-patient-card > em,
+  .acr-record-patient-card > small {
+    margin-top: 1px !important;
+    color: #444 !important;
+    font-size: 8.5px !important;
+  }
+
+  .acr-record-patient-card > strong {
+    color: #111 !important;
+    font-size: 11px !important;
+  }
+
+  .acr-record-patient-inline {
+    display: flex !important;
+    margin: 3px 0 1px !important;
+  }
+
+  .acr-record-patient-inline small {
+    color: #444 !important;
+  }
+
+  /* ── Deux colonnes, comme le formulaire papier ── */
+  .acr-record-sections {
+    display: block !important;
+    column-count: 2;
+    column-gap: 7mm;
+  }
+
+  /* Section sans cadre : le bandeau fléché structure la page */
+  .acr-record-section {
+    display: block !important;
+    break-inside: avoid;
+    margin: 0 0 8px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  /* Le suivi de la réanimation peut s'étendre (cycles nombreux) */
+  .acr-record-section:nth-child(5) {
+    break-inside: auto;
+  }
+
+  /* Bandeau fléché noir, texte blanc — identique au formulaire papier */
+  .acr-record-section-head {
+    min-height: 0 !important;
+    padding: 3px 18px 3px 8px !important;
+    border: 0 !important;
+    background: #111 !important;
+    color: #fff !important;
+    cursor: default !important;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+
+  .acr-record-section-head h4 {
+    color: #fff !important;
+    font-size: 10px !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-section-subtitle {
+    margin-top: 0 !important;
+    color: #ddd !important;
+    font-size: 7.5px !important;
+  }
+
+  .acr-record-section-index {
+    width: 14px !important;
+    height: 14px !important;
+    border: 1.3px solid #fff !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 9px !important;
+  }
+
+  /* Tout imprimer, même les sections repliées à l'écran */
+  .acr-record-section-body {
+    display: block !important;
+    padding: 5px 2px 0 !important;
+    background: #fff !important;
+  }
+
+  /* ── Champs : ligne d'écriture comme sur papier ── */
+  .acr-record-field > span,
+  .acr-record-textarea > span,
+  .acr-record-chip-label,
+  .acr-record-causes > div > strong {
+    color: #111 !important;
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+  }
+
+  .acr-record-fields {
+    gap: 4px !important;
+  }
+
+  /* Chaque champ sur sa ligne : étiquette à gauche, valeur soulignée à droite */
+  .acr-record-fields-two,
+  .acr-record-fields-three {
+    grid-template-columns: 1fr !important;
+  }
+
+  .acr-record-compact-fields .acr-record-field,
+  .acr-record-field {
+    grid-template-columns: minmax(0, 1fr) 150px !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .acr-record-input-wrap,
+  .acr-record-patient-input-wrap {
+    min-height: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px dotted #333 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  .acr-record-input-wrap input,
+  .acr-record-patient-input-wrap input {
+    padding: 1px 3px !important;
+    color: #111 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+  }
+
+  .acr-record-input-wrap em,
+  .acr-record-patient-input-wrap em {
+    color: #444 !important;
+    font-size: 8px !important;
+  }
+
+  .acr-record-textarea textarea {
+    min-height: 46px !important;
+    border: 1px solid #444 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 10px !important;
+    resize: none !important;
+  }
+
+  .acr-record-analyse-row,
+  .acr-record-vvp-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 4px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* ── Chips = cases à cocher du formulaire (❑ libellé / ■ coché) ── */
+  .acr-record-chip {
+    min-height: 0 !important;
+    padding: 1px 2px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    white-space: normal !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+
+  .acr-record-chip::before {
+    content: "";
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border: 1.2px solid #111;
+    background: #fff;
+  }
+
+  .acr-record-chip-active {
+    background: transparent !important;
+    color: #111 !important;
+    font-weight: 900 !important;
+  }
+
+  .acr-record-chip-active::before {
+    background: #111;
+  }
+
+  .acr-record-chip-group {
+    gap: 2px 10px !important;
+    margin-top: 3px !important;
+  }
+
+  /* ── Cases à cocher ── */
+  .acr-record-check {
+    min-height: 0 !important;
+    padding: 1px 2px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+
+  .acr-record-check span {
+    width: 9px !important;
+    height: 9px !important;
+    border: 1.2px solid #111 !important;
+    border-radius: 0 !important;
+  }
+
+  .acr-record-check span svg {
+    width: 7px !important;
+    height: 7px !important;
+  }
+
+  .acr-record-check-on {
+    color: #111 !important;
+    font-weight: 900 !important;
+  }
+
+  .acr-record-check-on span {
+    background: #111 !important;
+    color: #fff !important;
+  }
+
+  .acr-record-check-grid {
+    gap: 2px !important;
+  }
+
+  /* ── 5H / 5T : encadrés comme sur le formulaire ── */
+  .acr-record-causes {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    margin-top: 5px !important;
+  }
+
+  .acr-record-causes > div {
+    border: 1px solid #444 !important;
+    border-radius: 0 !important;
+    padding: 4px 6px !important;
+    background: #f2f2f2 !important;
+  }
+
+  .acr-record-causes .acr-record-chip-group {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1px !important;
+    margin-top: 2px !important;
+  }
+
+  .acr-record-causes .acr-record-chip {
+    min-height: 0 !important;
+    font-size: 8.5px !important;
+  }
+
+  /* ── Stats + tableau de cycles : vrai tableau quadrillé ── */
+  .acr-record-stats {
+    display: flex !important;
+    margin: 0 0 4px !important;
+  }
+
+  .acr-record-stats span {
+    border: 1px solid #666 !important;
+    border-radius: 0 !important;
+    padding: 0 5px !important;
+    background: #f2f2f2 !important;
+    color: #111 !important;
+    font-size: 8px !important;
+  }
+
+  .acr-record-stats strong {
+    color: #111 !important;
+  }
+
+  .acr-record-cycle-table-wrap {
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  .acr-record-cycle-table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    font-size: 8.5px !important;
+  }
+
+  .acr-record-cycle-table thead {
+    display: table-header-group !important;
+  }
+
+  .acr-record-cycle-table tbody {
+    display: table-row-group !important;
+  }
+
+  .acr-record-cycle-table tr {
+    display: table-row !important;
+    break-inside: avoid;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+  }
+
+  .acr-record-cycle-table th {
+    display: table-cell !important;
+    border: 1px solid #444 !important;
+    padding: 2px 5px !important;
+    background: #111 !important;
+    color: #fff !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+  }
+
+  .acr-record-cycle-table td {
+    display: table-cell !important;
+    border: 1px solid #888 !important;
+    padding: 2px 5px !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 9px !important;
+  }
+
+  .acr-cycle-num strong {
+    color: #111 !important;
+    font-size: 9.5px !important;
+    font-weight: 900 !important;
+  }
+
+  .acr-cycle-num span,
+  .acr-cycle-num em,
+  .acr-cycle-comment,
+  .acr-cycle-input em {
+    color: #444 !important;
+    font-size: 8px !important;
+  }
+
+  .acr-cycle-input input {
+    min-height: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px dotted #333 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #111 !important;
+    font-size: 9px !important;
+    padding: 1px 2px !important;
+  }
+
+  .acr-record-empty {
+    border: 1px dashed #888 !important;
+    border-radius: 0 !important;
+    padding: 5px !important;
+    background: #fff !important;
+    color: #444 !important;
+  }
+
+  /* ── Événements horodatés : liste compacte sur deux colonnes ── */
+  .acr-record-events-card {
+    border: 1px solid #666 !important;
+    border-radius: 0 !important;
+    margin-top: 5px !important;
+    padding: 4px 7px !important;
+    background: #fff !important;
+  }
+
+  .acr-record-events-card h4 {
+    margin-bottom: 3px !important;
+    color: #111 !important;
+    font-size: 8.5px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .acr-record-events {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1px 14px !important;
+  }
+
+  .acr-record-events li {
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+    color: #444 !important;
+    font-size: 8.5px !important;
+  }
+
+  .acr-record-events strong,
+  .acr-record-events em {
+    color: #111 !important;
+  }
+
+  .acr-record-wake-precision {
+    margin-top: 3px !important;
+  }
+}
