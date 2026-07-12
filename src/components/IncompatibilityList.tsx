@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import "../styles/incompatibilites.css";
+import "../styles/incompatibilites-desktop.css";
 import {
   getIncompatDisplayName,
   getIncompatRelation,

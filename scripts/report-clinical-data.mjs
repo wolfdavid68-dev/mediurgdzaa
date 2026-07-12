@@ -9,7 +9,7 @@ import { PSE } from "../src/data/pse.js";
 import { INCOMPATIBILITIES } from "../src/data/incompatibilities.js";
 import { PROTOCOLS } from "../src/data/protocols.js";
 import { PREP_KITS } from "../src/data/prepKits.js";
-import { APP_VERSION } from "../src/data/changelog.js";
+import { APP_VERSION } from "../src/data/appVersion.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");

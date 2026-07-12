@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ANNOUNCE_VERSION, ANNOUNCE_LS_KEY } from "../components/AnnounceModal";
+import { ANNOUNCE_VERSION, ANNOUNCE_LS_KEY } from "./announceConfig";
 import { safeGetItem, safeSetItem } from "./safeStorage";
 
 // Annonce ponctuelle (ex : nouvel outil ECG) — vue une seule fois par

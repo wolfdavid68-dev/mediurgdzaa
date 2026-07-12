@@ -1,14 +1,10 @@
 import { UsersRound } from "lucide-react";
 import ModalDialog from "./ModalDialog";
-import { STORAGE_KEYS } from "../lib/storageKeys";
 
 // Annonce ponctuelle affichée à l'ouverture de l'app pour présenter une
 // nouveauté importante. Vue une seule fois par appareil (clé localStorage
 // versionnée). Purement informatif → dismissable (×, backdrop, bouton).
 // Bump ANNOUNCE_VERSION pour ré-annoncer plus tard.
-
-export const ANNOUNCE_VERSION = "tutorat-demo-1";
-export const ANNOUNCE_LS_KEY = STORAGE_KEYS.announce;
 
 type Props = { open: boolean; onClose: () => void };
 

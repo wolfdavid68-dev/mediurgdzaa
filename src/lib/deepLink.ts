@@ -1,11 +1,7 @@
 import { DRUGS } from "../data/drugs";
-import { PREP_KITS } from "../data/prepKits";
-import { PROTOCOLS } from "../data/protocols";
-import { SCALES } from "../data/scales";
 import { filterDrugs } from "./drugSearch";
-import { resolveIncompatDrugName } from "./incompatCatalog";
 import { normalize } from "./normalize";
-import type { ClinicalScale, Drug, Protocol } from "../types/data";
+import type { ClinicalScale, Drug, PrepKit, Protocol } from "../types/data";
 
 // Résolution des liens profonds (query params) au lancement de l'app.
 // Utilisés par les raccourcis manifest (long-press icône Android), les
@@ -72,7 +68,7 @@ const KIT_TAB_ALIASES: Record<string, string> = {
 
 // Un onglet n'est proposé par PrepKitCard que si le kit a les données
 // correspondantes — mêmes conditions que le rendu des <Tab> dans la carte.
-const kitTabAvailable = (kit: (typeof PREP_KITS)[number], tab: string): boolean => {
+const kitTabAvailable = (kit: PrepKit, tab: string): boolean => {
   switch (tab) {
     case "drogues":
     case "materiel":
@@ -111,22 +107,21 @@ const findDrugForParam = (raw: string): { search: string; drug?: Drug; unique: b
 // « pisu 5 », « PISU5 », « pisu-5 » → même clé compacte que le code officiel.
 const compactCode = (value: string) => normalize(value).replace(/[^a-z0-9]+/g, "");
 
-const findProtocolForParam = (raw: string): Protocol | undefined => {
+const findProtocolForParam = (raw: string, protocols: Protocol[]): Protocol | undefined => {
   const trimmed = raw.trim();
-  if (/^\d+$/.test(trimmed)) return PROTOCOLS.find((p) => p.id === Number(trimmed));
+  if (/^\d+$/.test(trimmed)) return protocols.find((p) => p.id === Number(trimmed));
   const compact = compactCode(trimmed);
   if (!compact) return undefined;
-  const byCode = PROTOCOLS.find((p) => compactCode(p.code) === compact);
+  const byCode = protocols.find((p) => compactCode(p.code) === compact);
   if (byCode) return byCode;
   const q = normalize(trimmed);
-  const matches = PROTOCOLS.filter((p) => normalize(`${p.code} ${p.titre}`).includes(q));
+  const matches = protocols.filter((p) => normalize(`${p.code} ${p.titre}`).includes(q));
   return matches.length === 1 ? matches[0] : undefined;
 };
 
-const findScaleForParam = (raw: string): ClinicalScale | undefined => {
+const findScaleForParam = (raw: string, scales: ClinicalScale[]): ClinicalScale | undefined => {
   const trimmed = raw.trim();
   if (!trimmed) return undefined;
-  const scales = SCALES as ClinicalScale[];
   const q = normalize(trimmed);
   const byId = scales.find((s) => normalize(s.id) === q);
   if (byId) return byId;
@@ -134,10 +129,10 @@ const findScaleForParam = (raw: string): ClinicalScale | undefined => {
   return matches.length === 1 ? matches[0] : undefined;
 };
 
-export const resolveDeepLink = (
+export const resolveDeepLink = async (
   searchString: string,
   hasFullAppAccess: boolean
-): DeepLinkResult => {
+): Promise<DeepLinkResult> => {
   const params = new URLSearchParams(searchString);
   const result: DeepLinkResult = { cleanedSearch: "", dirty: false };
   const consume = (key: string) => {
@@ -188,6 +183,7 @@ export const resolveDeepLink = (
   // pour la check-list de réarmement) ; ignoré s'il n'existe pas pour ce kit.
   const kitParam = params.get("kit");
   if (hasFullAppAccess && kitParam !== null) {
+    const { PREP_KITS } = await import("../data/prepKits");
     const kit = PREP_KITS.find((k) => k.id === kitParam.trim().toLowerCase());
     if (kit) {
       result.page = "protocoles";
@@ -209,6 +205,7 @@ export const resolveDeepLink = (
   // aucun → on ouvre quand même l'onglet Incompatibilités.
   const compatParam = params.get("compat");
   if (hasFullAppAccess && compatParam !== null) {
+    const { resolveIncompatDrugName } = await import("./incompatCatalog");
     const resolved = compatParam
       .split(",")
       .map((token) => token.trim())
@@ -231,7 +228,8 @@ export const resolveDeepLink = (
   // auto-ouverture, jamais un protocole choisi arbitrairement.
   const protocoleParam = params.get("protocole");
   if (hasFullAppAccess && protocoleParam !== null) {
-    const protocol = findProtocolForParam(protocoleParam);
+    const { PROTOCOLS } = await import("../data/protocols");
+    const protocol = findProtocolForParam(protocoleParam, PROTOCOLS as Protocol[]);
     result.page = "protocoles";
     result.protoCategory = "PISU";
     if (protocol) result.autoOpenProtocolId = protocol.id;
@@ -241,7 +239,8 @@ export const resolveDeepLink = (
   // Échelle clinique (ex: ?echelle=glasgow, ?echelle=rass).
   const echelleParam = params.get("echelle");
   if (hasFullAppAccess && echelleParam !== null) {
-    const scale = findScaleForParam(echelleParam);
+    const { SCALES } = await import("../data/scales");
+    const scale = findScaleForParam(echelleParam, SCALES as ClinicalScale[]);
     result.page = "echelles";
     if (scale) result.autoOpenScaleId = scale.id;
     consume("echelle");

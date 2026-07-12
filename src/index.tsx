@@ -12,34 +12,14 @@ import "./styles/header.css";
 import "./styles/drug-card.css";
 import "./styles/prep-med-preview.css";
 import "./styles/pse.css";
-import "./styles/protocols.css";
 import "./styles/drug-related.css";
-import "./styles/echelles.css";
-import "./styles/kits.css";
 import "./styles/ktc-light-contrast.css";
-import "./styles/incompatibilites.css";
-import "./styles/incompatibilites-desktop.css";
 import "./styles/ci-severity.css";
 import "./styles/font-large.css";
-import "./styles/changelog.css";
 import "./styles/urgence-button.css";
 import "./styles/bottom-nav-safe-area.css";
 // Sous-fichiers de l'ancien acr.css (2071 lignes) — découpés par sous-composant
 // d'AcrTimer.parts.tsx. L'ordre suit la cascade originale.
-import "./styles/acr-base.css";
-import "./styles/acr-doses.css";
-import "./styles/acr-metro.css";
-import "./styles/acr-step.css";
-import "./styles/acr-tally.css";
-import "./styles/acr-history.css";
-import "./styles/acr-controls.css";
-import "./styles/acr-zoom.css";
-import "./styles/acr-prep.css";
-import "./styles/acr-postrosc.css";
-import "./styles/acr-ht.css";
-import "./styles/acr-record.css";
-import "./styles/ecg.css";
-import "./styles/ecg-reader.css";
 // Styles isolés pour les écrans d'auth (login/register/admin/etc.) — palette
 // dark + rouge GHR différente de la palette MediURG. Charge les tokens via
 // .auth-stage / .admin-stage scopes pour ne pas polluer le reste de l'app.

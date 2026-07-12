@@ -1,4 +1,16 @@
 import { useEffect, useState } from "react";
+import "../styles/acr-base.css";
+import "../styles/acr-doses.css";
+import "../styles/acr-metro.css";
+import "../styles/acr-step.css";
+import "../styles/acr-tally.css";
+import "../styles/acr-history.css";
+import "../styles/acr-controls.css";
+import "../styles/acr-zoom.css";
+import "../styles/acr-prep.css";
+import "../styles/acr-postrosc.css";
+import "../styles/acr-ht.css";
+import "../styles/acr-record.css";
 import AcrTimer from "./AcrTimer";
 import ModalDialog from "./ModalDialog";
 import TestVersionBanner from "./TestVersionBanner";

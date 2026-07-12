@@ -1,18 +1,19 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import ProtocolCard from "../components/ProtocolCard";
 import CardErrorFallback from "../components/CardErrorFallback";
 import { PROTOCOLS } from "../data/protocols";
-import { PREP_KITS } from "../data/prepKits";
+import "../styles/protocols.css";
 
-// Tout en import STATIQUE (PAS de lazy). Un chunk lazy peut échouer hors-ligne
-// si son hash ne matche pas le précache du SW → crash. Ces sous-onglets doivent
-// marcher hors-ligne, donc ils vivent dans le bundle principal (chargé avec
-// index.html). Cf. App.tsx.
-import IncompatibilityList from "../components/IncompatibilityList";
-import PrepKitCard from "../components/PrepKitCard";
-import EcgDiagnostic from "../components/EcgDiagnostic";
-import EcgReader from "../components/EcgReader";
+const IncompatibilityList = lazy(() => import("../components/IncompatibilityList"));
+const ProtocolEcgView = lazy(() => import("../components/ProtocolEcgView"));
+const ProtocolKitsView = lazy(() => import("../components/ProtocolKitsView"));
+
+const TabFallback = () => (
+  <div className="empty" role="status" aria-live="polite">
+    Chargement de la section…
+  </div>
+);
 
 // Page Protocoles avec ses sous-onglets (PISU, Incompatibilités, ECG, Kits).
 // Imports statiques : la page reste disponible hors-ligne même après une
@@ -98,43 +99,28 @@ const ProtocolesPage = ({
           onClick={() => changeProtoCategory("kits")}
         >
           Kits
-          <span className="proto-category-count">{PREP_KITS.length}</span>
         </button>
       </div>
 
-      {protoCategory === "incompatibilites" && (
-        <IncompatibilityList
-          initialPair={incompatPair}
-          initialFocus={incompatFocus}
-          onInitialConsumed={onIncompatConsumed}
-        />
-      )}
+      <Suspense fallback={<TabFallback />}>
+        {protoCategory === "incompatibilites" && (
+          <IncompatibilityList
+            initialPair={incompatPair}
+            initialFocus={incompatFocus}
+            onInitialConsumed={onIncompatConsumed}
+          />
+        )}
 
-      {protoCategory === "ecg" && (
-        <>
-          {/* Lecteur ECG (photo → analyse IA) : visible pour tous. Outil
-              d'aide à la décision en test, ne remplace pas l'interprétation
-              médicale. Nécessite le réseau (analyse) — cf. OfflineBanner. */}
-          <div className="ecg-reader-shell">
-            <EcgReader onDrugSearch={onDrugSearch} />
-          </div>
-          <EcgDiagnostic />
-        </>
-      )}
+        {protoCategory === "ecg" && <ProtocolEcgView onDrugSearch={onDrugSearch} />}
 
-      {protoCategory === "kits" && (
-        <div className="protocol-list">
-          {PREP_KITS.map((k) => (
-            <PrepKitCard
-              key={k.id}
-              kit={k}
-              autoOpen={autoOpenKitId != null && autoOpenKitId === k.id}
-              autoOpenTab={autoOpenKitTab}
-              onAutoOpen={onAutoOpenKit}
-            />
-          ))}
-        </div>
-      )}
+        {protoCategory === "kits" && (
+          <ProtocolKitsView
+            autoOpenKitId={autoOpenKitId}
+            autoOpenKitTab={autoOpenKitTab}
+            onAutoOpenKit={onAutoOpenKit}
+          />
+        )}
+      </Suspense>
 
       {protoCategory === "PISU" && (
         <>

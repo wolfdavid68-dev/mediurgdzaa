@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../styles/changelog.css";
 import { CHANGELOG } from "../data/changelog";
 import type { ChangelogEntry } from "../types/data";
 import NotesBackup from "./NotesBackup";

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useDeferredValue, useCallback } from "react";
+import { lazy, Suspense, useMemo, useState, useEffect, useDeferredValue, useCallback } from "react";
 import { DRUGS } from "./data/drugs";
 import AppHeader from "./components/AppHeader";
 import BottomNav from "./components/BottomNav";
@@ -6,23 +6,10 @@ import MedicamentsPage from "./pages/MedicamentsPage";
 import OfflineBanner from "./components/OfflineBanner";
 import PatientWeightBanner from "./components/PatientWeightBanner";
 import TestVersionBanner from "./components/TestVersionBanner";
-// Tout en import STATIQUE (PAS de lazy). Un chunk lazy peut échouer à charger
-// hors-ligne si le hash demandé ne matche pas le précache du service worker
-// (décalage inévitable à chaque mise à jour en mode 'prompt') → « Failed to
-// fetch dynamically imported module » → crash. L'app est offline-first :
-// chaque écran DOIT marcher hors-ligne, donc tout vit dans le bundle principal,
-// chargé avec index.html, toujours cohérent, aucun fetch séparé possible. Le
-// surcoût de poids initial est précaché de toute façon. Cf. RootErrorFallback.
-import AcrModeModal from "./components/AcrModeModal";
-import ProtocolesPage from "./pages/ProtocolesPage";
-import EchellesPage from "./pages/EchellesPage";
-import ChangelogModal from "./components/ChangelogModal";
-import NotesBackupModal from "./components/NotesBackupModal";
 import CharterModal from "./components/CharterModal";
-import AnnounceModal from "./components/AnnounceModal";
 import { useCharterFlow } from "./lib/useCharterFlow";
 import { useAnnounceFlow } from "./lib/useAnnounceFlow";
-import { APP_VERSION } from "./data/changelog";
+import { APP_VERSION } from "./data/appVersion";
 import {
   pushNav,
   replaceNav,
@@ -48,6 +35,19 @@ const CATEGORIES = ["Tout", ...Array.from(new Set(DRUGS.map((d) => d.cat)))];
 const SERVICES = ["Tout", "SMUR", "SAU"];
 const ALL_PAGES = ["medicaments", "protocoles", "echelles"];
 const MEDICAMENTS_ONLY_PAGES = ["medicaments"];
+
+const AcrModeModal = lazy(() => import("./components/AcrModeModal"));
+const ProtocolesPage = lazy(() => import("./pages/ProtocolesPage"));
+const EchellesPage = lazy(() => import("./pages/EchellesPage"));
+const ChangelogModal = lazy(() => import("./components/ChangelogModal"));
+const NotesBackupModal = lazy(() => import("./components/NotesBackupModal"));
+const AnnounceModal = lazy(() => import("./components/AnnounceModal"));
+
+const LazyFallback = () => (
+  <div className="empty" role="status" aria-live="polite">
+    Chargement…
+  </div>
+);
 
 const openTutorat = () => {
   void openTutoratWithCurrentSession();
@@ -210,27 +210,32 @@ const App = () => {
   // pour éviter qu'un refresh reproduise le raccourci ; ceux qui attendent
   // l'accès complet restent en place et sont rejoués quand l'accès arrive.
   useEffect(() => {
-    const link = resolveDeepLink(window.location.search, hasFullAppAccess);
-    if (!link.dirty) return;
-    if (link.showAcr) setShowAcr(true);
-    if (link.page) setPage(link.page);
-    if (link.protoCategory) setProtoCategory(link.protoCategory);
-    if (link.search !== undefined) setSearch(link.search);
-    if (link.autoOpenDrugId !== undefined) setAutoOpenDrugId(link.autoOpenDrugId);
-    if (link.autoOpenKitId !== undefined) setAutoOpenKitId(link.autoOpenKitId);
-    if (link.autoOpenKitTab !== undefined) setAutoOpenKitTab(link.autoOpenKitTab);
-    if (link.autoOpenProtocolId !== undefined) setAutoOpenProtocolId(link.autoOpenProtocolId);
-    if (link.autoOpenScaleId !== undefined) setAutoOpenScaleId(link.autoOpenScaleId);
-    if (link.incompatPair !== undefined) setIncompatPair(link.incompatPair);
-    if (link.incompatFocus !== undefined) setIncompatFocus(link.incompatFocus);
-    if (link.patientWeight !== undefined) setPatientWeight(link.patientWeight);
-    try {
-      window.history.replaceState(
-        window.history.state,
-        "",
-        window.location.pathname + (link.cleanedSearch ? `?${link.cleanedSearch}` : "")
-      );
-    } catch {}
+    let active = true;
+    void resolveDeepLink(window.location.search, hasFullAppAccess).then((link) => {
+      if (!active || !link.dirty) return;
+      if (link.showAcr) setShowAcr(true);
+      if (link.page) setPage(link.page);
+      if (link.protoCategory) setProtoCategory(link.protoCategory);
+      if (link.search !== undefined) setSearch(link.search);
+      if (link.autoOpenDrugId !== undefined) setAutoOpenDrugId(link.autoOpenDrugId);
+      if (link.autoOpenKitId !== undefined) setAutoOpenKitId(link.autoOpenKitId);
+      if (link.autoOpenKitTab !== undefined) setAutoOpenKitTab(link.autoOpenKitTab);
+      if (link.autoOpenProtocolId !== undefined) setAutoOpenProtocolId(link.autoOpenProtocolId);
+      if (link.autoOpenScaleId !== undefined) setAutoOpenScaleId(link.autoOpenScaleId);
+      if (link.incompatPair !== undefined) setIncompatPair(link.incompatPair);
+      if (link.incompatFocus !== undefined) setIncompatFocus(link.incompatFocus);
+      if (link.patientWeight !== undefined) setPatientWeight(link.patientWeight);
+      try {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          window.location.pathname + (link.cleanedSearch ? `?${link.cleanedSearch}` : "")
+        );
+      } catch {}
+    });
+    return () => {
+      active = false;
+    };
   }, [hasFullAppAccess, setPatientWeight]);
 
   const toggleFavorite = (id: number) => {
@@ -509,31 +514,33 @@ const App = () => {
               />
             )}
 
-            {hasFullAppAccess && page === "protocoles" && (
-              <ProtocolesPage
-                protoCategory={protoCategory}
-                changeProtoCategory={changeProtoCategory}
-                autoOpenKitId={autoOpenKitId}
-                autoOpenKitTab={autoOpenKitTab}
-                onAutoOpenKit={consumeAutoOpenKit}
-                autoOpenProtocolId={autoOpenProtocolId}
-                onAutoOpenProtocol={consumeAutoOpenProtocol}
-                incompatPair={incompatPair}
-                incompatFocus={incompatFocus}
-                onIncompatConsumed={consumeIncompatTarget}
-                onDrugSearch={(name: string) => {
-                  navigateTo("medicaments");
-                  setSearch(name);
-                }}
-              />
-            )}
+            <Suspense fallback={<LazyFallback />}>
+              {hasFullAppAccess && page === "protocoles" && (
+                <ProtocolesPage
+                  protoCategory={protoCategory}
+                  changeProtoCategory={changeProtoCategory}
+                  autoOpenKitId={autoOpenKitId}
+                  autoOpenKitTab={autoOpenKitTab}
+                  onAutoOpenKit={consumeAutoOpenKit}
+                  autoOpenProtocolId={autoOpenProtocolId}
+                  onAutoOpenProtocol={consumeAutoOpenProtocol}
+                  incompatPair={incompatPair}
+                  incompatFocus={incompatFocus}
+                  onIncompatConsumed={consumeIncompatTarget}
+                  onDrugSearch={(name: string) => {
+                    navigateTo("medicaments");
+                    setSearch(name);
+                  }}
+                />
+              )}
 
-            {hasFullAppAccess && page === "echelles" && (
-              <EchellesPage
-                autoOpenScaleId={autoOpenScaleId}
-                onAutoOpenScale={consumeAutoOpenScale}
-              />
-            )}
+              {hasFullAppAccess && page === "echelles" && (
+                <EchellesPage
+                  autoOpenScaleId={autoOpenScaleId}
+                  onAutoOpenScale={consumeAutoOpenScale}
+                />
+              )}
+            </Suspense>
           </main>
 
           <BottomNav
@@ -546,23 +553,22 @@ const App = () => {
             onOpenAcr={openAcr}
           />
 
-          {/* Modales montées à la demande (showXxx) mais importées en statique →
-          aucun fetch réseau, fonctionnent hors-ligne sans risque de chunk
-          manquant. */}
-          {showAcr && (
-            <AcrModeModal
-              open={showAcr}
-              onClose={closeOverlay}
-              onOpenDrug={(name: string) => {
-                replaceNav({ page: "medicaments", modal: null });
-                setShowAcr(false);
-                setPage("medicaments");
-                setSearch(name);
-              }}
-            />
-          )}
-          {showChangelog && <ChangelogModal open={showChangelog} onClose={closeOverlay} />}
-          {showNotesBackup && <NotesBackupModal open={showNotesBackup} onClose={closeOverlay} />}
+          <Suspense fallback={null}>
+            {showAcr && (
+              <AcrModeModal
+                open={showAcr}
+                onClose={closeOverlay}
+                onOpenDrug={(name: string) => {
+                  replaceNav({ page: "medicaments", modal: null });
+                  setShowAcr(false);
+                  setPage("medicaments");
+                  setSearch(name);
+                }}
+              />
+            )}
+            {showChangelog && <ChangelogModal open={showChangelog} onClose={closeOverlay} />}
+            {showNotesBackup && <NotesBackupModal open={showNotesBackup} onClose={closeOverlay} />}
+          </Suspense>
 
           {exitToast && (
             <div className="exit-toast" role="status" aria-live="polite">
@@ -580,7 +586,9 @@ const App = () => {
             />
           )}
           {!showCharter && showAnnounce && showTutoratAccess && (
-            <AnnounceModal open={showAnnounce} onClose={dismissAnnounce} />
+            <Suspense fallback={null}>
+              <AnnounceModal open={showAnnounce} onClose={dismissAnnounce} />
+            </Suspense>
           )}
         </>
       )}

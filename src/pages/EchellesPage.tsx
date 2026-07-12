@@ -3,6 +3,7 @@ import { SCALES } from "../data/scales";
 import ScaleCard from "../components/ScaleCard";
 import CardErrorFallback from "../components/CardErrorFallback";
 import type { ClinicalScale } from "../types/data";
+import "../styles/echelles.css";
 
 // Page autonome (3e tab du bottom-nav). Liste les échelles cliniques avec
 // chacune son propre calculateur interactif. Lazy-loadée depuis App.tsx :

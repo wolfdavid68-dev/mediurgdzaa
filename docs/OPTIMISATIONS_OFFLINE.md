@@ -272,7 +272,18 @@ sur cette passe.
 
 ## Impact offline
 
-Ces optimisations ne changent pas le modele PWA : elles n'ajoutent ni reseau,
-ni chunk charge a la demande, ni cache applicatif supplementaire. Elles deplacent
-du calcul repete vers des index en memoire construits depuis les donnees deja
-embarquees dans le bundle precache.
+Les pages Protocoles et Echelles ainsi que les vues ACR, ECG, Kits,
+Incompatibilites, changelog, annonce et sauvegarde des notes sont chargees a la
+demande avec `React.lazy`. Le deep-linking importe lui aussi les catalogues
+secondaires uniquement lorsque le parametre correspondant est present.
+
+Les écrans différés ne sont pas placés dans des groupes Rolldown forcés : le
+découpage automatique conserve leurs dépendances partagées sans créer de cycle
+avec l'entrée. Sur le build de référence, les assets préchargés par `index.html`
+passent de 312,08 à 210,90 kB gzip en JavaScript et de 45,26 à 27,92 kB gzip en
+CSS, soit 118,52 kB gzip retirés du démarrage.
+
+Le modele offline-first reste inchange : Workbox precache tous les chunks JS et
+CSS produits (y compris les routes lazy). Une route secondaire reste donc
+ouvrable sans reseau apres l'installation ou la mise a jour complete du service
+worker ; aucun CDN ni cache applicatif supplementaire n'est introduit.

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../styles/ecg.css";
 
 // Tableau diagnostique ECG (source : SMUR Sélestat).
 // Sélecteur interactif en haut + tableau de référence PDF en dessous.

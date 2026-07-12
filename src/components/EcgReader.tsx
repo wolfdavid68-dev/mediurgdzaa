@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import "../styles/ecg-reader.css";
 import { Ic, Disclaimer } from "./EcgReader.icons";
 import {
   anonymizeEcgImage,

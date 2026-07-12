@@ -113,6 +113,7 @@ const screenshotOfflineRoute = async (page, viewport, route, pattern, label, fil
 let preview;
 let browser;
 let cleanupStarted = false;
+const browserDiagnostics = [];
 
 const cleanup = async () => {
   if (cleanupStarted) return;
@@ -140,6 +141,14 @@ hardTimeout.unref?.();
     );
     const context = await browser.newContext({ serviceWorkers: "allow" });
     const page = await context.newPage();
+    page.on("console", (message) => {
+      if (message.type() === "error" || message.type() === "warning") {
+        browserDiagnostics.push(`console ${message.type()}: ${message.text()}`);
+      }
+    });
+    page.on("pageerror", (error) =>
+      browserDiagnostics.push(`pageerror: ${error.stack || error.message}`)
+    );
 
     await page.goto(baseUrl, { waitUntil: "networkidle" });
     await waitForServiceWorker(page);
@@ -252,7 +261,8 @@ hardTimeout.unref?.();
     await context.setOffline(false);
     await context.close();
   } catch (err) {
-    fail(err instanceof Error ? err.message : String(err));
+    const details = browserDiagnostics.length > 0 ? `\n${browserDiagnostics.join("\n")}` : "";
+    fail(`${err instanceof Error ? err.message : String(err)}${details}`);
   } finally {
     clearTimeout(hardTimeout);
     await cleanup();

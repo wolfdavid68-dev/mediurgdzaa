@@ -9,7 +9,7 @@
 // l'invalidation cache est automatique. Le check ne porte donc plus que
 // sur l'APP_VERSION visible côté UI.
 
-const fs   = require("fs");
+const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -23,9 +23,10 @@ const fail = (msg) => {
 };
 
 const changelog = read("src/data/changelog.js");
+const appVersionSource = read("src/data/appVersion.js");
 
-const appMatch = changelog.match(/APP_VERSION\s*=\s*['"](v\d+)['"]/);
-if (!appMatch) fail("Impossible de lire APP_VERSION dans src/data/changelog.js");
+const appMatch = appVersionSource.match(/APP_VERSION\s*=\s*['"](v\d+)['"]/);
+if (!appMatch) fail("Impossible de lire APP_VERSION dans src/data/appVersion.js");
 const appVersion = appMatch[1];
 
 const firstEntryMatch = changelog.match(/version:\s*['"](v\d+)['"]/);
@@ -35,8 +36,8 @@ const changelogVersion = firstEntryMatch[1];
 if (appVersion !== changelogVersion) {
   fail(
     `Les deux doivent être identiques :\n` +
-    `  - APP_VERSION             = ${appVersion}\n` +
-    `  - CHANGELOG[0].version    = ${changelogVersion}`
+      `  - APP_VERSION             = ${appVersion}\n` +
+      `  - CHANGELOG[0].version    = ${changelogVersion}`
   );
 }
 

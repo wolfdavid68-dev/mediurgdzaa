@@ -6,6 +6,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
+import "../styles/kits.css";
 import { DRUGS } from "../data/drugs";
 import { enqueueSyncItem, pullKitChecks, type KitCheckPayload } from "../lib/deviceSync";
 import { useAuthProfile } from "../lib/authProfile";

@@ -24,6 +24,7 @@ export default defineConfig(({ command }) => ({
     // ESLint full type-aware reste sur le run manuel + pre-commit ; oxlint
     // (12 ms) suffit largement pour l'overlay dev.
     command === "serve" &&
+      !process.env.VITEST &&
       checker({
         typescript: true,
         oxlint: { lintCommand: "oxlint src" },
@@ -200,6 +201,10 @@ export default defineConfig(({ command }) => ({
     outDir: "build",
     emptyOutDir: true,
     rollupOptions: {
+      // Rolldown 1.1 refuse les groupes non récursifs avec la signature
+      // stricte utilisée par les builds internes de plugins (notamment PWA).
+      // `allow-extension` conserve les exports tout en autorisant ce découpage.
+      preserveEntrySignatures: "allow-extension",
       output: {
         entryFileNames: "static/js/[name].[hash].js",
         chunkFileNames: "static/js/[name].[hash].js",
@@ -241,29 +246,14 @@ export default defineConfig(({ command }) => ({
             },
             { name: "data-medic", test: /[\\/]src[\\/]data[\\/](drugs|pse|aliases)/, priority: 90 },
             {
-              name: "auth-admin",
-              test: /[\\/]src[\\/]components[\\/]auth[\\/](AdminDashboard|mobile[\\/]MobileAdminDashboard|hooks[\\/]useAdminProfiles)/,
-              priority: 85,
-            },
-            {
-              name: "auth-mobile",
-              test: /([\\/]src[\\/]components[\\/]auth[\\/]mobile[\\/]|[\\/]src[\\/]styles[\\/]auth-mobile)/,
-              priority: 80,
-            },
-            {
               name: "auth",
-              test: /([\\/]src[\\/]components[\\/]auth[\\/]|[\\/]src[\\/]components[\\/]AuthGate|[\\/]src[\\/]lib[\\/](auth|access|profileCache)|[\\/]src[\\/]styles[\\/]auth)/,
+              test: /([\\/]src[\\/]components[\\/]auth[\\/]AuthGate|[\\/]src[\\/]lib[\\/](auth|access|profileCache)|[\\/]src[\\/]styles[\\/]auth)/,
               priority: 75,
             },
             {
-              name: "acr",
-              test: /([\\/]src[\\/]components[\\/]Acr|[\\/]src[\\/]styles[\\/](acr-|urgence-button))/,
-              priority: 70,
-            },
-            {
-              name: "changelog",
-              test: /([\\/]src[\\/]components[\\/]ChangelogModal|[\\/]src[\\/]data[\\/]changelog|[\\/]src[\\/]styles[\\/]changelog)/,
-              priority: 69,
+              name: "acr-sync",
+              test: /[\\/]src[\\/]lib[\\/]acr(Session|SessionStore|LiveSync)/,
+              priority: 71,
             },
             {
               name: "medicaments-preparation",
@@ -271,39 +261,9 @@ export default defineConfig(({ command }) => ({
               priority: 68,
             },
             {
-              name: "protocoles-incompat",
-              test: /([\\/]src[\\/]components[\\/](IncompatibilityList|KtcLinePlanner)|[\\/]src[\\/]data[\\/]incompatibilities|[\\/]src[\\/]lib[\\/]incompatibilityIndex|[\\/]src[\\/]styles[\\/]incompatibilites)/,
-              priority: 65,
-            },
-            {
-              name: "protocoles-kits",
-              test: /([\\/]src[\\/]components[\\/](PrepKitCard|KitChecklist|KitScaleIllustration)|[\\/]src[\\/]data[\\/]prepKits|[\\/]src[\\/]styles[\\/]kits)/,
-              priority: 64,
-            },
-            {
-              name: "protocoles-ecg",
-              test: /([\\/]src[\\/]components[\\/]Ecg|[\\/]src[\\/]styles[\\/]ecg)/,
-              priority: 63,
-            },
-            {
-              name: "protocoles-pisu",
-              test: /([\\/]src[\\/]components[\\/]ProtocolCard|[\\/]src[\\/]data[\\/]protocols|[\\/]src[\\/]lib[\\/](protocolText|crossref))/,
-              priority: 62,
-            },
-            {
-              name: "protocoles",
-              test: /([\\/]src[\\/]pages[\\/]ProtocolesPage|[\\/]src[\\/]styles[\\/]protocols)/,
-              priority: 61,
-            },
-            {
               name: "medicaments",
               test: /([\\/]src[\\/]pages[\\/]MedicamentsPage|[\\/]src[\\/]components[\\/](Drug|PrepBlock|PseBlock)|[\\/]src[\\/]lib[\\/](calc|drugSearch)|[\\/]src[\\/]styles[\\/](drug|pse))/,
               priority: 60,
-            },
-            {
-              name: "echelles",
-              test: /([\\/]src[\\/]pages[\\/]EchellesPage|[\\/]src[\\/]components[\\/]ScaleCard|[\\/]src[\\/]data[\\/]scales|[\\/]src[\\/]styles[\\/]echelles)/,
-              priority: 55,
             },
           ],
         },
