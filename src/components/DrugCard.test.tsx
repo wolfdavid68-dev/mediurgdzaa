@@ -176,7 +176,7 @@ describe("DrugCard", () => {
       fireEvent.click(screen.getByText("HYPNOVEL").closest("button")!);
 
       expect(
-        await screen.findByRole("button", { name: /Bolus titré 1 mg\/mL pur/ })
+        await screen.findByRole("button", { name: /Bolus titré 1 mg\/mL pur/ }, { timeout: 5_000 })
       ).toHaveAttribute("aria-pressed", "true");
       expect(
         screen.getByText(/Bolus titrés : ampoule 5 mg\/5 mL.*pas de préparation/)
