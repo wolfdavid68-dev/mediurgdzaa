@@ -345,6 +345,9 @@ const DrugCard = ({
     setPreviewRecipeInput(Math.min(control.max ?? next, Math.max(control.min ?? 0, next)));
   };
   const previewStructuredSteps = previewModel.steps;
+  const previewStepNeedsWeight = (step: (typeof previewStructuredSteps)[number]) =>
+    /poids requis|\bkg absent\b/i.test(`${step.detail} ${step.result}`);
+  const previewPendingWeightCount = previewStructuredSteps.filter(previewStepNeedsWeight).length;
   const previewControlLabels = previewModel.controls;
 
   // onOpen volontairement exclu des deps : addToHistory est recréé à chaque render
@@ -842,17 +845,39 @@ const DrugCard = ({
                 </div>
                 <span className="preview-v25-prep-context">{previewModel.context}</span>
               </div>
+              {previewPendingWeightCount > 0 && (
+                <div className="preview-v25-prep-requirement" role="note">
+                  <span aria-hidden="true">
+                    <UserRound />
+                  </span>
+                  <span>
+                    <strong>Renseigner le poids patient</strong>
+                    <small>
+                      Saisir le poids dans le bandeau patient pour calculer automatiquement{" "}
+                      {previewPendingWeightCount === 1
+                        ? "l’étape pondérale."
+                        : `les ${previewPendingWeightCount} étapes pondérales.`}
+                    </small>
+                  </span>
+                </div>
+              )}
               <ol className="preview-v25-recipe">
-                {previewStructuredSteps.map((step, index) => (
-                  <li key={`${step.title}-${step.detail}-${index}`}>
-                    <span>{index + 1}</span>
-                    <span>
-                      <strong>{step.title}</strong>
-                      <small>{step.detail}</small>
-                    </span>
-                    <b>{step.result}</b>
-                  </li>
-                ))}
+                {previewStructuredSteps.map((step, index) => {
+                  const needsWeight = previewStepNeedsWeight(step);
+                  return (
+                    <li
+                      key={`${step.title}-${step.detail}-${index}`}
+                      className={needsWeight ? "is-pending" : undefined}
+                    >
+                      <span>{index + 1}</span>
+                      <span>
+                        <strong>{step.title}</strong>
+                        <small>{step.detail}</small>
+                      </span>
+                      <b>{needsWeight ? "À calculer" : step.result}</b>
+                    </li>
+                  );
+                })}
               </ol>
               {previewModel.notes.length ? (
                 <div className="preview-v25-recipe-notes">

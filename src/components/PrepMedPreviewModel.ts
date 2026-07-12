@@ -36,6 +36,8 @@ type PrepPreviewStep = {
   title: string;
   detail: string;
   result: string;
+  phaseDose?: boolean;
+  doseSummary?: string;
 };
 
 type PrepPreviewMetric = {
@@ -108,6 +110,28 @@ const formatNumber = (value: number, precision?: number) => {
 const parseNumber = (value: string) => Number(value.replace(",", "."));
 
 const formatMl = (value: number) => `${formatNumber(value)} mL`;
+
+const formatDosePerKgUnit = (unit: string) => {
+  if (unit === "mg/h") return "mg/kg/h";
+  if (unit === "UI/h") return "UI/kg/h";
+  if (unit === "µg/min") return "µg/kg/min";
+  return `${unit}/kg`;
+};
+
+const displayableConcentration = (value: string) => {
+  if (!value || /variable|selon|cible|prescription/i.test(value)) return null;
+  return /\d[\d\s]*(?:[,.]\d+)?\s*(?:µg|ug|mg|g|UI)\s*\/\s*(?:\d[\d\s]*(?:[,.]\d+)?\s*)?mL\b/i.test(
+    value
+  )
+    ? value
+    : null;
+};
+
+const productPresentationLabel = (detail: string) => {
+  if (/\bflacon\b/i.test(detail)) return "Flacon";
+  if (/\bampoule\b/i.test(detail)) return "Ampoule";
+  return "Conditionnement vérifié";
+};
 
 const productUnit = (prep: DrugPrep | null) => prep?.unite || "mg";
 
@@ -348,6 +372,15 @@ const buildRecipeSteps = (
 
   const usesDirectRecipeFields = Boolean(recipe && (recipeSteps.length || recipe.rows?.length));
   const productDetail = usesDirectRecipeFields ? resolveProductDetail(drug, prep, recipe) : null;
+  const preleverDescribesReconstitutedFlacon = /^\s*flacon\s+reconstitu/i.test(
+    recipe?.prelever || ""
+  );
+  const reconstitutionDetail = preleverDescribesReconstitutedFlacon
+    ? prep.etapes?.find((step) => /^\s*reconstitu/i.test(step)) || recipe?.prelever || ""
+    : "";
+  const detectedProductConcentration = concentrationFromProduct(
+    productDetail || drug.cond?.[0] || ""
+  );
   const steps: PrepPreviewStep[] = usesDirectRecipeFields
     ? [
         {
@@ -357,18 +390,25 @@ const buildRecipeSteps = (
               ? "Identifier l’ampoule"
               : "Identifier le produit",
           detail: productDetail || `${drug.nom} · ${drug.dci}`,
-          result: concentrationFromProduct(productDetail || drug.cond?.[0] || ""),
+          result:
+            detectedProductConcentration === "Conditionnement vérifié" && concentration
+              ? displayableConcentration(concentration) ||
+                productPresentationLabel(productDetail || drug.cond?.[0] || "")
+              : detectedProductConcentration,
         },
         ...(recipe?.prelever
           ? [
               {
-                title: "Prélever",
-                detail: recipe.prelever,
-                result:
-                  extractPreparedVolume(recipe.prelever) ||
-                  containerCount(recipe.prelever) ||
-                  recipe.tag ||
-                  "Selon prescription",
+                title: preleverDescribesReconstitutedFlacon ? "Reconstituer le flacon" : "Prélever",
+                detail: reconstitutionDetail || recipe.prelever,
+                result: preleverDescribesReconstitutedFlacon
+                  ? extractPreparedVolume(recipe.prelever)
+                    ? `Vf ${extractPreparedVolume(recipe.prelever)}`
+                    : concentration
+                  : extractPreparedVolume(recipe.prelever) ||
+                    containerCount(recipe.prelever) ||
+                    recipe.tag ||
+                    "Selon prescription",
               },
             ]
           : []),
@@ -414,6 +454,7 @@ const buildRecipeSteps = (
     );
     const calculatedSteps = phaseRows.flatMap((phase) => {
       const unit = phase.unit || "mg";
+      const isWeightBased = phase.dose_kg !== undefined;
       const dose =
         phase.dose === null
           ? "Poids requis"
@@ -421,28 +462,37 @@ const buildRecipeSteps = (
             ? `${formatNumber(phase.dose)}–${formatNumber(phase.doseMax)} ${unit}`
             : `${formatNumber(phase.dose)} ${unit}`;
       const volume = recipe.hide_phase_volume
-        ? dose
+        ? phase.rate !== null
+          ? `${formatNumber(phase.rate)}${phase.rateMax !== null ? `–${formatNumber(phase.rateMax)}` : ""} mL/h`
+          : dose
         : phase.rate !== null
           ? `${formatNumber(phase.rate)}${phase.rateMax !== null ? `–${formatNumber(phase.rateMax)}` : ""} mL/h`
           : phase.volume !== null
             ? `${formatNumber(phase.volume)}${phase.volumeMax !== null ? `–${formatNumber(phase.volumeMax)}` : ""} mL`
             : dose;
+      const prescription = isWeightBased
+        ? `${formatNumber(phase.dose_kg!)} ${formatDosePerKgUnit(unit)}`
+        : volume === dose
+          ? "Dose fixe"
+          : `Dose fixe · ${dose}`;
+      const duration = phase.duree ? ` · ${phase.duree}` : "";
       const doseStep = {
-        title: `${phase.label} — calcul au poids`,
-        detail: Number.isFinite(kg) && kg > 0 ? `${dose} pour ${formatNumber(kg)} kg` : dose,
+        title: phase.label,
+        detail:
+          isWeightBased && Number.isFinite(kg) && kg > 0
+            ? `${prescription} · ${dose} pour ${formatNumber(kg)} kg${duration}`
+            : `${prescription}${duration}`,
         result: volume,
+        phaseDose: true,
+        doseSummary: phase.dose === null ? undefined : dose,
       };
-      if (phase.rate === null) return [doseStep];
-      return [
-        doseStep,
-        {
-          title: `${phase.label} — débit PSE`,
-          detail: phase.duree ? `Administration sur ${phase.duree}` : "Débit calculé par le main",
-          result: `${formatNumber(phase.rate)}${phase.rateMax !== null ? `–${formatNumber(phase.rateMax)}` : ""} mL/h`,
-        },
-      ];
+      return [doseStep];
     });
-    steps.splice(Math.min(1, steps.length), 0, ...calculatedSteps);
+    const reconstitutionIndex = steps.findIndex((step) =>
+      /^Reconstituer le flacon$/i.test(step.title)
+    );
+    const phaseInsertIndex = reconstitutionIndex >= 0 ? reconstitutionIndex + 1 : 1;
+    steps.splice(Math.min(phaseInsertIndex, steps.length), 0, ...calculatedSteps);
   }
 
   if (recipe?.rows?.length) {
@@ -1497,15 +1547,29 @@ export const buildPrepMedPreviewModel = ({
       ? buildStructuredPseSteps(drug, prep, activeRecipe, programmedRate, pse)
       : baseSteps);
 
-  const calculatedDoseValues = steps
-    .filter((step) => /calcul au poids/i.test(step.title))
-    .map((step) => step.detail.match(/^(.+?)\s+pour\s+\d/i)?.[1]?.trim())
+  const weightCalculatedSteps = steps.filter(
+    (step) =>
+      /calcul au poids/i.test(step.title) ||
+      (/\b(?:µg|mg|g|UI|gouttes)\/kg(?:\/h|\/min)?\b/i.test(step.detail) &&
+        /\bpour\s+\d/i.test(step.detail))
+  );
+  const inferredCalculatedDoseValues = weightCalculatedSteps
+    .map((step) => step.detail.match(/(?:^|·)\s*([^·]+?)\s+pour\s+\d/i)?.[1]?.trim())
     .filter((value): value is string => Boolean(value));
+  const phaseDoseSteps = steps.filter((step) => step.phaseDose);
+  const readyPhaseDoseValues = phaseDoseSteps
+    .map((step) => step.doseSummary)
+    .filter((value): value is string => Boolean(value));
+  const calculatedDoseValues = phaseDoseSteps.length
+    ? readyPhaseDoseValues.length === phaseDoseSteps.length
+      ? readyPhaseDoseValues
+      : []
+    : inferredCalculatedDoseValues;
   const calculatedDose = calculatedDoseValues.length
     ? [...new Set(calculatedDoseValues)].join(" puis ")
     : null;
-  const calculatedVolumes = steps
-    .filter((step) => /calcul au poids/i.test(step.title) && /mL(?!\/h)/i.test(step.result))
+  const calculatedVolumes = weightCalculatedSteps
+    .filter((step) => /mL(?!\/h)/i.test(step.result))
     .map((step) => step.result);
   const calculatedVolume = calculatedVolumes.length
     ? [...new Set(calculatedVolumes)].join(" puis ")

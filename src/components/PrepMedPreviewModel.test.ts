@@ -182,8 +182,93 @@ describe("modèle Prépa Med v2.5", () => {
     const gluconateChild = modelFor("GLUCONATE DE CALCIUM", "enfant", "20");
     expect(flattenModelText(gluconateChild)).not.toContain("20000 mL");
     expect(gluconateChild.steps).toContainEqual(
-      expect.objectContaining({ title: "Dose — calcul au poids", result: "2000 mg" })
+      expect.objectContaining({
+        title: "Dose",
+        detail: expect.stringContaining("100 mg/kg"),
+        result: "2000 mg",
+      })
     );
+  });
+
+  test("distingue les doses fixes des phases pondérales dans la préparation", () => {
+    const actilyse = modelFor("ACTILYSE", "adulte", "", 0);
+
+    expect(actilyse.steps).toContainEqual(
+      expect.objectContaining({
+        title: "Identifier le flacon",
+        result: "1 mg/mL",
+      })
+    );
+    expect(actilyse.steps).toContainEqual(
+      expect.objectContaining({
+        title: "Bolus IV",
+        detail: "Dose fixe",
+        result: "15 mg",
+      })
+    );
+    expect(actilyse.steps).toContainEqual(
+      expect.objectContaining({
+        title: "PSE 30 min",
+        detail: "0,75 mg/kg · 30 min",
+        result: "Poids requis",
+      })
+    );
+    expect(actilyse.steps.map((step) => step.title)).toEqual([
+      "Identifier le flacon",
+      "Reconstituer le flacon",
+      "Bolus IV",
+      "PSE 30 min",
+      "PSE 60 min",
+    ]);
+    expect(actilyse.steps[1]).toMatchObject({ result: "Vf 50 mL" });
+
+    const actilyse80kg = modelFor("ACTILYSE", "adulte", "80", 0);
+    expect(actilyse80kg.steps).toHaveLength(5);
+    expect(actilyse80kg.metrics[0]).toMatchObject({
+      label: "Dose calculée",
+      value: "15 mg puis 60 mg puis 40 mg",
+    });
+    expect(actilyse80kg.steps).toContainEqual(
+      expect.objectContaining({
+        title: "PSE 30 min",
+        detail: "0,75 mg/kg · 60 mg pour 80 kg · 30 min",
+        result: "120 mL/h",
+      })
+    );
+    expect(actilyse80kg.steps).toContainEqual(
+      expect.objectContaining({
+        title: "PSE 60 min",
+        detail: "0,5 mg/kg · 40 mg pour 80 kg · 60 min",
+        result: "40 mL/h",
+      })
+    );
+
+    const metalyse80kg = modelFor("METALYSE", "adulte", "80", 0);
+    expect(metalyse80kg.metrics[0]).toMatchObject({
+      label: "Dose calculée",
+      value: "45 mg",
+    });
+
+    const atropine = modelFor("ATROPINE", "adulte", "80", 0);
+    expect(atropine.steps).toContainEqual(
+      expect.objectContaining({
+        title: "Disponible",
+        detail: "Dose fixe · 1 mg",
+        result: "2 mL",
+      })
+    );
+
+    const celesteneChild = modelFor("CÉLESTÈNE", "enfant", "20", 0);
+    expect(celesteneChild.metrics[0]).toMatchObject({
+      label: "Dose calculée",
+      value: "60 gouttes",
+    });
+
+    for (const drugName of ["GLUCAGEN", "SOLUMEDROL", "AMOXICILLINE", "ZOVIRAX"]) {
+      const productStep = modelFor(drugName, "adulte", "80", 0).steps[0];
+      expect(productStep.result, drugName).not.toMatch(/variable|selon|cible|prescription/i);
+      expect(productStep.result, drugName).toMatch(/flacon|ampoule|\d/i);
+    }
   });
 
   test("préserve les calculateurs spécialisés et les concentrations produit", () => {

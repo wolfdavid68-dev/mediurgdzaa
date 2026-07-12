@@ -122,6 +122,24 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     expect(within(notes).getByText("Insuffisance rénale : adapter posologie")).toBeInTheDocument();
   });
 
+  test("regroupe la dépendance au poids au lieu de la répéter dans chaque phase", () => {
+    const { container } = render(
+      <DrugCard drug={drugNamed("ACTILYSE")} patientWeight="" prepPopulation="adulte" />
+    );
+    openDrug("ACTILYSE");
+
+    const preparation = container.querySelector<HTMLElement>(".preview-v25-prepare")!;
+    const requirement = within(preparation).getByRole("note");
+    expect(within(requirement).getByText("Renseigner le poids patient")).toBeInTheDocument();
+    expect(within(requirement).getByText(/les 2 étapes pondérales/i)).toBeInTheDocument();
+
+    const recipe = preparation.querySelector<HTMLElement>(".preview-v25-recipe")!;
+    expect(within(recipe).queryByText("Poids requis")).not.toBeInTheDocument();
+    expect(within(recipe).getAllByText("À calculer")).toHaveLength(2);
+    expect(within(recipe).getByText("Dose fixe")).toBeInTheDocument();
+    expect(within(recipe).getByText("0,75 mg/kg · 30 min")).toBeInTheDocument();
+  });
+
   test("n’affiche pas l’ancien moteur détaillé dans la structure V2.5", async () => {
     const { container } = render(
       <DrugCard drug={drugNamed("ANEXATE")} patientWeight="80" prepPopulation="adulte" />
