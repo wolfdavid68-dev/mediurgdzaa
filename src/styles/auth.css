@@ -564,7 +564,7 @@
   cursor: pointer;
   transition:
     transform 0.1s,
-    background 0.15s;
+    background-color 0.15s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -677,7 +677,7 @@
   height: 4px;
   background: var(--auth-surface-2);
   border-radius: 2px;
-  transition: background 0.15s;
+  transition: background-color 0.15s;
 }
 .auth-pw-bar-1,
 .auth-pw-bar-2 {
@@ -1049,7 +1049,7 @@
   border-radius: 10px;
   cursor: pointer;
   font-size: 13px;
-  transition: background 0.12s;
+  transition: background-color 0.12s;
 }
 .admin-row:hover {
   background: var(--auth-surface-2);

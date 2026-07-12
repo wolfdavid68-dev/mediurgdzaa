@@ -20,7 +20,7 @@
   font-weight: 700;
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s,
     color 0.15s,
     opacity 0.15s,

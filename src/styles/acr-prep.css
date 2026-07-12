@@ -147,7 +147,7 @@
   letter-spacing: 0.04em;
   cursor: pointer;
   transition:
-    background 0.16s,
+    background-color 0.16s,
     border-color 0.16s;
 }
 .acr-prep-back {

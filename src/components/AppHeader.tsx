@@ -190,8 +190,16 @@ const AppHeader = ({
                   className="header-menu-item"
                   onClick={handle(onToggleTheme)}
                 >
-                  <span className="header-menu-ic" aria-hidden="true">
-                    {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+                  <span
+                    className={`header-menu-ic header-theme-icons ${theme === "dark" ? "is-dark" : "is-light"}`}
+                    aria-hidden="true"
+                  >
+                    <span className="header-theme-icon header-theme-icon-sun">
+                      <SunIcon />
+                    </span>
+                    <span className="header-theme-icon header-theme-icon-moon">
+                      <MoonIcon />
+                    </span>
                   </span>
                   <span>{theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}</span>
                 </button>

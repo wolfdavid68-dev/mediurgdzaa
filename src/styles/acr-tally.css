@@ -30,7 +30,7 @@
   margin-left: 4px;
   font-family: var(--font);
   transition:
-    background 0.15s,
+    background-color 0.15s,
     color 0.15s,
     border-color 0.15s;
 }
@@ -127,7 +127,7 @@
   font-weight: 700;
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     color 0.15s;
 }
 .acr-tally-stepper button:hover:not(:disabled) {

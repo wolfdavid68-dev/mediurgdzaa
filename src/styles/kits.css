@@ -119,7 +119,7 @@
 }
 .kit-checklist-chevron {
   flex-shrink: 0;
-  transition: transform 0.18s ease;
+  transition: transform 0.22s var(--ease-out-quart);
   transform: rotate(0deg);
 }
 .kit-checklist-chevron-open {

@@ -51,7 +51,7 @@
   border-radius: 6px;
   cursor: pointer;
   transition:
-    background 0.12s,
+    background-color 0.12s,
     border-color 0.12s;
 }
 .acr-zoom-skip:hover {
@@ -150,7 +150,7 @@
   font-size: 12px;
   font-weight: 600;
   transition:
-    background 0.18s,
+    background-color 0.18s,
     border-color 0.18s,
     color 0.18s;
 }

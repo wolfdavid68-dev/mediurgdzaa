@@ -128,7 +128,7 @@
   align-items: center;
   justify-content: center;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     color 0.15s;
 }
 .changelog-close:hover {
@@ -573,7 +573,7 @@
   font-weight: 600;
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s;
 }
 .notes-backup-btn:hover {
@@ -636,7 +636,7 @@
   padding: 0 4px;
   cursor: pointer;
   border-radius: 6px;
-  transition: background 0.15s;
+  transition: background-color 0.15s;
 }
 .notes-backup-modal-close:hover {
   background: var(--card-hover);

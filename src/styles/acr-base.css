@@ -20,7 +20,7 @@
   cursor: pointer;
   box-shadow: 0 14px 30px rgba(239, 68, 68, 0.24);
   transition:
-    background 0.15s,
+    background-color 0.15s,
     box-shadow 0.15s,
     scale 0.12s;
 }
@@ -81,7 +81,7 @@
   text-align: left;
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     scale 0.12s;
 }
 
@@ -110,7 +110,7 @@
   font-size: 15px;
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     color 0.15s,
     scale 0.12s;
 }
@@ -210,7 +210,7 @@
   cursor: pointer;
   white-space: nowrap;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s,
     color 0.15s,
     box-shadow 0.15s;
@@ -286,7 +286,7 @@
   padding: 8px 10px;
   text-align: center;
   transition:
-    background 0.2s,
+    background-color 0.2s,
     border-color 0.2s,
     color 0.2s;
 }

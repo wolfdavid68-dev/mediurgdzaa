@@ -9,7 +9,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s;
 }
 .acr-metro-on {
@@ -77,7 +77,7 @@
   font-weight: 700;
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     color 0.15s,
     border-color 0.15s;
 }

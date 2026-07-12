@@ -151,6 +151,44 @@ const focusedSignature = () => {
   return `${element.tagName}.${element.className}:${text}`;
 };
 
+const assertTouchTargets = async (page, label) => {
+  const violations = await page.evaluate(() => {
+    const controls = document.querySelectorAll("button, [role='button'], [role='tab']");
+    return [...controls]
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return (
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          Number(style.opacity) > 0 &&
+          rect.width > 0 &&
+          rect.height > 0
+        );
+      })
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          label: (element.getAttribute("aria-label") || element.textContent || element.className)
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 48),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        };
+      })
+      .filter(({ width, height }) => width < 40 || height < 40);
+  });
+
+  if (violations.length > 0) {
+    const details = violations
+      .slice(0, 8)
+      .map(({ label: control, width, height }) => `${control || "contrôle"} (${width}×${height})`)
+      .join(", ");
+    throw new Error(`${label}: cibles tactiles < 40 px — ${details}`);
+  }
+};
+
 const assertTabStops = async (page, route, pattern, label, minStops) => {
   await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle" });
   await expectVisibleText(page, pattern, label);
@@ -158,6 +196,8 @@ const assertTabStops = async (page, route, pattern, label, minStops) => {
     await page.keyboard.press("Escape");
     await sleep(250);
   }
+
+  await assertTouchTargets(page, label);
 
   const seen = new Set();
   for (let index = 0; index < 36; index++) {
@@ -220,6 +260,13 @@ if (!fs.existsSync(indexPath)) {
       .locator(".acr-mode-close")
       .click({ timeout: 5000 })
       .catch(() => {});
+    await assertTabStops(
+      page,
+      "/?page=medicaments",
+      /Médicaments|Recherche|Adrénaline/i,
+      "Médicaments",
+      10
+    );
     await assertTabStops(page, "/?page=protocoles&tab=kits", /Kits|Kit ISR|Réarmement/i, "Kits", 8);
     await assertTabStops(
       page,
@@ -228,6 +275,7 @@ if (!fs.existsSync(indexPath)) {
       "Incompatibilités",
       8
     );
+    await assertTabStops(page, "/?page=echelles", /Échelles|Glasgow|RASS/i, "Échelles", 8);
 
     await page.goto(`${baseUrl}/?page=protocoles&tab=incompatibilites`, {
       waitUntil: "networkidle",
@@ -237,7 +285,7 @@ if (!fs.existsSync(indexPath)) {
     await expectVisibleText(page, /Médicament A|Medicament A/i, "activation clavier Comparer");
 
     await context.close();
-    ok("navigation clavier validée sur ACR, Kits et Incompatibilités");
+    ok("navigation clavier et cibles tactiles validées sur les cinq parcours cliniques");
   } catch (err) {
     fail(err instanceof Error ? err.message : String(err));
   } finally {

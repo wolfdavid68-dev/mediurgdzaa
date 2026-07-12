@@ -39,7 +39,7 @@
   font-size: 12px;
   cursor: pointer;
   transition:
-    background 120ms,
+    background-color 120ms,
     border-color 120ms;
 }
 

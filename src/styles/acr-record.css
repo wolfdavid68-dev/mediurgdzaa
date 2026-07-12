@@ -1259,7 +1259,7 @@
   .acr-record-textarea textarea,
   .acr-cycle-input input {
     transition:
-      background 0.16s ease,
+      background-color 0.16s ease,
       border-color 0.16s ease,
       color 0.16s ease,
       box-shadow 0.16s ease,

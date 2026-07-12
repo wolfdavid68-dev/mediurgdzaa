@@ -162,7 +162,7 @@
   border-radius: 12px;
   overflow: hidden;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s,
     box-shadow 0.15s;
 }
@@ -294,7 +294,7 @@ select.m-input {
   background: oklch(0.24 0.006 280);
   color: oklch(0.97 0.004 90);
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s,
     color 0.15s,
     transform 0.15s;
@@ -708,7 +708,7 @@ select.m-input {
   font: inherit;
   color: oklch(0.97 0.004 90);
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s,
     color 0.15s,
     transform 0.15s;

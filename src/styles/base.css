@@ -76,6 +76,8 @@ html {
     0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.24), 0 10px 22px rgb(0 0 0 / 0.16);
   --surface-shadow-hover:
     0 0 0 1px rgb(255 255 255 / 0.11), 0 2px 4px rgb(0 0 0 / 0.26), 0 14px 28px rgb(0 0 0 / 0.2);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --control-hit: 40px;
 
   /* Fluid container width */
   --content-max: 100%;
@@ -131,7 +133,7 @@ body {
   line-height: 1.5;
   overflow-x: hidden;
   transition:
-    background 0.2s,
+    background-color 0.2s,
     color 0.2s;
 }
 
@@ -160,7 +162,14 @@ body {
   .scale-header-score,
   .scale-opt-score,
   .scale-pick-score,
-  .net-status
+  .net-status,
+  .materiel-progress,
+  .kit-checklist-secbadge,
+  .kit-checklist-progressbar,
+  .prep-v25-results,
+  .prep-v25-check-progress,
+  .prep-v25-dose-result,
+  .m-card-time
 ) {
   font-variant-numeric: tabular-nums;
 }
@@ -177,6 +186,30 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   :where(button, [role="button"]):active:not(:disabled) {
     scale: 0.96;
+  }
+}
+
+:root button:not([data-static-hit]),
+:root [role="button"]:not([data-static-hit]),
+:root [role="tab"]:not([data-static-hit]) {
+  min-block-size: var(--control-hit);
+  min-inline-size: var(--control-hit);
+  transition-property:
+    scale, transform, background-color, border-color, color, box-shadow, opacity, filter;
+  transition-duration: 150ms;
+  transition-timing-function: var(--ease-out-quart);
+}
+
+:root button:not([data-static-hit]):disabled,
+:root [role="button"]:not([data-static-hit]):disabled,
+:root [role="tab"]:not([data-static-hit]):disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --control-hit: 44px;
   }
 }
 
@@ -226,12 +259,61 @@ a,
    ─────────────────────────────────────────────────────────── */
 @keyframes panel-expand-in {
   from {
-    opacity: 0;
-    transform: translateY(-4px);
+    opacity: 0.72;
+    transform: translateY(-8px) scale(0.995);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes interface-section-in {
+  from {
+    opacity: 0.76;
+    transform: translateY(10px);
+    filter: blur(3px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(.drug-card-open .drug-body, .protocol-card-open .protocol-body) > * {
+    animation: interface-section-in 280ms var(--ease-out-quart) both;
+  }
+
+  :where(.drug-card-open .drug-body, .protocol-card-open .protocol-body) > :nth-child(2) {
+    animation-delay: 45ms;
+  }
+
+  :where(.drug-card-open .drug-body, .protocol-card-open .protocol-body) > :nth-child(3) {
+    animation-delay: 90ms;
+  }
+
+  :where(.drug-card-open .drug-body, .protocol-card-open .protocol-body) > :nth-child(n + 4) {
+    animation-delay: 135ms;
+  }
+
+  .scale-card-open .scale-item {
+    animation: interface-section-in 260ms var(--ease-out-quart) both;
+  }
+
+  .scale-card-open .scale-item:nth-child(2) {
+    animation-delay: 45ms;
+  }
+
+  .scale-card-open .scale-item:nth-child(3) {
+    animation-delay: 90ms;
+  }
+
+  .scale-card-open .scale-item:nth-child(n + 4) {
+    animation-delay: 135ms;
   }
 }
 

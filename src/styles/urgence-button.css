@@ -157,7 +157,7 @@
   border-radius: 16px;
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     color 0.15s;
 }
 .update-prompt-action:hover {
@@ -306,7 +306,7 @@
   color: var(--text);
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s,
     transform 0.1s,
     scale 0.12s;
@@ -358,7 +358,7 @@
   color: var(--text-dim);
   cursor: pointer;
   transition:
-    background 0.15s,
+    background-color 0.15s,
     border-color 0.15s,
     color 0.15s,
     scale 0.12s;

@@ -31,7 +31,7 @@
   cursor: pointer;
   letter-spacing: 0.02em;
   transition:
-    background 0.12s,
+    background-color 0.12s,
     color 0.12s,
     scale 0.12s;
   margin-bottom: -2px;
@@ -108,7 +108,7 @@
   font-weight: 600;
   cursor: pointer;
   transition:
-    background 0.12s,
+    background-color 0.12s,
     border-color 0.12s,
     color 0.12s,
     scale 0.12s;
@@ -170,12 +170,21 @@
   box-shadow: var(--surface-shadow);
   transition:
     border-color 0.15s,
-    box-shadow 0.15s;
+    box-shadow 0.15s,
+    transform 0.18s var(--ease-out-quart);
 }
 
 .protocol-card-open {
   border-color: var(--border-strong);
   box-shadow: var(--surface-shadow-hover);
+  transform: none;
+}
+
+@media (hover: hover) {
+  .protocol-card:not(.protocol-card-open):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--surface-shadow-hover);
+  }
 }
 
 .ecg-reader-shell {
@@ -317,7 +326,7 @@
   color: #ff3b30;
   font-size: 12px;
   cursor: pointer;
-  transition: background 120ms;
+  transition: background-color 120ms;
 }
 
 .card-error-retry:hover,
