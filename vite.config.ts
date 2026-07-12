@@ -26,6 +26,11 @@ export default defineConfig({
     checker({
       typescript: true,
       oxlint: { lintCommand: "oxlint src" },
+      // Le build de production est précédé par les contrôles dédiés de la
+      // chaîne de vérification/release. Garder ce worker actif pendant
+      // `vite build` refait les mêmes analyses et ralentit inutilement la
+      // génération des assets ; l'overlay reste pleinement actif en dev.
+      enableBuild: false,
     }),
     react(),
     // React Compiler (stable v1.0) : analyse les composants et insère

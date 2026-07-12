@@ -19,316 +19,21 @@ import DrugNote from "./DrugNote";
 import PrepBlock from "./PrepBlock";
 import PseBlock from "./PseBlock";
 import {
-  buildPrepMedPreviewModel,
-  getPreviewPseDefault,
-  type PrepPreviewNumericControl,
-} from "./PrepMedPreviewModel";
+  buildPreparationModel,
+  getPreparationPseDefault,
+  type PreparationNumericControl,
+} from "./PreparationModel";
 import { useResolvedDrugPrep, useResolvedDrugPse } from "./useResolvedPreparation";
-
-const TABS = [
-  { key: "poso", label: "Posologie", type: "poso" },
-  { key: "indic", label: "Indications", type: "info" },
-  { key: "ci", label: "Contre-ind.", type: "ci" },
-  { key: "ei", label: "Effets indés.", type: "danger" },
-  { key: "cond", label: "Conditionnements", type: "neutral" },
-];
-
-const MONITORING_BADGES = [
-  {
-    label: "Scope",
-    className: "monitor-scope",
-    pattern:
-      /sous scope|surveillance scop|scope|monitorage ecg|surveillance ecg|surveillance cardiaque/i,
-  },
-  {
-    label: "ECG",
-    className: "monitor-ecg",
-    pattern: /ecg obligatoire|ecg long|electrocardioscope|électrocardioscope/i,
-  },
-  {
-    label: "Capno",
-    className: "monitor-capno",
-    pattern: /capno|etco2|etco₂/i,
-  },
-];
-
-const MonitoringWaveIcon = () => (
-  <svg viewBox="0 0 34 14" aria-hidden="true" className="monitor-wave">
-    <path d="M1 8h6l3-6 5 11 4-8h5l2-3 3 6h4" />
-  </svg>
-);
-
-const normalizePrepDuplicateText = (value: string | undefined | null) =>
-  String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[→⇒]/g, " ")
-    .replace(/[—–-]/g, " ")
-    .replace(/[,;:()=]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const collectPrepDuplicateTexts = (prep: Drug["prep"]): string[] => {
-  if (!prep) return [];
-  const out: string[] = [];
-  const push = (value: unknown) => {
-    if (typeof value === "string" && value.trim()) out.push(value);
-  };
-
-  [
-    prep.solvant,
-    prep.conc_finale,
-    prep.duree,
-    prep.stabilite,
-    prep.debit,
-    prep.prelever_label,
-    prep.fd_prelever,
-    prep.calc_titre,
-    ...(prep.etapes || []),
-    ...(prep.notes || []),
-    ...(prep.duplicate_posology || []),
-  ].forEach(push);
-
-  prep.preparations?.forEach((recipe) => {
-    [
-      recipe.titre,
-      recipe.tag,
-      recipe.prelever,
-      recipe.completer,
-      recipe.concentration,
-      recipe.rate_label,
-      recipe.rate_value,
-      recipe.note,
-      ...(recipe.etapes || []),
-      ...(recipe.notes || []),
-      ...(recipe.duplicate_posology || []),
-    ].forEach(push);
-    recipe.rows?.forEach((row) => push(`${row.label} ${row.value}`));
-    recipe.phase_doses?.forEach((phase) => push(phase.label));
-    if (recipe.dose_based_dilution) {
-      push(recipe.dose_based_dilution.below_or_equal);
-      push(recipe.dose_based_dilution.above);
-    }
-  });
-
-  return out.map(normalizePrepDuplicateText).filter((text) => text.length >= 12);
-};
-
-const isPosoDuplicateOfPrep = (line: string, prepTexts: string[]) => {
-  const normalized = normalizePrepDuplicateText(line);
-  if (normalized.length < 12 || /^voies? /.test(normalized)) return false;
-  return prepTexts.some((prepText) => {
-    if (prepText === normalized) return true;
-    return (
-      Math.min(prepText.length, normalized.length) >= 24 &&
-      (prepText.includes(normalized) || normalized.includes(prepText))
-    );
-  });
-};
-
-const normalizePrepPresentationText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[→⇒]/g, " ")
-    .replace(/[^a-z0-9µ]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const prepStepDetail = (title: string, detail: string, result: string) => {
-  const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const withoutRepeatedAction = detail
-    .replace(new RegExp(`^\\s*${escapedTitle}\\s*[:—–-]\\s*`, "i"), "")
-    .trim();
-
-  return normalizePrepPresentationText(withoutRepeatedAction) ===
-    normalizePrepPresentationText(result)
-    ? ""
-    : withoutRepeatedAction;
-};
-
-type PreviewDoseStepperProps = {
-  label: string;
-  displayValue: string;
-  control: PrepPreviewNumericControl;
-  onDecrease: () => void;
-  onIncrease: () => void;
-  onEdit: () => void;
-  onValueChange: (value: number) => void;
-};
-
-const formatEditableNumber = (value: number) => String(value).replace(".", ",");
-
-const parseEditableNumber = (value: string) => {
-  const normalized = value.trim().replace(/\s+/g, "").replace(",", ".");
-  if (!/^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(normalized)) return null;
-  const parsed = Number(normalized);
-  return Number.isFinite(parsed) ? +parsed.toFixed(6) : null;
-};
-
-const formatControlBound = (value: number) =>
-  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 6 }).format(value);
-
-const isUnsetPreviewValue = (value: number, minimum: number | undefined) =>
-  value === 0 && minimum !== undefined && minimum > 0;
-
-const formatControlDraft = (value: number, minimum: number | undefined) =>
-  isUnsetPreviewValue(value, minimum) ? "" : formatEditableNumber(value);
-
-const PreviewDoseStepper = ({
-  label,
-  displayValue,
-  control,
-  onDecrease,
-  onIncrease,
-  onEdit,
-  onValueChange,
-}: PreviewDoseStepperProps) => {
-  const [draft, setDraft] = useState(() => formatControlDraft(control.value, control.min));
-  const [error, setError] = useState<string | null>(null);
-  const errorId = useId();
-  const minimum = control.min;
-  const maximum = control.max;
-
-  useEffect(() => {
-    setDraft(formatControlDraft(control.value, control.min));
-    setError(null);
-  }, [control.value, control.min]);
-
-  const rangeHint =
-    minimum !== undefined && maximum !== undefined
-      ? `${formatControlBound(minimum)} à ${formatControlBound(maximum)}`
-      : minimum !== undefined
-        ? `au moins ${formatControlBound(minimum)}`
-        : maximum !== undefined
-          ? `au plus ${formatControlBound(maximum)}`
-          : null;
-
-  const validate = (value: string) => {
-    const parsed = parseEditableNumber(value);
-    if (parsed === null) return { value: null, message: "Saisir un nombre valide" };
-    if (minimum !== undefined && parsed < minimum) {
-      return { value: null, message: `Valeur attendue : ${rangeHint}` };
-    }
-    if (maximum !== undefined && parsed > maximum) {
-      return { value: null, message: `Valeur attendue : ${rangeHint}` };
-    }
-    if (
-      control.kind === "recipe" &&
-      control.steps?.length &&
-      !control.steps.some((step) => Math.abs(step - parsed) < 0.0001)
-    ) {
-      return {
-        value: null,
-        message: `Valeurs disponibles : ${control.steps.join(", ")}`,
-      };
-    }
-    return { value: parsed, message: null };
-  };
-
-  const applyDraft = (value: string) => {
-    const result = validate(value);
-    if (result.value === null) {
-      setError(`${result.message} · valeur précédente conservée`);
-      setDraft(formatControlDraft(control.value, control.min));
-      return;
-    }
-    setDraft(formatEditableNumber(result.value));
-    setError(null);
-    if (result.value !== control.value) onValueChange(result.value);
-  };
-
-  const handleDraftChange = (value: string) => {
-    onEdit();
-    setDraft(value);
-    const result = validate(value);
-    setError(result.message);
-    if (result.value !== null && result.value !== control.value) {
-      onValueChange(result.value);
-    }
-  };
-
-  return (
-    <>
-      <div className="preview-v25-dose-stepper">
-        <button
-          type="button"
-          aria-label={
-            control.kind === "pse" ? "Diminuer le réglage" : "Diminuer la valeur prescrite"
-          }
-          disabled={minimum !== undefined && control.value <= minimum}
-          onClick={onDecrease}
-        >
-          −
-        </button>
-        <span className="preview-v25-dose-entry">
-          <input
-            type="text"
-            role="spinbutton"
-            inputMode="decimal"
-            autoComplete="off"
-            spellCheck={false}
-            value={draft}
-            placeholder="Saisir"
-            aria-label={`Saisir ${label}`}
-            aria-valuemin={minimum}
-            aria-valuemax={maximum}
-            aria-valuenow={
-              isUnsetPreviewValue(control.value, control.min) ? undefined : control.value
-            }
-            aria-valuetext={
-              isUnsetPreviewValue(control.value, control.min) ? "Non renseigné" : displayValue
-            }
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? errorId : undefined}
-            onFocus={(event) => {
-              setError(null);
-              event.currentTarget.select();
-            }}
-            onChange={(event) => handleDraftChange(event.currentTarget.value)}
-            onBlur={(event) => applyDraft(event.currentTarget.value)}
-            onKeyDown={(event) => {
-              if (event.key === "ArrowDown") {
-                event.preventDefault();
-                onDecrease();
-              } else if (event.key === "ArrowUp") {
-                event.preventDefault();
-                onIncrease();
-              } else if (event.key === "Enter") {
-                event.preventDefault();
-                event.currentTarget.blur();
-              } else if (event.key === "Escape") {
-                event.preventDefault();
-                setDraft(formatControlDraft(control.value, control.min));
-                setError(null);
-                event.currentTarget.blur();
-              }
-            }}
-          />
-          {control.unit && <span aria-hidden="true">{control.unit}</span>}
-        </span>
-        <button
-          type="button"
-          aria-label={
-            control.kind === "pse" ? "Augmenter le réglage" : "Augmenter la valeur prescrite"
-          }
-          disabled={maximum !== undefined && control.value >= maximum}
-          onClick={onIncrease}
-        >
-          +
-        </button>
-      </div>
-      {control.result && <output className="preview-v25-dose-result">{control.result}</output>}
-      {error && (
-        <span id={errorId} className="preview-v25-dose-error" role="alert">
-          {error}
-        </span>
-      )}
-    </>
-  );
-};
+import { PreparationDoseStepper } from "./preparation/PreparationDoseStepper";
+import {
+  CLOSED_PREPARATION_MODEL,
+  collectPrepDuplicateTexts,
+  isPosoDuplicateOfPrep,
+  MONITORING_BADGES,
+  MonitoringWaveIcon,
+  prepStepDetail,
+  TABS,
+} from "./preparation/drugCardHelpers";
 
 type DrugCardProps = {
   drug: Drug;
@@ -487,25 +192,28 @@ const DrugCard = ({
   const previewClinicalLoading = previewMode && (previewPrepLoading || previewPseLoading);
   const previewPrepData = previewMode && previewPrepLoading ? null : resolvedPrep;
   const previewPseData = previewMode && previewPseLoading ? null : resolvedPse;
-  const previewModel = buildPrepMedPreviewModel({
-    drug,
-    prep: previewPrepData,
-    pse: previewPseData,
-    population: previewPopulation,
-    weight,
-    recipeIndex: previewRecipeIndex,
-    pseInput: previewDose,
-    recipeInput: previewRecipeInput,
-    ageBand: previewAgeBand,
-    monitoringLabel,
-  });
+  const previewModel =
+    open && prepV25Mode
+      ? buildPreparationModel({
+          drug,
+          prep: previewPrepData,
+          pse: previewPseData,
+          population: previewPopulation,
+          weight,
+          recipeIndex: previewRecipeIndex,
+          pseInput: previewDose,
+          recipeInput: previewRecipeInput,
+          ageBand: previewAgeBand,
+          monitoringLabel,
+        })
+      : CLOSED_PREPARATION_MODEL;
   const previewModeCards = previewModel.modes;
   const previewDoseSteps = previewModel.pseSteps;
   useEffect(() => {
     setPreviewRecipeIndex((index) => (index < previewModeCards.length ? index : 0));
   }, [previewModeCards.length]);
   useEffect(() => {
-    setPreviewDose(getPreviewPseDefault(resolvedPse, weight, resolvedPrep));
+    setPreviewDose(getPreparationPseDefault(resolvedPse, weight, resolvedPrep));
   }, [drug.id, previewPopulation, previewPseLoading, resolvedPrep, resolvedPse, weight]);
   const adjustPreviewDose = (direction: -1 | 1) => {
     resetPreviewVerification();
@@ -537,7 +245,7 @@ const DrugCard = ({
     const next = +(control.value + direction * step).toFixed(4);
     setPreviewRecipeInput(Math.min(control.max ?? next, Math.max(control.min ?? 0, next)));
   };
-  const setPreviewNumericValue = (control: PrepPreviewNumericControl, value: number) => {
+  const setPreviewNumericValue = (control: PreparationNumericControl, value: number) => {
     if (control.kind === "pse") {
       setPreviewDose(value);
       return;
@@ -960,7 +668,7 @@ const DrugCard = ({
                         ))}
                       </div>
                     ) : metric.control ? (
-                      <PreviewDoseStepper
+                      <PreparationDoseStepper
                         label={metric.label}
                         displayValue={metric.value}
                         control={metric.control}

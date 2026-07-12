@@ -11,6 +11,8 @@ modification. Les commandes et scripts effectifs restent ceux de `package.json`.
   préparation, protocoles, kits et incompatibilités.
 - `OPTIMISATIONS_OFFLINE.md` : stratégie hors-ligne, découpage des chunks,
   précache Workbox et vérifications PWA.
+- `ARCHITECTURE_CODE.md` : découpage des modules, conventions de nommage et
+  garde-fou contre les fichiers monolithiques.
 - `UNIFICATION_DOMAINE_TUTORAT.md` : fonctionnement du passage MediURG ↔ Tutorat
   sous `/tutorat/`.
 - `RACCOURCIS_VOCAUX.md` : liens profonds (`?med=`, `?kit=`, `?poids=`,

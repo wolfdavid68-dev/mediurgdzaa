@@ -14,7 +14,6 @@ import {
   calcDoseLibre,
 } from "../lib/calc";
 import { isPreview } from "../lib/featureFlags";
-import type { Drug } from "../types/data";
 import {
   computeAmiklinAdult,
   computeClottafactPediatric,
@@ -35,15 +34,14 @@ import {
   recipeModeClass,
 } from "./PrepBlock.parts";
 import type { PrepRecipe, PrepRecipePhaseRow } from "./PrepBlock.parts";
+import {
+  EmptyRecipe,
+  PediatricModeSwitch,
+  PrepHeader,
+  RecipeSwitch,
+} from "./preparation/PrepBlockParts";
+import type { PrepBlockProps } from "./preparation/PrepBlockParts";
 import { useResolvedDrugPrep } from "./useResolvedPreparation";
-
-type PrepBlockProps = {
-  drug: Drug;
-  weight: string;
-  produitFinal?: string;
-  prepPopulation?: "adulte" | "enfant" | null;
-  includePreviewOverrides?: boolean;
-};
 
 // Bloc Préparation : étapes + calculateur (4 variantes selon la shape de prep).
 const PrepBlock = ({
@@ -487,35 +485,15 @@ const PrepBlock = ({
   const getThresholdDose = () => computeThresholdDose(prep, thresholdValue);
   const getThresholdTitle = (pf?: number) => computeThresholdTitle(prep, thresholdValue, pf);
 
-  const renderRecipeSwitch = () =>
-    visiblePreparations.length > 1 ? (
-      <div className="prep-mode-switch" role="group" aria-label="Choix de préparation">
-        {visiblePreparations.map((recipe, index) => (
-          <button
-            key={recipe.titre}
-            type="button"
-            className={`prep-mode-option${recipeModeClass(recipe)}${
-              index === activeRecipeIndex ? " is-active" : ""
-            }`}
-            aria-pressed={index === activeRecipeIndex}
-            onClick={() => setActivePrepIndex(index)}
-          >
-            <span>{recipe.titre}</span>
-            {recipe.tag && <small>{recipe.tag}</small>}
-          </button>
-        ))}
-      </div>
-    ) : null;
-
-  const renderRecipeEmpty = (recipe: PrepRecipe) => (
-    <div className={`prep-calc-empty${recipeModeClass(recipe)}`}>
-      <div className="prep-calc-header">
-        <InfoIcon /> {recipe.titre}
-        {recipe.tag && <span style={{ marginLeft: "auto" }}>{recipe.tag}</span>}
-      </div>
-      <div className="prep-empty-text">{recipe.note || "Préparation à compléter."}</div>
-    </div>
+  const renderRecipeSwitch = () => (
+    <RecipeSwitch
+      recipes={visiblePreparations}
+      activeIndex={activeRecipeIndex}
+      onSelect={setActivePrepIndex}
+    />
   );
+
+  const renderRecipeEmpty = (recipe: PrepRecipe) => <EmptyRecipe recipe={recipe} />;
 
   const renderRecipeSufentaTable = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     const r = calcPrepSufentaTable(weight);
@@ -1737,35 +1715,7 @@ const PrepBlock = ({
   // rendent leur pedTable générique via pedTableBlock.
   const pediatricModeSwitch =
     pediatricPrepOnly && drug.id === 13 ? (
-      <div className="prep-mode-switch" role="group" aria-label="Choix de préparation pédiatrique">
-        <button
-          type="button"
-          className={`prep-mode-option prep-recipe-ped${activePedPrep === "ivd" ? " is-active" : ""}`}
-          aria-pressed={activePedPrep === "ivd"}
-          onClick={() => setActivePedPrep("ivd")}
-        >
-          <span>IVD ACR</span>
-          <small>10 mL</small>
-        </button>
-        <button
-          type="button"
-          className={`prep-mode-option prep-recipe-ped-im${activePedPrep === "im" ? " is-active" : ""}`}
-          aria-pressed={activePedPrep === "im"}
-          onClick={() => setActivePedPrep("im")}
-        >
-          <span>IM anaphylaxie</span>
-          <small>1 mg/mL pur</small>
-        </button>
-        <button
-          type="button"
-          className={`prep-mode-option prep-recipe-pse${activePedPrep === "pse" ? " is-active" : ""}`}
-          aria-pressed={activePedPrep === "pse"}
-          onClick={() => setActivePedPrep("pse")}
-        >
-          <span>PSE</span>
-          <small>0,2 mg/mL</small>
-        </button>
-      </div>
+      <PediatricModeSwitch activeMode={activePedPrep} onSelect={setActivePedPrep} />
     ) : null;
   const prepTableCurrentRow =
     prep.table && validKg ? prep.table.rows.find((row) => row.poids === kg) : null;
@@ -1916,19 +1866,7 @@ const PrepBlock = ({
 
     return (
       <section className="prep-v2" aria-label="Préparation v2">
-        <div className="prep-head">
-          <div className="prep-head-title">
-            <PrepIcon />
-            Préparation
-          </div>
-          <div className="prep-tags">
-            {tags.map((tag) => (
-              <span key={tag} className="prep-tag">
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
+        <PrepHeader tags={tags} />
         <div
           className={`prep-body ${!pediatricPrepOnly && !prepMainV2Block ? "prep-body-single" : ""}`}
         >

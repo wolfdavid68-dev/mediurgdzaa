@@ -3,18 +3,18 @@ import { PSE } from "../data/pse";
 import { PSE_PREVIEW } from "../data/pse.preview";
 import { calcDoseFromRate } from "../lib/calc";
 import {
-  buildPrepMedPreviewModel,
+  buildPreparationModel,
   extractPreparedVolume,
-  getPreviewPseDefault,
-  getPreviewPseSteps,
-  type PrepPreviewPopulation,
-} from "./PrepMedPreviewModel";
+  getPreparationPseDefault,
+  getPreparationPseSteps,
+  type PreparationPopulation,
+} from "./PreparationModel";
 
 const PREVIEW_PSE = { ...PSE, ...PSE_PREVIEW };
 
 const modelFor = (
   drugName: string,
-  population: PrepPreviewPopulation,
+  population: PreparationPopulation,
   weight: string,
   recipeIndex = 0,
   pseInput?: number,
@@ -24,14 +24,14 @@ const modelFor = (
   const drug = DRUGS.find((candidate) => candidate.nom === drugName);
   if (!drug) throw new Error(`Médicament introuvable : ${drugName}`);
   const pse = PSE[drug.id] || null;
-  return buildPrepMedPreviewModel({
+  return buildPreparationModel({
     drug,
     prep: drug.prep || null,
     pse,
     population,
     weight,
     recipeIndex,
-    pseInput: pseInput ?? getPreviewPseDefault(pse, weight, drug.prep || null),
+    pseInput: pseInput ?? getPreparationPseDefault(pse, weight, drug.prep || null),
     recipeInput,
     ageBand,
     monitoringLabel: (drug.monitoring || []).join(" + "),
@@ -40,7 +40,7 @@ const modelFor = (
 
 const previewModelFor = (
   drugName: string,
-  population: PrepPreviewPopulation,
+  population: PreparationPopulation,
   weight: string,
   recipeIndex = 0,
   pseInput?: number,
@@ -51,14 +51,14 @@ const previewModelFor = (
   if (!drug) throw new Error(`Médicament introuvable : ${drugName}`);
   const prep = drug.prep || null;
   const pse = PREVIEW_PSE[drug.id] || null;
-  return buildPrepMedPreviewModel({
+  return buildPreparationModel({
     drug,
     prep,
     pse,
     population,
     weight,
     recipeIndex,
-    pseInput: pseInput ?? getPreviewPseDefault(pse, weight, prep),
+    pseInput: pseInput ?? getPreparationPseDefault(pse, weight, prep),
     recipeInput,
     ageBand,
     monitoringLabel: (drug.monitoring || []).join(" + "),
@@ -87,14 +87,14 @@ describe("modèle Prépa Med v2.5", () => {
     for (const { drug, population, weight } of cases) {
       const prep = drug.prep || null;
       const pse = PREVIEW_PSE[drug.id] || null;
-      const first = buildPrepMedPreviewModel({
+      const first = buildPreparationModel({
         drug,
         prep,
         pse,
         population,
         weight,
         recipeIndex: 0,
-        pseInput: getPreviewPseDefault(pse, weight, prep),
+        pseInput: getPreparationPseDefault(pse, weight, prep),
         monitoringLabel: (drug.monitoring || []).join(" + "),
       });
 
@@ -104,14 +104,14 @@ describe("modèle Prépa Med v2.5", () => {
       first.controls.forEach((control) => expect(control.trim()).not.toBe(""));
 
       for (let recipeIndex = 0; recipeIndex < first.modes.length; recipeIndex += 1) {
-        const model = buildPrepMedPreviewModel({
+        const model = buildPreparationModel({
           drug,
           prep,
           pse,
           population,
           weight,
           recipeIndex,
-          pseInput: getPreviewPseDefault(pse, weight, prep),
+          pseInput: getPreparationPseDefault(pse, weight, prep),
           monitoringLabel: (drug.monitoring || []).join(" + "),
         });
         const text = flattenModelText(model);
@@ -280,7 +280,9 @@ describe("modèle Prépa Med v2.5", () => {
     );
     expect(flattenModelText(anexate)).not.toContain("1,2000000000000002");
     const anexateDrug = DRUGS.find((drug) => drug.nom === "ANEXATE")!;
-    expect(getPreviewPseSteps(PSE[anexateDrug.id], "80", anexateDrug.prep || null)).toContain(20);
+    expect(getPreparationPseSteps(PSE[anexateDrug.id], "80", anexateDrug.prep || null)).toContain(
+      20
+    );
   });
 
   test("distingue prélèvement, injection, perfusion et autres voies sur les recettes à risque", () => {
@@ -709,7 +711,7 @@ describe("modèle Prépa Med v2.5", () => {
     for (const drug of DRUGS) {
       const pse = PSE[drug.id];
       if (!pse || pse.hideBlock || pse.inputMode !== "mlh") continue;
-      const steps = getPreviewPseSteps(pse, "80", drug.prep || null);
+      const steps = getPreparationPseSteps(pse, "80", drug.prep || null);
       expect(steps.length).toBeGreaterThan(0);
       if (drug.prep?.dose_threshold !== undefined) {
         expect(steps).toContain(20);

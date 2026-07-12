@@ -1,7 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check as CheckIcon,
-  CheckCircle2,
   ChevronDown,
   ClipboardCopy,
   Download,
@@ -34,6 +33,15 @@ import {
 } from "../lib/acrSession";
 import { readSession, writeSession } from "../lib/acrSessionStore";
 import { enqueueSyncItem } from "../lib/deviceSync";
+import {
+  CheckOption,
+  Chip,
+  Field,
+  parseOptionalNumber,
+  Section,
+  toggleInArray,
+} from "./acr/AcrRecordControls";
+import { buildRecordText, displayPatient, getTimelineEvents } from "./acr/AcrRecordText";
 
 type AcrRecordViewProps = {
   sessionId: string;
@@ -52,15 +60,6 @@ type AcrRecordViewProps = {
 
 type ThemePreference = "dark" | "light";
 
-type FieldProps = {
-  label: string;
-  value?: string | number;
-  type?: string;
-  placeholder?: string;
-  suffix?: string;
-  onChange: (value: string) => void;
-};
-
 const SIGNE_REVEIL = [
   "Mouvements volontaires",
   "Ouverture des yeux",
@@ -69,7 +68,6 @@ const SIGNE_REVEIL = [
 ];
 const DESTINATIONS: AcrDevenir[] = ["Décès", "Transfert réa", "Retour domicile", "Autre"];
 const VOIES: AcrVoie[] = ["Périphérique", "Centrale", "IO"];
-const TIMELINE_EVENT_TYPES = new Set(["start", "choc", "adre", "amio", "rosc"]);
 
 const readStoredRecord = (sessionId: string) =>
   readSession(sessionId) ?? { ...createEmptyAcrSession(), id: sessionId };
@@ -85,186 +83,6 @@ const syncAcrRecord = (record: AcrFullSession) => {
 
 const readThemePreference = (): ThemePreference =>
   document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-
-const Field = ({ label, value, type = "text", placeholder, suffix, onChange }: FieldProps) => (
-  <label className="acr-record-field">
-    <span>{label}</span>
-    <div className="acr-record-input-wrap">
-      <input
-        type={type}
-        value={value ?? ""}
-        placeholder={placeholder}
-        onChange={(event: { currentTarget: HTMLInputElement }) =>
-          onChange(event.currentTarget.value)
-        }
-      />
-      {suffix && <em>{suffix}</em>}
-    </div>
-  </label>
-);
-
-const Section = ({
-  title,
-  subtitle,
-  showStatus = true,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  showStatus?: boolean;
-  children: ReactNode;
-}) => {
-  const [open, setOpen] = useState(true);
-  const panelId = useId();
-  const match = /^(\d+)\.\s*(.*)$/.exec(title);
-  const index = match?.[1];
-  const cleanTitle = match?.[2] ?? title;
-  return (
-    <section className={`acr-record-section ${open ? "" : "acr-record-section-collapsed"}`}>
-      <button
-        type="button"
-        className="acr-record-section-head"
-        aria-expanded={open}
-        aria-controls={panelId}
-        aria-label={`${open ? "Replier" : "Déplier"} ${cleanTitle}`}
-        onClick={() => setOpen((value) => !value)}
-      >
-        {index && <span className="acr-record-section-index">{index}</span>}
-        <div className="acr-record-section-head-text">
-          <h4>{cleanTitle}</h4>
-          {subtitle && <p className="acr-record-section-subtitle">{subtitle}</p>}
-        </div>
-        {showStatus && (
-          <CheckCircle2
-            className="acr-record-section-status"
-            size={20}
-            strokeWidth={2.7}
-            aria-hidden="true"
-          />
-        )}
-        <ChevronDown
-          className="acr-record-section-chevron"
-          size={20}
-          strokeWidth={2.4}
-          aria-hidden="true"
-        />
-      </button>
-      <div id={panelId} className="acr-record-section-body">
-        {children}
-      </div>
-    </section>
-  );
-};
-
-const Chip = ({
-  active,
-  children,
-  onClick,
-}: {
-  active: boolean;
-  children: ReactNode;
-  onClick: () => void;
-}) => (
-  <button
-    type="button"
-    className={`acr-record-chip ${active ? "acr-record-chip-active" : ""}`}
-    aria-pressed={active}
-    onClick={onClick}
-  >
-    {children}
-  </button>
-);
-
-const CheckOption = ({
-  checked,
-  children,
-  className,
-  onChange,
-}: {
-  checked: boolean;
-  children: ReactNode;
-  className?: string;
-  onChange: () => void;
-}) => (
-  <button
-    type="button"
-    className={`acr-record-check ${checked ? "acr-record-check-on" : ""} ${className ?? ""}`}
-    aria-pressed={checked}
-    onClick={onChange}
-  >
-    <span aria-hidden="true">{checked && <CheckIcon size={14} strokeWidth={3} />}</span>
-    {children}
-  </button>
-);
-
-const toggleInArray = (items: string[], value: string): string[] =>
-  items.includes(value) ? items.filter((item) => item !== value) : [...items, value];
-
-const parseOptionalNumber = (value: string): number | undefined => {
-  if (!value.trim()) return undefined;
-  const parsed = Number(value.replace(",", "."));
-  return Number.isFinite(parsed) ? parsed : undefined;
-};
-
-// Dossier anonyme : pas de nom patient. Résumé clinique non identifiant.
-const displayPatient = (record: AcrFullSession) => {
-  const summary = [record.patient.age && `${record.patient.age} ans`, record.patient.sexe]
-    .filter(Boolean)
-    .join(" · ");
-  return summary || "Patient anonyme";
-};
-
-const getTimelineEvents = (record: AcrFullSession) =>
-  record.events.filter((event) => TIMELINE_EVENT_TYPES.has(event.type));
-
-// Texte de transmission copiable, dossier anonyme — aucune donnée nominative.
-const buildRecordText = (record: AcrFullSession): string => {
-  const lines: string[] = [];
-  const s = record.stats;
-  const timelineEvents = getTimelineEvents(record);
-  lines.push(
-    `BILAN ACR ANONYME — ${record.pediatric ? "Enfant" : "Adulte"} · ${record.protocol === "acls" ? "ACLS" : "ERC"}`
-  );
-  const ident = [record.patient.age && `${record.patient.age} ans`, record.patient.sexe]
-    .filter(Boolean)
-    .join(" · ");
-  if (ident) lines.push(`Patient      : ${ident}`);
-  const ctx = [record.contexte.equipe, record.contexte.lit].filter(Boolean).join(" · ");
-  if (ctx) lines.push(`Contexte     : ${ctx}`);
-  lines.push(`Durée RCP    : ${formatAcrElapsed(s.elapsed)} (cycle ${s.cycle})`);
-  lines.push(`Chocs        : ${s.shocks}`);
-  lines.push(`Adrénaline   : ${s.adres}`);
-  lines.push(`Amiodarone   : ${s.amios}`);
-  if (record.horaires.survenueAcr || record.horaires.debutRcp || record.racs.heure) {
-    lines.push("");
-    lines.push("Horaires :");
-    if (record.horaires.survenueAcr) lines.push(`  Survenue ACR : ${record.horaires.survenueAcr}`);
-    if (record.horaires.debutRcp) lines.push(`  Début RCP    : ${record.horaires.debutRcp}`);
-    if (record.racs.heure || record.horaires.racs)
-      lines.push(`  RACS         : ${record.racs.heure || record.horaires.racs}`);
-  }
-  if (timelineEvents.length > 0) {
-    lines.push("");
-    lines.push("Horaires RCP / traitements :");
-    timelineEvents.forEach((event) => {
-      lines.push(`  ${formatWallTime(event.at)} · T+${formatAcrElapsed(event.t)} · ${event.label}`);
-    });
-  }
-  if (record.cycles.length > 0) {
-    lines.push("");
-    lines.push("Cycles :");
-    record.cycles.forEach((c) => {
-      const acts = [c.choc, c.drogues].filter(Boolean).join(" · ") || c.actions.join(" · ") || "—";
-      lines.push(`  C${c.cycle} (T+${formatAcrElapsed(c.t)}) ${c.rhythm || "—"} → ${acts}`);
-    });
-  }
-  if (record.devenir.destination || record.devenir.commentaires) {
-    lines.push("");
-    if (record.devenir.destination) lines.push(`Devenir      : ${record.devenir.destination}`);
-    if (record.devenir.commentaires) lines.push(`Commentaires : ${record.devenir.commentaires}`);
-  }
-  return lines.join("\n");
-};
 
 const AcrRecordView = ({
   sessionId,
