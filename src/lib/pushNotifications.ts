@@ -1,12 +1,7 @@
 import { getCurrentSession } from "./auth";
 
 export type PushNotificationStatus =
-  | "unsupported"
-  | "missing-key"
-  | "denied"
-  | "default"
-  | "enabled"
-  | "disabled";
+  "unsupported" | "missing-key" | "denied" | "default" | "enabled" | "disabled";
 
 type PushResult = { ok: true; status: PushNotificationStatus } | { ok: false; error: string };
 type PushTestResult = { ok: true; sent: number } | { ok: false; error: string };

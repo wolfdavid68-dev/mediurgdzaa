@@ -336,14 +336,12 @@ const containerPresentations = (value?: string): ContainerPresentation[] => {
   if (!type) return [];
   const presentations: ContainerPresentation[] = [
     ...value.matchAll(/(\d[\d\s]*(?:[,.]\d+)?)\s*(µg|ug|mg|g|UI)\s*\/\s*(\d+(?:[,.]\d+)?)\s*mL/gi),
-  ].map(
-    (match): ContainerPresentation => ({
-      type,
-      dose: parseSpacedNumber(match[1]),
-      unit: match[2].replace(/^ug$/i, "µg"),
-      volume: parseNumber(match[3]),
-    })
-  );
+  ].map((match): ContainerPresentation => ({
+    type,
+    dose: parseSpacedNumber(match[1]),
+    unit: match[2].replace(/^ug$/i, "µg"),
+    volume: parseNumber(match[3]),
+  }));
   return presentations.filter(
     (presentation, index) =>
       presentations.findIndex(

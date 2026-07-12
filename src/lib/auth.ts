@@ -175,8 +175,7 @@ export const passwordStrength = (p: string): number => {
 // déclenche le repli sur le profil caché.
 type AuthErrorKind = "network" | "notfound" | "config" | "unknown";
 export type AuthResult<T = void> =
-  | { ok: true; data: T }
-  | { ok: false; error: string; kind?: AuthErrorKind };
+  { ok: true; data: T } | { ok: false; error: string; kind?: AuthErrorKind };
 
 // Heuristique « erreur réseau » : message fetch/timeout OU navigator
 // hors-ligne. Volontairement large — pour un outil d'urgence, mieux
