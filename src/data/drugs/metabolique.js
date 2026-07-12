@@ -74,6 +74,7 @@ export const DRUGS_METABOLIQUE = [
   },
   {
     id: 45,
+    preparationStrategy: "dose-based-dilution",
     nom: "SOLUMEDROL",
     commercial: "Méthylprednisolone",
     dci: "Méthylprednisolone",
@@ -168,6 +169,7 @@ export const DRUGS_METABOLIQUE = [
   },
   {
     id: 46,
+    preparationStrategy: "pediatric-glucose",
     nom: "GLUCOSE 30%",
     commercial: "Glucose 30%",
     dci: "Glucose anhydre",

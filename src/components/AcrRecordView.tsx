@@ -24,7 +24,6 @@ import {
   formatWallTime,
   mergeTimerSnapshotIntoSession,
   type AcrCycleRecord,
-  type AcrDevenir,
   type AcrFullSession,
   type AcrRhythm,
   type AcrTimedEvent,
@@ -36,10 +35,13 @@ import { enqueueSyncItem } from "../lib/deviceSync";
 import {
   CheckOption,
   Chip,
+  DESTINATIONS,
   Field,
   parseOptionalNumber,
   Section,
+  SIGNE_REVEIL,
   toggleInArray,
+  VOIES,
 } from "./acr/AcrRecordControls";
 import { buildRecordText, displayPatient, getTimelineEvents } from "./acr/AcrRecordText";
 
@@ -59,15 +61,6 @@ type AcrRecordViewProps = {
 };
 
 type ThemePreference = "dark" | "light";
-
-const SIGNE_REVEIL = [
-  "Mouvements volontaires",
-  "Ouverture des yeux",
-  "Respiration spontanée",
-  "Autre",
-];
-const DESTINATIONS: AcrDevenir[] = ["Décès", "Transfert réa", "Retour domicile", "Autre"];
-const VOIES: AcrVoie[] = ["Périphérique", "Centrale", "IO"];
 
 const readStoredRecord = (sessionId: string) =>
   readSession(sessionId) ?? { ...createEmptyAcrSession(), id: sessionId };
@@ -112,7 +105,24 @@ const AcrRecordView = ({
   const [showActions, setShowActions] = useState(false);
   const [themePreference, setThemePreference] = useState<ThemePreference>(readThemePreference);
   const captureRef = useRef<HTMLDivElement>(null);
+  const timeoutIds = useRef(new Set<number>());
   const timelineEvents = getTimelineEvents(record);
+
+  const scheduleTimeout = (callback: () => void, delay: number) => {
+    const id = window.setTimeout(() => {
+      timeoutIds.current.delete(id);
+      callback();
+    }, delay);
+    timeoutIds.current.add(id);
+  };
+
+  useEffect(
+    () => () => {
+      timeoutIds.current.forEach(window.clearTimeout);
+      timeoutIds.current.clear();
+    },
+    []
+  );
 
   useEffect(() => {
     setRecord((prev) =>
@@ -147,7 +157,7 @@ const AcrRecordView = ({
     writeSession(record);
     syncAcrRecord(record);
     setSaved(true);
-    window.setTimeout(() => setSaved(false), 1800);
+    scheduleTimeout(() => setSaved(false), 1800);
   };
 
   const exportJson = () => {
@@ -163,7 +173,7 @@ const AcrRecordView = ({
 
   const printPdf = () => {
     saveNow();
-    window.setTimeout(() => window.print(), 80);
+    scheduleTimeout(() => window.print(), 80);
   };
 
   const resetRecord = () => {
@@ -206,7 +216,7 @@ const AcrRecordView = ({
         document.body.removeChild(ta);
       }
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      scheduleTimeout(() => setCopied(false), 2000);
     } catch {}
   };
 
@@ -252,7 +262,7 @@ const AcrRecordView = ({
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: "Dossier ACR" });
           setExportStatus("shared");
-          window.setTimeout(() => setExportStatus(null), 2500);
+          scheduleTimeout(() => setExportStatus(null), 2500);
           return;
         }
       } catch (shareErr) {
@@ -266,10 +276,10 @@ const AcrRecordView = ({
       link.href = dataUrl;
       link.click();
       setExportStatus("downloaded");
-      window.setTimeout(() => setExportStatus(null), 2500);
+      scheduleTimeout(() => setExportStatus(null), 2500);
     } catch {
       setExportStatus("error");
-      window.setTimeout(() => setExportStatus(null), 3000);
+      scheduleTimeout(() => setExportStatus(null), 3000);
     } finally {
       setExporting(false);
     }

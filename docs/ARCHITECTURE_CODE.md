@@ -32,6 +32,19 @@ Le terme `preview` ne doit être utilisé que pour les surcharges réellement
 expérimentales activées par `?author=preview`. La préparation v2.5 publique est
 nommée `Preparation` dans les fichiers et les API TypeScript.
 
+Les traitements particuliers utilisent `drug.preparationStrategy` dans les
+données cliniques. Le moteur ne doit pas sélectionner une règle métier à partir
+d'un identifiant numérique de médicament.
+
+Le build sépare `medicaments` et `medicaments-preparation`. Le premier contient
+la liste et la fiche, le second les calculateurs spécialisés ; les deux restent
+précachés par Workbox pour garantir le fonctionnement hors ligne.
+
+Les données PSE et les alias de recherche vivent dans `data-pse` et
+`data-search`, séparément des fiches `data-medic`. Les styles de préparation,
+du journal des versions et de l’ACR suivent également leur chunk fonctionnel au
+lieu d’alourdir le CSS principal.
+
 ## Dossier ACR
 
 - `components/AcrRecordView.tsx` orchestre le dossier et son état.

@@ -240,6 +240,7 @@ export const DRUGS_ANTIDOTES = [
   },
   {
     id: 30,
+    preparationStrategy: "glucagon-infusion",
     nom: "GLUCAGEN",
     commercial: "Glucagon",
     dci: "Glucagon",

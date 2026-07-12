@@ -14,7 +14,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 // Le manifest PWA et la liste de précache sont désormais générés depuis
 // cette config — plus de public/manifest.json ni de service-worker.js
 // à maintenir à la main.
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     // vite-plugin-checker : remonte les erreurs tsc + oxlint dans l'overlay
     // Vite en dev (le rond rouge en bas à droite). Plus besoin de garder un
@@ -23,15 +23,11 @@ export default defineConfig({
     // Le checker tourne en worker thread, n'impacte pas le HMR.
     // ESLint full type-aware reste sur le run manuel + pre-commit ; oxlint
     // (12 ms) suffit largement pour l'overlay dev.
-    checker({
-      typescript: true,
-      oxlint: { lintCommand: "oxlint src" },
-      // Le build de production est précédé par les contrôles dédiés de la
-      // chaîne de vérification/release. Garder ce worker actif pendant
-      // `vite build` refait les mêmes analyses et ralentit inutilement la
-      // génération des assets ; l'overlay reste pleinement actif en dev.
-      enableBuild: false,
-    }),
+    command === "serve" &&
+      checker({
+        typescript: true,
+        oxlint: { lintCommand: "oxlint src" },
+      }),
     react(),
     // React Compiler (stable v1.0) : analyse les composants et insère
     // automatiquement la mémoïsation (useMemo/useCallback implicites)
@@ -233,6 +229,16 @@ export default defineConfig({
               test: /[\\/]src[\\/]data[\\/]pse\.preview/,
               priority: 92,
             },
+            {
+              name: "data-pse",
+              test: /[\\/]src[\\/]data[\\/]pse\.js$/,
+              priority: 91,
+            },
+            {
+              name: "data-search",
+              test: /[\\/]src[\\/]data[\\/]aliases\.js$/,
+              priority: 91,
+            },
             { name: "data-medic", test: /[\\/]src[\\/]data[\\/](drugs|pse|aliases)/, priority: 90 },
             {
               name: "auth-admin",
@@ -251,8 +257,18 @@ export default defineConfig({
             },
             {
               name: "acr",
-              test: /([\\/]src[\\/]components[\\/]Acr|[\\/]src[\\/]styles[\\/]acr-)/,
+              test: /([\\/]src[\\/]components[\\/]Acr|[\\/]src[\\/]styles[\\/](acr-|urgence-button))/,
               priority: 70,
+            },
+            {
+              name: "changelog",
+              test: /([\\/]src[\\/]components[\\/]ChangelogModal|[\\/]src[\\/]data[\\/]changelog|[\\/]src[\\/]styles[\\/]changelog)/,
+              priority: 69,
+            },
+            {
+              name: "medicaments-preparation",
+              test: /([\\/]src[\\/]components[\\/](PreparationModel|PrepBlock|PseBlock)|[\\/]src[\\/]components[\\/]preparation[\\/]|[\\/]src[\\/]styles[\\/]prep-med-preview)/,
+              priority: 68,
             },
             {
               name: "protocoles-incompat",
@@ -306,7 +322,6 @@ export default defineConfig({
   // → `localStorage` undefined en node (comportement pré-Node-25 pour
   // lequel le projet "libs" est conçu). happy-dom (projet "dom") fournit
   // son propre localStorage, non affecté. NE PAS retirer ce flag.
-  // @ts-expect-error — clé `test` ajoutée par vitest, pas dans le type de Vite
   test: {
     // Projects : sépare les tests purs (logique métier, reducers) du test DOM.
     // - "libs" tourne en environnement node pur → ~2× plus rapide qu'en happy-dom,
@@ -331,6 +346,42 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
+      thresholds: {
+        statements: 64,
+        branches: 61,
+        functions: 52,
+        lines: 65,
+        "src/lib/calc.ts": {
+          statements: 90,
+          branches: 88,
+          functions: 100,
+          lines: 95,
+        },
+        "src/components/PreparationModel.ts": {
+          statements: 95,
+          branches: 85,
+          functions: 100,
+          lines: 95,
+        },
+        "src/components/preparation/model/specialRecipes.ts": {
+          statements: 95,
+          branches: 60,
+          functions: 100,
+          lines: 95,
+        },
+        "src/lib/acrSession.ts": {
+          statements: 90,
+          branches: 90,
+          functions: 90,
+          lines: 90,
+        },
+        "src/lib/deviceSync.ts": {
+          statements: 75,
+          branches: 68,
+          functions: 75,
+          lines: 80,
+        },
+      },
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "src/**/*.test.{js,ts,tsx}",
@@ -393,4 +444,4 @@ export default defineConfig({
       },
     ],
   },
-});
+}));

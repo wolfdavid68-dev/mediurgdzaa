@@ -197,8 +197,17 @@ type DrugPrep = {
   dose_calc?: boolean;
 };
 
+type PreparationStrategy =
+  | "pediatric-adrenaline"
+  | "glucagon-infusion"
+  | "dose-based-dilution"
+  | "pediatric-glucose"
+  | "pediatric-not-established"
+  | "pediatric-age-band";
+
 export type Drug = {
   id: number;
+  preparationStrategy?: PreparationStrategy;
   nom: string;
   commercial: string;
   dci: string;

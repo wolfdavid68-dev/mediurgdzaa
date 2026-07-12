@@ -1,5 +1,15 @@
 import { useId, useState, type ReactNode } from "react";
 import { Check as CheckIcon, CheckCircle2, ChevronDown } from "lucide-react";
+import type { AcrDevenir, AcrVoie } from "../../lib/acrSession";
+
+export const SIGNE_REVEIL = [
+  "Mouvements volontaires",
+  "Ouverture des yeux",
+  "Respiration spontanée",
+  "Autre",
+];
+export const DESTINATIONS: AcrDevenir[] = ["Décès", "Transfert réa", "Retour domicile", "Autre"];
+export const VOIES: AcrVoie[] = ["Périphérique", "Centrale", "IO"];
 
 type FieldProps = {
   label: string;

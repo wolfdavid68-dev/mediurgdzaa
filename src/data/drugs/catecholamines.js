@@ -7,6 +7,7 @@
 export const DRUGS_CATECHOLAMINES = [
   {
     id: 13,
+    preparationStrategy: "pediatric-adrenaline",
     nom: "ADRÉNALINE",
     commercial: "Adrénaline",
     dci: "Adrénaline tartrate / Épinéphrine",

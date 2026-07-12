@@ -426,6 +426,7 @@ export const DRUGS_NEUROLOGIE = [
   },
   {
     id: 51,
+    preparationStrategy: "pediatric-not-established",
     nom: "NIMOTOP",
     commercial: "Nimodipine",
     dci: "Nimodipine",

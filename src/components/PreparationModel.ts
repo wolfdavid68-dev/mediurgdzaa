@@ -68,9 +68,12 @@ export const buildPreparationModel = ({
   // La donnée principale indique explicitement « Non établi » chez l’enfant.
   // Cette restriction reste liée au médicament, elle ne doit pas être inférée
   // génériquement depuis la présence d’une recette adulte non populationnée.
-  const blockedByPopulation = drug.id === 51 && population === "enfant";
+  const blockedByPopulation =
+    drug.preparationStrategy === "pediatric-not-established" && population === "enfant";
   const pediatricTable = Boolean(prep?.pedTable && population === "enfant" && !blockedByWeight);
-  const pediatricAdrenaline = Boolean(drug.id === 13 && pediatricTable);
+  const pediatricAdrenaline = Boolean(
+    drug.preparationStrategy === "pediatric-adrenaline" && pediatricTable
+  );
   const pediatricTableOnly = pediatricTable && !pediatricAdrenaline;
   const pediatricAdrenalineRecipes: PrepRecipe[] = pediatricAdrenaline
     ? [
@@ -523,7 +526,7 @@ export const buildPreparationModel = ({
         }
       : null;
   const ageControl: PreparationControl | null =
-    (drug.id === 74 || drug.id === 75) && activeRecipe?.population === "enfant"
+    drug.preparationStrategy === "pediatric-age-band" && activeRecipe?.population === "enfant"
       ? {
           kind: "age",
           value: ageBand,

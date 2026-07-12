@@ -108,7 +108,7 @@ export const buildSpecialRecipeSteps = (
   const kg = Number.parseFloat(weight);
   const validKg = Number.isFinite(kg) && kg > 0 && kg <= 300;
 
-  if (drug.id === 46 && recipe?.population === "enfant") {
+  if (drug.preparationStrategy === "pediatric-glucose" && recipe?.population === "enfant") {
     if (!validKg) {
       return {
         requiresUserInput: true,
@@ -188,7 +188,7 @@ export const buildSpecialRecipeSteps = (
     };
   }
 
-  if (drug.id === 13 && recipe?.mode === "ped-ivd") {
+  if (drug.preparationStrategy === "pediatric-adrenaline" && recipe?.mode === "ped-ivd") {
     const steps = buildPedSteps(prep, weight);
     const requiresUserInput = steps.some((step) => /poids requis/i.test(step.result));
     return {
@@ -200,7 +200,7 @@ export const buildSpecialRecipeSteps = (
     };
   }
 
-  if (drug.id === 13 && recipe?.mode === "ped-im") {
+  if (drug.preparationStrategy === "pediatric-adrenaline" && recipe?.mode === "ped-im") {
     const doseMg = validKg ? Math.min(kg * 0.01, 0.5) : null;
     return {
       requiresUserInput: doseMg === null,
@@ -348,7 +348,11 @@ export const buildSpecialRecipeSteps = (
     };
   }
 
-  if (drug.id === 30 && recipe?.population === "adulte" && recipe.dose_input_unit === "mg/h") {
+  if (
+    drug.preparationStrategy === "glucagon-infusion" &&
+    recipe?.population === "adulte" &&
+    recipe.dose_input_unit === "mg/h"
+  ) {
     const prescribedRate = recipeInput;
     const vialCount = prescribedRate === null ? null : Math.ceil(prescribedRate * 4);
     return {
@@ -389,7 +393,7 @@ export const buildSpecialRecipeSteps = (
     };
   }
 
-  if (drug.id === 30 && recipe?.population === "enfant") {
+  if (drug.preparationStrategy === "glucagon-infusion" && recipe?.population === "enfant") {
     const selected = validKg
       ? recipe.rows?.find((row) => (kg < 25 ? /^<\s*25\s*kg/i : /^≥\s*25\s*kg/i).test(row.label))
       : null;
@@ -429,7 +433,10 @@ export const buildSpecialRecipeSteps = (
     };
   }
 
-  if (drug.id === 45 && recipe?.dose_based_dilution?.source === "dose_input") {
+  if (
+    drug.preparationStrategy === "dose-based-dilution" &&
+    recipe?.dose_based_dilution?.source === "dose_input"
+  ) {
     const dose = recipeInput;
     const presentations = (drug.cond || [])
       .map((condition) => {
@@ -679,7 +686,7 @@ export const buildSpecialRecipeSteps = (
     };
   }
 
-  if ((drug.id === 74 || drug.id === 75) && recipe?.population === "enfant") {
+  if (drug.preparationStrategy === "pediatric-age-band" && recipe?.population === "enfant") {
     const branchPattern = ageBand === "lt6" ? /^<\s*6\s*ans/i : /^≥\s*6\s*ans/i;
     const selected = ageBand ? recipe.rows?.find((row) => branchPattern.test(row.label)) : null;
     const administration = recipe.rows?.find((row) => /administr/i.test(row.label));

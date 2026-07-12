@@ -157,6 +157,7 @@ export const DRUGS_PNEUMOLOGIE = [
   },
   {
     id: 74,
+    preparationStrategy: "pediatric-age-band",
     nom: "BRICANYL",
     commercial: "Terbutaline",
     dci: "Terbutaline sulfate",
@@ -274,6 +275,7 @@ export const DRUGS_PNEUMOLOGIE = [
   },
   {
     id: 75,
+    preparationStrategy: "pediatric-age-band",
     nom: "ATROVENT",
     commercial: "Ipratropium",
     dci: "Bromure d'ipratropium",

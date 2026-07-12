@@ -72,11 +72,13 @@ function strategiesFromMainData(drug: (typeof DRUGS)[number]) {
     if (pse.extra) strategies.push("pse_extra_unit");
   }
 
-  // Cas explicitement portés par le moteur main mais non exprimés par un
-  // champ générique dans drugs.js : ils restent volontairement liés à l’id.
-  if (drug.id === 13) strategies.push("pediatric_adrenaline_modes");
-  if (drug.id === 51) strategies.push("pediatric_not_established");
-  if (drug.id === 74 || drug.id === 75) strategies.push("pediatric_age_band");
+  // Cas explicitement portés par le moteur main via une stratégie clinique
+  // déclarative dans les données, sans couplage à l'identifiant numérique.
+  if (drug.preparationStrategy === "pediatric-adrenaline")
+    strategies.push("pediatric_adrenaline_modes");
+  if (drug.preparationStrategy === "pediatric-not-established")
+    strategies.push("pediatric_not_established");
+  if (drug.preparationStrategy === "pediatric-age-band") strategies.push("pediatric_age_band");
 
   return strategies;
 }

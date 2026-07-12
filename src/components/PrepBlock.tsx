@@ -693,11 +693,11 @@ const PrepBlock = ({
   const pediatricPrepBlock =
     activePedPrep === "pse" ? pedPseBlock : activePedPrep === "im" ? pedImBlock : pedTableBlock;
   // Le switch IVD ACR / IM / PSE et les blocs pedIm/pedPse sont du contenu
-  // spécifique ADRÉNALINE codé en dur → réservé à drug.id === 13. Les autres
+  // spécifique ADRÉNALINE → réservé à sa stratégie déclarative. Les autres
   // drogues à pedTable (ex. Nalbuphine) restent sur activePedPrep "ivd" et
   // rendent leur pedTable générique via pedTableBlock.
   const pediatricModeSwitch =
-    pediatricPrepOnly && drug.id === 13 ? (
+    pediatricPrepOnly && drug.preparationStrategy === "pediatric-adrenaline" ? (
       <PediatricModeSwitch activeMode={activePedPrep} onSelect={setActivePedPrep} />
     ) : null;
   const prepTableCurrentRow =
