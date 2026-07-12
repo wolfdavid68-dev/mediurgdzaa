@@ -6,10 +6,6 @@ const path = require("node:path");
 const root = process.cwd();
 const sourceRoot = path.join(root, "src");
 const defaultLimit = 1000;
-const temporaryLimits = new Map([
-  ["src/components/PrepBlock.tsx", 2000],
-  ["src/components/PreparationModel.ts", 2000],
-]);
 
 const sourceExtensions = new Set([".js", ".ts", ".tsx"]);
 const normalize = (filePath) => path.relative(root, filePath).replaceAll("\\", "/");
@@ -35,7 +31,7 @@ const files = collectFiles(sourceRoot)
   .map(({ filePath, relativePath }) => ({
     relativePath,
     lines: fs.readFileSync(filePath, "utf8").split(/\r?\n/).length,
-    limit: temporaryLimits.get(relativePath) ?? defaultLimit,
+    limit: defaultLimit,
   }))
   .sort((a, b) => b.lines - a.lines);
 

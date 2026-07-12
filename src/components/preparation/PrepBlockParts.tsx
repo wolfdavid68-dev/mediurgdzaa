@@ -1,4 +1,12 @@
-import { InfoIcon, PrepIcon, recipeModeClass, type PrepRecipe } from "../PrepBlock.parts";
+import {
+  formatDoseNumber,
+  InfoIcon,
+  PrepIcon,
+  recipeModeClass,
+  type DrugPrep,
+  type PrepRecipe,
+} from "../PrepBlock.parts";
+import type { calcPedTable } from "../../lib/calc";
 import type { Drug } from "../../types/data";
 
 export type PrepBlockProps = {
@@ -22,6 +30,103 @@ export const PrepHeader = ({ tags }: { tags: Array<string | undefined> }) => (
         </span>
       ))}
     </div>
+  </div>
+);
+
+export const PediatricPreparationTable = ({
+  table,
+  result,
+  validWeight,
+  previewMode,
+}: {
+  table: NonNullable<DrugPrep["pedTable"]>;
+  result: ReturnType<typeof calcPedTable>;
+  validWeight: boolean | 0;
+  previewMode: boolean;
+}) => (
+  <div className={previewMode ? "prep-calc prep-recipe-ped" : "prep-calc-box"}>
+    <div className="prep-calc-header">
+      {previewMode ? (
+        <>
+          <span>Préparation pédiatrique</span>
+          <span>{result?.volume_final ? `${result.volume_final} mL` : "Pédiatrique"}</span>
+        </>
+      ) : (
+        <>
+          <PrepIcon />
+          {table.titre}
+        </>
+      )}
+    </div>
+    {!previewMode && table.description && <p className="prep-table-desc">{table.description}</p>}
+    {!validWeight && (
+      <div className="prep-empty-text">Saisir le poids de l'enfant ci-dessus pour calculer.</div>
+    )}
+    {validWeight && !result && (
+      <div className="prep-empty-text">
+        Aucune préparation calculable pour ce poids — vérifier le protocole.
+      </div>
+    )}
+    {validWeight && result && (
+      <>
+        <div className="prep-calc-row">
+          <span className="prep-calc-step">Pour</span>
+          <span className="prep-calc-val prep-calc-highlight">{result.kg} kg</span>
+        </div>
+        {result.dose && result.dose_unit && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Dose</span>
+            <span className="prep-calc-val prep-calc-highlight">
+              {formatDoseNumber(result.dose)} {result.dose_unit}
+            </span>
+          </div>
+        )}
+        {result.mode === "inject" && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">Injecter</span>
+            <span className="prep-calc-val prep-calc-highlight">{result.vol_inject} mL</span>
+          </div>
+        )}
+        {result.mode === "dilute" && (
+          <>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Prélever</span>
+              <span className="prep-calc-val prep-calc-highlight">
+                {result.vol_med} mL de produit
+              </span>
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Compléter</span>
+              <span className="prep-calc-val">
+                {result.vol_solvant} mL {result.solvant}
+              </span>
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Préparation</span>
+              <span className="prep-calc-val">{result.preparation}</span>
+            </div>
+            <div className="prep-calc-row">
+              <span className="prep-calc-step">Final</span>
+              <span className="prep-calc-val">{result.volume_final} mL</span>
+            </div>
+            {result.admin && (
+              <div className="prep-calc-row">
+                <span className="prep-calc-step">Injecter</span>
+                <span className="prep-calc-val prep-calc-highlight">{result.admin}</span>
+              </div>
+            )}
+          </>
+        )}
+        {result.admin_volume && !("admin" in result && result.admin) && (
+          <div className="prep-calc-row">
+            <span className="prep-calc-step">{result.admin_route || "IV"}</span>
+            <span className="prep-calc-val prep-calc-highlight">
+              {formatDoseNumber(result.admin_volume)} mL {result.admin_interval}
+            </span>
+          </div>
+        )}
+      </>
+    )}
   </div>
 );
 

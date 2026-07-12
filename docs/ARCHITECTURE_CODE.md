@@ -14,9 +14,17 @@ données, et non des modules cumulant logique, état et rendu.
   de présentation pures.
 - `components/preparation/model/pse.ts` contient les calculs et étapes propres
   au pousse-seringue électrique.
+- `components/preparation/model/recipeSteps.ts` construit les étapes des
+  recettes génériques.
+- `components/preparation/model/specialRecipes.ts` regroupe les exceptions
+  cliniques spécialisées sans les mélanger à l’orchestrateur principal.
 - `components/PrepBlock.tsx` orchestre l’affichage historique de préparation.
 - `components/preparation/PrepBlockParts.tsx` regroupe les types, sélecteurs et
   en-têtes purement visuels de ce bloc sans multiplier les micro-fichiers.
+- `components/preparation/PrepRecipeCalculations.tsx` rend les calculs propres
+  aux différentes familles de recettes.
+- `components/preparation/PrepCalculationLayouts.tsx` compose les variantes
+  classique et v2 sans alourdir l’orchestrateur.
 - `components/preparation/PreparationDoseStepper.tsx` gère la saisie numérique
   contrôlée de la préparation publique.
 
@@ -32,11 +40,9 @@ nommée `Preparation` dans les fichiers et les API TypeScript.
 
 ## Limites de taille
 
-`npm run verify:source-size` applique une limite de 1 000 lignes aux fichiers
-de code applicatif. `PrepBlock.tsx` et `PreparationModel.ts` disposent
-temporairement d’un plafond de 2 000 lignes : cette exception empêche toute
-croissance et doit diminuer lors des prochaines extractions. Les tests et les
-tables de données cliniques sont exclus de ce contrôle spécifique.
+`npm run verify:source-size` applique une limite uniforme de 1 000 lignes aux
+fichiers de code applicatif, sans exception. Les tests et les tables de données
+cliniques sont exclus de ce contrôle spécifique.
 
 Une extraction doit conserver l’API publique quand c’est possible, déplacer
 une responsabilité complète et être couverte par les tests existants ou par un
