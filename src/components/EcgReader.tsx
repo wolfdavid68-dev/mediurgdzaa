@@ -13,8 +13,8 @@ import {
   type Severite,
 } from "./EcgReader.helpers";
 
-// Lecteur ECG — module d'aide à la lecture (PREVIEW uniquement, cf.
-// ProtocolesPage / isPreview). Flux RÉEL : photo/galerie → compression
+// Lecteur ECG — module public d'aide à la lecture. Flux RÉEL :
+// photo/galerie → compression
 // client + anonymisation locale → POST /api/analyze-ecg (proxy serverless
 // Vercel, clés API secrètes côté serveur, Gemini 2.5 Flash + repli Mistral Pixtral) →
 // rendu data-driven. Contenu NON-DIAGNOSTIQUE : disclaimers + validation

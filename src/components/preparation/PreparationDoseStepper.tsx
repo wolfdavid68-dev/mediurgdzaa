@@ -23,11 +23,11 @@ const parseEditableNumber = (value: string) => {
 const formatControlBound = (value: number) =>
   new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 6 }).format(value);
 
-const isUnsetPreviewValue = (value: number, minimum: number | undefined) =>
+const isUnsetPreparationValue = (value: number, minimum: number | undefined) =>
   value === 0 && minimum !== undefined && minimum > 0;
 
 const formatControlDraft = (value: number, minimum: number | undefined) =>
-  isUnsetPreviewValue(value, minimum) ? "" : formatEditableNumber(value);
+  isUnsetPreparationValue(value, minimum) ? "" : formatEditableNumber(value);
 
 export const PreparationDoseStepper = ({
   label,
@@ -104,7 +104,7 @@ export const PreparationDoseStepper = ({
 
   return (
     <>
-      <div className="preview-v25-dose-stepper">
+      <div className="prep-v25-dose-stepper">
         <button
           type="button"
           aria-label={
@@ -115,7 +115,7 @@ export const PreparationDoseStepper = ({
         >
           −
         </button>
-        <span className="preview-v25-dose-entry">
+        <span className="prep-v25-dose-entry">
           <input
             type="text"
             role="spinbutton"
@@ -128,10 +128,10 @@ export const PreparationDoseStepper = ({
             aria-valuemin={minimum}
             aria-valuemax={maximum}
             aria-valuenow={
-              isUnsetPreviewValue(control.value, control.min) ? undefined : control.value
+              isUnsetPreparationValue(control.value, control.min) ? undefined : control.value
             }
             aria-valuetext={
-              isUnsetPreviewValue(control.value, control.min) ? "Non renseigné" : displayValue
+              isUnsetPreparationValue(control.value, control.min) ? "Non renseigné" : displayValue
             }
             aria-invalid={Boolean(error)}
             aria-describedby={error ? errorId : undefined}
@@ -172,9 +172,9 @@ export const PreparationDoseStepper = ({
           +
         </button>
       </div>
-      {control.result && <output className="preview-v25-dose-result">{control.result}</output>}
+      {control.result && <output className="prep-v25-dose-result">{control.result}</output>}
       {error && (
-        <span id={errorId} className="preview-v25-dose-error" role="alert">
+        <span id={errorId} className="prep-v25-dose-error" role="alert">
           {error}
         </span>
       )}

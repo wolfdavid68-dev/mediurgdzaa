@@ -65,21 +65,13 @@ const DrugCard = ({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState(false);
-  const [previewWorkflow, setPreviewWorkflow] = useState<"prepare" | "control" | "reference">(
-    "prepare"
-  );
-  const [previewRecipeIndex, setPreviewRecipeIndex] = useState(0);
-  const [previewDose, setPreviewDose] = useState(0.5);
-  const [previewRecipeInput, setPreviewRecipeInput] = useState<number | null>(null);
-  const [previewAgeBand, setPreviewAgeBand] = useState<"lt6" | "gte6" | null>(null);
-  const [previewChecks, setPreviewChecks] = useState<boolean[]>([
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
-  const [previewVerifiedAt, setPreviewVerifiedAt] = useState<string | null>(null);
+  const [prepWorkflow, setPrepWorkflow] = useState<"prepare" | "control" | "reference">("prepare");
+  const [prepRecipeIndex, setPrepRecipeIndex] = useState(0);
+  const [prepDose, setPrepDose] = useState(0.5);
+  const [prepRecipeInput, setPrepRecipeInput] = useState<number | null>(null);
+  const [prepAgeBand, setPrepAgeBand] = useState<"lt6" | "gte6" | null>(null);
+  const [prepChecks, setPrepChecks] = useState<boolean[]>([false, false, false, false, false]);
+  const [prepVerifiedAt, setPrepVerifiedAt] = useState<string | null>(null);
   const previewMode = isPreview();
   // La surface Prépa Med v2.5 est désormais la fiche publique. Le mode preview
   // ne pilote plus que les overlays de données encore expérimentaux (PSE).
@@ -126,33 +118,33 @@ const DrugCard = ({
   }, [open, canOpenProtocol, drug.nom]);
 
   useEffect(() => {
-    setPreviewRecipeIndex((index) => (index === 0 ? index : 0));
-    setPreviewRecipeInput(null);
-    setPreviewAgeBand(null);
-    setPreviewChecks((checks) =>
+    setPrepRecipeIndex((index) => (index === 0 ? index : 0));
+    setPrepRecipeInput(null);
+    setPrepAgeBand(null);
+    setPrepChecks((checks) =>
       checks.some(Boolean) ? [false, false, false, false, false] : checks
     );
-    setPreviewVerifiedAt(null);
+    setPrepVerifiedAt(null);
   }, [drug.id, prepPopulation, weight]);
 
   useEffect(() => {
-    setPreviewChecks((checks) =>
+    setPrepChecks((checks) =>
       checks.some(Boolean) ? [false, false, false, false, false] : checks
     );
-    setPreviewVerifiedAt(null);
+    setPrepVerifiedAt(null);
   }, [previewPrepLoading, previewPseLoading]);
 
-  const resetPreviewVerification = () => {
-    setPreviewChecks([false, false, false, false, false]);
-    setPreviewVerifiedAt(null);
+  const resetPrepVerification = () => {
+    setPrepChecks([false, false, false, false, false]);
+    setPrepVerifiedAt(null);
   };
 
-  const selectPreviewRecipe = (index: number) => {
-    if (index === previewRecipeIndex) return;
-    setPreviewRecipeIndex(index);
-    setPreviewRecipeInput(null);
-    setPreviewAgeBand(null);
-    resetPreviewVerification();
+  const selectPrepRecipe = (index: number) => {
+    if (index === prepRecipeIndex) return;
+    setPrepRecipeIndex(index);
+    setPrepRecipeInput(null);
+    setPrepAgeBand(null);
+    resetPrepVerification();
   };
 
   const monitoringBadges = useMemo(() => {
@@ -186,81 +178,81 @@ const DrugCard = ({
   const monitoringLabel = monitoringBadges.map((badge) => badge.label).join(" + ");
   const monitoringCornerLabel = monitoringBadges.map((badge) => badge.label).join("+");
   const monitoringClass = monitoringBadges[0]?.className || "monitor-custom";
-  const previewWeight = Number.parseFloat(weight);
-  const previewPopulation =
-    prepPopulation || (Number.isFinite(previewWeight) && previewWeight < 30 ? "enfant" : "adulte");
-  const previewClinicalLoading = previewMode && (previewPrepLoading || previewPseLoading);
-  const previewPrepData = previewMode && previewPrepLoading ? null : resolvedPrep;
-  const previewPseData = previewMode && previewPseLoading ? null : resolvedPse;
-  const previewModel =
+  const prepWeight = Number.parseFloat(weight);
+  const resolvedPrepPopulation =
+    prepPopulation || (Number.isFinite(prepWeight) && prepWeight < 30 ? "enfant" : "adulte");
+  const prepClinicalLoading = previewMode && (previewPrepLoading || previewPseLoading);
+  const prepData = previewMode && previewPrepLoading ? null : resolvedPrep;
+  const pseData = previewMode && previewPseLoading ? null : resolvedPse;
+  const preparationModel =
     open && prepV25Mode
       ? buildPreparationModel({
           drug,
-          prep: previewPrepData,
-          pse: previewPseData,
-          population: previewPopulation,
+          prep: prepData,
+          pse: pseData,
+          population: resolvedPrepPopulation,
           weight,
-          recipeIndex: previewRecipeIndex,
-          pseInput: previewDose,
-          recipeInput: previewRecipeInput,
-          ageBand: previewAgeBand,
+          recipeIndex: prepRecipeIndex,
+          pseInput: prepDose,
+          recipeInput: prepRecipeInput,
+          ageBand: prepAgeBand,
           monitoringLabel,
         })
       : CLOSED_PREPARATION_MODEL;
-  const previewModeCards = previewModel.modes;
-  const previewDoseSteps = previewModel.pseSteps;
+  const preparationModes = preparationModel.modes;
+  const prepDoseSteps = preparationModel.pseSteps;
   useEffect(() => {
-    setPreviewRecipeIndex((index) => (index < previewModeCards.length ? index : 0));
-  }, [previewModeCards.length]);
+    setPrepRecipeIndex((index) => (index < preparationModes.length ? index : 0));
+  }, [preparationModes.length]);
   useEffect(() => {
-    setPreviewDose(getPreparationPseDefault(resolvedPse, weight, resolvedPrep));
-  }, [drug.id, previewPopulation, previewPseLoading, resolvedPrep, resolvedPse, weight]);
-  const adjustPreviewDose = (direction: -1 | 1) => {
-    resetPreviewVerification();
-    if (!previewDoseSteps.length) {
-      setPreviewDose((dose) => Math.max(0.01, +(dose + direction * 0.1).toFixed(2)));
+    setPrepDose(getPreparationPseDefault(resolvedPse, weight, resolvedPrep));
+  }, [drug.id, resolvedPrepPopulation, previewPseLoading, resolvedPrep, resolvedPse, weight]);
+  const adjustPrepDose = (direction: -1 | 1) => {
+    resetPrepVerification();
+    if (!prepDoseSteps.length) {
+      setPrepDose((dose) => Math.max(0.01, +(dose + direction * 0.1).toFixed(2)));
       return;
     }
     const nextStep =
       direction < 0
-        ? [...previewDoseSteps].reverse().find((step) => step < previewDose)
-        : previewDoseSteps.find((step) => step > previewDose);
-    if (nextStep !== undefined) setPreviewDose(nextStep);
+        ? [...prepDoseSteps].reverse().find((step) => step < prepDose)
+        : prepDoseSteps.find((step) => step > prepDose);
+    if (nextStep !== undefined) setPrepDose(nextStep);
   };
-  const adjustPreviewRecipeInput = (
+  const adjustPrepRecipeInput = (
     direction: -1 | 1,
     control: { value: number; step?: number; min?: number; max?: number; steps?: number[] }
   ) => {
-    resetPreviewVerification();
+    resetPrepVerification();
     const allowed = control.steps || [];
     if (allowed.length) {
       const nextStep =
         direction < 0
           ? [...allowed].reverse().find((step) => step < control.value)
           : allowed.find((step) => step > control.value);
-      if (nextStep !== undefined) setPreviewRecipeInput(nextStep);
+      if (nextStep !== undefined) setPrepRecipeInput(nextStep);
       return;
     }
     const step = control.step || 1;
     const next = +(control.value + direction * step).toFixed(4);
-    setPreviewRecipeInput(Math.min(control.max ?? next, Math.max(control.min ?? 0, next)));
+    setPrepRecipeInput(Math.min(control.max ?? next, Math.max(control.min ?? 0, next)));
   };
-  const setPreviewNumericValue = (control: PreparationNumericControl, value: number) => {
+  const setPrepNumericValue = (control: PreparationNumericControl, value: number) => {
     if (control.kind === "pse") {
-      setPreviewDose(value);
+      setPrepDose(value);
       return;
     }
-    setPreviewRecipeInput(value);
+    setPrepRecipeInput(value);
   };
-  const previewStructuredSteps = previewModel.steps;
-  const previewDisplaySteps = previewStructuredSteps.map((step) => ({
+  const prepStructuredSteps = preparationModel.steps;
+  const prepDisplaySteps = prepStructuredSteps.map((step) => ({
     ...step,
     detail: prepStepDetail(step.title, step.detail, step.result),
   }));
-  const previewStepNeedsWeight = (step: (typeof previewStructuredSteps)[number]) =>
+  const prepStepNeedsWeight = (step: (typeof prepStructuredSteps)[number]) =>
     /poids requis|\bkg absent\b/i.test(`${step.detail} ${step.result}`);
-  const previewPendingWeightCount = previewStructuredSteps.filter(previewStepNeedsWeight).length;
-  const previewControlLabels = previewModel.controls;
+  const prepPendingWeightCount = prepStructuredSteps.filter(prepStepNeedsWeight).length;
+  const prepControlLabels = preparationModel.controls;
 
   // onOpen volontairement exclu des deps : addToHistory est recréé à chaque render
   // parent, ce qui relancerait l'effet et écraserait l'onglet sélectionné par l'utilisateur.
@@ -459,7 +451,7 @@ const DrugCard = ({
     <div
       className={`drug-card ${open ? "drug-card-open" : ""} ${
         monitoringBadges.length > 0 ? "drug-card-monitored" : ""
-      } ${prepV25Mode ? "drug-card-preview-v25" : ""}`}
+      } ${prepV25Mode ? "drug-card-prep-v25" : ""}`}
       style={{ "--drug-accent": drug.couleur } as CSSProperties}
     >
       <div className="drug-row">
@@ -533,21 +525,21 @@ const DrugCard = ({
       </div>
 
       {open && (
-        <div className={`drug-body ${prepV25Mode ? `preview-workflow-${previewWorkflow}` : ""}`}>
+        <div className={`drug-body ${prepV25Mode ? `prep-workflow-${prepWorkflow}` : ""}`}>
           {prepV25Mode && (
             <>
-              <nav className="preview-v25-workflow" aria-label="Étapes de la fiche médicament">
+              <nav className="prep-v25-workflow" aria-label="Étapes de la fiche médicament">
                 {[
                   ["prepare", "1", "Préparer", "Recette active"],
-                  ["control", "2", "Contrôler", `${previewChecks.filter(Boolean).length} / 5`],
+                  ["control", "2", "Contrôler", `${prepChecks.filter(Boolean).length} / 5`],
                   ["reference", "i", "Référence", "Fiche clinique"],
                 ].map(([key, index, label, detail]) => (
                   <button
                     key={key}
                     type="button"
-                    className={previewWorkflow === key ? "is-active" : ""}
-                    aria-pressed={previewWorkflow === key}
-                    onClick={() => setPreviewWorkflow(key as typeof previewWorkflow)}
+                    className={prepWorkflow === key ? "is-active" : ""}
+                    aria-pressed={prepWorkflow === key}
+                    onClick={() => setPrepWorkflow(key as typeof prepWorkflow)}
                   >
                     <span>{index}</span>
                     <span>
@@ -560,14 +552,14 @@ const DrugCard = ({
             </>
           )}
           {prepV25Mode ? (
-            <section className="preview-v25-identity" aria-label="Identité clinique">
+            <section className="prep-v25-identity" aria-label="Identité clinique">
               <div>
                 <strong>DCI</strong>
                 <span>{drug.dci}</span>
               </div>
               <div>
                 <strong>Surveillance</strong>
-                <span className="preview-v25-monitoring">
+                <span className="prep-v25-monitoring">
                   {monitoringBadges.length
                     ? monitoringBadges.map((badge) => badge.label).join(" · ")
                     : "Selon protocole"}
@@ -593,22 +585,22 @@ const DrugCard = ({
             </>
           )}
 
-          {previewClinicalLoading && (
-            <div className="preview-v25-loading" role="status">
+          {prepClinicalLoading && (
+            <div className="prep-v25-loading" role="status">
               Chargement de la préparation sécurisée…
             </div>
           )}
 
-          {prepV25Mode && !previewClinicalLoading && (
-            <div className="preview-v25-modes" role="group" aria-label="Modes de préparation">
-              {previewModeCards.map((mode, index) => (
+          {prepV25Mode && !prepClinicalLoading && (
+            <div className="prep-v25-modes" role="group" aria-label="Modes de préparation">
+              {preparationModes.map((mode, index) => (
                 <button
                   key={`${mode.title}-${index}`}
                   type="button"
-                  className={index === previewRecipeIndex ? "is-active" : ""}
+                  className={index === prepRecipeIndex ? "is-active" : ""}
                   aria-label={`${mode.title} — ${mode.detail}`}
-                  aria-pressed={index === previewRecipeIndex}
-                  onClick={() => selectPreviewRecipe(index)}
+                  aria-pressed={index === prepRecipeIndex}
+                  onClick={() => selectPrepRecipe(index)}
                 >
                   <span>
                     {index % 3 === 0 ? (
@@ -620,10 +612,10 @@ const DrugCard = ({
                     )}
                   </span>
                   <span>
-                    <strong className="preview-v25-mode-title">{mode.title}</strong>
-                    <small className="preview-v25-mode-detail">{mode.detail}</small>
+                    <strong className="prep-v25-mode-title">{mode.title}</strong>
+                    <small className="prep-v25-mode-detail">{mode.detail}</small>
                   </span>
-                  {index === previewRecipeIndex && (
+                  {index === prepRecipeIndex && (
                     <b>
                       <Check />
                     </b>
@@ -633,25 +625,21 @@ const DrugCard = ({
             </div>
           )}
 
-          {prepV25Mode && !previewClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && (
             <div
-              className="preview-v25-results"
+              className="prep-v25-results"
               aria-label="Résultats de préparation"
               aria-live="polite"
             >
-              {previewModel.metrics.map((metric, index) => (
+              {preparationModel.metrics.map((metric, index) => (
                 <div key={`${metric.label}-${index}`}>
-                  <span className="preview-v25-result-icon">
+                  <span className="prep-v25-result-icon">
                     {index === 0 ? <Syringe /> : index === 1 ? <TestTubes /> : <BriefcaseMedical />}
                   </span>
                   <span>
                     <small>{metric.label}</small>
                     {metric.control?.kind === "age" ? (
-                      <div
-                        className="preview-v25-age-switch"
-                        role="group"
-                        aria-label="Tranche d’âge"
-                      >
+                      <div className="prep-v25-age-switch" role="group" aria-label="Tranche d’âge">
                         {metric.control.options.map((option) => (
                           <button
                             key={option.value}
@@ -659,8 +647,8 @@ const DrugCard = ({
                             className={metric.control?.value === option.value ? "is-active" : ""}
                             aria-pressed={metric.control?.value === option.value}
                             onClick={() => {
-                              resetPreviewVerification();
-                              setPreviewAgeBand(option.value);
+                              resetPrepVerification();
+                              setPrepAgeBand(option.value);
                             }}
                           >
                             {option.label}
@@ -674,22 +662,22 @@ const DrugCard = ({
                         control={metric.control}
                         onDecrease={() =>
                           metric.control?.kind === "pse"
-                            ? adjustPreviewDose(-1)
+                            ? adjustPrepDose(-1)
                             : metric.control?.kind === "recipe"
-                              ? adjustPreviewRecipeInput(-1, metric.control)
+                              ? adjustPrepRecipeInput(-1, metric.control)
                               : undefined
                         }
                         onIncrease={() =>
                           metric.control?.kind === "pse"
-                            ? adjustPreviewDose(1)
+                            ? adjustPrepDose(1)
                             : metric.control?.kind === "recipe"
-                              ? adjustPreviewRecipeInput(1, metric.control)
+                              ? adjustPrepRecipeInput(1, metric.control)
                               : undefined
                         }
-                        onEdit={resetPreviewVerification}
+                        onEdit={resetPrepVerification}
                         onValueChange={(value) =>
                           metric.control?.kind === "pse" || metric.control?.kind === "recipe"
-                            ? setPreviewNumericValue(metric.control, value)
+                            ? setPrepNumericValue(metric.control, value)
                             : undefined
                         }
                       />
@@ -725,21 +713,21 @@ const DrugCard = ({
             </div>
           )}
 
-          {prepV25Mode && !previewClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && (
             <section
-              className="preview-v25-panel preview-v25-prepare"
-              aria-labelledby={`${instanceId}-preview-prep-title`}
+              className="prep-v25-panel prep-v25-prepare"
+              aria-labelledby={`${instanceId}-prep-title`}
             >
-              <div className="preview-v25-section-head">
+              <div className="prep-v25-section-head">
                 <div>
-                  <span id={`${instanceId}-preview-prep-title`}>
+                  <span id={`${instanceId}-prep-title`}>
                     <ShieldCheck /> Préparation pas à pas
                   </span>
                 </div>
-                <span className="preview-v25-prep-context">{previewModel.context}</span>
+                <span className="prep-v25-prep-context">{preparationModel.context}</span>
               </div>
-              {previewPendingWeightCount > 0 && (
-                <div className="preview-v25-prep-requirement" role="note">
+              {prepPendingWeightCount > 0 && (
+                <div className="prep-v25-prep-requirement" role="note">
                   <span aria-hidden="true">
                     <UserRound />
                   </span>
@@ -747,16 +735,16 @@ const DrugCard = ({
                     <strong>Renseigner le poids patient</strong>
                     <small>
                       Saisir le poids dans le bandeau patient pour calculer automatiquement{" "}
-                      {previewPendingWeightCount === 1
+                      {prepPendingWeightCount === 1
                         ? "l’étape pondérale."
-                        : `les ${previewPendingWeightCount} étapes pondérales.`}
+                        : `les ${prepPendingWeightCount} étapes pondérales.`}
                     </small>
                   </span>
                 </div>
               )}
-              <ol className="preview-v25-recipe">
-                {previewDisplaySteps.map((step, index) => {
-                  const needsWeight = previewStepNeedsWeight(step);
+              <ol className="prep-v25-recipe">
+                {prepDisplaySteps.map((step, index) => {
+                  const needsWeight = prepStepNeedsWeight(step);
                   return (
                     <li
                       key={`${step.title}-${step.detail}-${index}`}
@@ -772,9 +760,9 @@ const DrugCard = ({
                   );
                 })}
               </ol>
-              {previewModel.notes.length ? (
-                <div className="preview-v25-recipe-notes">
-                  {previewModel.notes.map((note) => (
+              {preparationModel.notes.length ? (
+                <div className="prep-v25-recipe-notes">
+                  {preparationModel.notes.map((note) => (
                     <span key={note}>{note}</span>
                   ))}
                 </div>
@@ -782,68 +770,68 @@ const DrugCard = ({
             </section>
           )}
 
-          {prepV25Mode && !previewClinicalLoading && (
+          {prepV25Mode && !prepClinicalLoading && (
             <section
-              className="preview-v25-panel preview-v25-control"
-              aria-labelledby={`${instanceId}-preview-control-title`}
+              className="prep-v25-panel prep-v25-control"
+              aria-labelledby={`${instanceId}-prep-control-title`}
             >
-              <div className="preview-v25-section-head">
-                <div className="preview-v25-control-title">
-                  <strong id={`${instanceId}-preview-control-title`}>
+              <div className="prep-v25-section-head">
+                <div className="prep-v25-control-title">
+                  <strong id={`${instanceId}-prep-control-title`}>
                     <UsersRound /> Double contrôle
                   </strong>
-                  {!previewVerifiedAt && (
+                  {!prepVerifiedAt && (
                     <small>
                       Vérifier les éléments qui conditionnent le calcul avant administration.
                     </small>
                   )}
                 </div>
               </div>
-              {previewVerifiedAt ? (
-                <div className="preview-v25-verified" role="status">
+              {prepVerifiedAt ? (
+                <div className="prep-v25-verified" role="status">
                   <span>
                     <Check />
                   </span>
                   <div>
                     <strong>Préparation vérifiée</strong>
-                    <small>5 / 5 contrôles · {previewVerifiedAt}</small>
+                    <small>5 / 5 contrôles · {prepVerifiedAt}</small>
                   </div>
-                  <button type="button" onClick={() => setPreviewVerifiedAt(null)}>
+                  <button type="button" onClick={() => setPrepVerifiedAt(null)}>
                     Revoir
                   </button>
                 </div>
               ) : (
                 <>
-                  <div className="preview-v25-checks">
-                    {previewControlLabels.map((label, index) => (
+                  <div className="prep-v25-checks">
+                    {prepControlLabels.map((label, index) => (
                       <button
                         key={label}
                         type="button"
                         aria-label={label}
-                        aria-pressed={previewChecks[index]}
-                        className={previewChecks[index] ? "is-checked" : ""}
+                        aria-pressed={prepChecks[index]}
+                        className={prepChecks[index] ? "is-checked" : ""}
                         onClick={() =>
-                          setPreviewChecks((checks) =>
+                          setPrepChecks((checks) =>
                             checks.map((checked, checkIndex) =>
                               checkIndex === index ? !checked : checked
                             )
                           )
                         }
                       >
-                        <span aria-hidden="true">{previewChecks[index] ? <Check /> : null}</span>
+                        <span aria-hidden="true">{prepChecks[index] ? <Check /> : null}</span>
                         <strong>{label}</strong>
                       </button>
                     ))}
                   </div>
                   <button
                     type="button"
-                    disabled={!previewChecks.every(Boolean) || !previewModel.canValidate}
-                    className={`preview-v25-validation ${
-                      previewChecks.every(Boolean) && previewModel.canValidate ? "ready" : ""
+                    disabled={!prepChecks.every(Boolean) || !preparationModel.canValidate}
+                    className={`prep-v25-validation ${
+                      prepChecks.every(Boolean) && preparationModel.canValidate ? "ready" : ""
                     }`}
                     onClick={() => {
-                      if (!previewChecks.every(Boolean) || !previewModel.canValidate) return;
-                      setPreviewVerifiedAt(
+                      if (!prepChecks.every(Boolean) || !preparationModel.canValidate) return;
+                      setPrepVerifiedAt(
                         new Date().toLocaleTimeString("fr-FR", {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -851,28 +839,28 @@ const DrugCard = ({
                       );
                     }}
                   >
-                    {previewChecks.every(Boolean)
-                      ? previewModel.canValidate
+                    {prepChecks.every(Boolean)
+                      ? preparationModel.canValidate
                         ? "Valider les 5 contrôles"
                         : "Calcul à compléter"
                       : "Préparation à vérifier"}
                   </button>
-                  {previewChecks.every(Boolean) && previewModel.validationReason && (
-                    <span className="preview-v25-validation-reason" role="status">
-                      {previewModel.validationReason}
+                  {prepChecks.every(Boolean) && preparationModel.validationReason && (
+                    <span className="prep-v25-validation-reason" role="status">
+                      {preparationModel.validationReason}
                     </span>
                   )}
-                  <span className="preview-v25-check-progress">
-                    {previewChecks.filter(Boolean).length} / 5 contrôles
+                  <span className="prep-v25-check-progress">
+                    {prepChecks.filter(Boolean).length} / 5 contrôles
                   </span>
                 </>
               )}
             </section>
           )}
 
-          {prepV25Mode && !previewClinicalLoading && (
-            <section className="preview-v25-panel preview-v25-reference">
-              <div className="preview-v25-section-head preview-v25-reference-head">
+          {prepV25Mode && !prepClinicalLoading && (
+            <section className="prep-v25-panel prep-v25-reference">
+              <div className="prep-v25-section-head prep-v25-reference-head">
                 <div>
                   <strong>
                     <BookOpen /> Référence clinique
@@ -893,10 +881,9 @@ const DrugCard = ({
                       style={
                         tab.type === "poso" && isActive
                           ? {
-                              background:
-                                "color-mix(in srgb, var(--preview-primary) 9%, var(--card))",
-                              borderColor: "var(--preview-primary)",
-                              color: "var(--preview-primary)",
+                              background: "color-mix(in srgb, var(--prep-primary) 9%, var(--card))",
+                              borderColor: "var(--prep-primary)",
+                              color: "var(--prep-primary)",
                             }
                           : {}
                       }
@@ -919,9 +906,7 @@ const DrugCard = ({
                       ) : (
                         <span
                           className={`dot dot-${tab.type}`}
-                          style={
-                            tab.type === "poso" ? { background: "var(--preview-primary)" } : {}
-                          }
+                          style={tab.type === "poso" ? { background: "var(--prep-primary)" } : {}}
                         />
                       )}
                       <span className="tab-label">{tab.label}</span>

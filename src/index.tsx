@@ -10,7 +10,7 @@ import RootErrorFallback from "./components/RootErrorFallback";
 import "./styles/base.css";
 import "./styles/header.css";
 import "./styles/drug-card.css";
-import "./styles/prep-med-preview.css";
+import "./styles/preparation-v25.css";
 import "./styles/pse.css";
 import "./styles/drug-related.css";
 import "./styles/ktc-light-contrast.css";

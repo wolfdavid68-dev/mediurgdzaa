@@ -257,7 +257,7 @@ export default defineConfig(({ command }) => ({
             },
             {
               name: "medicaments-preparation",
-              test: /([\\/]src[\\/]components[\\/](PreparationModel|PrepBlock|PseBlock)|[\\/]src[\\/]components[\\/]preparation[\\/]|[\\/]src[\\/]styles[\\/]prep-med-preview)/,
+              test: /([\\/]src[\\/]components[\\/](PreparationModel|PrepBlock|PseBlock)|[\\/]src[\\/]components[\\/]preparation[\\/]|[\\/]src[\\/]styles[\\/]preparation-v25)/,
               priority: 68,
             },
             {

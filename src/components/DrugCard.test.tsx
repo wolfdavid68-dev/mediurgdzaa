@@ -1367,7 +1367,7 @@ describe("DrugCard", () => {
 
       expect(await screen.findByText("Référence clinique")).toBeInTheDocument();
       expect(screen.getByText("Double contrôle")).toBeInTheDocument();
-      expect(container.querySelectorAll(".preview-v25-recipe li")).toHaveLength(4);
+      expect(container.querySelectorAll(".prep-v25-recipe li")).toHaveLength(4);
       expect(
         screen.getByRole("button", {
           name: "Dose conforme à la prescription",

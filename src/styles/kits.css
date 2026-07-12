@@ -273,7 +273,7 @@
   color: var(--text-mute);
 }
 
-/* ── Onglet « Schéma » (kit KTC — preview) ───────────────── */
+/* ── Onglet « Schéma » du kit KTC ────────────────────────── */
 .kit-schema {
   display: flex;
   flex-direction: column;

@@ -17,7 +17,7 @@ const findPreparationModes = () => screen.findByRole("group", { name: "Modes de 
 const findPreparationResults = () => screen.findByLabelText("Résultats de préparation");
 
 const checkAllControls = (container: HTMLElement) => {
-  const section = container.querySelector<HTMLElement>(".preview-v25-control")!;
+  const section = container.querySelector<HTMLElement>(".prep-v25-control")!;
   within(section)
     .getAllByRole("button")
     .filter((button) => button.hasAttribute("aria-pressed"))
@@ -40,8 +40,8 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     );
     openDrug("ADRÉNALINE");
 
-    expect(container.querySelector(".preview-v25-results")).toBeInTheDocument();
-    expect(container.querySelector(".preview-v25-panel")).toBeInTheDocument();
+    expect(container.querySelector(".prep-v25-results")).toBeInTheDocument();
+    expect(container.querySelector(".prep-v25-panel")).toBeInTheDocument();
   });
 
   test("ne modifie pas l’en-tête de la carte médicament", () => {
@@ -51,9 +51,9 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     main.unmount();
 
     window.history.pushState({}, "", "/?author=preview");
-    const preview = render(<DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" />);
-    expect(preview.container.querySelector(".drug-row")?.innerHTML).toBe(mainHeader);
-    expect(preview.container.querySelector(".drug-header .preview-v25-panel")).toBeNull();
+    const previewView = render(<DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" />);
+    expect(previewView.container.querySelector(".drug-row")?.innerHTML).toBe(mainHeader);
+    expect(previewView.container.querySelector(".drug-header .prep-v25-panel")).toBeNull();
   });
 
   test("affiche et ajuste le débit mL/h avec la dose délivrée calculée", async () => {
@@ -250,7 +250,7 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     await waitFor(() => expect(within(modes).getAllByRole("button")).toHaveLength(4));
     fireEvent.click(within(modes).getByRole("button", { name: /Éclampsie — Charge puis PSE/i }));
 
-    const notes = container.querySelector<HTMLElement>(".preview-v25-recipe-notes")!;
+    const notes = container.querySelector<HTMLElement>(".prep-v25-recipe-notes")!;
     expect(within(notes).getAllByText(/.+/)).toHaveLength(4);
     expect(within(notes).getByText("Insuffisance rénale : adapter posologie")).toBeInTheDocument();
   });
@@ -261,12 +261,12 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     );
     openDrug("ACTILYSE");
 
-    const preparation = container.querySelector<HTMLElement>(".preview-v25-prepare")!;
+    const preparation = container.querySelector<HTMLElement>(".prep-v25-prepare")!;
     const requirement = within(preparation).getByRole("note");
     expect(within(requirement).getByText("Renseigner le poids patient")).toBeInTheDocument();
     expect(within(requirement).getByText(/les 2 étapes pondérales/i)).toBeInTheDocument();
 
-    const recipe = preparation.querySelector<HTMLElement>(".preview-v25-recipe")!;
+    const recipe = preparation.querySelector<HTMLElement>(".prep-v25-recipe")!;
     expect(within(recipe).queryByText("Poids requis")).not.toBeInTheDocument();
     expect(within(recipe).getAllByText("À calculer")).toHaveLength(2);
     expect(within(recipe).getByText("Dose fixe")).toBeInTheDocument();
@@ -294,7 +294,7 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     expect(
       await within(modes).findByRole("button", { name: /ACR — 1 mg IV\/IO/i })
     ).toHaveAttribute("aria-pressed", "true");
-    const recipe = container.querySelector<HTMLElement>(".preview-v25-recipe")!;
+    const recipe = container.querySelector<HTMLElement>(".prep-v25-recipe")!;
     const injectStep = within(recipe).getByText("Injecter").closest("li")!;
     const rinseStep = within(recipe).getByText("Rincer").closest("li")!;
 
