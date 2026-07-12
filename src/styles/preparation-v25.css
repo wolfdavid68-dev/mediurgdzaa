@@ -1069,9 +1069,13 @@
   background: color-mix(in srgb, var(--bg) 28%, var(--card));
 }
 
-.prep-v25-reference .poso-filter-hint,
-.prep-v25-reference .poso-note {
+.prep-v25-reference .poso-filter-hint {
   display: none;
+}
+
+.prep-v25-reference > .poso-note {
+  margin: 0 14px 14px;
+  background: color-mix(in srgb, var(--bg) 28%, var(--card));
 }
 
 .prep-v25-reference .poso-grid {

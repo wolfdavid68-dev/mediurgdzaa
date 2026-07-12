@@ -1,65 +1,89 @@
-import { useState, useEffect, type ChangeEvent } from "react";
-import { safeGetItem, safeRemoveItem, safeSetItem } from "../lib/safeStorage";
-import { storageKey } from "../lib/storageKeys";
+import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
+import { ChevronDown, PencilLine } from "lucide-react";
+import { useAuthProfile } from "../lib/authProfile";
+import { readUserNote, removeUserNote, writeUserNote } from "../lib/userStorage";
 
 // Note personnelle par drug, persistée dans localStorage (mediurg-note-{id}).
 // onChange(hasContent) permet au parent d'afficher l'indicateur ✎ dans l'en-tête.
 type DrugNoteProps = { drugId: number; onChange?: (hasContent: boolean) => void };
 
 const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
+  const authProfile = useAuthProfile();
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
-  const noteKey = storageKey.note(drugId);
+  const [expanded, setExpanded] = useState(false);
+  const contentId = useId();
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const userId = authProfile?.id ?? null;
 
   useEffect(() => {
-    const saved = safeGetItem(noteKey);
-    if (saved) {
-      setNote(saved);
-      if (onChange) onChange(true);
-    }
-  }, [onChange, noteKey]);
+    const saved = readUserNote(userId, drugId) ?? "";
+    setNote(saved);
+    setExpanded(false);
+    onChange?.(Boolean(saved.trim()));
+  }, [drugId, onChange, userId]);
+
+  useEffect(
+    () => () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    },
+    []
+  );
 
   const handleNoteChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setNote(value);
-    if (value.trim()) safeSetItem(noteKey, value);
-    else safeRemoveItem(noteKey);
+    if (value.trim()) writeUserNote(userId, drugId, value);
+    else removeUserNote(userId, drugId);
     setNoteSaved(true);
-    setTimeout(() => setNoteSaved(false), 1500);
-    if (onChange) onChange(!!value.trim());
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => setNoteSaved(false), 1500);
+    onChange?.(Boolean(value.trim()));
   };
 
   return (
-    <div className="poso-note">
-      <div className="poso-note-header">
-        <div className="poso-note-label">
-          <svg
-            viewBox="0 0 24 24"
-            width="12"
-            height="12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-          <span>Note personnelle</span>
+    <section className={`poso-note ${expanded ? "is-expanded" : ""}`}>
+      <button
+        type="button"
+        className="poso-note-toggle"
+        aria-expanded={expanded}
+        aria-controls={contentId}
+        onClick={() => setExpanded((current) => !current)}
+      >
+        <span className="poso-note-icon" aria-hidden="true">
+          <PencilLine />
+        </span>
+        <span className="poso-note-heading">
+          <strong>Note personnelle</strong>
+          <small>{note.trim() ? "Note enregistrée localement" : "Ajouter une note locale"}</small>
+        </span>
+        {noteSaved && (
+          <span className="note-saved" role="status">
+            Enregistré
+          </span>
+        )}
+        <ChevronDown className="poso-note-chevron" aria-hidden="true" />
+      </button>
+
+      {!expanded && note.trim() && <p className="poso-note-preview">{note}</p>}
+
+      {expanded && (
+        <div className="poso-note-content" id={contentId}>
+          <div className="poso-note-warning" role="note">
+            Stockage local uniquement. Ne saisir aucune identité patient, IPP, date de naissance ou
+            donnée nominative.
+          </div>
+          <textarea
+            className="poso-note-textarea"
+            value={note}
+            onChange={handleNoteChange}
+            aria-label="Note personnelle pour ce médicament"
+            placeholder="Remarque locale sans donnée patient nominative…"
+            rows={3}
+          />
         </div>
-        {noteSaved && <span className="note-saved">✓ Enregistré</span>}
-      </div>
-      <div className="poso-note-warning" role="note">
-        Notes locales uniquement : ne saisir aucune identité patient, IPP, date de naissance ou
-        donnée nominative.
-      </div>
-      <textarea
-        className="poso-note-textarea"
-        value={note}
-        onChange={handleNoteChange}
-        placeholder="Remarque locale sans donnée patient nominative…"
-        rows={3}
-      />
-    </div>
+      )}
+    </section>
   );
 };
 

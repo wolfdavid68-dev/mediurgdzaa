@@ -916,6 +916,7 @@ const DrugCard = ({
                 })}
               </div>
               {activeTab && <div className="tab-content">{renderContent(activeTab)}</div>}
+              <DrugNote drugId={drug.id} onChange={setHasNote} />
             </section>
           )}
 
