@@ -520,6 +520,49 @@
   line-height: 1.18;
 }
 
+/* Affordance commune : les modes ont le relief d'un contrôle, les résultats restent plats. */
+.preview-v25-modes > button {
+  border-width: 2px;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+.preview-v25-modes > button:not(.is-active)::after {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 45%, var(--border));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--drug-accent) 7%, var(--card));
+  color: var(--preview-primary);
+  content: "›";
+  font-family: var(--font);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.preview-v25-modes > button:active {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+.preview-v25-results > div {
+  border-color: transparent;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--card) 72%, var(--bg));
+  box-shadow: none;
+}
+
+.preview-v25-results .preview-v25-result-icon {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 /* Trois panneaux principaux. */
 .preview-v25-panel {
   min-width: 0;
