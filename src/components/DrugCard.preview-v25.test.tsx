@@ -64,12 +64,140 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
 
     const results = container.querySelector<HTMLElement>(".preview-v25-results")!;
     expect(within(results).getByText("Prescription · µg/kg/min")).toBeInTheDocument();
-    expect(within(results).getByText("0,5")).toBeInTheDocument();
+    const doseInput = within(results).getByRole("spinbutton", {
+      name: "Saisir Prescription · µg/kg/min",
+    });
+    expect(doseInput).toHaveValue("0,5");
     expect(within(results).getByText("5 mL/h")).toBeInTheDocument();
 
     fireEvent.click(within(results).getByRole("button", { name: "Augmenter le réglage" }));
-    expect(within(results).getByText("1")).toBeInTheDocument();
+    expect(doseInput).toHaveValue("1");
     expect(within(results).getByText("10 mL/h")).toBeInTheDocument();
+  });
+
+  test("accepte une saisie décimale libre et conserve les paliers rapides", async () => {
+    const { container } = render(
+      <DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" prepPopulation="adulte" />
+    );
+    openDrug("ADRÉNALINE");
+
+    const modes = container.querySelector<HTMLElement>(".preview-v25-modes")!;
+    fireEvent.click(
+      await within(modes).findByRole("button", { name: /PSR \/ PSE — Vi\/Vf poids/i })
+    );
+    const results = container.querySelector<HTMLElement>(".preview-v25-results")!;
+    const doseInput = within(results).getByRole("spinbutton", {
+      name: /saisir prescription/i,
+    });
+
+    fireEvent.change(doseInput, { target: { value: "0,7" } });
+    expect(doseInput).toHaveValue("0,7");
+    expect(within(results).getByText("7 mL/h")).toBeInTheDocument();
+
+    fireEvent.click(within(results).getByRole("button", { name: "Diminuer le réglage" }));
+    expect(doseInput).toHaveValue("0,5");
+    fireEvent.change(doseInput, { target: { value: "0,7" } });
+    fireEvent.click(within(results).getByRole("button", { name: "Augmenter le réglage" }));
+    expect(doseInput).toHaveValue("1");
+  });
+
+  test("refuse une valeur hors plage sans l’appliquer au calcul", async () => {
+    const { container } = render(
+      <DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" prepPopulation="adulte" />
+    );
+    openDrug("ADRÉNALINE");
+    const modes = container.querySelector<HTMLElement>(".preview-v25-modes")!;
+    fireEvent.click(
+      await within(modes).findByRole("button", { name: /PSR \/ PSE — Vi\/Vf poids/i })
+    );
+    const results = container.querySelector<HTMLElement>(".preview-v25-results")!;
+    const doseInput = within(results).getByRole("spinbutton", {
+      name: /saisir prescription/i,
+    });
+
+    fireEvent.change(doseInput, { target: { value: "9" } });
+    expect(within(results).getByRole("alert")).toHaveTextContent("0,125 à 2");
+    expect(within(results).getByText("5 mL/h")).toBeInTheDocument();
+    fireEvent.blur(doseInput);
+    expect(doseInput).toHaveValue("0,5");
+    expect(within(results).getByRole("alert")).toHaveTextContent("valeur précédente conservée");
+  });
+
+  test("annule le double contrôle dès qu’une saisie devient invalide", async () => {
+    const { container } = render(
+      <DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" prepPopulation="adulte" />
+    );
+    openDrug("ADRÉNALINE");
+    const modes = container.querySelector<HTMLElement>(".preview-v25-modes")!;
+    fireEvent.click(
+      await within(modes).findByRole("button", { name: /PSR \/ PSE — Vi\/Vf poids/i })
+    );
+    checkAllControls(container);
+    fireEvent.click(screen.getByRole("button", { name: "Valider les 5 contrôles" }));
+    expect(screen.getByText("Préparation vérifiée")).toBeInTheDocument();
+
+    const results = container.querySelector<HTMLElement>(".preview-v25-results")!;
+    fireEvent.change(within(results).getByRole("spinbutton", { name: /saisir prescription/i }), {
+      target: { value: "abc" },
+    });
+    expect(screen.queryByText("Préparation vérifiée")).not.toBeInTheDocument();
+    expect(screen.getByText("0 / 5 contrôles")).toBeInTheDocument();
+  });
+
+  test("traite le volume IVD efficace d’Anexate comme une saisie libre en mL", async () => {
+    const { container } = render(
+      <DrugCard drug={drugNamed("ANEXATE")} patientWeight="80" prepPopulation="adulte" />
+    );
+    openDrug("ANEXATE");
+    const modes = container.querySelector<HTMLElement>(".preview-v25-modes")!;
+    fireEvent.click(await within(modes).findByRole("button", { name: /Débit PSE/i }));
+    const results = container.querySelector<HTMLElement>(".preview-v25-results")!;
+    const volumeInput = within(results).getByRole("spinbutton", {
+      name: /saisir volume IVD efficace/i,
+    });
+
+    expect(volumeInput).toHaveValue("");
+    expect(volumeInput).toHaveAttribute("placeholder", "Saisir");
+    fireEvent.change(volumeInput, { target: { value: "12,5" } });
+    expect(volumeInput).toHaveValue("12,5");
+    expect(within(results).getByText("1,25 mg administrés en IVD")).toBeInTheDocument();
+    expect(within(results).getByText("12,5 mL/h")).toBeInTheDocument();
+  });
+
+  test("sépare les deux saisies et les deux résultats d’Octaplex", () => {
+    const { container } = render(
+      <DrugCard drug={drugNamed("OCTAPLEX")} patientWeight="80" prepPopulation="adulte" />
+    );
+    openDrug("OCTAPLEX");
+    const results = container.querySelector<HTMLElement>(".preview-v25-results")!;
+    const inrInput = within(results).getByRole("spinbutton", {
+      name: /saisir INR \/ dose calculée/i,
+    });
+    const rateInput = within(results).getByRole("spinbutton", {
+      name: /saisir prescription · mL\/kg\/min/i,
+    });
+
+    expect(inrInput).toHaveValue("4");
+    expect(within(results).getByText("Dose calculée : 2800 UI")).toBeInTheDocument();
+    expect(rateInput).toHaveValue("0,12");
+    expect(rateInput.parentElement).toHaveTextContent("mL/kg/min");
+    expect(within(results).getByText("Débit calculé : 480 mL/h")).toBeInTheDocument();
+  });
+
+  test("accepte une dose recette libre et annonce la ligne clinique retenue", async () => {
+    const { container } = render(
+      <DrugCard drug={drugNamed("AMOXICILLINE")} patientWeight="80" prepPopulation="adulte" />
+    );
+    openDrug("AMOXICILLINE");
+    const modes = container.querySelector<HTMLElement>(".preview-v25-modes")!;
+    fireEvent.click(await within(modes).findByRole("button", { name: /Dose méningée pompe/i }));
+    const results = container.querySelector<HTMLElement>(".preview-v25-results")!;
+    const doseInput = within(results).getByRole("spinbutton", { name: /saisir Dose\/j/i });
+
+    fireEvent.change(doseInput, { target: { value: "13,5" } });
+    expect(doseInput).toHaveValue("13,5");
+    expect(screen.getByText("Ligne la plus proche de 13,5 g/j")).toBeInTheDocument();
+    expect(screen.getByText("14 g/j")).toBeInTheDocument();
   });
 
   test("réinitialise le double contrôle après débit, poids ou protocole", async () => {

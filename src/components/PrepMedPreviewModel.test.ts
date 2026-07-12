@@ -287,10 +287,32 @@ describe("modèle Prépa Med v2.5", () => {
     expect(flattenModelText(octaplex)).toContain("35 UI/kg · 2800 UI");
     expect(flattenModelText(octaplex)).toContain("Vitamine K1 10 mg IV");
     expect(octaplex.metrics[2]).toMatchObject({
-      label: "Débit à programmer",
-      value: "480 mL/h",
+      label: "Prescription · mL/kg/min",
+      value: "0,12 mL/kg/min",
+      control: {
+        unit: "mL/kg/min",
+        min: 0.05,
+        max: 0.12,
+        result: "Débit calculé : 480 mL/h",
+      },
     });
     expect(octaplex.canValidate).toBe(true);
+  });
+
+  test("sépare les bornes thérapeutiques des paliers de saisie rapide", () => {
+    const firstDiprivan = modelFor("DIPRIVAN", "adulte", "80");
+    const pseIndex = firstDiprivan.modes.findIndex((mode) => /Débit PSE/i.test(mode.title));
+    expect(pseIndex).toBeGreaterThanOrEqual(0);
+
+    const diprivan = modelFor("DIPRIVAN", "adulte", "80", pseIndex, 0.5);
+    expect(diprivan.metrics[0].control).toMatchObject({
+      kind: "pse",
+      value: 0.5,
+      unit: "mg/kg/h",
+      min: 0.5,
+      max: 4,
+      steps: [1, 2, 3, 4],
+    });
   });
 
   test("projette les préparations particulières médicament par médicament", () => {

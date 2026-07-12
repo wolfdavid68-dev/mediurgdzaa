@@ -48,15 +48,19 @@ type PrepPreviewMetric = {
   control?: PrepPreviewControl;
 };
 
+export type PrepPreviewNumericControl = {
+  kind: "pse" | "recipe";
+  value: number;
+  unit?: string;
+  result?: string;
+  steps?: number[];
+  step?: number;
+  min?: number;
+  max?: number;
+};
+
 type PrepPreviewControl =
-  | {
-      kind: "pse" | "recipe";
-      value: number;
-      steps?: number[];
-      step?: number;
-      min?: number;
-      max?: number;
-    }
+  | PrepPreviewNumericControl
   | {
       kind: "age";
       value: "lt6" | "gte6" | null;
@@ -226,6 +230,42 @@ export const getPreviewPseDefault = (
   }
   if (steps.includes(0.5)) return 0.5;
   return steps[0] || pse?.min || 0.5;
+};
+
+const getPreviewPseInputConfig = (
+  pse: PseEntry,
+  weight: string,
+  prep: DrugPrep | null,
+  steps: number[]
+): Pick<PrepPreviewNumericControl, "unit" | "min" | "max"> => {
+  const stepMinimum = steps.length ? Math.min(...steps) : undefined;
+  const stepMaximum = steps.length ? Math.max(...steps) : undefined;
+
+  // ANEXATE : l'entrée est le volume IVD efficace. Les min/max PSE sont
+  // exprimés en mg/h et ne doivent donc pas borner ce champ en mL.
+  if (prep?.dose_threshold_input_unit === "mL") {
+    return { unit: "mL", min: stepMinimum, max: stepMaximum };
+  }
+
+  if (pse.inputMode === "effectiveDose") {
+    return {
+      unit: pse.effectiveInputUnit || pse.unite,
+      min: pse.min,
+      max: pse.max,
+    };
+  }
+
+  if (pse.inputMode === "mlh") {
+    const minimumRate = calcDebit(pse, pse.min, weight);
+    const maximumRate = calcDebit(pse, pse.max, weight);
+    return {
+      unit: "mL/h",
+      min: minimumRate ?? undefined,
+      max: maximumRate ?? undefined,
+    };
+  }
+
+  return { unit: pse.unite, min: pse.min, max: pse.max };
 };
 
 const inferStepTitle = (detail: string, index: number) => {
@@ -1679,11 +1719,14 @@ export const buildPrepMedPreviewModel = ({
     },
   ];
   const pseSteps = getPreviewPseSteps(isPse ? pse : null, weight, prep);
+  const pseInputConfig =
+    isPse && pse ? getPreviewPseInputConfig(pse, weight, prep, pseSteps) : null;
   const recipeControl: PrepPreviewControl | null =
     activeRecipe?.dose_input_label && activeRecipeInput !== null
       ? {
           kind: "recipe",
           value: activeRecipeInput,
+          unit: activeRecipe.dose_input_unit || undefined,
           step: activeRecipe.dose_input_step ?? 1,
           min: activeRecipe.dose_input_min ?? 0,
           max: activeRecipe.dose_input_max,
@@ -1713,7 +1756,14 @@ export const buildPrepMedPreviewModel = ({
               : "INR ou poids requis",
             note: octaplexResult ? `${octaplexResult.uiKg} UI/kg` : "Calcul selon la table AVK",
             kind: "dose",
-            control: recipeControl || undefined,
+            control: recipeControl
+              ? {
+                  ...recipeControl,
+                  result: octaplexResult
+                    ? `Dose calculée : ${formatNumber(octaplexResult.totalUi)} UI`
+                    : "Poids ou INR requis",
+                }
+              : undefined,
           },
           {
             label: "Volume à préparer",
@@ -1722,14 +1772,18 @@ export const buildPrepMedPreviewModel = ({
             kind: "volume",
           },
           {
-            label: "Débit à programmer",
-            value:
-              programmedRate === null ? "Poids requis" : `${formatNumber(programmedRate)} mL/h`,
-            note: `${formatNumber(pseInput)} mL/kg/min · maximum 480 mL/h`,
+            label: "Prescription · mL/kg/min",
+            value: `${formatNumber(pseInput)} mL/kg/min`,
+            note: "Débit plafonné à 480 mL/h",
             kind: "administration",
             control: {
               kind: "pse",
               value: pseInput,
+              ...pseInputConfig,
+              result:
+                programmedRate === null
+                  ? "Poids requis"
+                  : `Débit calculé : ${formatNumber(programmedRate)} mL/h`,
               steps: pseSteps,
             },
           },
@@ -1742,6 +1796,7 @@ export const buildPrepMedPreviewModel = ({
           control: {
             kind: "pse",
             value: pseInput,
+            ...pseInputConfig,
             steps: pseSteps,
           },
         },

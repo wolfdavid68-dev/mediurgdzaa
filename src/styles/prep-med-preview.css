@@ -175,6 +175,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .preview-v25-dose-stepper button {
@@ -196,14 +197,77 @@
   opacity: 0.42;
 }
 
-.preview-v25-dose-stepper output {
-  min-width: 72px;
+.preview-v25-dose-entry {
+  display: flex;
+  align-items: center;
+  flex: 1 1 132px;
+  min-width: 132px;
+  max-width: 170px;
+  height: 44px;
+  padding-inline: 5px 9px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--drug-accent) 38%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--drug-accent) 6%, var(--card));
+}
+
+.preview-v25-dose-entry input {
+  flex: 0 1 64px;
+  width: 64px;
+  min-width: 0;
+  height: 42px;
+  padding: 0 4px;
+  border: 0;
+  outline: 0;
+  background: transparent;
   color: var(--preview-primary);
   font-family: var(--mono);
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 950;
   line-height: 1;
   text-align: center;
+}
+
+.preview-v25-dose-entry:focus-within {
+  border-color: var(--drug-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--drug-accent) 18%, transparent);
+}
+
+.preview-v25-dose-entry:has(input[aria-invalid="true"]) {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 7%, var(--card));
+}
+
+.preview-v25-dose-entry > span {
+  flex: none;
+  color: var(--preview-primary);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.preview-v25-dose-result {
+  display: block;
+  color: var(--preview-primary);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.preview-v25-dose-error {
+  display: block;
+  max-width: 250px;
+  color: var(--danger);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+[data-theme="dark"] .preview-v25-dose-error {
+  color: #ff9aa2;
 }
 
 .preview-v25-age-switch {
