@@ -68,6 +68,7 @@ export const DRUGS_CURARES = [
           titre: "ISR adulte",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "10 mg/mL",
           prelever: "2 mL d'ampoule 100 mg/2 mL (50 mg/mL)",
           completer: "10 mL avec NaCl 0,9%",
@@ -93,6 +94,7 @@ export const DRUGS_CURARES = [
           titre: "ISR enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "10 mg/mL",
           prelever: "2 mL d'ampoule 100 mg/2 mL (50 mg/mL)",
           completer: "10 mL avec NaCl 0,9%",
@@ -109,6 +111,7 @@ export const DRUGS_CURARES = [
             {
               label: "Laryngospasme",
               value: "4 mg/kg IM (ampoule pure 50 mg/mL)",
+              reference_only: true,
             },
           ],
           etapes: [
@@ -176,6 +179,7 @@ export const DRUGS_CURARES = [
         {
           titre: "ISR",
           mode: "bolus",
+          calculated_volume_role: "injecter",
           tag: "10 mg/mL pur",
           prelever: "Ampoule 50 mg/5 mL (10 mg/mL) — administrer pure",
           concentration: "10 mg/mL",
@@ -190,6 +194,7 @@ export const DRUGS_CURARES = [
             {
               label: "Standard",
               value: "0,6 mg/kg IV",
+              reference_only: true,
             },
           ],
           etapes: [
@@ -250,6 +255,7 @@ export const DRUGS_CURARES = [
           titre: "Bolus adulte",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "1 mg/mL",
           prelever: "10 mL d'ampoule 20 mg/10 mL (2 mg/mL)",
           completer: "20 mL avec NaCl 0,9%",
@@ -275,6 +281,7 @@ export const DRUGS_CURARES = [
           titre: "Bolus enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "1 mg/mL",
           prelever: "10 mL d'ampoule 20 mg/10 mL (2 mg/mL)",
           completer: "20 mL avec NaCl 0,9%",

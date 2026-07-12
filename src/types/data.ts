@@ -75,10 +75,13 @@ type DrugPrepRecipe = {
   concentration?: string;
   rate_label?: string;
   rate_value?: string;
+  calculated_volume_role?: "prelever" | "injecter" | "perfuser" | "administrer" | "programmer";
+  phase_relation?: "sequence" | "alternative" | "breakdown";
   rows?: Array<{
     label: string;
     value: string;
     highlight?: boolean;
+    reference_only?: boolean;
   }>;
   dose_based_dilution?: {
     threshold: number;
@@ -134,6 +137,7 @@ type DrugPrepRecipe = {
   dose_input_min?: number;
   dose_input_max?: number;
   dose_input_step?: number;
+  dose_input_steps?: number[];
   effective_input_label?: string;
   effective_input_unit?: string;
   effective_input_conc?: number;

@@ -41,6 +41,29 @@ export const formatNumberRange = (min: number, max: number | null) =>
     ? `${formatDoseNumber(min)}-${formatDoseNumber(max)}`
     : formatDoseNumber(min);
 
+const doseUnitScaleMg = (unit?: string) => {
+  const normalized = String(unit || "")
+    .replace(/\s*\/\s*(?:h|min)$/i, "")
+    .trim()
+    .toLowerCase();
+  if (normalized.startsWith("µg") || normalized.startsWith("ug")) return 0.001;
+  if (normalized.startsWith("mg")) return 1;
+  if (normalized === "g") return 1000;
+  return null;
+};
+
+const convertDoseUnit = (value: number, fromUnit?: string, toUnit?: string) => {
+  const fromScale = doseUnitScaleMg(fromUnit);
+  const toScale = doseUnitScaleMg(toUnit);
+  if (fromScale === null || toScale === null) {
+    return String(fromUnit || "").replace(/\s*\/\s*(?:h|min)$/i, "") ===
+      String(toUnit || "").replace(/\s*\/\s*(?:h|min)$/i, "")
+      ? value
+      : null;
+  }
+  return (value * fromScale) / toScale;
+};
+
 // ── Helpers de calcul purs (extraits du composant PrepBlock) ──────────
 // Fonctions sans état ni JSX : elles ne dépendent que de leurs arguments
 // (la recette, l'objet prep, le poids). Extraites pour alléger PrepBlock.tsx
@@ -124,12 +147,18 @@ export const computeRecipePhaseRows = (
     const unit = phase.unit || "mg";
     const roundedDose = +dose.toFixed(1);
     const roundedDoseMax = doseMax !== null ? +doseMax.toFixed(1) : null;
-    const hasVolumeUnit = unit === "mg" || unit === "mg/h" || unit === "g";
+    const hasVolumeUnit =
+      unit === "mg" || unit === "mg/h" || unit === "g" || unit === "UI" || unit === "UI/h";
+    const doseForConcentration = convertDoseUnit(dose, unit, prep.unite || unit);
+    const doseMaxForConcentration =
+      doseMax === null ? null : convertDoseUnit(doseMax, unit, prep.unite || unit);
     const volume =
-      hasVolumeUnit && prep.conc_produit ? +(dose / prep.conc_produit).toFixed(1) : null;
+      hasVolumeUnit && prep.conc_produit && doseForConcentration !== null
+        ? +(doseForConcentration / prep.conc_produit).toFixed(1)
+        : null;
     const volumeMax =
-      hasVolumeUnit && prep.conc_produit && doseMax !== null
-        ? +(doseMax / prep.conc_produit).toFixed(1)
+      hasVolumeUnit && prep.conc_produit && doseMaxForConcentration !== null
+        ? +(doseMaxForConcentration / prep.conc_produit).toFixed(1)
         : null;
     const durationHours = getDurationHours(phase.duree);
     const rate =
@@ -293,7 +322,7 @@ const CLAFORAN_MENINGEE_PUMP = [
   { dose: 14, prep: "3 g/48 mL", rate: 9.3 },
   { dose: 16, prep: "4 g/48 mL", rate: 8 },
   { dose: 20, prep: "5 g/48 mL", rate: 8 },
-  { dose: 24, prep: "6 g/250 mL", rate: 8 },
+  { dose: 24, prep: "6 g/48 mL", rate: 8 },
 ] as const;
 
 export const computeMeningitisPump = (recipe: PrepRecipe, doseInput = "") => {
@@ -301,11 +330,8 @@ export const computeMeningitisPump = (recipe: PrepRecipe, doseInput = "") => {
   const requestedDose = computeRecipeDoseInputValue(recipe, doseInput);
   if (!requestedDose) return null;
   const table = recipe.claforan_meningee_pump ? CLAFORAN_MENINGEE_PUMP : AMOXICILLINE_MENINGEE_PUMP;
-  const current =
-    table.find((row) => row.dose === requestedDose) ||
-    table.reduce((closest, row) =>
-      Math.abs(row.dose - requestedDose) < Math.abs(closest.dose - requestedDose) ? row : closest
-    );
+  const current = table.find((row) => row.dose === requestedDose);
+  if (!current) return null;
   return { requestedDose, dose: current.dose, prep: current.prep, rate: current.rate };
 };
 

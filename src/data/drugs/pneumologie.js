@@ -46,6 +46,7 @@ export const DRUGS_PNEUMOLOGIE = [
           titre: "PSE adulte",
           mode: "pse",
           population: "adulte",
+          calculated_volume_role: "programmer",
           tag: "0,1-0,2 µg/kg/min",
           prelever: "1 ampoule 5 mg/5 mL",
           completer: "à 50 mL avec NaCl 0,9%",
@@ -73,8 +74,16 @@ export const DRUGS_PNEUMOLOGIE = [
           titre: "Asthme aigu",
           mode: "ivl",
           population: "adulte",
+          calculated_volume_role: "administrer",
           tag: "Nébulisation",
-          prelever: "5 mg",
+          concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_fixed: 5,
+              unit: "mg",
+            },
+          ],
           rows: [
             { label: "Rythme", value: "/20 min × 3", highlight: true },
             { label: "Administrer", value: "nébulisé sous O₂" },
@@ -90,6 +99,7 @@ export const DRUGS_PNEUMOLOGIE = [
           titre: "PSE enfant",
           mode: "pse",
           population: "enfant",
+          calculated_volume_role: "programmer",
           tag: "0,1-0,3 µg/kg/min",
           prelever: "1 ampoule 5 mg/5 mL",
           completer: "à 50 mL avec NaCl 0,9%",
@@ -117,7 +127,17 @@ export const DRUGS_PNEUMOLOGIE = [
           titre: "Nébulisation enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "administrer",
           tag: "2,5-5 mg",
+          concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "Dose",
+              dose_fixed: 2.5,
+              dose_max_fixed: 5,
+              unit: "mg",
+            },
+          ],
           rows: [
             { label: "Dose", value: "2,5-5 mg selon poids", highlight: true },
             { label: "Administrer", value: "nébulisé sous O₂" },

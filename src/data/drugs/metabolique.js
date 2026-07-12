@@ -48,6 +48,7 @@ export const DRUGS_METABOLIQUE = [
           titre: "Per os enfant",
           mode: "po",
           population: "enfant",
+          calculated_volume_role: "administrer",
           tag: "15 gouttes/kg",
           phase_doses: [
             {
@@ -94,6 +95,8 @@ export const DRUGS_METABOLIQUE = [
       "Poudre 20 mg à reconstituer",
       "Poudre 40 mg à reconstituer",
       "Poudre 120 mg à reconstituer",
+      "Poudre 500 mg à reconstituer",
+      "Poudre 1 g à reconstituer",
     ],
     poso: {
       a: [
@@ -127,11 +130,13 @@ export const DRUGS_METABOLIQUE = [
         {
           titre: "IV",
           mode: "bolus",
+          population: "adulte",
           tag: "dose saisie",
           dose_input_label: "Dose à préparer",
           dose_input_unit: "mg",
           dose_input_default: 120,
           dose_input_min: 1,
+          dose_input_max: 1000,
           dose_input_step: 1,
           dose_based_dilution: {
             threshold: 120,
@@ -190,7 +195,7 @@ export const DRUGS_METABOLIQUE = [
       solvant: "Pur ou dilué G10%",
       volume_final: null,
       conc_finale: "30% (300 g/L)",
-      conc_produit: 300,
+      conc_produit: 0.3,
       unite: "g",
       duree: "Bolus IV lent",
       stabilite: "Utiliser immédiatement après ouverture",
@@ -209,6 +214,7 @@ export const DRUGS_METABOLIQUE = [
           titre: "IVD adulte",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "PUR",
           prelever: "1 à 2 ampoules 3 g/10 mL (= 3-6 g)",
           rows: [
@@ -241,12 +247,22 @@ export const DRUGS_METABOLIQUE = [
           titre: "Enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "administrer",
           tag: "0,3-0,5 g/kg",
+          concentration: "0,1 g/mL après dilution à G10%",
           rows: [
             {
               label: "Dose",
               value: "0,3-0,5 g/kg IV (G10% ou G30% dilué)",
               highlight: true,
+            },
+            {
+              label: "Diluer",
+              value: "1 volume de G30% + 2 volumes d’eau PPI = G10%",
+            },
+            {
+              label: "Administrer",
+              value: "G10% en IV lente",
             },
             {
               label: "Nourrisson",
@@ -466,6 +482,7 @@ export const DRUGS_METABOLIQUE = [
           titre: "IVL adulte",
           mode: "ivl",
           population: "adulte",
+          calculated_volume_role: "administrer",
           tag: "10 mg /8h",
           prelever: "1 ampoule 10 mg/2 mL — administrer pur",
           hide_final: true,
@@ -531,6 +548,7 @@ export const DRUGS_METABOLIQUE = [
           titre: "IVD adulte",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "4-8 mg",
           phase_doses: [
             {
@@ -556,6 +574,7 @@ export const DRUGS_METABOLIQUE = [
           titre: "IVD enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "0,1 mg/kg max 4 mg",
           phase_doses: [
             {

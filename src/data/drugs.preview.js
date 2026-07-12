@@ -2,8 +2,8 @@
  * Overlay « preview » des fiches médicaments (champ `prep`).
  *
  * Les préparations validées ont été promues dans src/data/drugs/*.js.
- * Restent ici les préparations PSE des 5 médicaments à garder en Vi/Vf sur main
- * tant que leur bascule n'est pas explicitement validée.
+ * Restent ici les préparations PSE des 5 médicaments à garder en Vi/Vf sur main,
+ * ainsi que les recettes structurées encore réservées à la surface preview.
  * Les nouveaux débits PSE restent séparés dans src/data/pse.preview.js.
  */
 export const DRUGS_PREVIEW = {
@@ -18,9 +18,12 @@ export const DRUGS_PREVIEW = {
         {
           titre: "ACR",
           mode: "bolus",
+          population: "adulte",
           tag: "1 mg IV/IO",
+          calculated_volume_role: "injecter",
           prelever: "2 ampoules d'adrénaline 5 mg/5 mL (= 10 mg/10 mL)",
           concentration: "1 mg/mL",
+          phase_doses: [{ label: "Injecter", unit: "mg", dose_fixed: 1 }],
           etapes: [
             "Ampoules 5 mg/5 mL (1 mg/mL)",
             "Préparer 2 ampoules (= 10 mg/10 mL) — utiliser pur",
@@ -34,9 +37,12 @@ export const DRUGS_PREVIEW = {
         {
           titre: "Choc anaphylactique",
           mode: "im",
+          population: "adulte",
           tag: "0,5 mg IM",
-          prelever: "0,5 mL d'adrénaline 1 mg/1 mL (= 0,5 mg)",
+          calculated_volume_role: "injecter",
+          prelever: "Ampoule d'adrénaline 1 mg/1 mL",
           concentration: "1 mg/mL",
+          phase_doses: [{ label: "Injecter IM", unit: "mg", dose_fixed: 0.5 }],
           etapes: [
             "Ampoule 1 mg/1 mL (1 mg/mL)",
             "Prélever 0,5 mL (= 0,5 mg)",
@@ -51,6 +57,7 @@ export const DRUGS_PREVIEW = {
         {
           titre: "PSR / PSE",
           mode: "pse",
+          population: "adulte",
           tag: "0,2 mg/mL",
           prelever: "2 ampoules 5 mg/5 mL (= 10 mg)",
           completer: "50 mL avec G5%",
@@ -139,6 +146,7 @@ export const DRUGS_PREVIEW = {
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "20 µg/mL",
           prelever: "5 ampoules 0,2 mg/2 mL (= 1 mg)",
           completer: "50 mL avec G5%",
@@ -152,6 +160,13 @@ export const DRUGS_PREVIEW = {
             "À l'abri de la lumière — tubulure opaque",
             "Ne se conserve plus au réfrigérateur",
           ],
+        },
+        {
+          titre: "PSE enfant — référence uniquement",
+          mode: "pse",
+          population: "enfant",
+          empty: true,
+          note: "Préparation pédiatrique non validée dans cette fiche — utiliser le protocole local",
         },
       ],
       etapes: [
@@ -227,6 +242,50 @@ export const DRUGS_PREVIEW = {
         "Nouvelle préparation service — dilution FIXE 0,33 mg/mL",
         "Objectif : PAM cible à atteindre — si PAM trop basse, augmenter le débit",
         "Voie dédiée — VVC conseillée. Pas de bolus, débit constant",
+      ],
+    },
+  },
+  78: {
+    prep: {
+      preparations: [
+        {
+          titre: "Adulte",
+          population: "adulte",
+          mode: "ivl",
+          tag: "5 g",
+          calculated_volume_role: "administrer",
+          prelever: "Flacon lyophilisé 5 g + 200 mL NaCl 0,9 % solvant fourni",
+          completer: "Reconstituer jusqu’au volume final de 200 mL avec le NaCl 0,9 % fourni",
+          concentration: "25 mg/mL",
+          phase_doses: [{ label: "Administrer", unit: "mg", dose_fixed: 5000 }],
+          etapes: [
+            "Administrer en IVL sur 15 min",
+            "En cas d’ACR : administrer en bolus IV rapide",
+          ],
+          notes: [
+            "Ne pas agiter : retourner doucement le flacon",
+            "Deuxième flacon possible si réponse insuffisante ou ACR réfractaire",
+          ],
+        },
+        {
+          titre: "Enfant",
+          population: "enfant",
+          mode: "ivl",
+          tag: "70 mg/kg · max 5 g",
+          calculated_volume_role: "administrer",
+          prelever: "Flacon lyophilisé 5 g + 200 mL NaCl 0,9 % solvant fourni",
+          completer: "Reconstituer jusqu’au volume final de 200 mL avec le NaCl 0,9 % fourni",
+          concentration: "25 mg/mL",
+          phase_doses: [{ label: "Administrer", unit: "mg", dose_kg: 70, max: 5000 }],
+          etapes: [
+            "Administrer en IVL sur 15 min",
+            "En cas d’ACR : administrer en bolus IV rapide",
+          ],
+          notes: [
+            "Ne pas agiter : retourner doucement le flacon",
+            "Deuxième dose possible selon réponse clinique et protocole",
+          ],
+        },
       ],
     },
   },

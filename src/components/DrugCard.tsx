@@ -127,6 +127,28 @@ const isPosoDuplicateOfPrep = (line: string, prepTexts: string[]) => {
   });
 };
 
+const normalizePrepPresentationText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[→⇒]/g, " ")
+    .replace(/[^a-z0-9µ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const prepStepDetail = (title: string, detail: string, result: string) => {
+  const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const withoutRepeatedAction = detail
+    .replace(new RegExp(`^\\s*${escapedTitle}\\s*[:—–-]\\s*`, "i"), "")
+    .trim();
+
+  return normalizePrepPresentationText(withoutRepeatedAction) ===
+    normalizePrepPresentationText(result)
+    ? ""
+    : withoutRepeatedAction;
+};
+
 type PreviewDoseStepperProps = {
   label: string;
   displayValue: string;
@@ -192,6 +214,16 @@ const PreviewDoseStepper = ({
     }
     if (maximum !== undefined && parsed > maximum) {
       return { value: null, message: `Valeur attendue : ${rangeHint}` };
+    }
+    if (
+      control.kind === "recipe" &&
+      control.steps?.length &&
+      !control.steps.some((step) => Math.abs(step - parsed) < 0.0001)
+    ) {
+      return {
+        value: null,
+        message: `Valeurs disponibles : ${control.steps.join(", ")}`,
+      };
     }
     return { value: parsed, message: null };
   };
@@ -342,8 +374,11 @@ const DrugCard = ({
   ]);
   const [previewVerifiedAt, setPreviewVerifiedAt] = useState<string | null>(null);
   const previewMode = isPreview();
-  const { prep: resolvedPrep, loading: previewPrepLoading } = useResolvedDrugPrep(drug, false);
-  const { pse: resolvedPse, loading: previewPseLoading } = useResolvedDrugPse(drug.id, false);
+  const { prep: resolvedPrep, loading: previewPrepLoading } = useResolvedDrugPrep(
+    drug,
+    previewMode
+  );
+  const { pse: resolvedPse, loading: previewPseLoading } = useResolvedDrugPse(drug.id, previewMode);
   // Poids partagé : vient du bandeau global (App.tsx → PatientWeightBanner) via
   // le prop. Plus d'input local dans la fiche (évite le doublon avec le bandeau).
   const weight = patientWeight;
@@ -444,11 +479,13 @@ const DrugCard = ({
   const previewWeight = Number.parseFloat(weight);
   const previewPopulation =
     prepPopulation || (Number.isFinite(previewWeight) && previewWeight < 30 ? "enfant" : "adulte");
-  const previewPrepData = resolvedPrep;
+  const previewClinicalLoading = previewMode && (previewPrepLoading || previewPseLoading);
+  const previewPrepData = previewMode && previewPrepLoading ? null : resolvedPrep;
+  const previewPseData = previewMode && previewPseLoading ? null : resolvedPse;
   const previewModel = buildPrepMedPreviewModel({
     drug,
     prep: previewPrepData,
-    pse: resolvedPse,
+    pse: previewPseData,
     population: previewPopulation,
     weight,
     recipeIndex: previewRecipeIndex,
@@ -503,6 +540,10 @@ const DrugCard = ({
     setPreviewRecipeInput(value);
   };
   const previewStructuredSteps = previewModel.steps;
+  const previewDisplaySteps = previewStructuredSteps.map((step) => ({
+    ...step,
+    detail: prepStepDetail(step.title, step.detail, step.result),
+  }));
   const previewStepNeedsWeight = (step: (typeof previewStructuredSteps)[number]) =>
     /poids requis|\bkg absent\b/i.test(`${step.detail} ${step.result}`);
   const previewPendingWeightCount = previewStructuredSteps.filter(previewStepNeedsWeight).length;
@@ -839,7 +880,13 @@ const DrugCard = ({
             </>
           )}
 
-          {previewMode && (
+          {previewClinicalLoading && (
+            <div className="preview-v25-loading" role="status">
+              Chargement de la préparation sécurisée…
+            </div>
+          )}
+
+          {previewMode && !previewClinicalLoading && (
             <div className="preview-v25-modes" role="group" aria-label="Modes de préparation">
               {previewModeCards.map((mode, index) => (
                 <button
@@ -873,7 +920,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {previewMode && (
+          {previewMode && !previewClinicalLoading && (
             <div
               className="preview-v25-results"
               aria-label="Résultats de préparation"
@@ -965,7 +1012,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {previewMode && (
+          {previewMode && !previewClinicalLoading && (
             <section
               className="preview-v25-panel preview-v25-prepare"
               aria-labelledby={`${instanceId}-preview-prep-title`}
@@ -973,7 +1020,7 @@ const DrugCard = ({
               <div className="preview-v25-section-head">
                 <div>
                   <span id={`${instanceId}-preview-prep-title`}>
-                    <ShieldCheck /> Préparation sécurisée
+                    <ShieldCheck /> Préparation pas à pas
                   </span>
                 </div>
                 <span className="preview-v25-prep-context">{previewModel.context}</span>
@@ -995,7 +1042,7 @@ const DrugCard = ({
                 </div>
               )}
               <ol className="preview-v25-recipe">
-                {previewStructuredSteps.map((step, index) => {
+                {previewDisplaySteps.map((step, index) => {
                   const needsWeight = previewStepNeedsWeight(step);
                   return (
                     <li
@@ -1005,7 +1052,7 @@ const DrugCard = ({
                       <span>{index + 1}</span>
                       <span>
                         <strong>{step.title}</strong>
-                        <small>{step.detail}</small>
+                        {step.detail && <small>{step.detail}</small>}
                       </span>
                       <b>{needsWeight ? "À calculer" : step.result}</b>
                     </li>
@@ -1022,7 +1069,7 @@ const DrugCard = ({
             </section>
           )}
 
-          {previewMode && (
+          {previewMode && !previewClinicalLoading && (
             <section
               className="preview-v25-panel preview-v25-control"
               aria-labelledby={`${instanceId}-preview-control-title`}
@@ -1070,9 +1117,7 @@ const DrugCard = ({
                           )
                         }
                       >
-                        <span aria-hidden="true">
-                          <Check />
-                        </span>
+                        <span aria-hidden="true">{previewChecks[index] ? <Check /> : null}</span>
                         <strong>{label}</strong>
                       </button>
                     ))}
@@ -1112,7 +1157,7 @@ const DrugCard = ({
             </section>
           )}
 
-          {previewMode && (
+          {previewMode && !previewClinicalLoading && (
             <section className="preview-v25-panel preview-v25-reference">
               <div className="preview-v25-section-head preview-v25-reference-head">
                 <div>

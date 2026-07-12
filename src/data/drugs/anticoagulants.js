@@ -101,6 +101,7 @@ export const DRUGS_ANTICOAGULANTS = [
           titre: "Enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "prelever",
           tag: "15-20 mg/kg max 1 g",
           completer: "à 100 mL avec NaCl 0,9%",
           phase_doses: [
@@ -161,7 +162,7 @@ export const DRUGS_ANTICOAGULANTS = [
       "Thrombopénie Induite par Héparine (TIH)",
       "Ostéoporose (long terme)",
     ],
-    cond: ["Flacon 25 000 UI/25 mL"],
+    cond: ["Flacon 25 000 UI/5 mL"],
     poso: {
       a: [
         "IVD SCA : prélever 2 mL (10 000 UI) qsp 10 mL NaCl 0,9% (soit 1000 UI/mL)",
@@ -185,6 +186,7 @@ export const DRUGS_ANTICOAGULANTS = [
           titre: "Bolus SCA",
           mode: "ivd",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "70-100 UI/kg",
           prelever: "2 mL d'héparine (= 10 000 UI)",
           completer: "à 10 mL avec NaCl 0,9%",
@@ -201,7 +203,7 @@ export const DRUGS_ANTICOAGULANTS = [
             { label: "Injecter", value: "volume selon dose calculée", highlight: true },
           ],
           etapes: [
-            "Flacon HNF 25 000 UI/25 mL (5 000 UI/mL)",
+            "Flacon HNF 25 000 UI/5 mL (5 000 UI/mL)",
             "IVD SCA : prélever 2 mL (= 10 000 UI)",
             "Compléter à 10 mL avec NaCl 0,9% → 1 000 UI/mL",
             "Posologie : 70-100 UI/kg",
@@ -225,7 +227,7 @@ export const DRUGS_ANTICOAGULANTS = [
             { label: "Préparation", value: "selon tableau de dilution", highlight: true },
           ],
           etapes: [
-            "Flacon HNF 25 000 UI/25 mL (5 000 UI/mL)",
+            "Flacon HNF 25 000 UI/5 mL (5 000 UI/mL)",
             "PSE : prélever 4 mL (= 20 000 UI)",
             "Compléter à 48 mL avec NaCl 0,9%",
             "Prescription : 15-25 UI/kg/h",
@@ -241,6 +243,7 @@ export const DRUGS_ANTICOAGULANTS = [
           titre: "Bolus enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "75 UI/kg",
           phase_doses: [
             {
@@ -249,8 +252,11 @@ export const DRUGS_ANTICOAGULANTS = [
               dose_kg: 75,
             },
           ],
-          rows: [{ label: "Injecter", value: "bolus IV selon prescription", highlight: true }],
-          etapes: ["Flacon HNF 25 000 UI/25 mL (5 000 UI/mL)", "Enfant : 75 UI/kg bolus IV"],
+          rows: [
+            { label: "Concentration", value: "5 000 UI/mL" },
+            { label: "Injecter", value: "bolus IV selon prescription", highlight: true },
+          ],
+          etapes: ["Flacon HNF 25 000 UI/5 mL (5 000 UI/mL)", "Enfant : 75 UI/kg bolus IV"],
           notes: [
             "Contrôle TCA H+4",
             "Risque hémorragique : surveillance clinique rapprochée",
@@ -270,7 +276,7 @@ export const DRUGS_ANTICOAGULANTS = [
             { label: "Préparation", value: "selon tableau de dilution", highlight: true },
           ],
           etapes: [
-            "Flacon HNF 25 000 UI/25 mL (5 000 UI/mL)",
+            "Flacon HNF 25 000 UI/5 mL (5 000 UI/mL)",
             "PSE enfant : prélever 4 mL (= 20 000 UI)",
             "Compléter à 48 mL avec NaCl 0,9%",
             "Débuter à 20 UI/kg/h IVSE",

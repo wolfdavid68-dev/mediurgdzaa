@@ -392,6 +392,7 @@ export const DRUGS_ELECTROLYTES = [
           titre: "Éclampsie enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "prelever",
           tag: "50 mg/kg max 4 g",
           completer: "à 100 mL avec NaCl 0,9%",
           phase_doses: [
@@ -418,6 +419,7 @@ export const DRUGS_ELECTROLYTES = [
           titre: "TdP enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "prelever",
           tag: "25-50 mg/kg max 2 g",
           completer: "à 100 mL avec NaCl 0,9%",
           phase_doses: [

@@ -153,6 +153,14 @@ const App = () => {
   // (procédure en cours → ne pas verrouiller mains gantées).
   const [patientWeight, setPatientWeight] = usePatientWeight();
   const [prepPopulation, setPrepPopulation] = useState<"adulte" | "enfant" | null>(null);
+  const patientWeightNumber = Number.parseFloat(patientWeight);
+  const effectivePrepPopulation =
+    prepPopulation ||
+    (Number.isFinite(patientWeightNumber) && patientWeightNumber > 0 && patientWeightNumber <= 300
+      ? patientWeightNumber < 30
+        ? "enfant"
+        : "adulte"
+      : null);
   useWakeLock(anyDrugOpen);
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== "undefined" ? navigator.onLine : true
@@ -490,7 +498,7 @@ const App = () => {
                 favorites={favorites}
                 showFavoritesOnly={showFavoritesOnly}
                 patientWeight={patientWeight}
-                prepPopulation={prepPopulation}
+                prepPopulation={effectivePrepPopulation}
                 autoOpenDrugId={autoOpenDrugId}
                 onAutoOpenDrug={consumeAutoOpenDrug}
                 onToggleFavorite={toggleFavorite}

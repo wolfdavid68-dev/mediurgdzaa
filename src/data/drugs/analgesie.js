@@ -61,6 +61,7 @@ export const DRUGS_ANALGESIE = [
         {
           titre: "Intranasal",
           mode: "in",
+          calculated_volume_role: "administrer",
           tag: "0,3 µg/kg",
           sufenta_intranasal: true,
           etapes: [
@@ -128,6 +129,7 @@ export const DRUGS_ANALGESIE = [
         {
           titre: "Bolus / titration",
           mode: "bolus",
+          population: "adulte",
           tag: "1 mg/mL",
           prelever: "1 mL de morphine 10 mg/1 mL (= 10 mg)",
           completer: "10 mL avec NaCl 0,9%",
@@ -136,6 +138,7 @@ export const DRUGS_ANALGESIE = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "1 mg/mL",
           prelever: "5 mL d'une ampoule 100 mg/10 mL (= 50 mg)",
           completer: "50 mL avec NaCl 0,9%",
@@ -351,6 +354,7 @@ export const DRUGS_ANALGESIE = [
           titre: "IVL adulte",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "0,2 mg/kg",
           prelever: "1 ampoule 20 mg/2 mL",
           completer: "20 mL avec NaCl 0,9%",

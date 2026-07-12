@@ -46,6 +46,7 @@ export const DRUGS_ANTIDOTES = [
         {
           titre: "IVD",
           mode: "bolus",
+          population: "adulte",
           tag: "0,04 mg/mL",
           prelever: "1 ampoule 0,4 mg/1 mL",
           completer: "10 mL avec NaCl 0,9%",
@@ -64,6 +65,7 @@ export const DRUGS_ANTIDOTES = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "0,1 mg/mL",
           prelever: "10 ampoules 0,4 mg/1 mL (= 4 mg)",
           completer: "40 mL avec NaCl 0,9%",
@@ -131,7 +133,8 @@ export const DRUGS_ANTIDOTES = [
           titre: "CICO adulte",
           mode: "bolus",
           population: "adulte",
-          tag: "100 mg/mL pur",
+          calculated_volume_role: "injecter",
+          tag: "CICO · 16 mg/kg",
           prelever: "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL) — pur",
           concentration: "100 mg/mL",
           phase_doses: [
@@ -141,18 +144,15 @@ export const DRUGS_ANTIDOTES = [
               unit: "mg",
             },
           ],
-          etapes: [
-            "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL)",
-            "Administrer pur en IVD",
-            "Urgence CICO : 16 mg/kg",
-          ],
+          etapes: ["Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL)"],
           notes: ["Surveiller anaphylaxie, bradycardie et recurarisation si dose insuffisante"],
         },
         {
           titre: "Décurarisation enfant",
           mode: "bolus",
           population: "enfant",
-          tag: "100 mg/mL pur",
+          calculated_volume_role: "injecter",
+          tag: "Selon profondeur du bloc · 4-16 mg/kg",
           prelever: "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL) — pur",
           concentration: "100 mg/mL",
           phase_doses: [
@@ -163,10 +163,7 @@ export const DRUGS_ANTIDOTES = [
               unit: "mg",
             },
           ],
-          etapes: [
-            "Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL)",
-            "Pédiatrie : 4-16 mg/kg IV selon profondeur du bloc",
-          ],
+          etapes: ["Flacon 200 mg/2 mL ou 500 mg/5 mL (100 mg/mL)"],
           notes: ["Surveiller anaphylaxie, bradycardie et recurarisation si dose insuffisante"],
         },
       ],
@@ -294,6 +291,12 @@ export const DRUGS_ANTIDOTES = [
           mode: "pse",
           population: "adulte",
           tag: "1-5 mg/h",
+          dose_input_label: "Débit prescrit",
+          dose_input_unit: "mg/h",
+          dose_input_default: 1,
+          dose_input_min: 1,
+          dose_input_max: 5,
+          dose_input_step: 1,
           prelever: "Nombre d'ampoules pour 4h (1 mg lyophilisé chacune)",
           completer: "24 mL avec G5%",
           rows: [
@@ -322,6 +325,7 @@ export const DRUGS_ANTIDOTES = [
           titre: "Hypoglycémie enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "administrer",
           tag: "SC / IM",
           rows: [
             {
@@ -379,6 +383,8 @@ export const DRUGS_ANTIDOTES = [
         {
           titre: "IVD pur",
           mode: "bolus",
+          population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "1 ampoule",
           prelever: "1 ampoule 5 mg/1 mL",
           concentration: "5 mg/mL",

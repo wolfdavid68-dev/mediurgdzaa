@@ -163,6 +163,7 @@ export const DRUGS_SOLUTES = [
           titre: "IVL adulte",
           mode: "ivl",
           population: "adulte",
+          calculated_volume_role: "perfuser",
           tag: "PUR 0,2 g/mL",
           prelever: "Flacon mannitol 20% (0,2 g/mL) — administrer pur",
           concentration: "0,2 g/mL",
@@ -183,6 +184,7 @@ export const DRUGS_SOLUTES = [
             {
               label: "Engagement",
               value: "1 g/kg IV rapide",
+              reference_only: true,
             },
           ],
           hide_final: true,
@@ -200,6 +202,7 @@ export const DRUGS_SOLUTES = [
           titre: "IVL enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "perfuser",
           tag: "0,5-1 g/kg",
           prelever: "Flacon mannitol 20% (0,2 g/mL) — administrer pur",
           concentration: "0,2 g/mL",

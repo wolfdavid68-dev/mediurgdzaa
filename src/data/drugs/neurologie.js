@@ -59,6 +59,7 @@ export const DRUGS_NEUROLOGIE = [
           titre: "IVD crise convulsive",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "10 mg pur",
           prelever: "1 mL (= 10 mg)",
           rate_label: "Injecter",
@@ -92,6 +93,7 @@ export const DRUGS_NEUROLOGIE = [
           titre: "IM",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "10 mg pur",
           prelever: "1 mL (= 10 mg)",
           rate_label: "Injecter",
@@ -104,6 +106,7 @@ export const DRUGS_NEUROLOGIE = [
           titre: "IVD enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "0,3-0,5 mg/kg max 10 mg",
           phase_doses: [
             {
@@ -126,6 +129,7 @@ export const DRUGS_NEUROLOGIE = [
           titre: "Rectal enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "administrer",
           tag: "0,5 mg/kg max 10 mg",
           phase_doses: [
             {
@@ -222,6 +226,7 @@ export const DRUGS_NEUROLOGIE = [
           titre: "IVD enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "0,05-0,1 mg/kg max 1 mg",
           prelever: "Ampoule 1 mg/1 mL — à reconstituer avec son solvant",
           concentration: "1 mg/mL",
@@ -288,6 +293,7 @@ export const DRUGS_NEUROLOGIE = [
           titre: "IVL adulte",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "prelever",
           tag: "40-60 mg/kg max 4 g",
           phase_doses: [
             {
@@ -339,7 +345,7 @@ export const DRUGS_NEUROLOGIE = [
     indic: ["État de mal épileptique (2ème-3ème ligne)", "Épilepsies focales"],
     ci: ["Bradycardie sinusale", "Bloc AV 2-3e degré", "Insuffisance cardiaque sévère"],
     ei: ["Hypotension, bradycardie", "Arythmies ventriculaires", "Ataxie, nystagmus (surdosage)"],
-    cond: ["Ampoule selon présentation"],
+    cond: ["Flacon 10 mL : 750 mg de fosphénytoïne (= 500 mg EP ; 50 mg EP/mL)"],
     poso: {
       a: [
         "PSE : solvant NaCl 0,9% ou G5%",
@@ -464,6 +470,7 @@ export const DRUGS_NEUROLOGIE = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "Pur",
           prelever: "Ampoule 10 mg/50 mL (0,2 mg/mL)",
           rate_label: "Débit",

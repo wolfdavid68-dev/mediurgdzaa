@@ -1498,23 +1498,31 @@ const PrepBlock = ({
   );
   const rawVisibleEtapes = pediatricPrepOnly
     ? []
-    : activeRecipe?.use_table_row && getPrepTableCurrentSteps()
-      ? getPrepTableCurrentSteps()
-      : activeRecipe && Object.hasOwn(activeRecipe, "etapes")
-        ? activeRecipe.etapes
-        : prep.etapes;
+    : activeRecipe?.empty
+      ? []
+      : activeRecipe?.use_table_row && getPrepTableCurrentSteps()
+        ? getPrepTableCurrentSteps()
+        : activeRecipe && Object.hasOwn(activeRecipe, "etapes")
+          ? activeRecipe.etapes
+          : prep.etapes;
   const visibleEtapes = staticLegacyUsesFirstStep
     ? rawVisibleEtapes?.filter((_, index) => index !== 0)
     : rawVisibleEtapes;
   const visibleNotes = pediatricPrepOnly
     ? []
-    : activeRecipe && Object.hasOwn(activeRecipe, "notes")
-      ? activeRecipe.notes
-      : prep.notes;
-  const displaySolvant = activeRecipe?.solvant || prep.solvant;
-  const displayDuree = activeRecipe?.duree || prep.duree;
-  const displayStabilite = activeRecipe?.stabilite || prep.stabilite;
-  const displayConc = activeRecipe?.conc_finale || prep.conc_finale;
+    : activeRecipe?.empty
+      ? []
+      : activeRecipe && Object.hasOwn(activeRecipe, "notes")
+        ? activeRecipe.notes
+        : prep.notes;
+  const displaySolvant = activeRecipe?.empty ? undefined : activeRecipe?.solvant || prep.solvant;
+  const displayDuree = activeRecipe?.empty ? undefined : activeRecipe?.duree || prep.duree;
+  const displayStabilite = activeRecipe?.empty
+    ? undefined
+    : activeRecipe?.stabilite || prep.stabilite;
+  const displayConc = activeRecipe?.empty
+    ? undefined
+    : activeRecipe?.conc_finale || prep.conc_finale;
   const pedTableResult = prep.pedTable ? calcPedTable(prep, weight) : null;
   const pedImDoseMg = validKg ? Math.min(kg * 0.01, 0.5) : null;
   const pedImVolumeMl = pedImDoseMg !== null ? +pedImDoseMg.toFixed(2) : null;
@@ -1583,7 +1591,7 @@ const PrepBlock = ({
             )}
             {validKg && !r && (
               <div className="prep-empty-text">
-                Hors plage de la table — utiliser la posologie adulte.
+                Aucune préparation calculable pour ce poids — vérifier le protocole.
               </div>
             )}
             {validKg && r && (

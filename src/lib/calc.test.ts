@@ -390,6 +390,55 @@ describe("calcPedTable", () => {
       admin_route: "IVD",
     });
   });
+
+  test("refuse une dilution dont le volume médicament dépasse le volume final", () => {
+    const prep = {
+      pedTable: {
+        bandes: [
+          {
+            kg_min: 1,
+            kg_max: 40,
+            mode: "dilute" as const,
+            preparation: "Solution mère 1 mg/mL",
+            vol_per_kg: 0.2,
+            volume_final: 4,
+            solvant: "NaCl 0,9%",
+          },
+        ],
+      },
+    };
+
+    expect(calcPedTable(prep, 20)).toMatchObject({ vol_med: 4, vol_solvant: 0 });
+    expect(calcPedTable(prep, 20.1)).toBeNull();
+    expect(calcPedTable(prep, 40)).toBeNull();
+  });
+
+  test("n’extrapole pas entre deux bandes de poids", () => {
+    const prep = {
+      pedTable: {
+        bandes: [
+          {
+            kg_min: 1,
+            kg_max: 30,
+            mode: "inject" as const,
+            preparation: "Bande basse",
+            vol_per_kg: 0.1,
+          },
+          {
+            kg_min: 31,
+            kg_max: 55,
+            mode: "inject" as const,
+            preparation: "Bande haute",
+            vol_per_kg: 0.1,
+          },
+        ],
+      },
+    };
+
+    expect(calcPedTable(prep, 30)?.preparation).toBe("Bande basse");
+    expect(calcPedTable(prep, 30.5)).toBeNull();
+    expect(calcPedTable(prep, 31)?.preparation).toBe("Bande haute");
+  });
 });
 
 // ════════════════════════════════════════════════════════════════

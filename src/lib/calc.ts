@@ -395,8 +395,13 @@ export function calcPedTable(
   if (bande.mode === "dilute") {
     if (typeof bande.volume_final !== "number") return null;
     const raw = kg * bande.vol_per_kg;
+    // Fail closed : une dilution ne peut pas demander plus de médicament que
+    // le volume final prévu. On ne corrige ni la dose ni le volume à la place
+    // des données cliniques ; le rendu doit demander une vérification.
+    if (!Number.isFinite(raw) || raw < 0 || raw > bande.volume_final) return null;
     const volMed = roundStep(raw, bande.step || 0.1, bande.round_mode);
     const volSolv = +(bande.volume_final - volMed).toFixed(1);
+    if (!Number.isFinite(volMed) || !Number.isFinite(volSolv) || volSolv < 0) return null;
     return {
       mode: "dilute",
       kg,

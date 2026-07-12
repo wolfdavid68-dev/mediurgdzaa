@@ -56,6 +56,7 @@ export const DRUGS_CATECHOLAMINES = [
           titre: "ACR",
           mode: "ivd",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "1 mg IV/IO",
           prelever: "1 mL (= 1 mg)",
           rows: [
@@ -75,6 +76,7 @@ export const DRUGS_CATECHOLAMINES = [
           titre: "Choc anaphylactique",
           mode: "im",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "0,5 mg IM",
           prelever: "0,5 mL (= 0,5 mg)",
           rows: [
@@ -172,6 +174,7 @@ export const DRUGS_CATECHOLAMINES = [
         {
           titre: "Bolus titré",
           mode: "bolus",
+          population: "adulte",
           tag: "3 mg/mL",
           prelever: "1 ampoule 30 mg/1 mL",
           completer: "10 mL avec NaCl 0,9%",

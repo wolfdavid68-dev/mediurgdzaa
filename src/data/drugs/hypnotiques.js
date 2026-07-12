@@ -34,7 +34,7 @@ export const DRUGS_HYPNOTIQUES = [
     cond: [
       "Ampoule 200 mg/20 mL (10 mg/mL)",
       "Flacon 500 mg/50 mL (10 mg/mL)",
-      "Flacon 200 mg/20 mL (20 mg/mL)",
+      "Seringue préremplie 1 g/50 mL (20 mg/mL)",
     ],
     poso: {
       a: [
@@ -73,6 +73,7 @@ export const DRUGS_HYPNOTIQUES = [
           titre: "Induction",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "PUR",
           prelever: "Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure",
           concentration: "10 mg/mL",
@@ -88,6 +89,7 @@ export const DRUGS_HYPNOTIQUES = [
             {
               label: "Sédation procédurale",
               value: "0,5-1 mg/kg IV en titration",
+              reference_only: true,
             },
           ],
           hide_final: true,
@@ -105,6 +107,7 @@ export const DRUGS_HYPNOTIQUES = [
           titre: "Induction enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "PUR",
           prelever: "Ampoule 200 mg/20 mL (10 mg/mL) — utiliser pure",
           concentration: "10 mg/mL",
@@ -120,6 +123,7 @@ export const DRUGS_HYPNOTIQUES = [
             {
               label: "Sédation procédurale",
               value: "1 mg/kg IV",
+              reference_only: true,
             },
           ],
           hide_final: true,
@@ -188,6 +192,7 @@ export const DRUGS_HYPNOTIQUES = [
         {
           titre: "ISR",
           mode: "bolus",
+          calculated_volume_role: "injecter",
           tag: "PUR",
           prelever: "Ampoule 20 mg/10 mL (2 mg/mL) — administrer pur",
           concentration: "2 mg/mL",
@@ -202,6 +207,7 @@ export const DRUGS_HYPNOTIQUES = [
             {
               label: "Sujet âgé",
               value: "0,2 mg/kg",
+              reference_only: true,
             },
           ],
           hide_final: true,
@@ -283,9 +289,24 @@ export const DRUGS_HYPNOTIQUES = [
           titre: "Bolus titré",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
+          phase_relation: "alternative",
           tag: "1 mg/mL pur",
           prelever: "Ampoule 5 mg/5 mL (1 mg/mL) — utiliser pure",
           concentration: "1 mg/mL",
+          phase_doses: [
+            {
+              label: "Sédation titrée",
+              dose_fixed: 1,
+              dose_max_fixed: 3,
+              unit: "mg",
+            },
+            {
+              label: "État de mal épileptique",
+              dose_fixed: 10,
+              unit: "mg",
+            },
+          ],
           rows: [
             {
               label: "Sédation",
@@ -326,6 +347,8 @@ export const DRUGS_HYPNOTIQUES = [
           titre: "Enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "injecter",
+          phase_relation: "alternative",
           tag: "IM / IN / IV",
           prelever: "Ampoule 5 mg/5 mL (1 mg/mL)",
           concentration: "1 mg/mL",
@@ -417,6 +440,7 @@ export const DRUGS_HYPNOTIQUES = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "50 mL",
           prelever: "2 ampoules 250 mg/5 mL (= 500 mg)",
           completer: "50 mL avec NaCl 0,9%",

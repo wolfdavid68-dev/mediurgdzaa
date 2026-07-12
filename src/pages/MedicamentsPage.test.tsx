@@ -73,4 +73,13 @@ describe("MedicamentsPage — intégration patientWeight → DrugCard", () => {
     expect(calc).toBeTruthy();
     expect(calc!.textContent).toMatch(/70.*140 mg/);
   });
+
+  test("mode adulte explicite → la posologie enfant disparaît sans second clic", () => {
+    render(<MedicamentsPage {...baseProps} patientWeight="80" prepPopulation="adulte" />);
+    fireEvent.click(screen.getByText("ZAA").closest("button")!);
+
+    expect(screen.getByText("Adulte")).toBeInTheDocument();
+    expect(screen.queryByText("Pédiatrique")).not.toBeInTheDocument();
+    expect(screen.queryByText("0,5 mg/kg IV")).not.toBeInTheDocument();
+  });
 });

@@ -49,6 +49,7 @@ export const DRUGS_DIURETIQUES = [
           titre: "IVD OAP",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "40-80 mg",
           phase_doses: [
             {
@@ -60,12 +61,9 @@ export const DRUGS_DIURETIQUES = [
             },
           ],
           hide_final: true,
-          etapes: [
-            "Ampoule 20 mg/2 mL (10 mg/mL) — administrer pure en bolus",
-            "OAP : 40-80 mg IV",
-            "Doubler si diurèse < 40 mL/h",
-          ],
+          etapes: ["Ampoule 20 mg/2 mL (10 mg/mL) — administrer pure en bolus"],
           notes: [
+            "Doubler la dose si diurèse < 40 mL/h selon prescription",
             "Rincer la tubulure avant et après",
             "Ototoxicité si injection rapide : toujours > 2 min",
           ],
@@ -90,6 +88,7 @@ export const DRUGS_DIURETIQUES = [
           titre: "IVD enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "1-2 mg/kg",
           phase_doses: [
             {
@@ -104,9 +103,9 @@ export const DRUGS_DIURETIQUES = [
           etapes: [
             "Ampoule 20 mg/2 mL (10 mg/mL) — administrer pure",
             "Dose enfant : 1-2 mg/kg IV",
-            "Maximum 6 mg/kg/j",
           ],
           notes: [
+            "Ne pas dépasser 6 mg/kg/j",
             "Rincer la tubulure avant et après",
             "Ototoxicité si injection rapide : toujours > 2 min",
           ],

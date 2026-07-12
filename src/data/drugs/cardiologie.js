@@ -63,6 +63,8 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "IVD pur",
           mode: "bolus",
+          population: "adulte",
+          calculated_volume_role: "prelever",
           tag: "0,5 mg/mL",
           prelever: "2 ampoules",
           phase_doses: [
@@ -141,6 +143,8 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "Charge 1 min",
           mode: "bolus",
+          population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "0,5 mg/kg",
           prelever: "Ampoule 100 mg/10 mL (10 mg/mL)",
           phase_doses: [
@@ -161,6 +165,8 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "PSE entretien",
           mode: "pse",
+          population: "adulte",
+          calculated_volume_role: "programmer",
           tag: "50 µg/kg/min",
           prelever: "Ampoule 100 mg/10 mL (10 mg/mL) pure",
           concentration: "10 mg/mL",
@@ -271,6 +277,9 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "ACR",
           mode: "bolus",
+          population: "adulte",
+          calculated_volume_role: "injecter",
+          phase_relation: "sequence",
           tag: "bolus pur",
           prelever: "Ampoule 150 mg/3 mL (50 mg/mL)",
           phase_doses: [
@@ -294,6 +303,7 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "IVL dose de charge",
           mode: "bolus",
+          calculated_volume_role: "prelever",
           tag: "5 mg/kg",
           prelever: "Ampoule 150 mg/3 mL (50 mg/mL)",
           completer: "G5% STRICT sur 30 min",
@@ -315,6 +325,7 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "PSE entretien",
           mode: "pse",
+          population: "adulte",
           tag: "600 mg/48 mL",
           prelever: "4 ampoules 150 mg/3 mL (= 600 mg/12 mL)",
           completer: "à 48 mL avec G5%",
@@ -393,6 +404,7 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "IVL",
           mode: "bolus",
+          population: "adulte",
           tag: "5 µg/mL",
           prelever: "1 ampoule 0,5 mg/2 mL",
           completer: "mini-flac 100 mL NaCl 0,9%",
@@ -463,6 +475,7 @@ export const DRUGS_CARDIOLOGIE = [
           titre: "IVD 10 mg",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "Pur",
           prelever: "1 mL de Striadyne 20 mg/2 mL (= 10 mg)",
           rate_label: "Injecter",
@@ -477,6 +490,7 @@ export const DRUGS_CARDIOLOGIE = [
           titre: "Répétition",
           mode: "bolus",
           population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "20 mg",
           prelever: "2 mL de Striadyne 20 mg/2 mL (= 20 mg)",
           rate_label: "Injecter",
@@ -488,6 +502,7 @@ export const DRUGS_CARDIOLOGIE = [
           titre: "IVD enfant",
           mode: "bolus",
           population: "enfant",
+          calculated_volume_role: "injecter",
           tag: "1 mg/kg max 10 mg",
           phase_doses: [
             {
@@ -579,11 +594,13 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "IDM",
           mode: "pse",
+          population: "adulte",
           tag: "bolus puis 30 + 60 min",
           prelever: "Flacon reconstitué 50 mg/50 mL (= 1 mg/mL)",
           concentration: "1 mg/mL",
           hide_final: true,
           hide_phase_volume: true,
+          phase_relation: "sequence",
           phase_doses: [
             {
               label: "Bolus IV",
@@ -592,11 +609,13 @@ export const DRUGS_CARDIOLOGIE = [
             {
               label: "PSE 30 min",
               dose_kg: 0.75,
+              max: 50,
               duree: "30 min",
             },
             {
               label: "PSE 60 min",
               dose_kg: 0.5,
+              max: 35,
               duree: "60 min",
             },
           ],
@@ -613,11 +632,13 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "EP massive",
           mode: "pse",
+          population: "adulte",
           tag: "10 mg puis 90 mg/2h",
           prelever: "Flacon reconstitué 50 mg/50 mL (= 1 mg/mL)",
           concentration: "1 mg/mL",
           hide_final: true,
           hide_phase_volume: true,
+          phase_relation: "sequence",
           phase_doses: [
             {
               label: "IVL",
@@ -639,11 +660,13 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "AVC",
           mode: "pse",
+          population: "adulte",
           tag: "0,9 mg/kg",
           prelever: "Flacon reconstitué 50 mg/50 mL (= 1 mg/mL)",
           concentration: "1 mg/mL",
           hide_final: true,
           hide_phase_volume: true,
+          phase_relation: "breakdown",
           phase_doses: [
             {
               label: "Dose totale",
@@ -733,6 +756,8 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "Bolus IV",
           mode: "bolus",
+          population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "dose poids",
           prelever: "Flacon reconstitue 50 mg/10 mL",
           concentration: "5 mg/mL",
@@ -832,7 +857,9 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "Bolus",
           mode: "bolus",
-          tag: "pur 1 mg/mL",
+          population: "adulte",
+          calculated_volume_role: "injecter",
+          tag: "Bolus initial · 1 mg IVD",
           prelever: "1 ampoule 10 mg/10 mL",
           phase_doses: [
             {
@@ -840,11 +867,7 @@ export const DRUGS_CARDIOLOGIE = [
               dose_fixed: 1,
             },
           ],
-          etapes: [
-            "Bolus initial : 1 mg IV (= 1 mL)",
-            "Administrer pur (1 mg/mL)",
-            "Surveillance hémodynamique rapprochée",
-          ],
+          etapes: ["Bolus initial : 1 mg IV (= 1 mL)", "Surveillance hémodynamique rapprochée"],
           notes: [
             "Conserver l'ampoule dans son emballage (photosensible)",
             "Titrer par paliers — ne pas dépasser baisse PA > 25% en 1h",
@@ -853,6 +876,7 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "1-15 mg/h",
           prelever: "1 ampoule 10 mg/10 mL",
           concentration: "1 mg/mL",
@@ -921,9 +945,13 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
+          calculated_volume_role: "programmer",
           tag: "5 mg/mL",
           prelever: "Ampoule 25 mg/5 mL",
           concentration: "5 mg/mL",
+          rate_label: "Programmer le PSE",
+          rate_value: "1-6 mL/h (5-30 mg/h)",
           etapes: [
             "PSE : administrer PUR",
             "Dose usuelle : 5-30 mg/h selon TA cible",
@@ -984,6 +1012,8 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "IVL",
           mode: "bolus",
+          population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "0,5 mg/mL",
           prelever: "1 ampoule 5 mg/2 mL",
           completer: "à 10 mL avec NaCl 0,9%",
@@ -1062,17 +1092,11 @@ export const DRUGS_CARDIOLOGIE = [
       ],
       preparations: [
         {
-          titre: "Bolus",
+          titre: "Bolus — référence uniquement",
           mode: "bolus",
-          tag: "pur 1 mg/mL",
-          prelever: "Ampoule 10 mg/10 mL",
-          concentration: "1 mg/mL",
-          hide_final: true,
-          etapes: [
-            "IVD en bolus : administrer PUR",
-            "Utiliser l'ampoule pure a 1 mg/mL",
-            "Titrer selon PA cible",
-          ],
+          population: "adulte",
+          empty: true,
+          note: "Dose de bolus non définie dans les données validées — utiliser le protocole local",
           notes: [
             "CI absolue si inhibiteurs PDE5 < 48h (effondrement PA mortel)",
             "Surveiller PA en continu",
@@ -1081,6 +1105,7 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "1-10 mg/h",
           prelever: "Ampoule 10 mg/10 mL",
           concentration: "1 mg/mL",
@@ -1141,6 +1166,7 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "PSE",
           mode: "pse",
+          population: "adulte",
           tag: "24 h",
           prelever: "6 ampoules 100 µg/1 mL (= 600 µg)",
           completer: "48 mL avec NaCl 0,9%",
@@ -1198,6 +1224,7 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "TSV / FA",
           mode: "pse",
+          population: "adulte",
           tag: "25 mg / 20 min",
           prelever: "1 flacon 25 mg qsp 25 mL NaCl 0,9%",
           rate_label: "Administrer",
@@ -1213,6 +1240,8 @@ export const DRUGS_CARDIOLOGIE = [
         {
           titre: "IVL poids",
           mode: "bolus",
+          population: "adulte",
+          calculated_volume_role: "injecter",
           tag: "0,25 mg/kg max 25 mg",
           prelever: "1 flacon 25 mg qsp 25 mL NaCl 0,9%",
           phase_doses: [

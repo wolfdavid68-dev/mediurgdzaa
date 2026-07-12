@@ -163,6 +163,7 @@ export const DRUGS_PRODUITS_SANGUINS = [
           titre: "PBS J1",
           mode: "ivl",
           population: "adulte",
+          calculated_volume_role: "perfuser",
           tag: "1,5 g/kg",
           phase_doses: [
             {
@@ -197,6 +198,7 @@ export const DRUGS_PRODUITS_SANGUINS = [
           titre: "PBS J3",
           mode: "ivl",
           population: "adulte",
+          calculated_volume_role: "perfuser",
           tag: "1 g/kg",
           phase_doses: [
             {
@@ -231,6 +233,7 @@ export const DRUGS_PRODUITS_SANGUINS = [
           titre: "Cirrhotique",
           mode: "ivl",
           population: "adulte",
+          calculated_volume_role: "perfuser",
           tag: "1 g/kg/j",
           phase_doses: [
             {
@@ -265,8 +268,23 @@ export const DRUGS_PRODUITS_SANGUINS = [
           titre: "Enfant",
           mode: "ped",
           population: "enfant",
+          calculated_volume_role: "perfuser",
+          phase_relation: "alternative",
           tag: "0,5-1 g/kg",
+          phase_doses: [
+            {
+              label: "Dose selon indication",
+              dose_kg: 0.5,
+              dose_max_kg: 1,
+              unit: "g",
+            },
+          ],
           rows: [
+            {
+              label: "Produit",
+              value: "Albumine 20%",
+              highlight: true,
+            },
             {
               label: "Dose",
               value: "0,5-1 g/kg IV selon indication",
