@@ -326,9 +326,9 @@ describe("DrugCard", () => {
       fireEvent.click(psrPseButton);
       expect(psrPseButton).toHaveAttribute("aria-pressed", "true");
 
-      fireEvent.click(await engine.findByRole("button", { name: /PSR \/ PSE.*Vi\/Vf poids/i }));
-      expect(engine.getByText("20 mL d'adrénaline")).toBeInTheDocument();
-      expect(engine.getByText("à 42 mL dans la seringue")).toBeInTheDocument();
+      fireEvent.click(await engine.findByRole("button", { name: /PSR \/ PSE.*0,2 mg\/mL/i }));
+      expect(engine.getByText("2 ampoules 5 mg/5 mL (= 10 mg)")).toBeInTheDocument();
+      expect(engine.getByText("50 mL avec G5%")).toBeInTheDocument();
       expect(screen.queryByText("PSE adulte")).not.toBeInTheDocument();
       expect(screen.queryByText("PSE enfant")).not.toBeInTheDocument();
     });
@@ -366,7 +366,7 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("garde la table Vi/Vf Adrénaline sur main hors author=preview", () => {
+    test("utilise la dilution fixe Adrénaline sur main hors author=preview", () => {
       sessionStorage.clear();
       window.history.pushState({}, "", "/");
       const adrenaline = DRUGS.find((drug) => drug.nom === "ADRÉNALINE")!;
@@ -374,9 +374,9 @@ describe("DrugCard", () => {
       render(<DrugCard drug={adrenaline} patientWeight="80" />);
       fireEvent.click(screen.getByText("ADRÉNALINE").closest("button")!);
 
-      fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*Vi\/Vf poids/i }));
-      expect(screen.getByText("20 mL d'adrénaline")).toBeInTheDocument();
-      expect(screen.getByText("à 42 mL dans la seringue")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*0,2 mg\/mL/i }));
+      expect(screen.getByText("2 ampoules 5 mg/5 mL (= 10 mg)")).toBeInTheDocument();
+      expect(screen.getByText("50 mL avec G5%")).toBeInTheDocument();
       expect(screen.getByText("Débit PSE")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 0,1 µg/kg/min")).toBeInTheDocument();
       expect(screen.queryByText("Débit réglé")).not.toBeInTheDocument();
@@ -490,9 +490,9 @@ describe("DrugCard", () => {
 
       const engine = await openMainPreparationEngine();
 
-      expect(await engine.findByText("Flacon 250 mg/20 mL (12,5 mg/mL)")).toBeInTheDocument();
+      expect(await engine.findByText("Flacon 250 mg/25 mL (10 mg/mL)")).toBeInTheDocument();
       // Le prélèvement ne doit apparaître qu'une fois (pas de double rendu recette + boîte fixe)
-      expect(engine.getAllByText("Flacon 250 mg/20 mL (12,5 mg/mL)")).toHaveLength(1);
+      expect(engine.getAllByText("Flacon 250 mg/25 mL (10 mg/mL)")).toHaveLength(1);
     });
   });
 
@@ -579,7 +579,7 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la préparation Vi/Vf enfant de l’app principale", async () => {
+    test("affiche la dilution fixe enfant de l’app principale", async () => {
       const noradrenaline = DRUGS.find((drug) => drug.nom === "NORADRÉNALINE")!;
 
       render(<DrugCard drug={noradrenaline} patientWeight="20" />);
@@ -587,9 +587,9 @@ describe("DrugCard", () => {
 
       const engine = await openMainPreparationEngine();
 
-      expect(await engine.findByText("IVSE poids")).toBeInTheDocument();
-      expect(engine.getByText("2.5 mL de noradrénaline")).toBeInTheDocument();
-      expect(engine.getByText("à 42 mL dans la seringue")).toBeInTheDocument();
+      expect(await engine.findByText("PSE enfant")).toBeInTheDocument();
+      expect(engine.getByText("2 ampoules 8 mg/4 mL (= 16 mg)")).toBeInTheDocument();
+      expect(engine.getByText("48 mL avec G5%")).toBeInTheDocument();
     });
   });
 
@@ -599,7 +599,7 @@ describe("DrugCard", () => {
       window.history.pushState({}, "", "/");
     });
 
-    test("affiche la préparation Vi/Vf et le débit PSE pondéral hors author=preview", () => {
+    test("affiche la dilution fixe et le débit PSE hors author=preview", () => {
       sessionStorage.clear();
       window.history.pushState({}, "", "/");
       const noradrenaline = DRUGS.find((drug) => drug.nom === "NORADRÉNALINE")!;
@@ -607,23 +607,19 @@ describe("DrugCard", () => {
       render(<DrugCard drug={noradrenaline} patientWeight="70" />);
       fireEvent.click(screen.getByText("NORADRÉNALINE").closest("button")!);
 
-      expect(screen.getAllByText("Pour 70 kg").length).toBeGreaterThan(0);
-      expect(screen.getByText("IVSE poids")).toBeInTheDocument();
-      expect(screen.getByText("10 mL de noradrénaline")).toBeInTheDocument();
-      expect(screen.getByText("à 48 mL dans la seringue")).toBeInTheDocument();
-      expect(
-        screen.getByText("1 mL/h de solution = 0,1 µg/kg/min de Noradrénaline")
-      ).toBeInTheDocument();
+      expect(screen.getByText("PSE adulte")).toBeInTheDocument();
+      expect(screen.getByText("2 ampoules 8 mg/4 mL (= 16 mg)")).toBeInTheDocument();
+      expect(screen.getByText("48 mL avec G5%")).toBeInTheDocument();
       expect(
         screen.queryByText(
           "Baby-NAD (dilution bloc) : 0,5 mL dans miniflac 100 mL G5% (soit 0,01 mg/mL) — VVP"
         )
-      ).not.toBeInTheDocument();
+      ).toBeInTheDocument();
       expect(
         screen.queryByText(
           "Baby-NAD (dilution Chir Card) : 1 ampoule dans 500 mL G5% (soit 0,016 mg/mL) — VVP"
         )
-      ).not.toBeInTheDocument();
+      ).toBeInTheDocument();
       expect(
         screen.queryByText("PSE : 2 ampoules qsp 48 mL (soit 0,33 mg/mL) — VVC conseillée")
       ).not.toBeInTheDocument();
@@ -634,19 +630,19 @@ describe("DrugCard", () => {
     });
   });
 
-  describe("Tables Vi/Vf main", () => {
+  describe("Préparations principales", () => {
     afterEach(() => {
       sessionStorage.clear();
       window.history.pushState({}, "", "/");
     });
 
     test.each([
-      ["ADRÉNALINE", "80", "20 mL d'adrénaline"],
-      ["DOBUTAMINE", "70", "20 mL de Dobutrex"],
-      ["ISUPREL", "70", "10 mL d'Isuprel"],
-      ["NORADRÉNALINE", "70", "10 mL de noradrénaline"],
+      ["ADRÉNALINE", "80", "2 ampoules 5 mg/5 mL (= 10 mg)"],
+      ["DOBUTAMINE", "70", "1 flacon 250 mg/25 mL (10 mg/mL)"],
+      ["ISUPREL", "70", "5 ampoules 0,2 mg/2 mL (= 1 mg)"],
+      ["NORADRÉNALINE", "70", "2 ampoules 8 mg/4 mL (= 16 mg)"],
       ["SUFENTANIL", "85", "5 mL d'ampoule pure"],
-    ])("%s affiche la Préparation v2 sur main avec sa table Vi/Vf", (name, weight, expected) => {
+    ])("%s affiche la préparation principale sur main", (name, weight, expected) => {
       sessionStorage.clear();
       window.history.pushState({}, "", "/");
       const drug = DRUGS.find((item) => item.nom === name)!;
@@ -656,30 +652,30 @@ describe("DrugCard", () => {
 
       expect(screen.getByRole("region", { name: "Préparation v2" })).toBeInTheDocument();
       if (name === "ADRÉNALINE") {
-        fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*Vi\/Vf poids/i }));
+        fireEvent.click(screen.getByRole("button", { name: /PSR \/ PSE.*0,2 mg\/mL/i }));
       }
-      expect(screen.getByText(expected)).toBeInTheDocument();
+      expect(screen.getAllByText(expected).length).toBeGreaterThan(0);
     });
 
-    test("Dobutamine garde la table poids de main", () => {
+    test("Dobutamine utilise la dilution fixe de main", () => {
       const dobutamine = DRUGS.find((drug) => drug.nom === "DOBUTAMINE")!;
 
       render(<DrugCard drug={dobutamine} patientWeight="70" />);
       fireEvent.click(screen.getByText("DOBUTAMINE").closest("button")!);
 
-      expect(screen.getByText("20 mL de Dobutrex")).toBeInTheDocument();
-      expect(screen.getByText("à 60 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("1 flacon 250 mg/25 mL (10 mg/mL)")).toBeInTheDocument();
+      expect(screen.getByText("50 mL avec G5%")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 1 µg/kg/min")).toBeInTheDocument();
     });
 
-    test("Isuprel garde la table poids de main", () => {
+    test("Isuprel utilise la dilution fixe de main", () => {
       const isuprel = DRUGS.find((drug) => drug.nom === "ISUPREL")!;
 
       render(<DrugCard drug={isuprel} patientWeight="70" />);
       fireEvent.click(screen.getByText("ISUPREL").closest("button")!);
 
-      expect(screen.getByText("10 mL d'Isuprel")).toBeInTheDocument();
-      expect(screen.getByText("à 48 mL dans la seringue")).toBeInTheDocument();
+      expect(screen.getByText("5 ampoules 0,2 mg/2 mL (= 1 mg)")).toBeInTheDocument();
+      expect(screen.getByText("50 mL avec G5%")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 0,01 µg/kg/min")).toBeInTheDocument();
     });
   });

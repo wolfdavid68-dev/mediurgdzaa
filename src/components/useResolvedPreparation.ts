@@ -1,30 +1,12 @@
 import { useEffect, useState } from "react";
 import { PSE } from "../data/pse";
-import { isPreview, isPsePreview } from "../lib/featureFlags";
+import { isPsePreview } from "../lib/featureFlags";
 import type { Drug, PsePreviewByDrugId } from "../types/data";
 import { resolvePrep } from "./PrepBlock.parts";
-import type { PreviewPrepByDrugId } from "./PrepBlock.parts";
 import { resolvePse } from "./PseBlock.parts";
 
-let cachedPreviewPrep: PreviewPrepByDrugId | null = null;
-let previewPrepPromise: Promise<PreviewPrepByDrugId> | null = null;
 let cachedPreviewPse: PsePreviewByDrugId | null = null;
 let previewPsePromise: Promise<PsePreviewByDrugId> | null = null;
-
-const loadPreviewPrep = (): Promise<PreviewPrepByDrugId> => {
-  if (!previewPrepPromise) {
-    previewPrepPromise = import("../data/drugs.preview")
-      .then(({ DRUGS_PREVIEW }) => {
-        cachedPreviewPrep = DRUGS_PREVIEW as unknown as PreviewPrepByDrugId;
-        return cachedPreviewPrep;
-      })
-      .catch(() => {
-        cachedPreviewPrep = {};
-        return cachedPreviewPrep;
-      });
-  }
-  return previewPrepPromise;
-};
 
 const loadPreviewPse = (): Promise<PsePreviewByDrugId> => {
   if (!previewPsePromise) {
@@ -39,31 +21,6 @@ const loadPreviewPse = (): Promise<PsePreviewByDrugId> => {
       });
   }
   return previewPsePromise;
-};
-
-const usePreviewPrepOverlay = (enabled: boolean) => {
-  const [overlay, setOverlay] = useState<PreviewPrepByDrugId | null>(cachedPreviewPrep);
-
-  useEffect(() => {
-    if (!enabled) {
-      setOverlay(null);
-      return;
-    }
-    if (cachedPreviewPrep) {
-      setOverlay(cachedPreviewPrep);
-      return;
-    }
-
-    let active = true;
-    void loadPreviewPrep().then((nextOverlay) => {
-      if (active) setOverlay(nextOverlay);
-    });
-    return () => {
-      active = false;
-    };
-  }, [enabled]);
-
-  return overlay;
 };
 
 const usePreviewPseOverlay = (enabled: boolean) => {
@@ -92,11 +49,10 @@ const usePreviewPseOverlay = (enabled: boolean) => {
 };
 
 export const useResolvedDrugPrep = (drug: Drug, includePreviewOverrides = true) => {
-  const previewMode = includePreviewOverrides && isPreview();
-  const previewOverlay = usePreviewPrepOverlay(previewMode);
+  void includePreviewOverrides;
   return {
-    prep: resolvePrep(drug, previewMode ? previewOverlay : null),
-    loading: previewMode && previewOverlay === null,
+    prep: resolvePrep(drug, null),
+    loading: false,
   };
 };
 

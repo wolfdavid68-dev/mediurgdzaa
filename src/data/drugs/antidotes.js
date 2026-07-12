@@ -441,6 +441,46 @@ export const DRUGS_ANTIDOTES = [
       display_below_kg: 30,
       duree: "15 min",
       stabilite: "Utiliser dans les 6h après reconstitution",
+      preparations: [
+        {
+          titre: "Adulte",
+          population: "adulte",
+          mode: "ivl",
+          tag: "5 g",
+          calculated_volume_role: "administrer",
+          prelever: "Flacon lyophilisé 5 g + 200 mL NaCl 0,9 % solvant fourni",
+          completer: "Reconstituer jusqu’au volume final de 200 mL avec le NaCl 0,9 % fourni",
+          concentration: "25 mg/mL",
+          phase_doses: [{ label: "Administrer", unit: "mg", dose_fixed: 5000 }],
+          etapes: [
+            "Administrer en IVL sur 15 min",
+            "En cas d’ACR : administrer en bolus IV rapide",
+          ],
+          notes: [
+            "Ne pas agiter : retourner doucement le flacon",
+            "Deuxième flacon possible si réponse insuffisante ou ACR réfractaire",
+          ],
+        },
+        {
+          titre: "Enfant",
+          population: "enfant",
+          mode: "ivl",
+          tag: "70 mg/kg · max 5 g",
+          calculated_volume_role: "administrer",
+          prelever: "Flacon lyophilisé 5 g + 200 mL NaCl 0,9 % solvant fourni",
+          completer: "Reconstituer jusqu’au volume final de 200 mL avec le NaCl 0,9 % fourni",
+          concentration: "25 mg/mL",
+          phase_doses: [{ label: "Administrer", unit: "mg", dose_kg: 70, max: 5000 }],
+          etapes: [
+            "Administrer en IVL sur 15 min",
+            "En cas d’ACR : administrer en bolus IV rapide",
+          ],
+          notes: [
+            "Ne pas agiter : retourner doucement le flacon",
+            "Deuxième dose possible selon réponse clinique et protocole",
+          ],
+        },
+      ],
       etapes: [
         "Flacon lyophilisé 5 g — injecter 200 mL NaCl 0,9 % fourni",
         "Retourner doucement (ne pas agiter)",

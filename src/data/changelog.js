@@ -1,11 +1,34 @@
 // Version courante de l'application (affichée en bas de la nav — clic = patch notes)
 // Convention : on aligne sur la version du service worker (CACHE_NAME dans public/service-worker.js).
-export const APP_VERSION = "v116";
+export const APP_VERSION = "v117";
 
 // Historique des versions — entrée la plus récente en premier.
 // Chaque entrée : { version, date (AAAA-MM-JJ), titre?, changes: [{ type, text }] }
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
+  {
+    version: "v117",
+    date: "2026-07-12",
+    titre: "Prépa Med v2.5 sur l’application principale",
+    changes: [
+      {
+        type: "feat",
+        text: "Médicaments : Prépa Med v2.5 est désormais active directement dans l’application principale, sans URL preview, avec choix du mode de préparation, résultats calculés, procédure pas à pas, double contrôle et référence clinique.",
+      },
+      {
+        type: "feat",
+        text: "Les recettes v2.5 sont intégrées aux données publiques pour les 81 médicaments. Les préparations Adrénaline, Dobutamine, Isuprel, Noradrénaline et Cyanokit ne dépendent plus de l’ancien overlay drugs.preview.js.",
+      },
+      {
+        type: "fix",
+        text: "Les dilutions fixes, populations adulte/enfant, volumes, concentrations et étapes de préparation sont maintenant contrôlés par les tests d’intégrité et le manifeste de couverture v2.5.",
+      },
+      {
+        type: "chore",
+        text: "Les débits PSE encore expérimentaux restent isolés derrière ?author=preview ; seule la préparation v2.5 validée est promue sur main.",
+      },
+    ],
+  },
   {
     version: "v116",
     date: "2026-07-09",

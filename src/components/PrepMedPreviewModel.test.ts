@@ -1,9 +1,7 @@
 import { DRUGS } from "../data/drugs";
-import { DRUGS_PREVIEW } from "../data/drugs.preview";
 import { PSE } from "../data/pse";
 import { PSE_PREVIEW } from "../data/pse.preview";
 import { calcDoseFromRate } from "../lib/calc";
-import { resolvePrep, type PreviewPrepByDrugId } from "./PrepBlock.parts";
 import {
   buildPrepMedPreviewModel,
   extractPreparedVolume,
@@ -12,7 +10,6 @@ import {
   type PrepPreviewPopulation,
 } from "./PrepMedPreviewModel";
 
-const PREVIEW_PREP = DRUGS_PREVIEW as unknown as PreviewPrepByDrugId;
 const PREVIEW_PSE = { ...PSE, ...PSE_PREVIEW };
 
 const modelFor = (
@@ -52,7 +49,7 @@ const previewModelFor = (
 ) => {
   const drug = DRUGS.find((candidate) => candidate.nom === drugName);
   if (!drug) throw new Error(`Médicament introuvable : ${drugName}`);
-  const prep = resolvePrep(drug, PREVIEW_PREP);
+  const prep = drug.prep || null;
   const pse = PREVIEW_PSE[drug.id] || null;
   return buildPrepMedPreviewModel({
     drug,
@@ -88,7 +85,7 @@ describe("modèle Prépa Med v2.5", () => {
     expect(cases).toHaveLength(162);
 
     for (const { drug, population, weight } of cases) {
-      const prep = resolvePrep(drug, PREVIEW_PREP);
+      const prep = drug.prep || null;
       const pse = PREVIEW_PSE[drug.id] || null;
       const first = buildPrepMedPreviewModel({
         drug,
@@ -248,8 +245,8 @@ describe("modèle Prépa Med v2.5", () => {
     expect(adrenaline.controls).toContain("Débit à programmer : 5 mL/h");
     expect(adrenaline.steps).toEqual([
       expect.objectContaining({ title: "Identifier l’ampoule", result: "1 mg/mL" }),
-      expect.objectContaining({ title: "Prélever selon le poids", result: "Vi 20 mL" }),
-      expect.objectContaining({ result: "Vf 42 mL" }),
+      expect.objectContaining({ title: "Prélever le médicament", result: "10 mL" }),
+      expect.objectContaining({ result: "Vf 50 mL" }),
       expect.objectContaining({ title: "Programmer le PSE", result: "5 mL/h" }),
     ]);
 
@@ -448,7 +445,7 @@ describe("modèle Prépa Med v2.5", () => {
     expect(flattenModelText(sufentanil)).toContain("Vi 5 mL");
     expect(flattenModelText(sufentanil)).toContain("Vf 31 mL");
 
-    expect(flattenModelText(modelFor("ISUPREL", "adulte", "80"))).toContain("0,2 mg/mL");
+    expect(flattenModelText(modelFor("ISUPREL", "adulte", "80"))).toContain("0,1 mg/mL");
     expect(flattenModelText(modelFor("VENTOLINE", "adulte", "80"))).toContain("1 mg/mL");
     expect(flattenModelText(modelFor("HÉPARINE SODIQUE", "adulte", "80", 1))).toContain(
       "5 000 UI/mL"

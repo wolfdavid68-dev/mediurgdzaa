@@ -79,7 +79,8 @@ export const PREP_MED_V25_COVERAGE = {
     strategies: [
       "steps",
       "ped_table",
-      "adrenaline_table",
+      "fixed_dilution",
+      "phase_doses",
       "pse",
       "pse_reference_tables",
       "pediatric_adrenaline_modes",
@@ -89,13 +90,17 @@ export const PREP_MED_V25_COVERAGE = {
   15: {
     id: 15,
     nom: "DOBUTAMINE",
-    strategies: ["steps", "dobutamine_table", "pse"],
+    strategies: ["steps", "fixed_dilution", "dobutamine_table", "pse"],
   },
-  16: { id: 16, nom: "ISUPREL", strategies: ["steps", "isuprel_table", "pse"] },
+  16: {
+    id: 16,
+    nom: "ISUPREL",
+    strategies: ["steps", "fixed_dilution", "isuprel_table", "pse"],
+  },
   17: {
     id: 17,
     nom: "NORADRÉNALINE",
-    strategies: ["steps", "norad_table", "pse"],
+    strategies: ["steps", "pse"],
   },
   19: { id: 19, nom: "ATROPINE", strategies: ["steps", "dose_kg", "phase_doses"] },
   20: { id: 20, nom: "BREVIBLOC", strategies: ["steps", "dose_kg", "phase_doses"] },
@@ -215,7 +220,7 @@ export const PREP_MED_V25_COVERAGE = {
   74: { id: 74, nom: "BRICANYL", strategies: ["steps", "pediatric_age_band"] },
   75: { id: 75, nom: "ATROVENT", strategies: ["steps", "pediatric_age_band"] },
   77: { id: 77, nom: "PERFALGAN", strategies: ["reference_only"] },
-  78: { id: 78, nom: "CYANOKIT", strategies: ["steps", "dose_kg"] },
+  78: { id: 78, nom: "CYANOKIT", strategies: ["steps", "dose_kg", "phase_doses"] },
   79: { id: 79, nom: "HIDONAC", strategies: ["steps", "phases"] },
   80: {
     id: 80,

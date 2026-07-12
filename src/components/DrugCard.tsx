@@ -335,6 +335,7 @@ type DrugCardProps = {
   isFavorite?: boolean;
   patientWeight?: string;
   prepPopulation?: "adulte" | "enfant" | null;
+  prepV25Enabled?: boolean;
   autoOpen?: boolean;
   onAutoOpen?: () => void;
   onToggleFavorite?: (id: number) => void;
@@ -348,6 +349,7 @@ const DrugCard = ({
   isFavorite,
   patientWeight = "",
   prepPopulation,
+  prepV25Enabled = false,
   autoOpen,
   onAutoOpen,
   onToggleFavorite,
@@ -374,6 +376,9 @@ const DrugCard = ({
   ]);
   const [previewVerifiedAt, setPreviewVerifiedAt] = useState<string | null>(null);
   const previewMode = isPreview();
+  // La surface Prépa Med v2.5 est désormais la fiche publique. Le mode preview
+  // ne pilote plus que les overlays de données encore expérimentaux (PSE).
+  const prepV25Mode = prepV25Enabled || previewMode;
   const { prep: resolvedPrep, loading: previewPrepLoading } = useResolvedDrugPrep(
     drug,
     previewMode
@@ -576,7 +581,7 @@ const DrugCard = ({
   }, [autoOpen, onAutoOpen]);
 
   const toggleTab = (key: string) =>
-    setActiveTab(previewMode ? key : activeTab === key ? null : key);
+    setActiveTab(prepV25Mode ? key : activeTab === key ? null : key);
 
   const renderList = (items: string[] | undefined) => {
     if (!items || items.length === 0) return <span className="na">Non renseigné</span>;
@@ -601,9 +606,9 @@ const DrugCard = ({
     const validKg = kgNum > 0 && kgNum <= 300;
     const hasAdult = !!(drug.poso?.a && drug.poso.a.length);
     const hasPed = !!(drug.poso?.p && drug.poso.p.length);
-    const effectivePrep = previewMode ? resolvedPrep : drug.prep;
+    const effectivePrep = prepV25Mode ? resolvedPrep : drug.prep;
     const hidePosologyGrid = Boolean(effectivePrep?.hide_poso_when_prepared);
-    const prepDuplicateTexts = previewMode ? collectPrepDuplicateTexts(effectivePrep) : [];
+    const prepDuplicateTexts = prepV25Mode ? collectPrepDuplicateTexts(effectivePrep) : [];
     let showAdult = true;
     let showPed = true;
     let posoHint = "";
@@ -738,7 +743,7 @@ const DrugCard = ({
         </div>
       );
     }
-    if (key === "poso") return renderPosoTab(!previewMode, !previewMode);
+    if (key === "poso") return renderPosoTab(!prepV25Mode, !prepV25Mode);
     return null;
   };
 
@@ -746,7 +751,7 @@ const DrugCard = ({
     <div
       className={`drug-card ${open ? "drug-card-open" : ""} ${
         monitoringBadges.length > 0 ? "drug-card-monitored" : ""
-      } ${previewMode ? "drug-card-preview-v25" : ""}`}
+      } ${prepV25Mode ? "drug-card-preview-v25" : ""}`}
       style={{ "--drug-accent": drug.couleur } as CSSProperties}
     >
       <div className="drug-row">
@@ -820,8 +825,8 @@ const DrugCard = ({
       </div>
 
       {open && (
-        <div className={`drug-body ${previewMode ? `preview-workflow-${previewWorkflow}` : ""}`}>
-          {previewMode && (
+        <div className={`drug-body ${prepV25Mode ? `preview-workflow-${previewWorkflow}` : ""}`}>
+          {prepV25Mode && (
             <>
               <nav className="preview-v25-workflow" aria-label="Étapes de la fiche médicament">
                 {[
@@ -846,7 +851,7 @@ const DrugCard = ({
               </nav>
             </>
           )}
-          {previewMode ? (
+          {prepV25Mode ? (
             <section className="preview-v25-identity" aria-label="Identité clinique">
               <div>
                 <strong>DCI</strong>
@@ -886,7 +891,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {previewMode && !previewClinicalLoading && (
+          {prepV25Mode && !previewClinicalLoading && (
             <div className="preview-v25-modes" role="group" aria-label="Modes de préparation">
               {previewModeCards.map((mode, index) => (
                 <button
@@ -920,7 +925,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {previewMode && !previewClinicalLoading && (
+          {prepV25Mode && !previewClinicalLoading && (
             <div
               className="preview-v25-results"
               aria-label="Résultats de préparation"
@@ -1012,7 +1017,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {previewMode && !previewClinicalLoading && (
+          {prepV25Mode && !previewClinicalLoading && (
             <section
               className="preview-v25-panel preview-v25-prepare"
               aria-labelledby={`${instanceId}-preview-prep-title`}
@@ -1069,7 +1074,7 @@ const DrugCard = ({
             </section>
           )}
 
-          {previewMode && !previewClinicalLoading && (
+          {prepV25Mode && !previewClinicalLoading && (
             <section
               className="preview-v25-panel preview-v25-control"
               aria-labelledby={`${instanceId}-preview-control-title`}
@@ -1157,7 +1162,7 @@ const DrugCard = ({
             </section>
           )}
 
-          {previewMode && !previewClinicalLoading && (
+          {prepV25Mode && !previewClinicalLoading && (
             <section className="preview-v25-panel preview-v25-reference">
               <div className="preview-v25-section-head preview-v25-reference-head">
                 <div>
@@ -1221,7 +1226,7 @@ const DrugCard = ({
             </section>
           )}
 
-          {!previewMode && (
+          {!prepV25Mode && (
             <div className="tabs-row">
               {TABS.map((tab) => {
                 const isActive = activeTab === tab.key;
@@ -1243,7 +1248,7 @@ const DrugCard = ({
             </div>
           )}
 
-          {activeTab && !previewMode && (
+          {activeTab && !prepV25Mode && (
             <div className="tab-content">{renderContent(activeTab)}</div>
           )}
         </div>

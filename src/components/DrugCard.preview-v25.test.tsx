@@ -33,13 +33,15 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     window.history.pushState({}, "", "/");
   });
 
-  test("reste strictement absente de l’app principale", () => {
+  test("est active dans l’app principale sans paramètre preview", () => {
     window.history.pushState({}, "", "/");
-    const { container } = render(<DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" />);
+    const { container } = render(
+      <DrugCard drug={drugNamed("ADRÉNALINE")} patientWeight="80" prepV25Enabled />
+    );
     openDrug("ADRÉNALINE");
 
-    expect(container.querySelector(".preview-v25-results")).toBeNull();
-    expect(container.querySelector(".preview-v25-panel")).toBeNull();
+    expect(container.querySelector(".preview-v25-results")).toBeInTheDocument();
+    expect(container.querySelector(".preview-v25-panel")).toBeInTheDocument();
   });
 
   test("ne modifie pas l’en-tête de la carte médicament", () => {

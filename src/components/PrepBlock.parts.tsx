@@ -1,8 +1,8 @@
 import type { Drug } from "../types/data";
 
 // Types partagés du bloc Préparation (extraits de PrepBlock.tsx pour alléger
-// le composant). `prep` public (drugs.js) éventuellement enrichi par l'override
-// preview (drugs.preview.js) si ?author=preview.
+// le composant). Les recettes v2.5 validées vivent désormais dans les données
+// publiques drugs.js ; le type d'overlay reste pour la compatibilité des tests.
 export type DrugPrep = NonNullable<Drug["prep"]>;
 export type PreviewPrepByDrugId = Partial<Record<number, { prep?: Partial<DrugPrep> }>>;
 export type PrepRecipe = NonNullable<DrugPrep["preparations"]>[number];

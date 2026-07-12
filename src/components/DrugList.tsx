@@ -13,6 +13,7 @@ type DrugListProps = {
   favorites?: Set<number>;
   patientWeight?: string;
   prepPopulation?: "adulte" | "enfant" | null;
+  prepV25Enabled?: boolean;
   autoOpenDrugId?: number | null;
   onAutoOpenDrug?: () => void;
   onToggleFavorite?: (id: number) => void;
@@ -26,6 +27,7 @@ const DrugList = ({
   favorites,
   patientWeight,
   prepPopulation,
+  prepV25Enabled,
   autoOpenDrugId,
   onAutoOpenDrug,
   onToggleFavorite,
@@ -42,6 +44,7 @@ const DrugList = ({
             isFavorite={favorites?.has(drug.id) || false}
             patientWeight={patientWeight}
             prepPopulation={prepPopulation}
+            prepV25Enabled={prepV25Enabled}
             autoOpen={autoOpenDrugId != null && autoOpenDrugId === drug.id}
             onAutoOpen={onAutoOpenDrug}
             onToggleFavorite={onToggleFavorite}

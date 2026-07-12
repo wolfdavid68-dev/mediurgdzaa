@@ -14,6 +14,7 @@ type MedicamentsPageProps = {
   showFavoritesOnly: boolean;
   patientWeight: string;
   prepPopulation?: "adulte" | "enfant" | null;
+  prepV25Enabled?: boolean;
   autoOpenDrugId?: number | null;
   onAutoOpenDrug?: () => void;
   onToggleFavorite: (id: number) => void;
@@ -29,6 +30,7 @@ const MedicamentsPage = ({
   showFavoritesOnly,
   patientWeight,
   prepPopulation,
+  prepV25Enabled,
   autoOpenDrugId,
   onAutoOpenDrug,
   onToggleFavorite,
@@ -77,6 +79,7 @@ const MedicamentsPage = ({
             onProtocolOpen={onProtocolOpen}
             patientWeight={patientWeight}
             prepPopulation={prepPopulation}
+            prepV25Enabled={prepV25Enabled}
           />
         </div>
       )}
@@ -91,6 +94,7 @@ const MedicamentsPage = ({
         onProtocolOpen={onProtocolOpen}
         patientWeight={patientWeight}
         prepPopulation={prepPopulation}
+        prepV25Enabled={prepV25Enabled}
       />
     </>
   );

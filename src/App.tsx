@@ -499,6 +499,7 @@ const App = () => {
                 showFavoritesOnly={showFavoritesOnly}
                 patientWeight={patientWeight}
                 prepPopulation={effectivePrepPopulation}
+                prepV25Enabled
                 autoOpenDrugId={autoOpenDrugId}
                 onAutoOpenDrug={consumeAutoOpenDrug}
                 onToggleFavorite={toggleFavorite}

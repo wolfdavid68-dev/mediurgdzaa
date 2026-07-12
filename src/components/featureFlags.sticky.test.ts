@@ -1,8 +1,8 @@
 import { isAuthEnabled, isPreview, isPsePreview } from "../lib/featureFlags";
 
 // Régression : le mode preview interne doit rester strictement explicite.
-// Seul `?author=preview` dans l'URL courante active les surcharges
-// drugs.preview.js / pse.preview.js. Sans ce paramètre visible : main.
+// Seul `?author=preview` dans l'URL courante active la surcharge PSE interne.
+// Les préparations v2.5 sont publiques et ne dépendent plus de ce paramètre.
 
 const store = new Map<string, string>();
 beforeEach(() => {

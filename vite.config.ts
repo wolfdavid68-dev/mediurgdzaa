@@ -225,7 +225,7 @@ export default defineConfig({
             },
             {
               name: "data-preview",
-              test: /[\\/]src[\\/]data[\\/](drugs|pse)\.preview/,
+              test: /[\\/]src[\\/]data[\\/]pse\.preview/,
               priority: 92,
             },
             { name: "data-medic", test: /[\\/]src[\\/]data[\\/](drugs|pse|aliases)/, priority: 90 },

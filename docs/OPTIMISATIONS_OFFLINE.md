@@ -88,7 +88,7 @@ Le build utilise `manualChunks` par domaine fonctionnel :
 
 - `vendor-react` : React et scheduler ;
 - `data-medic` : donnees medicaments / PSE / alias ;
-- `data-preview` : donnees internes de preparation preview, chargees seulement
+- `data-preview` : donnees PSE internes encore en validation, chargees seulement
   en mode `?author=preview` mais toujours precachees pour rester offline ;
 - `export-image` : moteur d'export PNG `html-to-image`, charge seulement au
   clic sur l'export du bilan ACR mais toujours precache pour rester offline ;

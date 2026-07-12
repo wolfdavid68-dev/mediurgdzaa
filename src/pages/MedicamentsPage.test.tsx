@@ -41,6 +41,16 @@ const baseProps = {
 };
 
 describe("MedicamentsPage — intégration patientWeight → DrugCard", () => {
+  test("active Prépa Med v2.5 sur l’application principale sans URL preview", () => {
+    window.history.replaceState({}, "", "/");
+    render(<MedicamentsPage {...baseProps} prepV25Enabled />);
+    fireEvent.click(screen.getByText("ZAA").closest("button")!);
+
+    expect(screen.getByRole("navigation", { name: "Étapes de la fiche médicament" })).toBeVisible();
+    expect(screen.getByRole("group", { name: "Modes de préparation" })).toBeVisible();
+    expect(screen.getByText("Double contrôle")).toBeVisible();
+  });
+
   test("sans poids saisi : ouverture d'une fiche ne produit aucun calc", () => {
     render(<MedicamentsPage {...baseProps} />);
     fireEvent.click(screen.getByText("ZAA").closest("button")!);
