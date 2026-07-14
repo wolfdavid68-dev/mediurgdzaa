@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AuthProfileProvider } from "../lib/authProfile";
 import DrugNote from "./DrugNote";
 
@@ -43,5 +43,14 @@ describe("DrugNote", () => {
 
     expect(localStorage.getItem("mediurg-usoignant-1-note-42")).toBe("Note du compte");
     expect(localStorage.getItem("mediurg-note-42")).toBeNull();
+  });
+
+  test("ouvre et focalise l’éditeur à la demande de la préparation", async () => {
+    const { rerender } = render(<DrugNote drugId={42} openRequest={0} />);
+
+    rerender(<DrugNote drugId={42} openRequest={1} />);
+
+    const editor = await screen.findByLabelText("Note personnelle pour ce médicament");
+    await waitFor(() => expect(editor).toHaveFocus());
   });
 });

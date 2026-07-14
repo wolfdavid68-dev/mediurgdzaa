@@ -5,6 +5,7 @@ import {
   BriefcaseMedical,
   Check,
   HeartPulse,
+  PencilLine,
   ShieldCheck,
   Syringe,
   TestTubes,
@@ -58,6 +59,9 @@ const DrugCard = ({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState(false);
+  const [noteContent, setNoteContent] = useState("");
+  const [noteEditorRequest, setNoteEditorRequest] = useState(0);
+  const [mobileNoteExpanded, setMobileNoteExpanded] = useState(false);
   const [prepWorkflow, setPrepWorkflow] = useState<"prepare" | "control" | "reference">("prepare");
   const [prepRecipeIndex, setPrepRecipeIndex] = useState(0);
   const [prepDose, setPrepDose] = useState(0.5);
@@ -120,6 +124,10 @@ const DrugCard = ({
     );
     setPrepVerifiedAt(null);
   }, [drug.id, prepPopulation, weight]);
+
+  useEffect(() => {
+    setMobileNoteExpanded(false);
+  }, [drug.id]);
 
   useEffect(() => {
     setPrepChecks((checks) =>
@@ -289,6 +297,14 @@ const DrugCard = ({
   const toggleTab = (key: string) =>
     setActiveTab(prepV25Mode ? key : activeTab === key ? null : key);
 
+  const openNoteEditor = () => {
+    setPrepWorkflow("reference");
+    setNoteEditorRequest((request) => request + 1);
+  };
+
+  const trimmedNote = noteContent.trim();
+  const hasLongMobileNote = trimmedNote.length > 120 || trimmedNote.split("\n").length > 3;
+
   const renderContent = (tabKey: string) => (
     <DrugTabContent
       tabKey={tabKey}
@@ -439,6 +455,35 @@ const DrugCard = ({
             </>
           )}
 
+          {prepV25Mode && trimmedNote && (
+            <aside className="prep-v25-mobile-note" aria-label="Note personnelle utile">
+              <div className="prep-v25-mobile-note-head">
+                <span>
+                  <PencilLine aria-hidden="true" />
+                  <strong>Note personnelle</strong>
+                </span>
+                <button
+                  type="button"
+                  aria-label="Modifier la note personnelle"
+                  onClick={openNoteEditor}
+                >
+                  <PencilLine aria-hidden="true" />
+                </button>
+              </div>
+              <p className={mobileNoteExpanded ? "is-expanded" : undefined}>{trimmedNote}</p>
+              {hasLongMobileNote && (
+                <button
+                  type="button"
+                  className="prep-v25-mobile-note-more"
+                  aria-expanded={mobileNoteExpanded}
+                  onClick={() => setMobileNoteExpanded((expanded) => !expanded)}
+                >
+                  {mobileNoteExpanded ? "Réduire" : "Lire toute la note"}
+                </button>
+              )}
+            </aside>
+          )}
+
           {(prepClinicalLoading || preparationEngineLoading) && (
             <div className="prep-v25-loading" role="status">
               Chargement de la préparation sécurisée…
@@ -579,6 +624,17 @@ const DrugCard = ({
                   </span>
                 </div>
                 <span className="prep-v25-prep-context">{preparationModel.context}</span>
+                <button
+                  type="button"
+                  className="prep-v25-note-action"
+                  aria-label={
+                    hasNote ? "Modifier la note personnelle" : "Ajouter une note personnelle"
+                  }
+                  title={hasNote ? "Modifier la note" : "Ajouter une note"}
+                  onClick={openNoteEditor}
+                >
+                  <PencilLine aria-hidden="true" />
+                </button>
               </div>
               {prepPendingWeightCount > 0 && (
                 <div className="prep-v25-prep-requirement" role="note">
@@ -770,7 +826,12 @@ const DrugCard = ({
                 })}
               </div>
               {activeTab && <div className="tab-content">{renderContent(activeTab)}</div>}
-              <DrugNote drugId={drug.id} onChange={setHasNote} />
+              <DrugNote
+                drugId={drug.id}
+                onChange={setHasNote}
+                onValueChange={setNoteContent}
+                openRequest={noteEditorRequest}
+              />
             </section>
           )}
 

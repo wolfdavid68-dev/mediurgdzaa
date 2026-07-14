@@ -89,6 +89,39 @@ describe("DrugCard", () => {
     });
   });
 
+  describe("Notes pendant la préparation mobile", () => {
+    beforeEach(() => localStorage.clear());
+    afterEach(() => localStorage.clear());
+
+    test("le crayon Préparer ouvre Référence et focalise l’éditeur", async () => {
+      render(<DrugCard drug={mockDrug} prepV25Enabled />);
+      fireEvent.click(screen.getByText("TEST_DRUG_XYZ").closest("button")!);
+
+      fireEvent.click(await screen.findByRole("button", { name: "Ajouter une note personnelle" }));
+
+      expect(
+        within(screen.getByRole("navigation", { name: "Étapes de la fiche médicament" })).getByRole(
+          "button",
+          { name: /Référence/i }
+        )
+      ).toHaveAttribute("aria-pressed", "true");
+      const editor = await screen.findByLabelText("Note personnelle pour ce médicament");
+      await waitFor(() => expect(editor).toHaveFocus());
+    });
+
+    test("une note existante est exposée dans le flux de préparation", async () => {
+      localStorage.setItem("mediurg-note-99999", "Surveiller le point de ponction.");
+      render(<DrugCard drug={mockDrug} prepV25Enabled />);
+      fireEvent.click(screen.getByText("TEST_DRUG_XYZ").closest("button")!);
+
+      const note = await screen.findByLabelText("Note personnelle utile");
+      expect(within(note).getByText("Surveiller le point de ponction.")).toBeInTheDocument();
+      expect(
+        within(note).getByRole("button", { name: "Modifier la note personnelle" })
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("Onglets — switch et contenu", () => {
     const openCard = () => {
       render(<DrugCard drug={mockDrug} />);

@@ -38,6 +38,11 @@
   display: none;
 }
 
+.prep-v25-mobile-note,
+.prep-v25-note-action {
+  display: none;
+}
+
 .prep-v25-loading {
   padding: 12px 14px;
   border: 1px solid var(--border);
@@ -1317,6 +1322,110 @@
 
   .prep-v25-workflow small {
     display: none;
+  }
+
+  .prep-v25-mobile-note {
+    display: grid;
+    gap: 7px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--info) 42%, var(--border));
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--info) 8%, var(--card));
+  }
+
+  .prep-v25-mobile-note-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .prep-v25-mobile-note-head > span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--info);
+  }
+
+  .prep-v25-mobile-note-head > span svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .prep-v25-mobile-note-head strong {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 850;
+  }
+
+  .prep-v25-mobile-note-head > button,
+  .prep-v25-note-action {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border: 0;
+    background: transparent;
+    color: var(--info);
+  }
+
+  .prep-v25-mobile-note-head > button::before,
+  .prep-v25-note-action::before {
+    position: absolute;
+    inset: 6px;
+    border: 1px solid color-mix(in srgb, var(--info) 38%, var(--border));
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--info) 9%, var(--card));
+    content: "";
+  }
+
+  .prep-v25-mobile-note-head > button:focus-visible,
+  .prep-v25-note-action:focus-visible,
+  .prep-v25-mobile-note-more:focus-visible {
+    outline: 2px solid var(--info);
+    outline-offset: 2px;
+  }
+
+  .prep-v25-mobile-note-head > button svg,
+  .prep-v25-note-action svg {
+    position: relative;
+    width: 18px;
+    height: 18px;
+  }
+
+  .prep-v25-mobile-note p {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.45;
+    white-space: pre-line;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .prep-v25-mobile-note p.is-expanded {
+    display: block;
+    overflow: visible;
+  }
+
+  .prep-v25-mobile-note-more {
+    justify-self: start;
+    min-height: 36px;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--info);
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .prep-v25-note-action {
+    margin-left: -4px;
   }
 
   .prep-v25-identity,

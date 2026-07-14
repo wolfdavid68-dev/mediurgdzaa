@@ -5,15 +5,23 @@ import { readUserNote, removeUserNote, writeUserNote } from "../lib/userStorage"
 
 // Note personnelle par drug, persistée dans localStorage (mediurg-note-{id}).
 // onChange(hasContent) permet au parent d'afficher l'indicateur ✎ dans l'en-tête.
-type DrugNoteProps = { drugId: number; onChange?: (hasContent: boolean) => void };
+type DrugNoteProps = {
+  drugId: number;
+  onChange?: (hasContent: boolean) => void;
+  onValueChange?: (note: string) => void;
+  openRequest?: number;
+};
 
-const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
+const DrugNote = ({ drugId, onChange, onValueChange, openRequest = 0 }: DrugNoteProps) => {
   const authProfile = useAuthProfile();
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const contentId = useId();
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rootRef = useRef<HTMLElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const focusRequested = useRef(false);
   const userId = authProfile?.id ?? null;
 
   useEffect(() => {
@@ -21,7 +29,24 @@ const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
     setNote(saved);
     setExpanded(false);
     onChange?.(Boolean(saved.trim()));
-  }, [drugId, onChange, userId]);
+    onValueChange?.(saved);
+  }, [drugId, onChange, onValueChange, userId]);
+
+  useEffect(() => {
+    if (!openRequest) return;
+    focusRequested.current = true;
+    setExpanded(true);
+  }, [openRequest]);
+
+  useEffect(() => {
+    if (!expanded || !focusRequested.current) return;
+    const frame = requestAnimationFrame(() => {
+      focusRequested.current = false;
+      rootRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      textareaRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [expanded]);
 
   useEffect(
     () => () => {
@@ -39,10 +64,11 @@ const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
     if (savedTimer.current) clearTimeout(savedTimer.current);
     savedTimer.current = setTimeout(() => setNoteSaved(false), 1500);
     onChange?.(Boolean(value.trim()));
+    onValueChange?.(value);
   };
 
   return (
-    <section className={`poso-note ${expanded ? "is-expanded" : ""}`}>
+    <section ref={rootRef} className={`poso-note ${expanded ? "is-expanded" : ""}`}>
       <button
         type="button"
         className="poso-note-toggle"
@@ -74,6 +100,7 @@ const DrugNote = ({ drugId, onChange }: DrugNoteProps) => {
             donnée nominative.
           </div>
           <textarea
+            ref={textareaRef}
             className="poso-note-textarea"
             value={note}
             onChange={handleNoteChange}
