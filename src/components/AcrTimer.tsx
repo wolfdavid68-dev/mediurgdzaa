@@ -29,6 +29,7 @@ import {
   AcrZoomOverlay,
 } from "./AcrTimer.parts";
 import { useWakeLock } from "../lib/useWakeLock";
+import { useAuthProfile } from "../lib/authProfile";
 import { safeSetItem } from "../lib/safeStorage";
 import {
   createEmptyAcrSession,
@@ -142,8 +143,8 @@ const summarizeEntry = (session: AcrFullSession, source: "local" | "remote"): Ac
   ...(source === "remote" ? { remoteSession: session } : {}),
 });
 
-const enqueueAcrSession = (session: AcrFullSession) => {
-  enqueueSyncItem({
+const enqueueAcrSession = (userId: string | null, session: AcrFullSession) => {
+  enqueueSyncItem(userId, {
     kind: "acr-session",
     item_id: session.id,
     payload: session,
@@ -153,6 +154,8 @@ const enqueueAcrSession = (session: AcrFullSession) => {
 
 // phase ∈ "rcp" | "analyse" | "actions" | "post-rosc"
 const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerProps) => {
+  const authProfile = useAuthProfile();
+  const userId = useRef(authProfile?.id ?? null).current;
   const refDoses = pediatric
     ? [
         { drug: "Adrénaline", dose: "0,01 mg/kg", note: "IV / IO" },
@@ -219,7 +222,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
       updatedAt: Date.now(),
     };
     writeSession(sessionRecord);
-    enqueueAcrSession(sessionRecord);
+    enqueueAcrSession(userId, sessionRecord);
     loadRecord(sessionRecord);
   };
 
@@ -244,7 +247,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
     )
       return;
     deleteSession(sessionId);
-    enqueueSyncDelete("acr-session", sessionId);
+    enqueueSyncDelete(userId, "acr-session", sessionId);
     publishAcrLiveDelete(sessionId);
     setRecentSessions((prev) => prev.filter((item) => item.id !== sessionId));
   };
@@ -353,7 +356,7 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
       cycle,
     });
     writeSession(nextRecord);
-    enqueueAcrSession(nextRecord);
+    enqueueAcrSession(userId, nextRecord);
     // Diffusion live : uniquement quand le CONTENU clinique change (la
     // signature ignore elapsed/updatedAt), sinon on émettrait un broadcast
     // par seconde de chrono. Si la signature vient d'être posée par la
@@ -364,7 +367,19 @@ const AcrTimer = ({ pediatric = false, protocol = "erc", onOpenDrug }: AcrTimerP
       publishAcrLiveSession(nextRecord);
     }
     setRecentSessions(listSessions().map((item) => ({ ...item, source: "local" })));
-  }, [activeSessionId, pediatric, protocol, elapsed, shocks, adres, amios, history, events, cycle]);
+  }, [
+    activeSessionId,
+    pediatric,
+    protocol,
+    elapsed,
+    shocks,
+    adres,
+    amios,
+    history,
+    events,
+    cycle,
+    userId,
+  ]);
 
   const rcpInCycle = Math.max(0, elapsed - cycleStartedAt);
   const nextAnalyseIn = Math.max(0, CYCLE_ANALYSE_S - rcpInCycle);

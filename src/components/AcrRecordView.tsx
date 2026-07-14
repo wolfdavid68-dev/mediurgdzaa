@@ -25,6 +25,7 @@ import {
 } from "../lib/acrSession";
 import { readSession, writeSession } from "../lib/acrSessionStore";
 import { enqueueSyncItem } from "../lib/deviceSync";
+import { useAuthProfile } from "../lib/authProfile";
 import { buildRecordText, displayPatient, getTimelineEvents } from "./acr/AcrRecordText";
 import AcrRecordContent from "./acr/AcrRecordContent";
 
@@ -48,8 +49,8 @@ type ThemePreference = "dark" | "light";
 const readStoredRecord = (sessionId: string) =>
   readSession(sessionId) ?? { ...createEmptyAcrSession(), id: sessionId };
 
-const syncAcrRecord = (record: AcrFullSession) => {
-  enqueueSyncItem({
+const syncAcrRecord = (userId: string | null, record: AcrFullSession) => {
+  enqueueSyncItem(userId, {
     kind: "acr-session",
     item_id: record.id,
     payload: record,
@@ -74,6 +75,8 @@ const AcrRecordView = ({
   events,
   cycle,
 }: AcrRecordViewProps) => {
+  const authProfile = useAuthProfile();
+  const userId = useRef(authProfile?.id ?? null).current;
   const snapshot = useMemo(
     () => ({ pediatric, protocol, elapsed, shocks, adres, amios, history, events, cycle }),
     [pediatric, protocol, elapsed, shocks, adres, amios, history, events, cycle]
@@ -118,8 +121,8 @@ const AcrRecordView = ({
 
   useEffect(() => {
     writeSession(record);
-    syncAcrRecord(record);
-  }, [record]);
+    syncAcrRecord(userId, record);
+  }, [record, userId]);
 
   useEffect(() => {
     setThemePreference(readThemePreference());
@@ -138,7 +141,7 @@ const AcrRecordView = ({
 
   const saveNow = () => {
     writeSession(record);
-    syncAcrRecord(record);
+    syncAcrRecord(userId, record);
     setSaved(true);
     scheduleTimeout(() => setSaved(false), 1800);
   };

@@ -74,7 +74,7 @@ describe("deviceSync", () => {
     syncMocks.rpc.mockResolvedValue({ error: null });
     const session = { ...createEmptyAcrSession(), id: "acr-1", updatedAt: 1_000 };
 
-    enqueueSyncItem({
+    enqueueSyncItem("u1", {
       kind: "acr-session",
       item_id: session.id,
       payload: session,
@@ -92,7 +92,7 @@ describe("deviceSync", () => {
   test("garde la file si le réseau ou Supabase échoue", async () => {
     syncMocks.rpc.mockRejectedValue(new Error("Failed to fetch"));
 
-    enqueueSyncItem({
+    enqueueSyncItem("u1", {
       kind: "kit-check",
       item_id: "acr",
       payload: { ts: 1_000, items: { 0: true } },
@@ -101,6 +101,57 @@ describe("deviceSync", () => {
     await flushSyncQueue();
 
     expect(queuedItems(store)).toHaveLength(1);
+  });
+
+  test("ne rejoue pas sous un autre compte une file créée hors ligne", async () => {
+    syncMocks.rpc.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    enqueueSyncItem("u1", {
+      kind: "kit-check",
+      item_id: "acr",
+      payload: { ts: 1_000, items: { 0: true } },
+      updated_at: 1_000,
+    });
+    await flushSyncQueue();
+    expect(queuedItems(store)).toHaveLength(1);
+
+    syncMocks.rpc.mockReset();
+    syncMocks.rpc.mockResolvedValue({ error: null });
+    syncMocks.getSession.mockResolvedValue({ data: { session: { user: { id: "u2" } } } });
+
+    await flushSyncQueue();
+
+    expect(syncMocks.rpc).not.toHaveBeenCalled();
+    expect(queuedItems(store)).toHaveLength(1);
+
+    syncMocks.getSession.mockResolvedValue({ data: { session: { user: { id: "u1" } } } });
+    await flushSyncQueue();
+
+    expect(syncMocks.rpc).toHaveBeenCalledWith(
+      "upsert_sync_item",
+      expect.objectContaining({ p_kind: "kit-check", p_item_id: "acr" })
+    );
+    expect(queuedItems(store)).toEqual([]);
+  });
+
+  test("supprime une ancienne entrée sans propriétaire sans jamais l'envoyer", async () => {
+    store.set(
+      STORAGE_KEYS.syncQueue,
+      JSON.stringify([
+        {
+          kind: "kit-check",
+          item_id: "legacy",
+          payload: { ts: 1_000, items: { 0: true } },
+          updated_at: 1_000,
+        },
+      ])
+    );
+    syncMocks.rpc.mockResolvedValue({ error: null });
+
+    await flushSyncQueue();
+
+    expect(syncMocks.rpc).not.toHaveBeenCalled();
+    expect(queuedItems(store)).toEqual([]);
   });
 
   test("scrub le payload ACR avant l'envoi", async () => {
@@ -112,7 +163,7 @@ describe("deviceSync", () => {
       patient: { age: "72", sexe: "M", nom: "INTERDIT" },
     };
 
-    enqueueSyncItem({
+    enqueueSyncItem("u1", {
       kind: "acr-session",
       item_id: session.id,
       payload: session,
@@ -127,7 +178,7 @@ describe("deviceSync", () => {
   test("reste inerte quand l'auth est désactivée", () => {
     syncMocks.authEnabled = false;
 
-    enqueueSyncItem({
+    enqueueSyncItem("u1", {
       kind: "kit-check",
       item_id: "acr",
       payload: { ts: 1_000, items: { 0: true } },
@@ -145,13 +196,13 @@ describe("deviceSync", () => {
     // Un upsert attend déjà pour cette session : la suppression doit le
     // remplacer dans la file, pas s'y ajouter (inspection synchrone, avant
     // que les flushs asynchrones ne tournent).
-    enqueueSyncItem({
+    enqueueSyncItem("u1", {
       kind: "acr-session",
       item_id: session.id,
       payload: session,
       updated_at: session.updatedAt,
     });
-    enqueueSyncDelete("acr-session", session.id);
+    enqueueSyncDelete("u1", "acr-session", session.id);
     expect(queuedItems(store)).toEqual([
       expect.objectContaining({ op: "delete", item_id: "acr-del" }),
     ]);
@@ -167,7 +218,7 @@ describe("deviceSync", () => {
   test("la pierre tombale reste en file si la suppression distante échoue", async () => {
     syncMocks.tableDelete.mockRejectedValue(new Error("Failed to fetch"));
 
-    enqueueSyncDelete("acr-session", "acr-offline");
+    enqueueSyncDelete("u1", "acr-session", "acr-offline");
     await flushSyncQueue();
 
     expect(queuedItems(store)).toEqual([
@@ -177,7 +228,7 @@ describe("deviceSync", () => {
 
   test("pullSessions écarte les sessions dont la suppression est en attente", async () => {
     syncMocks.tableDelete.mockRejectedValue(new Error("Failed to fetch"));
-    enqueueSyncDelete("acr-session", "acr-pending-delete");
+    enqueueSyncDelete("u1", "acr-session", "acr-pending-delete");
     await flushSyncQueue();
 
     syncMocks.rpc.mockResolvedValue({

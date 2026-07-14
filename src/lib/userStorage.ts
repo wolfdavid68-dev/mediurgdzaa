@@ -26,7 +26,10 @@ const MIGRATABLE_KEYS = [
   "acr-coach",
   "coach-mode",
 ];
-const MIGRATABLE_DYNAMIC_PREFIXES = [STORAGE_PREFIXES.kitCheck, STORAGE_PREFIXES.kitChecklist];
+// Les checklists cliniques détaillées peuvent contenir des valeurs de prise
+// en charge : leur ancienne clé anonyme n'a pas de propriétaire prouvable et
+// ne doit donc jamais être attribuée au compte qui se connecte ensuite.
+const MIGRATABLE_DYNAMIC_PREFIXES = [STORAGE_PREFIXES.kitCheck];
 
 const listLocalStorageKeys = (): string[] => {
   try {

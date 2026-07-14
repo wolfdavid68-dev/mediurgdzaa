@@ -7,6 +7,7 @@ import { STORAGE_KEYS } from "./storageKeys";
 type SyncKind = "acr-session" | "kit-check";
 
 export type SyncQueueItem = {
+  owner_id: string;
   kind: SyncKind;
   item_id: string;
   payload: unknown;
@@ -15,6 +16,8 @@ export type SyncQueueItem = {
   // retour réseau comme les upserts. Absent/"upsert" = comportement historique.
   op?: "upsert" | "delete";
 };
+
+type SyncQueueInput = Omit<SyncQueueItem, "owner_id">;
 
 export type PulledAcrSession = {
   session: AcrFullSession;
@@ -49,6 +52,8 @@ const readQueue = (): SyncQueueItem[] =>
   safeGetJson<SyncQueueItem[]>(STORAGE_KEYS.syncQueue, []).filter(
     (item): item is SyncQueueItem =>
       Boolean(item) &&
+      typeof item.owner_id === "string" &&
+      item.owner_id.length > 0 &&
       (item.kind === "acr-session" || item.kind === "kit-check") &&
       typeof item.item_id === "string" &&
       typeof item.updated_at === "number" &&
@@ -82,13 +87,16 @@ const currentUserId = async (): Promise<string | null> => {
   }
 };
 
-export const enqueueSyncItem = (item: SyncQueueItem): void => {
-  if (!isAuthEnabled()) return;
-  const clean = sanitizeItem(item);
+export const enqueueSyncItem = (ownerId: string | null, item: SyncQueueInput): void => {
+  if (!isAuthEnabled() || !ownerId) return;
+  const clean = sanitizeItem({ ...item, owner_id: ownerId });
   const next = [
     clean,
     ...readQueue().filter(
-      (queued) => queued.kind !== clean.kind || queued.item_id !== clean.item_id
+      (queued) =>
+        queued.owner_id !== ownerId ||
+        queued.kind !== clean.kind ||
+        queued.item_id !== clean.item_id
     ),
   ];
   writeQueue(next);
@@ -99,9 +107,10 @@ export const enqueueSyncItem = (item: SyncQueueItem): void => {
 // attente pour le même item (inutile de pousser un état qu'on supprime) et
 // sera rejouée au retour réseau — sans elle, une session supprimée
 // localement « ressusciterait » au prochain pull.
-export const enqueueSyncDelete = (kind: SyncKind, itemId: string): void => {
-  if (!isAuthEnabled()) return;
+export const enqueueSyncDelete = (ownerId: string | null, kind: SyncKind, itemId: string): void => {
+  if (!isAuthEnabled() || !ownerId) return;
   const tombstone: SyncQueueItem = {
+    owner_id: ownerId,
     kind,
     item_id: itemId,
     payload: null,
@@ -110,7 +119,9 @@ export const enqueueSyncDelete = (kind: SyncKind, itemId: string): void => {
   };
   const next = [
     tombstone,
-    ...readQueue().filter((queued) => queued.kind !== kind || queued.item_id !== itemId),
+    ...readQueue().filter(
+      (queued) => queued.owner_id !== ownerId || queued.kind !== kind || queued.item_id !== itemId
+    ),
   ];
   writeQueue(next);
   void flushSyncQueue();
@@ -119,10 +130,10 @@ export const enqueueSyncDelete = (kind: SyncKind, itemId: string): void => {
 // IDs avec une suppression en attente — les pulls les écartent pour que la
 // session ne réapparaisse pas dans la liste tant que la tombale n'est pas
 // passée côté serveur.
-const pendingDeleteIds = (kind: SyncKind): Set<string> =>
+const pendingDeleteIds = (ownerId: string, kind: SyncKind): Set<string> =>
   new Set(
     readQueue()
-      .filter((item) => item.op === "delete" && item.kind === kind)
+      .filter((item) => item.owner_id === ownerId && item.op === "delete" && item.kind === kind)
       .map((item) => item.item_id)
   );
 
@@ -131,8 +142,9 @@ export const flushSyncQueue = async (): Promise<void> => {
   const userId = await currentUserId();
   if (!supabase || !userId) return;
 
-  const remaining: SyncQueueItem[] = [];
-  for (const item of readQueue().map(sanitizeItem)) {
+  const queue = readQueue().map(sanitizeItem);
+  const remaining = queue.filter((item) => item.owner_id !== userId);
+  for (const item of queue.filter((item) => item.owner_id === userId)) {
     try {
       if (item.op === "delete") {
         // Suppression directe sur la table : la policy RLS
@@ -177,7 +189,7 @@ export const pullSessions = async (): Promise<PulledAcrSession[]> => {
       p_kind: "acr-session",
     });
     if (error || !Array.isArray(data)) return [];
-    const deleted = pendingDeleteIds("acr-session");
+    const deleted = pendingDeleteIds(userId, "acr-session");
     return (data as SyncRow[])
       .filter((row) => !deleted.has(row.item_id))
       .map((row) => {

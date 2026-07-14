@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { AuthProfileProvider } from "../lib/authProfile";
 import KitChecklist from "./KitChecklist";
 
 // Mini-checklist couvrant les 3 types d'items + un select dérivé des drogues.
@@ -41,6 +42,19 @@ const renderChecklist = () =>
       drogues={drogues}
       couleur="#FF453A"
     />
+  );
+
+const renderChecklistForUser = (userId: string) =>
+  render(
+    <AuthProfileProvider value={{ id: userId, prenom: "", nom: "", fonction: "IDE" } as never}>
+      <KitChecklist
+        kitId="test-kit"
+        titre="Test — KitChecklist"
+        checklist={mockChecklist}
+        drogues={drogues}
+        couleur="#FF453A"
+      />
+    </AuthProfileProvider>
   );
 
 beforeEach(() => {
@@ -178,5 +192,19 @@ describe("KitChecklist — persistance localStorage", () => {
     );
     renderChecklist();
     expect(screen.getByText(/0\/6 complétés?/)).toBeInTheDocument();
+  });
+
+  test("deux comptes successifs sur le même navigateur restent isolés", () => {
+    const first = renderChecklistForUser("u1");
+    fireEvent.click(screen.getByLabelText("Item 1"));
+    expect(screen.getByText(/1\/6 complétés?/)).toBeInTheDocument();
+    first.unmount();
+
+    const second = renderChecklistForUser("u2");
+    expect(screen.getByText(/0\/6 complétés?/)).toBeInTheDocument();
+    second.unmount();
+
+    renderChecklistForUser("u1");
+    expect(screen.getByText(/1\/6 complétés?/)).toBeInTheDocument();
   });
 });

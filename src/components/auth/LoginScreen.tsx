@@ -26,9 +26,6 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
     errorNonce,
     submit: onSubmit,
   } = useLoginForm(onLoggedIn);
-  // keepSession n'est pas wired à Supabase (persistSession est déjà global) —
-  // placeholder UI pour usage futur (logout sur close de tab).
-  const [keepSession, setKeepSession] = useState(true);
   const [shake, setShake] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
 
@@ -39,8 +36,6 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
     const t = window.setTimeout(() => setShake(false), 400);
     return () => window.clearTimeout(t);
   }, [errorNonce]);
-  void keepSession;
-
   return (
     <div className="auth-stage">
       <div className="auth-bg-decor" aria-hidden="true">
@@ -115,15 +110,7 @@ const LoginScreen = ({ onLoggedIn, onGoToRegister, onGoToForgot }: Props) => {
               />
             </label>
 
-            <div className="auth-row-between">
-              <label className="auth-checkbox">
-                <input
-                  type="checkbox"
-                  checked={keepSession}
-                  onChange={(e) => setKeepSession(e.target.checked)}
-                />
-                <span>Maintenir la session</span>
-              </label>
+            <div className="auth-row-end">
               <button type="button" className="auth-link" onClick={onGoToForgot} disabled={loading}>
                 Mot de passe oublié
               </button>

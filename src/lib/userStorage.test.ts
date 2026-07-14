@@ -79,7 +79,7 @@ describe("userStorage — mode authentifié (userId=abc)", () => {
 });
 
 describe("migrateAnonymousData", () => {
-  test("copie favorites/history/theme/notes/kits anonymes vers user", () => {
+  test("copie les préférences et notes, mais pas une checklist clinique sans propriétaire", () => {
     // Setup : données anonymes pré-existantes
     lsStore.set("mediurg-favorites", "[1,2,3]");
     lsStore.set("mediurg-history", "[10,20]");
@@ -90,7 +90,7 @@ describe("migrateAnonymousData", () => {
     lsStore.set("mediurg-kit-checklist-acr", JSON.stringify({ ts: 2, values: { dose: "ok" } }));
 
     const result = migrateAnonymousData("user1", [12, 23, 99]);
-    expect(result.migrated).toBe(7); // 3 settings + 2 notes + 2 kits
+    expect(result.migrated).toBe(6); // 3 settings + 2 notes + 1 check-list matériel
     expect(result.skipped).toBe(0);
 
     expect(readUserItem("user1", "favorites")).toBe("[1,2,3]");
@@ -101,9 +101,7 @@ describe("migrateAnonymousData", () => {
     expect(readUserItem("user1", "kit-check-isr")).toBe(
       JSON.stringify({ ts: 1, items: { 0: true } })
     );
-    expect(readUserItem("user1", "kit-checklist-acr")).toBe(
-      JSON.stringify({ ts: 2, values: { dose: "ok" } })
-    );
+    expect(readUserItem("user1", "kit-checklist-acr")).toBeNull();
 
     // Les clés anonymes restent (fallback pour autres users du device)
     expect(lsStore.get("mediurg-favorites")).toBe("[1,2,3]");

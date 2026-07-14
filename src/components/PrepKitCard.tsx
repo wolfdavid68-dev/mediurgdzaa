@@ -67,7 +67,7 @@ type PrepKitCardProps = {
 
 const PrepKitCard = ({ kit, autoOpen, autoOpenTab, onAutoOpen }: PrepKitCardProps) => {
   const authProfile = useAuthProfile();
-  const userId = authProfile?.id ?? null;
+  const userId = useRef(authProfile?.id ?? null).current;
   const [open, setOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [activeTab, setActiveTab] = useState("drogues");
@@ -112,7 +112,7 @@ const PrepKitCard = ({ kit, autoOpen, autoOpenTab, onAutoOpen }: PrepKitCardProp
     if (!isChecklist) return;
     const payload = { ts: Date.now(), items: checkedItems };
     writeUserItem(userId, kitCheckKey(kit.id), JSON.stringify(payload));
-    enqueueSyncItem({
+    enqueueSyncItem(userId, {
       kind: "kit-check",
       item_id: kit.id,
       payload,

@@ -177,7 +177,7 @@ describe("AcrTimer · suppression manuelle des sessions", () => {
     expect(confirmMock).toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: /^Adulte · ERC/ })).not.toBeInTheDocument();
     expect(localStorage.getItem(storageKey.acrSessionV2(local.id))).toBeNull();
-    expect(enqueueSyncDelete).toHaveBeenCalledWith("acr-session", local.id);
+    expect(enqueueSyncDelete).toHaveBeenCalledWith(null, "acr-session", local.id);
     expect(publishAcrLiveDelete).toHaveBeenCalledWith(local.id);
   });
 

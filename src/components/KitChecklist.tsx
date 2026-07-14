@@ -1,8 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import KitScaleIllustration from "./KitScaleIllustration";
 import { useAuthProfile } from "../lib/authProfile";
-import { safeGetJson, safeRemoveItem, safeSetJson } from "../lib/safeStorage";
-import { storageKey } from "../lib/storageKeys";
+import { readUserItem, removeUserItem, writeUserItem } from "../lib/userStorage";
 import type { ChecklistItem, ChecklistSection } from "../types/data";
 
 // Check-list interactive d'un kit (ex : ISR / intubation). Types d'items :
@@ -12,8 +11,8 @@ import type { ChecklistItem, ChecklistSection } from "../types/data";
 // par kit, avec auto-expiration ~3 h (comme la check-list matériel) pour ne
 // pas traîner les valeurs d'un patient/garde précédent.
 //
-// Clé localStorage dédiée (mediurg-kit-checklist-{kitId}) — distincte de la
-// check-list matériel (mediurg-kit-check-{kitId}) pour éviter toute collision.
+// Clé localStorage dédiée, préfixée par utilisateur en mode authentifié —
+// distincte de la check-list matériel pour éviter toute collision.
 
 const CHECK_MAX_AGE_MS = 3 * 60 * 60 * 1000; // 3 h
 
@@ -49,14 +48,24 @@ const computeSectionDone = (checklist: ChecklistSection[], vals: Values): boolea
 const collapsedFromDone = (done: boolean[]): Set<number> =>
   new Set(done.flatMap((d, i) => (d ? [i] : [])));
 
-const loadValues = (kitId: string): Values => {
-  const parsed = safeGetJson<StoredValues | null>(storageKey.kitChecklist(kitId), null);
+const kitChecklistKey = (kitId: string): string => `kit-checklist-${kitId}`;
+
+const loadValues = (userId: string | null, kitId: string): Values => {
+  const key = kitChecklistKey(kitId);
+  const raw = readUserItem(userId, key);
+  let parsed: StoredValues | null = null;
+  try {
+    parsed = raw ? (JSON.parse(raw) as StoredValues) : null;
+  } catch {
+    removeUserItem(userId, key);
+    return {};
+  }
   if (!parsed || typeof parsed.ts !== "number" || !parsed.values) {
-    safeRemoveItem(storageKey.kitChecklist(kitId));
+    removeUserItem(userId, key);
     return {};
   }
   if (Date.now() - parsed.ts > CHECK_MAX_AGE_MS) {
-    safeRemoveItem(storageKey.kitChecklist(kitId));
+    removeUserItem(userId, key);
     return {};
   }
   return parsed.values;
@@ -104,6 +113,7 @@ const twoDigits = (value: number): string => String(value).padStart(2, "0");
 const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
   const sectionIdPrefix = useId();
   const authProfile = useAuthProfile();
+  const userId = useRef(authProfile?.id ?? null).current;
   // Options d'un menu déroulant : soit explicites (`options`), soit dérivées
   // des drogues du kit dont le rôle contient le mot-clé `from` (ex : tous les
   // « Hypnotique … » / « Curare … » du kit). Sufentanil (« Morphinique ») est
@@ -116,7 +126,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
     }
     return [];
   };
-  const [values, setValues] = useState<Values>(() => loadValues(kitId));
+  const [values, setValues] = useState<Values>(() => loadValues(userId, kitId));
 
   // Sections repliées. À l'ouverture, les sections déjà complètes (valeurs
   // persistées) démarrent repliées pour réduire le scroll. Ensuite, une
@@ -167,8 +177,8 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   }, [kitId]);
 
   useEffect(() => {
-    safeSetJson(storageKey.kitChecklist(kitId), { ts: Date.now(), values });
-  }, [values, kitId]);
+    writeUserItem(userId, kitChecklistKey(kitId), JSON.stringify({ ts: Date.now(), values }));
+  }, [values, kitId, userId]);
 
   // Auto-repli sur la transition incomplète → complète (uniquement à ce
   // moment-là, pour ne pas re-replier une section que l'utilisateur a

@@ -16,6 +16,7 @@ describe("LoginScreen (desktop)", () => {
     expect(screen.getByText("Bienvenue.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Se connecter/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Créer un compte/i })).toBeInTheDocument();
+    expect(screen.queryByText("Maintenir la session")).not.toBeInTheDocument();
   });
 
   test("submit matricule vide → erreur de format, pas de navigation", async () => {
