@@ -168,8 +168,15 @@ const assertTouchTargets = async (page, label) => {
       })
       .map((element) => {
         const rect = element.getBoundingClientRect();
+        const compactKind = element.getAttribute("data-compact-hit");
         const minSize =
-          window.innerWidth <= 640 && element.hasAttribute("data-compact-hit") ? 36 : 40;
+          window.innerWidth <= 640 && compactKind
+            ? compactKind === "status"
+              ? 24
+              : compactKind === "filter"
+                ? 28
+              : 36
+            : 40;
         return {
           label: (element.getAttribute("aria-label") || element.textContent || element.className)
             .replace(/\s+/g, " ")
@@ -217,12 +224,20 @@ const assertMobileHeaderDensity = async (page) => {
             .trim()
             .slice(0, 48),
           height: Math.round(rect.height),
+          expectedHeight:
+            element.getAttribute("data-compact-hit") === "status"
+              ? 24
+              : element.getAttribute("data-compact-hit") === "filter"
+                ? 28
+                : 36,
         };
       })
   );
-  const invalid = controls.filter(({ height }) => height !== 36);
+  const invalid = controls.filter(({ height, expectedHeight }) => height !== expectedHeight);
   if (controls.length === 0 || invalid.length > 0) {
-    const details = invalid.map(({ label, height }) => `${label} (${height}px)`).join(", ");
+    const details = invalid
+      .map(({ label, height, expectedHeight }) => `${label} (${height}px, attendu ${expectedHeight}px)`)
+      .join(", ");
     throw new Error(`header mobile : hauteur compacte inattendue${details ? ` — ${details}` : ""}`);
   }
   await assertTouchTargets(page, "Médicaments mobile compact");

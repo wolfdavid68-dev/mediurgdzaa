@@ -711,10 +711,39 @@
     --control-hit: 36px;
   }
 
-  .header-menu-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+  .logo-mark {
+    width: 24px;
+    height: 24px;
+  }
+
+  .logo-text h1 {
+    font-size: 16px;
+  }
+
+  .net-status {
+    height: 24px;
+    padding-inline: 8px;
+    margin-right: 6px;
+    font-size: 10px;
+  }
+
+  :root .app-header .header-menu-btn {
+    min-block-size: 24px;
+    min-inline-size: 24px;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+  }
+
+  .header-menu-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  :root .app-header .tutorat-pill {
+    min-block-size: 24px;
+    min-inline-size: 0;
+    height: 24px;
   }
 
   .search-row {
@@ -723,6 +752,18 @@
 
   .search-row .search-bar {
     flex-basis: 100%;
+  }
+
+  .app-header .search-bar input {
+    min-height: 36px;
+    padding: 6px 36px 6px 34px;
+    border-radius: 8px;
+  }
+
+  .app-header .search-bar svg {
+    left: 10px;
+    width: 15px;
+    height: 15px;
   }
 
   .search-row .patient-weight {
@@ -741,12 +782,14 @@
 
   .filter-label {
     width: 34px;
-    padding-top: 10px;
+    padding-top: 6px;
   }
 
-  .app-header .chip {
-    min-height: 36px;
-    padding-inline: 10px;
+  :root .app-header .chip {
+    min-block-size: 28px;
+    min-inline-size: 28px;
+    min-height: 28px;
+    padding: 2px 8px;
   }
 
   .patient-population-switch {

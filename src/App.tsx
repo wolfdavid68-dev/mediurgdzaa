@@ -481,7 +481,7 @@ const App = () => {
                     <button
                       type="button"
                       className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
-                      data-compact-hit
+                      data-compact-hit="filter"
                       onClick={() => setShowFavoritesOnly((v) => !v)}
                       aria-pressed={showFavoritesOnly}
                       title={
@@ -498,7 +498,7 @@ const App = () => {
                         key={c}
                         type="button"
                         data-cat={c}
-                        data-compact-hit
+                        data-compact-hit="filter"
                         className={`chip ${cat === c ? "chip-active" : ""}`}
                         onClick={() => setCat(c)}
                         aria-pressed={cat === c}
@@ -516,7 +516,7 @@ const App = () => {
                         key={s}
                         type="button"
                         className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
-                        data-compact-hit
+                        data-compact-hit="filter"
                         onClick={() => setSvc(s)}
                         aria-pressed={svc === s}
                       >

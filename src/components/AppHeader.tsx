@@ -14,7 +14,7 @@ const TutoratLink = () => (
   <button
     type="button"
     className="tutorat-pill"
-    data-compact-hit
+    data-compact-hit="status"
     title="Ouvrir le Compagnon ESI/AS avec mon login MediURG"
     onClick={openTutorat}
   >
@@ -167,7 +167,7 @@ const AppHeader = ({
             <button
               type="button"
               className="header-menu-btn"
-              data-compact-hit
+              data-compact-hit="status"
               aria-haspopup="menu"
               aria-expanded={menuOpen}
               aria-label="Réglages"
