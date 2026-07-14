@@ -174,7 +174,7 @@
 
 /* Font size toggle button */
 /* Menu kebab (regroupe thème / police / sauvegarde notes derrière un seul
-   bouton 48 px à droite du header). Ouvre un menu déroulant ancré. */
+   bouton carré à droite du header). Ouvre un menu déroulant ancré. */
 .header-menu {
   position: relative;
   flex-shrink: 0;
@@ -704,6 +704,19 @@
   }
 }
 @media (max-width: 640px) {
+  /* Densité mobile du cockpit : ces contrôles secondaires restent au-dessus
+     du minimum WCAG 2.2 de 24 px, tout en libérant 8 px par rangée face au
+     garde-fou tactile global de 44 px. Le desktop conserve ses dimensions. */
+  .app-header {
+    --control-hit: 36px;
+  }
+
+  .header-menu-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
   .search-row {
     flex-wrap: wrap;
   }
@@ -731,9 +744,9 @@
     padding-top: 10px;
   }
 
-  .chip {
-    min-height: 40px;
-    padding-inline: 12px;
+  .app-header .chip {
+    min-height: 36px;
+    padding-inline: 10px;
   }
 
   .patient-population-switch {
@@ -1187,8 +1200,8 @@
     align-items: center;
     gap: 8px;
     width: 100%;
-    min-height: 40px;
-    padding: 5px 10px;
+    min-height: 36px;
+    padding: 4px 10px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: color-mix(in srgb, var(--card) 84%, transparent);

@@ -168,6 +168,8 @@ const assertTouchTargets = async (page, label) => {
       })
       .map((element) => {
         const rect = element.getBoundingClientRect();
+        const minSize =
+          window.innerWidth <= 640 && element.hasAttribute("data-compact-hit") ? 36 : 40;
         return {
           label: (element.getAttribute("aria-label") || element.textContent || element.className)
             .replace(/\s+/g, " ")
@@ -175,18 +177,55 @@ const assertTouchTargets = async (page, label) => {
             .slice(0, 48),
           width: Math.round(rect.width),
           height: Math.round(rect.height),
+          minSize,
         };
       })
-      .filter(({ width, height }) => width < 40 || height < 40);
+      .filter(({ width, height, minSize }) => width < minSize || height < minSize);
   });
 
   if (violations.length > 0) {
     const details = violations
       .slice(0, 8)
-      .map(({ label: control, width, height }) => `${control || "contrôle"} (${width}×${height})`)
+      .map(
+        ({ label: control, width, height, minSize }) =>
+          `${control || "contrôle"} (${width}×${height}, minimum ${minSize})`
+      )
       .join(", ");
-    throw new Error(`${label}: cibles tactiles < 40 px — ${details}`);
+    throw new Error(`${label}: cibles tactiles sous le minimum attendu — ${details}`);
   }
+};
+
+const assertMobileHeaderDensity = async (page) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${baseUrl}/?page=medicaments`, { waitUntil: "networkidle" });
+  await expectVisibleText(page, /Médicaments|Recherche|Adrénaline/i, "Médicaments mobile");
+
+  const filtersToggle = page.locator(".filters-toggle");
+  await filtersToggle.click({ timeout: 5000 });
+  const controls = await page.locator("[data-compact-hit]").evaluateAll((elements) =>
+    elements
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.height > 0;
+      })
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          label: (element.getAttribute("aria-label") || element.textContent || element.className)
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 48),
+          height: Math.round(rect.height),
+        };
+      })
+  );
+  const invalid = controls.filter(({ height }) => height !== 36);
+  if (controls.length === 0 || invalid.length > 0) {
+    const details = invalid.map(({ label, height }) => `${label} (${height}px)`).join(", ");
+    throw new Error(`header mobile : hauteur compacte inattendue${details ? ` — ${details}` : ""}`);
+  }
+  await assertTouchTargets(page, "Médicaments mobile compact");
 };
 
 const assertTabStops = async (page, route, pattern, label, minStops) => {
@@ -284,8 +323,10 @@ if (!fs.existsSync(indexPath)) {
     await page.keyboard.press("Enter");
     await expectVisibleText(page, /Médicament A|Medicament A/i, "activation clavier Comparer");
 
+    await assertMobileHeaderDensity(page);
+
     await context.close();
-    ok("navigation clavier et cibles tactiles validées sur les cinq parcours cliniques");
+    ok("navigation clavier, cibles tactiles et densité du header mobile validées");
   } catch (err) {
     fail(err instanceof Error ? err.message : String(err));
   } finally {

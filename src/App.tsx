@@ -457,6 +457,7 @@ const App = () => {
                 <button
                   type="button"
                   className="filters-toggle"
+                  data-compact-hit
                   aria-expanded={mobileFiltersOpen}
                   aria-controls="drug-category-filters drug-service-filters"
                   onClick={() => setMobileFiltersOpen((open) => !open)}
@@ -480,6 +481,7 @@ const App = () => {
                     <button
                       type="button"
                       className={`chip chip-fav ${showFavoritesOnly ? "chip-active" : ""}`}
+                      data-compact-hit
                       onClick={() => setShowFavoritesOnly((v) => !v)}
                       aria-pressed={showFavoritesOnly}
                       title={
@@ -496,6 +498,7 @@ const App = () => {
                         key={c}
                         type="button"
                         data-cat={c}
+                        data-compact-hit
                         className={`chip ${cat === c ? "chip-active" : ""}`}
                         onClick={() => setCat(c)}
                         aria-pressed={cat === c}
@@ -513,6 +516,7 @@ const App = () => {
                         key={s}
                         type="button"
                         className={`chip chip-svc ${svc === s ? "chip-active" : ""}`}
+                        data-compact-hit
                         onClick={() => setSvc(s)}
                         aria-pressed={svc === s}
                       >

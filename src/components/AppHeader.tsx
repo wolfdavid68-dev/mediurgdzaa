@@ -14,6 +14,7 @@ const TutoratLink = () => (
   <button
     type="button"
     className="tutorat-pill"
+    data-compact-hit
     title="Ouvrir le Compagnon ESI/AS avec mon login MediURG"
     onClick={openTutorat}
   >
@@ -83,7 +84,7 @@ const AppHeader = ({
 }: AppHeaderProps) => {
   const authProfile = useAuthProfile();
   // Menu kebab : regroupe thème / police / sauvegarde notes derrière un seul
-  // bouton 48 px (au lieu de 3 boutons serrés). Le badge ONLINE/OFFLINE reste
+  // bouton carré (au lieu de 3 boutons serrés). Le badge ONLINE/OFFLINE reste
   // visible en permanence à côté.
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoutBusy, setLogoutBusy] = useState(false);
@@ -166,6 +167,7 @@ const AppHeader = ({
             <button
               type="button"
               className="header-menu-btn"
+              data-compact-hit
               aria-haspopup="menu"
               aria-expanded={menuOpen}
               aria-label="Réglages"
