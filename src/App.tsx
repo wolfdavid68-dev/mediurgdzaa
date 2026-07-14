@@ -83,7 +83,6 @@ const App = () => {
   const deferredSearch = useDeferredValue(search);
   const [cat, setCat] = useState("Tout");
   const [svc, setSvc] = useState("Tout");
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   // protoFilter (filtre Adulte/Enfant) est maintenant géré en interne par
   // ProtocolesPage. App garde uniquement protoCategory parce qu'il est dans
   // l'historique navigateur (pushNav { protoCategory: ... }).
@@ -426,6 +425,7 @@ const App = () => {
                     </svg>
                     <input
                       type="text"
+                      data-mobile-density="search"
                       placeholder="Rechercher un médicament, DCI, classe…"
                       aria-label="Rechercher un médicament"
                       value={search}
@@ -436,6 +436,7 @@ const App = () => {
                     {search && (
                       <button
                         className="search-clear"
+                        data-compact-hit="field"
                         onClick={() => setSearch("")}
                         aria-label="Effacer"
                       >
@@ -453,28 +454,7 @@ const App = () => {
               </div>
             )}
             {page === "medicaments" && !anyDrugOpen && (
-              <div className={`filters ${mobileFiltersOpen ? "filters-open" : ""}`}>
-                <button
-                  type="button"
-                  className="filters-toggle"
-                  data-compact-hit
-                  aria-expanded={mobileFiltersOpen}
-                  aria-controls="drug-category-filters drug-service-filters"
-                  onClick={() => setMobileFiltersOpen((open) => !open)}
-                >
-                  <span>Filtres</span>
-                  <span className="filters-toggle-summary">
-                    {showFavoritesOnly
-                      ? "Favoris"
-                      : [cat !== "Tout" ? cat : "", svc !== "Tout" ? svc : ""]
-                          .filter(Boolean)
-                          .join(" · ") || "CAT et SVC"}
-                  </span>
-                  <span className="filters-toggle-count">{filtered.length}</span>
-                  <span className="filters-toggle-chevron" aria-hidden="true">
-                    ⌄
-                  </span>
-                </button>
+              <div className="filters">
                 <div className="filter-group" id="drug-category-filters">
                   <span className="filter-label">CAT</span>
                   <div className="filter-chips" aria-label="Filtres par catégorie">

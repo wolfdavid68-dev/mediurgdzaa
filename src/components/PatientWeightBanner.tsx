@@ -20,7 +20,12 @@ const PatientWeightBanner = ({ weight, onChange, population, onPopulationChange 
   const activePopulation = population || (validKg && kg < 30 ? "enfant" : "adulte");
 
   return (
-    <div className="patient-weight" role="group" aria-label="Poids patient">
+    <div
+      className="patient-weight"
+      data-mobile-density="weight"
+      role="group"
+      aria-label="Poids patient"
+    >
       <svg
         viewBox="0 0 24 24"
         width="16"
@@ -51,6 +56,7 @@ const PatientWeightBanner = ({ weight, onChange, population, onPopulationChange 
         <div className="patient-population-switch" role="group" aria-label="Choix adulte ou enfant">
           <button
             type="button"
+            data-compact-hit="field"
             className={`patient-population-option${activePopulation === "adulte" ? " is-active" : ""}`}
             aria-pressed={activePopulation === "adulte"}
             onClick={() => onPopulationChange("adulte")}
@@ -59,6 +65,7 @@ const PatientWeightBanner = ({ weight, onChange, population, onPopulationChange 
           </button>
           <button
             type="button"
+            data-compact-hit="field"
             className={`patient-population-option${activePopulation === "enfant" ? " is-active" : ""}`}
             aria-pressed={activePopulation === "enfant"}
             onClick={() => onPopulationChange("enfant")}
@@ -70,6 +77,7 @@ const PatientWeightBanner = ({ weight, onChange, population, onPopulationChange 
       {weight && (
         <button
           type="button"
+          data-compact-hit="field"
           className="patient-weight-clear"
           onClick={() => {
             onChange("");

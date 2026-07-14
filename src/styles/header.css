@@ -443,10 +443,12 @@
 }
 
 @media (max-width: 899px) {
-  .version-badge-nav {
+  :root button.version-badge-nav {
     position: absolute;
-    bottom: max(4px, var(--safe-bottom));
+    bottom: var(--safe-bottom);
     left: 50%;
+    min-block-size: 24px;
+    height: 24px;
     transform: translateX(-50%);
     padding: 0 8px;
     font-size: 9px;
@@ -503,15 +505,25 @@
 }
 
 @media (max-width: 480px) {
+  .bottom-nav {
+    height: calc(68px + var(--safe-bottom));
+  }
+
   .bottom-nav-row {
-    height: 56px;
-    min-height: 56px;
+    height: 40px;
+    min-height: 40px;
   }
 
   .bottom-tab {
-    min-height: 56px;
-    padding-top: 6px;
-    padding-bottom: 5px;
+    gap: 2px;
+    min-height: 40px;
+    padding: 2px 6px;
+    font-size: 9.5px;
+  }
+
+  .bottom-tab svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -705,19 +717,19 @@
 }
 @media (max-width: 640px) {
   /* Densité mobile du cockpit : ces contrôles secondaires restent au-dessus
-     du minimum WCAG 2.2 de 24 px, tout en libérant 8 px par rangée face au
-     garde-fou tactile global de 44 px. Le desktop conserve ses dimensions. */
+     du minimum WCAG 2.2 de 24 px. L'identité garde davantage de présence,
+     tandis que la recherche et le poids libèrent de la hauteur. */
   .app-header {
-    --control-hit: 36px;
+    --control-hit: 32px;
   }
 
   .logo-mark {
-    width: 24px;
-    height: 24px;
+    width: 34px;
+    height: 34px;
   }
 
   .logo-text h1 {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .net-status {
@@ -755,20 +767,35 @@
   }
 
   .app-header .search-bar input {
-    min-height: 36px;
-    padding: 6px 36px 6px 34px;
+    height: 32px;
+    min-height: 32px;
+    padding: 4px 32px;
     border-radius: 8px;
   }
 
   .app-header .search-bar svg {
-    left: 10px;
-    width: 15px;
-    height: 15px;
+    left: 9px;
+    width: 14px;
+    height: 14px;
   }
 
   .search-row .patient-weight {
     width: 100%;
+    min-height: 32px;
+    padding-block: 1px;
     justify-content: flex-start;
+  }
+
+  .app-header .patient-weight-input {
+    height: 24px;
+  }
+
+  :root .app-header .search-clear,
+  :root .app-header .patient-weight-clear,
+  :root .app-header .patient-population-option {
+    min-block-size: 24px;
+    min-inline-size: 24px;
+    height: 24px;
   }
 
   .filters {
@@ -776,13 +803,17 @@
   }
 
   .filter-group {
-    align-items: flex-start;
+    align-items: center;
     gap: 6px;
   }
 
   .filter-label {
     width: 34px;
-    padding-top: 6px;
+    padding-top: 0;
+  }
+
+  .app-header .filter-chips {
+    padding-block: 0;
   }
 
   :root .app-header .chip {
@@ -794,6 +825,7 @@
 
   .patient-population-switch {
     margin-left: auto;
+    padding: 1px;
   }
 }
 
@@ -882,9 +914,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-.filters-toggle {
-  display: none;
 }
 .filter-group {
   display: flex;
@@ -1230,67 +1259,9 @@
   background: linear-gradient(180deg, rgba(132, 163, 112, 0.16), rgba(255, 255, 255, 0.86));
 }
 
-/* Sur téléphone, le filtrage secondaire se replie pour rendre les médicaments
-   visibles plus tôt. CAT et SVC restent deux rangées distinctes à l'ouverture. */
+/* Sur téléphone, CAT et SVC restent visibles et forment deux rangées distinctes. */
 @media (max-width: 640px) {
   .filters {
     gap: 5px;
-  }
-
-  .filters-toggle {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 36px;
-    padding: 4px 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--card) 84%, transparent);
-    color: var(--text);
-    font: inherit;
-    font-size: 12px;
-    font-weight: 800;
-    text-align: left;
-  }
-
-  .filters-toggle-summary {
-    overflow: hidden;
-    color: var(--text-mute);
-    font-size: 11px;
-    font-weight: 600;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .filters-toggle-count {
-    color: var(--text-dim);
-    font-family: var(--mono);
-    font-size: 10px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .filters-toggle-chevron {
-    color: var(--text-mute);
-    font-size: 18px;
-    line-height: 1;
-    transition: transform 180ms var(--ease-out-quart);
-  }
-
-  .filters-open .filters-toggle-chevron {
-    transform: rotate(180deg);
-  }
-
-  .filters:not(.filters-open) .filter-group {
-    display: none;
-  }
-
-  .filters-open .filter-group {
-    animation: panel-expand-in 160ms var(--ease-out-quart) both;
-  }
-
-  .filters-open #drug-service-filters {
-    animation-delay: 45ms;
   }
 }

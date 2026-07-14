@@ -146,7 +146,7 @@ const AppHeader = ({
             {...adminLongPress}
             style={{ WebkitUserSelect: "none", userSelect: "none" }}
           >
-            <div className="logo-mark">
+            <div className="logo-mark" data-mobile-density="brand">
               <img src="/logo-sau.png" alt="Urgences Mulhouse" draggable={false} />
             </div>
             <div className="logo-text">

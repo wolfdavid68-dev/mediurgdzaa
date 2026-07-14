@@ -175,7 +175,9 @@ const assertTouchTargets = async (page, label) => {
               ? 24
               : compactKind === "filter"
                 ? 28
-              : 36
+                : compactKind === "field"
+                  ? 24
+                  : 32
             : 40;
         return {
           label: (element.getAttribute("aria-label") || element.textContent || element.className)
@@ -207,8 +209,6 @@ const assertMobileHeaderDensity = async (page) => {
   await page.goto(`${baseUrl}/?page=medicaments`, { waitUntil: "networkidle" });
   await expectVisibleText(page, /Médicaments|Recherche|Adrénaline/i, "Médicaments mobile");
 
-  const filtersToggle = page.locator(".filters-toggle");
-  await filtersToggle.click({ timeout: 5000 });
   const controls = await page.locator("[data-compact-hit]").evaluateAll((elements) =>
     elements
       .filter((element) => {
@@ -229,16 +229,48 @@ const assertMobileHeaderDensity = async (page) => {
               ? 24
               : element.getAttribute("data-compact-hit") === "filter"
                 ? 28
-                : 36,
+                : element.getAttribute("data-compact-hit") === "field"
+                  ? 24
+                  : 32,
         };
       })
   );
   const invalid = controls.filter(({ height, expectedHeight }) => height !== expectedHeight);
   if (controls.length === 0 || invalid.length > 0) {
     const details = invalid
-      .map(({ label, height, expectedHeight }) => `${label} (${height}px, attendu ${expectedHeight}px)`)
+      .map(
+        ({ label, height, expectedHeight }) => `${label} (${height}px, attendu ${expectedHeight}px)`
+      )
       .join(", ");
     throw new Error(`header mobile : hauteur compacte inattendue${details ? ` — ${details}` : ""}`);
+  }
+
+  const density = await page.locator("[data-mobile-density]").evaluateAll((elements) =>
+    elements.map((element) => ({
+      kind: element.getAttribute("data-mobile-density"),
+      height: Math.round(element.getBoundingClientRect().height),
+    }))
+  );
+  const expectedDensity = { brand: 34, search: 32, weight: 32 };
+  const invalidDensity = density.filter(
+    ({ kind, height }) => !kind || expectedDensity[kind] !== height
+  );
+  if (invalidDensity.length > 0 || density.length !== Object.keys(expectedDensity).length) {
+    const details = invalidDensity
+      .map(({ kind, height }) => `${kind || "inconnu"} (${height}px)`)
+      .join(", ");
+    throw new Error(
+      `header mobile : densité structurelle inattendue${details ? ` — ${details}` : ""}`
+    );
+  }
+
+  const filterRows = await page
+    .locator("#drug-category-filters, #drug-service-filters")
+    .evaluateAll((elements) =>
+      elements.map((element) => Math.round(element.getBoundingClientRect().height))
+    );
+  if (filterRows.length !== 2 || filterRows.some((height) => height !== 28)) {
+    throw new Error(`header mobile : rangées CAT/SVC inattendues (${filterRows.join("px, ")}px)`);
   }
   await assertTouchTargets(page, "Médicaments mobile compact");
 };

@@ -16,7 +16,7 @@
 
 @media (max-width: 480px) {
   :root {
-    --bottom-nav-clearance: 132px;
+    --bottom-nav-clearance: 124px;
   }
 }
 

@@ -95,6 +95,7 @@ const BottomNav = ({
       <button
         type="button"
         className="version-badge-nav"
+        data-compact-hit="status"
         onClick={onOpenChangelog}
         title="Voir les notes de version"
         aria-label={`Version ${version} — voir les notes de version`}
