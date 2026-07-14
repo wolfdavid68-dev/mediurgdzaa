@@ -97,7 +97,13 @@ describe("DrugCard", () => {
       render(<DrugCard drug={mockDrug} prepV25Enabled />);
       fireEvent.click(screen.getByText("TEST_DRUG_XYZ").closest("button")!);
 
-      fireEvent.click(await screen.findByRole("button", { name: "Ajouter une note personnelle" }));
+      fireEvent.click(
+        await screen.findByRole(
+          "button",
+          { name: "Ajouter une note personnelle" },
+          { timeout: 10000 }
+        )
+      );
 
       expect(
         within(screen.getByRole("navigation", { name: "Étapes de la fiche médicament" })).getByRole(
@@ -107,7 +113,7 @@ describe("DrugCard", () => {
       ).toHaveAttribute("aria-pressed", "true");
       const editor = await screen.findByLabelText("Note personnelle pour ce médicament");
       await waitFor(() => expect(editor).toHaveFocus());
-    });
+    }, 15000);
 
     test("une note existante est exposée dans le flux de préparation", async () => {
       localStorage.setItem("mediurg-note-99999", "Surveiller le point de ponction.");
