@@ -4,10 +4,10 @@ import { useAdminProfiles, type AdminTab } from "../hooks/useAdminProfiles";
 import { BAN_REASONS } from "../authConstants";
 import MobileLogo from "./MobileLogo";
 import {
+  Arrow,
   ArrowL,
   BanIcon,
   Check,
-  Dots,
   ExitIcon,
   InboxIcon,
   JournalIcon,
@@ -127,27 +127,30 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
           <p className="m-admin-sub">
             {currentUserName} · {subtitle}
           </p>
-          <button
-            type="button"
-            className={`m-push-btn ${pushEnabled ? "on" : ""}`}
-            onClick={pushEnabled ? disablePush : enablePush}
-            disabled={pushBusy}
-          >
-            {pushBusy ? "…" : pushEnabled ? "Notifications actives" : "Activer notifications"}
-          </button>
-          {pushEnabled && (
+          <div className={`m-push-actions ${pushEnabled ? "m-push-actions-split" : ""}`}>
             <button
               type="button"
-              className="m-push-btn m-push-btn-test"
-              onClick={testPush}
-              disabled={pushTestBusy}
+              className={`m-push-btn ${pushEnabled ? "on" : ""}`}
+              onClick={pushEnabled ? disablePush : enablePush}
+              disabled={pushBusy}
             >
-              {pushTestBusy ? "…" : "Tester la notification"}
+              {pushBusy ? "…" : pushEnabled ? "Notifications actives" : "Activer les notifications"}
             </button>
-          )}
+            {pushEnabled && (
+              <button
+                type="button"
+                className="m-push-btn m-push-btn-test"
+                onClick={testPush}
+                disabled={pushTestBusy}
+              >
+                {pushTestBusy ? "…" : "Tester la notification"}
+              </button>
+            )}
+          </div>
           <div className="m-search-wrap">
             <SearchIcon />
             <input
+              type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher un nom, matricule…"
@@ -203,7 +206,7 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
               <button
                 key={p.id}
                 type="button"
-                className={`m-card ${tab === "banned" ? "m-card-banned" : ""}`}
+                className={`m-card ${tab === "pending" ? "m-card-pending" : ""} ${tab === "banned" ? "m-card-banned" : ""}`}
                 onClick={() => setSelected(p)}
               >
                 <span className={`m-av ${tab === "banned" ? "m-av-muted" : ""}`}>
@@ -242,16 +245,21 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
                   </span>
                 </span>
                 {tab === "pending" && <span className="m-card-cta">À valider</span>}
-                <Dots />
+                <Arrow />
               </button>
             ))}
         </main>
 
-        <nav className="m-tabbar" inert={selected ? true : undefined}>
+        <nav
+          className="m-tabbar"
+          aria-label="Sections de l'administration"
+          inert={selected ? true : undefined}
+        >
           <button
             type="button"
             className={`m-tab ${tab === "pending" ? "on" : ""}`}
             onClick={() => setTab("pending")}
+            aria-current={tab === "pending" ? "page" : undefined}
           >
             <span className="m-tab-icn">
               <InboxIcon />
@@ -263,6 +271,7 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
             type="button"
             className={`m-tab ${tab === "active" ? "on" : ""}`}
             onClick={() => setTab("active")}
+            aria-current={tab === "active" ? "page" : undefined}
           >
             <span className="m-tab-icn">
               <UsersIcon />
@@ -273,6 +282,7 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
             type="button"
             className={`m-tab ${tab === "banned" ? "on" : ""}`}
             onClick={() => setTab("banned")}
+            aria-current={tab === "banned" ? "page" : undefined}
           >
             <span className="m-tab-icn">
               <BanIcon />
@@ -283,6 +293,7 @@ const MobileAdminDashboard = ({ currentUserId, currentUserName, onLogout, onExit
             type="button"
             className={`m-tab ${tab === "audit" ? "on" : ""}`}
             onClick={() => setTab("audit")}
+            aria-current={tab === "audit" ? "page" : undefined}
           >
             <span className="m-tab-icn">
               <JournalIcon />

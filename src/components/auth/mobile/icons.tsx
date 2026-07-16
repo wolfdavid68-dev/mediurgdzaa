@@ -91,13 +91,6 @@ export const JournalIcon = ({ size = 20, ...p }: IconProps) => (
     <path d="M9 12h6" />
   </svg>
 );
-export const Dots = ({ size = 18, ...p }: IconProps) => (
-  <svg {...base(size)} {...p}>
-    <circle cx="5" cy="12" r="1.5" />
-    <circle cx="12" cy="12" r="1.5" />
-    <circle cx="19" cy="12" r="1.5" />
-  </svg>
-);
 export const ExitIcon = ({ size = 20, ...p }: IconProps) => (
   <svg {...base(size)} {...p}>
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
