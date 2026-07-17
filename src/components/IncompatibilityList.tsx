@@ -21,6 +21,10 @@ type ViewMode = "fiche" | "comparaison" | "matrice";
 const { incomp: INCOMP, compat: COMPAT } = INCOMPAT_INDEX;
 
 const getDrugDisplayName = (drug: string) => getIncompatDisplayName(drug, DRUG_DISPLAY_OVERRIDES);
+const getDrugPickerName = (drug: string) =>
+  getDrugDisplayName(drug)
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .replace(/®/g, "");
 const getDrugEntry = (drug: string) => INCOMPAT_INDEX.byName.get(drug);
 
 const getRelation = (drugA: string, drugB: string): Selected => {
@@ -308,10 +312,11 @@ const IncompatibilityList = ({
                   className={entry.drug === focusDrug ? "incompat-drug-active" : ""}
                   style={{ borderColor: entry.drug === focusDrug ? entry.color : undefined }}
                   onClick={() => handleSelectDrug(entry.drug)}
-                  title={entry.drug}
+                  aria-label={getDrugDisplayName(entry.drug)}
+                  title={getDrugDisplayName(entry.drug)}
                 >
                   <span className="incompat-drug-dot" style={{ background: entry.color }} />
-                  <span>{getDrugDisplayName(entry.drug)}</span>
+                  <span>{getDrugPickerName(entry.drug)}</span>
                 </button>
               ))}
             </div>
