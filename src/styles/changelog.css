@@ -454,10 +454,6 @@
   .announce-where {
     max-width: 30ch;
     justify-content: center;
-    padding-left: 0;
-    border-left: 0;
-    border-bottom: 2px solid var(--info);
-    padding-bottom: 4px;
     text-align: center;
   }
   .announce-points {
