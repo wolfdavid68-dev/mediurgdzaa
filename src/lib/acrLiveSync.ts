@@ -18,9 +18,9 @@
 // (acrLiveSignature) évite de re-publier une session qu'on vient de recevoir.
 //
 // Confidentialité : le dossier ACR est anonyme par construction (cf.
-// acrSession.ts — jamais de nom/prénom/IPP) et le topic inclut l'UUID
-// utilisateur, non devinable. Durcissement possible plus tard : canal
-// Realtime `private: true` + policies RLS sur realtime.messages.
+// acrSession.ts — jamais de nom/prénom/IPP). Le canal est privé et les
+// policies RLS de docs/auth-sync-patch.sql limitent lecture + émission au
+// propriétaire dont l'UUID termine le topic.
 
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { coerceAcrSession, type AcrFullSession } from "./acrSession";
@@ -86,8 +86,8 @@ const resolveUserId = async (): Promise<string | null> => {
 let activeChannel: RealtimeChannel | null = null;
 
 // Ouvre le canal live et route les sessions distantes vers `onSession`.
-// Retourne un cleanup à appeler au démontage. Toutes les erreurs sont
-// silencieuses : le pire cas est « pas de live », jamais un crash ACR.
+// Retourne un cleanup à appeler au démontage. Une erreur Realtime désactive
+// uniquement le live : le chrono local et le relais différé restent actifs.
 export const connectAcrLive = (handlers: AcrLiveHandlers): (() => void) => {
   let cancelled = false;
   let channel: RealtimeChannel | null = null;
@@ -106,7 +106,7 @@ export const connectAcrLive = (handlers: AcrLiveHandlers): (() => void) => {
     handlers.onStatus?.("connecting");
     try {
       channel = supabase.channel(`acr-live-${userId}`, {
-        config: { broadcast: { self: false } },
+        config: { broadcast: { self: false }, private: true },
       });
       channel.on("broadcast", { event: LIVE_EVENT }, (message) => {
         const payload = (message as { payload?: { deviceId?: string; session?: unknown } }).payload;
@@ -119,9 +119,23 @@ export const connectAcrLive = (handlers: AcrLiveHandlers): (() => void) => {
         if (!payload || payload.deviceId === DEVICE_ID) return;
         if (typeof payload.sessionId === "string") handlers.onDelete?.(payload.sessionId);
       });
-      channel.subscribe((status) => {
+      channel.subscribe((status, error) => {
         if (cancelled) return;
-        handlers.onStatus?.(status === "SUBSCRIBED" ? "connected" : "connecting");
+        if (status === "SUBSCRIBED") {
+          activeChannel = channel;
+          handlers.onStatus?.("connected");
+          return;
+        }
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          if (activeChannel === channel) activeChannel = null;
+          handlers.onStatus?.("off");
+          console.warn("[acr-live] Canal Realtime indisponible", {
+            status,
+            error: error?.message,
+          });
+          return;
+        }
+        handlers.onStatus?.("connecting");
       });
       activeChannel = channel;
     } catch {

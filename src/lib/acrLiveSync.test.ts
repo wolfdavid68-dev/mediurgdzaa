@@ -16,14 +16,14 @@ type SentMessage = {
 const makeFakeSupabase = (userId: string | null) => {
   const sent: SentMessage[] = [];
   const handlers = new Map<string, (message: BroadcastMessage) => void>();
-  let statusCallback: ((status: string) => void) | null = null;
+  let statusCallback: ((status: string, error?: Error) => void) | null = null;
 
   const channel = {
     on(_type: string, filter: { event: string }, handler: (message: BroadcastMessage) => void) {
       handlers.set(filter.event, handler);
       return channel;
     },
-    subscribe(callback: (status: string) => void) {
+    subscribe(callback: (status: string, error?: Error) => void) {
       statusCallback = callback;
       return channel;
     },
@@ -50,7 +50,7 @@ const makeFakeSupabase = (userId: string | null) => {
     channelFactory: supabase.channel,
     emit: (event: string, payload: BroadcastMessage["payload"]) =>
       handlers.get(event)?.({ payload }),
-    setStatus: (status: string) => statusCallback?.(status),
+    setStatus: (status: string, error?: Error) => statusCallback?.(status, error),
   };
 };
 
@@ -115,7 +115,7 @@ describe("connectAcrLive / publishAcrLiveSession", () => {
     await flush();
 
     expect(fake.channelFactory).toHaveBeenCalledWith("acr-live-user-42", {
-      config: { broadcast: { self: false } },
+      config: { broadcast: { self: false }, private: true },
     });
     fake.setStatus("SUBSCRIBED");
     expect(onStatus).toHaveBeenLastCalledWith("connected");
@@ -148,6 +148,32 @@ describe("connectAcrLive / publishAcrLiveSession", () => {
     // Après cleanup, publier redevient un no-op.
     publishAcrLiveSession(remote);
     expect(fake.sent).toHaveLength(1);
+  });
+
+  test("erreur d'abonnement : repasse hors live et journalise la cause", async () => {
+    const fake = makeFakeSupabase("user-42");
+    getSupabaseMock.mockReturnValue(fake.supabase);
+    const { connectAcrLive, publishAcrLiveSession } = await loadModule();
+    const onStatus = vi.fn();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const cleanup = connectAcrLive({ onSession: vi.fn(), onStatus });
+    await flush();
+
+    fake.setStatus("CHANNEL_ERROR", new Error("private channel denied"));
+
+    expect(onStatus).toHaveBeenLastCalledWith("off");
+    expect(warn).toHaveBeenCalledWith(
+      "[acr-live] Canal Realtime indisponible",
+      expect.objectContaining({
+        status: "CHANNEL_ERROR",
+        error: "private channel denied",
+      })
+    );
+    publishAcrLiveSession(createEmptyAcrSession());
+    expect(fake.sent).toHaveLength(0);
+
+    cleanup();
+    warn.mockRestore();
   });
 
   test("suppression : diffusée, reçue des autres appareils, écho filtré", async () => {

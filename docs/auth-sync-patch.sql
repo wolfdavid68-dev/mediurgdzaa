@@ -50,6 +50,28 @@ create policy "sync_items_self_delete"
   to authenticated
   using ((select auth.uid()) = user_id);
 
+-- Canal Realtime privé ACR : un utilisateur ne peut lire et émettre que sur
+-- `acr-live-{son UUID}`. Les messages Broadcast servent uniquement au relais
+-- éphémère ; Supabase teste ces policies à la connexion sans stocker le dossier.
+drop policy if exists "acr_live_self_receive" on realtime.messages;
+drop policy if exists "acr_live_self_send" on realtime.messages;
+
+create policy "acr_live_self_receive"
+  on realtime.messages for select
+  to authenticated
+  using (
+    realtime.messages.extension = 'broadcast'
+    and (select realtime.topic()) = 'acr-live-' || (select auth.uid())::text
+  );
+
+create policy "acr_live_self_send"
+  on realtime.messages for insert
+  to authenticated
+  with check (
+    realtime.messages.extension = 'broadcast'
+    and (select realtime.topic()) = 'acr-live-' || (select auth.uid())::text
+  );
+
 create or replace function public.purge_expired_sync_items(p_user_id uuid)
 returns void
 language sql

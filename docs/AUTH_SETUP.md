@@ -44,7 +44,9 @@ activer le relais éphémère multi-appareils :
 - Table `sync_items` : dossiers ACR anonymes et check-lists de kits, owner-only
   via RLS ;
 - RPC `upsert_sync_item` et `list_sync_items` : écriture/lecture avec purge TTL
-  opportuniste (48 h pour ACR, 3 h pour kits).
+  opportuniste (48 h pour ACR, 3 h pour kits) ;
+- policies `acr_live_self_receive` et `acr_live_self_send` sur
+  `realtime.messages` : canal Broadcast ACR privé et limité au compte connecté.
 
 Si le schéma existe déjà et que seule la protection MFA admin doit être ajoutée, utiliser le patch
 ciblé [`docs/auth-admin-mfa-patch.sql`](./auth-admin-mfa-patch.sql) au lieu de relancer tout le
@@ -285,13 +287,13 @@ bloquer l'UI ; en mode anonyme ou hors réseau, tout continue en local pur.
 
 **Synchro ACR temps réel.** En plus du relais asynchrone, la session ACR
 active est diffusée en direct via un canal Supabase Realtime broadcast
-(`acr-live-{userId}`, cf. `src/lib/acrLiveSync.ts`). Aucun SQL requis : le
-broadcast ne touche pas la base, `sync_items` reste la persistance de
-référence. Le payload est le dossier ACR anonyme (jamais de donnée
-nominative, garanti par `coerceAcrSession`) et le topic contient l'UUID
-utilisateur, non devinable. Durcissement possible si besoin : passer le
-canal en `private: true` avec des policies RLS sur `realtime.messages`.
-Hors-ligne ou non authentifié, la connexion est un no-op silencieux.
+(`acr-live-{userId}`, cf. `src/lib/acrLiveSync.ts`). Le canal est déclaré
+`private: true` et les policies de `auth-sync-patch.sql` autorisent lecture et
+émission uniquement lorsque l'UUID du topic correspond à `auth.uid()`. Le
+broadcast ne persiste pas le dossier ; `sync_items` reste la persistance de
+référence. Le payload est anonyme (jamais de donnée nominative, garanti par
+`coerceAcrSession`). Hors-ligne, non authentifié ou canal indisponible, le
+chrono continue localement et le relais différé reste actif.
 
 **Risque accepté — falsification du cache.** Le profil en localStorage
 (`mediurg-profile-cache-v1`) est éditable côté client : un utilisateur
