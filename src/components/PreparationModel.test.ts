@@ -265,7 +265,26 @@ describe("modèle Prépa Med v2.5", () => {
     );
     expect(effectiveDoseEntries.map(([id]) => Number(id))).toEqual([8]);
 
-    const anexate = modelFor("ANEXATE", "adulte", "80", 0, 12);
+    const anexateBolus = modelFor("ANEXATE", "adulte", "80");
+    expect(anexateBolus.modes.map((mode) => mode.title)).toEqual([
+      "Bolus urgence / transport",
+      "PSE entretien",
+    ]);
+    expect(anexateBolus.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ title: "Bolus initial", result: "2 mL = 0,2 mg IV en 15 s" }),
+        expect.objectContaining({
+          title: "Répéter à +60 s",
+          result: "1 mL = 0,1 mg IV si effet insuffisant",
+        }),
+        expect.objectContaining({
+          title: "Puis répéter — maximum",
+          result: "1 mL toutes les 60 s jusqu'à effet · dose cumulée max 10 mL = 1 mg",
+        }),
+      ])
+    );
+    const anexatePseIndex = anexateBolus.modes.findIndex((mode) => mode.title === "PSE entretien");
+    const anexate = modelFor("ANEXATE", "adulte", "80", anexatePseIndex, 12);
     expect(anexate.metrics[0]).toMatchObject({
       label: "Volume IVD efficace",
       value: "12 mL",
@@ -663,6 +682,7 @@ describe("modèle Prépa Med v2.5", () => {
       ["KÉTAMINE", ["PSE"]],
       ["MORPHINE", ["Bolus / titration", "PSE"]],
       ["NARCAN", ["IVD", "PSE"]],
+      ["ANEXATE", ["Bolus urgence / transport", "PSE entretien"]],
       ["POLARAMINE", ["IVD pur"]],
       ["ADRÉNALINE", ["ACR", "Choc anaphylactique", "PSR / PSE"]],
       ["ÉPHÉDRINE", ["Bolus titré"]],
@@ -675,7 +695,7 @@ describe("modèle Prépa Med v2.5", () => {
       ["SOLUMEDROL", ["IV"]],
     ]);
 
-    expect([...adultOnlyRecipes.values()].flat()).toHaveLength(20);
+    expect([...adultOnlyRecipes.values()].flat()).toHaveLength(22);
 
     for (const [drugName, recipeTitles] of adultOnlyRecipes) {
       const adultTitles = previewModelFor(drugName, "adulte", "80").modes.map((mode) => mode.title);

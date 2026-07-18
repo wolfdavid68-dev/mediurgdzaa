@@ -202,7 +202,8 @@ export const DRUGS_ANTIDOTES = [
     poso: {
       a: [
         "IVD : administrer PUR",
-        "Bolus 0,2 mg IVD puis 0,1 mg/min jusqu'à dose efficace (max 2 mg)",
+        "Urgence/transport : 0,2 mg (2 mL) IV en 15 s",
+        "Si effet insuffisant après 60 s : 0,1 mg (1 mL), à répéter toutes les 60 s (max total 1 mg)",
         "PSE entretien : dose efficace/heure",
         "Voies : VVP ou VVC",
       ],
@@ -233,8 +234,52 @@ export const DRUGS_ANTIDOTES = [
       ],
       notes: [
         "Durée d'action plus courte que les BZD — surveiller réapparition de la sédation",
-        "Titration : 0,2 mg IVD → répéter 0,1 mg/min jusqu'à effet",
+        "Urgence/transport : 0,2 mg (2 mL) IV en 15 s → 0,1 mg (1 mL) après 60 s, puis toutes les 60 s jusqu'à effet (max total 1 mg)",
         "PSE entretien : régler à dose efficace / heure",
+      ],
+      preparations: [
+        {
+          titre: "Bolus urgence / transport",
+          mode: "bolus",
+          population: "adulte",
+          tag: "0,1 mg/mL · pur",
+          prelever: "Ampoule 0,5 mg/5 mL (0,1 mg/mL) — pure",
+          concentration: "0,1 mg/mL",
+          rows: [
+            {
+              label: "Bolus initial",
+              value: "2 mL = 0,2 mg IV en 15 s",
+              highlight: true,
+            },
+            {
+              label: "Répéter à +60 s",
+              value: "1 mL = 0,1 mg IV si effet insuffisant",
+              highlight: true,
+            },
+            {
+              label: "Puis répéter — maximum",
+              value: "1 mL toutes les 60 s jusqu'à effet · dose cumulée max 10 mL = 1 mg",
+            },
+          ],
+          notes: [
+            "Arrêter la titration dès l'obtention de l'objectif clinique",
+            "Surveiller la réapparition de la sédation et de la dépression respiratoire",
+            "Risque de convulsions ou de sevrage, notamment en cas de traitement chronique par benzodiazépines ou d'intoxication mixte",
+          ],
+        },
+        {
+          titre: "PSE entretien",
+          mode: "pse",
+          population: "adulte",
+          tag: "Après dose efficace",
+          prelever: "Ampoule 0,5 mg/5 mL (0,1 mg/mL) — pure",
+          concentration: "0,1 mg/mL",
+          notes: [
+            "Débuter seulement après titration IVD et obtention de l'effet clinique",
+            "Durée d'action plus courte que les BZD — surveiller réapparition de la sédation",
+            "Régler le PSE selon la dose efficace et le protocole local",
+          ],
+        },
       ],
     },
   },

@@ -148,7 +148,16 @@ describe("DrugCard — surface Prépa Med v2.5", () => {
     render(<DrugCard drug={drugNamed("ANEXATE")} patientWeight="80" prepPopulation="adulte" />);
     openDrug("ANEXATE");
     const modes = await findPreparationModes();
-    fireEvent.click(await within(modes).findByRole("button", { name: /Débit PSE/i }));
+    expect(
+      await within(modes).findByRole("button", { name: /Bolus urgence \/ transport/i })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("2 mL = 0,2 mg IV en 15 s")).toBeInTheDocument();
+    expect(screen.getByText("1 mL = 0,1 mg IV si effet insuffisant")).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 mL toutes les 60 s.*dose cumulée max 10 mL = 1 mg/i)
+    ).toBeInTheDocument();
+
+    fireEvent.click(await within(modes).findByRole("button", { name: /PSE entretien/i }));
     const results = await findPreparationResults();
     const volumeInput = within(results).getByRole("spinbutton", {
       name: /saisir volume IVD efficace/i,

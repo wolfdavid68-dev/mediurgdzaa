@@ -232,17 +232,19 @@ describe("DrugCard", () => {
     test("affiche le résultat de préparation comme un débit, pas comme une injection", async () => {
       const anexate = DRUGS.find((drug) => drug.nom === "ANEXATE")!;
 
-      render(<DrugCard drug={anexate} patientWeight="80" />);
+      render(<DrugCard drug={anexate} patientWeight="80" prepV25Enabled />);
       fireEvent.click(screen.getByText("ANEXATE").closest("button")!);
       expect(await screen.findByText("PSE entretien")).toBeInTheDocument();
-      fireEvent.change(screen.getByLabelText("Dose efficace"), { target: { value: "12" } });
+      fireEvent.click(screen.getByRole("button", { name: /PSE entretien/i }));
+      const results = screen.getByLabelText("Résultats de préparation");
+      fireEvent.change(
+        within(results).getByRole("spinbutton", { name: /saisir volume IVD efficace/i }),
+        { target: { value: "12" } }
+      );
 
-      expect(screen.getByText("Débit")).toBeInTheDocument();
-      expect(screen.getByText("Pour 12 mL")).toBeInTheDocument();
-      expect(screen.getByText("4 ampoules soit 20 mL")).toBeInTheDocument();
-      expect(screen.getByText("12 mL/h")).toBeInTheDocument();
-      expect(screen.queryByText("Produit final")).not.toBeInTheDocument();
-      expect(screen.queryByText("Injecter")).not.toBeInTheDocument();
+      expect(within(results).getByText("Débit à programmer")).toBeInTheDocument();
+      expect(within(results).getByText("12 mL/h")).toBeInTheDocument();
+      expect(within(results).queryByText("Volume à injecter")).not.toBeInTheDocument();
     });
   });
 
