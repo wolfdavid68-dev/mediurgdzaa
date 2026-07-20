@@ -151,6 +151,9 @@ const DrugCard = ({
 
   const monitoringBadges = useMemo(() => {
     const labels = new Set((drug.monitoring || []).map((item) => item.trim()).filter(Boolean));
+    if (drug.cat === "Cardiologie" || drug.cat === "Catécholamines") {
+      labels.add("Vérifier débit");
+    }
     const text = [
       drug.desc,
       ...(drug.indic || []),

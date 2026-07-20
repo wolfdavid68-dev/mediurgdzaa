@@ -64,6 +64,19 @@ describe("DrugCard", () => {
       expect(screen.getByLabelText(/Surveillance requise : Scope/)).toBeInTheDocument();
       expect(screen.queryByText("Surveillance")).not.toBeInTheDocument();
     });
+
+    test.each(["Cardiologie", "Catécholamines"])(
+      "ajoute la mise en garde Vérifier débit aux médicaments de %s",
+      (category) => {
+        const drug = DRUGS.find((candidate) => candidate.cat === category)!;
+
+        render(<DrugCard drug={drug} />);
+
+        expect(
+          screen.getByLabelText(/Surveillance requise : .*Vérifier débit/i)
+        ).toBeInTheDocument();
+      }
+    );
   });
 
   describe("Toggle open / close", () => {
