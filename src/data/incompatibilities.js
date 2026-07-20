@@ -34,7 +34,7 @@ export const INCOMPATIBILITIES = [
     ],
   },
   {
-    drug: "Isoprénaline (Isuprel®)",
+    drug: "Isoprénaline",
     short: "Isopr.",
     color: "#ec4899",
     items: [],
@@ -56,7 +56,7 @@ export const INCOMPATIBILITIES = [
     items: [],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)"
+      "Isoprénaline"
     ],
   },
   {
@@ -66,7 +66,7 @@ export const INCOMPATIBILITIES = [
     items: [],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®"
+      "Isoprénaline", "Lidocaïne®"
     ],
   },
   {
@@ -77,7 +77,7 @@ export const INCOMPATIBILITIES = [
       { with: "Amiodarone (Cordarone®)", type: "incompatible", note: "" },
     ],
     compatibleWith: [
-      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline (Isuprel®)",
+      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline",
       "Milrinone (Corotrope®)"
     ],
   },
@@ -126,7 +126,7 @@ export const INCOMPATIBILITIES = [
     color: "#a16207",
     items: [],
     compatibleWith: [
-      "Amiodarone (Cordarone®)", "Isoprénaline (Isuprel®)"
+      "Amiodarone (Cordarone®)", "Isoprénaline"
     ],
   },
   {
@@ -142,7 +142,7 @@ export const INCOMPATIBILITIES = [
       { with: "Urapidil (Eupressyl®)", type: "incompatible", note: "" },
     ],
     compatibleWith: [
-      "Norépinéphrine (Noradrénaline®)", "Isoprénaline (Isuprel®)", "Lidocaïne®",
+      "Norépinéphrine (Noradrénaline®)", "Isoprénaline", "Lidocaïne®",
       "Clonidine (Catapressan®)", "Isosorbide (Risordan®)", "Bumétanide (Burinex®)"
     ],
   },
@@ -153,7 +153,7 @@ export const INCOMPATIBILITIES = [
     items: [],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
+      "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
       "Labetalol (Trandate®)", "Nicardipine (Loxen®)", "Bumétanide (Burinex®)", "Furosémide (Lasilix®)"
     ],
   },
@@ -167,7 +167,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Landiolol (Rapibloc®)", "Lidocaïne®", "Milrinone (Corotrope®)",
+      "Isoprénaline", "Landiolol (Rapibloc®)", "Lidocaïne®", "Milrinone (Corotrope®)",
       "Clonidine (Catapressan®)", "Labetalol (Trandate®)", "Nicardipine (Loxen®)",
       "Urapidil (Eupressyl®)", "Dexmédétomidine (Dexdor®)"
     ],
@@ -181,7 +181,7 @@ export const INCOMPATIBILITIES = [
       { with: "Lidocaïne®", type: "incompatible", note: "" },
     ],
     compatibleWith: [
-      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline (Isuprel®)",
+      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline",
       "Milrinone (Corotrope®)", "Clonidine (Catapressan®)", "Isosorbide (Risordan®)",
       "Labetalol (Trandate®)", "Bumétanide (Burinex®)", "Furosémide (Lasilix®)",
       "Dexmédétomidine (Dexdor®)", "Midazolam (Hypnovel®)"
@@ -197,7 +197,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
+      "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
       "Labetalol (Trandate®)", "Nicardipine (Loxen®)", "Dexmédétomidine (Dexdor®)",
       "Midazolam (Hypnovel®)", "Propofol (Diprivan®)"
     ],
@@ -234,7 +234,7 @@ export const INCOMPATIBILITIES = [
     color: "#06b6d4",
     items: [],
     compatibleWith: [
-      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline (Isuprel®)",
+      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline",
       "Lidocaïne®", "Dexmédétomidine (Dexdor®)", "Midazolam (Hypnovel®)"
     ],
   },
@@ -248,7 +248,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Isosorbide (Risordan®)",
+      "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)", "Isosorbide (Risordan®)",
       "Labetalol (Trandate®)", "Nicardipine (Loxen®)", "Furosémide (Lasilix®)",
       "Dexmédétomidine (Dexdor®)", "Midazolam (Hypnovel®)", "Propofol (Diprivan®)", "Kétamine®",
       "Morphine®", "Rémifentanil (Ultiva®)"
@@ -264,7 +264,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Landiolol (Rapibloc®)", "Lidocaïne®", "Clonidine (Catapressan®)",
+      "Isoprénaline", "Landiolol (Rapibloc®)", "Lidocaïne®", "Clonidine (Catapressan®)",
       "Labetalol (Trandate®)", "Nicardipine (Loxen®)", "Urapidil (Eupressyl®)", "Bumétanide (Burinex®)",
       "Dexmédétomidine (Dexdor®)", "Midazolam (Hypnovel®)", "Morphine®", "Néfopam (Acupan®)",
       "Rémifentanil (Ultiva®)", "Sufentanil®"
@@ -358,7 +358,7 @@ export const INCOMPATIBILITIES = [
       { with: "Cisatracurium (Nimbex®)", type: "incompatible", note: "" },
     ],
     compatibleWith: [
-      "Adrénaline®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline (Isuprel®)",
+      "Adrénaline®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline",
       "Landiolol (Rapibloc®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
       "Urapidil (Eupressyl®)", "Furosémide (Lasilix®)", "Dexmédétomidine (Dexdor®)",
       "Midazolam (Hypnovel®)", "Propofol (Diprivan®)", "Morphine®", "Rémifentanil (Ultiva®)",
@@ -395,7 +395,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Labetalol (Trandate®)",
+      "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)", "Labetalol (Trandate®)",
       "Furosémide (Lasilix®)", "Midazolam (Hypnovel®)", "Kétamine®", "Sufentanil®",
       "Phénobarbital (Gardenal®)", "Valproate de sodium (Dépakine®)", "Héparine sodique",
       "Acétylcystéine (Hidonac®)"
@@ -411,7 +411,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Isosorbide (Risordan®)", "Nicardipine (Loxen®)",
+      "Isoprénaline", "Lidocaïne®", "Isosorbide (Risordan®)", "Nicardipine (Loxen®)",
       "Furosémide (Lasilix®)", "Dexmédétomidine (Dexdor®)", "Propofol (Diprivan®)", "Kétamine®",
       "Néfopam (Acupan®)", "Rémifentanil (Ultiva®)", "Sufentanil®", "Cisatracurium (Nimbex®)",
       "Fosphenytoïne (Prodilantin®)", "Valproate de sodium (Dépakine®)", "Argatroban (Arganova®)",
@@ -428,7 +428,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
+      "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
       "Isosorbide (Risordan®)", "Labetalol (Trandate®)", "Nicardipine (Loxen®)",
       "Urapidil (Eupressyl®)", "Furosémide (Lasilix®)", "Dexmédétomidine (Dexdor®)",
       "Midazolam (Hypnovel®)", "Propofol (Diprivan®)", "Morphine®", "Rémifentanil (Ultiva®)",
@@ -460,7 +460,7 @@ export const INCOMPATIBILITIES = [
       { with: "Dobutamine®", type: "incompatible", note: "" },
       { with: "Norépinéphrine (Noradrénaline®)", type: "incompatible", note: "" },
       { with: "Amiodarone (Cordarone®)", type: "incompatible", note: "" },
-      { with: "Isoprénaline (Isuprel®)", type: "incompatible", note: "" },
+      { with: "Isoprénaline", type: "incompatible", note: "" },
       { with: "Milrinone (Corotrope®)", type: "incompatible", note: "" },
       { with: "Clonidine (Catapressan®)", type: "incompatible", note: "" },
       { with: "Labetalol (Trandate®)", type: "incompatible", note: "" },
@@ -666,7 +666,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Furosémide (Lasilix®)",
+      "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)", "Furosémide (Lasilix®)",
       "Dexmédétomidine (Dexdor®)", "Kétamine®", "Sufentanil®", "Valproate de sodium (Dépakine®)",
       "Héparine sodique", "Naloxone (Narcan®)", "Hydrocortisone", "Salbutamol®", "Céfazoline",
       "Céfotaxime (Claforan®)", "Céfoxitine", "Ceftazidime (Fortum®)"
@@ -684,7 +684,7 @@ export const INCOMPATIBILITIES = [
       { with: "Thiopental (Penthotal®)", type: "incompatible", note: "" },
     ],
     compatibleWith: [
-      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline (Isuprel®)",
+      "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Isoprénaline",
       "Lidocaïne®", "Milrinone (Corotrope®)", "Labetalol (Trandate®)", "Furosémide (Lasilix®)",
       "Dexmédétomidine (Dexdor®)", "Morphine®", "Sufentanil®", "Phénobarbital (Gardenal®)",
       "Valproate de sodium (Dépakine®)", "Héparine sodique", "Acétylcystéine (Hidonac®)",
@@ -799,7 +799,7 @@ export const INCOMPATIBILITIES = [
     ],
     compatibleWith: [
       "Adrénaline®", "Dobutamine®", "Norépinéphrine (Noradrénaline®)", "Amiodarone (Cordarone®)",
-      "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
+      "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)", "Clonidine (Catapressan®)",
       "Isosorbide (Risordan®)", "Labetalol (Trandate®)", "Nicardipine (Loxen®)",
       "Urapidil (Eupressyl®)", "Dexmédétomidine (Dexdor®)", "Midazolam (Hypnovel®)", "Kétamine®",
       "Morphine®", "Néfopam (Acupan®)", "Rémifentanil (Ultiva®)", "Sufentanil®",
@@ -818,7 +818,7 @@ export const INCOMPATIBILITIES = [
       { with: "Salbutamol®", type: "incompatible", note: "" },
     ],
     compatibleWith: [
-      "Adrénaline®", "Dobutamine®", "Isoprénaline (Isuprel®)", "Lidocaïne®", "Milrinone (Corotrope®)",
+      "Adrénaline®", "Dobutamine®", "Isoprénaline", "Lidocaïne®", "Milrinone (Corotrope®)",
       "Clonidine (Catapressan®)", "Isosorbide (Risordan®)", "Labetalol (Trandate®)",
       "Nicardipine (Loxen®)", "Furosémide (Lasilix®)", "Dexmédétomidine (Dexdor®)",
       "Midazolam (Hypnovel®)", "Propofol (Diprivan®)", "Kétamine®", "Morphine®",
@@ -844,7 +844,7 @@ export const INCOMPATIBILITIES = [
       { with: "Céfépime (Axépim®)", type: "incompatible", note: "" },
     ],
     compatibleWith: [
-      "Adrénaline®", "Isoprénaline (Isuprel®)", "Landiolol (Rapibloc®)", "Lidocaïne®",
+      "Adrénaline®", "Isoprénaline", "Landiolol (Rapibloc®)", "Lidocaïne®",
       "Milrinone (Corotrope®)", "Clonidine (Catapressan®)", "Labetalol (Trandate®)",
       "Nicardipine (Loxen®)", "Urapidil (Eupressyl®)", "Dexmédétomidine (Dexdor®)",
       "Midazolam (Hypnovel®)", "Propofol (Diprivan®)", "Kétamine®", "Morphine®", "Néfopam (Acupan®)",

@@ -84,7 +84,7 @@ export const PSE_PREVIEW = {
     tag: "1 flacon 250 mg qsp 50 mL G5% → 5 mg/mL",
   },
   16: {
-    // Isoprénaline (Isuprel) — Amp 0,2 mg/2 mL ; 5 amp qsp 50 mL → 20 µg/mL
+    // Isoprénaline générique — solution à 0,2 mg/mL ; 5 mL qsp 50 mL → 20 µg/mL
     conc: 20,
     unite: "µg/kg/min",
     min: 0.01,
@@ -93,7 +93,7 @@ export const PSE_PREVIEW = {
     dosePrecision: 3, // millième
     mlhSteps: [1, 2, 3, 5, 8, 10, 15],
     steps: [0.02, 0.05, 0.08, 0.1],
-    tag: "5 amp 0,2 mg qsp 50 mL G5% → 20 µg/mL",
+    tag: "5 mL à 0,2 mg/mL qsp 50 mL G5% → 20 µg/mL",
   },
   5: {
     // Sufentanil — Amp 250 µg/5 mL ; 1 amp qsp 50 mL NaCl 0,9% → 5 µg/mL

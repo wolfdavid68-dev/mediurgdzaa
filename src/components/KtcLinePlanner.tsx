@@ -141,7 +141,7 @@ const getDrugProfile = (drug: string) => {
       "Adrénaline®",
       "Dobutamine®",
       "Norépinéphrine (Noradrénaline®)",
-      "Isoprénaline (Isuprel®)",
+      "Isoprénaline",
       "Milrinone (Corotrope®)",
       "Landiolol (Rapibloc®)",
       "Amiodarone (Cordarone®)",

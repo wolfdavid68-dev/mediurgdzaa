@@ -308,8 +308,8 @@ export const DRUGS_CATECHOLAMINES = [
   },
   {
     id: 16,
-    nom: "ISUPREL",
-    commercial: "Isoprénaline",
+    nom: "ISOPRÉNALINE",
+    commercial: "",
     dci: "Isoprénaline",
     classe: "Agoniste β1/β2 pur",
     cat: "Catécholamines",
@@ -335,7 +335,9 @@ export const DRUGS_CATECHOLAMINES = [
       "Ischémie myocardique",
       "Tremblements, anxiété",
     ],
-    cond: ["Ampoule 0,2 mg/1 mL"],
+    cond: [
+      "Solution à diluer pour perfusion 0,2 mg/mL (volume selon le générique disponible à la PUI)",
+    ],
     poso: {
       a: [
         "PSE : dilution Vi/Vf par poids (1 mL/h = 0,01 µg/kg/min)",
@@ -354,7 +356,7 @@ export const DRUGS_CATECHOLAMINES = [
       duree: "Continu IVSE",
       stabilite: "Stable 6h — à l'abri de la lumière",
       fixed_dilution: true,
-      fd_prelever: "5 ampoules 0,2 mg (10 mL)",
+      fd_prelever: "5 mL d'isoprénaline 0,2 mg/mL (= 1 mg)",
       isuprel_table: true,
       preparations: [
         {
@@ -362,12 +364,12 @@ export const DRUGS_CATECHOLAMINES = [
           mode: "pse",
           population: "adulte",
           tag: "20 µg/mL",
-          prelever: "5 ampoules 0,2 mg/2 mL (= 1 mg)",
+          prelever: "5 mL d'isoprénaline 0,2 mg/mL (= 1 mg)",
           completer: "50 mL avec G5%",
           concentration: "0,02 mg/mL (20 µg/mL)",
           etapes: [
-            "Ampoule 0,2 mg/2 mL",
-            "PSE : 5 ampoules (1 mg) qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL",
+            "Solution à diluer pour perfusion d'isoprénaline 0,2 mg/mL",
+            "Prélever 5 mL (= 1 mg) puis compléter qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL",
             "Débit selon µg/kg/min — voir bloc « Débit PSE »",
           ],
           notes: [
@@ -384,8 +386,8 @@ export const DRUGS_CATECHOLAMINES = [
         },
       ],
       etapes: [
-        "Ampoule 0,2 mg/2 mL",
-        "PSE : 5 ampoules (1 mg) qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL",
+        "Solution à diluer pour perfusion d'isoprénaline 0,2 mg/mL",
+        "Prélever 5 mL (= 1 mg) puis compléter qsp 50 mL G5% → 0,02 mg/mL = 20 µg/mL",
         "Débit selon µg/kg/min — voir bloc « Débit PSE »",
       ],
       notes: [

@@ -683,7 +683,7 @@ describe("DrugCard", () => {
     test.each([
       ["ADRÉNALINE", "80", "2 ampoules 5 mg/5 mL (= 10 mg)"],
       ["DOBUTAMINE", "70", "1 flacon 250 mg/25 mL (10 mg/mL)"],
-      ["ISUPREL", "70", "5 ampoules 0,2 mg/2 mL (= 1 mg)"],
+      ["ISOPRÉNALINE", "70", "5 mL d'isoprénaline 0,2 mg/mL (= 1 mg)"],
       ["NORADRÉNALINE", "70", "2 ampoules 8 mg/4 mL (= 16 mg)"],
       ["SUFENTANIL", "85", "5 mL d'ampoule pure"],
     ])("%s affiche la préparation principale sur main", (name, weight, expected) => {
@@ -712,13 +712,13 @@ describe("DrugCard", () => {
       expect(screen.getByText("Dilution poids · 1 mL/h = 1 µg/kg/min")).toBeInTheDocument();
     });
 
-    test("Isuprel utilise la dilution fixe de main", () => {
-      const isuprel = DRUGS.find((drug) => drug.nom === "ISUPREL")!;
+    test("L’isoprénaline utilise la dilution fixe de main", () => {
+      const isoprenaline = DRUGS.find((drug) => drug.nom === "ISOPRÉNALINE")!;
 
-      render(<DrugCard drug={isuprel} patientWeight="70" />);
-      fireEvent.click(screen.getByText("ISUPREL").closest("button")!);
+      render(<DrugCard drug={isoprenaline} patientWeight="70" />);
+      fireEvent.click(screen.getByText("ISOPRÉNALINE").closest("button")!);
 
-      expect(screen.getByText("5 ampoules 0,2 mg/2 mL (= 1 mg)")).toBeInTheDocument();
+      expect(screen.getByText("5 mL d'isoprénaline 0,2 mg/mL (= 1 mg)")).toBeInTheDocument();
       expect(screen.getByText("50 mL avec G5%")).toBeInTheDocument();
       expect(screen.getByText("Dilution poids · 1 mL/h = 0,01 µg/kg/min")).toBeInTheDocument();
     });

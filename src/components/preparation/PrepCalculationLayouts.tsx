@@ -169,7 +169,7 @@ export const createCalculationLayoutRenderers = ({
         { titre: "PSE", tag: "IVSE poids" },
         "classic",
         r,
-        "mL d'Isuprel",
+        "mL d'isoprénaline",
         "IVSE poids",
         {
           classic: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
@@ -453,7 +453,7 @@ export const createCalculationLayoutRenderers = ({
         { titre: "PSE", tag: "IVSE poids" },
         "v2",
         r,
-        "mL d'Isuprel",
+        "mL d'isoprénaline",
         "IVSE poids",
         {
           classic: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",

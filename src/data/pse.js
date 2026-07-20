@@ -54,7 +54,7 @@ export const PSE = {
     tag: "Dilution poids · 1 mL/h = 1 µg/kg/min",
     steps: [2.5, 5, 10, 15, 20],
   },
-  16: { // Isuprel — dilution Vi/Vf par poids : 1 mL/h = 0,01 µg/kg/min
+  16: { // Isoprénaline — dilution Vi/Vf par poids : 1 mL/h = 0,01 µg/kg/min
     conc: 1, unite: "µg/kg/min", min: 0.01, max: 0.1, factor: 100,
     tag: "Dilution poids · 1 mL/h = 0,01 µg/kg/min",
     steps: [0.02, 0.05, 0.08, 0.1],

@@ -94,7 +94,7 @@ export const PREP_MED_V25_COVERAGE = {
   },
   16: {
     id: 16,
-    nom: "ISUPREL",
+    nom: "ISOPRÉNALINE",
     strategies: ["steps", "fixed_dilution", "isuprel_table", "pse"],
   },
   17: {

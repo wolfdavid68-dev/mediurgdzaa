@@ -289,7 +289,7 @@ export function calcPrepDobutamineTable(weightKg: string | number | null | undef
   return { kg, vi, vf };
 }
 
-// ── Préparation : table Isuprel (Vi/Vf par poids) ─────────────
+// ── Préparation : table isoprénaline (Vi/Vf par poids) ────────
 // Règle : 1 mL/h = 0,01 µg/kg/min ; ampoule 0,2 mg/mL ; Vf = round(200 × Vi / (0,6 × kg))
 export function calcPrepIsuprelTable(weightKg: string | number | null | undefined) {
   if (!isValidWeight(weightKg)) return null;

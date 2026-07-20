@@ -555,7 +555,7 @@ describe("tables Vi/Vf catécholamines", () => {
     expect(calcPrepDobutamineTable(70)).toEqual({ kg: 70, vi: 20, vf: 60 });
   });
 
-  test("Isuprel 70 kg → Vi=10 mL, Vf=48 mL", () => {
+  test("Isoprénaline 70 kg → Vi=10 mL, Vf=48 mL", () => {
     expect(calcPrepIsuprelTable(70)).toEqual({ kg: 70, vi: 10, vf: 48 });
   });
 });

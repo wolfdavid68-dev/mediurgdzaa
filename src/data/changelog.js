@@ -13,11 +13,19 @@ export const CHANGELOG = [
       },
       {
         type: "feat",
-        text: "Les recettes v2.5 sont intégrées aux données publiques pour les 81 médicaments. Les préparations Adrénaline, Dobutamine, Isuprel, Noradrénaline et Cyanokit ne dépendent plus de l’ancien overlay drugs.preview.js.",
+        text: "Les recettes v2.5 sont intégrées aux données publiques pour les 81 médicaments. Les préparations Adrénaline, Dobutamine, Isoprénaline, Noradrénaline et Cyanokit ne dépendent plus de l’ancien overlay drugs.preview.js.",
       },
       {
         type: "fix",
         text: "Les dilutions fixes, populations adulte/enfant, volumes, concentrations et étapes de préparation sont maintenant contrôlés par les tests d’intégrité et le manifeste de couverture v2.5.",
+      },
+      {
+        type: "fix",
+        text: "Valium : présentation harmonisée à 10 mg/2 mL (5 mg/mL), avec 2 mL à prélever pour 10 mg et calculs pédiatriques séparés entre nourrisson et enfant.",
+      },
+      {
+        type: "fix",
+        text: "Isoprénaline : suppression des anciens conditionnements fixes et de la marque historique dans les écrans cliniques ; la préparation part maintenant d’une solution générique à 0,2 mg/mL, quel que soit le volume du contenant disponible à la PUI.",
       },
       {
         type: "chore",
@@ -102,7 +110,7 @@ export const CHANGELOG = [
     changes: [
       {
         type: "feat",
-        text: "Médicaments : l'affichage Préparation v2 est maintenant actif sur main pour toutes les fiches, avec les tables Vi/Vf validées pour Adrénaline, Dobutamine, Isuprel, Noradrénaline et Sufentanil.",
+        text: "Médicaments : l'affichage Préparation v2 est maintenant actif sur main pour toutes les fiches, avec les tables Vi/Vf validées pour Adrénaline, Dobutamine, Isoprénaline, Noradrénaline et Sufentanil.",
       },
       {
         type: "fix",

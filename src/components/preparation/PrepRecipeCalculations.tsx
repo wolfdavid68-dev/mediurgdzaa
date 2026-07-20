@@ -179,7 +179,7 @@ export const createRecipeCalculationRenderer = ({
   const renderRecipeIsuprelTable = (recipe: PrepRecipe, variant: "classic" | "v2") => {
     const r = calcPrepIsuprelTable(weight);
     if (!r) return null;
-    return renderRecipeViVfTable(recipe, variant, r, "mL d'Isuprel", "IVSE poids", {
+    return renderRecipeViVfTable(recipe, variant, r, "mL d'isoprénaline", "IVSE poids", {
       classic: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
       v2: "1 à 10 mL/h (= 0,01 à 0,1 µg/kg/min)",
     });

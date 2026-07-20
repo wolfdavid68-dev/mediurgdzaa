@@ -339,13 +339,30 @@ describe("modèle Prépa Med v2.5", () => {
     });
 
     const valiumModes = modelFor("VALIUM", "enfant", "20").modes;
-    const rectalIndex = valiumModes.findIndex((mode) => mode.title === "Rectal enfant");
+    expect(valiumModes.map((mode) => mode.title)).toEqual([
+      "IVD nourrisson",
+      "IVD enfant",
+      "Rectal nourrisson / enfant",
+    ]);
+    const nourrisson = modelFor("VALIUM", "enfant", "8", 0);
+    expect(nourrisson.metrics[1]).toMatchObject({
+      label: "Volume à injecter",
+      value: "0,8 mL",
+    });
+    const enfant = modelFor("VALIUM", "enfant", "20", 1);
+    expect(enfant.metrics[1]).toMatchObject({
+      label: "Volume à injecter",
+      value: "0,8–1,2 mL",
+    });
+    const rectalIndex = valiumModes.findIndex(
+      (mode) => mode.title === "Rectal nourrisson / enfant"
+    );
     const valiumRectal = modelFor("VALIUM", "enfant", "20", rectalIndex);
     expect(valiumRectal.metrics[1]).toMatchObject({
       label: "Volume à administrer",
-      value: "1 mL",
+      value: "2 mL",
     });
-    expect(flattenModelText(valiumRectal)).not.toContain("Volume à injecter 1 mL");
+    expect(flattenModelText(valiumRectal)).not.toContain("Volume à injecter 2 mL");
 
     const prodilantin = modelFor("PRODILANTIN", "adulte", "80");
     expect(flattenModelText(prodilantin)).toContain("200 mL/h");
@@ -466,7 +483,7 @@ describe("modèle Prépa Med v2.5", () => {
     expect(flattenModelText(sufentanil)).toContain("Vi 5 mL");
     expect(flattenModelText(sufentanil)).toContain("Vf 31 mL");
 
-    expect(flattenModelText(modelFor("ISUPREL", "adulte", "80"))).toContain("0,1 mg/mL");
+    expect(flattenModelText(modelFor("ISOPRÉNALINE", "adulte", "80"))).toContain("0,2 mg/mL");
     expect(flattenModelText(modelFor("VENTOLINE", "adulte", "80"))).toContain("1 mg/mL");
     expect(flattenModelText(modelFor("HÉPARINE SODIQUE", "adulte", "80", 1))).toContain(
       "5 000 UI/mL"
@@ -658,11 +675,11 @@ describe("modèle Prépa Med v2.5", () => {
     expect(nimotopChild.hasPreparation).toBe(false);
     expect(nimotopChild.modes[0].title).toBe("Référence uniquement");
 
-    const isuprelChild = previewModelFor("ISUPREL", "enfant", "20");
-    expect(isuprelChild.activeRecipe?.empty).toBe(true);
-    expect(isuprelChild.isPse).toBe(false);
-    expect(isuprelChild.canValidate).toBe(false);
-    expect(isuprelChild.validationReason).toMatch(/préparation pédiatrique non validée/i);
+    const isoprenalineChild = previewModelFor("ISOPRÉNALINE", "enfant", "20");
+    expect(isoprenalineChild.activeRecipe?.empty).toBe(true);
+    expect(isoprenalineChild.isPse).toBe(false);
+    expect(isoprenalineChild.canValidate).toBe(false);
+    expect(isoprenalineChild.validationReason).toMatch(/préparation pédiatrique non validée/i);
 
     for (const model of [
       modelFor("NALBUPHINE", "enfant", "20.1"),

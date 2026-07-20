@@ -107,6 +107,48 @@ describe("DRUGS — intégrité", () => {
     expect(broken).toEqual([]);
   });
 
+  test("présentations critiques Valium, Adrénaline et isoprénaline cohérentes", () => {
+    const valium = DRUGS.find((drug) => drug.id === 32)!;
+    expect(valium.cond).toEqual(["Ampoule 10 mg/2 mL (5 mg/mL)"]);
+    expect(valium.prep?.conc_produit).toBe(5);
+    expect(
+      valium.prep?.preparations?.find((recipe) => recipe.titre === "IVD crise convulsive")
+    ).toMatchObject({ prelever: "2 mL (= 10 mg)" });
+    expect(
+      valium.prep?.preparations
+        ?.filter((recipe) => recipe.population === "enfant")
+        .map((recipe) => recipe.titre)
+    ).toEqual(["IVD nourrisson", "IVD enfant", "Rectal nourrisson / enfant"]);
+    expect(JSON.stringify(valium)).not.toContain("20 mg/2 mL");
+
+    const adrenaline = DRUGS.find((drug) => drug.id === 13)!;
+    expect(adrenaline.prep?.preparations?.find((recipe) => recipe.titre === "ACR")).toMatchObject({
+      prelever: "2 ampoules d'adrénaline 5 mg/5 mL (= 10 mg/10 mL)",
+    });
+    expect(
+      adrenaline.prep?.preparations?.find((recipe) => recipe.titre === "PSR / PSE")
+    ).toMatchObject({ prelever: "2 ampoules 5 mg/5 mL (= 10 mg)" });
+
+    const isoprenaline = DRUGS.find((drug) => drug.id === 16)!;
+    expect(isoprenaline).toMatchObject({ nom: "ISOPRÉNALINE", commercial: "" });
+    expect(isoprenaline.cond).toEqual([
+      "Solution à diluer pour perfusion 0,2 mg/mL (volume selon le générique disponible à la PUI)",
+    ]);
+    const isoprenalineDisplayText = [
+      isoprenaline.nom,
+      isoprenaline.commercial,
+      isoprenaline.dci,
+      ...(isoprenaline.cond || []),
+      ...(isoprenaline.prep?.etapes || []),
+      ...(isoprenaline.prep?.preparations || []).flatMap((recipe) => [
+        recipe.titre,
+        recipe.prelever || "",
+        ...(recipe.etapes || []),
+      ]),
+    ].join(" ");
+    expect(isoprenalineDisplayText).not.toMatch(/0,2 mg\/(?:1|2) mL|Isuprel/i);
+  });
+
   test("les médicaments à scopage obligatoire déclarent monitoring Scope", () => {
     const scopedCategories = new Set([
       "Hypnotiques",
