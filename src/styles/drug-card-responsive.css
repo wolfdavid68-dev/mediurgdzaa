@@ -309,13 +309,26 @@
   .drug-title-row {
     gap: 6px;
   }
+  .drug-card-monitored .drug-title-row {
+    padding-right: min(78px, 28vw);
+  }
   /* Sur très petit écran, on réduit un peu la police du nom pour que même le
-     nom le plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne. */
+     nom le plus long (VIALEBEX / ALBUMINE HUMAINE) tienne sur une ligne malgré
+     le badge texte. */
   .drug-name {
     font-size: 12px;
   }
   .drug-subtitle {
     gap: 4px;
+  }
+  .drug-monitor-corner {
+    max-width: min(78px, 28vw);
+    padding: 4px 5px;
+    font-size: 6.5px;
+  }
+  .monitor-wave {
+    width: 18px;
+    height: 10px;
   }
   .logo-text p {
     font-size: 9px;

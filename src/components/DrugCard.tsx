@@ -181,6 +181,8 @@ const DrugCard = ({
     });
   }, [drug, resolvedPrep]);
   const monitoringLabel = monitoringBadges.map((badge) => badge.label).join(" + ");
+  const monitoringCornerLabel = monitoringBadges.map((badge) => badge.label).join("+");
+  const monitoringClass = monitoringBadges[0]?.className || "monitor-custom";
   const prepWeight = Number.parseFloat(weight);
   const resolvedPrepPopulation =
     prepPopulation || (Number.isFinite(prepWeight) && prepWeight < 30 ? "enfant" : "adulte");
@@ -359,25 +361,6 @@ const DrugCard = ({
               ))}
             </div>
             {drug.classe && <div className="drug-classe">{drug.classe}</div>}
-            {monitoringBadges.length > 0 && (
-              <div
-                className="drug-monitoring-alert"
-                aria-label={`Surveillance prioritaire : ${monitoringLabel}`}
-                title={`Surveillance prioritaire : ${monitoringLabel}`}
-              >
-                <span className="drug-monitoring-heading">
-                  <MonitoringWaveIcon />
-                  <span>Surveillance prioritaire</span>
-                </span>
-                <span className="drug-monitoring-items">
-                  {monitoringBadges.map((badge) => (
-                    <strong key={badge.label} className="drug-monitoring-item">
-                      {badge.label}
-                    </strong>
-                  ))}
-                </span>
-              </div>
-            )}
           </div>
           <svg
             className={`chevron ${open ? "chevron-open" : ""}`}
@@ -390,6 +373,16 @@ const DrugCard = ({
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
+          {monitoringBadges.length > 0 && (
+            <div
+              className={`drug-monitor-corner ${monitoringClass}`}
+              aria-label={`Surveillance requise : ${monitoringLabel}`}
+              title={`Surveillance requise : ${monitoringLabel}`}
+            >
+              <MonitoringWaveIcon />
+              <span>{monitoringCornerLabel}</span>
+            </div>
+          )}
         </button>
         {onToggleFavorite && (
           <button
@@ -438,7 +431,7 @@ const DrugCard = ({
                 <span>{drug.dci}</span>
               </div>
               <div>
-                <strong>Surveillance prioritaire</strong>
+                <strong>Surveillance</strong>
                 <span className="prep-v25-monitoring">
                   {monitoringBadges.length
                     ? monitoringBadges.map((badge) => badge.label).join(" · ")
@@ -456,7 +449,7 @@ const DrugCard = ({
                 </div>
                 {monitoringBadges.length > 0 && (
                   <div>
-                    <strong>Surveillance prioritaire</strong>
+                    <strong>Surveillance</strong>
                     <span>{monitoringBadges.map((badge) => badge.label).join(" · ")}</span>
                   </div>
                 )}
