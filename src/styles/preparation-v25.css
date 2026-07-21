@@ -100,12 +100,18 @@
 
 .prep-v25-monitoring {
   justify-self: start;
-  padding: 4px 8px;
-  border: 1px solid color-mix(in srgb, var(--drug-accent) 42%, var(--border));
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 2px solid color-mix(in srgb, var(--drug-accent) 72%, var(--border));
   border-radius: 4px;
-  background: color-mix(in srgb, var(--drug-accent) 10%, transparent);
-  color: var(--prep-primary) !important;
-  font-weight: 850;
+  background: color-mix(in srgb, var(--drug-accent) 22%, var(--card));
+  color: var(--text) !important;
+  font-family: var(--mono);
+  font-size: 12px !important;
+  font-weight: 950;
+  line-height: 1.2 !important;
+  white-space: nowrap;
 }
 
 /* Choix de préparation. */
