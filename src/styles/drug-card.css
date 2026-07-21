@@ -104,8 +104,8 @@
   margin-bottom: 5px;
   flex-wrap: nowrap;
 }
-.drug-card-monitored .drug-title-row {
-  padding-right: min(84px, 26vw);
+.drug-card-monitored {
+  border-color: color-mix(in srgb, var(--warn) 52%, var(--border));
 }
 .drug-icon {
   font-size: clamp(15px, 1.6vw, 18px);
@@ -172,51 +172,78 @@
   font-weight: 500;
 }
 
-/* Badge de surveillance en coin haut-droit, avec son texte (SCOPE /
-   SCOPE+ECG) en petite police pour rester compact et laisser le nom du
-   médicament sur une seule ligne. La ligne de titre réserve sa largeur
-   (.drug-card-monitored .drug-title-row). */
-.drug-monitor-corner {
-  position: absolute;
-  top: 0;
-  right: 0;
+/* Bandeau de surveillance toujours visible dans l'en-tête. Les consignes
+   restent séparées pour être lues d'un coup d'œil sous pression clinique. */
+.drug-monitoring-alert {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  border: 1px solid color-mix(in srgb, var(--warn) 72%, var(--border));
+  border-left-width: 4px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--warn) 12%, var(--card));
+  overflow: hidden;
+}
+
+.drug-monitoring-heading {
+  align-self: stretch;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  max-width: min(84px, 26vw);
-  padding: 4px 6px;
-  border-radius: 0 11px 0 9px;
-  font-family: var(--mono);
-  font-size: 7px;
+  gap: 5px;
+  padding: 6px 8px;
+  background: var(--warn);
+  color: #111827;
+  font-size: 9px;
   font-weight: 950;
-  line-height: 1;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
-  z-index: 2;
-  transform: translateY(-1px);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
-[data-theme="light"] .drug-monitor-corner {
-  transform: none;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.14);
+.drug-monitoring-heading .monitor-wave {
+  width: 17px;
+  height: 10px;
 }
 
-.drug-monitor-corner span {
+.drug-monitoring-items {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 5px 7px;
 }
 
-.drug-monitor-corner .monitor-wave {
-  width: 12px;
-  height: 8px;
+.drug-monitoring-item {
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--warn) 62%, var(--border));
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--warn) 18%, transparent);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@container (max-width: 460px) {
+  .drug-monitoring-alert {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .drug-monitoring-heading {
+    justify-content: flex-start;
+    padding: 5px 7px;
+  }
+
+  .drug-monitoring-items {
+    padding: 5px 7px 6px;
+  }
 }
 
 .monitor-wave {

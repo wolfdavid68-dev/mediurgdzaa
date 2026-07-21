@@ -100,12 +100,12 @@
 
 .prep-v25-monitoring {
   justify-self: start;
-  padding: 4px 8px;
-  border: 1px solid color-mix(in srgb, var(--drug-accent) 42%, var(--border));
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--warn) 68%, var(--border));
   border-radius: 4px;
-  background: color-mix(in srgb, var(--drug-accent) 10%, transparent);
-  color: var(--prep-primary) !important;
-  font-weight: 850;
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  color: var(--text) !important;
+  font-weight: 900;
 }
 
 /* Choix de préparation. */

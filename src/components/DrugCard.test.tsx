@@ -61,20 +61,22 @@ describe("DrugCard", () => {
 
       render(<DrugCard drug={kcl} />);
 
-      expect(screen.getByLabelText(/Surveillance requise : Scope/)).toBeInTheDocument();
-      expect(screen.queryByText("Surveillance")).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/Surveillance prioritaire : Scope/)).toBeInTheDocument();
+      expect(screen.getByText("Surveillance prioritaire")).toBeVisible();
     });
 
     test.each(["Cardiologie", "Catécholamines"])(
-      "ajoute la mise en garde Vérifier débit aux médicaments de %s",
+      "affiche Débit contrôlé dans le bandeau prioritaire des médicaments de %s",
       (category) => {
         const drug = DRUGS.find((candidate) => candidate.cat === category)!;
 
         render(<DrugCard drug={drug} />);
 
-        expect(
-          screen.getByLabelText(/Surveillance requise : .*Vérifier débit/i)
-        ).toBeInTheDocument();
+        const alert = screen.getByLabelText(/Surveillance prioritaire : .*Débit contrôlé/i);
+        expect(alert).toHaveClass("drug-monitoring-alert");
+        expect(within(alert).getByText("Débit contrôlé")).toBeVisible();
+        expect(within(alert).getByText("Scope")).toBeVisible();
+        expect(screen.queryByText("Vérifier débit")).not.toBeInTheDocument();
       }
     );
   });
