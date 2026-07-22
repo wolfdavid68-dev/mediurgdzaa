@@ -16,6 +16,9 @@
     "web-push": "^3.6.7",
     "zod": "^4.4.3"
   },
+  "overrides": {
+    "sharp": "0.35.3"
+  },
   "scripts": {
     "start": "vite",
     "dev": "vite",
