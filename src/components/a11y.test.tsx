@@ -25,6 +25,7 @@ import CharterModal from "./CharterModal";
 import OfflineBanner from "./OfflineBanner";
 import AcrModeModal from "./AcrModeModal";
 import KitChecklist from "./KitChecklist";
+import IsrFlashBrief from "./IsrFlashBrief";
 import IncompatibilityList from "./IncompatibilityList";
 import type { Drug, Protocol } from "../types/data";
 
@@ -142,6 +143,29 @@ describe("a11y — axe-core", () => {
         checklist={mockChecklist}
         couleur="#FF453A"
         drogues={[{ nom: "Étomidate", role: "Hypnotique d'induction" }]}
+      />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test("Brief flash ISR ouvert : aucune violation sur les contrôles collectifs", async () => {
+    const { container } = render(
+      <IsrFlashBrief
+        open
+        patientWeight="72"
+        values={{
+          "0-0": "Dr Martin",
+          "0-1": "Dr Bernard",
+          "0-4": "IDE Robert",
+          "0-5": "IDE Petit",
+          "5-0": "Kétamine",
+          "5-1": "108",
+          "5-2": "Rocuronium",
+          "5-3": "86,4",
+        }}
+        onValueChange={() => {}}
+        onClose={() => {}}
       />
     );
     const results = await axe(container);

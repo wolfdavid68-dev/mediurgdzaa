@@ -21,6 +21,7 @@ const TabFallback = () => (
 type ProtocolesPageProps = {
   protoCategory: string;
   changeProtoCategory: (cat: string) => void;
+  patientWeight: string;
   autoOpenKitId?: string | null;
   autoOpenKitTab?: string | null;
   onAutoOpenKit?: () => void;
@@ -35,6 +36,7 @@ type ProtocolesPageProps = {
 const ProtocolesPage = ({
   protoCategory,
   changeProtoCategory,
+  patientWeight,
   autoOpenKitId,
   autoOpenKitTab,
   onAutoOpenKit,
@@ -115,6 +117,7 @@ const ProtocolesPage = ({
 
         {protoCategory === "kits" && (
           <ProtocolKitsView
+            patientWeight={patientWeight}
             autoOpenKitId={autoOpenKitId}
             autoOpenKitTab={autoOpenKitTab}
             onAutoOpenKit={onAutoOpenKit}

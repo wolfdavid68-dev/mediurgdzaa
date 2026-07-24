@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AuthProfileProvider } from "../lib/authProfile";
+import { PREP_KITS } from "../data/prepKits";
 import KitChecklist from "./KitChecklist";
 
 // Mini-checklist couvrant les 3 types d'items + un select dérivé des drogues.
@@ -56,6 +57,21 @@ const renderChecklistForUser = (userId: string) =>
       />
     </AuthProfileProvider>
   );
+
+const renderIsrChecklist = () => {
+  const kit = PREP_KITS.find((candidate) => candidate.id === "isr");
+  if (!kit?.checklist) throw new Error("Kit ISR introuvable");
+  return render(
+    <KitChecklist
+      kitId={kit.id}
+      titre={`Check-list — ${kit.nom}`}
+      checklist={kit.checklist}
+      drogues={kit.drogues}
+      couleur={kit.couleur}
+      patientWeight="72"
+    />
+  );
+};
 
 beforeEach(() => {
   localStorage.clear();
@@ -206,5 +222,41 @@ describe("KitChecklist — persistance localStorage", () => {
 
     renderChecklistForUser("u1");
     expect(screen.getByText(/1\/6 complétés?/)).toBeInTheDocument();
+  });
+});
+
+describe("KitChecklist — brief flash ISR", () => {
+  test("place le brief avant la décision finale et affiche la dose saisie dans la check-list", () => {
+    localStorage.setItem(
+      "mediurg-kit-checklist-isr",
+      JSON.stringify({
+        ts: Date.now(),
+        values: {
+          "0-0": "Dr Martin",
+          "0-1": "Dr Bernard",
+          "0-4": "IDE Robert",
+          "0-5": "IDE Petit",
+          "5-0": "Kétamine",
+          "5-1": "108",
+          "5-2": "Rocuronium",
+          "5-3": "86,4",
+        },
+      })
+    );
+    renderIsrChecklist();
+
+    const launchButton = screen.getByRole("button", { name: "Lancer · 30 s" });
+    const noGoDecision = screen.getByRole("radio", { name: "No go : reporter / optimiser" });
+    expect(
+      launchButton.compareDocumentPosition(noGoDecision) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+
+    fireEvent.click(launchButton);
+    expect(screen.getByText("Kétamine · 108 mg IV")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Fermer" }));
+
+    fireEvent.change(screen.getByLabelText("Dose hypnotique"), { target: { value: "120" } });
+    fireEvent.click(screen.getByRole("button", { name: "Lancer · 30 s" }));
+    expect(screen.getByText("Kétamine · 120 mg IV")).toBeInTheDocument();
   });
 });

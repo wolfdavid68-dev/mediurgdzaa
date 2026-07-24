@@ -60,12 +60,19 @@ const isSectionLabel = (m: string) => {
 
 type PrepKitCardProps = {
   kit: PrepKit;
+  patientWeight: string;
   autoOpen?: boolean;
   autoOpenTab?: string | null;
   onAutoOpen?: () => void;
 };
 
-const PrepKitCard = ({ kit, autoOpen, autoOpenTab, onAutoOpen }: PrepKitCardProps) => {
+const PrepKitCard = ({
+  kit,
+  patientWeight,
+  autoOpen,
+  autoOpenTab,
+  onAutoOpen,
+}: PrepKitCardProps) => {
   const authProfile = useAuthProfile();
   const userId = useRef(authProfile?.id ?? null).current;
   const [open, setOpen] = useState(false);
@@ -258,6 +265,7 @@ const PrepKitCard = ({ kit, autoOpen, autoOpenTab, onAutoOpen }: PrepKitCardProp
                 checklist={kit.checklist}
                 drogues={kit.drogues}
                 couleur={kit.couleur}
+                patientWeight={patientWeight}
               />
             )}
             {activeTab === "sequence" && (

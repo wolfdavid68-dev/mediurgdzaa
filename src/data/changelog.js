@@ -3,6 +3,29 @@
 // type ∈ "feat" | "fix" | "chore" | "refactor" | "docs"
 export const CHANGELOG = [
   {
+    version: "v118",
+    date: "2026-07-24",
+    titre: "Brief flash ISR connecté à la check-list",
+    changes: [
+      {
+        type: "feat",
+        text: "Kit ISR : ajout d’un brief collectif chronométré de 30 secondes dans « Contrôle ultime & décision », juste avant le choix final Go / No go. Les rôles sont préremplis depuis la check-list et restent modifiables.",
+      },
+      {
+        type: "feat",
+        text: "Le brief reprend en lecture seule l’hypnotique, le curare et les doses réellement saisis dans la section « Thérapeutiques » de la check-list. Toute modification d’une dose invalide automatiquement sa confirmation précédente.",
+      },
+      {
+        type: "feat",
+        text: "La validation exige le poids patient, la capnographie, le Plan B, la double lecture des drogues et doses, quatre rôles attribués et un plan de secours annoncé. Le statut horodaté reste associé à la session de 3 heures sans sélectionner automatiquement « Go ISR ».",
+      },
+      {
+        type: "feat",
+        text: "Le Brief flash ISR dispose d’une présentation responsive mobile et desktop, cohérente avec les couleurs sémantiques MediURG dans les modes clair et sombre.",
+      },
+    ],
+  },
+  {
     version: "v117",
     date: "2026-07-12",
     titre: "Prépa Med v2.5 sur l’application principale",

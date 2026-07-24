@@ -1,5 +1,10 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import KitScaleIllustration from "./KitScaleIllustration";
+import IsrFlashBrief, {
+  formatCompletedTime,
+  isIsrBriefComplete,
+  ISR_BRIEF_KEYS,
+} from "./IsrFlashBrief";
 import { useAuthProfile } from "../lib/authProfile";
 import { readUserItem, removeUserItem, writeUserItem } from "../lib/userStorage";
 import type { ChecklistItem, ChecklistSection } from "../types/data";
@@ -77,6 +82,7 @@ type Props = {
   checklist: ChecklistSection[];
   couleur: string;
   drogues?: Drogue[];
+  patientWeight?: string;
 };
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -110,7 +116,14 @@ const getDateTimeAutofillKey = (kitId: string): string | null =>
 
 const twoDigits = (value: number): string => String(value).padStart(2, "0");
 
-const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props) => {
+const KitChecklist = ({
+  kitId,
+  titre,
+  checklist,
+  couleur,
+  drogues = [],
+  patientWeight = "",
+}: Props) => {
   const sectionIdPrefix = useId();
   const authProfile = useAuthProfile();
   const userId = useRef(authProfile?.id ?? null).current;
@@ -127,6 +140,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
     return [];
   };
   const [values, setValues] = useState<Values>(() => loadValues(userId, kitId));
+  const [briefOpen, setBriefOpen] = useState(false);
 
   // Sections repliées. À l'ouverture, les sections déjà complètes (valeurs
   // persistées) démarrent repliées pour réduire le scroll. Ensuite, une
@@ -328,9 +342,18 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
   const handleReset = () => {
     if (!hasAnyValue) return;
     if (window.confirm("Réinitialiser toute la check-list (coches + saisies) ?")) {
+      setBriefOpen(false);
       setValues({});
       setCollapsed(new Set());
     }
+  };
+
+  const briefComplete = kitId === "isr" && isIsrBriefComplete(values, patientWeight);
+  const completedAtValue = values[ISR_BRIEF_KEYS.completedAt];
+  const briefCompletedAt = typeof completedAtValue === "string" ? completedAtValue : "";
+
+  const setBriefValue = (key: string, value: boolean | string) => {
+    setValues((previous) => ({ ...previous, [key]: value }));
   };
 
   return (
@@ -474,9 +497,38 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
               <ul id={contentId} className="checklist">
                 {section.items.map((item, ii) => {
                   const key = `${si}-${ii}`;
+                  const briefLauncher =
+                    kitId === "isr" && si === 6 && ii === 6 ? (
+                      <li className={`isr-brief-launcher ${briefComplete ? "is-complete" : ""}`}>
+                        <div className="isr-brief-launcher-icon" aria-hidden="true">
+                          {briefComplete ? "✓" : "30"}
+                        </div>
+                        <div className="isr-brief-launcher-copy">
+                          <strong>
+                            {briefComplete
+                              ? `Brief réalisé · ${formatCompletedTime(briefCompletedAt)}`
+                              : "Brief flash · à réaliser"}
+                          </strong>
+                          <span>
+                            {briefComplete
+                              ? "4 rôles, 4 confirmations et plan de secours validés."
+                              : "Validation collective avant la décision finale."}
+                          </span>
+                        </div>
+                        <button type="button" onClick={() => setBriefOpen(true)}>
+                          {briefComplete ? "Revoir le brief" : "Lancer · 30 s"}
+                        </button>
+                      </li>
+                    ) : null;
+                  const withBriefLauncher = (content: ReactNode) => (
+                    <Fragment key={ii}>
+                      {briefLauncher}
+                      {content}
+                    </Fragment>
+                  );
                   if (item.type === "check") {
                     const checked = values[key] === true;
-                    return (
+                    return withBriefLauncher(
                       <li key={ii} className="checklist-item">
                         <label className={`checklist-label ${checked ? "checklist-checked" : ""}`}>
                           <input
@@ -507,7 +559,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                   }
                   if (item.type === "choice") {
                     const selected = (values[key] as string) || "";
-                    return (
+                    return withBriefLauncher(
                       <li key={ii} className="kit-checklist-field">
                         <span className="kit-checklist-flabel">{item.label}</span>
                         <div
@@ -548,7 +600,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                   if (item.type === "multicheck") {
                     const raw = (values[key] as string) || "";
                     const selected = new Set(raw ? raw.split(",") : []);
-                    return (
+                    return withBriefLauncher(
                       <li key={ii} className="kit-checklist-field">
                         <span className="kit-checklist-flabel">{item.label}</span>
                         <div className="kit-checklist-chips" role="group" aria-label={item.label}>
@@ -582,7 +634,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                   if (item.type === "select") {
                     const selected = (values[key] as string) || "";
                     const opts = selectOptions(item);
-                    return (
+                    return withBriefLauncher(
                       <li key={ii} className="kit-checklist-field">
                         <span className="kit-checklist-flabel">{item.label}</span>
                         <select
@@ -602,7 +654,7 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
                     );
                   }
                   // text
-                  return (
+                  return withBriefLauncher(
                     <li key={ii} className="kit-checklist-field">
                       <span className="kit-checklist-flabel">{item.label}</span>
                       <span className="kit-checklist-input-wrap">
@@ -629,6 +681,15 @@ const KitChecklist = ({ kitId, titre, checklist, couleur, drogues = [] }: Props)
           </div>
         );
       })}
+      {kitId === "isr" && (
+        <IsrFlashBrief
+          open={briefOpen}
+          patientWeight={patientWeight}
+          values={values}
+          onValueChange={setBriefValue}
+          onClose={() => setBriefOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -538,6 +538,7 @@ const App = () => {
                 <ProtocolesPage
                   protoCategory={protoCategory}
                   changeProtoCategory={changeProtoCategory}
+                  patientWeight={patientWeight}
                   autoOpenKitId={autoOpenKitId}
                   autoOpenKitTab={autoOpenKitTab}
                   onAutoOpenKit={consumeAutoOpenKit}
