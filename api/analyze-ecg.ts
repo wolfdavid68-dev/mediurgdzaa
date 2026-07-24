@@ -5,10 +5,9 @@
 // Cette fonction tourne côté serveur Vercel : les clés restent secrètes
 // dans process.env (jamais préfixées VITE_ → jamais bundlées).
 //
-// STRATÉGIE : Gemini 2.5 Flash en principal (meilleure lecture ECG des
-// modèles gratuits), repli automatique sur Mistral Pixtral si Gemini
-// échoue ou si son quota gratuit est atteint (429). Au moins une des deux
-// clés doit être configurée.
+// STRATÉGIE : Gemini 3.5 Flash-Lite en principal (quota gratuit élevé),
+// repli automatique sur Ministral 3 14B si Gemini échoue ou si son quota
+// gratuit est atteint (429). Au moins une des deux clés doit être configurée.
 //
 // Variables d'env (Vercel dashboard + .env.local pour `vercel dev`) :
 //   GEMINI_API_KEY=...    (Google AI Studio — offre gratuite)
@@ -66,10 +65,10 @@ const EcgAnalysisSchema = z.object({
 // on relève le plafond (défaut Hobby = 10 s) pour éviter un timeout.
 export const config = { maxDuration: 30 };
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-3.5-flash-lite";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions";
-const MISTRAL_MODEL = "pixtral-12b-2409";
+const MISTRAL_MODEL = "ministral-14b-2512";
 const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -122,8 +121,7 @@ type VercelRes = {
 // Résultat d'une tentative fournisseur. `retryable` = on peut basculer
 // sur l'autre fournisseur (quota/erreur réseau) ; sinon échec définitif.
 type Attempt =
-  | { ok: true; text: string }
-  | { ok: false; retryable: boolean; status: number; error: string };
+  { ok: true; text: string } | { ok: false; retryable: boolean; status: number; error: string };
 
 type RateBucket = { start: number; count: number };
 type AuthCheck = { ok: true; userId: string } | { ok: false; status: number; error: string };
@@ -256,7 +254,7 @@ async function tryGemini(image: string): Promise<Attempt> {
             ],
           },
         ],
-        generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
+        generationConfig: { responseMimeType: "application/json" },
       }),
     });
     if (!r.ok) {

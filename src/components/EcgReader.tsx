@@ -16,7 +16,8 @@ import {
 // Lecteur ECG — module public d'aide à la lecture. Flux RÉEL :
 // photo/galerie → compression
 // client + anonymisation locale → POST /api/analyze-ecg (proxy serverless
-// Vercel, clés API secrètes côté serveur, Gemini 2.5 Flash + repli Mistral Pixtral) →
+// Vercel, clés API secrètes côté serveur, Gemini 3.5 Flash-Lite + repli
+// Ministral 3 14B) →
 // rendu data-driven. Contenu NON-DIAGNOSTIQUE : disclaimers + validation
 // médicale obligatoire conservés. CSS scopé .ecg-reader (pas de Tailwind).
 //
